@@ -294,6 +294,8 @@ public interface ForumProvider {
 
     ForumCategory findForumCategoryById(Long Id);
 
+    void createForumCategory(ForumCategory category);
+
     InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long entryId);
 
     void createInteractSetting(InteractSetting setting);

@@ -1,6 +1,7 @@
 package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -150,7 +151,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
                     //  若没有找到字段则跳过
                     if (null == dto) {
-//						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
                         continue;
                     }
                     //  若没有值则不用返回
@@ -518,13 +518,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         form.setNamespaceId(UserContext.getCurrentNamespaceId());
         form.setFormVersion(0L);
         form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-
-        if (cmd.getDeleteFlag() == null)
-            form.setDeleteFlag(Byte.valueOf("1"));
-        if (cmd.getModifyFlag() == null)
-            form.setModifyFlag(Byte.valueOf("1"));
-        if (cmd.getFormAttribute() == null)
-            form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
 
         this.generalFormProvider.createGeneralForm(form);
 

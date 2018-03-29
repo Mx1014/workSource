@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 模块名</li>
  *     <li>communityId: 项目id</li>
+ *     <li>orgId: 公司id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */

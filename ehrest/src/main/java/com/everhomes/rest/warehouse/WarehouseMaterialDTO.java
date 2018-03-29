@@ -21,6 +21,7 @@ import java.sql.Timestamp;
  *     <li>categoryName: 物品分类名</li>
  *     <li>unitName: 单位名</li>
  *     <li>updateTime: 最后更新时间</li>
+ *     <li>supplierName: 供应商名字</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -52,6 +53,16 @@ public class WarehouseMaterialDTO {
     private String specificationInformation;
 
     private Timestamp updateTime;
+
+    private String supplierName;
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
 
     public Timestamp getUpdateTime() {
         return updateTime;

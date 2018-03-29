@@ -740,7 +740,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 								//改成以下方式，否则es中的数据无法删除
 								DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
 								deleteOrganizationIdCommand.setId(myOrganization.getId());
-								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand,false);
 								deleteContracts(myOrganization);
 							}
 							return true;

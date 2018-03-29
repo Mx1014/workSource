@@ -340,7 +340,13 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 						cmd.setNamespaceId(originalRange.getNamespaceId());
 						cmd.setBuildingName(originalRange.getRange());
 						cmd.setPageSize(1000000);
-						ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
+						ListEnterprisesCommandResponse rs = new ListEnterprisesCommandResponse();
+						rs.setDtos(new ArrayList());
+						try{
+							rs = organizationService.listNewEnterprises(cmd);
+						}catch (Exception e) {
+							LOGGER.info("organizationService.listNewEnterprises(cmd) catch exception", e);
+						}
 						rs.getDtos().stream().forEach(r->{
 							userLevelRanges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId())));
 						});
@@ -387,57 +393,77 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 	}
 
 	private List<String> getOrganizationAdministrators(String range) {
-		ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
-		cmd.setOrganizationId(Long.valueOf(range));
-		cmd.setActivationFlag(ActivationFlag.YES.getCode());
-		List<OrganizationContactDTO> dtos = rolePrivilegeService.listOrganizationAdministrators(cmd);
-		return dtos.stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
+		try{
+			ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+			cmd.setOrganizationId(Long.valueOf(range));
+			cmd.setActivationFlag(ActivationFlag.YES.getCode());
+			List<OrganizationContactDTO> dtos = rolePrivilegeService.listOrganizationAdministrators(cmd);
+			return dtos.stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
+		}catch (Exception e) {
+			LOGGER.info("getCommunityUsers catch exception, range = {}", range, e);
+			return new ArrayList<String>();
+		}
 	}
 
 	private  List<String> getCommunityUsers(String range, Integer isAuthor) {
-		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
-		cmd.setCommunityId(Long.valueOf(range));
-		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		cmd.setPageSize(10000000);
-		cmd.setIsAuth(isAuthor);
-		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
-		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-		List<String> userids = new ArrayList<>();
-		if(isAuthor == 0 || isAuthor == 1) {
-			userids = userOrganizations.stream().map(r -> String.valueOf(r.getUserId())).collect(Collectors.toList());
-		}
-		if(isAuthor == 0 || isAuthor == 2){
-			//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-			List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
-			if(users == null){
-				users = new ArrayList<>();
+		try{
+			ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+			cmd.setCommunityId(Long.valueOf(range));
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+			cmd.setPageSize(10000000);
+			cmd.setIsAuth(isAuthor);
+			//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
+			List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
+			List<String> userids = new ArrayList<>();
+			if(isAuthor == 0 || isAuthor == 1) {
+				userids = userOrganizations.stream().map(r -> String.valueOf(r.getUserId())).collect(Collectors.toList());
 			}
-			for (User user : users) {
-				userids.add(user.getId()+"");
+			if(isAuthor == 0 || isAuthor == 2){
+				//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+				if(users == null){
+					users = new ArrayList<>();
+				}
+				for (User user : users) {
+					userids.add(user.getId()+"");
+				}
 			}
+			return userids;
+		}catch (Exception e) {
+			LOGGER.info("getCommunityUsers catch exception, range = {}, isAuthor={}", range,isAuthor, e);
+			return new ArrayList<String>();
 		}
-		return userids;
 	}
 
 	private  List<String> getNamespaceUsers(String range, Integer isAuthor) {
-		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
-		cmd.setNamespaceId(Integer.valueOf(range));
-		cmd.setPageSize(10000000);
-		cmd.setIsAuth(isAuthor);
-		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
-		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+		try{
+			ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+			cmd.setNamespaceId(Integer.valueOf(range));
+			cmd.setPageSize(10000000);
+			cmd.setIsAuth(isAuthor);
+			//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
+			List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
+			return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+		}catch (Exception e) {
+			LOGGER.info("getNamespaceUsers catch exception, range = {}, isAuthor={}", range,isAuthor, e);
+			return new ArrayList<String>();
+		}
 	}
 
 	private List<String> getEnterpriseUsers(String range) {
-		ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
-		cmd.setOrganizationId( Long.valueOf(range));
-		cmd.setPageSize(10000000);//这里需要查询全部的人员
-		ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnels(cmd, false);
-		if(response == null || response.getMembers() == null){
-			return new ArrayList<>();
+		try{
+			ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
+			cmd.setOrganizationId( Long.valueOf(range));
+			cmd.setPageSize(10000000);//这里需要查询全部的人员
+			ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnels(cmd, false);
+			if(response == null || response.getMembers() == null){
+				return new ArrayList<>();
+			}
+			return response.getMembers().stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
+		}catch (Exception e) {
+			LOGGER.info("getEnterpriseUsers catch exception, range = {}", range, e);
+			return new ArrayList<String>();
 		}
-		return response.getMembers().stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
 	}
 
 	private List<UserOrganizations> listUserCommunities(

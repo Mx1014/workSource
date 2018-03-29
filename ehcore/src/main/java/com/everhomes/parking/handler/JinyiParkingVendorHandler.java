@@ -41,12 +41,16 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String GET_TEMP_CARD_LOGS = "parkingjet.open.s2s.shorttermcard.apply.order.parkingrecord";
 	//赠送全免券
 	private static final String COUPON_FREE_SEND = "parkingjet.open.s2s.coupon.free.send";
+	
+	//获取七天范围的通讯记录,时间限制为半年
+	private static final String PARKING_RECORD_SEARCH = "parkingjet.open.s2s.parkingrecord.search";
 
 	//金溢初始一个月
 	private static final int MONTH_COUNT = 1;
 
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	DateTimeFormatter ymd = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -167,6 +171,14 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return json;
 	}
+	
+//	public static void main(String[] args) {
+//		JinyiParkingVendorHandler handler = new JinyiParkingVendorHandler();
+//		ParkingClearanceLog log = new ParkingClearanceLog();
+//		log.setClearanceTime(new Timestamp(1521514862000L));
+//		log.setPlateNumber("湘UK86532");
+//		handler.getTempCardLogs(log);
+//	}
 
 	private JSONObject createOrderParam(ParkingRechargeOrder order) {
 
@@ -358,7 +370,8 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 	public List<JinyiClearance> getTempCardLogs(ParkingClearanceLog log) {
 
-		Map<String, String> params = createGeneralParam(GET_TEMP_CARD_LOGS, createGetTempCardLogsParam(log.getLogToken()));
+//		Map<String, String> params = createGeneralParam(GET_TEMP_CARD_LOGS, createGetTempCardLogsParam(log.getLogToken()));
+		Map<String, String> params = createGeneralParam(PARKING_RECORD_SEARCH, createParkingRecordSearch(log));
 		String url = configProvider.getValue("parking.zijing.url", "");
 		String responseJson = Utils.post(url, params);
 
@@ -392,10 +405,22 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return json;
 	}
 
-	private JSONObject createGetTempCardLogsParam(String logToken) {
+//	private JSONObject createGetTempCardLogsParam(String logToken) {
+//		JSONObject json = new JSONObject();
+//		json.put("pj_shorttermcardid", logToken);
+//
+//		return json;
+//	}
+	
+	private JSONObject createParkingRecordSearch(ParkingClearanceLog log) {
 		JSONObject json = new JSONObject();
-		json.put("pj_shorttermcardid", logToken);
-
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
+		json.put("parkingid", parkingid);
+		json.put("plateno", log.getPlateNumber());
+		LocalDateTime clearanceTime = log.getClearanceTime().toLocalDateTime();
+		String ymdhms = clearanceTime.format(ymd);
+		json.put("entrytime1", ymdhms+" 00:00:00");
+		json.put("entrytime2", ymdhms+" 23:59:59");
 		return json;
 	}
 }

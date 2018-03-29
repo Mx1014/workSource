@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加，2：例行检查生成的任务</li>
+ *  <li>namespaceId: 域空间id</li>
  * </ul>
  * Created by ying.xiong on 2017/6/8.
  */
@@ -57,6 +58,8 @@ public class SearchQualityTasksCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
 
     public Long getEndDate() {
         return endDate;
@@ -176,6 +179,14 @@ public class SearchQualityTasksCommand {
 
     public void setExecutorName(String executorName) {
         this.executorName = executorName;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

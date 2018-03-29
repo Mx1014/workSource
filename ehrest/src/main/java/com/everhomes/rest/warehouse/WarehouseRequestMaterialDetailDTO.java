@@ -68,6 +68,27 @@ public class WarehouseRequestMaterialDetailDTO {
 
     private Byte reviewResult;
 
+    // 添加 物品单位，和供应商名称 by Vincent Law 2018/3/21
+    private String unitName;
+    private String supplierName;
+
+    public String getUnitName() {
+        return unitName;
+    }
+
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
+    }
+
+    public String getSupplierName() {
+
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
     public Long getId() {
         return id;
     }

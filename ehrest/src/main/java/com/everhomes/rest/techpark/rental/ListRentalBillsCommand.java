@@ -12,6 +12,9 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
 * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListRentalBillsCommand {
@@ -29,6 +32,33 @@ public class ListRentalBillsCommand {
 	private Integer pageSize;
 	private Byte billStatus;
 	private Byte invoiceFlag;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	@Override
     public String toString() {
 

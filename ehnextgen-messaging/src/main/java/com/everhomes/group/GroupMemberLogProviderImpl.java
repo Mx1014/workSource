@@ -98,7 +98,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         }
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.ID.lt(locator.getAnchor()));
         }
 
         query.addLimit(pageSize + 1);
@@ -109,6 +109,8 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         if (logList != null && logList.size() > pageSize) {
             locator.setAnchor(logList.get(logList.size() - 1).getId());
             logList = logList.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
         }
         return logList;
     }

@@ -14,8 +14,9 @@ import com.everhomes.util.StringHelper;
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * </ul>
  */
-public class FindRentalSiteWeekStatusCommand {
-	  
+public class  FindRentalSiteWeekStatusCommand {
+
+	private String resourceType;
 	@NotNull
 	private Long siteId;
 	@NotNull
@@ -25,6 +26,14 @@ public class FindRentalSiteWeekStatusCommand {
 	private Byte priceType;
 	private String packageName;
 	private String sceneToken;
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Byte getRentalType() {
 		return rentalType;

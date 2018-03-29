@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -171,6 +172,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("getPrintLogonUrl")
 	 @RestReturn(value=GetPrintLogonUrlResponse.class)
 	 @RequireAuthentication(false)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
@@ -185,6 +187,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public  DeferredResult<RestResponse> logonPrint(@RequestParam(value="identifierToken", required=true)String identifierToken) {
 //	 public RestResponse logonPrint(LogonPrintCommand cmd) {
 		
@@ -203,6 +206,7 @@ public class SiYinPrintController extends ControllerBase {
 	  */
 	 @RequestMapping("informPrint")
 	 @RestReturn(value=InformPrintResponse.class)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public RestResponse informPrint(InformPrintCommand cmd) {
 		
 	     RestResponse response = new RestResponse(siyinPrintService.informPrint(cmd));
@@ -297,7 +301,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/unlockPrinter</b>
-	  * <p>19.直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
+	  * <p>19.直接解锁打印机或扫描驱动后调用的.请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
 	  */
 	 @RequestMapping("unlockPrinter")
 	 @RestReturn(value=UnlockPrinterResponse.class)
@@ -371,6 +375,21 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=String.class)
 	 public RestResponse deleteQueueJobs(DeleteQueueJobsCommand cmd) {
 	     siyinPrintService.deleteQueueJobs(cmd);
+	     RestResponse response = new RestResponse();
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 /**
+	  * <b>URL: /siyinprint/getPrintQrcode</b>
+	  * <p>25.提供给司印的二维码</p>
+	  */
+	 @RequestMapping("getPrintQrcode")
+	 @RestReturn(value=String.class)
+	 @RequireAuthentication(false)
+	 public RestResponse getPrintQrcode(HttpServletRequest req,HttpServletResponse rps) {
+	     siyinPrintService.getPrintQrcode(req,rps);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");

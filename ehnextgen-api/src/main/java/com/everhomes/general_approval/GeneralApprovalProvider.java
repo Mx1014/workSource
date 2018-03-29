@@ -27,4 +27,18 @@ public interface GeneralApprovalProvider {
 	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
 
 	void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
+	void createGeneralApprovalScopeMap(GeneralApprovalScopeMap scope);
+
+    void updateGeneralApprovalScopeMap(GeneralApprovalScopeMap scope);
+
+    GeneralApprovalScopeMap findGeneralApprovalScopeMap(Integer namespaceId, Long approvalId, Long sourceId, String sourceType);
+
+	void deleteApprovalScopeMapByApprovalId(Long approvalId);
+
+    void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
+
+    void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
+
+	List<GeneralApprovalScopeMap> listGeneralApprovalScopes(Integer namespaceId, Long approvalId);
 }

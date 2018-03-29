@@ -11,6 +11,8 @@ public class WebMenu extends EhWebMenus {
     }
 
     private Long appId;
+
+    private Long configId;
     
     @Override
     public String toString() {
@@ -23,5 +25,13 @@ public class WebMenu extends EhWebMenus {
 
     public void setAppId(Long appId) {
         this.appId = appId;
+    }
+
+    public Long getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
     }
 }

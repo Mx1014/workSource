@@ -1,12 +1,11 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -17,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>operatorId: 整改执行人id</li>
  *  <li>attachments: 整改上报内容图片</li>
  *  <li>message: 整改上报内容文字</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class ReportRectifyResultCommand {
@@ -37,6 +37,8 @@ public class ReportRectifyResultCommand {
     private List<AttachmentDescriptor> attachments;
 	
 	private String message;
+
+	private Integer namespaceId;
 	
 	public String getMessage() {
 		return message;
@@ -92,6 +94,14 @@ public class ReportRectifyResultCommand {
 
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

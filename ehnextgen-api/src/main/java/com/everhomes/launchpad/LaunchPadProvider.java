@@ -46,10 +46,16 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> listLaunchPadItemsByItemGroup(Integer namespaceId, String itemLocation,String itemGroup);
     List<LaunchPadLayout> getLaunchPadLayouts(String name, Integer namespaceId);
     List<LaunchPadItem> listLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, ListingQueryBuilderCallback queryBuilderCallback);
-    List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId);
+    List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup);
 	LaunchPadItem searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName);
 
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup,String location);
 
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup, String location, String itemName, Byte scopeCode, Long scopeId);
+
+    void deletePreviewVersionItems(Integer namespaceId);
+
+    void deletePreviewVersionLayouts(Integer namespaceId);
+
+    void deletePreviewVersionCategories(Integer namespaceId);
 }

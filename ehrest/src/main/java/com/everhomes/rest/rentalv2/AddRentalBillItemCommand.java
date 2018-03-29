@@ -19,8 +19,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalBillItemCommand {
-//	@NotNull
-//	private Long rentalSiteId;   
+
 	@NotNull
 	private Long rentalBillId; 
 	private Byte rentalType;
@@ -31,6 +30,62 @@ public class AddRentalBillItemCommand {
 
 	private String clientAppName;
 	private Integer paymentType;
+	private String customObject;
+
+	private Long userEnterpriseId;
+	private String userEnterpriseName;
+	private String userPhone;
+	private String userName;
+	private Long addressId;
+
+	public Long getUserEnterpriseId() {
+		return userEnterpriseId;
+	}
+
+	public void setUserEnterpriseId(Long userEnterpriseId) {
+		this.userEnterpriseId = userEnterpriseId;
+	}
+
+	public String getUserEnterpriseName() {
+		return userEnterpriseName;
+	}
+
+	public void setUserEnterpriseName(String userEnterpriseName) {
+		this.userEnterpriseName = userEnterpriseName;
+	}
+
+	public String getUserPhone() {
+		return userPhone;
+	}
+
+	public void setUserPhone(String userPhone) {
+		this.userPhone = userPhone;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getCustomObject() {
+		return customObject;
+	}
+
+	public void setCustomObject(String customObject) {
+		this.customObject = customObject;
+	}
+
 	public String getClientAppName() {
 		return clientAppName;
 	}
@@ -44,16 +99,6 @@ public class AddRentalBillItemCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-//	public Long getRentalSiteId() {
-//		return rentalSiteId;
-//	}
-//
-//	public void setRentalSiteId(Long rentalSiteId) {
-//		this.rentalSiteId = rentalSiteId;
-//	}
-
-	  
-	 
 	public Long getRentalBillId() {
 		return rentalBillId;
 	}

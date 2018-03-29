@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  * Define business logic interface for user management
- * 
+ *
  * @author Kelven Yang
  *
  */
@@ -37,41 +37,43 @@ public interface UserService {
     void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
-    
+
     User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
     void logoff(UserLogin login);
     boolean isValidLoginToken(LoginToken loginToken);
-    
+
     UserLogin registerLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
     UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
     void saveLogin(UserLogin login);
     List<UserLogin> listUserLogins(long uid);
-    
+
     UserInfo getUserInfo();
     UserInfo getUserInfo(Long uid);
     UserInfo getUserSnapshotInfo(Long uid);
     UserInfo getUserSnapshotInfoWithPhone(Long uid);
     User findUserByIndentifier(Integer namespaceId, String indentifierToken);
-    void setUserInfo(SetUserInfoCommand cmd); 
-    void setUserAccountInfo(SetUserAccountInfoCommand cmd); 
+    void setUserInfo(SetUserInfoCommand cmd);
+    void setUserAccountInfo(SetUserAccountInfoCommand cmd);
     CommunityDTO setUserCurrentCommunity(long communityId);
     Long setDefaultCommunity(Long userId, Integer namespaceId);
     void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId);
-    
+
     List<UserIdentifierDTO> listUserIdentifiers();
     void deleteUserIdentifier(long identifierId);
-    
+
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
-    
+
+    void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
-    
+
     void assumePortalRole(AssumePortalRoleCommand cmd);
-    
+
     long getNextStoreSequence(UserLogin login, int namespaceId, long appId);
-    
+
     List<ListUsersWithAddrResponse> listUsersWithAddr(ListUsersWithAddrCommand cmd);
     UsersWithAddrResponse searchUsersWithAddr(SearchUsersWithAddrCommand cmd);
     ListInvitatedUserResponse listInvitatedUser(ListInvitatedUserCommand cmd);
@@ -96,7 +98,7 @@ public interface UserService {
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);
-	void toOrganizationSceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, 
+	void toOrganizationSceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList,
 	    List<OrganizationDTO> organizationDtoList, SceneType sceneType);
 	SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType);
@@ -113,7 +115,7 @@ public interface UserService {
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
 
-    
+
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
 
     SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
@@ -148,7 +150,7 @@ public interface UserService {
      * @param sceneType
      */
     void checkUserScene(SceneType sceneType);
-    
+
     /**
      * 查询命名空间下的用户
      * @param cmd
@@ -178,7 +180,7 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
-    
+
     SearchUsersResponse searchUsers(SearchUsersCommand cmd);
 
     /**
@@ -187,7 +189,7 @@ public interface UserService {
      * @param identifierToken   手机号
      */
     void checkSmsBlackList(String smsAction, String identifierToken);
- 
+
     /**
      * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
      * @param cmd
@@ -228,9 +230,9 @@ public interface UserService {
      * @return
      */
     UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
-	
+
 	//added by R 20170713, 通讯录2.4增加
- 
+
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
 	//added by R 20170824, 人事1.4,  判断管理员
@@ -257,7 +259,7 @@ public interface UserService {
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
-	
+
     UserIdentifier getUserIdentifier(Long userId);
 
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
@@ -277,13 +279,13 @@ public interface UserService {
     SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
 
     List<SceneDTO> listAllCommunityScenes();
-    
+
     /**
      * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
      */
     String checkServerStatus();
-    
-    /** 
+
+    /**
      * 客户端更新设备信息到服务器端
      * @param cmd
      * @param request
@@ -292,7 +294,6 @@ public interface UserService {
      */
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
-
 
     void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
 
@@ -306,7 +307,9 @@ public interface UserService {
     void logonBuAnBangToken();
 
     void pushUserDemo();
-	
+
+    SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
+
     QRCodeDTO querySubjectIdForScan();
 
     DeferredResult<Object> waitScanForLogon(String subjectId);

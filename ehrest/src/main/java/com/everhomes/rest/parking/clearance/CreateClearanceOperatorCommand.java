@@ -15,6 +15,9 @@ import java.util.List;
  *     <li>parkingLotId: 停车场id</li>
  *     <li>operatorType: 添加的用户类型 {@link com.everhomes.rest.parking.clearance.ParkingClearanceOperatorType}</li>
  *     <li>userIds: 添加的用户id列表</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class CreateClearanceOperatorCommand {
@@ -28,6 +31,33 @@ public class CreateClearanceOperatorCommand {
     private String operatorType;
     @ItemType(Long.class)
     private List<Long> userIds;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
     public Integer getNamespaceId() {
         return namespaceId;

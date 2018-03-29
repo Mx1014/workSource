@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
@@ -23,5 +24,6 @@ public interface ServiceAllianceRequestInfoSearcher {
     void exportRequestInfo(SearchRequestInfoCommand cmd,HttpServletResponse resp);
     SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd);
     SearchRequestInfoResponse searchOrgRequestInfo(SearchOrgRequestInfoCommand cmd);
+    public List<ServiceAllianceRequestInfo> generateUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details);
 
 }

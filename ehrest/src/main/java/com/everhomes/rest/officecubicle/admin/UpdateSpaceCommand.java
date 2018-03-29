@@ -5,11 +5,15 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
+import com.everhomes.rest.officecubicle.OfficeRangeDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * add工位预定的空间 
+ * <li>namespaceId :namespaceId;</li>
+ * <li>ownerType : community 工位发布的范围</li>
+ * <li>ownerId : communityId 范围的id</li>
  *<li> id: id</li>
  *<li> name: 工位空间名称	</li>
 *<li> provinceId : 省份id	</li>
@@ -25,9 +29,16 @@ import com.everhomes.util.StringHelper;
 *<li> coverUri : 封面图片uri</li>
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
+ * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class UpdateSpaceCommand { 
+	private Integer namespaceId;
+	private String ownerType;
+	private Long ownerId;
 	private Long id;
 	private String name;
 	private Long provinceId;
@@ -45,6 +56,45 @@ public class UpdateSpaceCommand {
 	private List<OfficeAttachmentDTO> attachments;
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
+	@ItemType(OfficeRangeDTO.class)
+	private List<OfficeRangeDTO> ranges;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 
 	@Override
     public String toString() {
@@ -182,6 +232,36 @@ public class UpdateSpaceCommand {
 
 	public void setCategories(List<OfficeCategoryDTO> categories) {
 		this.categories = categories;
+	}
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+	public List<OfficeRangeDTO> getRanges() {
+		return ranges;
+	}
+
+
+	public void setRanges(List<OfficeRangeDTO> ranges) {
+		this.ranges = ranges;
 	}
   
 

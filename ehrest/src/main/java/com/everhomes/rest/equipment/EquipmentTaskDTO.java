@@ -1,28 +1,20 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>id: 任务主键id</li>
- *  <li>standardId: 标准id</li>
- *  <li>standardName: 标准名称</li>
- *  <li>templateId: 模板id</li>
- *  <li>templateName: 模板名称</li>
- *  <li>equipmentId: 设备id</li>
- *  <li>equipmentName: 设备名称</li>
+ *  <li>planId: 计划id</li>
  *  <li>equipmentLocation: 设备位置</li>
- *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
- *  <li>parentId: 父任务id</li>
- *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
  *  <li>ownerId: 任务所属机构id</li>
  *  <li>taskName: 任务名称</li>
  *  <li>taskNumber: 任务编号</li>
- *  <li>executiveGroupId: 执行业务组id</li>
- *  <li>groupName: 业务组名称</li>
  *  <li>executorType: 执行人类型</li>
  *  <li>executorId:执行人id</li>
  *  <li>executorName:执行人姓名</li>
@@ -40,29 +32,30 @@ import com.everhomes.util.StringHelper;
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>standardDescription: 标准内容</li>
- *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
+ *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
+ *  <li>inspectionCategoryId: 巡检对象类型</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
 	private Long id;
-	
+
+	@Deprecated
 	private Long standardId;
-	
+	@Deprecated
 	private String standardName;
-	
+	@Deprecated
 	private Long templateId;
-	
+	@Deprecated
 	private String templateName;
-	
+	@Deprecated
 	private Long equipmentId;
-	
+	@Deprecated
 	private String equipmentName;
-	
+	@Deprecated
 	private String equipmentLocation;
-	
+	@Deprecated
 	private Long parentId;
-	
+	@Deprecated
 	private Long childCount;
 
 	private String ownerType;
@@ -78,9 +71,9 @@ public class EquipmentTaskDTO {
 	private String taskName;
 	
 	private String taskNumber;
-	
+	@Deprecated
 	private String groupName;
-	
+	@Deprecated
 	private Long executiveGroupId;
 	
 	private String executorType;
@@ -116,12 +109,34 @@ public class EquipmentTaskDTO {
 	private String reviewerType;
 	
 	private String reviewerName;
-
+	@Deprecated
 	private String standardDescription;
-	
+	private String planDescription;
+	@Deprecated
 	private Byte qrCodeFlag;
-
+	@Deprecated
 	private Byte pictureFlag;
+
+	private String lastSyncTime;
+
+	private Timestamp createTime;
+
+	private Timestamp reviewTime;
+
+	private Long planId;
+
+	private Long inspectionCategoryId;
+
+	@ItemType(EquipmentStandardRelationDTO.class)
+	private List<EquipmentStandardRelationDTO> equipments;
+
+	public Long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(Long planId) {
+		this.planId = planId;
+	}
 
 	public Long getId() {
 		return id;
@@ -433,6 +448,54 @@ public class EquipmentTaskDTO {
 
 	public void setPictureFlag(Byte pictureFlag) {
 		this.pictureFlag = pictureFlag;
+	}
+
+	public List<EquipmentStandardRelationDTO> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentStandardRelationDTO> equipments) {
+		this.equipments = equipments;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
+	}
+
+	public String getPlanDescription() {
+		return planDescription;
+	}
+
+	public void setPlanDescription(String planDescription) {
+		this.planDescription = planDescription;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
 	}
 
 	@Override

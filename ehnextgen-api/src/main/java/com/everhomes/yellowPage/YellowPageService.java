@@ -65,4 +65,8 @@ public interface YellowPageService {
 	ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd);
 
 	GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd);
+
+	void syncOldForm();
+
+	void syncServiceAllianceApplicationRecords();
 }

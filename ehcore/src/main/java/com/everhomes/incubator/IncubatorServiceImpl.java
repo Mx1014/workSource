@@ -91,7 +91,8 @@ public class IncubatorServiceImpl implements IncubatorService {
 			pageOffset = cmd.getPageOffset();
 		}
 
-		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy, cmd.getApplyType());
+		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject,
+				pageOffset, pageSize + 1, orderBy, cmd.getApplyType(), cmd.getStartTime(), cmd.getEndTime());
 
 		ListIncubatorApplyResponse response = new ListIncubatorApplyResponse();
 		if (list != null && list.size() > pageSize) {
@@ -161,6 +162,12 @@ public class IncubatorServiceImpl implements IncubatorService {
 		if(cmd.getApplyType() != null){
 			params.put("applyType", cmd.getApplyType());
 		}
+		if(cmd.getStartTime() != null){
+			params.put("startTime", cmd.getStartTime());
+		}
+		if(cmd.getEndTime() != null){
+			params.put("endTime", cmd.getEndTime());
+		}
 
 		String statusName = ApproveStatus.fromCode(cmd.getApproveStatus()) == null ? "全部": ApproveStatus.fromCode(cmd.getApproveStatus()).getText();
 		String fileName = String.format("入驻申请企业_%s_%s.xlsx", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
@@ -169,9 +176,9 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
-	public IncubatorApplyDTO findIncubatorAppling() {
+	public IncubatorApplyDTO findIncubatorAppling(FindIncubatorApplingCommand cmd) {
 		Long userId = UserContext.currentUserId();
-		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(userId);
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(userId, cmd.getRootId());
 
 		if(incubatorApplies == null || incubatorApplies.size() == 0){
 			return null;
@@ -206,17 +213,25 @@ public class IncubatorServiceImpl implements IncubatorService {
 					"ERROR_INVALID_PARAMS");
 		}
 
-		IncubatorApplyDTO incubatorAppling = findIncubatorAppling();
+		User user = UserContext.current().getUser();
 
-		//一个人只允许一个申请中的记录，如果是他的父节点是OK的（申请中的重新申请，后面会删除的），
-		if(incubatorAppling != null && !incubatorAppling.getId().equals(cmd.getParentId())){
-			LOGGER.error("incubatorAppling id={}", incubatorAppling.getId());
-			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_HAVE_WAITTING_APPLY,
-					"ERROR_HAVE_WAITTING_APPLY");
+		//如果是有parentId的，要判断当前申请记录的树结构中有没有正在审核中的记录
+		if(cmd.getParentId() != null){
+
+			IncubatorApply parentApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+
+			List<IncubatorApply> applies = incubatorProvider.listIncubatorAppling(user.getId(), parentApply.getRootId());
+
+			//在一棵树只允许一个申请中的记录。有一种情况是例外的，如果它只有一个申请中的，并且申请中的就是父节点，即是申请中的记录重新申请。
+			if(applies != null && applies.size() > 0 && !applies.get(0).getId().equals(cmd.getParentId())){
+				LOGGER.error("incubatorAppling id={}", applies.get(0).getId());
+				throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_HAVE_WAITTING_APPLY,
+						"ERROR_HAVE_WAITTING_APPLY");
+			}
 		}
 
 		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
-		User user = UserContext.current().getUser();
+
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -264,6 +279,17 @@ public class IncubatorServiceImpl implements IncubatorService {
 				incubatorProvider.createAttachment(attachment);
 			}
 		}
+	}
+
+	@Override
+	public IncubatorApplyDTO updateIncubatorApply(UpdateIncubatorApplyCommand cmd) {
+		IncubatorApply apply = incubatorProvider.findIncubatorApplyById(cmd.getId());
+		apply.setCheckFlag(cmd.getCheckFlag());
+		incubatorProvider.updateIncubatorApply(apply);
+
+		IncubatorApplyDTO dto = ConvertHelper.convert(apply, IncubatorApplyDTO.class);
+		populateDto(dto);
+		return dto;
 	}
 
 	@Override
@@ -354,7 +380,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		}
 
 		//自己不是审核中，一个用户只允许一个审核中的，已经有的话不允许在申请
-		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId());
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId(), dto.getRootId());
 		if(incubatorApplies == null || incubatorApplies.size() == 0){
 			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
 		}else {

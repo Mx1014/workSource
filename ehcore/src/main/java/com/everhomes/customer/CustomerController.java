@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,6 +137,15 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("exportEnterpriseCustomer")
     public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         customerService.exportEnterpriseCustomer(cmd, response);
+    }
+
+    /**
+     * <b>URL: /customer/exportEnterpriseCustomerTemplate</b>
+     * <p>导出企业客户</p>
+     */
+    @RequestMapping("exportEnterpriseCustomerTemplate")
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomerTemplate(cmd, response);
     }
 
     /**

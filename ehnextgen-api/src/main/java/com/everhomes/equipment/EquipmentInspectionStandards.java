@@ -2,81 +2,111 @@ package com.everhomes.equipment;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.equipment.EquipmentStandardCommunity;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
-public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards{
-	
-	private static final long serialVersionUID = -1192073373709883176L;
-	
-	@ItemType(RepeatSettings.class)
-	private RepeatSettings repeat;
-	
-	private Integer equipmentsCount;
+public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards {
 
-	@ItemType(Long.class)
-	private List<Long> communities;
+    private static final long serialVersionUID = -1192073373709883176L;
 
-	private  String  targetName;
-	
-	@ItemType(EquipmentInspectionStandardGroupMap.class)
-	private List<EquipmentInspectionStandardGroupMap> executiveGroup;
+    @Deprecated
+    @ItemType(RepeatSettings.class)
+    private RepeatSettings repeat;
 
-	@ItemType(EquipmentInspectionStandardGroupMap.class)
-	private List<EquipmentInspectionStandardGroupMap> reviewGroup;
-	
-	public RepeatSettings getRepeat() {
-		return repeat;
-	}
+    private Integer equipmentsCount;
 
-	public void setRepeat(RepeatSettings repeat) {
-		this.repeat = repeat;
-	}
+    @ItemType(EquipmentStandardCommunity.class)
+    private List<EquipmentStandardCommunity> communities;
 
-	public Integer getEquipmentsCount() {
-		return equipmentsCount;
-	}
+    private String targetName;
 
-	public void setEquipmentsCount(Integer equipmentsCount) {
-		this.equipmentsCount = equipmentsCount;
-	}
 
-	public List<EquipmentInspectionStandardGroupMap> getExecutiveGroup() {
-		return executiveGroup;
-	}
+    //add in PM.V3.2
+    @ItemType(EquipmentInspectionEquipments.class)
+    private List<EquipmentInspectionEquipments> equipments;
 
-	public void setExecutiveGroup(
-			List<EquipmentInspectionStandardGroupMap> executiveGroup) {
-		this.executiveGroup = executiveGroup;
-	}
+    //add in PM.V3.2
+    @ItemType(EquipmentInspectionItems.class)
+    private List<EquipmentInspectionItems> items;
 
-	public List<EquipmentInspectionStandardGroupMap> getReviewGroup() {
-		return reviewGroup;
-	}
+    @Deprecated
+    @ItemType(EquipmentInspectionStandardGroupMap.class)
+    private List<EquipmentInspectionStandardGroupMap> executiveGroup;
 
-	public void setReviewGroup(List<EquipmentInspectionStandardGroupMap> reviewGroup) {
-		this.reviewGroup = reviewGroup;
-	}
+    @Deprecated
+    @ItemType(EquipmentInspectionStandardGroupMap.class)
+    private List<EquipmentInspectionStandardGroupMap> reviewGroup;
 
-	public List<Long> getCommunities() {
-		return communities;
-	}
+    public RepeatSettings getRepeat() {
+        return repeat;
+    }
 
-	public void setCommunities(List<Long> communities) {
-		this.communities = communities;
-	}
+    public void setRepeat(RepeatSettings repeat) {
+        this.repeat = repeat;
+    }
 
-	public String getTargetName() {
-		return targetName;
-	}
+    public Integer getEquipmentsCount() {
+        return equipmentsCount;
+    }
 
-	public void setTargetName(String targetName) {
-		this.targetName = targetName;
-	}
+    public void setEquipmentsCount(Integer equipmentsCount) {
+        this.equipmentsCount = equipmentsCount;
+    }
 
-	@Override
+    public List<EquipmentInspectionStandardGroupMap> getExecutiveGroup() {
+        return executiveGroup;
+    }
+
+    public void setExecutiveGroup(
+            List<EquipmentInspectionStandardGroupMap> executiveGroup) {
+        this.executiveGroup = executiveGroup;
+    }
+
+    public List<EquipmentInspectionStandardGroupMap> getReviewGroup() {
+        return reviewGroup;
+    }
+
+    public void setReviewGroup(List<EquipmentInspectionStandardGroupMap> reviewGroup) {
+        this.reviewGroup = reviewGroup;
+    }
+
+
+    public List<EquipmentInspectionItems> getItems() {
+        return items;
+    }
+
+    public void setItems(List<EquipmentInspectionItems> items) {
+        this.items = items;
+    }
+
+    public List<EquipmentInspectionEquipments> getEquipments() {
+        return equipments;
+    }
+
+    public void setEquipments(List<EquipmentInspectionEquipments> equipments) {
+        this.equipments = equipments;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+    public List<EquipmentStandardCommunity> getCommunities() {
+        return communities;
+    }
+
+    public void setCommunities(List<EquipmentStandardCommunity> communities) {
+        this.communities = communities;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

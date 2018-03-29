@@ -2,7 +2,10 @@
 package com.everhomes.user;
 
 
+<<<<<<< HEAD
 import com.alibaba.fastjson.JSON;
+import com.everhomes.PictureValidate.PictureValidateService;
+import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -370,6 +373,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private CommunityService communityService;
+
+	@Autowired
+    private PictureValidateService pictureValidateService;
 
 
 	private static final String DEVICE_KEY = "device_login";
@@ -1887,6 +1893,27 @@ public class UserServiceImpl implements UserService {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
         }
+	}
+
+
+
+	@Override
+	public void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request) {
+
+		//校验图片验证码
+		Boolean validateFlag = pictureValidateService.validateCode(request, cmd.getPictureCode());
+		if(!validateFlag){
+			LOGGER.error("invalid picture code, validate fail");
+			throw errorWith(PictureValidateServiceErrorCode.SCOPE,
+					PictureValidateServiceErrorCode.ERROR_INVALID_CODE, "invalid picture code");
+		}
+
+		//发送手机验证码
+		ResendVerificationCodeByIdentifierCommand sendcmd = new ResendVerificationCodeByIdentifierCommand();
+		sendcmd.setNamespaceId(cmd.getNamespaceId());
+		sendcmd.setIdentifier(cmd.getIdentifier());
+		sendcmd.setRegionCode(cmd.getRegionCode());
+		resendVerficationCode(sendcmd, request);
 	}
 
 	@Override
@@ -5987,5 +6014,23 @@ public class UserServiceImpl implements UserService {
 		});
 		return cardDtos;
 	}
+	@Override
+	public SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd) {
 
+		if(cmd.getIdentifierToken().length() < 7){
+			return null;
+		}
+
+		int pageSize = 10 ;
+
+		List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
+
+		List<UserDTO> dtos = new ArrayList<>();
+		if(users != null){
+			dtos = users.stream().map(r -> ConvertHelper.convert(r, UserDTO.class)).collect(Collectors.toList());
+		}
+		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
+		response.setDtos(dtos);
+		return response;
+	}
 }

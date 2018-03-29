@@ -34,6 +34,8 @@ public class PropCommunityBuildAddessCommand {
     private String messageBodyType;
     
     private String imgUri;
+
+	private Integer namespaceId;
    
     public PropCommunityBuildAddessCommand() {
     }
@@ -127,4 +129,12 @@ public class PropCommunityBuildAddessCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }
