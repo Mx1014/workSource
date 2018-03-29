@@ -78,7 +78,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         return dtos;
     }
 
-    @Autowired
+    @Override
     public List<ServiceModuleAppAuthorization> listCommunityRelationOfOwnerIdAndAppId(Integer namespaceId, Long ownerId, Long appId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override

@@ -2408,7 +2408,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return projectTrees;
 	}
 
-	@Autowired
+	@Override
 	public List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects) {
 		List<ProjectDTO> projectTrees = new ArrayList<>();
 		List<Long> categoryIds = new ArrayList<>();
