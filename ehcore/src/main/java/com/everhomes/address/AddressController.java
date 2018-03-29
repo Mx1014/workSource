@@ -450,7 +450,7 @@ public class AddressController extends ControllerBase {
 
     /**
      * <b>URL: /address/createOfficeSite/b>
-     * <p>查询门牌的关联的企业</p>
+     * <p>添加办公地点</p>
      */
     @RequestMapping("createOfficeSite")
     @RestReturn(value=String.class)
