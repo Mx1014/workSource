@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -37,7 +38,7 @@ public interface UserService {
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
-    User logonDryrun(String userIdentifierToken, String password);
+    User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
@@ -317,4 +318,6 @@ public interface UserService {
     List<FunctionCardDto> listUserRelatedCards();
     User getUserFromAnBangToken(String token);
     List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
+    String makeAnbangRedirectUrl(Long userId, String location,
+            Map<String, String[]> paramMap);
 }

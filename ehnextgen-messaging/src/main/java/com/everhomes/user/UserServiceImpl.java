@@ -139,6 +139,8 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -151,6 +153,9 @@ import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -935,14 +940,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User logonDryrun(String userIdentifierToken, String password) {
+	public User logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
 		User user;
 		user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
             }
-			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
+			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(identifier != null) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
@@ -4861,6 +4866,22 @@ public class UserServiceImpl implements UserService {
 
 		return communityId;
 	}
+	
+	   private Long getOrgIdBySceneToken(SceneTokenDTO sceneTokenDTO) {
+	        SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+
+	        switch (sceneType) {
+	            case PM_ADMIN:// 无小区ID
+	            case ENTERPRISE: // 增加两场景，与园区企业保持一致
+	            case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致
+	                return sceneTokenDTO.getEntityId();
+	            default:
+	                break;
+	        }
+
+	        return null;
+	    }
+
 
 	public List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		if(cmd.getSceneType() == null){
@@ -5633,6 +5654,34 @@ public class UserServiceImpl implements UserService {
 			}
 			return null;
 		});
+	}
+	
+	@Override
+	public String makeAnbangRedirectUrl(Long userId, String location, Map<String, String[]> paramMap) {
+	    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+	    
+	    if(paramMap.get("sceneToken") != null) {
+	        String sceneToken = StringUtils.join(paramMap.get("sceneToken"));
+	        SceneTokenDTO sceneDTO = checkSceneToken(userId, sceneToken);
+	        Long communityId = getCommunityIdBySceneToken(sceneDTO);
+	        Long orgId = getOrgIdBySceneToken(sceneDTO);
+	        if(communityId != null) {
+	            builder.queryParam("communityId", communityId);
+	        }
+	        if(orgId != null) {
+	            builder.queryParam("organizationId", orgId);
+	        }
+	    }
+	    
+	    builder.queryParam("ns", ANBANG_NAMESPACE_ID);
+	    
+	    for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+	        if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && !entry.getKey().equals("abtoken")) {
+	            builder.queryParam(entry.getKey(), entry.getValue());
+	           }
+	    }
+	    
+	    return builder.build().toUriString();
 	}
 
 	@Override

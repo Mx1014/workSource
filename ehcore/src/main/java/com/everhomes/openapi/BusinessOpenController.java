@@ -889,6 +889,8 @@ public class BusinessOpenController extends ControllerBase {
                         }
                     }
                 
+                location = this.userService.makeAnbangRedirectUrl(login.getUserId(), location, paramMap);
+                
                 setCookieInResponse("token", tokenString, request, response);
                 httpHeaders.setLocation(new URI(location));
              
@@ -905,10 +907,10 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /openapi/listAnBangRelatedAddresses</b>
+     * <b>URL: /openapi/listAnbangRelatedScenes</b>
      * <p>根据用户域空间场景获取用户相关的地址列表</p>
      */
-    @RequestMapping("listAnBangRelatedAddresses")
+    @RequestMapping("listAnbangRelatedScenes")
     @RequireAuthentication(false)
     @RestReturn(value=SceneDTO.class, collection=true)
     public RestResponse listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
