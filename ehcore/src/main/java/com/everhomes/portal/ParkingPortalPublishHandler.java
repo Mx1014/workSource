@@ -21,6 +21,11 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         ParkingInstanceConfig parkingInstanceConfig = (ParkingInstanceConfig)StringHelper.fromJsonString(instanceConfig, ParkingInstanceConfig.class);
+
+        if(parkingInstanceConfig == null){
+            parkingInstanceConfig = new ParkingInstanceConfig();
+        }
+        
         if(null == parkingInstanceConfig.getResourceTypeId()){
             RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName, (byte)0,
                     (byte)0,RentalV2ResourceType.VIP_PARKING.getCode());

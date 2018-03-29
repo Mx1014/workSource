@@ -1705,3 +1705,6 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 -- 部分企业管理应用的名称为空导致菜单名称为空。add by yanjun 201803281555
 UPDATE eh_reflection_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
 UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+
+-- 调整模块属性
+update eh_service_modules set module_control_type = 'community_control' where id in (10100,10600,10300);
