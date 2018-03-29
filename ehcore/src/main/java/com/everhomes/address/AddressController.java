@@ -1,35 +1,32 @@
 package com.everhomes.address;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.address.*;
-
-import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.util.RequireAuthentication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/address")
@@ -446,6 +443,20 @@ public class AddressController extends ControllerBase {
     public RestResponse listApartmentEnterpriseCustomers(@Valid ListApartmentEnterpriseCustomersCommand cmd) {
         List<EnterpriseCustomerDTO> dtos = addressService.listApartmentEnterpriseCustomers(cmd);
         RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/createOfficeSite/b>
+     * <p>查询门牌的关联的企业</p>
+     */
+    @RequestMapping("createOfficeSite")
+    @RestReturn(value=String.class)
+    public RestResponse createOfficeSite(@Valid CreateOfficeSiteCommand cmd) {
+//        List<EnterpriseCustomerDTO> dtos = addressService.listApartmentEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
