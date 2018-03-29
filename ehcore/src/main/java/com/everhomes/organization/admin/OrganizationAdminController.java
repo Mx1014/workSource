@@ -405,7 +405,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /admin/org/createStandardEnterprise</b>
      * <p>创建企业</p>
      */
-    @RequestMapping("createEnterprise")
+    @RequestMapping("createStandardEnterprise")
     @RestReturn(value = String.class)
     public RestResponse createStandardEnterprise(@Valid CreateEnterpriseStandardCommand cmd) {
 //        cmd.setCheckPrivilege(true);
