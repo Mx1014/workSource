@@ -11,11 +11,12 @@ package com.everhomes.rest.archives;
  * <li>ADJUSTMENT((byte) 6): 编制调整</li>
  * <li>BREAK_RULE((byte) 7): 违纪</li>
  * <li>OTHER((byte) 8): 其他</li>
+ * <li>RETIRE((byte) 9): 退休</li>
  * </ul>
  */
 public enum ArchivesDismissReason {
     SALARY((byte) 0), CULTURE((byte) 1), BALANCE((byte) 2), PERSONAL_REASON((byte) 3), CAREER_DEVELOPMENT((byte) 4),
-    FIRE((byte) 5), ADJUSTMENT((byte) 6), BREAK_RULE((byte) 7), OTHER((byte) 8);
+    FIRE((byte) 5), ADJUSTMENT((byte) 6), BREAK_RULE((byte) 7), OTHER((byte) 8), RETIRE((byte) 9);
 
     private Byte code;
 
