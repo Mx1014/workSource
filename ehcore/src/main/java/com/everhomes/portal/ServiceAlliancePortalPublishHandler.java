@@ -341,7 +341,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     final Pattern pattern = Pattern.compile("^.*\"type\":[\\s]*([\\d]*)");
     @Override
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
-        LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = "+instanceConfig);
+        LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
         if(instanceConfig == null || instanceConfig.length() == 0){
             return null;
         }
