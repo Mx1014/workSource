@@ -3,10 +3,8 @@ package com.everhomes.openapi;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;

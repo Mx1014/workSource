@@ -233,6 +233,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         User userById = userProvider.findUserById(UserContext.currentUserId());
         order.setExecutorName(userById.getNickName());
         order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        warehouseProvider.insertWarehouseOrder(order);
         //增加库存,增加库存日志
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(purchaseRequestId);
         for(PurchaseItem item : items){
@@ -261,7 +262,9 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setOwnerType(order.getOwnerType());
                 stock.setStatus(Status.ACTIVE.getCode());
                 stock.setWarehouseId(item.getWarehouseId());
-
+                // 忘记在es上feed一下了 by vincent wang 2018/3/28
+                warehouseProvider.insertWarehouseStock(stock);
+                warehouseStockSearcher.feedDoc(stock);
             }
             //出入库记录
             WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
@@ -276,9 +279,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
             logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
             logs.setRequestId(purchaseOrder.getId());
-            // 忘记在es上feed一下了 by vincent wang 2018/3/28
-            warehouseProvider.insertWarehouseStock(stock);
-            warehouseStockSearcher.feedDoc(stock);
+
             warehouseProvider.insertWarehouseStockLog(logs);
             warehouseStockLogSearcher.feedDoc(logs);
         }

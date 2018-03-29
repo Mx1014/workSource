@@ -17,6 +17,7 @@ import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
@@ -153,7 +154,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
-				rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.FAIL.getCode(), false);
+				CancelRentalBillCommand cmd = new CancelRentalBillCommand();
+				cmd.setRentalBillId(order.getId());
+				rentalv2Service.cancelRentalBill(cmd);
 			}
 
 		}
