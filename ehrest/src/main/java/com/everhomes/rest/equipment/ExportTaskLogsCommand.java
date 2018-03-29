@@ -2,8 +2,6 @@ package com.everhomes.rest.equipment;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
-
 /**
  * Created by Rui.Jia  2018/3/29 15 :38
  */
@@ -12,7 +10,7 @@ public class ExportTaskLogsCommand {
 
     private String taskId;
 
-    private List<Byte> processType;
+    private Byte processType;
 
     public String getTaskId() {
         return taskId;
@@ -22,11 +20,11 @@ public class ExportTaskLogsCommand {
         this.taskId = taskId;
     }
 
-    public List<Byte> getProcessType() {
+    public Byte getProcessType() {
         return processType;
     }
 
-    public void setProcessType(List<Byte> processType) {
+    public void setProcessType(Byte processType) {
         this.processType = processType;
     }
 

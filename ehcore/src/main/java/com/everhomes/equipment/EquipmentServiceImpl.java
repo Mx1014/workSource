@@ -17,6 +17,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -6308,15 +6309,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public HttpServletResponse exportTaskLogs(ExportTaskLogsCommand cmd, HttpServletResponse response) {
-		/*ListingLocator locator = new ListingLocator();
+		ListingLocator locator = new ListingLocator();
 		int pageSize = Integer.MAX_VALUE - 1;
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize+1,
-				Long.valueOf(cmd.getTaskId()), cmd.getProcessType(), null);
+				Long.valueOf(cmd.getTaskId()), new ArrayList<>(cmd.getProcessType()), null);
 		//展示最新一次的任务日志记录
 		logs = getLatestTaskLogs(logs);
 
 		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-		//为了查看特定设备详情和批量审阅的总览  增加以下
 			dtos = processEquipmentTaskLogsDTOS(logs);
 
 			URL rootPath = RentalServiceImpl.class.getResource("/");
@@ -6324,13 +6324,54 @@ public class EquipmentServiceImpl implements EquipmentService {
 			File file = new File(filePath);
 			if (!file.exists())
 				file.mkdirs();
-			filePath = filePath + "EquipmentStandards" + System.currentTimeMillis() + ".xlsx";
+			filePath = filePath + "任务巡检记录" + System.currentTimeMillis() + ".xlsx";
 			//新建了一个文件
-			this.createEquipmentStandardsBook(filePath, null);
+			this.createEquipmentTaskLogsBook(filePath, dtos);
 
 			return download(filePath, response);
-			return null;*/
 
-		return null;
+	}
+
+	private void createEquipmentTaskLogsBook(String filePath, List<EquipmentTaskLogsDTO> dtos) {
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("任务记录");
+
+		this.createEquipmentTaskLogsBookSheetHead(sheet);
+
+		for (EquipmentTaskLogsDTO dto : dtos) {
+			this.setNewEquipmentTaskLogsBookRow(sheet, dto);
+		}
+
+		try {
+			FileOutputStream out = new FileOutputStream(filePath);
+			wb.write(out);
+			wb.close();
+			out.close();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+	}
+
+	private void setNewEquipmentTaskLogsBookRow(Sheet sheet, EquipmentTaskLogsDTO dto) {
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+		int i = -1;
+		if (dto.getItemResults() != null && dto.getItemResults().size() > 0) {
+			for (InspectionItemResult result : dto.getItemResults()) {
+				row.createCell(++i).setCellValue(dto.getEquipmentName());
+				row.createCell(++i).setCellValue(result.toString());
+				row.createCell(++i).setCellValue(result.getNormalFlag() == 1 ? "正常" : "异常");
+			}
+		}
+	}
+
+	private void createEquipmentTaskLogsBookSheetHead(Sheet sheet) {
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue("设备名称");
+		row.createCell(++i).setCellValue("检查项");
+		row.createCell(++i).setCellValue("结果");
 	}
 }
