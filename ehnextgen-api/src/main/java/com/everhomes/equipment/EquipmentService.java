@@ -170,4 +170,6 @@ public interface EquipmentService {
     List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd);
 
     void updateEquipmentStatus(DeleteEquipmentsCommand cmd);
+
+    void startCrontabTask();
 }

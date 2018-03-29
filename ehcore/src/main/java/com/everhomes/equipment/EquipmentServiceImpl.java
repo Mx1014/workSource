@@ -211,6 +211,8 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -252,6 +254,7 @@ import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -405,6 +408,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private UserService userService;
+
+	//上线时间影响定时任务问题
+	@Value("${equipment.ip}")
+	private String equipmentIp;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -6261,5 +6271,53 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 	}
 
+	@Override
+	public void startCrontabTask() {
 
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+		if (taskServer.equals(equipmentIp)) {
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
+			}
+			//双机判断
+			if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+				closeDelayTasks();
+				createTaskByPlan();
+			}
+		}
+	}
+	private void createTaskByPlan() {
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("EquipmentInspectionScheduleJob:createTaskByPlan.....");
+		}
+
+		List<EquipmentInspectionPlans> plans = equipmentProvider.listQualifiedEquipmentInspectionPlans();
+		if (plans != null && plans.size() > 0) {
+			LOGGER.info("createTaskByPlan.....plan size = {}"+plans.size());
+			for (EquipmentInspectionPlans plan : plans) {
+				if (checkPlanRepeat(plan)) {
+					LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
+					createEquipmentTaskByPlan(plan);
+					plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					equipmentProvider.updateEquipmentInspectionPlan(plan);
+				}
+			}
+		}
+	}
+
+	private boolean checkPlanRepeat(EquipmentInspectionPlans plan) {
+		boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
+		LOGGER.info("checkPlanRepeat: plans  id = " + plan.getId()
+				+ "repeat setting id = "+ plan.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+		return isRepeat;
+	}
+
+	private void closeDelayTasks() {
+		LOGGER.info("EquipmentInspectionScheduleJob: close delay tasks.");
+		equipmentProvider.closeDelayTasks();
+
+		LOGGER.info("EquipmentInspectionScheduleJob: close expired review tasks.");
+		equipmentProvider.closeExpiredReviewTasks();
+	}
 }

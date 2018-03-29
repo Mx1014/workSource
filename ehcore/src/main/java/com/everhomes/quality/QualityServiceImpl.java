@@ -3,6 +3,7 @@ package com.everhomes.quality;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -174,6 +175,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -274,6 +276,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Value("${equipment.ip}")
+	private String equipmentIp;
 
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -5119,5 +5124,29 @@ Long nextPageAnchor = null;
 		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 		record.setProcessMessage(msg);
+	}
+
+	@Override
+	public void startCrontabTask() {
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+			qualityProvider.closeDelayTasks();
+
+			List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
+
+			for (QualityInspectionStandards standard : activeStandards) {
+				boolean isRepeat = false;
+				try {
+					isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+				} catch (Exception e) {
+					LOGGER.info("repeatSetting  analyzed erro :", e.getMessage());
+				}
+				LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId()
+						+ "repeat setting id = " + standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+				if (isRepeat) {
+					createTaskByStandardId(standard.getId());
+				}
+
+			}
 	}
 }

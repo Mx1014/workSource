@@ -1015,4 +1015,17 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
+    /**
+     * <b>URL: /equipment/startCrontabTask</b>
+     * <p>上线时间问题临时接口启动任务生成</p>
+     */
+    @RequestMapping("startCrontabTask")
+    @RestReturn(value = String.class)
+    public RestResponse startCrontabTask() {
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        equipmentService.startCrontabTask();
+        return getSuccessResponse();
+    }
+
 }
