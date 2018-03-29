@@ -211,8 +211,6 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -254,7 +252,6 @@ import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -408,13 +405,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private UserService userService;
-
-	//上线时间影响定时任务问题
-	@Value("${equipment.ip}")
-	private String equipmentIp;
-
-	@Autowired
-	private ScheduleProvider scheduleProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -6273,20 +6263,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void startCrontabTask() {
-
-		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
-		if (taskServer.equals(equipmentIp)) {
-			if(LOGGER.isInfoEnabled()) {
-				LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
-			}
-			//双机判断
-			if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-				closeDelayTasks();
-				createTaskByPlan();
-			}
-		}
+		LOGGER.info("================================================ starting equipment  manual job... ");
+		closeDelayTasks();
+		createTaskByPlan();
 	}
+
 	private void createTaskByPlan() {
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob:createTaskByPlan.....");
