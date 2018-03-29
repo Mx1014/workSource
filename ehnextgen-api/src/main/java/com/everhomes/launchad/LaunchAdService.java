@@ -3,7 +3,7 @@ package com.everhomes.launchad;
 
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.launchad.LaunchAdDTO;
-import com.everhomes.rest.launchad.SetLaunchAdCommand;
+import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -19,7 +19,7 @@ public interface LaunchAdService {
     /**
      * 设置启动广告数据
      */
-    LaunchAdDTO setLaunchAd(SetLaunchAdCommand cmd);
+    LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd);
 
     /**
      * 上传附件

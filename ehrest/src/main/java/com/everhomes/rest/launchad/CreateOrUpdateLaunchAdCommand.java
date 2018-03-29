@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
  * </ul>
  */
-public class SetLaunchAdCommand {
+public class CreateOrUpdateLaunchAdCommand {
 
     @NotNull private Integer namespaceId;
     private String contentType;

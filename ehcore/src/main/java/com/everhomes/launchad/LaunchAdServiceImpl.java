@@ -4,8 +4,8 @@ package com.everhomes.launchad;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
+import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
 import com.everhomes.rest.launchad.LaunchAdDTO;
-import com.everhomes.rest.launchad.SetLaunchAdCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +41,7 @@ public class LaunchAdServiceImpl implements LaunchAdService {
     }
 
     @Override
-    public LaunchAdDTO setLaunchAd(SetLaunchAdCommand cmd) {
+    public LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
         LaunchAd launchAd = launchAdProvider.getLaunchAd(cmd.getNamespaceId());
         if (launchAd != null) {
             if (cmd.getActionData() != null) {
@@ -54,7 +54,7 @@ public class LaunchAdServiceImpl implements LaunchAdService {
                 launchAd.setContentType(cmd.getContentType());
             }
             if (cmd.getContentUri() != null) {
-                launchAd.setContentUri(cmd.getContentUri());
+                launchAd.setContentUri(zipContent(cmd.getContentUri()));
             }
             if (cmd.getDisplayInterval() != null) {
                 launchAd.setDisplayInterval(cmd.getDisplayInterval());
@@ -77,6 +77,12 @@ public class LaunchAdServiceImpl implements LaunchAdService {
             launchAdProvider.createLaunchAd(launchAd);
         }
         return toLaunchAdDTO(launchAd);
+    }
+
+    private String zipContent(String contentUri) {
+        String url = contentServerService.parserUri(contentUri);
+
+        return null;
     }
 
     @Override
