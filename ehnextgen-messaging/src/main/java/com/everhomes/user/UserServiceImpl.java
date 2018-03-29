@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserService {
 	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
 	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
 	private static String ANBANG_CURRENT_USER_URL = "http://139.196.255.176:8000/api/auth/current-user";
-	private static Integer ANBANG_NAMESPACE_ID = 999992;
+	private static Integer ANBANG_NAMESPACE_ID = 999949;
 
 
 	@Autowired
