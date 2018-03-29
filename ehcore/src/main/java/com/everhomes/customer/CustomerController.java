@@ -996,7 +996,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("syncEnterpriseCustomers")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
-        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd));
+        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, true));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
