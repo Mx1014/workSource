@@ -1,5 +1,6 @@
 package com.everhomes.rest.enterprise;
 
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  * <li>officeLocation: 关联的办公地点id</li>
  * <li>communityIds: 关联的管理项目 </li>
  * <li>workbenchFlag: 是否启用工作台 </li>
- *
+ * <li>CreateOfficeSiteCommand: 工作地点信息，参考{@link CreateOfficeSiteCommand} </li>
  * </ul>
  *
  */
@@ -29,6 +30,7 @@ public class CreateEnterpriseStandardCommand {
     private Long officeLocation;
     private List<Long> communityIds;
     private boolean workbenchFlag;
+    private List<CreateOfficeSiteCommand> officeSites;
 
 
     @Override
