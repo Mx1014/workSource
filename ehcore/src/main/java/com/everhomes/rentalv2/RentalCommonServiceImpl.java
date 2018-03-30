@@ -412,9 +412,9 @@ public class RentalCommonServiceImpl {
             sb.append(i+j+1);
             sb.append("，");
             sb.append("订单开始前");
-            sb.append(innerRules.get(i).getDuration());
+            sb.append(innerRules.get(j).getDuration());
             sb.append("小时内取消，退还");
-            sb.append(innerRules.get(i).getFactor());
+            sb.append(innerRules.get(j).getFactor());
             sb.append("%订单金额");
          //   sb.append("\r\n");
         }
