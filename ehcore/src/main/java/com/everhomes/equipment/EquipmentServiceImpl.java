@@ -6316,18 +6316,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 		logs = getLatestTaskLogs(logs);
 
 		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-			dtos = processEquipmentTaskLogsDTOS(logs);
+		dtos = processEquipmentTaskLogsDTOS(logs);
 
-			URL rootPath = EquipmentServiceImpl.class.getResource("/");
-			String filePath = rootPath.getPath() + this.downloadDir;
-			File file = new File(filePath);
-			if (!file.exists())
-				file.mkdirs();
-			filePath = filePath + "任务巡检记录" + System.currentTimeMillis() + ".xlsx";
-			//新建了一个文件
-			this.createEquipmentTaskLogsBook(filePath, dtos);
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
+		String filePath = rootPath.getPath() + this.downloadDir;
+		File file = new File(filePath);
+		if (!file.exists())
+			file.mkdirs();
+		filePath = filePath + "任务巡检记录" + System.currentTimeMillis() + ".xlsx";
+		//新建了一个文件
+		this.createEquipmentTaskLogsBook(filePath, dtos);
 
-			return download(filePath, response);
+		return download(filePath, response);
 
 	}
 
@@ -6360,8 +6360,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (dto.getItemResults() != null && dto.getItemResults().size() > 0) {
 			for (InspectionItemResult result : dto.getItemResults()) {
 				row.createCell(++i).setCellValue(dto.getEquipmentName());
-				row.createCell(++i).setCellValue(result.toString());
+				row.createCell(++i).setCellValue("检查项名称："+ result.getItemName() +"类型："+(result.getItemValueType()==0?"确认":"记录")+ result.getItemValue()+result.getItemUnit());
 				row.createCell(++i).setCellValue(result.getNormalFlag() == 1 ? "正常" : "异常");
+				row = sheet.createRow(sheet.getLastRowNum() + 1);
 			}
 		}
 	}
@@ -6371,6 +6372,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		int i = -1;
 		row.createCell(++i).setCellValue("设备名称");
 		row.createCell(++i).setCellValue("检查项");
-		row.createCell(++i).setCellValue("结果");
+		row.createCell(++i).setCellValue("检查结果");
 	}
 }
