@@ -6362,6 +6362,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				row.createCell(++i).setCellValue(dto.getEquipmentName());
 				row.createCell(++i).setCellValue("检查项名称："+ result.getItemName() +"类型："+(result.getItemValueType()==0?"确认":"记录")+ result.getItemValue()+result.getItemUnit());
 				row.createCell(++i).setCellValue(result.getNormalFlag() == 1 ? "正常" : "异常");
+				row = sheet.createRow(sheet.getLastRowNum() + 1);
 			}
 		}
 	}
