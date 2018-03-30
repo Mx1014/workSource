@@ -2626,8 +2626,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue("截止时间");
 		row.createCell(++i).setCellValue("设备位置");
 		row.createCell(++i).setCellValue("任务状态");
-		row.createCell(++i).setCellValue("审核状态");
-		row.createCell(++i).setCellValue("任务结果");
 		row.createCell(++i).setCellValue("完成时间");
 		row.createCell(++i).setCellValue("执行人");
 	}
@@ -2651,16 +2649,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if (null != dto.getStatus() && null != EquipmentTaskStatus.fromStatus(dto.getStatus()))
 			row.createCell(++i).setCellValue(EquipmentTaskStatus.fromStatus(dto.getStatus()).getName());
-
-		if (ReviewResult.NONE.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("");
-		if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("审核通过");
-		if (ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("审核不通过");
-
-		if (null != dto.getResult() && null != EquipmentTaskResult.fromStatus(dto.getResult()))
-			row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
 
 		if (dto.getProcessTime() != null) {
 			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
@@ -6340,9 +6328,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Sheet taskSheet = wb.createSheet("任务信息");
 		Sheet taskLogSheet = wb.createSheet("巡检记录");
 		Sheet repairLogSheet = wb.createSheet("维修记录");
-		taskSheet.setDefaultColumnWidth(50);
-		taskLogSheet.setDefaultColumnWidth(50);
-		repairLogSheet.setDefaultColumnWidth(50);
+		taskSheet.setDefaultColumnWidth(20 * 256);
+		taskLogSheet.setDefaultColumnWidth(20 * 256);
+		repairLogSheet.setDefaultColumnWidth(20 * 256);
 		// task info
 		setNewEquipmentTaskInfoHeadAndBookRow(taskSheet, task);
 
@@ -6388,8 +6376,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue("截止时间");
 		row.createCell(++i).setCellValue("设备位置");
 		row.createCell(++i).setCellValue("任务状态");
-		row.createCell(++i).setCellValue("审核状态");
-		row.createCell(++i).setCellValue("任务结果");
 		row.createCell(++i).setCellValue("完成时间");
 		row.createCell(++i).setCellValue("执行人");
 		EquipmentTaskDTO taskDTO = convertTaskInfo(task);
