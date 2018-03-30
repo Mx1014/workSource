@@ -11,7 +11,7 @@ import java.util.List;
  * <li>mobile_uri: 移动端图片</li>
  * <li>pc_flag: 支持PC端（0：不支持，1：支持）</li>
  * <li>pc_uri: PC端图片</li>
- * <li>app_entry_infos: 应用入口信息</li>
+ * <li>app_entry_infos: 应用入口信息, 参考{@link AppEntryInfosDTO}</li>
  * <li>independent_config_flag: 允许独立配置</li>
  * <li>config_appIds: 若不支持独立配置，选择同时需要配置的应用</li>
  * <li>support_third_flag: 支持对接硬件和第三方系统</li>
