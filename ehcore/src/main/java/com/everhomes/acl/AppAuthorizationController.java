@@ -5,10 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.CreateAppProfileCommand;
-import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
-import com.everhomes.rest.acl.ListCommunityRelationOfOrgIdCommand;
-import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.ListProjectIdsByAppIdAndOrganizationIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -97,7 +94,7 @@ public class AppAuthorizationController {
      */
     @RequestMapping("updateAppProfile")
     @RestReturn(value = String.class)
-    public RestResponse updateAppProfile(@Valid CreateAppProfileCommand cmd) {
+    public RestResponse updateAppProfile(@Valid UpdateAppProfileCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
