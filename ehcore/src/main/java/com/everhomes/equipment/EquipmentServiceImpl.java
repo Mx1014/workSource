@@ -4659,16 +4659,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			Map<String, Object> dataMap = createEquipmentCardDoc(dto);
 
-			GetAppInfoCommand command = new GetAppInfoCommand();
-			command.setNamespaceId(dto.getNamespaceId());
-			command.setOsType(OSType.Android.getCode());
-			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
-			}
-			if (appUrlDTO.getLogoUrl() != null) {
-				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
-			}
+//			GetAppInfoCommand command = new GetAppInfoCommand();
+//			command.setNamespaceId(dto.getNamespaceId());
+//			command.setOsType(OSType.Android.getCode());
+//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+//			if (LOGGER.isDebugEnabled()) {
+//				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
+//			}
+//			if (appUrlDTO.getLogoUrl() != null) {
+//				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+//			}
 
 			if (QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto.getQrCodeToken().getBytes()));
