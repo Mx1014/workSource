@@ -57,10 +57,10 @@ CREATE TABLE `eh_service_module_app_profile` (
   `mobile_flag` tinyint(4) DEFAULT 0,
   `mobile_uri` varchar(1024) DEFAULT NULL,
   `pc_flag` tinyint(4) DEFAULT 0,
-  `pc_uris` varchar(1024) DEFAULT NULL,
+  `pc_uri` varchar(1024) DEFAULT NULL,
   `app_entry_info` varchar(2048) DEFAULT NULL,
   `independent_config_flag` tinyint(4) DEFAULT 0,
-  `config_app_info` varchar(128) DEFAULT NULL,
+  `config_app_ids` varchar(128) DEFAULT NULL,
   `support_third_flag` tinyint(4) DEFAULT 0,
   `default_flag` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`)

@@ -64,7 +64,7 @@ public class AppAuthorizationController {
     }
 
     /**
-     * <b>URL: /module/distributeServiceModuleAppAuthorization</b>
+     * <b>URL: /app/authorizaiton/distributeServiceModuleAppAuthorization</b>
      * 分配应用园区管理权
      */
     @RequestMapping("distributeServiceModuleAppAuthorization")
@@ -77,4 +77,29 @@ public class AppAuthorizationController {
         return response;
     }
 
+    /**
+     * <b>URL: /app/authorizaiton/createAppProfile</b>
+     * 创建应用信息
+     */
+    @RequestMapping("createAppProfile")
+    @RestReturn(value = String.class)
+    public RestResponse createAppProfile(@Valid DistributeServiceModuleAppAuthorizationCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /app/authorizaiton/updateAppProfile</b>
+     * 更新应用信息
+     */
+    @RequestMapping("updateAppProfile")
+    @RestReturn(value = String.class)
+    public RestResponse updateAppProfile(@Valid DistributeServiceModuleAppAuthorizationCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
