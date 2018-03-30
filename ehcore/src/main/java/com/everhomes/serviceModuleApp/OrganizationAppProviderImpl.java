@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,21 @@ public class OrganizationAppProviderImpl implements OrganizationAppProvider {
         }
 
         return objs;
+    }
+
+    @Override
+    public OrganizationApp findOrganizationAppsByOriginIdAndOrgId(Long appOriginId, Long orgId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationApps.class));
+
+        SelectQuery<EhOrganizationAppsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_APPS);
+
+        query.addConditions(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID.eq(appOriginId));
+        query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
+        query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.eq(OrganizationAppStatus.VALID.getCode()));
+
+        OrganizationApp organizationApp = query.fetchAnyInto(OrganizationApp.class);
+
+        return organizationApp;
     }
 
     private void prepareObj(OrganizationApp obj) {

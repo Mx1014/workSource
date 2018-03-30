@@ -11,6 +11,7 @@ package com.everhomes.rest.portal;
  *     <li>instanceConfig: 参数json</li>
  *     <li>menuId: 关联的菜单id</li>
  *     <li>moduleControlType: 模块控制类型 参考{@link com.everhomes.rest.oauth2.ModuleManagementType}</li>
+ *     <li>orgAppId: orgAppId</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -24,6 +25,7 @@ public class ServiceModuleAppDTO {
     private String instanceConfig;
     private Long menuId;
     private String moduleControlType;
+    private Long orgAppId;
 
 
     public Long getId() {
@@ -96,5 +98,13 @@ public class ServiceModuleAppDTO {
 
     public void setModuleControlType(String moduleControlType) {
         this.moduleControlType = moduleControlType;
+    }
+
+    public Long getOrgAppId() {
+        return orgAppId;
+    }
+
+    public void setOrgAppId(Long orgAppId) {
+        this.orgAppId = orgAppId;
     }
 }

@@ -18,4 +18,5 @@ public interface OrganizationAppProvider {
     List<OrganizationApp> queryOrganizationApps(ListingLocator locator,
             int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+    OrganizationApp findOrganizationAppsByOriginIdAndOrgId(Long appOriginId, Long orgId);
 }

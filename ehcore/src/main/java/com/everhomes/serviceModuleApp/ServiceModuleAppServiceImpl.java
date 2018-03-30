@@ -8,10 +8,10 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
+import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
@@ -20,12 +20,14 @@ import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +49,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	private PortalVersionProvider portalVersionProvider;
 	@Autowired
 	private PortalService portalService;
+
+	@Autowired
+	private OrganizationAppProvider organizationAppProvider;
 
 
 	@Override
@@ -189,5 +194,60 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		ListServiceModuleAppsForBannerResponse  response = new ListServiceModuleAppsForBannerResponse();
 		response.setApps(dtos);
 		return response;
+	}
+
+	@Override
+	public ServiceModuleAppDTO installApp(InstallAppCommand cmd) {
+
+		ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(cmd.getAppId());
+		if(serviceModuleApp == null){
+			LOGGER.error("app not found, appId = {}", cmd.getAppId());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_SERVICEMODULEAPP_NOT_FOUND, "app not found, appId = " + cmd.getAppId());
+		}
+
+
+		OrganizationApp orgapps = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(serviceModuleApp.getOriginId(), cmd.getOrgId());
+
+		if(orgapps != null){
+			LOGGER.error("already install this app, appId = {}", cmd.getAppId());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_ALREADY_INSTALL_THIS_APP, "already install this app, appId = " + cmd.getAppId());
+		}
+
+		orgapps = new OrganizationApp();
+		orgapps.setAppOriginId(serviceModuleApp.getOriginId());
+		orgapps.setOrgId(cmd.getOrgId());
+		//TODO
+		//orgapps.setAppType();
+		orgapps.setStatus(OrganizationAppStatus.VALID.getCode());
+		orgapps.setCreatorUid(UserContext.currentUserId());
+		orgapps.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		Long id = organizationAppProvider.createOrganizationApp(orgapps);
+
+
+		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+		dto.setOrgAppId(id);
+
+		return dto;
+	}
+
+	@Override
+	public void uninstallApp(UninstallAppCommand cmd) {
+
+		OrganizationApp orgapps = organizationAppProvider.getOrganizationAppById(cmd.getOrgAppId());
+
+		if(orgapps == null){
+			LOGGER.error("org app not found, orgAppId = {}", cmd.getOrgAppId());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_ORG_APP_NOT_FOUND, "org app not found, orgAppId = " + cmd.getOrgAppId());
+		}
+
+		orgapps.setStatus(OrganizationAppStatus.INVALID.getCode());
+		orgapps.setOperatorUid(UserContext.currentUserId());
+		orgapps.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+		organizationAppProvider.updateOrganizationApp(orgapps);
+
 	}
 }
