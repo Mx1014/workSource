@@ -1812,12 +1812,14 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(ids, ownerType, ownerId, communityId);
         if (requestMaterials != null && requestMaterials.size() > 0) {
-            HashSet<Integer> repeatedFilter = new HashSet<>();
+            HashSet<Long> repeatedFilter = new HashSet<>();
             List<WarehouseRequestMaterialDTO> requestDTOs = new ArrayList<>();
             requestMaterials.stream().forEach(requestMaterial -> {
                 if(repeatedFilter.contains(requestMaterial.getRequestId())){
                     // move to next iteration, return from lambda expression
                     return;
+                }else{
+                    repeatedFilter.add(requestMaterial.getRequestId());
                 }
                 WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
                 dto.setRequestAmount(requestMaterial.getAmount());
