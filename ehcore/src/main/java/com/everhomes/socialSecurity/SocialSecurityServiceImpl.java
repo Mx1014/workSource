@@ -544,7 +544,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
 //        if (null != detail) {
         dto.setUserName(detail.getContactName());
-        dto.setDeptName(detail.getDepartmentName());
+
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getDetailId()));
+        dto.setDeptName(depName);
         dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
         dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
         //// TODO: 2017/12/27  入职离职日期
@@ -606,7 +608,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Integer outWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null){
             outWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
+//                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
             });
@@ -1955,7 +1957,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setUserId(detail.getTargetId());
         report.setUserName(detail.getContactName());
         report.setEntryDate(detail.getCheckInTime());
-        report.setDeptName(detail.getDepartment());
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
+        report.setDeptName(depName);
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
             for (SocialSecuritySetting setting : settings) {
@@ -2870,7 +2873,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
             if (cmd.getDismissMonth() != null) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getDismissMonth()), getTheLastDate(cmd.getDismissMonth())));
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
+                //query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
             }
             if (cmd.getKeywords() != null) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(cmd.getKeywords()).or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like(cmd.getKeywords())));

@@ -34,4 +34,6 @@ public interface FlowConstants {
     Long JOURNAL_MODULE = 10400L;
     //采购管理模块id
     Long PURCHASE_MODULE= 26000L;
+    //资源预订模块id
+    Long RENTALV2_MODULE = 40400L;
 }

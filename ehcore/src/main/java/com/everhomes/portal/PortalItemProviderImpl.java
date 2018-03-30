@@ -222,7 +222,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		if(null != queryBuilderCallback)
 			queryBuilderCallback.buildCondition(locator, query);
 		if(null != locator && null != locator.getAnchor())
-			query.addConditions(Tables.EH_PORTAL_ITEMS.ID.lt(locator.getAnchor()));
+			query.addConditions(Tables.EH_PORTAL_ITEMS.ID.gt(locator.getAnchor()));
 		query.addConditions(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()));
 		query.addGroupBy(Tables.EH_PORTAL_ITEMS.ID);
 		query.addOrderBy(Tables.EH_PORTAL_ITEMS.ID.asc());

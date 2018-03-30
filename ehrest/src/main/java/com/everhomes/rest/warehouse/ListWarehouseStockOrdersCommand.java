@@ -23,6 +23,15 @@ public class ListWarehouseStockOrdersCommand {
     private String executor;
     private Long pageAnchor;
     private Integer pageSize;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

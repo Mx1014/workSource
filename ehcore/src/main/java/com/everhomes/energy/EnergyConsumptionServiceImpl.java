@@ -4685,6 +4685,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     dto.setMeterType(meter.getMeterType());
                     dto.setMaxReading(meter.getMaxReading());
                     dto.setStartReading(meter.getStartReading());
+                    dto.setMeterStatus(meter.getStatus());
                     // 日读表差
                     dto.setDayPrompt(this.processDayPrompt(meter, meter.getNamespaceId()));
                     // 月读表差

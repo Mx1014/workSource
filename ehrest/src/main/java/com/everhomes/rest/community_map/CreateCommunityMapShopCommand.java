@@ -4,7 +4,10 @@ import com.everhomes.util.StringHelper;
 
 /**
  * @author sw on 2017/9/25.
- */
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
+*/
 public class CreateCommunityMapShopCommand {
     private String ownerType;
     private Long ownerId;
@@ -17,6 +20,33 @@ public class CreateCommunityMapShopCommand {
     private Long addressId;
     private String description;
     private String shopAvatarUri;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
     @Override
     public String toString() {

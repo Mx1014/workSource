@@ -4,6 +4,7 @@ package com.everhomes.purchase;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Created by Wentian Wang on 2018/2/6.
  */
-
+@Component
 public class PurchaseFlowCaseListener extends AbstractFlowModuleListener {
     @Autowired
     private FlowService flowService;

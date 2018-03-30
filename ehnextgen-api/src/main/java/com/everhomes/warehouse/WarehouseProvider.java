@@ -34,6 +34,7 @@ public interface WarehouseProvider {
 
     void creatWarehouseStockLogs(WarehouseStockLogs log);
     WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId);
+    WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId, String materialName);
 
     void creatWarehouseStock(WarehouseStocks stock);
     void updateWarehouseStock(WarehouseStocks stock);
@@ -73,7 +74,7 @@ public interface WarehouseProvider {
 
     String findWarehouseMenuName();
 
-    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize);
+    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize, Long communityId);
 
     WarehouseOrder findWarehouseOrderById(Long id);
 
@@ -89,7 +90,7 @@ public interface WarehouseProvider {
 
     List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
 
-    void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity);
+    WarehouseStocks updateWarehouseStockByPurchase(Long warehouseId, Long materialId, Long purchaseQuantity);
 
     String findWarehouseNameByMaterialId(Long materialId);
 
@@ -106,4 +107,20 @@ public interface WarehouseProvider {
     List<WarehouseLogDTO> listMaterialLogsBySupplier(Long supplierId, Long pageAnchor, Integer integer);
 
     String findWarehouseMaterialCategoryNameById(Long value);
+
+    boolean checkStockExists(Long warehouseId, Long materialId);
+
+    void insertWarehouseStock(WarehouseStocks stock);
+
+    void insertWarehouseStockLog(WarehouseStockLogs logs);
+
+    String findWarehouseNameById(Long warehouseId);
+
+    void deleteWarehouseStocks(Long id);
+
+    String findMaterialSupplierNameByMaterialId(Long materialId);
+
+    Long findRequisitionId(Long requestId);
+
+    void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId);
 }

@@ -56,14 +56,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
 		//保存应用入口的信息，不存在则新增，存在则更新
-		ActivityCategories activityCategory = saveEntry(namespaceId, config.getEntryId(), appName);
+		ActivityCategories activityCategory = saveEntry(namespaceId, config.getCategoryId(), appName);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
-		config.setEntryId(activityCategory.getEntryId());
+		config.setCategoryId(activityCategory.getEntryId());
 
 		//新增、更新内容分类
-		saveContencategory(config, activityCategory, namespaceId);
+		saveContencategory(config, namespaceId);
 		//updateContentCategory(config, activityCategory, namespaceId);
 
 		LOGGER.info("ActivityPortalPublishHandler publish end instanceConfig = {}", StringHelper.toJsonString(config));
@@ -86,8 +86,6 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
 		ActivityActionData actionData = (ActivityActionData)StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
-
-		actionData.setCategoryId(config.getEntryId());
 
 		actionData.setTitle(config.getName());
 
@@ -113,15 +111,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(actionData, ActivityEntryConfigulation.class);
 
 		config.setName(actionDataObj.getTitle());
-		config.setEntryId(actionDataObj.getCategoryId());
 
 		//ActionData忘写或者老数据没有categoryId，会把它认为是入口1
-		if(config.getEntryId() == null){
-			config.setEntryId(1L);
+		if(config.getCategoryId() == null){
+			config.setCategoryId(1L);
 		}
 
 		//防止老数据可能没有ActivityCategories，先更新保存一下
-		ActivityCategories activityCategory = saveEntry(namespaceId, config.getEntryId(), config.getName());
+		ActivityCategories activityCategory = saveEntry(namespaceId, config.getCategoryId(), config.getName());
 
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getEntryId());
 
@@ -226,36 +223,51 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 
-	private void saveContencategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+	private void saveContencategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//清理部分被删除的主题分类
 		deleteContentCategory(config, namespaceId);
 		//更新、新增主题分类
-		updateContentCategory(config, parentCategory, namespaceId);
+		updateContentCategory(config, namespaceId);
 
 	}
 
-	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+	private void updateContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
+
+		List<ActivityCategoryDTO> categoryDtos = new ArrayList<>();
+
+		//获取有效的子分类
+		if(config.getCategoryDTOList() != null && config.getCategoryDTOList().size() > 0){
+			for(int i=0; i<config.getCategoryDTOList().size(); i++) {
+				ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+
+				if (dto.getId() == null){
+					dto.setParentId(config.getCategoryId());
+					categoryDtos.add(dto);
+				}else {
+					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
+					if(oldCategory != null && oldCategory.getParentId() != null && oldCategory.getParentId().equals(config.getCategoryId())){
+						dto.setParentId(config.getCategoryId());
+						categoryDtos.add(dto);
+					}
+				}
+			}
+		}
+
 
 		//如果没有则增加默认分类、或者子分类关闭
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
-
-			List<ActivityCategoryDTO> listDto = new ArrayList<>();
+		if(categoryDtos.size() == 0){
 			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 			newDto.setAllFlag(AllFlagType.YES.getCode());
 			newDto.setName("all");
 			newDto.setEnabled(TrueOrFalseFlag.TRUE.getCode());
-			listDto.add(newDto);
-			config.setCategoryDTOList(listDto);
+			newDto.setParentId(config.getCategoryId());
+			categoryDtos.add(newDto);
 		}
 
 //		//新增、更新入口
-//		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
-//		if(maxEntryId == null){
-//			maxEntryId = 1L;
-//		}
 
-		for(int i=0; i<config.getCategoryDTOList().size(); i++){
-			ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+		for(int i=0; i<categoryDtos.size(); i++){
+			ActivityCategoryDTO dto = categoryDtos.get(i);
 
 			if(dto.getId() != null){
 				ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
@@ -267,13 +279,16 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				oldCategory.setEnabled(dto.getEnabled());
 				activityProvider.updateActivityCategories(oldCategory);
 			}else {
-				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), parentCategory.getEntryId(), null, (byte)1, dto.getAllFlag());
+				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), dto.getParentId(), null, (byte)1, dto.getAllFlag());
 
 				dto.setId(newCategory.getId());
 				dto.setEntryId(newCategory.getEntryId());
 
 			}
 		}
+
+		//重新设置子分类
+		config.setCategoryDTOList(categoryDtos);
 
 	}
 
@@ -284,7 +299,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 */
 	private void deleteContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//删除分类
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getEntryId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getCategoryId());
 
 		//原来没有则不用删除了
 		if(oldContentCategories == null || oldContentCategories.size() == 0){
@@ -341,7 +356,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	@Override
 	public String processInstanceConfig(String instanceConfig) {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
-		if(null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
+		if(config != null && null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
 			for (ActivityCategoryDTO dto: config.getCategoryDTOList()) {
 				String iconUrl = contentServerService.parserUri(dto.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 				dto.setIconUrl(iconUrl);
@@ -353,14 +368,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
 
-		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
+		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
 
-
-		if(actionDataObj == null || actionDataObj.getCategoryId() == null){
-			actionDataObj = (ActivityActionData) StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
-		}
+//
+//		if(actionDataObj == null || actionDataObj.getCategoryId() == null){
+//			actionDataObj = (ActivityActionData) StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
+//		}
 
 		if(actionDataObj != null && actionDataObj.getCategoryId() != null){
 			return String.valueOf(actionDataObj.getCategoryId());
@@ -370,7 +385,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
 		return 42040000L;
 	}
 }

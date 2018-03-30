@@ -42,6 +42,7 @@ public class PaymentApplicationDTO {
     private Long contractId;
     private String title;
     private String applicationNumber;
+    private String categoryItemName;
     private String contractName;
     private String contractNumber;
     private String customerName;
@@ -65,6 +66,14 @@ public class PaymentApplicationDTO {
     private Byte status;
     private Long createUid;
     private Timestamp createTime;
+
+    public String getCategoryItemName() {
+        return categoryItemName;
+    }
+
+    public void setCategoryItemName(String categoryItemName) {
+        this.categoryItemName = categoryItemName;
+    }
 
     public String getRequestDepartment() {
         return requestDepartment;

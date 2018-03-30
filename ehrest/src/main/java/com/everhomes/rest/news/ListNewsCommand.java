@@ -23,6 +23,9 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态，参考 {@link NewsStatus}</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListNewsCommand {
@@ -40,6 +43,15 @@ public class ListNewsCommand {
 	private Byte checkPrivilegeFlag = TrueOrFalseFlag.FALSE.getCode();
 	private Long currentPMId;
 	private Long currentProjectId;
+	private Long appId;
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getCurrentPMId() {
 		return currentPMId;

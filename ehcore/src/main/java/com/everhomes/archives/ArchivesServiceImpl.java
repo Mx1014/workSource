@@ -2600,21 +2600,23 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void syncArchivesDismissStatus() {
         List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
-        for (ArchivesDismissEmployees result : results) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(result.getDetailId());
-            if (detail == null)
-                continue;
-            result.setEmployeeStatus(detail.getEmployeeStatus());
-            result.setDepartment(detail.getDepartment());
-            List<Long> departmentIds = JSONObject.parseArray(detail.getDepartmentIds(), Long.class);
-            if (departmentIds != null && departmentIds.size() > 0)
-                result.setDepartmentId(departmentIds.get(0));
-            result.setJobPosition(detail.getJobPosition());
-            result.setJobLevel(detail.getJobLevel());
-            archivesProvider.updateArchivesDismissEmployee(result);
-            detail.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
-            organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+        if (results != null) {
+            for (ArchivesDismissEmployees result : results) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(result.getDetailId());
+                if (detail == null)
+                    continue;
+                result.setEmployeeStatus(detail.getEmployeeStatus());
+                result.setDepartment(detail.getDepartment());
+                List<Long> departmentIds = JSONObject.parseArray(detail.getDepartmentIds(), Long.class);
+                if (departmentIds != null && departmentIds.size() > 0)
+                    result.setDepartmentId(departmentIds.get(0));
+                result.setJobPosition(detail.getJobPosition());
+                result.setJobLevel(detail.getJobLevel());
+                archivesProvider.updateArchivesDismissEmployee(result);
+                detail.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
+            }
         }
     }
 }

@@ -55,7 +55,7 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listAllCategory", allEntries=true),
             @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
-    public void createCategory(Category category) {
+    public Long createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
         long id = sequenceProvider.getNextSequence(NameMapper
@@ -72,6 +72,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
+        return id;
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
@@ -394,16 +395,23 @@ public class CategoryProviderImpl implements CategoryProvider {
 
 
     @Override
-	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName) {
+	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,
+                                                   Long ownerId,String categoryName) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
-		
-		Record record = context.select()
-				.from(Tables.EH_CATEGORIES)
-				.where(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CATEGORIES.NAME.eq(categoryName))
-				.and(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId))
-				.and(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()))
-				.fetchAny();
+
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+
+        query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_CATEGORIES.NAME.eq(categoryName));
+        query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+
+        if (ownerType!=null){
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_TYPE.eq(ownerType));
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_ID.eq(ownerId));
+        }
+
+        EhCategoriesRecord record = query.fetchAny();
 		
 		if (record != null) {
 			return ConvertHelper.convert(record, Category.class);

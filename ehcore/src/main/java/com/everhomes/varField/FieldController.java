@@ -164,6 +164,21 @@ public class FieldController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /varField/listScopeFieldItems</b>
+     * <p>获取域空间模块字段选择项</p>
+     * @return {@link FieldItemDTO}
+     */
+    @RequestMapping("listScopeFieldItems")
+    @RestReturn(value=FieldItemDTO.class, collection = true)
+    public RestResponse listScopeFieldItems(@Valid ListScopeFieldItemCommand cmd) {
+        List<FieldItemDTO> items = fieldService.listScopeFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
      * <b>URL: /varField/listFieldStatistics</b>
      * <p>列出特定字段统计信息</p>
      */

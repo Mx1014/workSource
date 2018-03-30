@@ -9,18 +9,24 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingSpaceLockOperateUserType {
-    RESERVE_PERSON((byte)1), PLATE_OWNER((byte)2);
+    RESERVE_PERSON((byte)1,"预约人"), PLATE_OWNER((byte)2,"车主");
 
     private byte code;
-    private ParkingSpaceLockOperateUserType(byte code) {
+    private String desc;
+    private ParkingSpaceLockOperateUserType(byte code,String desc) {
         this.code = code;
+        this.desc = desc;
     }
     
     public byte getCode() {
         return this.code;
     }
     
-    public static ParkingSpaceLockOperateUserType fromCode(Byte code) {
+    public String getDesc() {
+		return desc;
+	}
+
+	public static ParkingSpaceLockOperateUserType fromCode(Byte code) {
         if(code != null) {
             ParkingSpaceLockOperateUserType[] values = ParkingSpaceLockOperateUserType.values();
             for(ParkingSpaceLockOperateUserType value : values) {

@@ -8,20 +8,25 @@ import com.everhomes.util.StringHelper;
  * <ul>查询订单
  * <li>rentalSiteId：资源id</li>
  * <li>organizationId：机构id</li> 
- * <li>resourceTypeId：图标id</li> 
+ * <li>resourceTypeId：图标id</li>
+ * <li>resourceType：资源类型 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>startTime：开始时间</li> 
  * <li>endTime：结束时间</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
 * <li>billStatus：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>   
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListRentalBillsCommand {
 	private Long organizationId;
 	private Long communityId;
 	private Long rentalSiteId ;
-	private java.lang.Long       resourceTypeId; 
+	private java.lang.Long       resourceTypeId;
+	private String resourceType;
 	
 	private Long startTime; 
 	private Long endTime;
@@ -30,6 +35,33 @@ public class ListRentalBillsCommand {
 	private Long pageAnchor;
     
 	private Integer pageSize;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	
 	@Override
     public String toString() {
@@ -115,9 +147,12 @@ public class ListRentalBillsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
- 
-	  
- 
 
+	public String getResourceType() {
+		return resourceType;
+	}
 
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 }

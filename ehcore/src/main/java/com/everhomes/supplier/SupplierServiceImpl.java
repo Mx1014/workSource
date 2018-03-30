@@ -11,6 +11,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseSuppliers;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,11 +51,14 @@ public class SupplierServiceImpl implements SupplierService{
             supplier.setNamespaceId(cmd.getNamespaceId());
             supplier.setOwnerId(cmd.getOwnerId());
             supplier.setOwnerType(cmd.getOwnerType());
+            //增加communityId
+            supplier.setCommunityId(cmd.getCommunityId());
             supplier.setIdentity(supplierProvider.getNewIdentity());
         }else{
             create = false;
             supplier = this.supplierProvider.findSupplierById(cmd.getId());
         }
+        supplier.setFileName(cmd.getFileName());
         supplier.setAttachmentUrl(cmd.getAttachmentUrl());
         supplier.setBankCardNumber(cmd.getAccountNumber());
         supplier.setBankName(cmd.getBankOfDeposit());
@@ -94,7 +98,7 @@ public class SupplierServiceImpl implements SupplierService{
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
-        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize);
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize,cmd.getCommunityId());
         if(data.size() >= pageSize){
             data.remove(data.lastKey());
             pageAnchor = data.lastKey();
@@ -128,6 +132,7 @@ public class SupplierServiceImpl implements SupplierService{
         dto.setMainBizScope(supplier.getMainBizScope());
         dto.setName(supplier.getName());
         dto.setRegisterAddress(supplier.getEnterpriseRegisterAddress());
+        dto.setFileName(supplier.getFileName());
         return dto;
     }
 
@@ -135,6 +140,25 @@ public class SupplierServiceImpl implements SupplierService{
     public List<SearchSuppliersDTO> searchSuppliers(SearchSuppliersCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_VIEW);
         return supplierProvider.findSuppliersByKeyword(cmd.getNameKeyword());
+    }
+
+    @Override
+    public ListSuppliersResponse listSuppliersForSecondeParty(ListSuppliersCommand cmd) {
+        ListSuppliersResponse response = new ListSuppliersResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize,cmd.getCommunityId());
+        if(data.size() >= pageSize){
+            data.remove(data.lastKey());
+            pageAnchor = data.lastKey();
+        }else{
+            pageAnchor = null;
+        }
+        response.setNextPageAnchor(pageAnchor);
+        response.setDtos(new ArrayList<>(data.values()));
+        return response;
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {

@@ -1114,6 +1114,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipment.setCreateTime(exist.getCreateTime());
 			equipment.setCreatorUid(exist.getCreatorUid());
 			equipment.setOperatorUid(user.getId());
+			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 			dealEquipmentRelateTime(cmd, equipment);
@@ -1504,10 +1505,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
 		List<EquipmentsDTO> dtos = null;
-		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
-			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+		if (StringUtils.isNotEmpty(cmd.getEquipmentIds())) {
+			List<Long> equipmentIds = new ArrayList<>();
+			String[] ids = cmd.getEquipmentIds().split(",");
+			for (String id : ids) {
+				equipmentIds.add(Long.valueOf(id));
+			}
+			dtos = equipmentIds.stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
 					.collect(Collectors.toList());
-		}else {
+		} else {
 			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 			dtos = equipments.getEquipment();
 		}
@@ -1527,7 +1533,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
 				//去除附件 经纬度cell
-				if (!(Objects.equals(field.getFieldName(), "attachments") && Objects.equals(field.getFieldName(), "geohash"))) {
+				if (!(Objects.equals(field.getFieldName(), "attachments") || Objects.equals(field.getFieldName(), "geohash"))) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
@@ -1876,11 +1882,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-
-		return tasks.stream().
-				map(this::convertEquipmentTaskToDTO).
-				filter(Objects::nonNull).
-				collect(Collectors.toList());
+		if (tasks != null && tasks.size() > 0) {
+			return tasks.stream().
+                    map(this::convertEquipmentTaskToDTO).
+                    filter(Objects::nonNull).
+                    collect(Collectors.toList());
+		}
+		return null;
 	}
 
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
@@ -1902,6 +1910,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
+				relationDTO.setEquipmentId(equipment.getId());
+				relationDTO.setStandardId(map.getStandardId());
+				relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 				equipmentStandardRelations.add(relationDTO);
 			}
 		}
@@ -2678,26 +2689,26 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
 
 		tasks.forEach((task -> {
-			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
-			List<Long> equipmentIds = new ArrayList<>();
-			if (cmd.getEquipmentId() == null) {
-				if (task.getPlanId() != null && task.getPlanId() != 0L) {
-					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-					if (null != plan) {
-						List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(plan.getId());
-						if (planMaps != null && planMaps.size() > 0) {
-							planMaps.forEach((r) -> equipmentIds.add(r.getEquipmentId()));
-						}
-					}
-				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
-					//兼容
-					equipmentIds.add(task.getEquipmentId());
-				}
-			} else {
-				equipmentIds.addAll(new ArrayList<>(Collections.singletonList(cmd.getEquipmentId())));
-			}
+//			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
+//			List<Long> equipmentIds = new ArrayList<>();
+//			if (cmd.getEquipmentId() == null) {
+//				if (task.getPlanId() != null && task.getPlanId() != 0L) {
+//					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+//					if (null != plan) {
+//						List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(plan.getId());
+//						if (planMaps != null && planMaps.size() > 0) {
+//							planMaps.forEach((r) -> equipmentIds.add(r.getEquipmentId()));
+//						}
+//					}
+//				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
+//					//兼容
+//					equipmentIds.add(task.getEquipmentId());
+//				}
+//			} else {
+//				equipmentIds.addAll(new ArrayList<>(Collections.singletonList(cmd.getEquipmentId())));
+//			}
 			List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
-					task.getId(), cmd.getProcessType(), equipmentIds);
+					task.getId(), cmd.getProcessType(), null);
 			//展示最新一次的任务日志记录
 			logs = getLatestTaskLogs(logs);
 
@@ -2707,11 +2718,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				dtos = processEquipmentTaskLogsDTOS(logs);
 			} else {
 				if (logs != null && logs.size() > 0)
-					dtos = logs.stream().map((r) -> {
-						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-						populateItemResultToTasklog(r, dto);
-						return dto;
-					}).collect(Collectors.toList());
+//					dtos = logs.stream().map((r) -> {
+//						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+//						populateItemResultToTasklog(r, dto);
+//						return dto;
+//					}).collect(Collectors.toList());
+					dtos = processEquipmentTaskLogsDTOS(logs);
 				//增加正常异常数
 				calculateAbnormalCount(dtos);
 			}
@@ -2729,9 +2741,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentInspectionTasksLogs> getLatestTaskLogs(List<EquipmentInspectionTasksLogs> logs) {
-		Map<Long, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
+		Map<String, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
 		if(logs!=null && logs.size()>0){
-			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId(), log));
+			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId().toString()+log.getStandardId().toString(), log));
 			return new ArrayList<>(logsMap.values());
 		}
 		return null;
@@ -3529,7 +3541,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		Integer offset = cmd.getPageAnchor().intValue();
 
-		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		List<String> targetTypes = new ArrayList<>();
 		List<Long> targetIds = new ArrayList<>();
 		if(cmd.getTargetType() != null)
@@ -3542,82 +3553,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		boolean isAdmin = checkCurrentUserisAdmin(cmd.getOwnerId(), userId);
 
 		List<EquipmentInspectionTasks> allTasks = null;
-		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
-			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
-
-			equipmentProvider.populateTodayTaskStatusCount(null, null, AdminFlag.YES.getCode(), response,(loc,query)->{
-				if (targetTypes.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
-
-				if (targetIds.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
-
-				if (cmd.getInspectionCategoryId() != null) {
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
-				}
-				return query;
-			});
+		if (isAdmin) {
+			allTasks = getAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds);
 		}
-		if(!isAdmin) {
-			List<Long> executePlanIds = new ArrayList<>();
-			List<Long> reviewPlanIds = new ArrayList<>();
-			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
-			//get execute and review members from plans  20180129
-			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
-			if (maps != null && maps.size() > 0) {
-				for (EquipmentInspectionPlanGroupMap r : maps) {
-					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						reviewPlanIds.add(r.getPlanId());
-					}
-					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						executePlanIds.add(r.getPlanId());
-					}
-				}
-			}
-
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime,userId);
-            LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
-
-			equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response,(loc,query)->{
-				if (targetTypes.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
-
-				if (targetIds.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
-
-				if (cmd.getInspectionCategoryId() != null) {
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
-				}
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(new Date(DateHelper.currentGMTTime().getTime()));
-				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(getDayBegin(calendar, 0)));
-				return query;
-			});
+		if (!isAdmin) {
+			allTasks = getNoAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds, userId);
 		}
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
 			response.setNextPageAnchor((long) (offset + 1));
 		}
-
-//		tasks = allTasks.stream().map(r -> {
-//			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-//					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
-//				return r;
-//			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-//					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
-//				return r;
-//			}
-//			return null;
-//		}).filter(Objects::nonNull).collect(Collectors.toList());
 
 		List<EquipmentTaskDTO> dtos = new ArrayList<>();
 		if (allTasks.size() > 0) {
@@ -3629,6 +3575,84 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		return response;
 
+	}
+
+	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
+		List<EquipmentInspectionTasks> allTasks;
+		List<Long> executePlanIds = new ArrayList<>();
+		List<Long> reviewPlanIds = new ArrayList<>();
+		List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+		//get execute and review members from plans  20180129
+		List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
+		if (maps != null && maps.size() > 0) {
+            for (EquipmentInspectionPlanGroupMap r : maps) {
+                if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+                    reviewPlanIds.add(r.getPlanId());
+                }
+                if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+                    executePlanIds.add(r.getPlanId());
+                }
+            }
+        }
+
+		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
+				executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime, userId);
+		LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}", cacheKey);
+		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+				targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(), lastSyncTime);
+		if (cmd.getTaskStatus().size() > 1) {
+			populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+		} else {
+			populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+		}
+		return allTasks;
+	}
+
+	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds) {
+		List<EquipmentInspectionTasks> allTasks;
+		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+                targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
+		LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}", cacheKey);
+
+		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+                targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(), lastSyncTime);
+
+		if (cmd.getTaskStatus().size() > 1) {
+			populateTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+		} else {
+			populateReviewTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+		}
+		return allTasks;
+	}
+
+	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte isAdmin, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateReviewTaskStatusCount(executePlanIds, reviewPlanIds, isAdmin, response, (loc, query) -> {
+			if (targetTypes.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+			if (targetIds.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (cmd.getInspectionCategoryId() != null) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+			}
+			return query;
+		});
+	}
+
+	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, adminFlag, response, (loc, query) -> {
+			if (targetTypes.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+			if (targetIds.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (cmd.getInspectionCategoryId() != null) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+			}
+			return query;
+		});
 	}
 
 	private boolean checkCurrentUserisAdmin(Long ownerId, Long userId) {
@@ -3679,7 +3703,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			Collections.sort(reviewStandardIds);
 			sb.append(reviewStandardIds);
 		}
-		if(lastSyncTime!=null){
+		if (lastSyncTime != null) {
 			sb.append(lastSyncTime.toString());
 		}
 
@@ -3911,23 +3935,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private String convertAttachmentURL(String url) {
-		String[] urls = url.split("&");
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < urls.length; i++) {
-			if(i == 0) {
-				sb.append(urls[i]);
-			} else if(i < urls.length-2) {
-				sb.append("&");
-				sb.append(urls[i]);
-			} else if(i == urls.length-2) {
-				sb.append("&w=600");
-			} else if(i == urls.length-1) {
-				sb.append("&h=800");
-			}
-
-		}
-
-		return sb.toString();
+		return url + "&w=600" + "&h=800";
 	}
 
 	@Override
@@ -4108,7 +4116,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Category category = getEquipmentCategory(parentId);
 		path = category.getPath() + "/" + cmd.getName();
 
-		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, null,null,cmd.getName());
 //		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
 			LOGGER.error("equipment category have been in existing");
@@ -4159,19 +4167,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public List<InspectionItemDTO> listParametersByStandardId(
-			ListParametersByStandardIdCommand cmd) {
+	public List<InspectionItemDTO> listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		//解决之前的删除导致的任务查不到巡检template问题
-//		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 		if(template == null) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
- 				"巡检项不存在");
-		}
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
+// 				"巡检项不存在");
+            return null;
+        }
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
 
 		return  listTemplateItems(dto,cmd.getStandardId());
@@ -4495,16 +4502,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 							.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
 							.collect(Collectors.toList());
 			}
+			if (planIds == null || planIds.size() == 0) {
+				return null;
+			}
 			tasks = equipmentProvider.listTaskByPlanMaps(planIds, null, null, locator, pageSize + 1,taskStatus);
 		} else {
 			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
 			List<StandardAndStatus> standards = new ArrayList<>();
 			List<Byte> executeTaskStatus = new ArrayList<Byte>();
 			executeTaskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			executeTaskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 
 			List<Byte> reviewTaskStatus = new ArrayList<Byte>();
-			reviewTaskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+			reviewTaskStatus.add(EquipmentTaskStatus.CLOSE.getCode());
 
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
@@ -4523,8 +4532,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					standards.add(standardAndStatus);
 				}
 			}
-			//tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
-			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
+			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(standards, null, null, locator, pageSize+1);
 		}
 
 		if(tasks.size() > pageSize) {
@@ -4756,14 +4764,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return new Timestamp(todayStart.getTime().getTime());
 	}
 
-	private Timestamp getDayEnd(Calendar cal, int period) {
+	private Timestamp getDayEnd(Calendar todayEnd, int period) {
 		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
 		return new Timestamp(cal.getTimeInMillis());*/
-		Calendar todayEnd = Calendar.getInstance();
 		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
 		todayEnd.set(Calendar.MINUTE, 59);
 		todayEnd.set(Calendar.SECOND, 59);
@@ -5133,6 +5140,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
 			} else {
+				reviewDate.setId(cmd.getId());
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.updateReviewExpireDays(reviewDate);
 			}
@@ -5683,17 +5691,20 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
-				List<EquipmentStandardMap> equipmentStandardMaps = new ArrayList<>();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
 				if (equipment != null) {
 					relations.setEquipmentName(equipment.getName());
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setQrCodeToken(equipment.getQrCodeToken());
+					relations.setLatitude(equipment.getLatitude());
+					relations.setLongitude(equipment.getLongitude());
+					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relations.setSequenceNo(equipment.getSequenceNo());
-					equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+//					equipmentStandardMaps = equipmentProvider.
+//							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+//									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 				if (standard != null) {
 					relations.setStandardName(standard.getName());
@@ -5703,10 +5714,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
-
-				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-					relations.setId(equipmentStandardMaps.get(0).getId());
-				}
+				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
 			//sort equipmentStandardRelations
@@ -5862,31 +5870,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//巡检item表包含standardId
 		List<InspectionItemDTO> items = new ArrayList<>();
 
-		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
-		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
-		todayComplete.setTargetId(cmd.getTargetId());
-
-		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
-		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
-		todayTaskCount.setTargetId(cmd.getTargetId());
-
-		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
-		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
+		obtainTodayTaskCount(cmd, response, offlineResponse);
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
 		tasks.forEach((task) -> {
-			if (task.getReviewTime() == null) {
-				if (task.getExecutiveTime() != null) {
-					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
-				} else {
-					task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
-				}
-			} else {
-				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
-			}
+			setTaskMaxUpdatedTime(task);
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 			if (plan != null) {
 				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
@@ -5901,12 +5890,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (equipment != null && standard != null) {
 					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
+					relationDTO.setLatitude(equipment.getLatitude());
+					relationDTO.setLongitude(equipment.getLongitude());
+					relationDTO.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
 					relationDTO.setStandardId(standard.getId());
-					List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.findEquipmentStandardMap(standard.getId(), equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 					if(equipmentStandardMaps!=null){
 						relationDTO.setId(equipmentStandardMaps.get(0).getId());
 					}
@@ -5918,26 +5908,65 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
-		//去除重复的
-		Map<Long, Long> standardIds = new HashMap<>();
-		equipments.forEach((relation) -> standardIds.put(relation.getStandardId(),relation.getStandardId()));
-		standardIds.forEach((k,v)->{
+		//remove duplicated
+		Set<Long> standardIds = new HashSet<>();
+		equipments.forEach((relation) -> standardIds.add(relation.getStandardId()));
+		standardIds.forEach((k)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
-			items.addAll(itemDTOS);
-		});
-		//remove duplicated
+            if (itemDTOS != null && itemDTOS.size()>0) {
+                items.addAll(itemDTOS);
+            }
+        });
+
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
-		syncRepairCategoryDate(offlineResponse,cmd);
+		syncRepairCategoryData(offlineResponse,cmd);
 		return offlineResponse;
 	}
 
-	private void syncRepairCategoryDate(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
+	private void obtainTodayTaskCount(ListEquipmentTasksCommand cmd, ListEquipmentTasksResponse response, EquipmentTaskOfflineResponse offlineResponse) {
+		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
+		todayComplete.setCount(response.getTodayCompleteCount());
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
+		todayComplete.setTargetId(cmd.getTargetId());
+
+		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
+		todayTaskCount.setCount(response.getTotayTasksCount());
+		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayTaskCount.setTargetId(cmd.getTargetId());
+
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
+	}
+
+	private void setTaskMaxUpdatedTime(EquipmentTaskDTO task) {
+		List<Long> timeList = new ArrayList<>();
+		if (task.getCreateTime() != null) {
+			timeList.add(task.getCreateTime().getTime());
+		}
+		if (task.getExecutiveTime() != null) {
+			timeList.add(task.getExecutiveTime().getTime());
+		}
+		if (task.getReviewTime() != null) {
+			timeList.add(task.getReviewTime().getTime());
+		}
+		if (task.getProcessTime() != null) {
+			timeList.add(task.getProcessTime().getTime());
+		}
+		if (timeList.size() > 0) {
+			List<Long> result = timeList.stream().sorted(Comparator.comparing(Long::longValue).reversed()).collect(Collectors.toList());
+			task.setLastSyncTime(new Timestamp(result.get(0)).toLocalDateTime().format(dateSF));
+		}
+	}
+
+	private void syncRepairCategoryData(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
 		ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
 		categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 		categoriesCommand.setTaskCategoryId(6L);
 		categoriesCommand.setNamespaceId(cmd.getNamespaceId());
+		categoriesCommand.setOwnerId(cmd.getTargetId());
+		categoriesCommand.setOwnerType(cmd.getTargetType());
 		ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
 		offlineResponse.setRepiarCategories(categories.getRequests());
 	}
@@ -6009,7 +6038,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 					equipmentTasksSearcher.feedDoc(task);
 				}
-				reportLogs.add(reportLog);
+				if (reportLog != null) {
+					reportLogs.add(reportLog);
+				}
 			});
 		}
 		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), tasksMap));
@@ -6029,9 +6060,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, Map<Long, EquipmentInspectionTasks> tasksMap) {
 		//reserve relations of  taskId and reportDetails
-		Map<Long, EquipmentTaskReportDetail> taskAndDetailsMap = new HashMap<>();
+		Map<Long, List<EquipmentTaskReportDetail>> taskAndDetailsMap = new HashMap<>();
 		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
-			equipmentTaskReportDetails.forEach((e) -> taskAndDetailsMap.put(e.getTaskId(), e));
+			if (tasksMap.keySet().size() > 0) {
+				tasksMap.keySet().forEach((taskId) -> taskAndDetailsMap.put(taskId, getTaskDetailListByTaskId(taskId,equipmentTaskReportDetails)));
+			}
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
@@ -6048,32 +6081,48 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				} else {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
-				EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
-				if (reportDetail.getMessage() != null) {
-					log.setProcessMessage(reportDetail.getMessage());
-				}
-				//process  attachements and   logs
-				log.setEquipmentId(reportDetail.getEquipmentId());
-				updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
-
-				List<InspectionItemResult> itemResults = reportDetail.getItemResults();
-				if (itemResults != null && itemResults.size() > 0) {
-					for (InspectionItemResult itemResult : itemResults) {
-						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
-						result.setTaskLogId(log.getId());
-						result.setCommunityId(task.getTargetId());
-						result.setEquipmentId(reportDetail.getEquipmentId());
-						result.setStandardId(reportDetail.getStandardId());
-						result.setInspectionCategoryId(task.getInspectionCategoryId());
-						result.setNamespaceId(task.getNamespaceId());
-						equipmentProvider.createEquipmentInspectionItemResults(result);
+				List<EquipmentTaskReportDetail> reportDetails = taskAndDetailsMap.get(task.getId());
+				reportDetails.forEach((reportDetail) -> {
+					if (reportDetail.getMessage() != null) {
+						log.setProcessMessage(reportDetail.getMessage());
 					}
-				}
+					//process  attachements and   logs
+					log.setEquipmentId(reportDetail.getEquipmentId());
+					log.setStandardId(reportDetail.getStandardId());
+					updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
+
+					List<InspectionItemResult> itemResults = reportDetail.getItemResults();
+					if (itemResults != null && itemResults.size() > 0) {
+						for (InspectionItemResult itemResult : itemResults) {
+							EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
+							result.setTaskLogId(log.getId());
+							result.setCommunityId(task.getTargetId());
+							result.setEquipmentId(reportDetail.getEquipmentId());
+							result.setStandardId(reportDetail.getStandardId());
+							result.setInspectionCategoryId(task.getInspectionCategoryId());
+							result.setNamespaceId(task.getNamespaceId());
+							equipmentProvider.createEquipmentInspectionItemResults(result);
+						}
+					}
+				});
 				reportLog.setSucessIds(task.getId());
 				reportLogs.add(reportLog);
 			}
 		}
 		return reportLogs;
+	}
+
+	private List<EquipmentTaskReportDetail> getTaskDetailListByTaskId(Long taskId, List<EquipmentTaskReportDetail> equipmentTaskReportDetails) {
+		List<EquipmentTaskReportDetail> details = new ArrayList<>();
+		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
+			equipmentTaskReportDetails.forEach((detail) -> {
+				if (detail.getTaskId().equals(taskId)) {
+					details.add(detail);
+				}
+			});
+			return details;
+		}
+		return null;
 	}
 
 	private List<OfflineEquipmentTaskReportLog> processEquipmentRepairTasks(List<CreateEquipmentRepairCommand> equipmentRepairReportDetail) {
@@ -6108,6 +6157,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//报修后log表中需维修状态保留
 			EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
 			tasksLog.setEquipmentId(cmd.getEquipmentId());
+			tasksLog.setStandardId(cmd.getStandardId());
 			tasksLog.setOperatorType(OwnerType.USER.getCode());
 			tasksLog.setOperatorId(UserContext.currentUserId());
 			tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
@@ -6210,4 +6260,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//增加设备的操作记录
 		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 	}
+
+
 }

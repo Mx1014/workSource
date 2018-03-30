@@ -46,7 +46,6 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionCommand;
 import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
-import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
@@ -676,17 +675,17 @@ public class QualityController extends ControllerBase {
 	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
 	 * <p>用户关联项目</p>
 	 */
-//	@RequestMapping("listUserRelatedProjectByModuleId")
-//	@RestReturn(value = CommunityDTO.class, collection = true)
-//	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-//
-//		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
-//
-//		RestResponse response = new RestResponse(dtos);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("listUserRelatedProjectByModuleId")
+	@RestReturn(value = CommunityDTO.class, collection = true)
+	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /quality/createSampleQualityInspection</b>
@@ -968,17 +967,17 @@ public class QualityController extends ControllerBase {
 		return res;
 	}
 
-	/**
-	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
-	 * <p>绩效考核-app离线</p>
-	 */
-	@RequestMapping("getOfflineSampleQualityInspection")
-	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)
-	public RestResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
-		OfflineSampleQualityInspectionResponse offlineSampleQualityInspection = qualityService.getOfflineSampleQualityInspection(cmd);
-		RestResponse response = new RestResponse(offlineSampleQualityInspection);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
+//	 * <p>绩效考核-app离线</p>
+//	 */
+//	@RequestMapping("getOfflineSampleQualityInspection")
+//	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)
+//	public RestResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+//		OfflineSampleQualityInspectionResponse offlineSampleQualityInspection = qualityService.getOfflineSampleQualityInspection(cmd);
+//		RestResponse response = new RestResponse(offlineSampleQualityInspection);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 }

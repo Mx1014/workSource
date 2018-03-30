@@ -7,6 +7,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.payment_application.PaymentApplicationStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -47,6 +48,7 @@ public class PaymentApplicationProviderImpl implements PaymentApplicationProvide
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentApplications.class));
         application.setId(id);
         application.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        application.setStatus(PaymentApplicationStatus.WATING.getCode());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentApplicationsDao dao = new EhPaymentApplicationsDao(context.configuration());
         dao.insert(application);

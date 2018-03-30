@@ -72,7 +72,7 @@ public class SupplierProviderImpl implements SupplierProvider{
     }
 
     @Override
-    public TreeMap<Long,ListSuppliersDTO> findSuppliers(String ownerType, Long ownerId, Integer namespaceId, String contactName, String supplierName, Long pageAnchor, Integer pageSize) {
+    public TreeMap<Long,ListSuppliersDTO> findSuppliers(String ownerType, Long ownerId, Integer namespaceId, String contactName, String supplierName, Long pageAnchor, Integer pageSize,Long communityId) {
         TreeMap<Long,ListSuppliersDTO> data = new TreeMap<>();
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
@@ -82,6 +82,9 @@ public class SupplierProviderImpl implements SupplierProvider{
         query.addConditions(supplier.NAMESPACE_ID.eq(namespaceId));
         if(contactName!=null){
             query.addConditions(supplier.CONTACT_NAME.eq(contactName));
+        }
+        if(communityId !=null){
+            query.addConditions(supplier.COMMUNITY_ID.eq(communityId));
         }
         if(supplierName!=null){
             query.addConditions(supplier.NAME.eq(supplierName));

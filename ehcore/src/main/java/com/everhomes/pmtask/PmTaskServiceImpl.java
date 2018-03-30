@@ -174,7 +174,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+		}
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
@@ -703,44 +705,51 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		return response;
 	}
-
+	
 	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
-
-		if (null != taskCategoryId ) {
-			//找到根节点, 多入口应用id是根节点id
-			boolean flag = true;
-			while (flag) {
-				Category category = categoryProvider.findCategoryById(taskCategoryId);
-				if (null != category && category.getParentId() != 0L) {
-					taskCategoryId = category.getParentId();
-				}else {
-					flag = false;
-				}
-			}
-
-			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
-//				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-//				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-//				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-//				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
-//				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-//				Long appId = null;
-//				if(null != apps && apps.getServiceModuleApps().size() > 0){
-//					appId = apps.getServiceModuleApps().get(0).getId();
-//				}
-//				if (null != apps) {
-//					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-//							orgId, privilege, appId, null, ownerId);
-//				}
-				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilege, FlowConstants.PM_TASK_MODULE, null, String.valueOf(taskCategoryId), null, ownerId);
-			}
-		}
-
-		return false;
+		return true;
 	}
+
+//	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
+//
+//		if (null != taskCategoryId ) {
+//			//找到根节点, 多入口应用id是根节点id
+//			boolean flag = true;
+//			while (flag) {
+//				Category category = categoryProvider.findCategoryById(taskCategoryId);
+//				if (null != category && category.getParentId() != 0L) {
+//					taskCategoryId = category.getParentId();
+//				}else {
+//					flag = false;
+//				}
+//			}
+//
+//			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
+////				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+////				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+////				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+////				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
+////				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+////				Long appId = null;
+////				if(null != apps && apps.getServiceModuleApps().size() > 0){
+////					appId = apps.getServiceModuleApps().get(0).getId();
+////				}
+////				if (null != apps) {
+////					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+////							orgId, privilege, appId, null, ownerId);
+////				}
+//				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilege, FlowConstants.PM_TASK_MODULE, null, String.valueOf(taskCategoryId), null, ownerId);
+//			}
+//		}
+//
+//		return false;
+//	}
 
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020150L, cmd.getAppId(), null,cmd.getCurrentProjectId());//服务录入权限
+		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if (null == namespaceId) {
@@ -874,7 +883,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		String path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 
-		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getName());
 		if(category != null) {
 			LOGGER.error("PmTask category have been in existing");
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
@@ -1056,7 +1065,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getAppId(), null,cmd.getCurrentProjectId());//统计信息权限
+		}
 //		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
@@ -1750,6 +1761,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getAppId(), null,cmd.getCurrentProjectId());//统计信息权限
+		}
 //		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
 
@@ -2491,6 +2505,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+		}
 		List<Long> taskIds = new ArrayList<>();
 		if(!StringUtils.isEmpty(cmd.getIds())) {
 			String[] ids = cmd.getIds().split(",");
@@ -2707,6 +2724,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 		flowService.processAutoStep(stepDTO);
 	}
 
+	private void copyCategories(Category c,Long parentId,Long communityId){
+		List<Category> list = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
+				null, null);
+			Category newCategory = ConvertHelper.convert(c,Category.class);
+			newCategory.setOwnerType("community");
+			newCategory.setOwnerId(communityId);
+			newCategory.setParentId(parentId);
+			Long id = categoryProvider.createCategory(newCategory);
+			if (list!=null && list.size()>0)
+				list.forEach(r->{
+					if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
+						copyCategories(r, id,communityId);
+					}
+				});
+
+	}
+
 	@Override
 	public void syncCategories() {
 		if (flag==0) {
@@ -2718,53 +2752,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		List<Category> list = categoryProvider.listTaskCategories(null,null,null, 6L, null,
 				null, null);
-		List<Category> list2 = new ArrayList<>();
-		while (list!=null && list.size()>0) {
-			for (Category c:list) {
-				Integer namespaceId = c.getNamespaceId();
-				List<Category> list3 = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
-						null, null);
-				if (list3 != null)
-					list2.addAll(list3);
-				if (namespaceId == null)
-					continue;
-				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-				communities.forEach(p -> {
-					Category category = ConvertHelper.convert(c, Category.class);
-					category.setOwnerType("community");
-					category.setOwnerId(p.getId());
-					categoryProvider.createCategory(category);
-				});
-				LOGGER.info("syncCategories test: categoryId="+c.getId()+", communitySize="
-						+ communities.size() + ", categorySize=" + list3.size() + ", namespaceId=" + namespaceId
-				+ ", list2Size=" + list2.size());
+		list.forEach(r->{
+			if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(r.getNamespaceId());
+				if (communities!=null && communities.size()>0)
+					for (Community community :communities)
+					copyCategories(r, 6l,community.getId());
 			}
-			list = list2;
-			list2 = new ArrayList<>();
-		}
+		});
 
 		list = categoryProvider.listTaskCategories(null,null,null, 9L, null,
 				null, null);
-		list2 = new ArrayList<>();
-		while (list!=null && list.size()>0) {
-			for (Category c:list) {
-				Integer namespaceId = c.getNamespaceId();
-				List<Category> list3 = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
-						null, null);
-				if (list3 != null)
-					list2.addAll(list3);
-				if (namespaceId == null)
-					continue;
-				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-				communities.forEach(p -> {
-					Category category = ConvertHelper.convert(c, Category.class);
-					category.setOwnerType("community");
-					category.setOwnerId(p.getId());
-					categoryProvider.createCategory(category);
-				});
+		list.forEach(r->{
+			if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(r.getNamespaceId());
+				if (communities!=null && communities.size()>0)
+					for (Community community :communities)
+						copyCategories(r, 9l,community.getId());
 			}
-			list = list2;
-			list2 = new ArrayList<>();
-		}
+		});
 	}
 }

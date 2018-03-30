@@ -289,7 +289,7 @@ public class ContractController extends ControllerBase {
 	@RestReturn(value = String.class)
 	public RestResponse syncContractsFromThirdPart(@Valid SyncContractsFromThirdPartCommand cmd) {
 		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-		RestResponse response = new RestResponse(contractService.syncContractsFromThirdPart(cmd));
+		RestResponse response = new RestResponse(contractService.syncContractsFromThirdPart(cmd, true));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

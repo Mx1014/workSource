@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2018/1/16.
  */
 public enum CustomerDynamicSheetClass {
+    CUSTOMER("com.everhomes.customer.EnterpriseCustomer"),
     CUSTOMER_TAX("com.everhomes.customer.CustomerTax"),
     CUSTOMER_ACCOUNT("com.everhomes.customer.CustomerAccount"),
     CUSTOMER_TALENT("com.everhomes.customer.CustomerTalent"),

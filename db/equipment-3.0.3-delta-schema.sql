@@ -82,6 +82,8 @@ ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `standard_id`  bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  varchar(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;

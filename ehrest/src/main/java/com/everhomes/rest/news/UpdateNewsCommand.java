@@ -30,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 新闻状态,参考{@link com.everhomes.rest.news.NewsStatus}</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class UpdateNewsCommand {
@@ -58,6 +59,15 @@ public class UpdateNewsCommand {
 	private byte status;
 	private Long currentPMId;
 	private Long currentProjectId;
+	private Long appId;
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getCurrentPMId() {
 		return currentPMId;

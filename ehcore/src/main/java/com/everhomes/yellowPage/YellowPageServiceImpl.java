@@ -163,6 +163,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -242,7 +243,10 @@ public class YellowPageServiceImpl implements YellowPageService {
     
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
-    
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private ConfigurationProvider configProvider;
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
 		 
@@ -705,6 +709,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040510L, cmd.getAppId(), null,0L);//样式设置权限
+		}
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null,null,cmd.getType());
 		if (null == sa){
 			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + cmd.getType()); 
@@ -743,7 +750,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040520L, cmd.getAppId(), null,0L);//服务管理权限
+		}
 		if(null != cmd.getCommunityId()) {
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType("community");
@@ -1320,6 +1329,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ListNotifyTargetsResponse listNotifyTargets(
 			ListNotifyTargetsCommand cmd) {
+		
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040530L, cmd.getAppId(), null,0L);//消息通知权限
+		}
 		ListNotifyTargetsResponse response = new ListNotifyTargetsResponse();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());

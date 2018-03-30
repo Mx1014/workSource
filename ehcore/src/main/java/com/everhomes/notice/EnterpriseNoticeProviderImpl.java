@@ -4,6 +4,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.notice.EnterpriseNoticeStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -19,7 +20,18 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseNoticeReceiversRec
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteConditionStep;
+import org.jooq.Record;
+import org.jooq.Record10;
+import org.jooq.Record11;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectForUpdateStep;
+import org.jooq.SelectOnConditionStep;
+import org.jooq.SortOrder;
+import org.jooq.UpdateConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -90,8 +102,8 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
     }
 
     @Override
-    public List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Integer offset, Integer pageSize) {
-        SelectForUpdateStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long,String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId)
+    public List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId, Integer offset, Integer pageSize) {
+        SelectForUpdateStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId)
                 .orderBy(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 
         Result<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> result = sql.fetch();
@@ -115,7 +127,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         return Collections.emptyList();
     }
 
-    private SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId) {
+    private SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseSql = context.selectDistinct(
                 Tables.EH_ENTERPRISE_NOTICES.ID,
@@ -131,13 +143,15 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME)
                 .from(Tables.EH_ENTERPRISE_NOTICES)
                 .where(Tables.EH_ENTERPRISE_NOTICES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENTERPRISE_NOTICES.OWNER_TYPE.eq(EntityType.ORGANIZATIONS.getCode()))
+                .and(Tables.EH_ENTERPRISE_NOTICES.OWNER_ID.eq(organizationId))
                 .and(Tables.EH_ENTERPRISE_NOTICES.STATUS.ne(EnterpriseNoticeStatus.DELETED.getCode()));
         return baseSql;
     }
 
     @Override
-    public int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId) {
-        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId);
+    public int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId) {
+        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId);
         return sql.fetchCount();
     }
 

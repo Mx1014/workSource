@@ -3,6 +3,8 @@ package com.everhomes.varField;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
@@ -48,27 +50,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.varField.*;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -154,6 +136,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -492,6 +477,19 @@ public class FieldServiceImpl implements FieldService {
     }
 
     @Override
+    public List<FieldItemDTO> listScopeFieldItems(ListScopeFieldItemCommand cmd) {
+        Field field = fieldProvider.findField(cmd.getGroupId(), cmd.getFieldName());
+        if(field != null) {
+            ListFieldItemCommand command = new ListFieldItemCommand();
+            command.setCommunityId(cmd.getCommunityId());
+            command.setNamespaceId(cmd.getNamespaceId());
+            command.setFieldId(field.getId());
+            return listFieldItems(command);
+        }
+        return null;
+    }
+
+    @Override
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
         if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
@@ -668,6 +666,7 @@ public class FieldServiceImpl implements FieldService {
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
         switch (sheetName){
+            case "客户信息":
             case "基本信息":
             case "企业情况":
             case "员工情况":
@@ -939,10 +938,12 @@ public class FieldServiceImpl implements FieldService {
             fieldName += "Name";
         }
 
-        if(fieldName.equals("addressId")){
-            fieldName = "addressName";
-        }
-
+//        if(fieldName.equals("addressId")){
+//            fieldName = "addressName";
+//        }
+//        if(fieldName.equals("buildingId")){
+//            fieldName = "buildingName";
+//        }
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
@@ -1071,9 +1072,20 @@ public class FieldServiceImpl implements FieldService {
             long addressId = Long.parseLong(invoke.toString());
             Address address = addressProvider.findAddressById(addressId);
             if(address != null){
-                invoke = String.valueOf(address.getAddress());
+                invoke = String.valueOf(address.getApartmentName());
             }else{
                 LOGGER.error("field "+ fieldName+" find name in address failed ,addressId is "+ addressId);
+            }
+        }
+
+        //处理buildingId
+        if("buildingId".equals(fieldName)) {
+            long buildingId = Long.parseLong(invoke.toString());
+            Building building = communityProvider.findBuildingById(buildingId);
+            if(building != null){
+                invoke = String.valueOf(building.getName());
+            }else{
+                LOGGER.error("field "+ fieldName+" find name in building failed ,buildingId is "+ buildingId);
             }
         }
         return String.valueOf(invoke);

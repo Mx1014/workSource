@@ -119,16 +119,19 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
 
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getApplicantName() == null || cmd.getApplicantName().isEmpty()) {
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getApplicantName())
-                    .field("applicantName", 5.0f)
-                    .field("applicantName.pinyin_prefix", 2.0f)
-                    .field("applicantName.pinyin_gram", 1.0f);
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("title", 5.0f)
+                    .field("contractName", 5.0f)
+                    .field("title.pinyin_prefix", 2.0f)
+                    .field("contractName.pinyin_prefix", 2.0f)
+                    .field("title.pinyin_gram", 1.0f)
+                    .field("contractName.pinyin_gram", 1.0f);
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("applicantName");
+            builder.addHighlightedField("title").addHighlightedField("contractName");
 
         }
 
@@ -138,6 +141,11 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getStatus() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
+
+        if(cmd.getApplicationNumber() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("applicationNumber", cmd.getApplicationNumber()));
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -181,10 +189,29 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
             b.field("id", application.getId());
             b.field("namespaceId", application.getNamespaceId());
             b.field("communityId", application.getCommunityId());
-            b.field("title", application.getTitle());
-            b.field("applicationNumber", application.getApplicationNumber());
-            b.field("createTime", application.getCreateTime().getTime());
-            b.field("paymentAmount", application.getPaymentAmount());
+            if(application.getTitle() != null) {
+                b.field("title", application.getTitle());
+            } else {
+                b.field("title", "");
+            }
+
+            if(application.getApplicationNumber() != null) {
+                b.field("applicationNumber", application.getApplicationNumber());
+            } else {
+                b.field("applicationNumber", "");
+            }
+
+            if(application.getPaymentAmount() != null) {
+                b.field("paymentAmount", application.getPaymentAmount());
+            } else {
+                b.field("paymentAmount", "");
+            }
+            if(application.getCreateTime() != null) {
+                b.field("createTime", application.getCreateTime().getTime());
+            } else {
+                b.field("createTime", "");
+            }
+
             b.field("status", application.getStatus());
 
             OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());

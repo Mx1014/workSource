@@ -1117,7 +1117,6 @@ public class ForumProviderImpl implements ForumProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumCategories.class, null);
     }
 
-    @Cacheable(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}", unless="#result == null")
     @Override
     public InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId) {
 
@@ -1144,7 +1143,6 @@ public class ForumProviderImpl implements ForumProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhInteractSettings.class, null);
     }
 
-    @Caching(evict = { @CacheEvict(value="findInteractSetting", key="{#setting.namespaceId, #setting.moduleType, #setting.categoryId}")})
     @Override
     public void updateInteractSetting(InteractSetting setting) {
 

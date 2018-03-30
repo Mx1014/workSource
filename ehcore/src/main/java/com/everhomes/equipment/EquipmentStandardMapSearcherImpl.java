@@ -122,8 +122,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	}
 
 	@Override
-	public SearchEquipmentStandardRelationsResponse query(
-			SearchEquipmentStandardRelationsCommand cmd) {
+	public SearchEquipmentStandardRelationsResponse query(SearchEquipmentStandardRelationsCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
 		if(cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);

@@ -4,6 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 
@@ -23,7 +24,7 @@ public interface QualityProvider {
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
 			List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos,Integer namespaceId,String taskName,Timestamp latestUpdateTime);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
-			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
+			Timestamp startDate, Timestamp endDate, Long groupId, List<Byte> executeStatus, Byte reviewStatus);
 
 
 	void createQualityInspectionStandards(QualityInspectionStandards standard);
@@ -192,4 +193,7 @@ public interface QualityProvider {
 															   Timestamp startDate, Timestamp endDate,
 															   List<Long> executeStandardIds, List<Long> reviewStandardIds,
 															   List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
+
+	void getTodayTaskCountStat(ListQualityInspectionTasksResponse response,List<Long> executeStandardIds, List<Long> reviewStandardIds,
+							   List<ExecuteGroupAndPosition> groupDtos, Timestamp todayBegin,ListingQueryBuilderCallback builderCallback);
 }
