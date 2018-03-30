@@ -5,6 +5,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.listing.ListingLocator;
@@ -104,6 +105,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Autowired
     private UserProvider userProvider;
@@ -997,7 +1001,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  4-4.员工头像赋值
-        response.setAvatar(employee.getAvatar());
+        response.setAvatar(contentServerService.parserUri(employee.getAvatar()));
 
         //  4-5.员工状态赋值
         response.setEmployeeCase(getArchivesEmployeeCase(employee));
