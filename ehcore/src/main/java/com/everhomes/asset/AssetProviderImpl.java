@@ -632,6 +632,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_APP_URLS)
                 .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetch(Tables.EH_APP_URLS.NAME);
+        if(fetch.size()<1){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION, "该域空间没有" +
+                    "在app地址表中进行注册，无法获得域空间名称，请联系左邻管理员，域空间id为"+UserContext.getCurrentNamespaceId());
+        }
         String appName = fetch.get(0);
         for(int i = 0; i < list.size(); i++){
             list.get(i).setAppName(appName);

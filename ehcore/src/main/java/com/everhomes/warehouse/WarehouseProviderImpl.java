@@ -8,6 +8,7 @@ import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.*;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
@@ -65,6 +66,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     private ShardingProvider shardingProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
 
     @Override
     public void creatWarehouse(Warehouses warehouse) {
@@ -596,6 +599,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.NAMESPACE_ID.eq(namespaceId));
+        query.addOrderBy(Tables.EH_WAREHOUSE_ORDERS.CREATE_TIME.desc());
         query.addLimit(pageAnchor.intValue(),pageSize);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         query.fetch()
@@ -680,12 +684,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_WAREHOUSE_STOCKS)
                 .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .execute();
         List<WarehouseStocks> warehouseStocks = context.select(Tables.EH_WAREHOUSE_STOCKS.fields())
                 .from(Tables.EH_WAREHOUSE_STOCKS)
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .fetchInto(WarehouseStocks.class);
         if(warehouseStocks != null && warehouseStocks.size() > 0){
@@ -742,9 +746,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     @Override
     public WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
+        List<WarehouseMaterialStock> warehouseMaterialStocks = context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
                 .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
-                .fetchOneInto(WarehouseMaterialStock.class);
+                .fetchInto(WarehouseMaterialStock.class);
+        if(warehouseMaterialStocks.size() > 0){
+            return warehouseMaterialStocks.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -855,6 +863,61 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
         dao.insert(logs);
+    }
+
+    @Override
+    public String findWarehouseNameById(Long warehouseId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<String> fetch = context.select(Tables.EH_WAREHOUSES.NAME)
+                .from(Tables.EH_WAREHOUSES)
+                .where(Tables.EH_WAREHOUSES.ID.eq(warehouseId))
+                .fetch(Tables.EH_WAREHOUSES.NAME);
+        if(fetch.size() == 1){
+            return fetch.get(0);
+        }
+        return "";
+    }
+
+    @Override
+    public void deleteWarehouseStocks(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<Long> fetch = context.select(Tables.EH_WAREHOUSE_STOCKS.ID)
+                .from(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(id))
+                .fetch(Tables.EH_WAREHOUSE_STOCKS.ID);
+        context.delete(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.in(fetch))
+                .execute();
+        for(Long stockId : fetch){
+            warehouseStockSearcher.deleteById(stockId);
+        }
+    }
+
+    @Override
+    public String findMaterialSupplierNameByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_MATERIALS.SUPPLIER_NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIALS.SUPPLIER_NAME);
+    }
+
+    @Override
+    public Long findRequisitionId(Long requestId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_REQUESTS.REQUISITION_ID)
+                .from(Tables.EH_WAREHOUSE_REQUESTS)
+                .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                .fetchOne(Tables.EH_WAREHOUSE_REQUESTS.REQUISITION_ID);
+    }
+
+    @Override
+    public void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_PURCHASE_ORDERS)
+                .set(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.WAREHOUSE_STATUS, status)
+                .where(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.ID.eq(purchaseRequestId))
+                .execute();
     }
 
     @Override
@@ -1158,7 +1221,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequestMaterials.class));
         requestMaterial.setId(id);
-        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
+        //这里toString，会报错，requestId
+//        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, id));
         EhWarehouseRequestMaterialsDao dao = new EhWarehouseRequestMaterialsDao(context.configuration());

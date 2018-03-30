@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <p>编辑公告的请求</p>
  * <ul>
- * <li>organizationId : 操作人所属部门ID</li>
+ * <li>organizationId : 总公司ID</li>
  * <li>id : 公告ID</li>
  * <li>title : 公告正文</li>
  * <li>summary : 内容摘要：用户输入或者从正文截取不超过280字节</li>

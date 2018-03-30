@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 /**
  * Created by Administrator on 2018/3/12.
  */
-@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.LEASE_PROJECT_MODUKE)
+@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.LEASE_PROJECT_MODULE)
 public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeaseProjectPublicshHandler.class);
 
@@ -36,7 +36,7 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
         }else{
             ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
             listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-            listServiceModuleAppsCommand.setModuleId(ServiceModuleConstants.LEASE_PROJECT_MODUKE);
+            listServiceModuleAppsCommand.setModuleId(ServiceModuleConstants.LEASE_PROJECT_MODULE);
             ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
             Byte max = 0;
             if (apps!=null && apps.getServiceModuleApps().size()>0){

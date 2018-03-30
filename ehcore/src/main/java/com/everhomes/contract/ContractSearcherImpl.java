@@ -10,7 +10,9 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.OrganizationOwnerType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
@@ -32,6 +34,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeField;
+import com.everhomes.varField.ScopeFieldItem;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -89,6 +92,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
     @Override
     public String getIndexType() {
         return SearchUtils.CONTRACT;
@@ -125,6 +131,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            builder.field("id", contract.getId());
             builder.field("communityId", contract.getCommunityId());
             builder.field("namespaceId", contract.getNamespaceId());
             builder.field("name", contract.getName());
@@ -141,6 +148,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 builder.field("rent", contract.getRent());
             } else {
                 builder.field("rent", "");
+            }
+
+            if(contract.getUpdateTime() != null) {
+                builder.field("updateTime", contract.getUpdateTime());
+            } else {
+                builder.field("updateTime", contract.getCreateTime());
             }
 
             builder.endObject();
@@ -248,6 +261,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             } else if(cmd.getSortType() == 1) {
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
+        } else {
+            builder.addSort("updateTime", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -280,6 +295,21 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                         dto.setCustomerName(owner.getContactName());
                     }
 
+                }
+                if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
+                    if(0 == contract.getPartyAType()) {
+                        Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
+                        if(organization != null) {
+                            dto.setPartyAName(organization.getName());
+                        }
+                    }
+
+                }
+                if(contract.getCategoryItemId() != null) {
+                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), contract.getCategoryItemId());
+                    if(item != null) {
+                        dto.setCategoryItemName(item.getItemDisplayName());
+                    }
                 }
                 processContractApartments(dto);
                 dtos.add(dto);

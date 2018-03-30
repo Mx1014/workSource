@@ -499,7 +499,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
-			new Timestamp(cmd.getEndDate());
+			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCardRechargeOrder> list = paymentCardProvider.searchCardRechargeOrder(cmd.getOwnerType(),

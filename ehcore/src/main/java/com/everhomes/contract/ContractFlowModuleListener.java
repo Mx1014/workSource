@@ -16,6 +16,8 @@ import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/8/21.
@@ -57,10 +60,28 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
 
 //    @Autowired
 //    private ContractService contractService;
 
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> list = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        List<Long> moduleIds = new ArrayList<>();
+        moduleIds.add(21200L);
+        List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(namespaceId, moduleIds);
+        if(apps != null && apps.size() > 0) {
+            dto.setNamespaceId(namespaceId);
+            dto.setId(null);
+            dto.setServiceName(apps.get(0).getName());
+            list.add(dto);
+        }
+        return list;
+    }
 
     @Override
     public FlowModuleInfo initModule() {
@@ -126,8 +147,10 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
         mappings.forEach(mapping -> {
             CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
-            addressMapping.setLivingStatus(livingStatus);
-            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+            if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+                addressMapping.setLivingStatus(livingStatus);
+                propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+            }
         });
     }
 

@@ -4,6 +4,8 @@ package com.everhomes.requisition;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
@@ -52,6 +54,8 @@ public class RequisitionServiceImpl implements RequisitionService {
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private OrganizationService organizationService;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -102,7 +106,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
         List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
-                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
         if(result.size() > pageSize){
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);
@@ -114,6 +118,10 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.REQUISITION_VIEW);
+        if(cmd.getRequisitionId() == null){
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
+            cmd.setRequisitionId(flowCase.getReferId());
+        }
         Requisition requisition = requisitionProvider.findRequisitionById(cmd.getRequisitionId());
         GetRequisitionDetailResponse response = new GetRequisitionDetailResponse();
         response.setAmount(requisition.getAmount().toPlainString());
@@ -162,7 +170,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
         List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
-                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
         if(result.size() > pageSize){
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);

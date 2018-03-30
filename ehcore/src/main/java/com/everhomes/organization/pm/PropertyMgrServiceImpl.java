@@ -1153,7 +1153,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		        SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
                 String.valueOf(UserContext.current().getUser().getId()),
-                UserContext.current().getScheme()
+                UserContext.current().getScheme(),
+				cmd.getNamespaceId()
         );
 
         jesqueClientFactory.getClientPool().enqueue(queueName, job);

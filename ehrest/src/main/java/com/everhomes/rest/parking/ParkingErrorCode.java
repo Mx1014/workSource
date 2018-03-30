@@ -37,6 +37,9 @@ public interface ParkingErrorCode {
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败
+    int ERROR_REPEAT_SPACE_NO = 10124; // 重复车位ID
+    int ERROR_REPEAT_LOCK_ID = 10125; //  重复车锁ID
+    int ERROR_UNCONN_LOCK_ID = 10126; //  错误的车锁，没有上线，或者id就是错误的
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";

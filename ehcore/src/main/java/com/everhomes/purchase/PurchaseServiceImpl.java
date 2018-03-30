@@ -4,6 +4,8 @@ package com.everhomes.purchase;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
@@ -13,6 +15,8 @@ import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
 import com.everhomes.rest.warehouse.*;
+import com.everhomes.search.WarehouseStockLogSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
@@ -68,17 +72,18 @@ public class PurchaseServiceImpl implements PurchaseService {
     private OrganizationService organizationService;
     @Autowired
     private UserProvider userProvider;
-
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
+    @Autowired
+    private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
 
     @Override
     public void CreateOrUpdatePurchaseOrderCommand(CreateOrUpdatePurchaseOrderCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_OPERATION);
-        if(cmd.getPurchaseRequestId() != null){
-            //删除
-            purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
-            purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
-        }
+
         PurchaseOrder order = new PurchaseOrder();
         order.setApplicantId(UserContext.currentUserId());
         order.setApplicantTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -110,8 +115,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         BigDecimal totalAmount = new BigDecimal("0");
         for(PurchaseMaterialDTO dto : cmd.getDtos()) {
-            long l = Long.parseLong(dto.getUnitPrice()) * dto.getPurchaseQuantity();
-            totalAmount = totalAmount.add(new BigDecimal(l));
+             totalAmount = new BigDecimal(dto.getUnitPrice()).multiply(new BigDecimal(dto.getPurchaseQuantity()));
         }
         order.setTotalAmount(totalAmount);
 
@@ -140,13 +144,16 @@ public class PurchaseServiceImpl implements PurchaseService {
             item.setOwnerType(cmd.getOwnerType());
             item.setPurchaseQuantity(dto.getPurchaseQuantity());
             item.setPurchaseRequestId(nextPurchaseOrderId);
-            item.setUnitPrice(new BigDecimal(dto.getUnitPrice()));
+            try{
+                item.setUnitPrice(new BigDecimal(dto.getUnitPrice().trim()));
+            }catch (Exception e){
+                LOGGER.error("unit price input incorrect");
+
+            }
             list.add(item);
         }
 
         this.dbProvider.execute((TransactionStatus status) -> {
-            purchaseProvider.insertPurchaseOrder(order);
-            purchaseProvider.insertPurchaseItems(list);
             if(cmd.getStartFlow().byteValue() == (byte)1){
                 //工作流case
                 //创建工作流
@@ -171,6 +178,14 @@ public class PurchaseServiceImpl implements PurchaseService {
                 createFlowCaseCommand.setProjectType(order.getOwnerType());
                 flowService.createFlowCase(createFlowCaseCommand);
             }
+            if(cmd.getPurchaseRequestId() != null){
+                //删除
+                purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
+                purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
+            }
+            purchaseProvider.insertPurchaseOrder(order);
+            purchaseProvider.insertPurchaseItems(list);
+
             return null;
         });
     }
@@ -183,7 +198,8 @@ public class PurchaseServiceImpl implements PurchaseService {
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null || pageSize < 1) pageSize = 20;
-        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,++pageSize,cmd.getSubmissionStatus()
+        int overloadPageSize = pageSize + 1;
+        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,overloadPageSize,cmd.getSubmissionStatus()
                 ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
         if(dtos.size() > pageSize) {
             response.setNextPageAnchor(pageAnchor + pageSize);
@@ -217,6 +233,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         User userById = userProvider.findUserById(UserContext.currentUserId());
         order.setExecutorName(userById.getNickName());
         order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        warehouseProvider.insertWarehouseOrder(order);
         //增加库存,增加库存日志
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(purchaseRequestId);
         for(PurchaseItem item : items){
@@ -245,7 +262,9 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setOwnerType(order.getOwnerType());
                 stock.setStatus(Status.ACTIVE.getCode());
                 stock.setWarehouseId(item.getWarehouseId());
+                // 忘记在es上feed一下了 by vincent wang 2018/3/28
                 warehouseProvider.insertWarehouseStock(stock);
+                warehouseStockSearcher.feedDoc(stock);
             }
             //出入库记录
             WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
@@ -260,14 +279,29 @@ public class PurchaseServiceImpl implements PurchaseService {
             logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
             logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
             logs.setRequestId(purchaseOrder.getId());
+
             warehouseProvider.insertWarehouseStockLog(logs);
+            warehouseStockLogSearcher.feedDoc(logs);
         }
+
+        //将purchaseOrder的warehouseStatus状态改变
+        resetWarehouseStatusForPurchaseOrder(WarehouseStatus.ENABLE.getCode(), purchaseRequestId);
+    }
+
+    private void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        warehouseProvider.resetWarehouseStatusForPurchaseOrder(status, purchaseRequestId);
     }
 
     @Override
     public GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd) {
         //校验权限
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_VIEW);
+        Long requestId = cmd.getPurchaseRequestId();
+        if(requestId == null){
+            Long flowCaseId = cmd.getFlowCaseId();
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+            cmd.setPurchaseRequestId(flowCase.getReferId());
+        }
         PurchaseOrder order = purchaseProvider.getPurchaseOrderById(cmd.getPurchaseRequestId());
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(cmd.getPurchaseRequestId());
         //组装数据 TODO api字段和jooq字段保持一致可以节省代码
@@ -288,13 +322,20 @@ public class PurchaseServiceImpl implements PurchaseService {
             PurchaseMaterialDetailDTO pto = new PurchaseMaterialDetailDTO();
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterialById(item.getMaterialId());
             WarehouseMaterialStock stock = warehouseProvider.findWarehouseStocksByMaterialId(item.getMaterialId());
-            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //还没有入库的话
+            if(stock != null){
+                pto.setStock(stock.getAmount());
+            }else{
+                pto.setStock(0l);
+            }
+//            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //拿填单的时候的仓库id
+            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameById(item.getWarehouseId()));
             pto.setMaterialCategory(warehouseProvider.findWarehouseMaterialCategoryByMaterialId(item.getMaterialId()));
             pto.setMaterialId(item.getMaterialId());
             pto.setMaterialName(material.getName());
             pto.setMaterialNumber(material.getMaterialNumber());
             pto.setPurchaseQuantity(item.getPurchaseQuantity());
-            pto.setStock(stock.getAmount());
             pto.setSupplierName(material.getSupplierName());
             pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
             pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));

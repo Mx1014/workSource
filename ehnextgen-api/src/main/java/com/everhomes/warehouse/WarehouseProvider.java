@@ -113,4 +113,14 @@ public interface WarehouseProvider {
     void insertWarehouseStock(WarehouseStocks stock);
 
     void insertWarehouseStockLog(WarehouseStockLogs logs);
+
+    String findWarehouseNameById(Long warehouseId);
+
+    void deleteWarehouseStocks(Long id);
+
+    String findMaterialSupplierNameByMaterialId(Long materialId);
+
+    Long findRequisitionId(Long requestId);
+
+    void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId);
 }
