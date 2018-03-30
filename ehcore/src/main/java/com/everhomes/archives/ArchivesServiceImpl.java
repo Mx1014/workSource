@@ -2591,7 +2591,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.set the target email or userId
         Long ryanId = 309154L;
-        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com");
+        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com","hao.yang@zuolin.com");
 
         //  2.get the notification body.
         String body = "您好，周杰伦\n\n" + "Google本周需要注意的人事日程如下：\n\n";
@@ -2617,9 +2617,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             if(date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
             if(df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex()))
-                anniversary += (employee.getContactName() + " 在" + organizationName + "工作满" + (employee.getCheckInTime().toLocalDate().getYear() - date.toLocalDate().getYear()) + "周年" +"\n");
-            if(df2.format(date.toLocalDate()).equals(employee.getBirthday()))
-                birthday += (employee.getContactName() + " " + (employee.getBirthday().toLocalDate().getYear() - date.toLocalDate().getYear()) + "岁生日");
+                anniversary += (employee.getContactName() + " 在" + organizationName + "工作满" + (date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear()) + "周年" +"\n");
+            if(df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex()))
+                birthday += (employee.getContactName() + " " + (date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear()) + "岁生日" + "\n");
         }
         if(!employment.equals("")){
             employment = employment.substring(0, employment.length()-1);
