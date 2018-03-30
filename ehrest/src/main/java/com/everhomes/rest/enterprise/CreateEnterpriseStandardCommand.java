@@ -16,7 +16,10 @@ import java.util.List;
  * <li>officeLocation: 关联的办公地点id</li>
  * <li>communityIds: 关联的管理项目 </li>
  * <li>workbenchFlag: 是否启用工作台 </li>
- * <li>CreateOfficeSiteCommand: 工作地点信息，参考{@link CreateOfficeSiteCommand} </li>
+ * <li>officeSites: 工作地点信息，参考{@link CreateOfficeSiteCommand} </li>
+ * <li>pmFlag: 是否是管理公司 </li>
+ * <li>projectIds: 管理园区列表 </li>
+ * <li>serviceSupportFlag: 是否是服务商 </li>
  * </ul>
  *
  */
@@ -29,8 +32,11 @@ public class CreateEnterpriseStandardCommand {
     private String entries;
     private Long officeLocation;
     private List<Long> communityIds;
-    private boolean workbenchFlag;
+    private Integer workbenchFlag;
     private List<CreateOfficeSiteCommand> officeSites;
+    private Integer pmFlag;
+    private List<Long> projectIds;
+    private Integer serviceSupportFlag;
 
 
     @Override
@@ -102,11 +108,43 @@ public class CreateEnterpriseStandardCommand {
         this.communityIds = communityIds;
     }
 
-    public boolean isWorkbenchFlag() {
+    public Integer getWorkbenchFlag() {
         return workbenchFlag;
     }
 
-    public void setWorkbenchFlag(boolean workbenchFlag) {
+    public void setWorkbenchFlag(Integer workbenchFlag) {
         this.workbenchFlag = workbenchFlag;
+    }
+
+    public List<CreateOfficeSiteCommand> getOfficeSites() {
+        return officeSites;
+    }
+
+    public void setOfficeSites(List<CreateOfficeSiteCommand> officeSites) {
+        this.officeSites = officeSites;
+    }
+
+    public Integer getPmFlag() {
+        return pmFlag;
+    }
+
+    public void setPmFlag(Integer pmFlag) {
+        this.pmFlag = pmFlag;
+    }
+
+    public Integer getServiceSupportFlag() {
+        return serviceSupportFlag;
+    }
+
+    public void setServiceSupportFlag(Integer serviceSupportFlag) {
+        this.serviceSupportFlag = serviceSupportFlag;
+    }
+
+    public List<Long> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(List<Long> projectIds) {
+        this.projectIds = projectIds;
     }
 }
