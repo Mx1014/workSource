@@ -156,7 +156,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
 				CancelRentalBillCommand cmd = new CancelRentalBillCommand();
 				cmd.setRentalBillId(order.getId());
-				if (order.getStatus()!=SiteBillStatus.FAIL.getCode())
+				if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
+						&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode())
 					rentalv2Service.cancelRentalBill(cmd);
 			}
 
