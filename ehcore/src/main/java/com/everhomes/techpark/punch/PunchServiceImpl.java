@@ -2876,21 +2876,20 @@ public class PunchServiceImpl implements PunchService {
             Long ownerId = getTopEnterpriseId(member.getOrganizationId());
             statistic.setOwnerId(ownerId);
             statistic.setUserId(member.getTargetId());
-            statistic.setDetailId(member.getDetailId());
-            //应上班天数
-//			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
-
-            statistic.setUserName(member.getContactName());
-//			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
-//			statistic.setDeptId(dept.getId());
-//			statistic.setDeptName(dept.getName());
-//			statistic.setWorkDayCount(workDayCount);
-            String department = getDepartment(punchOrg.getNamespaceId(), member.getDetailId());
-            statistic.setDeptName(department);
+            statistic.setDetailId(member.getDetailId()); 
+            statistic.setUserName(member.getContactName()); 
+            String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId()));
+            statistic.setDeptName(depName);
             List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
+            //找到每一个打卡日期的异常申请修改审批后状态
+            //既然轮询了顺便就统计一下 设备异常次数  
+            int deviceChangeCounts = 0;
             for (PunchDayLog dayLog : dayLogList) {
+            	if(NormalFlag.YES == NormalFlag.fromCode(dayLog.getDeviceChangeFlag())){
+            		deviceChangeCounts++;
+            	}
                 PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
                         PunchStatisticsDTO.class);
                 list.add(dto);
@@ -2904,17 +2903,10 @@ public class PunchServiceImpl implements PunchService {
                     dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
 
                 } else {
-                    //do nothing
-//					dto.setApprovalStatus((byte) 0);
                 }
 
             }
-//			if(statistic.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
-//				processTwicePunchListCount(list, statistic);
-//			}
-//			else{
-//				processForthPunchListCount(list, statistic);
-//			}
+            statistic.setDeviceChangeCounts(deviceChangeCounts);
             processPunchListCount(dayLogList, statistic);
 
             //对于2017年9月的数据特殊处理 --- 兼容之前的
