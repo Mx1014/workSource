@@ -126,7 +126,9 @@ ALTER TABLE `eh_equipment_inspection_standards`
 
 -- 任务操作记录表增加设备id表   by jiarui
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  BIGINT(20) NOT NULL DEFAULT 0 ;
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `standard_id`  bigint(20) NOT NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  VARCHAR(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
@@ -1694,6 +1696,7 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 
 ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
 
+ALTER TABLE eh_archives_dismiss_employees MODIFY dismiss_remarks VARCHAR(1024) COMMENT '备注';
 -- end by nan.rong
 
 -- by dengs,云打印添加字段 2018.03.06
@@ -1749,3 +1752,21 @@ CREATE TABLE `eh_service_alliance_application_records` (
 
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
+-- 对采购单中物品增加字段warehouseId 2018/03/09
+ALTER TABLE `eh_warehouse_purchase_items` ADD COLUMN `warehouse_id` BIGINT COMMENT '仓库id';
+
+-- 请示和供应商增加fileName字段 by wentian 2018/03/09
+ALTER TABLE  `eh_requisitions` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
+ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
+
+-- 增加公式的名称最大长度 by wentian 2018/03/09
+ALTER TABLE `eh_payment_formula` MODIFY COLUMN `name` VARCHAR(1024) COMMENT '公式名称';
+-- 供应商增加园区id by wentian 2018/03/15
+ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT '供应商所在园区的id';
+
+-- 合同增加修改时间 by xiongying 2018/03/21
+ALTER TABLE  `eh_contracts` ADD COLUMN  `update_time` DATETIME;
+
+-- 工作流修改字段长度    add by xq.tian  2018/03/09
+ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';

@@ -546,11 +546,13 @@ public class BannerServiceImpl implements BannerService {
         cmd.setNamespaceId(banner.getNamespaceId());
 
         CountEnabledBannersByScopeResponse enabledBanners = countEnabledBannersByScope(cmd);
+
+        int maxBannerCount = this.configurationProvider.getIntValue("banner.max.active.count", AppConstants.DEFAULT_MAX_BANNER_CAN_ACTIVE);
         enabledBanners.getList().stream()
                 .filter(r -> r.getScope().equals(banner.getScopeId()))
                 .findFirst()
                 .ifPresent(r -> {
-            if (r.getCount() >= 8) {
+            if (r.getCount() >= maxBannerCount) {
                 throw RuntimeErrorException.errorWith(
                         BannerServiceErrorCode.SCOPE,
                         BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE,
@@ -761,8 +763,8 @@ public class BannerServiceImpl implements BannerService {
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
 
-            Integer maxOrder = bannerProvider.getMaxOrderByCommunityId(cmd.getNamespaceId(), communityId);
-            banner.setOrder(maxOrder == null ? 1 : maxOrder + 1);
+            Integer minOrder = bannerProvider.getMinOrderByCommunityId(cmd.getNamespaceId(), communityId);
+            banner.setOrder(minOrder == null ? 10 : minOrder - 1);
             bannerProvider.createBanner(banner);
         }
     }
