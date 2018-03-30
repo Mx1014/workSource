@@ -3,6 +3,11 @@ package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -18,6 +23,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -35,12 +41,19 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
     private static final  String ACCOUNT_CODE = "sdgj";
 
     private CloseableHttpClient httpclient = null;
+    @Autowired
+    private UserProvider userProvider;
     @PostConstruct
     public void init() {
         httpclient = HttpClients.createDefault();
     }
     @Override
     public Object getThirdAddress(HttpServletRequest req) {
+        JSONObject params = new JSONObject();
+        params.put("AccountCode",ACCOUNT_CODE);
+        User user = UserContext.current().getUser();
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        params.put("phone",userIdentifier.getIdentifierToken());
         return super.getThirdAddress(req);
     }
 
