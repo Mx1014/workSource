@@ -34,4 +34,5 @@ public interface RentalServiceErrorCode {
 	int ERROR_ORDER_CANCELED = 10051; // 订单已取消
 	int ERROR_ORDER_CANCEL_OVERTIME = 10052; //已经进入预约使用时间，无法取消订单
 	int ERROR_DOWN_PARKING_LOCK = 10053; //无法结束使用，车锁未升起
+	int ERROR_ORDER_RENEW_OVERTIME = 10054; //无法延长，已经超时
 }

@@ -654,6 +654,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setPositionNums(cmd.getPositionNums());
 		order.setCategoryName(cmd.getCategoryName());
 		order.setCategoryId(cmd.getCategoryId());
+		order.setContactPhone(cmd.getReserveContactToken());
 		return order;
 	}
 
