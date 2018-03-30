@@ -1,32 +1,47 @@
 package com.everhomes.rest.statistics.terminal;
 
 
+import com.everhomes.util.StringHelper;
 
 /**
- *<ul>
- *<li>startDate:开始时间日期</li>
- *<li>endDate:结束时间日期</li>
- *</ul>
+ * <ul>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>startDate: 开始时间日期, e.g:20180101</li>
+ *     <li>endDate: 结束时间日期 e.g:20180101</li>
+ * </ul>
  */
 public class ListTerminalStatisticsByDateCommand {
 
-	private String startDate;
+    private Integer namespaceId;
+    private String startDate;
+    private String endDate;
 
-	private String endDate;
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public String getStartDate() {
-		return startDate;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
+    public String getStartDate() {
+        return startDate;
+    }
 
-	public String getEndDate() {
-		return endDate;
-	}
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
 
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -10,12 +10,16 @@ import com.everhomes.util.StringHelper;
  *     <li>contentType: 广告类型 {@link com.everhomes.rest.launchad.LaunchAdType}</li>
  *     <li>contentUri: 广告文件uri</li>
  *     <li>contentUrl: 广告文件url</li>
+ *     <li>contentUriOrigin: 原始资源uri</li>
+ *     <li>contentUrlOrigin: 原始资源url</li>
  *     <li>timesPerDay: 每天显示次数, 为 0 则不限制</li>
  *     <li>displayInterval: 最小的显示间隔时间, 单位为分钟, 为 0 则不限制</li>
  *     <li>durationTime: 显示时间, 单位 秒</li>
  *     <li>skipFlag: 是否支持跳过 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- *     <li>actionType: 点击动作 {@link com.everhomes.rest.launchpad.ActionType}</li>
- *     <li>actionData: 链接示例: {"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}</li>
+ *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
+ *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
+ *     <li>actionType: actionType</li>
+ *     <li>actionData: actionData</li>
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
  * </ul>
  */
@@ -26,10 +30,16 @@ public class LaunchAdDTO {
     private String contentType;
     private String contentUri;
     private String contentUrl;
+    private String contentUriOrigin;
+    private String contentUrlOrigin;
     private Integer timesPerDay;
     private Integer displayInterval;
     private Integer durationTime;
     private Byte skipFlag;
+
+    private String targetType;
+    private String targetData;
+
     private Byte actionType;
     private String actionData;
     private Byte status;
@@ -128,6 +138,38 @@ public class LaunchAdDTO {
 
     public void setActionData(String actionData) {
         this.actionData = actionData;
+    }
+
+    public String getContentUriOrigin() {
+        return contentUriOrigin;
+    }
+
+    public void setContentUriOrigin(String contentUriOrigin) {
+        this.contentUriOrigin = contentUriOrigin;
+    }
+
+    public String getContentUrlOrigin() {
+        return contentUrlOrigin;
+    }
+
+    public void setContentUrlOrigin(String contentUrlOrigin) {
+        this.contentUrlOrigin = contentUrlOrigin;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getTargetData() {
+        return targetData;
+    }
+
+    public void setTargetData(String targetData) {
+        this.targetData = targetData;
     }
 
     @Override
