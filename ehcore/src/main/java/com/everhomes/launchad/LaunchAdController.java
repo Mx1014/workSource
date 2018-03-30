@@ -6,15 +6,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
+import com.everhomes.rest.launchad.GetLaunchAdCommand;
 import com.everhomes.rest.launchad.LaunchAdDTO;
-import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * App启动广告模块
@@ -35,36 +33,10 @@ public class LaunchAdController extends ControllerBase {
     @RequestMapping("getLaunchad")
     @RestReturn(value = LaunchAdDTO.class)
     @RequireAuthentication(false)
-    public RestResponse geLaunchAd() {
-        return response(launchAdService.getLaunchAd());
+    public RestResponse geLaunchAd(GetLaunchAdCommand cmd) {
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        return response(launchAdService.getLaunchAd(cmd));
     }
-
-    /**
-     * <b>URL: /launchad/createOrUpdateLaunchAd</b>
-     * <p>创建或修改启动广告信息</p>
-     */
-    @RequestMapping("createOrUpdateLaunchAd")
-    @RestReturn(value = LaunchAdDTO.class)
-    public RestResponse createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
-        return response(launchAdService.createOrUpdateLaunchAd(cmd));
-    }
-
-    /**
-     * <b>URL: /launchad/uploadLaunchAdFile</b>
-     * <p>上传广告附件</p>
-     */
-    @RequestMapping("uploadLaunchAdFile")
-    @RestReturn(value = UploadCsFileResponse.class)
-    public RestResponse uploadLaunchAdFile(@RequestParam("attachment") MultipartFile [] files) {
-        return response(launchAdService.uploadLaunchAdFile(files));
-    }
-
-    /*private RestResponse success() {
-        RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }*/
 
     private RestResponse response(Object o) {
         RestResponse response = new RestResponse(o);

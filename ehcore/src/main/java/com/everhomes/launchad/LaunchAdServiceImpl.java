@@ -5,6 +5,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
+import com.everhomes.rest.launchad.GetLaunchAdCommand;
 import com.everhomes.rest.launchad.LaunchAdDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -32,8 +33,8 @@ public class LaunchAdServiceImpl implements LaunchAdService {
     private ContentServerService contentServerService;
 
     @Override
-    public LaunchAdDTO getLaunchAd() {
-        LaunchAd launchAd = launchAdProvider.getLaunchAd(currNamespaceId());
+    public LaunchAdDTO getLaunchAd(GetLaunchAdCommand cmd) {
+        LaunchAd launchAd = launchAdProvider.findByNamespaceId(currNamespaceId());
         if (launchAd != null) {
             return this.toLaunchAdDTO(launchAd);
         }
@@ -42,35 +43,16 @@ public class LaunchAdServiceImpl implements LaunchAdService {
 
     @Override
     public LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
-        LaunchAd launchAd = launchAdProvider.getLaunchAd(cmd.getNamespaceId());
+        LaunchAd launchAd = launchAdProvider.findById(cmd.getId());
         if (launchAd != null) {
-            if (cmd.getActionData() != null) {
-                launchAd.setActionData(cmd.getActionData());
-            }
-            if (cmd.getActionType() != null) {
-                launchAd.setActionType(cmd.getActionType());
-            }
-            if (cmd.getContentType() != null) {
-                launchAd.setContentType(cmd.getContentType());
-            }
-            if (cmd.getContentUri() != null) {
-                launchAd.setContentUri(zipContent(cmd.getContentUri()));
-            }
-            if (cmd.getDisplayInterval() != null) {
-                launchAd.setDisplayInterval(cmd.getDisplayInterval());
-            }
-            if (cmd.getDurationTime() != null) {
-                launchAd.setDurationTime(cmd.getDurationTime());
-            }
-            if (cmd.getSkipFlag() != null) {
-                launchAd.setSkipFlag(cmd.getSkipFlag());
-            }
-            if (cmd.getStatus() != null) {
-                launchAd.setStatus(cmd.getStatus());
-            }
-            if (cmd.getTimesPerDay() != null) {
-                launchAd.setTimesPerDay(cmd.getTimesPerDay());
-            }
+            launchAd.setContentType(cmd.getContentType());
+            launchAd.setContentUri(zipContent(cmd.getContentUriOrigin()));
+            launchAd.setDisplayInterval(cmd.getDisplayInterval());
+            launchAd.setDurationTime(cmd.getDurationTime());
+            launchAd.setSkipFlag(cmd.getSkipFlag());
+            launchAd.setStatus(cmd.getStatus());
+            launchAd.setTimesPerDay(cmd.getTimesPerDay());
+
             launchAdProvider.updateLaunchAd(launchAd);
         } else {
             launchAd = ConvertHelper.convert(cmd, LaunchAd.class);
