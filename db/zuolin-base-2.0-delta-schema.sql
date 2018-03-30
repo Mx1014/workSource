@@ -13,7 +13,7 @@
 
 CREATE TABLE `eh_organization_apps` (
   `id` bigint(20) NOT NULL,
-  `app_id` bigint(20) DEFAULT NULL,
+  `app_origin_id` bigint(20) DEFAULT NULL,
   `org_id` bigint(20) DEFAULT NULL,
   `app_type` varchar(255) DEFAULT NULL,
   `alias_name` varchar(255) DEFAULT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE `eh_organization_apps` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
-ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_id`) ;
+ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 
 
 CREATE TABLE `eh_app_community_config` (
