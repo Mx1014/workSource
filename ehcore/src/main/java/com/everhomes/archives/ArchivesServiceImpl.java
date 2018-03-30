@@ -507,7 +507,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     //  模板校验
     private String checkArchivesContactsTitle(ImportArchivesContactsDTO title) {
 
-        //  TODO:是否从数据库读取模板
         List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
         //  存储字段来进行校验
         List<String> temp = new ArrayList<>();
@@ -2321,7 +2320,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private boolean verifyPersonnelByPhone(Long organizationId, String contactToken) {
-        //  TODO:手机号存在的话则累积数目+1
         VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
         verifyCommand.setEnterpriseId(organizationId);
         verifyCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -2578,7 +2576,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
             Condition con = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
-            //  TODO: 生日与周年的计算
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME_INDEX.in(weekScopes));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY_INDEX.in(weekScopes));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTRACT_END_TIME.between(firstOfWeek, lastOfWeek));
@@ -2587,67 +2584,46 @@ public class ArchivesServiceImpl implements ArchivesService {
             return query;
         });
 
-        if (employees == null)
+        if (employees == null){
+            LOGGER.error("Nothing needs to be sent.");
             return;
-
-        String body = "您好，周杰伦\n\n" + "Google本周需要注意的人事日程如下：\n\n";
-        for (int n = 0; n < 7; n++)
-            body += (processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek, n)) + "\n");
-       /* body += processNotificationBody(employees, firstOfWeek);
-        body += processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek,1));
-        body += processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek,2));
-        body += processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek,3));
-        body += processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek,4));
-        body += processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek,5));
-        body += processNotificationBody(employees, lastOfWeek);*//*
-        if (employees != null) {
-            for (int i = 0; i < employees.size(); i++)
-                employmentName += (employees.get(i).getContactName() + ",");
-            employmentName = employmentName.substring(0, employmentName.length() - 1);
         }
-*/
-
 
         //  1.set the target email or userId
         Long ryanId = 309154L;
         List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com");
 
         //  2.get the notification body.
-
+        String body = "您好，周杰伦\n\n" + "Google本周需要注意的人事日程如下：\n\n";
+        for (int n = 0; n < 7; n++)
+            body += processNotificationBody(employees, "Google", ArchivesUtil.plusDate(firstOfWeek, n));
 
         //  3.send it
         sendArchivesEmails(emails, body);
         sendArchivesMessages(ryanId, body);
     }
-    private String processNotificationBody(List<OrganizationMemberDetails> employees, Date date){
+    private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date){
         String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String dateString = formatter.format(date.toLocalDate()) + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
+        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter df2 = DateTimeFormatter.ofPattern("MMdd");
+        String dateString = df1.format(date.toLocalDate()) + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
 
         for(OrganizationMemberDetails employee: employees){
             if(date.equals(employee.getEmploymentTime()))
                 employment += (employee.getContactName() + "，");
-            if(ArchivesUtil.previousYear(date).equals(employee.getCheckInTime()))
-                anniversary += (employee.getContactName() + "，");
-            if(date.equals(employee.getBirthday()))
-                birthday += (employee.getContactName() + "，");
             if(date.equals(employee.getContractEndTime()))
                 contract += (employee.getContactName() + "，");
             if(date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
+            if(df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex()))
+                anniversary += (employee.getContactName() + " 在" + organizationName + "工作满" + (employee.getCheckInTime().toLocalDate().getYear() - date.toLocalDate().getYear()) + "周年" +"\n");
+            if(df2.format(date.toLocalDate()).equals(employee.getBirthday()))
+                birthday += (employee.getContactName() + " " + (employee.getBirthday().toLocalDate().getYear() - date.toLocalDate().getYear()) + "岁生日");
         }
         if(!employment.equals("")){
             employment = employment.substring(0, employment.length()-1);
             body += ("转正：" + employment + "\n");
-        }
-        if(!anniversary.equals("")){
-            anniversary = anniversary.substring(0, anniversary.length()-1);
-            body += ("周年：" + anniversary + "\n");
-        }
-        if(!birthday.equals("")){
-            birthday = birthday.substring(0, birthday.length()-1);
-            body += ("生日：" + birthday + "\n");
         }
         if(!contract.equals("")){
             contract = contract.substring(0, contract.length()-1);
@@ -2657,6 +2633,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             idExpiry = idExpiry.substring(0, idExpiry.length()-1);
             body += ("身份证到期：" + idExpiry + "\n");
         }
+        if(!anniversary.equals("")){
+            body += anniversary;
+        }
+        if(!birthday.equals("")){
+            body += birthday;
+        }
+        body += "\n";
 
         return body;
     }
