@@ -394,9 +394,9 @@ public class RentalCommonServiceImpl {
         sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
         //sb.append("\r\n");
         //sb.append("\r\n");
-        int i = 1;
-        for ( int size = outerRules.size(); i < size; i++) {
-            sb.append(i);
+        int i = 0;
+        for (int  size = outerRules.size(); i < size; i++) {
+            sb.append(i+1);
             sb.append("，");
             sb.append("订单开始前");
             sb.append(outerRules.get(i).getDuration());
@@ -406,8 +406,8 @@ public class RentalCommonServiceImpl {
           //  sb.append("\r\n");
         }
 
-        for (int  size = innerRules.size(); i < size; i++) {
-            sb.append(i);
+        for (int j=0, size = innerRules.size(); j < size; j++) {
+            sb.append(i+j+1);
             sb.append("，");
             sb.append("订单开始前");
             sb.append(innerRules.get(i).getDuration());
