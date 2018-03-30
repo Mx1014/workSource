@@ -14,6 +14,8 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +30,7 @@ import java.util.Map;
  */
 @Component(RentalMessageHandler.RENTAL_MESSAGE_HANDLER_PREFIX + "vip_parking")
 public class VipParkingRentalMessageHandler implements RentalMessageHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(VipParkingRentalMessageHandler.class);
     @Autowired
     private UserProvider userProvider;
     @Autowired
@@ -80,7 +82,11 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
             String templateLocale = RentalNotificationTemplateCode.locale;
 
-            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+            try {
+                smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+            }catch (RuntimeException e){
+                LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:"+useInfoDTO.getPlateOwnerPhone());
+            }
 
         }
     }
@@ -149,8 +155,11 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             int templateId = SmsTemplateCode.PAY_ORDER_SUCCESS;
 
             String templateLocale = RentalNotificationTemplateCode.locale;
-
-            smsProvider.sendSms(order.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+            try {
+                smsProvider.sendSms(order.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+            } catch (RuntimeException e) {
+                LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
+            }
         }
     }
 
@@ -232,9 +241,11 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         int templateId = SmsTemplateCode.RENEW_RENTAL_ORDER_SUCCESS;
 
         String templateLocale = RentalNotificationTemplateCode.locale;
-
-        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
-
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+        } catch (RuntimeException e) {
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
+        }
     }
 
     @Override
@@ -251,9 +262,11 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         int templateId = SmsTemplateCode.RENTAL_ORDER_WILL_END;
 
         String templateLocale = RentalNotificationTemplateCode.locale;
-
-        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
-
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+        } catch (RuntimeException e) {
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
+        }
     }
 
     @Override
@@ -310,10 +323,12 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         int templateId = SmsTemplateCode.SYSTEM_AUTO_CANCEL_ORDER;
 
         String templateLocale = RentalNotificationTemplateCode.locale;
-
-        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
-        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
-
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+            smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+        } catch (RuntimeException e) {
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
+        }
     }
 
     @Override
@@ -351,8 +366,10 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables2, "spaceNo", oldUseInfoDTO.getSpaceNo());
         smsProvider.addToTupleList(variables2, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
         int templateId2 = SmsTemplateCode.SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER;
-
-        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId2, templateLocale, variables2);
-
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId2, templateLocale, variables2);
+        } catch (RuntimeException e) {
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
+        }
     }
 }

@@ -1906,7 +1906,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
-		return siteTotalMoneys[0];
+		return siteTotalMoneys[0].setScale(3,BigDecimal.ROUND_DOWN);
 	}
 
 	//设置各种提醒时间
