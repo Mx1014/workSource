@@ -3682,13 +3682,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		sb.append(offset);
 		sb.append(pageSize);
 		sb.append("-");
-		if (executeStandardIds == null) {
+		if (executeStandardIds == null || executeStandardIds.size() == 0) {
 			sb.append("all");
 		} else {
 			Collections.sort(executeStandardIds);
 			sb.append(executeStandardIds);
 		}
-		if (reviewStandardIds == null) {
+		if (reviewStandardIds == null || reviewStandardIds.size() == 0) {
 			sb.append("all");
 		} else {
 			Collections.sort(reviewStandardIds);
