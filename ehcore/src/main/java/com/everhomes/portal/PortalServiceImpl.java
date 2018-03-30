@@ -2842,7 +2842,7 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
 			if(null != handler){
 				customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), moduleApp.getInstanceConfig());
-				LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
+				LOGGER.debug("get customTag from handler = {}, customTag = {}",handler,customTag);
 			}
 			moduleApp.setCustomTag(customTag);
 
