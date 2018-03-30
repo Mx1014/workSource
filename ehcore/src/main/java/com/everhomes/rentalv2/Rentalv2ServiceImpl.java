@@ -1906,7 +1906,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
-		return siteTotalMoneys[0];
+		return siteTotalMoneys[0].setScale(3,BigDecimal.ROUND_DOWN);
 	}
 
 	//设置各种提醒时间
@@ -2162,6 +2162,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
+		bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+		rentalv2Provider.updateRentalBill(bill);//更新新的订单号
 		orderCmd.setOrderNo(bill.getOrderNo());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		orderCmd.setSubject(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
@@ -2183,6 +2185,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+		order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+		rentalv2Provider.updateRentalBill(order);//更新新的订单号
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
 		preOrderCommand.setAmount(amount);
@@ -3637,8 +3641,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (orderAmount.compareTo(new BigDecimal(0)) == 1)
-						if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
+					if (orderAmount.compareTo(new BigDecimal(0)) == 1) {
+						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode())) {
 							rentalCommonService.refundOrder(order, timestamp, orderAmount);
 							//更新bill状态
 							order.setStatus(SiteBillStatus.REFUNDED.getCode());
@@ -3647,9 +3651,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
 						}
+					}else //退款金额过小
+						order.setStatus(SiteBillStatus.FAIL.getCode());
 
-				}
-				//如果不需要退款 或退款金额过小，直接状态为已取消
+				}else
+				//如果不需要退款，直接状态为已取消
 				order.setStatus(SiteBillStatus.FAIL.getCode());
 
 			}else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())||
@@ -7970,6 +7976,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter");
 		}
+		if (DateHelper.currentGMTTime().getTime()>bill.getEndTime().getTime()){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
+		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 
@@ -8047,6 +8057,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (!bill.getStatus().equals(SiteBillStatus.IN_USING.getCode())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter");
+		}
+		if (DateHelper.currentGMTTime().getTime()>bill.getEndTime().getTime()){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
 		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
@@ -8183,11 +8197,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-		processCells(rs, order.getRentalType());
-
 
 		if (now > order.getEndTime().getTime()) {
-
+			processCells(rs, order.getRentalType());
 			long overTimeStartTime = order.getEndTime().getTime();
 			long overTimeEndTime = now;
 
@@ -8222,9 +8234,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if (interval % timeStep != 0) {
 						rentalCount = (int)rentalCount + 1;
 					}
-					rs.setResourceCounts(rs.getResourceCounts()+1.0);//超时的订单会占用一个车位 补回去
+					rs.setResourceCounts(rs.getResourceCounts()+9999999.0);//超时订单无视车锁数量
 					updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
+					order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 				}
 //				dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
 //						.collect(Collectors.toList()));

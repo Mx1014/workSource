@@ -2912,7 +2912,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCommunityId(c.getId());
             cmd.setNamespaceId(999971);
             customerService.syncIndividualCustomers(cmd);
-            customerService.syncEnterpriseCustomers(cmd);
+            customerService.syncEnterpriseCustomers(cmd, false);
         }
     }
 

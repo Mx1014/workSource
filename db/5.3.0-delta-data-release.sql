@@ -1536,7 +1536,7 @@ SET @realm_id = (SELECT MAX(id) FROM `eh_version_realm`);
 SET @url_id = (SELECT MAX(id) FROM `eh_version_urls`);
 SET @upgrade_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@realm_id := @realm_id + 1), 'energyManagement', NULL, NOW(), '0');
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', NULL, '0', NULL, NULL, NULL, '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0.zip', NULL, '0', NULL, NULL, NULL, '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES ((@upgrade_id := @upgrade_id + 1), @realm_id, '-0.1', '1048576', '0', '1.0.0', '0', NOW(), '0');
 
 -- fix 26107 by xiongying
@@ -1695,3 +1695,16 @@ UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
 -- 更新成都创业场的“入驻申请”的actionType为71
 UPDATE eh_launch_pad_items set action_type = 71 where action_type = 68  and namespace_id = 999964;
 
+-- 增加一个模块“企业信息”及其菜单 add by yanjun 201803281519
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('21400', '企业信息【企业后台】', '110000', '/110000/21400', '1', '2', '2', '35', '2018-03-28 14:49:34', NULL, '13', '2018-03-28 14:49:45', '0', '0', '0', '0', 'community_control');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76000000', '基础信息', '0', NULL, NULL, '1', '2', '/76000000', 'organization', '6', NULL, '1', 'system', 'classify', '2');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76010000', '企业信息', '76000000', NULL, 'customer-management', '1', '2', '/76000000/76010000', 'organization', '10', '21400', '2', 'system', 'module', '2');
+
+-- 部分企业管理应用的名称为空导致菜单名称为空。add by yanjun 201803281555
+UPDATE eh_reflection_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+
+-- 调整模块属性
+update eh_service_modules set module_control_type = 'community_control' where id in (10100,10600,10300);

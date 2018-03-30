@@ -233,6 +233,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         User userById = userProvider.findUserById(UserContext.currentUserId());
         order.setExecutorName(userById.getNickName());
         order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        warehouseProvider.insertWarehouseOrder(order);
         //增加库存,增加库存日志
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(purchaseRequestId);
         for(PurchaseItem item : items){

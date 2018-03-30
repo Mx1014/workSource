@@ -635,28 +635,6 @@ public class ContractProviderImpl implements ContractProvider {
 		return result;
 	}
 
-	@Override
-	public Set<Long> findContractNamespace() {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
-		query.addFrom(Tables.EH_WEB_MENU_SCOPES);
-		query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"));
-		query.addConditions(Tables.EH_WEB_MENU_SCOPES.MENU_ID.eq(21200L));
-		List<Long> fetch = query.fetch(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
-		return fetch.stream().collect(Collectors.toSet());
-	}
-
-	@Override
-	public String findContractMenuName() {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(Tables.EH_WEB_MENUS.NAME);
-		query.addFrom(Tables.EH_WEB_MENUS);
-		query.addConditions(Tables.EH_WEB_MENUS.ID.eq(21200L));
-		return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
-	}
-
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

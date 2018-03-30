@@ -980,4 +980,20 @@ public class QualityController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+
+	/**
+	 * <b>URL: /quality/startCrontabTask</b>
+	 * <p>上线时间影响问题</p>
+	 */
+	@RequestMapping("startCrontabTask")
+	@RestReturn(value = String.class)
+	public RestResponse startCrontabTask() {
+		UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+		qualityService.startCrontabTask();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }

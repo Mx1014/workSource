@@ -123,7 +123,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 		} else {
 
 //		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
-
+			rentalProvider.updateRentalBill(order);
 			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
 
 			FlowAutoStepDTO dto = new FlowAutoStepDTO();
