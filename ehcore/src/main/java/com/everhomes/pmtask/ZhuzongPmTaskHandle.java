@@ -3,6 +3,7 @@ package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -54,6 +55,11 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         User user = UserContext.current().getUser();
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
         params.put("phone",userIdentifier.getIdentifierToken());
+        String json = postToZhuzong(params,GET_ADDRESSES);
+        ZhuzongAddresses addresses = JSONObject.parseObject(json,ZhuzongAddresses.class);
+        if (addresses.isSuccess()){
+
+        }
         return super.getThirdAddress(req);
     }
 
