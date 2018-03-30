@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>appOriginId：关联应用id</li>
+ * <li>originId：关联应用id</li>
  * <li>appCategory：应用分类信息</li>
  * <li>version: 版本号</li>
  * <li>description: 应用描述</li>
@@ -22,7 +22,7 @@ import java.util.List;
  * </ul>
  */
 public class CreateAppProfileCommand {
-    private Long appOriginId;
+    private Long originId;
     private String appCategory;
     private String version;
     private String description;
@@ -41,13 +41,6 @@ public class CreateAppProfileCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public Long getAppOriginId() {
-        return appOriginId;
-    }
-
-    public void setAppOriginId(Long appOriginId) {
-        this.appOriginId = appOriginId;
-    }
 
     public String getAppCategory() {
         return appCategory;
@@ -105,13 +98,6 @@ public class CreateAppProfileCommand {
         this.pc_uri = pc_uri;
     }
 
-    public List<String> getApp_entry_infos() {
-        return app_entry_infos;
-    }
-
-    public void setApp_entry_infos(List<String> app_entry_infos) {
-        this.app_entry_infos = app_entry_infos;
-    }
 
     public Integer getIndependent_config_flag() {
         return independent_config_flag;
@@ -143,5 +129,21 @@ public class CreateAppProfileCommand {
 
     public void setConfig_appIds(List<Long> config_appIds) {
         this.config_appIds = config_appIds;
+    }
+
+    public Long getOriginId() {
+        return originId;
+    }
+
+    public void setOriginId(Long originId) {
+        this.originId = originId;
+    }
+
+    public List<AppEntryInfosDTO> getApp_entry_infos() {
+        return app_entry_infos;
+    }
+
+    public void setApp_entry_infos(List<AppEntryInfosDTO> app_entry_infos) {
+        this.app_entry_infos = app_entry_infos;
     }
 }
