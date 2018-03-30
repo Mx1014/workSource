@@ -7976,6 +7976,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter");
 		}
+		if (DateHelper.currentGMTTime().getTime()>bill.getEndTime().getTime()){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
+		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 
@@ -8053,6 +8057,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (!bill.getStatus().equals(SiteBillStatus.IN_USING.getCode())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter");
+		}
+		if (DateHelper.currentGMTTime().getTime()>bill.getEndTime().getTime()){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
 		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
