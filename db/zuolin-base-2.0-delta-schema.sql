@@ -46,3 +46,22 @@ CREATE TABLE `eh_app_community_config` (
 
 ALTER TABLE `eh_app_community_config` ADD INDEX `organization_app_id` (`organization_app_id`) ;
 ALTER TABLE `eh_app_community_config` ADD INDEX `community_id` (`community_id`) ;
+
+-- 应用档案表
+CREATE TABLE `eh_service_module_app_profile` (
+  `id` bigint(20) NOT NULL,
+  `origin_id` bigint(20) NOT NULL,
+  `app_category` varchar(255) DEFAULT NULL,
+  `version` varchar(128) DEFAULT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  `mobile_flag` tinyint(4) DEFAULT 0,
+  `mobile_uri` varchar(1024) DEFAULT NULL,
+  `pc_flag` tinyint(4) DEFAULT 0,
+  `pc_uris` varchar(1024) DEFAULT NULL,
+  `app_entry_info` varchar(2048) DEFAULT NULL,
+  `independent_config_flag` tinyint(4) DEFAULT 0,
+  `config_app_info` varchar(128) DEFAULT NULL,
+  `support_third_flag` tinyint(4) DEFAULT 0,
+  `default_flag` tinyint(4) DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
