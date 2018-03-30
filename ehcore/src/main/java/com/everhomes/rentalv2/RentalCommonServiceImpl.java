@@ -363,6 +363,8 @@ public class RentalCommonServiceImpl {
                 return amount;
             }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
                 return order.getPaidMoney();
+            }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
+                processOrderNotRefundTip(order);
             }
         }
 
