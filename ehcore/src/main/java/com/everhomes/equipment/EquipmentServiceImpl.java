@@ -6317,7 +6317,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				Long.valueOf(cmd.getTaskId()), Collections.singletonList(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()), null);
 		repairLogs = getLatestTaskLogs(repairLogs);
 
-		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(Long.valueOf(cmd.getTaskId()), null, null);
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(Long.valueOf(cmd.getTaskId()));
 
 		List<EquipmentTaskLogsDTO> taskLogsDTO = new ArrayList<>();
 		taskLogsDTO = processEquipmentTaskLogsDTOS(logs);
