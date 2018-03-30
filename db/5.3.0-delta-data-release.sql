@@ -1708,3 +1708,11 @@ UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 3300
 
 -- 调整模块属性
 update eh_service_modules set module_control_type = 'community_control' where id in (10100,10600,10300);
+
+
+-- 更新一些应用名字   add by yanjun 201803301855
+UPDATE eh_service_modules SET `name` = '门禁【app应用必选】' WHERE id = 41000;
+UPDATE eh_service_modules SET `name` = '请示单管理【深业定制】', default_order = 80 WHERE id = 25000;
+
+-- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如："表单管理"
+UPDATE eh_service_modules set type = 0 where id in (50900, 10850);
