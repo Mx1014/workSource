@@ -34,7 +34,6 @@ public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAlli
 	public void createServiceAllianceApplicationRecord(ServiceAllianceApplicationRecord serviceAllianceApplicationRecord) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceApplicationRecords.class));
 		serviceAllianceApplicationRecord.setId(id);
-		serviceAllianceApplicationRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		serviceAllianceApplicationRecord.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(serviceAllianceApplicationRecord);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceAllianceApplicationRecords.class, null);
