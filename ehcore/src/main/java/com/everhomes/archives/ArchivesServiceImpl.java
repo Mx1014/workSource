@@ -2594,7 +2594,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com","hao.yang@zuolin.com");
 
         //  2.get the notification body.
-        String body = "您好，周杰伦\n\n" + "Google本周需要注意的人事日程如下：\n\n";
+        String body = "您好，周杰伦\n\n" + "Goog le本周需要注意的人事日程如下：\n\n";
         for (int n = 0; n < 7; n++)
             body += processNotificationBody(employees, "Google", ArchivesUtil.plusDate(firstOfWeek, n));
 
