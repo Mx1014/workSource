@@ -1716,3 +1716,17 @@ UPDATE eh_service_modules SET `name` = '请示单管理【深业定制】', defa
 
 -- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如："表单管理"
 UPDATE eh_service_modules set type = 0 where id in (50900, 10850);
+
+
+-- 一些普通公司菜单的处理  add by yanjun 201804010308
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in (71000000, 71010000, 71020000, 71030000, 71040000, 72040000,72050000,72060000,72070000,72080000,72090000,72100000,72110000,72120000,72130000,72140000,72160000,73000000,73010000,76000000,76010000);
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id  = 75000000;
+
+UPDATE eh_web_menus set `status` = 0, `name` = '管理员管理' where type = 'organization' and id  = 75010000;
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in  (74010000, 74040000, 74050000, 74020000, 74030000, 74060000);
+
+UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 50500;
+
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
