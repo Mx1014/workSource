@@ -2,8 +2,13 @@ package com.everhomes.pmtask;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
+import com.everhomes.pmtask.zhuzong.ZhuzongCreateTask;
+import com.everhomes.pmtask.zhuzong.ZhuzongTasks;
+import com.everhomes.pmtask.zhuzong.ZhuzongTasksData;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -25,6 +30,8 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,17 +40,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ZHUZONG)
 public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuzongPmTaskHandle.class);
-
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     private static final String GET_ADDRESSES = "/phoneServer/QueryHouseByPhoneNumber";
+    private static final String CREATE_TASK = "/phoneServer/ZLAddWorkBill";
+    private static final String QUERY_TASKS = "/phoneServer/QueryBillList";
+    private static final String GET_TASK_DETAIL = "/phoneServer/QueryBillDetail";
     private static final  String ACCOUNT_CODE = "sdgj";
 
     private CloseableHttpClient httpclient = null;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
     @PostConstruct
     public void init() {
         httpclient = HttpClients.createDefault();
@@ -58,12 +71,62 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,GET_ADDRESSES);
         ZhuzongAddresses addresses = JSONObject.parseObject(json,ZhuzongAddresses.class);
         if (addresses.isSuccess()){
-
+            return addresses;
         }
-        return super.getThirdAddress(req);
+        return null;
     }
 
-    public String postToZhuzong(JSONObject params,String method) {
+    @Override
+    public Object createThirdTask(HttpServletRequest req) {
+        JSONObject params = new JSONObject();
+        params.put("AccountCode",ACCOUNT_CODE);
+        params.put("clientid",req.getParameter("clientid"));
+        params.put("houseid",req.getParameter("houseid"));
+        params.put("billtype",req.getParameter("billtype"));
+        params.put("content",req.getParameter("content"));
+        params.put("isPub",req.getParameter("isPub"));
+        String json = postToZhuzong(params,CREATE_TASK);
+        ZhuzongCreateTask task = JSONObject.parseObject(json,ZhuzongCreateTask.class);
+        if (task.isSuccess()){
+            return task;
+        }
+        return null;
+    }
+
+    @Override
+    public Object listThirdTasks(HttpServletRequest req) {
+        JSONObject params = new JSONObject();
+        params.put("AccountCode",ACCOUNT_CODE);
+        params.put("pageOprator",req.getParameter("pageOprator"));
+        params.put("currenpage",Integer.parseInt(req.getParameter("currenpage")));
+        params.put("clientid",getClientId());
+        String json = postToZhuzong(params,QUERY_TASKS);
+        ZhuzongTasks tasks = JSONObject.parseObject(json,ZhuzongTasks.class);
+        if (tasks.isSuccess()){
+            return tasks;
+        }
+        return null;
+    }
+
+    private String getClientId(){
+        User user = UserContext.current().getUser();
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor("zhuzong-ClientId", "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        String clientId = (String)redisTemplate.opsForValue().get(userIdentifier.getIdentifierToken());
+        if (clientId == null){
+            clientId = "none";
+            ZhuzongAddresses task =  (ZhuzongAddresses)getThirdAddress(null);
+            if (task!=null && task.getResult().size()>0){
+                clientId = task.getResult().get(0).getPk_client();
+                redisTemplate.opsForValue().set(userIdentifier.getIdentifierToken(), clientId);
+                redisTemplate.expire(userIdentifier.getIdentifierToken(), 2, TimeUnit.DAYS);
+            }
+        }
+        return clientId;
+    }
+
+    public String postToZhuzong(JSONObject params, String method) {
         String url = configProvider.getValue("pmtask.zhuzong.url", "");
         HttpPost httpPost = new HttpPost(url + method);
         CloseableHttpResponse response = null;

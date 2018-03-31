@@ -36,4 +36,6 @@ public interface PmTaskHandle {
 	void updateTaskByOrg(UpdateTaskCommand cmd);
 
 	Object getThirdAddress(HttpServletRequest req);
+	Object createThirdTask(HttpServletRequest req);
+	Object listThirdTasks(HttpServletRequest req);
 }
