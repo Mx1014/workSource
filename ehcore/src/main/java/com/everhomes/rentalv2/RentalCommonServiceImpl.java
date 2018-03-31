@@ -403,8 +403,8 @@ public class RentalCommonServiceImpl {
             sb.append("订单开始前");
             sb.append(outerRules.get(i).getDuration());
             sb.append("小时外取消，退还");
-            sb.append(outerRules.get(i).getFactor());
-            sb.append("%订单金额");
+            sb.append(outerRules.get(i).getFactor().intValue());
+            sb.append("%订单金额;");
           //  sb.append("\r\n");
         }
 
@@ -414,8 +414,8 @@ public class RentalCommonServiceImpl {
             sb.append("订单开始前");
             sb.append(innerRules.get(j).getDuration());
             sb.append("小时内取消，退还");
-            sb.append(innerRules.get(j).getFactor());
-            sb.append("%订单金额");
+            sb.append(innerRules.get(j).getFactor().intValue());
+            sb.append("%订单金额;");
          //   sb.append("\r\n");
         }
        // sb.append("\r\n");
