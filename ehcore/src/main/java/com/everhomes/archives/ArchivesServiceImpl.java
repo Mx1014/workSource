@@ -1197,12 +1197,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                     case ArchivesParameter.EMERGENCY_RELATIONSHIP:
                         employee.setEmergencyRelationship(itemValue.getFieldValue());
                         break;
-                    /* if(cmd.getDepartment() !=null)
-                            employee.setDepartment(cmd.getDepartment());
-                       if(cmd.getJobPosition() !=null)
-                            employee.setJobPosition(cmd.getJobPosition());
-                       if(cmd.getReportTarget() !=null)
-                            employee.setReportTarget(cmd.getReportTarget());*/
                     case ArchivesParameter.CONTACT_SHORT_TOKEN:
                         employee.setContactShortToken(itemValue.getFieldValue());
                         break;
@@ -2569,8 +2563,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek,6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();
-        for(int i=0; i<7; i++){
-            weekScopes.add(formatter.format(ArchivesUtil.plusDate(firstOfWeek,i).toLocalDate()));
+        for (int i = 0; i < 7; i++) {
+            weekScopes.add(formatter.format(ArchivesUtil.plusDate(firstOfWeek, i).toLocalDate()));
         }
 
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
@@ -2592,22 +2586,28 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  1.set the target email or userId
         Long ryanId = 309154L;
         List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com","hao.yang@zuolin.com");
+        String contactName = "Ronny";
+        String organizationName = "Google";
 
         //  2.get the notification body.
-        String body = "您好，周杰伦\n\n" + "Goog le本周需要注意的人事日程如下：\n\n";
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("contactName", contactName);
+        map.put("companyName", organizationName);
+        String body = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, "");
         for (int n = 0; n < 7; n++)
-            body += processNotificationBody(employees, "Google", ArchivesUtil.plusDate(firstOfWeek, n));
+            body += processNotificationBody(employees, organizationName, ArchivesUtil.plusDate(firstOfWeek, n));
 
         //  3.send it
         sendArchivesEmails(emails, body);
-        sendArchivesMessages(ryanId, body);
+//        sendArchivesMessages(ryanId, body);
     }
     private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date){
         String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
         DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter df2 = DateTimeFormatter.ofPattern("MMdd");
-        String dateString = df1.format(date.toLocalDate()) + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
+        String dateString = date.toLocalDate() + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
+        Map<String,Object> map;
 
         for(OrganizationMemberDetails employee: employees){
             if(date.equals(employee.getEmploymentTime()))
@@ -2616,22 +2616,37 @@ public class ArchivesServiceImpl implements ArchivesService {
                 contract += (employee.getContactName() + "，");
             if(date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
-            if(df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex()))
-                anniversary += (employee.getContactName() + " 在" + organizationName + "工作满" + (date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear()) + "周年" +"\n");
-            if(df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex()))
-                birthday += (employee.getContactName() + " " + (date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear()) + "岁生日" + "\n");
+            if(df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
+                map = new LinkedHashMap<>();
+                map.put("contactName", employee.getContactName());
+                map.put("companyName", organizationName);
+                map.put("count", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
+                anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
+            }
+            if(df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex())){
+                map = new LinkedHashMap<>();
+                map.put("contactName", employee.getContactName());
+                map.put("count", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
+                birthday += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, "");
+            }
         }
         if(!employment.equals("")){
             employment = employment.substring(0, employment.length()-1);
-            body += ("转正：" + employment + "\n");
+            map = new LinkedHashMap<>();
+            map.put("contactNames", employment);
+            body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_EMPLOYMENT, "zh_CN", map, "");
         }
         if(!contract.equals("")){
             contract = contract.substring(0, contract.length()-1);
-            body += ("合同到期：" + contract + "\n");
+            map = new LinkedHashMap<>();
+            map.put("contactNames", contract);
+            body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_CONTRACT, "zh_CN", map, "");
         }
         if(!idExpiry.equals("")){
             idExpiry = idExpiry.substring(0, idExpiry.length()-1);
-            body += ("身份证到期：" + idExpiry + "\n");
+            map = new LinkedHashMap<>();
+            map.put("contactNames", idExpiry);
+            body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ID, "zh_CN", map, "");
         }
         if(!anniversary.equals("")){
             body += anniversary;
