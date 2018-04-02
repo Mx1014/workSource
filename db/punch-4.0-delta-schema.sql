@@ -41,7 +41,7 @@ ALTER TABLE eh_punch_statistics ADD COLUMN `annual_leave_balance` DOUBLE COMMENT
 ALTER TABLE eh_punch_statistics ADD COLUMN `overtime_compensation_balance` DOUBLE COMMENT '调休余额';
 ALTER TABLE eh_punch_statistics ADD COLUMN `device_change_counts` INT COMMENT '设备异常次数';
 ALTER TABLE eh_punch_statistics ADD COLUMN `exception_request_counts` INT COMMENT '异常申报次数';
-ALTER TABLE eh_punch_statistics ADD COLUMN `belate_time` DOUBLE COMMENT '迟到时长(小时)';
-ALTER TABLE eh_punch_statistics ADD COLUMN `leave_early_time` DOUBLE COMMENT '早退时长(小时)';
+ALTER TABLE eh_punch_statistics ADD COLUMN `belate_time` LONG COMMENT '迟到时长(毫秒数)';
+ALTER TABLE eh_punch_statistics ADD COLUMN `leave_early_time` LONG COMMENT '早退时长(毫秒数)';
 ALTER TABLE eh_punch_statistics ADD COLUMN `forgot_count` INT COMMENT '下班缺卡次数';
 ALTER TABLE eh_punch_statistics ADD COLUMN `status_list` VARCHAR(1024) COMMENT '校正后状态列表(月初到月末)';
