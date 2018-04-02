@@ -1731,5 +1731,22 @@ UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 5050
 
 UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
 
+-- 纠正军哥调整模块的坑爹错误
+update eh_service_modules t1 set path = concat('/110000/20400',"/",t1.id) where t1.parent_id in (20400);
+update eh_service_modules t1 set path = concat('/110000/32500',"/",t1.id) where t1.parent_id in (32500);
+update eh_service_modules t1 set path = concat('/110000/40900',"/",t1.id) where t1.parent_id in (40900);
+update eh_service_modules t1 set path = concat('/110000/21300',"/",t1.id) where t1.parent_id in (21300);
+update eh_service_modules t1 set path = concat('/110000/21200',"/",t1.id) where t1.parent_id in (21200);
+update eh_service_modules t1 set path = concat('/110000/37000',"/",t1.id) where t1.parent_id in (37000);
+update eh_service_modules t1 set path = concat('/110000/21100',"/",t1.id) where t1.parent_id in (21100);
+
+update eh_service_modules t1 set path = concat('/100000/40100',"/",t1.id) where t1.parent_id in (40100);
+update eh_service_modules t1 set path = concat('/100000/36000',"/",t1.id) where t1.parent_id in (36000);
+update eh_service_modules t1 set path = concat('/100000/40200',"/",t1.id) where t1.parent_id in (40200);
+update eh_service_modules t1 set path = concat('/100000/22000',"/",t1.id) where t1.parent_id in (22000);
+update eh_service_modules t1 set path = concat('/100000/23000',"/",t1.id) where t1.parent_id in (23000);
+update eh_service_modules t1 set path = concat('/100000/24000',"/",t1.id) where t1.parent_id in (24000);
+
+
 -- 公司门禁改dataType add by yanjun 201804021557
 UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门禁' and id in (16041400, 48140000, 72140000);
