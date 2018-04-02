@@ -22,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * <li>requestId: 申请id</li>
  * <li>detailType: 详细类型 {@link DetailType} </li>
  * <li>jsonInfo: 附带信息</li>
+ * <li>contractName:真实姓名<li/>
+ * <li>contactDescription:部门信息<li/>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -39,7 +41,9 @@ public class QuestionMetaObject {
     private Long requestId;
     private Byte detailType;
     private String jsonInfo;
-
+    //add by yuanlei
+    private String contactName;
+    private String contactDescription;
     
     public Long getRequestId() {
 		return requestId;
@@ -151,6 +155,38 @@ public class QuestionMetaObject {
 
     public void setJsonInfo(String jsonInfo) {
         this.jsonInfo = jsonInfo;
+    }
+
+    /**
+     * 设置真实姓名的方法
+     * @return
+     */
+    public String getContactName() {
+        return contactName;
+    }
+
+    /**
+     * 获取真实姓名的方法
+     * @param contactName
+     */
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    /**
+     * 设置部门描述信息的方法
+     * @return
+     */
+    public String getContactDescription() {
+        return contactDescription;
+    }
+
+    /**
+     * 获取部门描述信息的方法
+     * @param contactDescription
+     */
+    public void setContactDescription(String contactDescription) {
+        this.contactDescription = contactDescription;
     }
 
     @Override

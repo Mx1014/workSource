@@ -9221,6 +9221,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             metaObject.setRequestorUid(requestor.getTargetId());
             metaObject.setRequestTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             metaObject.setRequestorNickName(requestor.getNickName());
+            //add by yuanlei
+            metaObject.setContactName(requestor.getContactName());
+            metaObject.setContactDescription(requestor.getContactDescription());
             String avatar = requestor.getAvatar();
             metaObject.setRequestorAvatar(avatar);
             if (avatar != null && avatar.length() > 0) {
