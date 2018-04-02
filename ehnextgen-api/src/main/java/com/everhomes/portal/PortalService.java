@@ -127,6 +127,8 @@ public interface PortalService {
 
     PortalVersionDTO findPortalVersionById(Long versionId);
 
+    PortalPublishHandler getPortalPublishHandler(Long moduleId);
+
     ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
 
 	void updatePortalVersionUsers(UpdatePortalVersionUsersCommand cmd);
