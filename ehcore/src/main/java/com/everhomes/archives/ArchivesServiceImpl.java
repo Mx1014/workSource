@@ -202,7 +202,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 logCommand.setEffectiveTime(String.valueOf(ArchivesUtil.currentDate()));
                 logCommand.setTransferType(ArchivesTransferType.OTHER.getCode());
                 transferArchivesEmployeesLogs(logCommand);
-                transferArchivesEmployeesLogs(logCommand);
             }
             return null;
         });
@@ -761,9 +760,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     /*
         获取员工在企业的真实名称
      */
-    @Override
-    public String getEmployeeRealName(Long userId, Long organizationId) {
+    private String getEmployeeRealName(Long userId, Long organizationId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+        if(userIdentifier == null)
+            return "管理员";
         String contactToken = userIdentifier.getIdentifierToken();
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
         if (member == null)
