@@ -9,6 +9,16 @@ public class ZhuzongTasksData {
     private String bill_id;
     private String state;
 
+    private String preparedDate;
+    private String client_name;
+    private String phone;
+    private String receivePeople;
+    private String receiveTime;
+    private String professionalLevel;
+    private String isTimely;
+    private String serviceAttitude;
+    private String clientSelectOpinion;
+
     public String getPrepareddate() {
         return prepareddate;
     }
@@ -47,5 +57,77 @@ public class ZhuzongTasksData {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getPreparedDate() {
+        return preparedDate;
+    }
+
+    public void setPreparedDate(String preparedDate) {
+        this.preparedDate = preparedDate;
+    }
+
+    public String getClient_name() {
+        return client_name;
+    }
+
+    public void setClient_name(String client_name) {
+        this.client_name = client_name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getReceivePeople() {
+        return receivePeople;
+    }
+
+    public void setReceivePeople(String receivePeople) {
+        this.receivePeople = receivePeople;
+    }
+
+    public String getReceiveTime() {
+        return receiveTime;
+    }
+
+    public void setReceiveTime(String receiveTime) {
+        this.receiveTime = receiveTime;
+    }
+
+    public String getProfessionalLevel() {
+        return professionalLevel;
+    }
+
+    public void setProfessionalLevel(String professionalLevel) {
+        this.professionalLevel = professionalLevel;
+    }
+
+    public String getIsTimely() {
+        return isTimely;
+    }
+
+    public void setIsTimely(String isTimely) {
+        this.isTimely = isTimely;
+    }
+
+    public String getServiceAttitude() {
+        return serviceAttitude;
+    }
+
+    public void setServiceAttitude(String serviceAttitude) {
+        this.serviceAttitude = serviceAttitude;
+    }
+
+    public String getClientSelectOpinion() {
+        return clientSelectOpinion;
+    }
+
+    public void setClientSelectOpinion(String clientSelectOpinion) {
+        this.clientSelectOpinion = clientSelectOpinion;
     }
 }

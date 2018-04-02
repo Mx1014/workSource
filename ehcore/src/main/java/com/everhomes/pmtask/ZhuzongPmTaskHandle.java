@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
-import com.everhomes.pmtask.zhuzong.ZhuzongCreateTask;
-import com.everhomes.pmtask.zhuzong.ZhuzongTasks;
-import com.everhomes.pmtask.zhuzong.ZhuzongTasksData;
+import com.everhomes.pmtask.zhuzong.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -23,6 +20,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -71,7 +70,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,GET_ADDRESSES);
         ZhuzongAddresses addresses = JSONObject.parseObject(json,ZhuzongAddresses.class);
         if (addresses.isSuccess()){
-            return addresses;
+            return addresses.getResult();
         }
         return null;
     }
@@ -88,7 +87,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,CREATE_TASK);
         ZhuzongCreateTask task = JSONObject.parseObject(json,ZhuzongCreateTask.class);
         if (task.isSuccess()){
-            return task;
+            return task.getResult();
         }
         return null;
     }
@@ -103,7 +102,20 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,QUERY_TASKS);
         ZhuzongTasks tasks = JSONObject.parseObject(json,ZhuzongTasks.class);
         if (tasks.isSuccess()){
-            return tasks;
+            return tasks.getResult();
+        }
+        return null;
+    }
+
+    @Override
+    public Object getThirdTaskDetail(HttpServletRequest req) {
+        JSONObject params = new JSONObject();
+        params.put("AccountCode",ACCOUNT_CODE);
+        params.put("bill_id",req.getParameter("bill_id"));
+        String json = postToZhuzong(params,GET_TASK_DETAIL);
+        ZhuzongTaskDetail taskDetail = JSONObject.parseObject(json,ZhuzongTaskDetail.class);
+        if (taskDetail.isSuccess()){
+            return taskDetail.getResult();
         }
         return null;
     }
@@ -174,6 +186,9 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("AccountCode", "sdgj"));
         nameValuePairs.add(new BasicNameValuePair("phone", "15650723221"));
+
+        MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();
+
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
            // httpPost.setHeader("Content-Type", "application/json");

@@ -38,4 +38,5 @@ public interface PmTaskHandle {
 	Object getThirdAddress(HttpServletRequest req);
 	Object createThirdTask(HttpServletRequest req);
 	Object listThirdTasks(HttpServletRequest req);
+	Object getThirdTaskDetail(HttpServletRequest req);
 }
