@@ -1,6 +1,7 @@
 package com.everhomes.pmtask;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -12,13 +13,16 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
@@ -35,7 +39,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,12 +92,41 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         params.put("billtype",req.getParameter("billtype"));
         params.put("content",req.getParameter("content"));
         params.put("isPub",req.getParameter("isPub"));
-        String json = postToZhuzong(params,CREATE_TASK);
+        String imgs = req.getParameter("imgs");
+        String json = "";
+        if (StringUtils.isEmpty(imgs)) {
+            json = postToZhuzong(params, CREATE_TASK);
+        }else{
+            JSONArray array = JSONArray.parseArray(imgs);
+            String[] urls =(String[])  array.toArray();
+            List<InputStream> ises = downloadImags(urls);
+            json = postToZhuzong(params,CREATE_TASK,ises);
+        }
         ZhuzongCreateTask task = JSONObject.parseObject(json,ZhuzongCreateTask.class);
         if (task.isSuccess()){
             return task.getResult();
         }
         return null;
+    }
+
+    private List<InputStream> downloadImags(String[] urls){
+        List<InputStream> ises = new ArrayList<>();
+        if (urls!=null && urls.length>0){
+            for (String url:urls){
+                try {
+                    HttpGet httpGet = new HttpGet(url);
+                    CloseableHttpResponse response = httpclient.execute(httpGet);
+                    HttpEntity httpEntity = response.getEntity();
+                    InputStream is = httpEntity.getContent();
+                    ises.add(is);
+                }catch (IOException e){
+                    LOGGER.error("Pmtask request error, param={}", url, e);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            "Pmtask download imgs error.");
+                }
+            }
+        }
+        return  ises;
     }
 
     @Override
@@ -136,6 +173,51 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
             }
         }
         return clientId;
+    }
+
+    public String postToZhuzong(JSONObject params,String method,List<InputStream> ises){
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        String url = configProvider.getValue("pmtask.zhuzong.url", "");
+        HttpPost httpPost = new HttpPost(url + method);
+        CloseableHttpResponse response = null;
+
+        String json = null;
+        try {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                builder.addTextBody(entry.getKey(),(String) entry.getValue());
+            }
+            for (int i = 0; i < ises.size(); i++) {
+                builder.addBinaryBody("imgs", ises.get(i),
+                        ContentType.MULTIPART_FORM_DATA, URLEncoder.encode("img" + i, "UTF-8"));
+            }
+            HttpEntity multipart = builder.build();
+            httpPost.setEntity(multipart);
+            response = httpclient.execute(httpPost);
+            int status = response.getStatusLine().getStatusCode();
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    json = EntityUtils.toString(entity, "utf8");
+                }
+            }
+        }catch (Exception e){
+            LOGGER.error("Pmtask request error, param={}", params.toJSONString(), e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Pmtask request error.");
+        }finally {
+            if (null != response) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    LOGGER.error("Pmtask close instream, response error, param={}", params.toJSONString(), e);
+                }
+            }
+
+        }
+        if(LOGGER.isDebugEnabled())
+            LOGGER.debug("Data from zhuzong, param={}, json={}", params, json);
+
+        return json;
     }
 
     public String postToZhuzong(JSONObject params, String method) {
