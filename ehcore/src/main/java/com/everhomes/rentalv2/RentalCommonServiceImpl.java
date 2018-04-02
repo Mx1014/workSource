@@ -174,7 +174,7 @@ public class RentalCommonServiceImpl {
         sendMessageToUser(uid, notifyText);
     }
 
-    public BigDecimal calculateOverTimeFee(RentalOrder order, long now) {
+    public BigDecimal calculateOverTimeFee(RentalOrder order,BigDecimal amount, long now) {
 
         if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
             RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
@@ -223,9 +223,20 @@ public class RentalCommonServiceImpl {
                     }
                 }
             }
-            return order.getPaidMoney();
+
+            amount = amount.multiply(new BigDecimal(orderRule.getFactor()))
+                    .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
+            BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
+            order.setResourceTotalMoney(totalAmount);
+            order.setPayTotalMoney(totalAmount);
+            return amount;
+        }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()){
+            BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
+            order.setResourceTotalMoney(totalAmount);
+            order.setPayTotalMoney(totalAmount);
         }
-        return order.getPaidMoney();
+
+        return new BigDecimal(0);
     }
 
     public void refundOrder(RentalOrder order, long timestamp, BigDecimal orderAmount) {
