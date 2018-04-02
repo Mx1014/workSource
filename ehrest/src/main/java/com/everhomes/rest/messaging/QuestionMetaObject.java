@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>jsonInfo: 附带信息</li>
  * <li>contractName:真实姓名<li/>
  * <li>contactDescription:部门信息<li/>
+ * <li>phoneNo:电话号码</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -44,6 +45,7 @@ public class QuestionMetaObject {
     //add by yuanlei
     private String contactName;
     private String contactDescription;
+    private String phoneNo;
     
     public Long getRequestId() {
 		return requestId;
@@ -187,6 +189,22 @@ public class QuestionMetaObject {
      */
     public void setContactDescription(String contactDescription) {
         this.contactDescription = contactDescription;
+    }
+
+    /**
+     * 获取电话号码的方法
+     * @return
+     */
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+
+    /**
+     * 设置电话号码的方法
+     * @param phoneNo
+     */
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
     }
 
     @Override

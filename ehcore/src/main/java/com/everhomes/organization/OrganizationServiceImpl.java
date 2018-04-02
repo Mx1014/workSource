@@ -14,6 +14,7 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.common.IdentifierTypeEnum;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -9243,9 +9244,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             metaObject.setTargetId(target.getTargetId());
             metaObject.setRequestId(target.getId());
         }
+        //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(requestor.getId(), IdentifierTypeEnum.MOBILE.getCode());
+        if((userIdentifier != null) && !"".equals(userIdentifier)){
+            metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
+        }
 
         return metaObject;
     }
+
+
 
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
