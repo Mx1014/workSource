@@ -9237,17 +9237,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
+
+            //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(
+                    requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());
+            if((userIdentifier != null) && !"".equals(userIdentifier)){
+                metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
+            }
         }
 
         if (target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getTargetId());
             metaObject.setRequestId(target.getId());
-        }
-        //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(requestor.getId(), IdentifierTypeEnum.MOBILE.getCode());
-        if((userIdentifier != null) && !"".equals(userIdentifier)){
-            metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
         }
 
         return metaObject;
