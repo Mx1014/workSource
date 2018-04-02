@@ -875,7 +875,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
         if (templates == null || templates.size() == 0)
-            return response;
+            LOGGER.error("Approval templates not exist. Please check it.");
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), templates.get(0).getId());
         if (ga == null)

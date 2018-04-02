@@ -293,6 +293,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
 
 
         String json = post(HANDLER_MONTHCARD,param);
+        order.setErrorDescriptionJson(json);
 
         JSONObject jsonObject = JSONObject.parseObject(json);
         Object obj = jsonObject.get("flag");

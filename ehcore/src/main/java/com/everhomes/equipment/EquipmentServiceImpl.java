@@ -2626,8 +2626,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue("截止时间");
 		row.createCell(++i).setCellValue("设备位置");
 		row.createCell(++i).setCellValue("任务状态");
-		row.createCell(++i).setCellValue("审核状态");
-		row.createCell(++i).setCellValue("任务结果");
 		row.createCell(++i).setCellValue("完成时间");
 		row.createCell(++i).setCellValue("执行人");
 	}
@@ -2638,14 +2636,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(dto.getTaskName());
 		if (null != dto.getTaskType() && null != StandardType.fromStatus(dto.getTaskType()))
 			row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getTaskType()).getName());
-		//row.createCell(++i).setCellValue(dto.getEquipmentName());
 		if (null != dto.getExecutiveStartTime())
-			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
+			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toLocalDateTime().format(dateSF));
 		if (dto.getProcessExpireTime() != null) {
-			row.createCell(++i).setCellValue(dto.getProcessExpireTime().toString());
+			row.createCell(++i).setCellValue(dto.getProcessExpireTime().toLocalDateTime().format(dateSF));
 		} else {
 			if (null != dto.getExecutiveExpireTime())
-				row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
+				row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toLocalDateTime().format(dateSF));
 		}
 
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
@@ -2653,18 +2650,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (null != dto.getStatus() && null != EquipmentTaskStatus.fromStatus(dto.getStatus()))
 			row.createCell(++i).setCellValue(EquipmentTaskStatus.fromStatus(dto.getStatus()).getName());
 
-		if (ReviewResult.NONE.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("");
-		if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("审核通过");
-		if (ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
-			row.createCell(++i).setCellValue("审核不通过");
-
-		if (null != dto.getResult() && null != EquipmentTaskResult.fromStatus(dto.getResult()))
-			row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
-
 		if (dto.getProcessTime() != null) {
-			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
+			row.createCell(++i).setCellValue(dto.getProcessTime().toLocalDateTime().format(dateSF));
 			row.createCell(++i).setCellValue(dto.getOperatorName());
 		} else {
 			if (null != dto.getExecutiveTime())
@@ -3695,13 +3682,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		sb.append(offset);
 		sb.append(pageSize);
 		sb.append("-");
-		if (executeStandardIds == null) {
+		if (executeStandardIds == null || executeStandardIds.size() == 0) {
 			sb.append("all");
 		} else {
 			Collections.sort(executeStandardIds);
 			sb.append(executeStandardIds);
 		}
-		if (reviewStandardIds == null) {
+		if (reviewStandardIds == null || reviewStandardIds.size() == 0) {
 			sb.append("all");
 		} else {
 			Collections.sort(reviewStandardIds);
@@ -4672,16 +4659,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			Map<String, Object> dataMap = createEquipmentCardDoc(dto);
 
-			GetAppInfoCommand command = new GetAppInfoCommand();
-			command.setNamespaceId(dto.getNamespaceId());
-			command.setOsType(OSType.Android.getCode());
-			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
-			}
-			if (appUrlDTO.getLogoUrl() != null) {
-				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
-			}
+//			GetAppInfoCommand command = new GetAppInfoCommand();
+//			command.setNamespaceId(dto.getNamespaceId());
+//			command.setOsType(OSType.Android.getCode());
+//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+//			if (LOGGER.isDebugEnabled()) {
+//				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
+//			}
+//			if (appUrlDTO.getLogoUrl() != null) {
+//				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+//			}
 
 			if (QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto.getQrCodeToken().getBytes()));
@@ -6310,35 +6297,52 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public HttpServletResponse exportTaskLogs(ExportTaskLogsCommand cmd, HttpServletResponse response) {
 		ListingLocator locator = new ListingLocator();
 		int pageSize = Integer.MAX_VALUE - 1;
-		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize+1,
-				Long.valueOf(cmd.getTaskId()), Collections.singletonList(cmd.getProcessType()), null);
-		//展示最新一次的任务日志记录
+		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
+				Long.valueOf(cmd.getTaskId()), Collections.singletonList(EquipmentTaskProcessType.COMPLETE.getCode()), null);
 		logs = getLatestTaskLogs(logs);
 
-		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-			dtos = processEquipmentTaskLogsDTOS(logs);
+		List<EquipmentInspectionTasksLogs> repairLogs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
+				Long.valueOf(cmd.getTaskId()), Collections.singletonList(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()), null);
+		repairLogs = getLatestTaskLogs(repairLogs);
 
-			URL rootPath = EquipmentServiceImpl.class.getResource("/");
-			String filePath = rootPath.getPath() + this.downloadDir;
-			File file = new File(filePath);
-			if (!file.exists())
-				file.mkdirs();
-			filePath = filePath + "任务巡检记录" + System.currentTimeMillis() + ".xlsx";
-			//新建了一个文件
-			this.createEquipmentTaskLogsBook(filePath, dtos);
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(Long.valueOf(cmd.getTaskId()));
 
-			return download(filePath, response);
+		List<EquipmentTaskLogsDTO> taskLogsDTO = new ArrayList<>();
+		taskLogsDTO = processEquipmentTaskLogsDTOS(logs);
+
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
+		String filePath = rootPath.getPath() + this.downloadDir;
+		File file = new File(filePath);
+		if (!file.exists())
+			file.mkdirs();
+		filePath = filePath + "equipment_task_logs" + System.currentTimeMillis() + ".xlsx";
+		//新建了一个文件
+		this.createEquipmentTaskLogsBook(filePath, taskLogsDTO, task, repairLogs);
+
+		return download(filePath, response);
 
 	}
 
-	private void createEquipmentTaskLogsBook(String filePath, List<EquipmentTaskLogsDTO> dtos) {
-		Workbook wb = new XSSFWorkbook();
-		Sheet sheet = wb.createSheet("任务记录");
+	private void createEquipmentTaskLogsBook(String filePath, List<EquipmentTaskLogsDTO> taskLogsDTO,EquipmentInspectionTasks task,List<EquipmentInspectionTasksLogs> repairLogs) {
+		XSSFWorkbook wb = new XSSFWorkbook();
+		Sheet taskSheet = wb.createSheet("任务信息");
+		Sheet taskLogSheet = wb.createSheet("巡检记录");
+		Sheet repairLogSheet = wb.createSheet("维修记录");
+		taskSheet.setDefaultColumnWidth(20 * 256);
+		taskLogSheet.setDefaultColumnWidth(20 * 256);
+		repairLogSheet.setDefaultColumnWidth(20 * 256);
+		// task info
+		setNewEquipmentTaskInfoHeadAndBookRow(taskSheet, task);
 
-		this.createEquipmentTaskLogsBookSheetHead(sheet);
-
-		for (EquipmentTaskLogsDTO dto : dtos) {
-			this.setNewEquipmentTaskLogsBookRow(sheet, dto);
+		//task logs
+		this.createEquipmentTaskLogsBookSheetHead(taskLogSheet);
+		if (taskLogsDTO != null && taskLogsDTO.size() > 0) {
+			taskLogsDTO.forEach((dto) -> setNewEquipmentTaskLogsBookRow(taskLogSheet, dto));
+		}
+		// repair logs
+		this.createEquipmentRepairLogsBookSheetHead(repairLogSheet);
+		if (repairLogs != null && repairLogs.size() > 0){
+			repairLogs.forEach((dto) -> setNewEquipmentRepairLogsBookRow(repairLogSheet, dto));
 		}
 
 		try {
@@ -6354,14 +6358,84 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 	}
 
+	private void createEquipmentRepairLogsBookSheetHead(Sheet repairLogSheet) {
+		Row row = repairLogSheet.createRow(repairLogSheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue("服务类型");
+		row.createCell(++i).setCellValue("服务地点");
+		row.createCell(++i).setCellValue("服务内容");
+		row.createCell(++i).setCellValue("状态");
+	}
+
+	private void setNewEquipmentTaskInfoHeadAndBookRow(Sheet taskSheet, EquipmentInspectionTasks task) {
+		Row row = taskSheet.createRow(taskSheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue("任务名称");
+		row.createCell(++i).setCellValue("类型");
+		row.createCell(++i).setCellValue("开始时间");
+		row.createCell(++i).setCellValue("截止时间");
+		row.createCell(++i).setCellValue("设备位置");
+		row.createCell(++i).setCellValue("任务状态");
+		row.createCell(++i).setCellValue("完成时间");
+		row.createCell(++i).setCellValue("执行人");
+		EquipmentTaskDTO taskDTO = convertTaskInfo(task);
+		setNewEquipmentTasksBookRow(taskSheet,taskDTO);
+	}
+
+	private EquipmentTaskDTO convertTaskInfo(EquipmentInspectionTasks task) {
+		if (task != null) {
+			EquipmentInspectionPlans plan = null;
+			EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+			if (task.getPlanId() != null && task.getPlanId() != 0L) {
+				plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+				if (null != plan) {
+					EquipmentInspectionPlanDTO plansDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
+					processEquipmentInspectionObjectsByPlanId(plan.getId(), plansDTO);
+					dto.setPlanDescription(plansDTO.getRemarks());
+					dto.setTaskType(plansDTO.getPlanType());
+					dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+				}
+			}
+			if (task.getExecutorId() != null && task.getExecutorId() != 0) {
+				List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+				if (executors != null && executors.size() > 0) {
+					dto.setExecutorName(executors.get(0).getContactName());
+				}
+			}
+			return dto;
+		}
+		return null;
+	}
+
+
+	private void setNewEquipmentRepairLogsBookRow(Sheet sheet, EquipmentInspectionTasksLogs dto) {
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getMaintanceType());
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(dto.getEquipmentId());
+		String location = "";
+		if (equipment != null) {
+			location = equipment.getLocation();
+		}
+		row.createCell(++i).setCellValue(location);
+		row.createCell(++i).setCellValue(dto.getProcessMessage());
+		row.createCell(++i).setCellValue(PmTaskFlowStatus.fromCode(dto.getMaintanceStatus()).getDescription());
+	}
+
 	private void setNewEquipmentTaskLogsBookRow(Sheet sheet, EquipmentTaskLogsDTO dto) {
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+//		HSSFCellStyle style=workbook.createCellStyle();
+//		style.setWrapText(true);//自动换行
 		int i = -1;
 		if (dto.getItemResults() != null && dto.getItemResults().size() > 0) {
 			for (InspectionItemResult result : dto.getItemResults()) {
 				row.createCell(++i).setCellValue(dto.getEquipmentName());
-				row.createCell(++i).setCellValue(result.toString());
+				row.createCell(++i).setCellValue("检查项名称：" + result.getItemName() +
+						" 类型：" + (result.getItemValueType() == 0 ? " 确认 " : " 记录 ") +
+						(result.getItemValue() == null ? "" : result.getItemValue()) + (result.getItemUnit() == null ? "" : result.getItemUnit()));
 				row.createCell(++i).setCellValue(result.getNormalFlag() == 1 ? "正常" : "异常");
+				row = sheet.createRow(sheet.getLastRowNum() + 1);
+				i = -1;
 			}
 		}
 	}
@@ -6371,6 +6445,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		int i = -1;
 		row.createCell(++i).setCellValue("设备名称");
 		row.createCell(++i).setCellValue("检查项");
-		row.createCell(++i).setCellValue("结果");
+		row.createCell(++i).setCellValue("检查结果");
 	}
 }

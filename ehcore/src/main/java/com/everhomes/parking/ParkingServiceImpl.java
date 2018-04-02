@@ -1986,9 +1986,9 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"time out.");
-		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L, exceptionResult);
+		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.RECHARE_TIME_OUT,
+				"回调超时，请稍后再试");
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(60000L, exceptionResult);
 //        System.out.println(Thread.currentThread().getName());
 //        map.put("test", deferredResult);
 

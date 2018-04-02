@@ -1708,3 +1708,25 @@ UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 3300
 
 -- 调整模块属性
 update eh_service_modules set module_control_type = 'community_control' where id in (10100,10600,10300);
+
+
+-- 更新一些应用名字   add by yanjun 201803301855
+UPDATE eh_service_modules SET `name` = '门禁【app应用必选】' WHERE id = 41000;
+UPDATE eh_service_modules SET `name` = '请示单管理【深业定制】', default_order = 80 WHERE id = 25000;
+
+-- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如："表单管理"
+UPDATE eh_service_modules set type = 0 where id in (50900, 10850);
+
+
+-- 一些普通公司菜单的处理  add by yanjun 201804010308
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in (71000000, 71010000, 71020000, 71030000, 71040000, 72040000,72050000,72060000,72070000,72080000,72090000,72100000,72110000,72120000,72130000,72140000,72160000,73000000,73010000,76000000,76010000);
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id  = 75000000;
+
+UPDATE eh_web_menus set `status` = 0, `name` = '管理员管理' where type = 'organization' and id  = 75010000;
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in  (74010000, 74040000, 74050000, 74020000, 74030000, 74060000);
+
+UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 50500;
+
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
