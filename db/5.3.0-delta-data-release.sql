@@ -1746,3 +1746,7 @@ update eh_service_modules t1 set path = concat('/100000/40200',"/",t1.id) where 
 update eh_service_modules t1 set path = concat('/100000/22000',"/",t1.id) where t1.parent_id in (22000);
 update eh_service_modules t1 set path = concat('/100000/23000',"/",t1.id) where t1.parent_id in (23000);
 update eh_service_modules t1 set path = concat('/100000/24000',"/",t1.id) where t1.parent_id in (24000);
+
+
+-- 公司门禁改dataType add by yanjun 201804021557
+UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门禁' and id in (16041400, 48140000, 72140000);

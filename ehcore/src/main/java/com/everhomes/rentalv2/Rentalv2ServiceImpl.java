@@ -2257,6 +2257,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//本订单状态置为成功,
 //			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 			order.setStatus(status);
+			if (order.getStatus() == SiteBillStatus.SUCCESS.getCode() )
+				order.setPaidMoney(order.getPayTotalMoney());
 			rentalv2Provider.updateRentalBill(order);
 			return null;
 		});
@@ -8162,7 +8164,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
-		return amount;
+		if (rule.getNeedPay() == NormalFlag.NEED.getCode())
+			return amount;
+		else
+			return new BigDecimal(0);
 	}
 
 	@Override
