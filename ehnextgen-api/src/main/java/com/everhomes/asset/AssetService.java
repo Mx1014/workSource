@@ -169,4 +169,6 @@ public interface AssetService {
     void activeLateFine();
 
     void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
+
+    BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file);
 }

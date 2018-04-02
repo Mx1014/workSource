@@ -36,6 +36,24 @@ public class CreateBillCommand {
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private Byte isSettled;
+    private String dateStrBegin;
+    private String dateStrEnd;
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
 
     public CreateBillCommand() {
     }

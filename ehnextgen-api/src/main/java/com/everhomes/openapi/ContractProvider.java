@@ -58,4 +58,6 @@ public interface ContractProvider {
 	List<Contract> listContractsByAddressId(Long addressId);
 
     String findContractIdByThirdPartyId(String contractId, String code);
+
+	List<Long> SimpleFindContractByNumber(String header);
 }

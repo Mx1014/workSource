@@ -21,7 +21,7 @@ public class PropMrgOwnerHandler
 	 
 	 private static final String[] PRELOAD_CLASSES = new String[]{"org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorkbook"};
 	
-	public static ArrayList processorExcel(File file)
+	public static ArrayList processorExcel()
 	{
 		ArrayList resultList = new ArrayList();
 		MySheetContentsHandler sheetContenthandler=new MySheetContentsHandler();

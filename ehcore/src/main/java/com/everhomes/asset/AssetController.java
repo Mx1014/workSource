@@ -1220,7 +1220,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("batchImportBills")
     @RestReturn(value = BatchImportBillsResponse.class)
     public RestResponse batchImportBills(@RequestParam("attachment") MultipartFile file,BatchImportBillsCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        BatchImportBillsResponse  res = assetService.batchImportBills(cmd, file);
+        RestResponse restResponse = new RestResponse(res);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;

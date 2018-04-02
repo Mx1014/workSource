@@ -904,7 +904,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId) {
+    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId, String dateStrBegin, String dateStrEnd) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -926,8 +926,13 @@ public class AssetProviderImpl implements AssetProvider {
             Integer billsDay = group.getBillsDay();
             Calendar start = Calendar.getInstance();
             try{
-                start.setTime(yyyyMM.parse(dateStr));
-                start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                // 如果传递了计费开始时间
+                if(dateStrBegin != null){
+                    start.setTime(yyyyMMdd.parse(dateStrBegin));
+                }else{
+                    start.setTime(yyyyMM.parse(dateStr));
+                    start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                }
                 dates.add(yyyyMMdd.format(start.getTime()));
                 int cycle = 0;
                 switch(balanceDateType){
@@ -947,7 +952,12 @@ public class AssetProviderImpl implements AssetProvider {
                     start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }
                 start.add(Calendar.DAY_OF_MONTH,-1);
-                dates.add(yyyyMMdd.format(start.getTime()));
+                // 如果计费结束时间不是null，那么就应该设置为给定的
+                if(dateStrEnd != null){
+                    dates.add(yyyyMMdd.format(dateStrEnd));
+                }else{
+                    dates.add(yyyyMMdd.format(start.getTime()));
+                }
                 start.add(Calendar.MONTH,1);
                 start.set(Calendar.DAY_OF_MONTH,billsDay);
                 dates.add(yyyyMMdd.format(start.getTime()));
@@ -3898,6 +3908,33 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return status;
         });
+    }
+
+    @Override
+    public PaymentChargingItem getBillItemByName(Long billGroupId, String projectLevelName) {
+        DSLContext context = getReadOnlyContext();
+        List<Long> chargingItemIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+        List<Long> chosenId = context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME.eq(projectLevelName))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.in(chargingItemIds))
+                .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID);
+        if(chosenId.size() != 1){
+            return null;
+        }
+        return context.selectFrom(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chosenId.get(0)))
+                .fetchOneInto(PaymentChargingItem.class);
+    }
+
+    @Override
+    public String findBillGroupNameById(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

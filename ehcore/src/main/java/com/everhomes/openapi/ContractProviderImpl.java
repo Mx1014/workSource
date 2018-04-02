@@ -23,6 +23,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 
 import org.jooq.*;
@@ -470,6 +471,16 @@ public class ContractProviderImpl implements ContractProvider {
 		if(zuolinContractId == null) return null;
 		return String.valueOf(zuolinContractId);
 	}
+
+	@Override
+	public List<Long> SimpleFindContractByNumber(String contractNumber) {
+		DSLContext context = getReadOnlyContext();
+        List<Long> fetch = context.select(Tables.EH_CONTRACTS.ID)
+                .from(Tables.EH_CONTRACTS)
+                .where(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
+                .fetch(Tables.EH_CONTRACTS.ID);
+        return fetch;
+    }
 
 	@Override
 	public void createContractParam(ContractParam param) {

@@ -10,10 +10,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -63,6 +60,10 @@ public class ExcelUtils {
     private boolean needTitleRemark = false;
     //是否需要标注必填项
     private boolean needMandatoryTitle = false;
+    //说明的背景颜色
+    private Short titleRemarkBackGroundColorIndex = null;
+    //标题的北京颜色
+    private Short headerBackGroundColorIndex = null;
 
     private XSSFWorkbook workbook = null;
 
@@ -71,6 +72,7 @@ public class ExcelUtils {
         this.sheetName = sheetName;
         workbook = new XSSFWorkbook();
     }
+
 
     public ExcelUtils(HttpServletResponse response, String fileName, String sheetName) {
         this.response = response;
@@ -86,6 +88,16 @@ public class ExcelUtils {
      */
     public ExcelUtils setTitleFontType(String titleFontType) {
         this.titleFontType = titleFontType;
+        return this;
+    }
+
+    public ExcelUtils setTitleRemarkColorIndex(Short index){
+        this.titleRemarkBackGroundColorIndex = index;
+        return this;
+    }
+
+    public ExcelUtils setHeaderColorIndex(Short index){
+        this.headerBackGroundColorIndex = index;
         return this;
     }
 
@@ -217,9 +229,15 @@ public class ExcelUtils {
         // 设置样式
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         setTitleFont(titleStyle);
+        if(headerBackGroundColorIndex != null){
+            titleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
+        }
         // 若含有必填项的样式
         XSSFCellStyle mandatoryTitleStyle = workbook.createCellStyle();
         setMandatoryTitleFont(mandatoryTitleStyle);
+        if(headerBackGroundColorIndex != null){
+            mandatoryTitleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
+        }
 
 
         if (needSequenceColumn) {
@@ -303,7 +321,7 @@ public class ExcelUtils {
     /**
      * 设置首行备注
      */
-    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight){
+    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight ){
         Sheet sheet = workbook.getSheet(this.sheetName);
         sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
         // 合并首行单元格
@@ -314,6 +332,9 @@ public class ExcelUtils {
         // 设置样式
         XSSFCellStyle titleRemarkStyle = workbook.createCellStyle();
         setTitleRemarkFont(titleRemarkStyle);
+        if(titleRemarkBackGroundColorIndex != null){
+            titleRemarkStyle.setFillBackgroundColor(titleRemarkBackGroundColorIndex.shortValue());
+        }
         // 加入内容
         Cell cell = titleRemarkRow.createCell(0);
         cell.setCellStyle(titleRemarkStyle);
