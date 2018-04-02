@@ -1730,3 +1730,6 @@ UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in  (740
 UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 50500;
 
 UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
+
+-- 公司门禁改dataType add by yanjun 201804021557
+UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门禁' and id in (16041400, 48140000, 72140000);
