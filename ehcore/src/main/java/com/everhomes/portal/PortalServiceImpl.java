@@ -1804,7 +1804,8 @@ public class PortalServiceImpl implements PortalService {
 			setItemModuleAppActionData(item, instanceConfig.getModuleAppId());
 		}
 		for (SceneType sceneType: SceneType.values()) {
-			if(sceneType == SceneType.PARK_TOURIST ||
+			if(sceneType == SceneType.DEFAULT ||
+					sceneType == SceneType.PARK_TOURIST ||
 					sceneType == SceneType.PM_ADMIN){
 				item.setSceneType(sceneType.getCode());
 				launchPadProvider.createLaunchPadItem(item);
