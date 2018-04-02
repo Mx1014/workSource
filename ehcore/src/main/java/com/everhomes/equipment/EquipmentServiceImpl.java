@@ -4693,10 +4693,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			DocUtil docUtil=new DocUtil();
 			Map<String, Object> dataMap = createTwoEquipmentCardDoc(dto1, dto2);
 
-			GetAppInfoCommand command = new GetAppInfoCommand();
-			command.setNamespaceId(dto1.getNamespaceId());
-			command.setOsType(OSType.Android.getCode());
-			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+//			GetAppInfoCommand command = new GetAppInfoCommand();
+//			command.setNamespaceId(dto1.getNamespaceId());
+//			command.setOsType(OSType.Android.getCode());
+//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
 //			if (appUrlDTO.getLogoUrl() != null) {
 //				dataMap.put("shenyeLogo1", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
 //				dataMap.put("shenyeLogo2", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
