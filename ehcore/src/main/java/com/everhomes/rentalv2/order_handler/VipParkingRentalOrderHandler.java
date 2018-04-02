@@ -99,8 +99,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         order.setStringTag2(parkingInfo.getPlateNumber());
 
         //更新停车位状态
-        parkingSpace.setStatus(ParkingSpaceStatus.IN_USING.getCode());
-        parkingProvider.updateParkingSpace(parkingSpace);
+//        parkingSpace.setStatus(ParkingSpaceStatus.IN_USING.getCode());
+//        parkingProvider.updateParkingSpace(parkingSpace);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
 
                 order.setStatus(SiteBillStatus.IN_USING.getCode());
                 rentalv2Provider.updateRentalBill(order);
-
+                lockOrderResourceStatus(order);
                 handler.autoUpdateOrderSpaceSendMessage(order);
             }else {
                 rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
@@ -158,6 +158,7 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         }else {
             order.setStatus(SiteBillStatus.IN_USING.getCode());
             rentalv2Provider.updateRentalBill(order);
+            lockOrderResourceStatus(order);
         }
     }
 
