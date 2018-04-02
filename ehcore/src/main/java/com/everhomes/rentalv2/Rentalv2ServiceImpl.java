@@ -2513,7 +2513,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
 					//订单开始 置为使用中的状态
-					if (currTime >= order.getStartTime().getTime() && currTime <= order.getEndTime().getTime()) {
+					if (currTime >= order.getStartTime().getTime() ) {
 						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 						orderHandler.autoUpdateOrder(order);
 					}
@@ -8067,7 +8067,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		processCells(rs, bill.getRentalType());
 
-		updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount(), true);
+		BigDecimal amount = updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount(), true);
+		BigDecimal totalAmount = bill.getPayTotalMoney().add(amount);//计算价格
+		bill.setResourceTotalMoney(totalAmount);
+		bill.setPayTotalMoney(totalAmount);
+		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
@@ -8082,7 +8086,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return bill;
 	}
 
-	private void updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
+	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(bill.getId());
 		//TODO:此处取的是连续单元格后面的id，不适用跨场景延长时间
 		Long ruleId = resourceOrders.stream().mapToLong(RentalResourceOrder::getRentalResourceRuleId).max().getAsLong();
@@ -8122,11 +8126,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid param amount");
 		}
 
-		BigDecimal totalAmount = bill.getPayTotalMoney().add(amount);
-
-		bill.setResourceTotalMoney(totalAmount);
-		bill.setPayTotalMoney(totalAmount);
-
 		List<RentalBillRuleDTO> totalRules = getBillRules(bill);
 
 		totalRules.addAll(rules);
@@ -8163,6 +8162,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
+		return amount;
 	}
 
 	@Override
@@ -8235,9 +8235,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalCount = (int)rentalCount + 1;
 					}
 					rs.setResourceCounts(rs.getResourceCounts()+9999999.0);//超时订单无视车锁数量
-					updateRentalOrder(rs, order, null, rentalCount, false);
+					BigDecimal amount = updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
-					order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+					amount = rentalCommonService.calculateOverTimeFee(order,amount,now);
+					if (amount.compareTo(new BigDecimal(0)) == 1)
+						order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 				}
 //				dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
 //						.collect(Collectors.toList()));

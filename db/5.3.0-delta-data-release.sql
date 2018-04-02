@@ -1716,3 +1716,33 @@ UPDATE eh_service_modules SET `name` = '请示单管理【深业定制】', defa
 
 -- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如："表单管理"
 UPDATE eh_service_modules set type = 0 where id in (50900, 10850);
+
+
+-- 一些普通公司菜单的处理  add by yanjun 201804010308
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in (71000000, 71010000, 71020000, 71030000, 71040000, 72040000,72050000,72060000,72070000,72080000,72090000,72100000,72110000,72120000,72130000,72140000,72160000,73000000,73010000,76000000,76010000);
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id  = 75000000;
+
+UPDATE eh_web_menus set `status` = 0, `name` = '管理员管理' where type = 'organization' and id  = 75010000;
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in  (74010000, 74040000, 74050000, 74020000, 74030000, 74060000);
+
+UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 50500;
+
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
+
+-- 纠正军哥调整模块的坑爹错误
+update eh_service_modules t1 set path = concat('/110000/20400',"/",t1.id) where t1.parent_id in (20400);
+update eh_service_modules t1 set path = concat('/110000/32500',"/",t1.id) where t1.parent_id in (32500);
+update eh_service_modules t1 set path = concat('/110000/40900',"/",t1.id) where t1.parent_id in (40900);
+update eh_service_modules t1 set path = concat('/110000/21300',"/",t1.id) where t1.parent_id in (21300);
+update eh_service_modules t1 set path = concat('/110000/21200',"/",t1.id) where t1.parent_id in (21200);
+update eh_service_modules t1 set path = concat('/110000/37000',"/",t1.id) where t1.parent_id in (37000);
+update eh_service_modules t1 set path = concat('/110000/21100',"/",t1.id) where t1.parent_id in (21100);
+
+update eh_service_modules t1 set path = concat('/100000/40100',"/",t1.id) where t1.parent_id in (40100);
+update eh_service_modules t1 set path = concat('/100000/36000',"/",t1.id) where t1.parent_id in (36000);
+update eh_service_modules t1 set path = concat('/100000/40200',"/",t1.id) where t1.parent_id in (40200);
+update eh_service_modules t1 set path = concat('/100000/22000',"/",t1.id) where t1.parent_id in (22000);
+update eh_service_modules t1 set path = concat('/100000/23000',"/",t1.id) where t1.parent_id in (23000);
+update eh_service_modules t1 set path = concat('/100000/24000',"/",t1.id) where t1.parent_id in (24000);
