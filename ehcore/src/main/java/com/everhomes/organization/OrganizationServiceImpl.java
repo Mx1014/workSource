@@ -3241,10 +3241,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-                //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
-                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
-                }
+//                //物业或业委增加小区Id和小区name信息
+//                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+//                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+//                }
+
+                // 普通公司也要园区id，现在去掉上面的if限制。后续标准版里这个可能会有问题，因为公司可能在几个项目里。201804421006
+                this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+
                 orgs.add(tempSimpleOrgDTO);
             }
         }
