@@ -115,24 +115,25 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                    df.setDisplayName(fieldDTO.getFieldDisplayName());
-                    if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
-                        df.setDateFormat("yyyy-MM-dd HH:mm");
+                    if(!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                        DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                        df.setDisplayName(fieldDTO.getFieldDisplayName());
+                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                        }
+                        //boolean isMandatory 数据库是0和1 默认false
+                        if(fieldDTO.getMandatoryFlag() == 1) {
+                            df.setMandatory(true);
+                        }
+                        if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                                return item.getItemDisplayName();
+                            }).collect(Collectors.toList());
+                            df.setAllowedValued(allowedValued);
+                        }
+                        dynamicFields.add(df);
                     }
-                    //boolean isMandatory 数据库是0和1 默认false
-                    if(fieldDTO.getMandatoryFlag() == 1) {
-                        df.setMandatory(true);
-                    }
-                    if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                        List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                            return item.getItemDisplayName();
-                        }).collect(Collectors.toList());
-                        df.setAllowedValued(allowedValued);
-                    }
-                    dynamicFields.add(df);
                 }
-
             });
         }
 

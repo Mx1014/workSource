@@ -1757,3 +1757,7 @@ UPDATE eh_reflection_service_module_apps SET action_type = 34, instance_config =
 
 -- 开放普通公司文件管理菜单  add by yanjun 201804030945  已经在现网、清华执行
 UPDATE eh_web_menus set `name` = '文件管理', data_type = 'file-management', `status` = 2, module_id = 41500 where type = 'organization' and id  = 74030000 ;
+
+-- 图片验证码错误提醒  add by yanjun 201804031355
+SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id := @id +1, 'picturevalidate', '10000', 'zh_CN', '请输入正确的字母或数字');

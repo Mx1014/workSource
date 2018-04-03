@@ -8856,6 +8856,7 @@ public class PunchServiceImpl implements PunchService {
 		// 未关联人数
 		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, CONFIG_VERSION_CODE, null);
 		response.setUnjoinPunchGroupCount(details == null ? 0 : details.size());
+		LOGGER.debug("查未排班人数之前的response: "+response);
 		//未排班的人
 		response.setUnSchedulingCount(0);
 		List<PunchRule> prList = punchProvider.listPunchRulesByOwnerAndRuleType(cmd.getOwnerType(), cmd.getOwnerId(), PunchRuleType.PAIBAN.getCode());
@@ -8870,7 +8871,7 @@ public class PunchServiceImpl implements PunchService {
 			end.setTime(start.getTime());
 			end.add(Calendar.MONTH, 1);
 			for (PunchRule pr : prList) {
-
+				LOGGER.debug("开始查询"+StringHelper.toJsonString(pr));
 				List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),CONFIG_VERSION_CODE);
 
 				List<Long> detailIds = new ArrayList<>();
@@ -8879,6 +8880,7 @@ public class PunchServiceImpl implements PunchService {
 						detailIds.add(detail.getDetailId());
 					}
 				}
+				LOGGER.debug("排班ids"+StringHelper.toJsonString(detailIds));
 				Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(), new java.sql.Date(start.getTimeInMillis()), new java.sql.Date(end.getTimeInMillis()), detailIds);
 				int unlikedCount = detailIds.size() - linkedCount;
 				response.setUnSchedulingCount(response.getUnSchedulingCount()+unlikedCount);
