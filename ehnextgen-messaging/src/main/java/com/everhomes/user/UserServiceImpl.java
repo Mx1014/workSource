@@ -5907,7 +5907,6 @@ public class UserServiceImpl implements UserService {
 				}
 				old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 				old_userIdentifier.setRegionCode(86);
-				old_userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				this.userProvider.updateIdentifierByUid(old_userIdentifier);
 			}else{
