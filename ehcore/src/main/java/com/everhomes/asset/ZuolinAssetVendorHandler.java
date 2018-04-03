@@ -539,7 +539,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId()
-        ,cmd.getDateStrBegin(), cmd.getDateStrEnd());
+        ,cmd.getDateStrBegin(), cmd.getDateStrEnd(),cmd.getIsOwed());
     }
 
     @Override

@@ -904,7 +904,9 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId, String dateStrBegin, String dateStrEnd) {
+    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel
+            , Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum
+            ,Long contractId, String dateStrBegin, String dateStrEnd, Byte isOwed) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -954,7 +956,7 @@ public class AssetProviderImpl implements AssetProvider {
                 start.add(Calendar.DAY_OF_MONTH,-1);
                 // 如果计费结束时间不是null，那么就应该设置为给定的
                 if(dateStrEnd != null){
-                    dates.add(yyyyMMdd.format(dateStrEnd));
+                    dates.add(dateStrEnd);
                 }else{
                     dates.add(yyyyMMdd.format(start.getTime()));
                 }
@@ -1020,10 +1022,12 @@ public class AssetProviderImpl implements AssetProvider {
 
                     exemptionItems.add(exemptionItem);
 
-                    if(amount.compareTo(zero)==-1){
-                        amount = amount.multiply(new BigDecimal("-1"));
+                    if(amount.compareTo(zero)==-1 || exemptionItemDTO.getIsPlus().byteValue() == ExemptionPlus.MINUS.getCode()){
+                        if(exemptionItemDTO.getIsPlus().byteValue() != ExemptionPlus.MINUS.getCode()){
+                            amount = amount.multiply(new BigDecimal("-1"));
+                        }
                         amountExemption = amountExemption.add(amount);
-                    }else if(amount.compareTo(zero)==1){
+                    }else if(amount.compareTo(zero)==1 || exemptionItemDTO.getIsPlus().byteValue() == ExemptionPlus.PLUS.getCode()){
                         amountSupplement = amountSupplement.add(amount);
                     }
                 }
@@ -1143,6 +1147,11 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
 
+            if(isOwed == null){
+                newBill.setChargeStatus((byte)0);
+            }else{
+                newBill.setChargeStatus(isOwed);
+            }
             newBill.setSwitch(isSettled);
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
@@ -3911,14 +3920,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public PaymentChargingItem getBillItemByName(Long billGroupId, String projectLevelName) {
+    public PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName) {
         DSLContext context = getReadOnlyContext();
         List<Long> chargingItemIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
         List<Long> chosenId = context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME.eq(projectLevelName))
                 .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.in(chargingItemIds))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
                 .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID);
         if(chosenId.size() != 1){
             return null;

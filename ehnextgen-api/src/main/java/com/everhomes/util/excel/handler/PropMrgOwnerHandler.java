@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ public class PropMrgOwnerHandler
 	 
 	 private static final String[] PRELOAD_CLASSES = new String[]{"org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorkbook"};
 	
-	public static ArrayList processorExcel()
+	public static ArrayList processorExcel(File file)
 	{
 		ArrayList resultList = new ArrayList();
 		MySheetContentsHandler sheetContenthandler=new MySheetContentsHandler();

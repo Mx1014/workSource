@@ -78,6 +78,7 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -2928,7 +2929,7 @@ public class AssetServiceImpl implements AssetService {
         ArrayList finalResultList = resultList;
         task = importFileService.executeTask(() -> {
             ImportFileResponse importTaskResponse = new ImportFileResponse();
-            Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId());
+            Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch());
             List<CreateBillCommand> createBillCommands = new ArrayList<>();
             List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
             for(Map.Entry<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> entry : map.entrySet()){
@@ -2967,7 +2968,7 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
-    private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId) {
+    private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch) {
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
@@ -2975,7 +2976,7 @@ public class AssetServiceImpl implements AssetService {
         List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
         //假设了第一行为标题
         RowResult headerRow = (RowResult) resultList.get(1);
-        String[] headers = getOrderedCellValues(headerRow);
+        String[] headers = getOrderedCellValues(headerRow, null);
         //datas的第一行
         ImportFileResultLog<List<String>> headLog = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
         datas.add(headLog);
@@ -2997,16 +2998,16 @@ public class AssetServiceImpl implements AssetService {
         }
         bill:for (int i = 2; i < resultList.size(); i++) {
             RowResult currentRow = (RowResult) resultList.get(i);
-            String[] currentValue = getOrderedCellValues(currentRow);
+            String[] data = getOrderedCellValues(currentRow, headers.length);
             //放置log
             ImportFileResultLog<List<String>> log = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
-            log.setData(Arrays.asList(currentValue));
+            log.setData(Arrays.asList(data));
 
 
             CreateBillCommand cmd = new CreateBillCommand();
             BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
-            RowResult dataRow = (RowResult) resultList.get(i);
-            String[] data = getOrderedCellValues(dataRow);
+//            RowResult dataRow = (RowResult) resultList.get(i);
+//            String[] data = getOrderedCellValues(dataRow, headers.length);
             ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
             ExemptionItemDTO increaseItemDTO = new ExemptionItemDTO();
             //账期被依赖
@@ -3023,10 +3024,10 @@ public class AssetServiceImpl implements AssetService {
             String apartment = headers[apartmentIndex];
             //客户属性也是
             switch (data[targetTypeIndex]){
-                case "eh_organization":
+                case "企业客户":
                     cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
                     break;
-                case "eh_user":
+                case "个人客户":
                     cmd.setTargetType(AssetTargetType.USER.getCode());
                     break;
                 default:
@@ -3059,9 +3060,9 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }else if(headers[j].contains("客户手机号")){
                     if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
-                        Long uid = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]).getOwnerUid();
-                        if(uid!=null){
-                            cmd.setTargetId(uid);
+                        UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
+                        if(claimedIdentifierByToken!=null){
+                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
                     }
                 }
@@ -3084,11 +3085,11 @@ public class AssetServiceImpl implements AssetService {
                         datas.add(log);
                         continue bill;
                     }
-                    cmd.setNoticeTel(headers[j]);
+                    cmd.setNoticeTel(data[j]);
                 }
                 // 收费项目
                 else if(j >= itemStart && j <= itemEnd){
-                    PaymentChargingItem itemPojo = getBillItemByName(billGroupId, headers[j]);
+                    PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
                     if(itemPojo == null){
                         log.setErrorLog("charging Item not found");
                         log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
@@ -3105,7 +3106,11 @@ public class AssetServiceImpl implements AssetService {
                 }else if(headers[j].contains("减免金额")){
                     //减免项
                     try{
-                        exemptionItemDTO.setAmount(new BigDecimal(data[j]));
+                        if(!StringUtils.isEmpty(data[j])){
+                            exemptionItemDTO.setAmount(new BigDecimal(data[j]));
+                        }else{
+                            exemptionItemDTO.setAmount(new BigDecimal("0"));
+                        }
                     }catch(Exception e){
                         log.setErrorLog("exemption amount error");
                         log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
@@ -3118,7 +3123,11 @@ public class AssetServiceImpl implements AssetService {
                     exemptionItemDTO.setRemark(data[j]);
                 }else if(headers[j].contains("增收金额")){
                     try{
-                        increaseItemDTO.setAmount(new BigDecimal(data[j]));
+                        if(!StringUtils.isEmpty(data[j])){
+                            increaseItemDTO.setAmount(new BigDecimal(data[j]));
+                        }else{
+                            increaseItemDTO.setAmount(new BigDecimal("0"));
+                        }
                     }catch(Exception e){
                         log.setErrorLog("amption amount error");
                         log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
@@ -3127,10 +3136,12 @@ public class AssetServiceImpl implements AssetService {
                     }
                     increaseItemDTO.setIsPlus(ExemptionPlus.PLUS.getCode());
                     increaseItemDTO.setDateStr(dateStr);
+                }else if(headers[j].contains("增收备注")){
+                    increaseItemDTO.setRemark(data[j]);
                 }
-                exemptionItemDTOList.add(exemptionItemDTO);
-                exemptionItemDTOList.add(increaseItemDTO);
             }
+            exemptionItemDTOList.add(exemptionItemDTO);
+            exemptionItemDTOList.add(increaseItemDTO);
             billGroupDTO.setBillGroupId(billGroupId);
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
@@ -3138,32 +3149,265 @@ public class AssetServiceImpl implements AssetService {
             if(cmd.getTargetId() == null){
                 // 没有找到用户，也可以导入
             }
+            cmd.setOwnerType("community");
+            cmd.setOwnerId(ownerId);
+            cmd.setIsSettled(billSwitch);
             cmds.add(cmd);
         }
         map.put(cmds, datas);
         return map;
     }
 
-    private PaymentChargingItem getBillItemByName(Long billGroupId, String projectLevelName) {
-        return assetProvider.getBillItemByName(billGroupId, projectLevelName);
+    private String handlerChargingItemName(String value) {
+        return value.replace("*","")
+                .replace("(","")
+                .replace(")","")
+                .replace("元","");
     }
 
-    private String[] getOrderedCellValues(RowResult header) {
-        // 指定了初始容量的hashmap的遍历并不慢
-        HashMap<String,String> cellsMap = new HashMap<>(27);
-        Map<String, String> cells = header.getCells();
-        cellsMap.putAll(cells);
-        Iterator<Map.Entry<String, String>> iterator = cellsMap.entrySet().iterator();
-        // 迭代器删除
-        while(iterator.hasNext()){
-            Map.Entry<String, String> next = iterator.next();
-            if(org.apache.commons.lang.StringUtils.isEmpty(next.getValue())){
-                cellsMap.remove(next.getKey());
-            }
+    private PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName) {
+        return assetProvider.getBillItemByName(namespaceId,  ownerId,  ownerType, billGroupId, projectLevelName);
+    }
+
+    private String[] getOrderedCellValues(RowResult header, Integer limit) {
+//        // 指定了初始容量的hashmap的遍历并不慢
+//        HashMap<String,String> cellsMap = new HashMap<>(27);
+        int count = 1;
+        int init = header.getCells().size();
+        if(limit != null){
+            init = limit;
+        }else{
+            limit = init;
         }
-        TreeMap<String, String> treeMap = new TreeMap<>();
-        treeMap.putAll(cellsMap);
-        return treeMap.values().toArray(new String[treeMap.size()]);
+        String[] data = new String[init];
+
+        if(header.getA() == null && count <= limit){
+            header.setA("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getA();
+        count++;
+        if(header.getB() == null&& count <= limit){
+            header.setB("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getB();
+        count++;
+        if(header.getC() == null&& count <= limit){
+            header.setC("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getC();
+        count++;
+        if(header.getD() == null&& count <= limit){
+            header.setD("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getD();
+        count++;
+        if(header.getE() == null&& count <= limit){
+            header.setE("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getE();
+        count++;
+        if(header.getF() == null&& count <= limit){
+            header.setF("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getF();
+        count++;
+        if(header.getG() == null&& count <= limit){
+            header.setG("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getG();
+        count++;
+        if(header.getH() == null&& count <= limit){
+            header.setH("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getH();
+        count++;
+        if(header.getI() == null&& count <= limit){
+            header.setI("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getI();
+        count++;
+        if(header.getJ() == null&& count <= limit){
+            header.setJ("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getJ();
+        count++;
+
+        if(header.getK() == null&& count <= limit){
+            header.setK("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getK();
+        count++;
+
+        if(header.getL() == null&& count <= limit){
+            header.setL("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getL();
+        count++;
+
+        // M
+        if(header.getM() == null&& count <= limit){
+            header.setM("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getM();
+        count++;
+        if(header.getN() == null&& count <= limit){
+            header.setN("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getN();
+        count++;
+        if(header.getO() == null&& count <= limit){
+            header.setO("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getO();
+        count++;
+        if(header.getP() == null&& count <= limit){
+            header.setP("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getP();
+        count++;
+        if(header.getQ() == null&& count <= limit){
+            header.setQ("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getQ();
+        count++;
+        if(header.getR() == null&& count <= limit){
+            header.setR("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getR();
+        count++;
+        if(header.getS() == null&& count <= limit){
+            header.setS("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getS();
+        count++;
+        if(header.getT() == null&& count <= limit){
+            header.setT("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getT();
+        count++;
+        if(header.getU() == null&& count <= limit){
+            header.setU("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getU();
+        count++;
+        if(header.getV() == null&& count <= limit){
+            header.setV("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getV();
+        count++;
+        if(header.getW() == null&& count <= limit){
+            header.setW("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getW();
+        count++;
+        if(header.getX() == null&& count <= limit){
+            header.setX("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getX();
+        count++;
+        if(header.getY() == null&& count <= limit){
+            header.setY("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getY();
+        count++;
+        if(header.getZ() == null&& count <= limit){
+            header.setZ("");
+        }
+        if(count - 1 >= init){
+            return data;
+        }
+        data[count-1] = header.getZ();
+//        count++;
+        return data;
+//         此方法不能支持index
+////        Map<String, String> cells = header.getCells();
+//        cellsMap.putAll(cells);
+////        Iterator<Map.Entry<String, String>> iterator = cellsMap.entrySet().iterator();
+////        // 迭代器删除
+////        while(iterator.hasNext()){
+////            Map.Entry<String, String> next = iterator.next();
+////            if(org.apache.commons.lang.StringUtils.isEmpty(next.getValue())){
+////                cellsMap.remove(next.getKey());
+////            }
+////        }
+//        TreeMap<String, String> treeMap = new TreeMap<>();
+//        treeMap.putAll(cellsMap);
+//        return treeMap.values().toArray(new String[treeMap.size()]);
     }
 
     @Override
