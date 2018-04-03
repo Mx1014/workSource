@@ -2547,14 +2547,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             newNotify.setNotifyTime(cmd.getRemindTime());
             newNotify.setMailFlag(cmd.getMailFlag());
             newNotify.setMessageFlag(cmd.getMessageFlag());
-            newNotify.setNotificationTargets(getNotificationTarget(cmd).toString());
+            newNotify.setNotifyTarget(getNotificationTarget(cmd).toString());
             archivesProvider.createArchivesNotifications(newNotify);
         } else {
             originNotify.setNotifyDay(cmd.getRemindDay());
             originNotify.setNotifyTime(cmd.getRemindTime());
             originNotify.setMailFlag(cmd.getMailFlag());
             originNotify.setMessageFlag(cmd.getMessageFlag());
-            originNotify.setNotificationTargets(getNotificationTarget(cmd).toString());
+            originNotify.setNotifyTarget(getNotificationTarget(cmd).toString());
             archivesProvider.updateArchivesNotifications(originNotify);
         }
     }
