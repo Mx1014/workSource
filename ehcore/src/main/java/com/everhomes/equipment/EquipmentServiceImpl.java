@@ -6078,7 +6078,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
-		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
 		if (tasksMap != null) {
 			for (EquipmentInspectionTasks task : tasksMap.values()) {
 				//EquipmentInspectionTasks task = verifyEquipmentTask(taskId, null, null);
@@ -6116,6 +6115,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						}
 					}
 				});
+				OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
 				reportLog.setSucessIds(task.getId());
 				reportLogs.add(reportLog);
 			}
