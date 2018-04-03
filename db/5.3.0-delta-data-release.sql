@@ -1750,3 +1750,10 @@ update eh_service_modules t1 set path = concat('/100000/24000',"/",t1.id) where 
 
 -- 公司门禁改dataType add by yanjun 201804021557
 UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门禁' and id in (16041400, 48140000, 72140000);
+
+-- 更新企业管理应用的ActionData和ActionType  add by yanjun 201804030945  已经在现网执行
+UPDATE eh_service_module_apps set action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
+UPDATE eh_reflection_service_module_apps SET action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
+
+-- 开放普通公司文件管理菜单  add by yanjun 201804030945  已经在现网执行
+UPDATE eh_web_menus set `status` = 2, module_id = 41500 where type = 'organization' and id  = 74030000 ;
