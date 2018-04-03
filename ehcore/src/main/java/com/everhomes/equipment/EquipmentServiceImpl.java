@@ -43,8 +43,6 @@ import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
@@ -223,7 +221,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -3516,9 +3513,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public ListEquipmentTasksResponse listEquipmentTasks(ListEquipmentTasksCommand cmd) {
 
+		//delay  tasks can remove with offline  version
 		if (cmd.getTaskStatus() != null && cmd.getTaskStatus().size() == 1
 				&& EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(cmd.getTaskStatus().get(0)))) {
 			return listDelayTasks(cmd);
+		}
+
+		if (cmd.getTaskStatus() != null && cmd.getTaskStatus().size() == 1 && EquipmentTaskStatus.PERSONAL_DONE.equals(EquipmentTaskStatus.fromStatus(cmd.getTaskStatus().get(0)))) {
+			return listPersonalDoneTasks(cmd);
 		}
 		Timestamp lastSyncTime = null;
 		if (cmd.getLastSyncTime() != null) {
@@ -3566,6 +3568,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		return response;
 
+	}
+
+	private ListEquipmentTasksResponse listPersonalDoneTasks(ListEquipmentTasksCommand cmd) {
+
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
+		if (null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -6);
+		Integer offset = cmd.getPageAnchor().intValue();
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listPersonalDoneTasks(cmd.getTargetId(), cmd.getInspectionCategoryId(), pageSize + 1, offset, startTime);
+		if (tasks != null && tasks.size() > pageSize) {
+			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		} else {
+			response.setNextPageAnchor(null);
+
+		}
+		return response;
 	}
 
 	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
@@ -4693,14 +4714,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			DocUtil docUtil=new DocUtil();
 			Map<String, Object> dataMap = createTwoEquipmentCardDoc(dto1, dto2);
 
-			GetAppInfoCommand command = new GetAppInfoCommand();
-			command.setNamespaceId(dto1.getNamespaceId());
-			command.setOsType(OSType.Android.getCode());
-			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
-			if (appUrlDTO.getLogoUrl() != null) {
-				dataMap.put("shenyeLogo1", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
-				dataMap.put("shenyeLogo2", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
-			}
+//			GetAppInfoCommand command = new GetAppInfoCommand();
+//			command.setNamespaceId(dto1.getNamespaceId());
+//			command.setOsType(OSType.Android.getCode());
+//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+//			if (appUrlDTO.getLogoUrl() != null) {
+//				dataMap.put("shenyeLogo1", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+//				dataMap.put("shenyeLogo2", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+//			}
 
 			if (QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto1.getQrCodeToken().getBytes()));

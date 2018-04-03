@@ -2257,6 +2257,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//本订单状态置为成功,
 //			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 			order.setStatus(status);
+			if (order.getStatus() == SiteBillStatus.SUCCESS.getCode() )
+				order.setPaidMoney(order.getPayTotalMoney());
 			rentalv2Provider.updateRentalBill(order);
 			return null;
 		});
@@ -8162,7 +8164,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
-		return amount;
+		if (rule.getNeedPay() == NormalFlag.NEED.getCode())
+			return amount;
+		else
+			return new BigDecimal(0);
 	}
 
 	@Override
@@ -8184,7 +8189,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
 			LOGGER.error("Order not in using");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order not in using");
+					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"结束失败，订单不在使用中");
 		}
 
 		VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
@@ -8192,7 +8197,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
 			LOGGER.error("Parking lock not raise");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"Parking lock not raise");
+					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"结束失败，请先升起车锁");
 		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
