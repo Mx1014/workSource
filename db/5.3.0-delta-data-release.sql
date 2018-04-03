@@ -1755,5 +1755,5 @@ UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门�
 UPDATE eh_service_module_apps set action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
 UPDATE eh_reflection_service_module_apps SET action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
 
--- 开放普通公司文件管理菜单  add by yanjun 201804030945  已经在现网执行
-UPDATE eh_web_menus set `status` = 2, module_id = 41500 where type = 'organization' and id  = 74030000 ;
+-- 开放普通公司文件管理菜单  add by yanjun 201804030945  已经在现网、清华执行
+UPDATE eh_web_menus set `name` = '文件管理', data_type = 'file-management', `status` = 2, module_id = 41500 where type = 'organization' and id  = 74030000 ;
