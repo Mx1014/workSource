@@ -255,4 +255,5 @@ public interface EquipmentProvider {
 
     void updateEquipmentTaskByPlanId(Long planId);
 
+    List<EquipmentInspectionTasks> listPersonalDoneTasks(Long targetId, Long inspectionCategoryId, int pageSize, Integer offset, Timestamp startTime);
 }
