@@ -1788,3 +1788,11 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '8', 'zh_CN', '人事身份证到期提醒', '身份证到期：${contactNames}\r\n', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '9', 'zh_CN', '人事周年提醒', '${contactName} 在${companyName}工作满 ${count} 年\r\n', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '10', 'zh_CN', '人事生日提醒', '${contactName} ${count} 岁生日\r\n', '0');
+
+ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
+ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
+ALTER TABLE `eh_archives_notifications` ADD COLUMN `email_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
+ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `email_targets`;
+ALTER TABLE `eh_archives_notifications` ADD COLUMN `notification_targets` TEXT COMMENT 'the target email address' AFTER `message_flag`;
+
+

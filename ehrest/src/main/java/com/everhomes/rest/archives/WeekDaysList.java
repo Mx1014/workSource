@@ -2,13 +2,13 @@ package com.everhomes.rest.archives;
 
 /**
  * <ul>
- * <li>SUNDAY(1): 星期日</li>
- * <li>MONDAY(2): 星期一</li>
- * <li>TUESDAY(3): 星期二</li>
- * <li>WEDNESDAY(4): 星期三</li>
- * <li>THURSDAY(5): 星期四</li>
- * <li>FRIDAY(6): 星期五</li>
- * <li>SATURDAY(7): 星期六</li>
+ * <li>MONDAY(1): 星期一</li>
+ * <li>TUESDAY(2): 星期二</li>
+ * <li>WEDNESDAY(3): 星期三</li>
+ * <li>THURSDAY(4): 星期四</li>
+ * <li>FRIDAY(5): 星期五</li>
+ * <li>SATURDAY(6): 星期六</li>
+ * <li>SUNDAY(7): 星期日</li>
  * </ul>
  */
 public enum WeekDaysList {
