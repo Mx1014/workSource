@@ -5895,24 +5895,30 @@ public class UserServiceImpl implements UserService {
 
 	private void createUsersAndUserIdentifiers(List<User> users){
 		for (User user : users) {
-//			this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
-			User old_user = this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(),NamespaceUserType.ANBANG.getCode());
-			// create userIdentifier
-			UserIdentifier userIdentifier = new UserIdentifier();
-			userIdentifier.setOwnerUid(user.getId());
-			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-			userIdentifier.setIdentifierToken(user.getIdentifierToken());
-			userIdentifier.setNamespaceId(user.getNamespaceId());
-			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-			userIdentifier.setRegionCode(86);
+			UserIdentifier old_userIdentifier = this.userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), user.getIdentifierToken());
 
-			if(old_user != null && old_user.getId() != null){
-				user.setId(old_user.getId());
-				this.userProvider.updateUser(user);
-				this.userProvider.updateIdentifierByUid(userIdentifier);
+			if(old_userIdentifier != null){
+				User old_user = this.userProvider.findUserById(old_userIdentifier.getOwnerUid());
+				if(old_user != null){
+					old_user.setUpdateTime(user.getUpdateTime());
+					old_user.setNamespaceUserToken(user.getNamespaceUserToken());
+					old_user.setNamespaceUserType(user.getNamespaceUserType());
+					this.userProvider.updateUser(old_user);
+				}
+				old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				old_userIdentifier.setRegionCode(86);
+				old_userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				this.userProvider.updateIdentifierByUid(old_userIdentifier);
 			}else{
 				this.userProvider.createUser(user);
+				UserIdentifier userIdentifier = new UserIdentifier();
 				userIdentifier.setOwnerUid(user.getId());
+				userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				userIdentifier.setIdentifierToken(user.getIdentifierToken());
+				userIdentifier.setNamespaceId(user.getNamespaceId());
+				userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userIdentifier.setRegionCode(86);
 				userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				this.userProvider.createIdentifier(userIdentifier);
