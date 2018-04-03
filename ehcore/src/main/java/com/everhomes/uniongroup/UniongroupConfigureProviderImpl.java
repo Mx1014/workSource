@@ -835,8 +835,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
 
         List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("id")).orderBy(t1.field("id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
+        LOGGER.debug("listDetailNotInUniongroup 's real sql is :" + step);
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
-
         locator.setAnchor(null);
         if (details.size() >= pageSize) {
             details.remove(details.size() - 1);
