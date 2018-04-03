@@ -8883,6 +8883,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
                 managerDTO.setMemberId(member.getId());
                 managerDTO.setDetailId(member.getDetailId());
+                managerDTO.setContactName(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()).getContactName());
                 dtos.add(managerDTO);
             }
         }
