@@ -8065,20 +8065,33 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
 		}
 
-		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+		//RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 
-		processCells(rs, bill.getRentalType());
-
-		BigDecimal amount = updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount(), true);
-		BigDecimal totalAmount = bill.getPayTotalMoney().add(amount);//计算价格
-		bill.setResourceTotalMoney(totalAmount);
-		bill.setPayTotalMoney(totalAmount);
+		//processCells(rs, bill.getRentalType());
+		if (cmd.getAmount().compareTo(new BigDecimal(0))==1) {
+			GetRenewRentalOrderInfoCommand cmd2 = new GetRenewRentalOrderInfoCommand();
+			cmd2.setCellCount(cmd.getCellCount());
+			cmd2.setRentalBillId(cmd.getRentalBillId());
+			cmd2.setRentalType(cmd.getRentalType());
+			cmd2.setTimeStep(cmd.getTimeStep());
+			GetRenewRentalOrderInfoResponse response = getRenewRentalOrderInfo(cmd2);//校验一次金额
+			if (null != response.getAmount() && cmd.getAmount().compareTo(response.getAmount()) != 0) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid param amount");
+			}
+			BigDecimal totalAmount = bill.getPayTotalMoney().add(response.getAmount());//计算价格
+			//bill.setResourceTotalMoney(totalAmount);
+			bill.setPayTotalMoney(totalAmount);
+			bill.setRentalCount(cmd.getCellCount());
+		}else{
+			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+			processCells(rs, bill.getRentalType());
+			updateRentalOrder(rs,bill,new BigDecimal(0),cmd.getCellCount(),false);
+		}
 		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
-//		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
-//		convertRentalOrderDTO(dto, bill);
 
 		//发消息
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
@@ -8086,6 +8099,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		handler.renewRentalOrderSendMessage(bill);
 
 		return bill;
+	}
+
+	@Override
+	public void renewOrderSuccess(RentalOrder rentalBill, Double rentalCount) {
+		RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
+		processCells(rs, rentalBill.getRentalType());
+		updateRentalOrder(rs, rentalBill, null, rentalCount, false);
+		rentalBill.setResourceTotalMoney(rentalBill.getPayTotalMoney());
 	}
 
 	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
@@ -8202,6 +8223,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+		restoreRentalBill(order);
 
 		if (now > order.getEndTime().getTime()) {
 			processCells(rs, order.getRentalType());
@@ -8307,6 +8329,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		}
 //	}
 
+	//停车缴费续费但没支付的订单 恢复原样
+	private void restoreRentalBill(RentalOrder order){
+		order.setPayTotalMoney(order.getResourceTotalMoney());
+		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
+		order.setRentalCount(resourceOrders.size()+0.0);
+	}
 	@Override
 	public GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd) {
 
