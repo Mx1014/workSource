@@ -135,7 +135,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         JSONObject params = new JSONObject();
         params.put("AccountCode",ACCOUNT_CODE);
         params.put("pageOprator",req.getParameter("pageOprator"));
-        params.put("currenpage",Integer.parseInt(req.getParameter("currenpage")));
+        params.put("currenpage",req.getParameter("currenpage"));
         params.put("clientid",getClientId());
         String json = postToZhuzong(params,QUERY_TASKS);
         ZhuzongTasks tasks = JSONObject.parseObject(json,ZhuzongTasks.class);
