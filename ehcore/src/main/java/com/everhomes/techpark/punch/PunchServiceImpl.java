@@ -55,10 +55,7 @@ import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -1630,6 +1627,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
 
+        checkCompanyIdIsNull(cmd.getEnterpriseId());
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
         String punchTime = datetimeSF.get().format(new Date());
         return createPunchLog(cmd, punchTime);
@@ -1639,13 +1637,15 @@ public class PunchServiceImpl implements PunchService {
     private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime) {
         //
         byte punchCode;
+        PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
+
         try {
-            punchCode = verifyPunchClock(cmd).getCode();
-            return createPunchLog(cmd, punchTime, punchCode);
+            punchCode = verifyPunchClock(cmd,punchLog).getCode();
+            return createPunchLog(cmd, punchTime, punchCode,punchLog);
         } catch (Exception e) {
             //有报错就表示不成功
             LOGGER.error("punch clock error", e);
-            PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
+//            PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
             punchLog.setPunchStatus(ClockCode.FAIL.getCode());
             punchProvider.createPunchLog(punchLog);
             throw e;
@@ -1653,10 +1653,8 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime,
-                                              byte punchCode) {
+                                              byte punchCode,PunchLog punchLog) {
 
-        checkCompanyIdIsNull(cmd.getEnterpriseId());
-        cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 //		if (cmd.getLatitude() == null || cmd.getLatitude().equals(0))
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 //					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1668,7 +1666,7 @@ public class PunchServiceImpl implements PunchService {
         PunchClockResponse response = new PunchClockResponse();
         Long userId = UserContext.current().getUser().getId();
         // new Date()为获取当前系统时间为打卡时间
-        PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
+//        PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
         punchLog.setUserId(userId);
         punchLog.setPunchTime(Timestamp.valueOf(punchTime));
         Calendar punCalendar = Calendar.getInstance();
@@ -1802,7 +1800,7 @@ public class PunchServiceImpl implements PunchService {
                 .getTime()));
     }
 
-    private ClockCode verifyPunchClock(PunchClockCommand cmd) {
+    private ClockCode verifyPunchClock(PunchClockCommand cmd, PunchLog punchLog) {
         //获取打卡规则
 //		ClockCode code = ClockCode.SUCESS;
         Long userId = UserContext.current().getUser().getId();
@@ -1817,8 +1815,10 @@ public class PunchServiceImpl implements PunchService {
         List<PunchWifi> wifis = punchProvider.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId());
         if (null != wifis && null != cmd.getWifiMac()) {
             for (PunchWifi wifi : wifis) {
-                if (null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
+                if (null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase())) {
+                    punchLog.setWifiInfo(wifi.getSsid()+" "+wifi.getMacAddress());
                     return ClockCode.SUCESS;
+                }
             }
 
         }
@@ -1842,6 +1842,7 @@ public class PunchServiceImpl implements PunchService {
             if (calculateDistance(cmd.getLongitude(), cmd.getLatitude(),
                     punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
                     .getDistance()) {
+                punchLog.setLocationInfo(punchGeopoint.getDescription());
                 // 如果找到了一个就跳出
                 return ClockCode.SUCESS;
             }
@@ -3171,31 +3172,41 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 
-    private void createPunchStatisticsBookSheetHead(Sheet sheet, List<PunchCountDTO> results) {
+    private void createPunchStatisticsBookSheetHead(Sheet sheet, ListPunchCountCommandResponse resp) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
 
-        row.createCell(++i).setCellValue("时间");
+//        row.createCell(++i).setCellValue("时间");
         row.createCell(++i).setCellValue("姓名");
         row.createCell(++i).setCellValue("部门");
-        row.createCell(++i).setCellValue("所属规则");
-        row.createCell(++i).setCellValue("应打卡天数");
-        row.createCell(++i).setCellValue("正常天数");
-        row.createCell(++i).setCellValue("异常天数");
-        row.createCell(++i).setCellValue("异常申请次数");
-        row.createCell(++i).setCellValue("缺勤小时数");
-        row.createCell(++i).setCellValue("迟到次数");
-        row.createCell(++i).setCellValue("早退次数");
-        row.createCell(++i).setCellValue("迟到且早退次数");
-        row.createCell(++i).setCellValue("加班时长");
-        row.createCell(++i).setCellValue("请假总时长");
-        if (null != results && results.size() > 0) {
-            if (null != results.get(0).getExts()) {
-                for (ExtDTO ext : results.get(0).getExts()) {
-                    row.createCell(++i).setCellValue(ext.getName());
-
+//        row.createCell(++i).setCellValue("所属规则");
+        row.createCell(++i).setCellValue("应出勤天数");
+        row.createCell(++i).setCellValue("实出勤天数");
+        row.createCell(++i).setCellValue("年假余额");
+        row.createCell(++i).setCellValue("调休余额");
+        if (null != resp) {
+            if (null != resp.getExtColumns()) {
+                for (String ext : resp.getExtColumns()) {
+                    row.createCell(++i).setCellValue(ext);
                 }
             }
+        }
+        row.createCell(++i).setCellValue("设备异常次数");
+        row.createCell(++i).setCellValue("异常申请次数");
+//        row.createCell(++i).setCellValue("缺勤小时数");
+        row.createCell(++i).setCellValue("迟到次数");
+        row.createCell(++i).setCellValue("迟到时长");
+        row.createCell(++i).setCellValue("早退次数");
+        row.createCell(++i).setCellValue("早退时长");
+        row.createCell(++i).setCellValue("迟到且早退次数");
+        row.createCell(++i).setCellValue("下班缺卡次数");
+        if (null != resp) {
+            if (null != resp.getDateList()) {
+                for (String ext : resp.getDateList()) {
+                    row.createCell(++i).setCellValue(ext);
+                }
+            }
+
         }
 //		row.createCell(++i).setCellValue("事假天数");
 //		row.createCell(++i).setCellValue("病假天数");
@@ -3205,58 +3216,84 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
-    public void setNewPunchStatisticsBookRow(Sheet sheet, PunchCountDTO statistic) {
+    public void setNewPunchStatisticsBookRow(Sheet sheet, PunchCountDTO statistic, List<String> dateList, XSSFWorkbook wb) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(statistic.getPunchMonth());
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
-        row.createCell(++i).setCellValue(statistic.getPunchOrgName());
         row.createCell(++i).setCellValue(statistic.getWorkDayCount());
         row.createCell(++i).setCellValue(statistic.getWorkCount());
-        row.createCell(++i).setCellValue(statistic.getExceptionDayCount());
-        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
-        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
-        row.createCell(++i).setCellValue(statistic.getBelateCount());
-        row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
-        row.createCell(++i).setCellValue(statistic.getBlandleCount());
-        row.createCell(++i).setCellValue(statistic.getOverTimeSum() == null ? "" : statistic.getOverTimeSum() + "");
-        int cellNum = ++i;
-        BigDecimal cellValue = new BigDecimal("0");
+        row.createCell(++i).setCellValue(statistic.getAnnualLeaveBalance());
+        row.createCell(++i).setCellValue(statistic.getOvertimeCompensationBalance());
         if (null != statistic.getExts()) {
             for (ExtDTO ext : statistic.getExts()) {
                 row.createCell(++i).setCellValue(ext.getTimeCount());
-                BigDecimal extCount = new BigDecimal(ext.getTimeCount() == null ? "0" : ext.getTimeCount());
-                cellValue = cellValue.add(extCount);
+//                BigDecimal extCount = new BigDecimal(ext.getTimeCount() == null ? "0" : ext.getTimeCount());
+//                cellValue = cellValue.add(extCount);
 
             }
         }
-        row.createCell(cellNum).setCellValue(cellValue.toString());
-//		row.createCell(++i).setCellValue(statistic.getAbsenceCount());
-//		row.createCell(++i).setCellValue(statistic.getSickCount());
-//		row.createCell(++i).setCellValue(statistic.getExchangeCount());
-//		row.createCell(++i).setCellValue(statistic.getOutworkCount());
-//		if(statistic.getOverTimeSum()==null || statistic.getOverTimeSum().equals(0L)){
-//			row.createCell(++i).setCellValue(0);
-//		}
-//		else{
-//			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
-//			row.createCell(++i).setCellValue(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
-//		}
+        row.createCell(++i).setCellValue(statistic.getDeviceChangeCounts());
+        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
+//        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
+        row.createCell(++i).setCellValue(statistic.getBelateCount());
+        row.createCell(++i).setCellValue(statistic.getBelateTime());
+        row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
+        row.createCell(++i).setCellValue(statistic.getLeaveEarlyTime());
+        row.createCell(++i).setCellValue(statistic.getBlandleCount());
+        row.createCell(++i).setCellValue(statistic.getForgotCount());
+        Map<String, String> statusMap = new HashMap<>();
+        if (statistic.getStatusList() != null) {
+            for (DayStatusDTO dto : statistic.getStatusList()) {
+                statusMap.put(dto.getDate(), dto.getStatus());
+            }
+        }
+        if (null != dateList) {
+            for (String date : dateList) {
+                String value = statusMap.get("date");
+                if (null == value) {
+                    value = "";
+                }
+                Cell cell = row.createCell(++i);
+                cell.setCellValue(value);
+                XSSFCellStyle cellStyle = wb.createCellStyle();
+                if ("正常".equals(value) || "休息".equals(value) || "非工作日".equals(value)) {
+                    //不处理
+                } else if ("缺勤".equals(value)) {
+                    cellStyle.setFillBackgroundColor(IndexedColors.DARK_RED.getIndex());
+                } else {
+                    cellStyle.setFillBackgroundColor(IndexedColors.DARK_YELLOW.getIndex());
+                }
+                cell.setCellStyle(cellStyle);
+            }
+        }
 
     }
 
-    public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd, Long taskId) {
+    public Workbook createPunchStatisticsBook(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId) {
 
+        Map<Long, PunchCountDTO> userDeptMap = new HashMap<>();
         XSSFWorkbook wb = new XSSFWorkbook();
-        int columnNo = 13;
+        createPunchStatisticsSheet(resp, cmd, taskId, wb, userDeptMap);
 
-        if (null != results && results.size() > 0) {
-            if (null != results.get(0).getExts()) {
-                columnNo += results.get(0).getExts().size();
-            }
-        }
-        XSSFSheet sheet = wb.createSheet("punchStatistics");
+        ListPunchDetailsCommand cmd1 = new ListPunchDetailsCommand();
+        cmd1.setPageSize(Integer.MAX_VALUE - 1);
+        cmd1.setStartDay(cmd.getStartDay());
+        cmd1.setEndDay(cmd.getEndDay());
+        cmd1.setOwnerId(cmd.getOwnerId());
+        cmd1.setOwnerType(cmd.getOwnerType());
+        ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
+        taskService.updateTaskProcess(taskId, 50);
+        createPunchDetailsBookSheet(resp1.getPunchDayDetails(), cmd1, taskId, wb);
+        List<PunchLog> logs = punchProvider.listPunchLogs(cmd.getOwnerId(), cmd.getStartDay(), cmd.getEndDay());
+        createPunchLogsSheet(logs,cmd, taskId, wb, userDeptMap);
+        return wb;
+    }
+
+    private void createPunchLogsSheet(List<PunchLog> logs, ListPunchCountCommand cmd, Long taskId, XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
+        int columnNo = 7;
+
+        XSSFSheet sheet = wb.createSheet("打卡记录");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnNo));
         XSSFCellStyle style = wb.createCellStyle();
         Font font = wb.createFont();
@@ -3283,121 +3320,163 @@ public class PunchServiceImpl implements PunchService {
         font1.setFontName("Courier New");
 
         style1.setFont(font1);
-
         XSSFCellStyle titleStyle1 = wb.createCellStyle();
 
         XSSFRow rowReminder = sheet.createRow(1);
         rowReminder.createCell(0).setCellValue("统计时间:" + dateSF.get().format(new Date(cmd.getStartDay())) + " ~ "
-                + dateSF.get().format(new Date(cmd.getEndDay())));
+                + dateSF.get().format(new Date(cmd.getEndDay()))+", 报表生成时间: "+datetimeSF.get().format(DateHelper.currentGMTTime()));
         rowReminder.setRowStyle(titleStyle1);
-        this.createPunchStatisticsBookSheetHead(sheet, results);
+        createPunchLogsBookSheetHead(sheet);
+
+        if (null == logs || logs.size() == 0)
+            return;
+        Map<Long,String> ruleMap = new HashMap<>();
+        for (PunchLog log : logs) {
+            setNewPunchLogsBookRow(sheet, log, userDeptMap, ruleMap);
+        }
+
+    }
+
+    private void setNewPunchLogsBookRow(XSSFSheet sheet, PunchLog log, Map<Long, PunchCountDTO> userDeptMap, Map<Long, String> ruleMap) {
+
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+
+        row.createCell(++i).setCellValue(dateSF.get().format(log.getPunchDate()));
+        PunchCountDTO dto = userDeptMap.get(log.getUserId());
+        if (null != dto) {
+            row.createCell(++i).setCellValue(dto.getUserName());
+            row.createCell(++i).setCellValue(dto.getDeptName());
+            row.createCell(++i).setCellValue(dto.getDeptName());
+        } else {
+            row.createCell(++i).setCellValue(log.getUserId());
+            row.createCell(++i).setCellValue("");
+            row.createCell(++i).setCellValue("");
+        }
+        row.createCell(++i).setCellValue(NormalFlag.NO == NormalFlag.fromCode(log.getPunchType()) ? "上班打卡" : "下班打卡");
+        row.createCell(++i).setCellValue(timeSF.get().format(log.getPunchTime()));
+        if (null != log.getLocationInfo()) {
+            row.createCell(++i).setCellValue("位置 :" + log.getLocationInfo());
+        }else{
+            row.createCell(++i).setCellValue("WiFi :" + log.getWifiInfo());
+        }
+        if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(log.getStatus())) {
+            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()) + getLeaveEarlyString(log));
+        }else if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(log.getStatus())) {
+            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()) + getBelateString(log));
+        }else{
+            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()));
+        }
+
+    }
+
+    private String getLeaveEarlyString(PunchLog log) {
+        Long time = processLeaveEarlyTime(log);
+        return processTimeLongToString(time);
+    }
+    private String getBelateString(PunchLog log) {
+        Long time = processBelateTime(log);
+        return processTimeLongToString(time);
+    }
+
+    private String processTimeLongToString(Long time) {
+        StringBuilder sb = new StringBuilder();
+
+        time = time/1000;
+        int hour = Integer.valueOf((time / 3600) + "");
+        if (hour > 0) {
+            sb.append(hour);
+            sb.append("小时");
+        }
+        time = time % 60;
+        int min = Integer.valueOf((time / 60) + "");
+        if (min > 0) {
+            sb.append(min);
+            sb.append("分");
+        }
+        if (sb.length() < 1) {
+            time = time % 60;
+            sb.append(time);
+            sb.append("秒");
+        }
+        return sb.toString();
+    }
+
+    private void createPunchLogsBookSheetHead(XSSFSheet sheet) {
+
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue("日期");
+        row.createCell(++i).setCellValue("姓名");
+        row.createCell(++i).setCellValue("部门");
+        row.createCell(++i).setCellValue("所属规则");
+        row.createCell(++i).setCellValue("打卡类型");
+        row.createCell(++i).setCellValue("打卡时间");
+        row.createCell(++i).setCellValue("打卡地点");
+        row.createCell(++i).setCellValue("状态");
+    }
+
+    private void createPunchStatisticsSheet(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId,
+                                            XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
+        int columnNo = 13;
+
+        List<PunchCountDTO> results = resp.getPunchCountList();
+        if (null != resp) {
+            if (null != resp.getExtColumns()) {
+                columnNo += resp.getExtColumns().size();
+            }
+            if (null != resp.getDateList()) {
+                columnNo += resp.getDateList().size();
+            }
+
+        }
+        XSSFSheet sheet = wb.createSheet("月度汇总");
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnNo));
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        //  创建标题
+        XSSFRow rowTitle = sheet.createRow(0);
+        rowTitle.createCell(0).setCellValue("月度汇总");
+        rowTitle.setRowStyle(titleStyle);
+        //副标题
+
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, columnNo));
+        XSSFCellStyle style1 = wb.createCellStyle();
+        Font font1 = wb.createFont();
+
+        font1.setFontHeightInPoints((short) 20);
+        font1.setFontName("Courier New");
+
+        style1.setFont(font1);
+        XSSFCellStyle titleStyle1 = wb.createCellStyle();
+
+        XSSFRow rowReminder = sheet.createRow(1);
+        rowReminder.createCell(0).setCellValue("统计时间:" + dateSF.get().format(new Date(cmd.getStartDay())) + " ~ "
+                + dateSF.get().format(new Date(cmd.getEndDay()))+", 报表生成时间: "+datetimeSF.get().format(DateHelper.currentGMTTime()));
+        rowReminder.setRowStyle(titleStyle1);
+        this.createPunchStatisticsBookSheetHead(sheet, resp);
         taskService.updateTaskProcess(taskId, 55);
         Integer num = 0;
 
         if (null == results || results.size() == 0)
-            return wb;
+            return;
         for (PunchCountDTO statistic : results) {
-//<<<<<<< HEAD
-//			this.setNewPunchStatisticsBookRow(sheet, statistic);
-//=======
-            this.setNewPunchStatisticsBookRow(sheet, statistic);
-//>>>>>>> opv2-2.0
+            userDeptMap.put(statistic.getUserId(), statistic);
+            this.setNewPunchStatisticsBookRow(sheet, statistic, resp.getDateList(), wb);
             taskService.updateTaskProcess(taskId, 55 + (int) (++num / (Double.valueOf(results.size()) / 45.00)));
         }
-        return wb;
-//		try {
-//
-//			FileOutputStream out = new FileOutputStream(path);
-//			wb.write(out);
-//			wb.close();
-//			out.close();
-//		} catch (Exception e) {
-//			LOGGER.error(e.getMessage());
-//			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-//					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-//					e.getLocalizedMessage());
-//		}
     }
 
-    //	@Override
-//	public HttpServletResponse exportPunchStatistics(
-//			ListPunchDetailsCommand cmd ,HttpServletResponse response
-//			) {
-//		return null;
-//		checkCompanyIdIsNull(cmd.getOwnerId());
-//
-//		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getEnterpriseId());
-//
-//		List<Long> userIds = new ArrayList<Long>();
-//		for (OrganizationMember member : members) {
-//			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
-//				userIds.add(member.getTargetId());
-//			}
-//
-//		}
-//
-//
-//		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
-//				cmd.getOwnerId(), cmd.getStartDay(), cmd.getEndDay(),
-//				cmd.getExceptionStatus(), cmd.getArriveTimeCompareFlag(),
-//				cmd.getArriveTime(), cmd.getLeaveTimeCompareFlag(),
-//				cmd.getLeaveTime(), cmd.getWorkTimeCompareFlag(),
-//				cmd.getWorkTime(), null, Integer.MAX_VALUE);
-//		if (null == result || result.size() ==0 )
-//			return null;
-//
-//		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
-//		List<String> groupTypes = new ArrayList<String>();
-//		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-//		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", groupTypes);
-//		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
-//
-//		List<PunchStatisticsDTO> dtos = result
-//				.stream()
-//				.map(r -> {
-//					PunchStatisticsDTO dto = ConvertHelper.convert(r,
-//							PunchStatisticsDTO.class);
-//					processPunchStatisticsDTOTime(dto, r);
-//					if (dto != null) {
-//						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getOwnerId());
-//						if (null != member) {
-//
-//							dto.setUserName(member.getContactName());
-//							dto.setUserPhoneNumber(member.getContactToken());
-//							Organization department = deptMap.get(member.getGroupId());
-//							if(null != department){
-//								dto.setUserDepartment(department.getName());
-//							}
-//							PunchExceptionApproval approval = punchProvider
-//									.getExceptionApproval(dto.getUserId(),
-//											dto.getEnterpriseId(),
-//											new java.sql.Date(dto.getPunchDate()));
-//							if (approval != null) {
-//								dto.setApprovalStatus(approval
-//										.getApprovalStatus());
-//								dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
-//								dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-//								OrganizationMember operaor = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
-//								dto.setOperatorName(operaor.getContactName());
-//							} else {
-//								dto.setApprovalStatus((byte) 0);
-//							}
-//						}
-//					}
-//					return dto;
-//				}).collect(Collectors.toList());
-//
-//		URL rootPath = PunchServiceImpl.class.getResource("/");
-//		String filePath =rootPath.getPath() + this.downloadDir ;
-//		File file = new File(filePath);
-//		if(!file.exists())
-//			file.mkdirs();
-//		filePath = filePath + "PunchStatistics"+System.currentTimeMillis()+".xlsx";
-//		//新建了一个文件
-//		this.createPunchStatisticsBook(filePath, dtos);
-//
-//		return download(filePath,response);
-//	}
+
     public HttpServletResponse download(Workbook workbook, String fileName, HttpServletResponse response) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -4648,7 +4727,7 @@ public class PunchServiceImpl implements PunchService {
         for (PunchStatistic statistic : results) {
             PunchCountDTO dto = ConvertHelper.convert(statistic, PunchCountDTO.class);
             if (null != statistic.getStatusList()) {
-                dto.setStatusList(JSON.parseArray(statistic.getStatusList(),DayStatusDTO.class));
+                dto.setStatusList(JSON.parseArray(statistic.getStatusList(), DayStatusDTO.class));
             }
             if (dto.getExceptionDayCount() == null) {
                 dto.setExceptionDayCount((int) ((dto.getWorkDayCount() == null ? 0 : dto.getWorkDayCount())
@@ -4669,6 +4748,12 @@ public class PunchServiceImpl implements PunchService {
             if (null != dto.getUnpunchCount()) {
                 dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
             }
+            if (null != statistic.getBelateTime()) {
+                dto.setBelateTime(new BigDecimal(statistic.getBelateTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
+            }
+            if (null != statistic.getLeaveEarlyTime()) {
+                dto.setLeaveEarlyTime(new BigDecimal(statistic.getLeaveEarlyTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
+            }
             punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
 //				dto.setOverTimeSum(0.0);
@@ -4685,48 +4770,6 @@ public class PunchServiceImpl implements PunchService {
             if (null == dto.getOverTimeSum()) {
                 dto.setOverTimeSum(0.0);
             }
-//			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-//				@Override
-//				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-//						SelectQuery<? extends Record> query) {
-//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.PUNCH_MONTH.eq(cmd.getMonth()));
-//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.USER_ID.eq(statistic.getUserId()));
-//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_ID.eq(statistic.getOwnerId()));
-//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_TYPE.eq(statistic.getOwnerType()));
-//
-//					return null;
-//				}
-//			});
-//			dto.setExts(new ArrayList<ExtDTO>());
-//			if(null != categories){
-//				for(ApprovalCategory category : categories){
-//					ExtDTO extDTO = new ExtDTO();
-//					dto.getExts().add(extDTO);
-//					extDTO.setName(category.getCategoryName());
-//					if(null != abscentStats && abscentStats.size()>0){
-//						for(ApprovalRangeStatistic abstat : abscentStats){
-//							if(abstat.getCategoryId().equals(category.getId())){
-//								StringBuffer timeCountBuffer = new StringBuffer();
-//								String[] range = abstat.getActualResult().split("\\.");
-//								if(!range[0].equals("0")){
-//									timeCountBuffer.append(range[0]);
-//									timeCountBuffer.append("天");
-//								}
-//								if(!range[1].equals("0")){
-//									timeCountBuffer.append(range[1]);
-//									timeCountBuffer.append("小时");
-//								}
-//								if(!range[2].equals("0")){
-//									timeCountBuffer.append(range[2]);
-//									timeCountBuffer.append("分钟");
-//								}
-//								extDTO.setTimeCount(timeCountBuffer.toString());
-//								break;
-//							}
-//						}
-//					}
-//				}
-//			}
             List<ExtDTO> extDTOs = punchProvider.listAskForLeaveExtDTOs(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth());
             dto.setExts(extDTOs);
             absenceUserIdList.add(statistic.getUserId());
@@ -5009,7 +5052,13 @@ public class PunchServiceImpl implements PunchService {
     private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId) {
 
         XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = wb.createSheet("punchDetails");
+        createPunchDetailsBookSheet(dtos, cmd, taskId, wb);
+        return wb;
+    }
+
+    private void createPunchDetailsBookSheet(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId, XSSFWorkbook wb) {
+
+        XSSFSheet sheet = wb.createSheet("每日统计");
 
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
         XSSFCellStyle style = wb.createCellStyle();
@@ -5025,7 +5074,7 @@ public class PunchServiceImpl implements PunchService {
 
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(0);
-        rowTitle.createCell(0).setCellValue("按日统计");
+        rowTitle.createCell(0).setCellValue("每日统计");
         rowTitle.setRowStyle(titleStyle);
         //副标题
 
@@ -5042,19 +5091,18 @@ public class PunchServiceImpl implements PunchService {
 
         XSSFRow rowReminder = sheet.createRow(1);
         rowReminder.createCell(0).setCellValue("统计时间:" + dateSF.get().format(new Date(cmd.getStartDay())) + "~"
-                + dateSF.get().format(new Date(cmd.getEndDay())));
+                + dateSF.get().format(new Date(cmd.getEndDay()))+", 报表生成时间: "+datetimeSF.get().format(DateHelper.currentGMTTime()));
         rowReminder.setRowStyle(titleStyle1);
         taskService.updateTaskProcess(taskId, 55);
         this.createPunchDetailsBookSheetHead(sheet);
         int num = 0;
         if (null == dtos || dtos.size() == 0)
-            return wb;
+            return;
         for (PunchDayDetailDTO dto : dtos) {
             this.setNewPunchDetailsBookRow(sheet, dto);
 
             taskService.updateTaskProcess(taskId, 55 + (int) (++num / (Double.valueOf(dtos.size()) / 45.00)));
         }
-        return wb;
     }
 
     private String convertTimeLongToString(Long timeLong) {
@@ -5531,8 +5579,8 @@ public class PunchServiceImpl implements PunchService {
         taskService.updateTaskProcess(taskId, 2);
         ListPunchCountCommandResponse resp = listPunchCount(cmd);
 
-        taskService.updateTaskProcess(taskId, 50);
-        Workbook wb = createPunchStatisticsBook(resp.getPunchCountList(), cmd, taskId);
+        taskService.updateTaskProcess(taskId, 20);
+        Workbook wb = createPunchStatisticsBook(resp, cmd, taskId);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             wb.write(out);
@@ -6934,7 +6982,8 @@ public class PunchServiceImpl implements PunchService {
             PunchClockCommand cmd = new PunchClockCommand();
             cmd.setEnterpriseId(Long.valueOf(r.getA()));
             try {
-                createPunchLog(cmd, datetimeSF.get().format(new SimpleDateFormat("yyyy/MM/dd  HH:mm:ss").parse(r.getB())), ClockCode.SUCESS.getCode());
+                PunchLog pl = ConvertHelper.convert(cmd, PunchLog.class);
+                createPunchLog(cmd, datetimeSF.get().format(new SimpleDateFormat("yyyy/MM/dd  HH:mm:ss").parse(r.getB())), ClockCode.SUCESS.getCode(), pl);
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

@@ -352,4 +352,6 @@ public interface PunchProvider {
 	PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo);
 
 	void updatePunchLog(PunchLog onDutyLog);
+
+	List<PunchLog> listPunchLogs(Long ownerId, Long startDay, Long endDay);
 }
