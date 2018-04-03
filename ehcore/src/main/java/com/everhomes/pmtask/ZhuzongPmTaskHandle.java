@@ -99,8 +99,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
             json = postToZhuzong(params, CREATE_TASK);
         }else{
             JSONArray array = JSONArray.parseArray(imgs);
-            String[] urls =(String[])  array.toArray();
-            List<InputStream> ises = downloadImags(urls);
+            List<InputStream> ises = downloadImags(array);
             json = postToZhuzong(params,CREATE_TASK,ises);
         }
         ZhuzongCreateTask task = JSONObject.parseObject(json,ZhuzongCreateTask.class);
@@ -110,10 +109,11 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         return null;
     }
 
-    private List<InputStream> downloadImags(String[] urls){
+    private List<InputStream> downloadImags(JSONArray urls){
         List<InputStream> ises = new ArrayList<>();
-        if (urls!=null && urls.length>0){
-            for (String url:urls){
+        if (urls!=null && urls.size()>0){
+            for (Object obj:urls){
+                String url  = (String)obj;
                 try {
                     HttpGet httpGet = new HttpGet(url);
                     CloseableHttpResponse response = httpclient.execute(httpGet);
