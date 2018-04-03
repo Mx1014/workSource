@@ -2972,5 +2972,29 @@ long id = sequenceProvider.getNextSequence(key);
 				punchLog.getId());
 
 	}
+
+	@Override
+	public List<PunchLog> listPunchLogs(Long ownerId, Long startDay, Long endDay) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_LOGS);
+		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.greaterOrEqual(new Date(startDay));
+		Condition condition2 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.lessOrEqual(new Date(endDay));
+		Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId);
+		Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode());
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		condition = condition.and(condition4);
+		step.where(condition);
+		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchLog.class);
+				});
+		return result; 
+
+	}
 }
 
