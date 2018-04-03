@@ -89,4 +89,13 @@ public interface PmTaskService {
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
 
 	void syncTaskStatistics(HttpServletResponse resp);
+
+	String getThirdAddress(HttpServletRequest req);
+
+	String createThirdTask(HttpServletRequest req);
+
+	String listThirdTasks(HttpServletRequest req);
+
+	String getThirdTaskDetail(HttpServletRequest req);
+
 }

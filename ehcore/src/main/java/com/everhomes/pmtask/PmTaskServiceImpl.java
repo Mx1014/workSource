@@ -2320,6 +2320,38 @@ public class PmTaskServiceImpl implements PmTaskService {
 		});
 	}
 
+	@Override
+	public String getThirdAddress(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdAddress(req);
+	}
+
+	@Override
+	public String createThirdTask(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.createThirdTask(req);
+	}
+
+	@Override
+	public String listThirdTasks(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.listThirdTasks(req);
+	}
+
+	@Override
+	public String getThirdTaskDetail(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdTaskDetail(req);
+	}
+
 	public static String computeSignature(Map<String, String> params, String secretKey) {
 		assert (params != null);
 		assert (secretKey != null);

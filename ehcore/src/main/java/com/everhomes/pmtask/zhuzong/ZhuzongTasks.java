@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ZhuzongTasks {
     static final int SUCCESS_CODE = 0;
-    private List<ZhuzongTasksResult> Result;
+    private ZhuzongTasksResult Result;
     private Integer StateCode;
     public Boolean isSuccess() {
         if(StateCode == SUCCESS_CODE)
@@ -25,11 +25,11 @@ public class ZhuzongTasks {
         StateCode = stateCode;
     }
 
-    public List<ZhuzongTasksResult> getResult() {
+    public ZhuzongTasksResult getResult() {
         return Result;
     }
 
-    public void setResult(List<ZhuzongTasksResult> result) {
+    public void setResult(ZhuzongTasksResult result) {
         Result = result;
     }
 }

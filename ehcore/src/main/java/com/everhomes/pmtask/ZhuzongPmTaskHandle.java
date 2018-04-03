@@ -13,6 +13,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -69,7 +70,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         httpclient = HttpClients.createDefault();
     }
     @Override
-    public Object getThirdAddress(HttpServletRequest req) {
+    public String getThirdAddress(HttpServletRequest req) {
         JSONObject params = new JSONObject();
         params.put("AccountCode",ACCOUNT_CODE);
         User user = UserContext.current().getUser();
@@ -78,13 +79,13 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,GET_ADDRESSES);
         ZhuzongAddresses addresses = JSONObject.parseObject(json,ZhuzongAddresses.class);
         if (addresses.isSuccess()){
-            return addresses.getResult();
+            return StringHelper.toJsonString(addresses);
         }
         return null;
     }
 
     @Override
-    public Object createThirdTask(HttpServletRequest req) {
+    public String createThirdTask(HttpServletRequest req) {
         JSONObject params = new JSONObject();
         params.put("AccountCode",ACCOUNT_CODE);
         params.put("clientid",req.getParameter("clientid"));
@@ -104,7 +105,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         }
         ZhuzongCreateTask task = JSONObject.parseObject(json,ZhuzongCreateTask.class);
         if (task.isSuccess()){
-            return task.getResult();
+            return StringHelper.toJsonString(task);
         }
         return null;
     }
@@ -130,7 +131,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
     }
 
     @Override
-    public Object listThirdTasks(HttpServletRequest req) {
+    public String listThirdTasks(HttpServletRequest req) {
         JSONObject params = new JSONObject();
         params.put("AccountCode",ACCOUNT_CODE);
         params.put("pageOprator",req.getParameter("pageOprator"));
@@ -139,20 +140,20 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String json = postToZhuzong(params,QUERY_TASKS);
         ZhuzongTasks tasks = JSONObject.parseObject(json,ZhuzongTasks.class);
         if (tasks.isSuccess()){
-            return tasks.getResult();
+            return StringHelper.toJsonString(tasks);
         }
         return null;
     }
 
     @Override
-    public Object getThirdTaskDetail(HttpServletRequest req) {
+    public String getThirdTaskDetail(HttpServletRequest req) {
         JSONObject params = new JSONObject();
         params.put("AccountCode",ACCOUNT_CODE);
         params.put("bill_id",req.getParameter("bill_id"));
         String json = postToZhuzong(params,GET_TASK_DETAIL);
         ZhuzongTaskDetail taskDetail = JSONObject.parseObject(json,ZhuzongTaskDetail.class);
         if (taskDetail.isSuccess()){
-            return taskDetail.getResult();
+            return StringHelper.toJsonString(taskDetail);
         }
         return null;
     }
@@ -165,9 +166,9 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         String clientId = (String)redisTemplate.opsForValue().get(userIdentifier.getIdentifierToken());
         if (clientId == null){
             clientId = "none";
-            ZhuzongAddresses task =  (ZhuzongAddresses)getThirdAddress(null);
-            if (task!=null && task.getResult().size()>0){
-                clientId = task.getResult().get(0).getPk_client();
+            ZhuzongAddresses addresses =  (ZhuzongAddresses)StringHelper.fromJsonString(getThirdAddress(null),ZhuzongAddresses.class);
+            if (addresses!=null && addresses.getResult().size()>0){
+                clientId = addresses.getResult().get(0).getPk_client();
                 redisTemplate.opsForValue().set(userIdentifier.getIdentifierToken(), clientId);
                 redisTemplate.expire(userIdentifier.getIdentifierToken(), 2, TimeUnit.DAYS);
             }
