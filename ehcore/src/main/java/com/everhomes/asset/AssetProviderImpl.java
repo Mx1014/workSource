@@ -3937,6 +3937,26 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
     }
 
+    @Override
+    public void linkIndividualUserToBill(Long ownerUid, String token) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
+                .where(Tables.EH_PAYMENT_BILLS.CUSTOMER_TEL.eq(token))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.USER.getCode()))
+                .execute();
+    }
+
+    @Override
+    public void linkOrganizationToBill(Long ownerUid, String token) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
+                .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(token))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))
+                .execute();
+    }
+
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
         Map<Long,String> map = new HashMap<>();
         EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");

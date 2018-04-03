@@ -293,4 +293,8 @@ public interface AssetProvider {
     PaymentChargingItem getBillItemByName(Long billGroupId, String projectLevelName);
 
     String findBillGroupNameById(Long billGroupId);
+
+    void linkIndividualUserToBill(Long ownerUid, String token);
+
+    void linkOrganizationToBill(Long ownerUid, String token);
 }
