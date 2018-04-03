@@ -35,8 +35,8 @@ public interface PmTaskHandle {
 
 	void updateTaskByOrg(UpdateTaskCommand cmd);
 
-	String getThirdAddress(HttpServletRequest req);
-	String createThirdTask(HttpServletRequest req);
-	String listThirdTasks(HttpServletRequest req);
-	String getThirdTaskDetail(HttpServletRequest req);
+	Object getThirdAddress(HttpServletRequest req);
+	Object createThirdTask(HttpServletRequest req);
+	Object listThirdTasks(HttpServletRequest req);
+	Object getThirdTaskDetail(HttpServletRequest req);
 }

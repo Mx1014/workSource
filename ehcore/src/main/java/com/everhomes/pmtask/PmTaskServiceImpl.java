@@ -2321,7 +2321,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public String getThirdAddress(HttpServletRequest req) {
+	public Object getThirdAddress(HttpServletRequest req) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
@@ -2329,7 +2329,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public String createThirdTask(HttpServletRequest req) {
+	public Object createThirdTask(HttpServletRequest req) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
@@ -2337,7 +2337,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public String listThirdTasks(HttpServletRequest req) {
+	public Object listThirdTasks(HttpServletRequest req) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
@@ -2345,7 +2345,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public String getThirdTaskDetail(HttpServletRequest req) {
+	public Object getThirdTaskDetail(HttpServletRequest req) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);

@@ -589,7 +589,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("queryThirdAddress")
     @RestReturn(value = String.class)
     public RestResponse queryThirdAddress(HttpServletRequest req){
-        String addresses = pmTaskService.getThirdAddress(req);
+        Object addresses = pmTaskService.getThirdAddress(req);
         RestResponse resp = new RestResponse(addresses);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
@@ -603,7 +603,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("createThirdTask")
     @RestReturn(value = String.class)
     public RestResponse createThirdTask(HttpServletRequest req){
-        String task = pmTaskService.createThirdTask(req);
+        Object task = pmTaskService.createThirdTask(req);
         RestResponse resp = new RestResponse(task);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
@@ -617,7 +617,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("listThirdTasks")
     @RestReturn(value = String.class)
     public RestResponse listThirdTasks(HttpServletRequest req){
-        String tasks = pmTaskService.listThirdTasks(req);
+        Object tasks = pmTaskService.listThirdTasks(req);
         RestResponse resp = new RestResponse(tasks);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
@@ -631,7 +631,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("getThirdTaskDetail")
     @RestReturn(value = String.class)
     public RestResponse getThirdTaskDetail(HttpServletRequest req){
-        String detail = pmTaskService.getThirdTaskDetail(req);
+        Object detail = pmTaskService.getThirdTaskDetail(req);
         RestResponse resp = new RestResponse(detail);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

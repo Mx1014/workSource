@@ -90,12 +90,12 @@ public interface PmTaskService {
 
 	void syncTaskStatistics(HttpServletResponse resp);
 
-	String getThirdAddress(HttpServletRequest req);
+	Object getThirdAddress(HttpServletRequest req);
 
-	String createThirdTask(HttpServletRequest req);
+	Object createThirdTask(HttpServletRequest req);
 
-	String listThirdTasks(HttpServletRequest req);
+	Object listThirdTasks(HttpServletRequest req);
 
-	String getThirdTaskDetail(HttpServletRequest req);
+	Object getThirdTaskDetail(HttpServletRequest req);
 
 }

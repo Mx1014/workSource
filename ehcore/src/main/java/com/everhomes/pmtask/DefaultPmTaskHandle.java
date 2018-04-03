@@ -337,22 +337,22 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	}
 
 	@Override
-	public String getThirdAddress(HttpServletRequest req) {
+	public Object getThirdAddress(HttpServletRequest req) {
 		return null;
 	}
 
 	@Override
-	public String createThirdTask(HttpServletRequest req) {
+	public Object createThirdTask(HttpServletRequest req) {
 		return null;
 	}
 
 	@Override
-	public String listThirdTasks(HttpServletRequest req) {
+	public Object listThirdTasks(HttpServletRequest req) {
 		return null;
 	}
 
 	@Override
-	public String getThirdTaskDetail(HttpServletRequest req) {
+	public Object getThirdTaskDetail(HttpServletRequest req) {
 		return null;
 	}
 
