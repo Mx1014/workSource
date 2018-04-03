@@ -171,4 +171,6 @@ public interface AssetService {
     void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file);
+
+    void linkCustomerToBill(String code, Long ownerUid, String identifierToken);
 }

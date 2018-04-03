@@ -2950,6 +2950,23 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
+    /**
+     *
+     * @param code 参考 {@link AssetTargetType}
+     * @param ownerUid 个人或者公司的id
+     * @param token 个人的手机号或者公司的名称
+     */
+    @Override
+    public void linkCustomerToBill(String code, Long ownerUid, String token) {
+        if(code.equals(AssetTargetType.USER.getCode())){
+            assetProvider.linkIndividualUserToBill(ownerUid, token);
+        }else if(code.equals(AssetTargetType.ORGANIZATION.getCode())){
+            assetProvider.linkOrganizationToBill(ownerUid, token);
+        }else{
+            LOGGER.error("link customer to bill failed, code={}, token = {}", code, token);
+        }
+    }
+
     private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId) {
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
