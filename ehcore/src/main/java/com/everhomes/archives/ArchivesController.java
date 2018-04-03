@@ -387,13 +387,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/remindArchivesEmployee</b>
-     * <p>14.为员工做提醒设置</p>
+     * <b>URL: /archives/ArchivesNotification</b>
+     * <p>14.人事档案提醒设置</p>
      */
-    @RequestMapping("remindArchivesEmployee")
+    @RequestMapping("ArchivesNotification")
     @RestReturn(value = String.class)
-    public RestResponse remindArchivesEmployee(RemindArchivesEmployeeCommand cmd){
-        archivesService.remindArchivesEmployee(cmd);
+    public RestResponse ArchivesNotification(ArchivesNotificationCommand cmd){
+        archivesService.ArchivesNotificationConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -445,7 +445,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("testNotification")
     @RestReturn(value = String.class)
     public RestResponse testNotification(){
-        archivesService.sendArchivesNotification();
+        archivesService.executeArchivesNotification();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -13,7 +13,6 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.message.MessageService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -762,7 +761,7 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private String getEmployeeRealName(Long userId, Long organizationId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-        if(userIdentifier == null)
+        if (userIdentifier == null)
             return "管理员";
         String contactToken = userIdentifier.getIdentifierToken();
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
@@ -2530,14 +2529,14 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        if(employee != null) {
+        if (employee != null) {
             employee.setAvatar(cmd.getAvatar());
             organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
         }
     }
 
     @Override
-    public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {
+    public void ArchivesNotificationConfig(ArchivesNotificationCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ArchivesNotifications originNotify = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
         if (originNotify == null) {
@@ -2545,22 +2544,44 @@ public class ArchivesServiceImpl implements ArchivesService {
             newNotify.setNamespaceId(namespaceId);
             newNotify.setOrganizationId(cmd.getOrganizationId());
             newNotify.setNotifyDay(cmd.getRemindDay());
-            newNotify.setNotifyHour(cmd.getRemindTime());
-            newNotify.setNotifyEmails(JSON.toJSONString(cmd.getRemindEmails()));
+            newNotify.setNotifyTime(cmd.getRemindTime());
+            newNotify.setMailFlag(cmd.getMailFlag());
+            newNotify.setMessageFlag(cmd.getMessageFlag());
+            newNotify.setNotificationTargets(getNotificationTarget(cmd).toString());
             archivesProvider.createArchivesNotifications(newNotify);
         } else {
-            originNotify.setNotifyEmails(JSON.toJSONString(cmd.getRemindEmails()));
             originNotify.setNotifyDay(cmd.getRemindDay());
-            originNotify.setNotifyHour(cmd.getRemindTime());
+            originNotify.setNotifyTime(cmd.getRemindTime());
+            originNotify.setMailFlag(cmd.getMailFlag());
+            originNotify.setMessageFlag(cmd.getMessageFlag());
+            originNotify.setNotificationTargets(getNotificationTarget(cmd).toString());
             archivesProvider.updateArchivesNotifications(originNotify);
         }
     }
 
+    private ArchivesNotificationTarget getNotificationTarget(ArchivesNotificationCommand cmd) {
+        ArchivesNotificationTarget target = new ArchivesNotificationTarget();
+        if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0)
+            return target;
+        List<String> mailList = new ArrayList<>();
+        List<Long> messageList = new ArrayList<>();
+        for (Long detailId : cmd.getDetailIds()) {
+            OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (null != employee.getWorkEmail())
+                mailList.add(employee.getWorkEmail());
+            if (0 != employee.getTargetId())
+                messageList.add(employee.getTargetId());
+        }
+        target.setEmailList(mailList);
+        target.setMessageList(messageList);
+        return target;
+    }
+
     @Override
-    public void sendArchivesNotification() {
+    public void executeArchivesNotification() {
         // set the time
         Date firstOfWeek = ArchivesUtil.currentDate();
-        Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek,6);
+        Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
@@ -2578,14 +2599,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             return query;
         });
 
-        if (employees == null){
+        if (employees == null) {
             LOGGER.error("Nothing needs to be sent.");
             return;
         }
 
         //  1.set the target email or userId
         Long ryanId = 309154L;
-        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com","hao.yang@zuolin.com");
+        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com", "hao.yang@zuolin.com");
         String contactName = "Ronny";
         String organizationName = "Google";
 
@@ -2601,57 +2622,58 @@ public class ArchivesServiceImpl implements ArchivesService {
         sendArchivesEmails(emails, body);
 //        sendArchivesMessages(ryanId, body);
     }
-    private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date){
+
+    private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date) {
         String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
-        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter df2 = DateTimeFormatter.ofPattern("MMdd");
         String dateString = date.toLocalDate() + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
-        Map<String,Object> map;
+        Map<String, Object> map;
 
-        for(OrganizationMemberDetails employee: employees){
-            if(date.equals(employee.getEmploymentTime()))
+        for (OrganizationMemberDetails employee : employees) {
+            if (date.equals(employee.getEmploymentTime()))
                 employment += (employee.getContactName() + "，");
-            if(date.equals(employee.getContractEndTime()))
+            if (date.equals(employee.getContractEndTime()))
                 contract += (employee.getContactName() + "，");
-            if(date.equals(employee.getIdExpiryDate()))
+            if (date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
-            if(df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
+            if (df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
                 map.put("count", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
                 anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
             }
-            if(df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex())){
+            if (df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("count", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
                 birthday += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, "");
             }
         }
-        if(!employment.equals("")){
-            employment = employment.substring(0, employment.length()-1);
+        if (!employment.equals("")) {
+            employment = employment.substring(0, employment.length() - 1);
             map = new LinkedHashMap<>();
             map.put("contactNames", employment);
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_EMPLOYMENT, "zh_CN", map, "");
         }
-        if(!contract.equals("")){
-            contract = contract.substring(0, contract.length()-1);
+        if (!contract.equals("")) {
+            contract = contract.substring(0, contract.length() - 1);
             map = new LinkedHashMap<>();
             map.put("contactNames", contract);
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_CONTRACT, "zh_CN", map, "");
         }
-        if(!idExpiry.equals("")){
-            idExpiry = idExpiry.substring(0, idExpiry.length()-1);
+        if (!idExpiry.equals("")) {
+            idExpiry = idExpiry.substring(0, idExpiry.length() - 1);
             map = new LinkedHashMap<>();
             map.put("contactNames", idExpiry);
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ID, "zh_CN", map, "");
         }
-        if(!anniversary.equals("")){
+        if (!anniversary.equals("")) {
             body += anniversary;
         }
-        if(!birthday.equals("")){
+        if (!birthday.equals("")) {
             body += birthday;
         }
         body += "\n";

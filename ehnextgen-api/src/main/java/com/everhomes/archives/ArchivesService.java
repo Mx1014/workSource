@@ -8,8 +8,6 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import org.jooq.Condition;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -104,9 +102,9 @@ public interface ArchivesService {
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
-    void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
+    void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
 
-    void sendArchivesNotification();
+    void executeArchivesNotification();
 
     void syncArchivesDismissStatus();
 }

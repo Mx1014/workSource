@@ -15,7 +15,7 @@ import java.util.List;
  * <li>messageFlag: 消息提醒 0-否,1-是</li>
  * </ul>
  */
-public class RemindArchivesEmployeeCommand {
+public class ArchivesNotificationCommand {
 
     private Long organizationId;
 
@@ -30,7 +30,7 @@ public class RemindArchivesEmployeeCommand {
 
     private Byte messageFlag;
 
-    public RemindArchivesEmployeeCommand() {
+    public ArchivesNotificationCommand() {
     }
 
     public Long getOrganizationId() {
