@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
+import com.everhomes.asset.AssetService;
 import com.everhomes.building.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -17,6 +18,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
@@ -91,6 +93,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
     @Autowired
     private SyncDataTaskProvider syncDataTaskProvider;
+
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public void syncEnterprises(String pageOffset, String version, String communityIdentifier, Long taskId) {
@@ -377,6 +382,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
         organization.setNamespaceOrganizationType(NamespaceOrganizationType.EBEI.getCode());
         organization.setNamespaceOrganizationToken(customer.getNamespaceCustomerToken());
         organizationProvider.createOrganization(organization);
+        assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
         return organization;
     }
 
