@@ -45,3 +45,5 @@ ALTER TABLE eh_punch_statistics ADD COLUMN `belate_time` BIGINT COMMENT '迟到�
 ALTER TABLE eh_punch_statistics ADD COLUMN `leave_early_time` BIGINT COMMENT '早退时长(毫秒数)';
 ALTER TABLE eh_punch_statistics ADD COLUMN `forgot_count` INT COMMENT '下班缺卡次数';
 ALTER TABLE eh_punch_statistics ADD COLUMN `status_list` VARCHAR(1024) COMMENT '校正后状态列表(月初到月末)';
+ALTER TABLE eh_punch_logs ADD COLUMN `wifi_info` VARCHAR(1024) COMMENT '打卡用到的WiFi信息';
+ALTER TABLE eh_punch_logs ADD COLUMN `location_info` VARCHAR(1024) COMMENT '打卡用到的地址定位';
