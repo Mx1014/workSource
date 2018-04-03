@@ -38,6 +38,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             Link link = linkProvider.findLinkByPostId(post.getId());
             if(link != null){
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
+            		link.setRichContent(link.getContent());
             		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
             		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
             	}
@@ -60,6 +61,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             Link link = linkProvider.findLinkByPostId(post.getId());
             if(link != null){
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
+            		link.setRichContent(link.getContent());
             		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
             		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
             	}
@@ -107,4 +109,12 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
         return post;
     }
 
+	@Override
+	public void beforePostDelete(Post post) {
+
+	}
+
+	@Override
+	public void afterPostDelete(Post post) {
+	}
 }

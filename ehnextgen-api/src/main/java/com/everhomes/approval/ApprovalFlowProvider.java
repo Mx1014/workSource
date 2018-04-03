@@ -18,5 +18,8 @@ public interface ApprovalFlowProvider {
 	ApprovalFlow findApprovalFlowByName(Integer namespaceId, String ownerType, Long ownerId, String name);
 
 	List<ApprovalFlow> listApprovalFlow(Integer namespaceId, String ownerType, Long ownerId);
+ 
+
+	void deleteApprovalFlows(List<Long> flowIds);
 
 }

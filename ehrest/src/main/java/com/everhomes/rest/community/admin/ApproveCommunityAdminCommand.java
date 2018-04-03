@@ -6,7 +6,6 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>communityId: 被审核小区Id</li>
  * <li>operatorRole: 操作者角色</li>

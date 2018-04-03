@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 	<li>userJoin : 是否将当前用户添加进组织成员,true-加入,false-不加入,只创建组织</li>
- * 	<li>memberType : 加入组织成员组类型,默认为manager,详情:{@link com.everhomes.rest.organization.OrganizationMemberGroupType}
+ * 	<li>memberType : 加入组织成员组类型,默认为manager, 详情:{@link com.everhomes.rest.organization.OrganizationMemberGroupType}</li>
  * 	<li>cityId : 城市id</li>
  * 	<li>areaId : 区县id</li>
  *	<li>address : 地址</li>

@@ -29,7 +29,7 @@ public class DeleteRelationOfOrganizationOwnerAndCarTest extends BaseLoginAuthTe
         String api = "/pm/deleteRelationOfOrganizationOwnerAndCar";
         DeleteRelationOfOrganizationOwnerAndCarCommand cmd = new DeleteRelationOfOrganizationOwnerAndCarCommand();
         cmd.setOrganizationId(1000001L);
-        cmd.setOwnerId(1L);
+        cmd.setOrgOwnerId(1L);
         cmd.setCarId(1L);
 
         RestResponseBase response = httpClientService.restPost(api, cmd, RestResponseBase.class);
@@ -43,13 +43,6 @@ public class DeleteRelationOfOrganizationOwnerAndCarTest extends BaseLoginAuthTe
                 .fetchOneMap();
 
         assertNull("The primary result should be null.", result);
-
-        result = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
-                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.PRIMARY_FLAG.eq(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode()))
-                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ID.eq(2L))
-                .fetchOneMap();
-
-        assertNotNull("The normal result should be not null.", result);
     }
 
     /**
@@ -61,7 +54,7 @@ public class DeleteRelationOfOrganizationOwnerAndCarTest extends BaseLoginAuthTe
         String api = "/pm/deleteRelationOfOrganizationOwnerAndCar";
         DeleteRelationOfOrganizationOwnerAndCarCommand cmd = new DeleteRelationOfOrganizationOwnerAndCarCommand();
         cmd.setOrganizationId(1000001L);
-        cmd.setOwnerId(2L);
+        cmd.setOrgOwnerId(2L);
         cmd.setCarId(1L);
 
         RestResponseBase response = httpClientService.restPost(api, cmd, RestResponseBase.class);
@@ -76,13 +69,6 @@ public class DeleteRelationOfOrganizationOwnerAndCarTest extends BaseLoginAuthTe
                 .fetchOneMap();
 
         assertNotNull("The primary result should be null.", result);
-
-        result = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
-                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.PRIMARY_FLAG.eq(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode()))
-                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ID.eq(2L))
-                .fetchOneMap();
-
-        assertNull("The normal result should be not null.", result);
     }
 
     private void logon() {
@@ -97,7 +83,8 @@ public class DeleteRelationOfOrganizationOwnerAndCarTest extends BaseLoginAuthTe
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-delete-owner-car-relation-primary-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-delete-owner-car-relation-primary-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

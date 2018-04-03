@@ -2,12 +2,14 @@ package com.everhomes.pmtask;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.rest.pmtask.PmTaskAppType;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -31,22 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.pmtask.PmTask;
-import com.everhomes.pmtask.PmTaskProvider;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -54,16 +44,10 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     private static final Logger LOGGER = LoggerFactory.getLogger(PmTaskSearchImpl.class);
 
     @Autowired
-    private ConfigurationProvider  configProvider;
-    
-    @Autowired
 	private PmTaskProvider pmTaskProvider;
-    
     @Autowired
-	private UserProvider userProvider;
-    
-    @Autowired
-	private CategoryProvider categoryProvider;
+    private CategoryProvider categoryProvider;
+
 	@Override
 	public String getIndexType() {
 		return SearchUtils.PMTASK;
@@ -72,7 +56,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 	private XContentBuilder createDoc(PmTask task){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            if(null != task.getAddressId())
+            
             b.field("address", task.getAddress());
             b.field("addressId", task.getAddressId());
             b.field("namespaceId", task.getNamespaceId());
@@ -83,16 +67,17 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	b.field("taskCategoryId", task.getTaskCategoryId());
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
-            if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
-				User user = userProvider.findUserById(task.getCreatorUid());
-    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    			b.field("requestorName", user.getNickName());
-                b.field("requestorPhone", userIdentifier.getIdentifierToken());
-			}else{
-				b.field("requestorName", task.getRequestorName());
-	            b.field("requestorPhone", task.getRequestorPhone());
-			}
-            
+            b.field("flowCaseId", task.getFlowCaseId());
+            b.field("requestorName", task.getRequestorName());
+            b.field("requestorPhone", task.getRequestorPhone());
+            b.field("buildingName", task.getBuildingName());
+
+            Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
+            //多入口查全部数据
+            if (null != appType && Arrays.asList(PmTaskAppType.TYPES).contains(appType.getParentId())) {
+                b.field("appType", appType.getParentId());
+            }
+
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -133,14 +118,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     }
     
     @Override
-    public void syncFromDb() {
-        List<PmTask> tasks = new ArrayList<PmTask>();
+    public void syncPmTask() {
         int pageSize = 200;
         Long nextPageAnchor = null;
         
         this.deleteAll();
         for(;;){
-        	tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
+            List<PmTask> tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
         	
         	if(tasks.size() > 0){
 
@@ -156,7 +140,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 	        }
  	       
            tasks.clear();
-           LOGGER.info("Sync pmtask(syncupdate), process count: " + tasks.size());
+           LOGGER.info("Sync pmtask(syncupdate), processStat count: " + tasks.size());
            
         }
         //TODO merge ?
@@ -167,11 +151,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
     @Override
     public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
-    		Long endDate, Long addressId, Long pageAnchor, Integer pageSize) {
+    		Long endDate, Long addressId, String buildingName, Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         
-        FilterBuilder fb = null;
+        FilterBuilder fb;
 //      int namespaceId = UserContext.getCurrentNamespaceId();
         fb = FilterBuilders.termFilter("ownerId", ownerId);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", ownerType));
@@ -188,7 +172,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         RangeQueryBuilder rb = null;
         if(null !=pageAnchor){
-        	rb = QueryBuilders.rangeQuery("createTime").lt(pageAnchor);
+        	rb = QueryBuilders.rangeQuery("createTime").lte(pageAnchor);
             qb = qb.must(rb);	
         }
         if(null != startDate){
@@ -201,9 +185,19 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             qb = qb.must(rb);
         }
 
-        if(null != categoryId){
-        	QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("taskCategoryId");
+        if(StringUtils.isNotBlank(buildingName)){
+        	QueryStringQueryBuilder sb = QueryBuilders.queryString(buildingName).field("buildingName");
             qb = qb.must(sb);	
+        }
+        
+        if(null != categoryId){
+            if (Arrays.asList(PmTaskAppType.TYPES).contains(categoryId)) {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("appType");
+                qb = qb.must(sb);
+            }else {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("taskCategoryId");
+                qb = qb.must(sb);
+            }
         }
         
         if(null != status){
@@ -228,7 +222,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         SearchResponse rsp = builder.execute().actionGet();
         
-        List<PmTaskDTO> dtos = new ArrayList<PmTaskDTO>();
+        List<PmTaskDTO> dtos = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
         for (SearchHit sd : docs) {
         	PmTaskDTO d = readDoc(sd.getSource(), sd.getId());
@@ -255,9 +249,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setStatus(((Integer)source.get("status")).byteValue());
             doc.setRequestorName((String)source.get("requestorName"));
             doc.setRequestorPhone((String)source.get("requestorPhone"));
-//            doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
-//            doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
-//            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
+            doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
+            doc.setBuildingName((String)source.get("buildingName"));
             
             return doc;
         }catch (Exception ex) {

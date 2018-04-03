@@ -2,7 +2,6 @@
 package com.everhomes.family;
 
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -11,6 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -18,10 +18,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupProvider;
+import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -38,6 +35,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.QuestionMetaActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
@@ -60,7 +59,6 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -146,6 +144,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private GroupMemberLogProvider groupMemberLogProvider;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -154,6 +155,8 @@ public class FamilyServiceImpl implements FamilyService {
     	if(null == u){
     		u = UserContext.current().getUser();
     	}
+
+
     	
     	final User user = u;
         long uid = user.getId();
@@ -179,7 +182,13 @@ public class FamilyServiceImpl implements FamilyService {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
                     f.setName(address.getAddress());
-                    f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+
+                    //生成的域空间原来是使用Namespace.DEFAULT_NAMESPACE，但是这查询的时候根据当前域空间查询查不出来，此处使用当前域空间  edit by yanjun 20170731
+                    Integer namespaceId = UserContext.getCurrentNamespaceId();
+                    if(namespaceId == null){
+                        namespaceId = Namespace.DEFAULT_NAMESPACE;
+                    }
+                    f.setNamespaceId(namespaceId);
                     f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     f.setAddressId(address.getId());
                     f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
@@ -295,11 +304,19 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_OPERATOR;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+            metaObject.setRequestInfo(notifyTextForOthers);
+
             List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            if(includeList != null && includeList.size() > 0)
-                sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,
-                        MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
+            if (includeList != null && includeList.size() > 0) {
+                metaObject.setRequestInfo(notifyTextForOthers);
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.FAMILY_MEMBER_APPLY, actionData);
+                sendRouterFamilyNotificationUseSystemUser(includeList,null,notifyTextForOthers, routerUri);
+            }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -320,13 +337,13 @@ public class FamilyServiceImpl implements FamilyService {
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
-            }
+        }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -361,7 +378,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
     
-    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList,
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         //User session
         Map<String, String> meta = null;
@@ -394,6 +411,74 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
 
+    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, Map<String, String> meta) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            if(meta != null){
+                messageDto.setMeta(meta);
+            }
+
+            includeList.stream().distinct().forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
+    private void sendRouterFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser includeList {}", includeList);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser excludeList {}", excludeList);
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            RouterMetaObject mo = new RouterMetaObject();
+            mo.setUrl(routerUri);
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+            messageDto.setMeta(meta);
+
+            includeList.stream().distinct().forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
  
     @Override
     public void joinFamily(JoinFamilyCommand cmd) {
@@ -403,7 +488,9 @@ public class FamilyServiceImpl implements FamilyService {
     	long userId = user.getId();
     	long familyId = cmd.getId();
     	Group group = this.groupProvider.findGroupById(familyId);
-    	
+        if(!group.getNamespaceId().equals(UserContext.getCurrentNamespaceId()))
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST,
+                    "Invalid familyId parameter");
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
     		
     		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), userId);
@@ -604,14 +691,13 @@ public class FamilyServiceImpl implements FamilyService {
                     "User not in user group.");
         }
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
-        
+
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
-        
     }
     
-    public void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
+    private void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
         // send notification to the applicant
         try {
             Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0,Role.ResourceOperator);
@@ -749,14 +835,14 @@ public class FamilyServiceImpl implements FamilyService {
 //            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
 //                    "User not in familly.");
         }
-        if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
+        if(member.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
                     "User has already join in family,fail to reject.");
         }
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(memberUid, group.getId());
-        if(userGroup == null){
+        if(userGroup == null) {
             LOGGER.error("User not in user group.userId=" + memberUid);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in familly.");
@@ -764,7 +850,8 @@ public class FamilyServiceImpl implements FamilyService {
         
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
-        
+        member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+        addGroupMemberLog(member, group);
         //Create reject history
         UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
@@ -778,6 +865,20 @@ public class FamilyServiceImpl implements FamilyService {
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
         else if(cmd.getOperatorRole() == Role.SystemAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
+    }
+
+    private void addGroupMemberLog(GroupMember member, Group group) {
+        GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
+        memberLog.setNamespaceId(group.getNamespaceId());
+        memberLog.setMemberStatus(member.getMemberStatus());
+        memberLog.setOperatorUid(UserContext.currentUserId());
+        memberLog.setApproveTime(DateUtils.currentTimestamp());
+        memberLog.setGroupMemberId(member.getId());
+        memberLog.setCreatorUid(UserContext.currentUserId());
+        memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        memberLog.setCommunityId(group.getFamilyCommunityId());
+        memberLog.setAddressId(group.getFamilyAddressId());
+        groupMemberLogProvider.createGroupMemberLog(memberLog);
     }
     
     private void sendFamilyNotificationForMemberRejectFamilyByAdmin(Address address, Group group, GroupMember member,long operatorId) {
@@ -881,20 +982,20 @@ public class FamilyServiceImpl implements FamilyService {
                 this.groupProvider.updateGroupMember(member);
                 
                 List<UserGroup> list = this.userProvider.listUserGroups(memberUid, GroupDiscriminator.FAMILY.getCode());
-                list = list.stream().filter((userGroup) ->{
+                list = list.stream().filter((userGroup) -> {
                     return userGroup.getGroupId().longValue() == group.getId().longValue();
                     
                 }).collect(Collectors.toList());
-                if(list != null && !list.isEmpty()){
+                if(list != null && !list.isEmpty()) {
                     UserGroup userGroup = list.get(0);
                     userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
                     this.userProvider.updateUserGroup(userGroup);
                 }
                 group.setMemberCount(group.getMemberCount() + 1);
                 groupProvider.updateGroup(group);
-                
+
+                addGroupMemberLog(member, group);// add by xq.tian  2017/07/12
                 return true;
-                
             });
            return true;
         });
@@ -931,36 +1032,43 @@ public class FamilyServiceImpl implements FamilyService {
     // add by xq.tian   20160922
     //
     private void autoApproveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
-        if (addressId != null) {
-            User memberUser = userProvider.findUserById(memberUid);
-            UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
-            if (memberUser != null && userIdentifier != null) {
-                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
-                        memberUser.getCommunityId(), userIdentifier.getIdentifierToken());
-                if (pmOwners != null && pmOwners.size() > 0) {
-                    for (CommunityPmOwner owner : pmOwners) {
-                        OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                                namespaceId, owner.getId(), addressId);
-                        if (ownerAddress != null) {
-                            if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
-                                ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-                            }
-                        }
-                        // 不存在ownerAddress, 创建ownerAddress记录
-                        else {
-                            propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                                    memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
+        if (addressId == null) {
+            return;
+        }
+        Address address = addressProvider.findAddressById(addressId);
+        if (address == null) {
+            return;
+        }
+        User memberUser = userProvider.findUserById(memberUid);
+        UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
+        if (memberUser != null && userIdentifier != null) {
+            List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
+                    address.getCommunityId(), userIdentifier.getIdentifierToken());
+            if (pmOwners != null && pmOwners.size() > 0) {
+                for (CommunityPmOwner owner : pmOwners) {
+                    OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+                            namespaceId, owner.getId(), addressId);
+                    if (ownerAddress != null) {
+                        if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
                         }
                     }
+                    // 不存在ownerAddress, 创建ownerAddress记录
+                    else {
+                        propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                                memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
+                    }
                 }
-                // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
-                else {
-                    long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
-                    // 创建ownerAddress
-                    propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                            memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
-                }
+            }
+            // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+            else {
+                // 只传递communityId
+                memberUser.setCommunityId(address.getCommunityId());
+                long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
+                // 创建ownerAddress
+                propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                        memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
             }
         }
     }
@@ -980,6 +1088,11 @@ public class FamilyServiceImpl implements FamilyService {
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+            //给客户端发一条通知
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OPERATOR;
@@ -1011,7 +1124,14 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            //给用户发一条
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+            //给客户端发一条通知
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
@@ -1077,7 +1197,7 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public void adminApproveMember(ApproveMemberCommand cmd) {
         cmd.setOperatorRole(Role.SystemAdmin);
-        //if address status is unactive,change status
+        //if address status is unactive,changeEnergyMeter status
         Address address = getAddressByFamilyId(cmd.getId());
         if(address == null){
             LOGGER.error("Address is not exists,find by familyId.familyId=" + cmd.getId());
@@ -1903,13 +2023,22 @@ public class FamilyServiceImpl implements FamilyService {
         if(targetId != null) {
             excludeList.add(targetId);
         }
+        // sendFamilyNotification(groupId, null, excludeList, message, null, null);
         sendFamilyNotification(groupId, null, excludeList, message, null, null);
     }
     
     private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message) {
         List<Long> includeList = new ArrayList<Long>();
         includeList.add(userId);
-        sendFamilyNotification(groupId, includeList, null, message, null, null);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, null);
+    }
+
+    private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message, Map<String, String> meta) {
+        List<Long> includeList = new ArrayList<Long>();
+        includeList.add(userId);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, meta);
     }
     
     private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {
@@ -1954,11 +2083,13 @@ public class FamilyServiceImpl implements FamilyService {
                         + ", memberId=" + requestor.getMemberId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getMemberId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;
@@ -2157,5 +2288,32 @@ public class FamilyServiceImpl implements FamilyService {
 			this.rejectMember(member);
 		}
         
+	}
+	
+	/**
+	 * 用于测试锁的获取
+	 * @param expression  格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
+	 *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
+	 *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
+	 *                                    这几项信息使用逗号分隔
+	 */
+	public void testLockAquiring(TestLockAquiringCommand cmd) {
+	    String lockCode = cmd.getLockCode(); // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
+	    long millis = (cmd.getLockTimeout() == null) ? 5000L : cmd.getLockTimeout();  // 持有锁的时间
+	    long number = (cmd.getNumber() == null) ? System.currentTimeMillis() : cmd.getNumber(); // 锁的编号
+	    
+	    if(lockCode != null) {
+	        long startTime = System.currentTimeMillis();
+	        final long tmpMillis = millis;
+    	    coordinationProvider.getNamedLock(lockCode).enter(() -> {
+                Thread.sleep(tmpMillis);
+                return null;
+            });
+    	    long endTime = System.currentTimeMillis();
+    	    if(LOGGER.isDebugEnabled()) {
+    	        LOGGER.debug("Test aquiring lock(release), lockCode={}, millis={}, number={}, elapse={}", 
+    	                lockCode, millis, number, (endTime - startTime));
+    	    }
+	    }
 	}
 }

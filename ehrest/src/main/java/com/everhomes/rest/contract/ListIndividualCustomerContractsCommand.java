@@ -1,0 +1,61 @@
+package com.everhomes.rest.contract;
+
+/**
+ * <ul>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 园区id</li>
+ *     <li>individualCustomerId: 个人客户id</li>
+ *     <li>contactToken: 手机号</li>
+ * </ul>
+ * Created by ying.xiong on 2017/8/26.
+ */
+public class ListIndividualCustomerContractsCommand {
+    private Long individualCustomerId;
+
+    private String contactToken;
+
+    private Long communityId;
+
+    private Integer namespaceId;
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getIndividualCustomerId() {
+        return individualCustomerId;
+    }
+
+    public void setIndividualCustomerId(Long individualCustomerId) {
+        this.individualCustomerId = individualCustomerId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+}

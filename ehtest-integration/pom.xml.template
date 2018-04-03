@@ -171,7 +171,11 @@
 	                 	</goals>
 		                <configuration>
 							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
-							<resources>          
+							<resources>   
+								<resource>
+									<directory>src/test/config/ehcore.properties</directory>
+									<filtering>false</filtering>
+		                     	</resource>       
 								<resource>
 									<directory>src/test/data</directory>
 									<filtering>false</filtering>

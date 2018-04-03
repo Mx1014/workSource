@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * 
  * <li>ownerType：查询类型organization/user</li>
  * <li>ownerId：查询对象id(如果是全部部门就是总公司id)</li>  
+ * <li>userId：用户id如果不为空,则是查某个人的打卡记录</li>  
+ * <li>includeSubDpt：是否包含子部门:0-不包含 1-包含(默认)</li>  
  * <li>userName：用户名搜索可为空</li>
  * <li>startDay: 开始时间</li>
  * <li>endDay：结束时间</li>
@@ -29,7 +31,9 @@ public class ListPunchDetailsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
-	 
+	private Long userId;
+	
+	private Byte includeSubDpt;
 	private String userName;
 	private Byte exceptionStatus;
 
@@ -160,6 +164,22 @@ public class ListPunchDetailsCommand {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public Byte getIncludeSubDpt() {
+		return includeSubDpt;
+	}
+
+	public void setIncludeSubDpt(Byte includeSubDpt) {
+		this.includeSubDpt = includeSubDpt;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
  
 

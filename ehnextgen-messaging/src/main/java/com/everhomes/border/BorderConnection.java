@@ -281,7 +281,8 @@ public class BorderConnection extends AbstractWebSocketHandler {
     }
     
     private void checkOutput() {
-        LOGGER.info("checkOutput: state=" + state );
+        // 日志过多，先注释掉 by lqs 20171102
+        // LOGGER.info("checkOutput: state=" + state );
         if(state == State.connected) {
             PduFrame rpcMessage = null;
             

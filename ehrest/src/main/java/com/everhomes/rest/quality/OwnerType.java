@@ -1,5 +1,7 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.rest.community.CommunityType;
+
 
 /**
  * <ul>
@@ -8,11 +10,12 @@ package com.everhomes.rest.quality;
  * <li>GROUP: 机构成员</li>
  * <li>PM: 物业</li>
  * <li>DEPARTMENT: 部门</li>
+ * <li>COMMUNITY: 小区</li>
  * </ul>
  */
 public enum OwnerType {
 
-	ENTERPRISE("enterprise"), USER("user"), GROUP("group"), PM("pm"), DEPARTMENT("department");
+	ENTERPRISE("enterprise"), USER("user"), GROUP("group"), PM("pm"), DEPARTMENT("department"), COMMUNITY("community");
 	
 	private String code;
     private OwnerType(String code) {
@@ -24,30 +27,15 @@ public enum OwnerType {
     }
     
     public static OwnerType fromCode(String code) {
-    	if(code == null) {
-    		return null;
-    	}
-        
-        if(code.equalsIgnoreCase(ENTERPRISE.getCode())) {
-        	return ENTERPRISE;
-        }
-
-        if(code.equalsIgnoreCase(USER.getCode())) {
-        	return USER;
+    	if(code != null) {
+    		OwnerType[] values = OwnerType.values();
+            for(OwnerType value : values) {
+                if(value.getCode().equalsIgnoreCase(code)) {
+                    return value;
+                }
+            }
         }
         
-        if(code.equalsIgnoreCase(GROUP.getCode())) {
-        	return GROUP;
-        }
-        
-        if(code.equalsIgnoreCase(PM.getCode())) {
-        	return PM;
-        }
-        
-        if(code.equalsIgnoreCase(DEPARTMENT.getCode())) {
-        	return DEPARTMENT;
-        }
-
         return null;
     }
 }

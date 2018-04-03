@@ -15,7 +15,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -42,7 +41,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -127,6 +125,11 @@ public class BannerServiceImpl implements BannerService {
         }
         
         List<Banner> allBanners = new ArrayList<Banner>();
+
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneType);
+
         List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> customizedBanners = new ArrayList<Banner>();
         
@@ -135,8 +138,8 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -224,8 +227,11 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneTypeStr);
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -359,7 +365,11 @@ public class BannerServiceImpl implements BannerService {
         SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
         
         GetBannersCommand getCmd = new GetBannersCommand();
-        getCmd.setBannerGroup(cmd.getBannerGroup());
+
+        //先注释掉bannerGroup，原因是运营后台配置是多入口的，但是园区后台发布banner是单入口的，他们的bannerGroup字段不一致会导致查询失败
+        //当前所有域空间的banner都是单入口的，因此此处临时去除bannerGroup，待园区后台实现多入口后可开放   add by yanjun 20171116
+        //getCmd.setBannerGroup(cmd.getBannerGroup());
+
         getCmd.setBannerLocation(cmd.getBannerLocation());
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
         
@@ -411,7 +421,11 @@ public class BannerServiceImpl implements BannerService {
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
-            orgCmd.setBannerGroup(cmd.getBannerGroup());
+
+            //先注释掉bannerGroup，原因是运营后台配置是多入口的，但是园区后台发布banner是单入口的，他们的bannerGroup字段不一致会导致查询失败
+            //当前所有域空间的banner都是单入口的，因此此处临时去除bannerGroup，待园区后台实现多入口后可开放   add by yanjun 20171116
+            //orgCmd.setBannerGroup(cmd.getBannerGroup());
+
             orgCmd.setBannerLocation(cmd.getBannerLocation());
             orgCmd.setNamespaceId(sceneToken.getNamespaceId());
             orgCmd.setSceneType(baseScene);
@@ -521,8 +535,10 @@ public class BannerServiceImpl implements BannerService {
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
-            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
-                return contentServerService.parserUri(uri,ownerType,ownerId);
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri)) {
+                String url = contentServerService.parserUri(uri, ownerType, ownerId);
+                return url + "&w=750&h=450";
+            }
             
         } catch (Exception e) {
             LOGGER.error("Parser uri is error." + e.getMessage());
@@ -698,23 +714,26 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd){
+    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        if(cmd.getKeyword() == null)
-            cmd.setKeyword("");
-        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+        final Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
-        long pageOffset = cmd.getPageOffset() == null ? 1L : cmd.getPageOffset();
-        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
-        List<BannerDTO> result = bannerProvider.listBanners(cmd.getKeyword(), offset,pageSize).stream().map((Banner r) ->{
-            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
-            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
-            return dto;
-         }).collect(Collectors.toList());
+
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+
+        List<BannerDTO> result = bannerProvider.listBannersByOwner(
+                namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                pageSize + 1, null);
+
+        for (BannerDTO dto : result) {
+            dto.setPosterPath(parserUri(dto.getPosterPath(), EntityType.USER.getCode(), userId));
+        }
+
         ListBannersAdminCommandResponse response = new ListBannersAdminCommandResponse();
-        if(result != null && result.size() >= pageSize){
-            response.setNextPageOffset((int)pageOffset + 1);
+        if(result.size() >= pageSize) {
+            response.setNextPageAnchor(result.get(result.size() - 1).getCreateTime().getTime());
+            result.remove(result.size() - 1);
         }
         response.setRequests(result);
         return response;
@@ -757,27 +776,33 @@ public class BannerServiceImpl implements BannerService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
 		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
+
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize()
 				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-				pageSize + 1, ApplyPolicy.CUSTOMIZED);
-        if(result == null || result.isEmpty()) {
-        	result = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
+
+        // 看是否有自定义banner
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getSceneType());
+        List<BannerDTO> bannerList;
+        if (customizedBanner != null) {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                    pageSize + 1, ApplyPolicy.CUSTOMIZED);
+        } else {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
                     ApplyPolicy.DEFAULT);
         }
-        
-        for(BannerDTO dto : result) {
+
+        for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
         }
         
-		bannerDTOSort(result);
+		bannerDTOSort(bannerList);
 		
 		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
-		resp.setBanners(result);
-		if(result.size() > pageSize) {
-			resp.setNextPageAnchor(result.get(result.size() - 1).getId());
-			result.remove(result.size() - 1);
+		resp.setBanners(bannerList);
+		if(bannerList.size() > pageSize) {
+			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getCreateTime().getTime());
+			bannerList.remove(bannerList.size() - 1);
 		}
 		return resp;
 	}
@@ -1096,12 +1121,12 @@ public class BannerServiceImpl implements BannerService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
 		}
-		User user = UserContext.current().getUser();
+		/*User user = UserContext.current().getUser();
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
 		if(member == null){
 			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"User is not in the organization.");
-		}
+		}*/
 	}
 }

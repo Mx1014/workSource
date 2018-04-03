@@ -38,6 +38,7 @@ public class OrganizationOwnerDTO {
     private String orgOwnerType;
     private String gender;
     private Long   birthday;
+    private String   birthdayDate;
     private String maritalStatus;
     private String job;
     private String company;
@@ -187,6 +188,14 @@ public class OrganizationOwnerDTO {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getBirthdayDate() {
+        return birthdayDate;
+    }
+
+    public void setBirthdayDate(String birthdayDate) {
+        this.birthdayDate = birthdayDate;
     }
 
     @Override

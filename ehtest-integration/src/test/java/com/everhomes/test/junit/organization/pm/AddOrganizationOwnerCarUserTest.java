@@ -25,10 +25,10 @@ public class AddOrganizationOwnerCarUserTest extends BaseLoginAuthTestCase {
         String api = "/pm/addOrganizationOwnerCarUser";
         AddOrganizationOwnerCarUserCommand cmd = new AddOrganizationOwnerCarUserCommand();
 
-        Long ownerId = 1L;
+        Long ownerId = 4L;
         Long carId = 1L;
 
-        cmd.setOwnerId(ownerId);
+        cmd.setOrgOwnerId(ownerId);
         cmd.setOrganizationId(1000001L);
         cmd.setCarId(carId);
 
@@ -38,8 +38,8 @@ public class AddOrganizationOwnerCarUserTest extends BaseLoginAuthTestCase {
         assertNotNull("The addOrganizationOwnerCarUser response OrganizationOwnerDTO should not be null.", response.getResponse());
 
         OrganizationOwnerDTO dto = response.getResponse();
-        assertEquals("The addOrganizationOwnerCarUser response OrganizationOwnerDTO contactName should be equal.", "zuolin", dto.getContactName());
-        assertEquals("The addOrganizationOwnerCarUser response OrganizationOwnerDTO contactToken should be equal.", "13245678911", dto.getContactToken());
+        assertEquals("The addOrganizationOwnerCarUser response OrganizationOwnerDTO contactName should be equal.", "赵六", dto.getContactName());
+        assertEquals("The addOrganizationOwnerCarUser response OrganizationOwnerDTO contactToken should be equal.", "12345678913", dto.getContactToken());
 
         DSLContext context = dbProvider.getDslContext();
         EhOrganizationOwnerOwnerCar ownerOwnerCar = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
@@ -62,7 +62,8 @@ public class AddOrganizationOwnerCarUserTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-create-owner-car-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-create-owner-car-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

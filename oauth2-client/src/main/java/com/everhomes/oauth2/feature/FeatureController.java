@@ -39,7 +39,8 @@ public class FeatureController {
     @RequestMapping("/getUserInfo")
     public Object getUserInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        String state = "DemoUser";
+        //可以不取 SessionId 而取其它合适的值
+        String state = request.getSession().getId();
 
         if(tokenManager.getAccessToken(state) == null) {
             URI uri = new URI(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=basic&state=%s#oauth2_redirect",
@@ -53,14 +54,17 @@ public class FeatureController {
             httpHeaders.setLocation(uri);
             return new ResponseEntity<Object>(httpHeaders, HttpStatus.SEE_OTHER);
         } else {
-            return "redirect:/result";
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(new URI("/result#clear_flag"));
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+//            return "redirect:/result";
         }
     }
 
     @RequestMapping("/result")
     public String result(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
-        String state = "DemoUser";
+        String state = request.getSession().getId();
         String token = this.tokenManager.getAccessToken(state);
 
         // acquire access token through OAuth2 provider's token service

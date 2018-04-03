@@ -21,8 +21,8 @@ public class OnlinePayController  extends ControllerBase{
 	@Autowired
 	private OnlinePayService onlinePay;
 	/**
-	 * <b>URL: /techpark/onlinePay/onlinePayBill
-	 * <p>线上支付
+	 * <b>URL: /techpark/onlinePay/onlinePayBill</b>
+	 * <p>线上支付</p>
 	 */
 	@RequestMapping("onlinePayBill")
 	@RestReturn(value=RechargeInfoDTO.class)

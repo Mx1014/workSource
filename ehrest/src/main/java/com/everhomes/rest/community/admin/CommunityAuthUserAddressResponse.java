@@ -8,7 +8,7 @@ import com.everhomes.rest.group.GroupMemberDTO;
 /**
  * <ul>
  * <li>nextPageAnchor: 下一页</li>
- * <li>dtos: 参考{@com.everhomes.rest.community.admin.GroupMemberDTO}</li>
+ * <li>dtos: 参考{@link com.everhomes.rest.community.admin.GroupMemberDTO}</li>
  * </ul>
  */
 public class CommunityAuthUserAddressResponse {

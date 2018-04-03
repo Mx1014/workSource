@@ -9,10 +9,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetDayPunchLogsCommand {
- 
-    private Long enterpirseId; 
-    private String queryDate;
-    
+
+    private Long enterpirseId;
+	 private String queryDate;
+
 
      @Override
      public String toString() {

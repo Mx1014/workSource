@@ -4,11 +4,11 @@
 <title>
     Message test
 </title>
-<script src="/static/jquery-2.1.3.min.js"></script>
-<script src="/static/jquery-ui.js"></script>
-<script src="jquery.fileupload.js"></script>
-<script src="jquery.lazyload.min.js"></script>
-<script src="/static/jquery.cookie.js"></script>
+<script src="/evh/static/jquery-2.1.3.min.js"></script>
+<script src="/evh/static/jquery-ui.js"></script>
+<script src="/evh/static/jquery.fileupload.js"></script>
+<script src="/evh/static/jquery.lazyload.min.js"></script>
+<script src="/evh/static/jquery.cookie.js"></script>
 </head>
 
 <body>
@@ -18,14 +18,14 @@
 <a id="originImage" href="#" alt="原图" target="_blank">
 <img id="headerImg" class="lazy" data-original=""/>
 </a>
-<input id="fileupload" type="file" name="upload_file" data-url="http://10.1.1.90:5000/upload/image" multiple>
+<input id="fileupload" type="file" name="upload_file" data-url="http://10.1.10.88:5000/upload/image?token=5aBROQLU14fGybMRFD9ChaQKKL5qDv776eitgVAGQq6s_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVh6Msa_8f1JtDcBus9MSdMY" multiple>
 <script>
 $('#fileupload').fileupload({
     dataType: 'text',
     done: function (e, data) {
         var obj = JSON.parse(data.result);
-        $("#originImage").attr("href", "http://10.1.1.90:5000/image/" + obj.response);
-        $("#headerImg").attr("data-original", "http://10.1.1.90:5000/image/" + obj.response + "/150_150");
+        $("#originImage").attr("href", obj.response.url);
+        $("#headerImg").attr("data-original", obj.response.url);
         $("img.lazy").lazyload();
     }
 });

@@ -1,7 +1,11 @@
 package com.everhomes.techpark.punch;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,30 +18,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommandResponse;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 
 /**
  * <ul>
@@ -52,6 +32,7 @@ import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 @RequestMapping("/techpark/punch")
 public class PunchController extends ControllerBase {
 
+	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchController.class);
 
@@ -60,22 +41,23 @@ public class PunchController extends ControllerBase {
 	
 	
 	
-	/**
-	 * <b>URL: /techpark/punch/addPunchExceptionRequest</b>
-	 * <p>
-	 * 增加打卡异常申报
-	 * </p>
-	 */
-	@RequestMapping("addPunchExceptionRequest")
-	@RestReturn(value = String.class)
-	public RestResponse addPunchExceptionRequest(
-			@Valid AddPunchExceptionRequestCommand cmd) {
-		punchService.createPunchExceptionRequest(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/addPunchExceptionRequest</b>
+//	 * <p>
+//	 * 增加打卡异常申报
+//	 * </p>
+//	 */
+//	@Deprecated
+//	@RequestMapping("addPunchExceptionRequest")
+//	@RestReturn(value = String.class)
+//	public RestResponse addPunchExceptionRequest(
+//			@Valid AddPunchExceptionRequestCommand cmd) {
+//		punchService.createPunchExceptionRequest(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * <b>URL: /techpark/punch/punchClock</b>
@@ -94,8 +76,77 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 
-	
+	/**
+	 * <b>URL: /techpark/punch/getPunchDayStatus</b>
+	 * <p>
+	 * 获取获取当前/某日 的打卡状态(以及将要打卡的状态)
+	 * </p>
+	 */
+	@RequestMapping("getPunchDayStatus")
+	@RestReturn(value = GetPunchDayStatusResponse.class)
+	public RestResponse getPunchDayStatus(@Valid GetPunchDayStatusCommand cmd) {
+		// 打卡返回打卡时间
+		GetPunchDayStatusResponse resp = punchService.getPunchDayStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	/**
+	 * <b>URL: /techpark/punch/listPunchMonthStatus</b>
+	 * <p>
+	 * 查询某月的打卡日历展示信息
+	 * </p>
+	 */
+	@RequestMapping("listPunchMonthStatus")
+	@RestReturn(value = ListPunchMonthStatusResponse.class)
+	public RestResponse listPunchMonthStatus(@Valid ListPunchMonthStatusCommand cmd) {
+		// 打卡返回打卡时间
+		ListPunchMonthStatusResponse resp = punchService.listPunchMonthStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
+	/**
+	 * <b>URL: /techpark/punch/checkAbnormalStatus</b>
+	 * <p>
+	 * 查询企业是否开启了异常审批
+	 * </p>
+	 */
+	@RequestMapping("checkAbnormalStatus")
+	@RestReturn(value = CheckAbnormalStatusResponse.class)
+	public RestResponse checkAbnormalStatus(@Valid CheckPunchAdminCommand cmd) {
+		// 打卡返回打卡时间
+		CheckAbnormalStatusResponse res = punchService.checkAbnormalStatus(cmd);
+		RestResponse response = new RestResponse(res); 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /techpark/punch/checkPunchAdmin</b>
+	 * <p>
+	 * 查询当前用户是否为该公司考勤的管理员(目前是企业管理员)
+	 * </p>
+	 */
+	@RequestMapping("checkPunchAdmin")
+	@RestReturn(value = CheckPunchAdminResponse.class)
+	public RestResponse checkPunchAdmin(@Valid CheckPunchAdminCommand cmd) {
+		// 打卡返回打卡时间
+		CheckPunchAdminResponse res = punchService.checkPunchAdmin(cmd);
+		RestResponse response = new RestResponse(res); 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /techpark/punch/getPunchNewException</b>
 	 * <p>
@@ -169,74 +220,98 @@ public class PunchController extends ControllerBase {
 		res.setResponseObject(pdl);
 		return res;
 	}
-	
-	
+
+
 	/**
-	 * <b>URL: /techpark/punch/addPunchRule</b>
+	 * <b>URL: /techpark/punch/listApprovalCategories</b>
 	 * <p>
-	 * 添加公司打卡规则
+	 * 根据请求 companyid和日期 取一年的打卡记录
 	 * </p>
 	 */
-	@RequestMapping("addPunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
-		punchService.createPunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
+	@RequestMapping("listApprovalCategories")
+	@RestReturn(value = ListApprovalCategoriesResponse.class)
+	public RestResponse listApprovalCategories() {
+
+		RestResponse res = new RestResponse(punchService.listApprovalCategories());
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
 	}
+
+//	/**
+//	 * <b>URL: /techpark/punch/addPunchRule</b>
+//	 * <p>
+//	 * 添加公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("addPunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
+//		punchService.createPunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+//	/**
+//	 * <b>URL: /techpark/punch/updatePunchRule</b>
+//	 * <p>
+//	 * 修改公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("updatePunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
+//		punchService.updatePunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /techpark/punch/deletePunchRule</b>
+//	 * <p>
+//	 * 删除公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("deletePunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
+//		punchService.deletePunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /techpark/punch/getPunchRule</b>
+//	 * <p>
+//	 * 查询公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("getPunchRule")
+//	@RestReturn(value = GetPunchRuleCommandResponse.class)
+//	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
+//		GetPunchRuleCommandResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
-	 * <b>URL: /techpark/punch/updatePunchRule</b>
-	 * <p>
-	 * 修改公司打卡规则
-	 * </p>
-	 */
-	@RequestMapping("updatePunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
-		punchService.updatePunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/punch/deletePunchRule</b>
-	 * <p>
-	 * 删除公司打卡规则
-	 * </p>
-	 */
-	@RequestMapping("deletePunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
-		punchService.deletePunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/punch/getPunchRule</b>
-	 * <p>
-	 * 查询公司打卡规则
-	 * </p>
-	 */
-	@RequestMapping("getPunchRule")
-	@RestReturn(value = GetPunchRuleCommandResponse.class)
-	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
-		GetPunchRuleCommandResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/punch/listPunchExceptionRequest</b>
+	 * <b>URL: /techpark/punch/listPunchExceptionRequestBetweenBeginAndEndTime</b>
 	 * <p>
 	 * 查询公司打卡异常申请列表
 	 * </p>
@@ -282,21 +357,21 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
  
-	/**
-	 * <b>URL: /techpark/punch/listPunchStatistics</b>
-	 * <p>
-	 * 查询公司打卡的统计结果
-	 * </p>
-	 */
-	@RequestMapping("listPunchStatistics")
-	@RestReturn(value = ListPunchStatisticsCommandResponse.class)
-	public RestResponse listPunchStatistics(@Valid ListPunchStatisticsCommand cmd) {
-		ListPunchStatisticsCommandResponse commandResponse = punchService.listPunchStatistics(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/listPunchStatistics</b>
+//	 * <p>
+//	 * 查询公司打卡的统计结果
+//	 * </p>
+//	 */
+//	@RequestMapping("listPunchStatistics")
+//	@RestReturn(value = ListPunchStatisticsCommandResponse.class)
+//	public RestResponse listPunchStatistics(@Valid ListPunchStatisticsCommand cmd) {
+//		ListPunchStatisticsCommandResponse commandResponse = punchService.listPunchStatistics(cmd);
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /techpark/punch/listPunchCount</b>
@@ -307,6 +382,8 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("listPunchCount")
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -328,6 +405,55 @@ public class PunchController extends ControllerBase {
 ////		response.setErrorDescription("OK");
 //		return commandResponse;
 //	}
-	
 
+    /**
+     * <b>URL: /techpark/punch/listPunchSupportiveAddress</b>
+     * <p>
+     * 获取用户对应的打卡wifi mac地址及经纬度信息
+     * </p>
+     */
+    @RequestMapping("listPunchSupportiveAddress")
+    @RestReturn(value = ListPunchSupportiveAddressCommandResponse.class)
+    public RestResponse listPunchSupportiveAddress(@Valid ListPunchSupportiveAddressCommand cmd) {
+        ListPunchSupportiveAddressCommandResponse res = punchService.listPunchSupportiveAddress(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /techpark/punch/addPunchPoints</b>
+     * <p>
+     * 上报经纬度坐标信息
+     * </p>
+     */
+    @RequestMapping("addPunchPoints")
+    @RestReturn(value = String.class)
+    public RestResponse addPunchPoints(@Valid AddPunchPointsCommand cmd) {
+        punchService.addPunchPoints(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /techpark/punch/addPunchWifis</b>
+     * <p>
+     * 上报wifi信息
+     * </p>
+     */
+    @RequestMapping("addPunchWifis")
+    @RestReturn(value = String.class)
+    public RestResponse addPunchWifis(@Valid AddPunchWifisCommand cmd) {
+        punchService.addPunchWifis(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    
 }

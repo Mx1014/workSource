@@ -4,7 +4,7 @@ package com.everhomes.rest.approval;
 /**
  * 
  * <ul>审批状态：
- * <li>WAITING_FOR_APPROVING: 0，待审批</li>
+ * <li>WAITING_FOR_APPROVING: 0，待审批 在日志表里只有提交的日志是这个 </li>
  * <li>AGREEMENT: 1，同意</li>
  * <li>REJECTION: 2，驳回</li>
  * </ul>

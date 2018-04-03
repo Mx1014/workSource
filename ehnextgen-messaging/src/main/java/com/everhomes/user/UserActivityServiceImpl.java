@@ -1,39 +1,6 @@
 package com.everhomes.user;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.exception.DataAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-
-import com.everhomes.activity.Activity;
-import com.everhomes.activity.ActivityProivider;
-import com.everhomes.activity.ActivityRoster;
-import com.everhomes.activity.ActivityStatus;
-import com.everhomes.activity.ActivityVideo;
-import com.everhomes.activity.ActivityVideoProvider;
-import com.everhomes.activity.CheckInStatus;
+import com.everhomes.activity.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
@@ -49,81 +16,71 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.NamespacesService;
+import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ListActiveStatResponse;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.UserActiveStatDTO;
-import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.ForumServiceErrorCode;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostFavoriteFlag;
-import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.common.ActivityListStyleFlag;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.AddUserFavoriteCommand;
-import com.everhomes.rest.user.BizOrderHolder;
-import com.everhomes.rest.user.CancelUserFavoriteCommand;
-import com.everhomes.rest.user.CommunityStatusResponse;
-import com.everhomes.rest.user.Contact;
-import com.everhomes.rest.user.ContactDTO;
-import com.everhomes.rest.user.FeedbackCommand;
-import com.everhomes.rest.user.FieldDTO;
-import com.everhomes.rest.user.FieldTemplateDTO;
-import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
-import com.everhomes.rest.user.GetRequestInfoCommand;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InvitationCommandResponse;
-import com.everhomes.rest.user.InvitationDTO;
-import com.everhomes.rest.user.ListActiveStatCommand;
-import com.everhomes.rest.user.ListPostResponse;
-import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
-import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
-import com.everhomes.rest.user.ListSignupActivitiesCommand;
-import com.everhomes.rest.user.ListTreasureResponse;
-import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
-import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
-import com.everhomes.rest.user.OrderCountDTO;
-import com.everhomes.rest.user.RequestFieldDTO;
-import com.everhomes.rest.user.RequestTemplateDTO;
-import com.everhomes.rest.user.SyncActivityCommand;
-import com.everhomes.rest.user.SyncBehaviorCommand;
-import com.everhomes.rest.user.SyncInsAppsCommand;
-import com.everhomes.rest.user.SyncLocationCommand;
-import com.everhomes.rest.user.SyncUserContactCommand;
-import com.everhomes.rest.user.UserFavoriteDTO;
-import com.everhomes.rest.user.UserFavoriteTargetType;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
-import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StatusChecker;
-import com.everhomes.util.Tuple;
+import com.everhomes.statistics.terminal.AppVersion;
+import com.everhomes.statistics.terminal.StatTerminalProvider;
+import com.everhomes.util.*;
 import com.everhomes.version.VersionService;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.ServiceAlliances;
+import com.everhomes.yellowPage.YellowPageProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.exception.DataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class UserActivityServiceImpl implements UserActivityService {
@@ -192,6 +149,24 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private VersionService versionService;
 
+    @Autowired
+    private StatTerminalProvider statTerminalProvider;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    protected ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private PointService pointService;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -251,10 +226,38 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (user != null)
             activity.setUid(user.getId());
         activity.setActivityType(ActivityType.fromString(cmd.getActivityType()).getCode());
+
+        if(OSType.fromString(cmd.getOsType()) == OSType.Unknown){
+            activity.setOsType(OSType.fromCode(cmd.getOsType()).getCode());
+        }else{
+            activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
+        }
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
-        if (user != null)
-        	userActivityProvider.addActivity(activity, user.getId());
-        
+        activity.setNamespaceId(UserContext.getCurrentNamespaceId());
+        activity.setVersionRealm(UserContext.current().getVersionRealm());
+
+        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
+        // if (user != null)
+        // 	userActivityProvider.addActivity(activity, user.getId());
+
+        // 增加版本号 用于运营统计 by sfyan 20170117
+        String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
+        String version = activity.getAppVersionName();
+        if(!org.springframework.util.StringUtils.isEmpty(version)
+                && version.split("\\.").length > 3)
+            version = version.substring(0, version.lastIndexOf("."));
+
+        AppVersion appVersion = statTerminalProvider.findAppVersion(activity.getNamespaceId(), version, type);
+        if(null == appVersion){
+            appVersion = new AppVersion();
+            appVersion.setName(version);
+            appVersion.setType(type);
+            appVersion.setNamespaceId(activity.getNamespaceId());
+            appVersion.setRealm(activity.getVersionRealm());
+            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+            appVersion.setDefaultOrder((int)versionRange.getUpperBound());
+            statTerminalProvider.createAppVersion(appVersion);
+        }
     }
 
     private static Timestamp getCreateTime() {
@@ -458,9 +461,36 @@ public class UserActivityServiceImpl implements UserActivityService {
     }
 
     @Override
-    public void updateFeedback(FeedbackCommand cmd) {
+    public void addFeedback(FeedbackCommand cmd) {
+
+
+        FeedbackHandler handler = getFeedBackHandler(cmd.getTargetType());
+
+        dbProvider.execute(status -> {
+
+            if(handler != null){
+                //业务实现
+                handler.beforeAddFeedback(cmd);
+            }
+
+            Feedback feedback = addFeedbackCommon(cmd);
+
+            if(handler != null){
+                //业务实现
+                handler.afterAddFeedback(feedback);
+            }
+
+            return null;
+        });
+
+    }
+
+    private Feedback addFeedbackCommon(FeedbackCommand cmd){
         User user = UserContext.current().getUser();
+
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
+        feedback.setNamespaceId(UserContext.getCurrentNamespaceId());
+        feedback.setStatus(Byte.parseByte("0"));
         if (user == null) {
             feedback.setOwnerUid(1L);
         } else {
@@ -474,28 +504,149 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
         feedback.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         userActivityProvider.addFeedback(feedback, feedback.getOwnerUid());
-        
-        if(cmd.getFeedbackType()== null || cmd.getFeedbackType() == 0){
-        	NewTopicCommand ntc = new NewTopicCommand();
-        	ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
-        	ntc.setCreatorTag(EntityType.USER.getCode());
-        	ntc.setTargetTag(EntityType.USER.getCode());
-        	ntc.setContentCategory(feedback.getContentCategory());
-//        	ntc.setActionCategory(actionCategory);
-        	ntc.setSubject(feedback.getSubject());
-        	if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
-        		ntc.setContentType(PostContentType.TEXT.getCode());
-        	else{
-        		ntc.setContentType(PostContentType.IMAGE.getCode());
-        	}
-        	ntc.setContent(feedback.getContent());
-        	ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-        	ntc.setVisibleRegionId(0L);
-        	
-        	forumService.createTopic(ntc);
+        return feedback;
+    }
+
+    @Override
+    public ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd) {
+    	ListFeedbacksResponse response = new ListFeedbacksResponse();
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), null, cmd.getStatus(), pageSize + 1);
+    	if (null == results)
+    		return response;
+    	Long nextPageAnchor = null;
+    	if (results != null && results.size() > pageSize) {
+    		results.remove(results.size() - 1);
+    		nextPageAnchor = results.get(results.size() - 1).getId();
+    	}
+    	
+    	List<FeedbackDTO> feedbackDtos = new ArrayList<FeedbackDTO>();
+    	results.forEach(r -> {
+    		FeedbackDTO feedbackDto = ConvertHelper.convert(r, FeedbackDTO.class);
+    		User user = userProvider.findUserById(feedbackDto.getOwnerUid());
+    		if(user != null){
+    			feedbackDto.setOwnerNickName(user.getNickName());
+    		}
+
+    		FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
+    		feedbackDto.setContentCategoryText(contentCategory.getText());
+
+            FeedbackHandler handler = getFeedBackHandler(feedbackDto.getTargetType());
+            if(handler != null){
+                //业务实现
+                handler.populateFeedbackDTO(feedbackDto);
+            }
+
+    		feedbackDtos.add(feedbackDto);
+    	});
+    	response.setNextPageAnchor(nextPageAnchor); 
+    	response.setFeedbackDtos(feedbackDtos);
+    	return response;
+    }
+
+	@Override
+	public void updateFeedback(UpdateFeedbackCommand cmd) {
+        Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
+        if (feedback == null) {
+            LOGGER.error("feedback is not exist");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_PARAMS, "feedback is not exist");
+        }
+        feedback.setStatus((byte) 1);
+        feedback.setVerifyType(cmd.getVerifyType());
+        feedback.setHandleType(cmd.getHandleType());
+        FeedbackHandler handler = getFeedBackHandler(feedback.getTargetType());
+
+        dbProvider.execute(status -> {
+
+            if (handler != null) {
+                //业务实现
+                handler.beforeUpdateFeedback(cmd);
+            }
+
+            //更新自己的状态
+            userActivityProvider.updateFeedback(feedback);
+            //如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+            if (feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()) {
+                userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+            }
+
+            if (handler != null) {
+                //业务实现
+                handler.afterUpdateFeedback(feedback);
+            }
+
+            return null;
+        });
+
+        //事件处理（比如扣积分等）
+        if (handler != null) {
+            handler.feedbackEvent(feedback);
         }
     }
 
+    private FeedbackHandler getFeedBackHandler(Byte feedbackTargetType){
+        FeedbackHandler handler = null;
+        if(feedbackTargetType != null) {
+            handler = PlatformContext.getComponent(FeedbackHandler.FEEDBACKHANDLER + feedbackTargetType);
+        }
+        return handler;
+    }
+//		//更新自己的状态
+//		userActivityProvider.updateFeedback(feedback);
+//
+//		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+//		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+//		}
+//
+//		//当前只对post类型的举报做实际处理，处理的方式只有删除
+//		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			 Post post = forumProvider.findPostById(feedback.getTargetId());
+//			 if(post != null){
+//				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+//             }
+//        }
+
+
+//    }
+
+    /*private void feedbackEvent(Feedback feedback) {
+        Post post = forumProvider.findPostById(feedback.getTargetId());
+        if(post == null) {
+            return;
+        }
+        Post parentPost = null;
+        if (post.getParentPostId() != null && post.getParentPostId() != 0) {
+            parentPost = forumProvider.findPostById(post.getParentPostId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        Post tempParentPost = parentPost;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(post.getCreatorUid());
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
+            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("feedback", StringHelper.toJsonString(feedback));
+            event.addParam("post", StringHelper.toJsonString(post));
+            if (tempParentPost != null) {
+                event.addParam("parentPost", StringHelper.toJsonString(tempParentPost));
+            }
+        });
+    }*/
+	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {
     	
@@ -555,7 +706,14 @@ public class UserActivityServiceImpl implements UserActivityService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.TOPIC.getCode(), locator, pageSize + 1);
-        
+
+        Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         if (CollectionUtils.isEmpty(result)) {
         	ListPostResponse response = new ListPostResponse();
             response.setPostDtos(new ArrayList<PostDTO>());
@@ -578,7 +736,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        Collections.reverse(ids);
         List<PostDTO> posts = forumService.getTopicById(ids, cmd.getCommunityId(), false, true);
         
-        Long nextPageAnchor = locator.getAnchor();
         ListPostResponse response = new ListPostResponse();
         response.setPostDtos(posts);
         response.setNextPageAnchor(nextPageAnchor);
@@ -626,6 +783,10 @@ public class UserActivityServiceImpl implements UserActivityService {
             ListTreasureResponse rsp = new ListTreasureResponse();
             rsp.setBusinessUrl(getTouristBusinessUrl());
             rsp.setBusinessRealm(getBusinessRealm());
+            //设置活动列表的默认列表样式, add by tt, 20170116
+            rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
+            rsp.setPoints(0L);
+            rsp.setPointsUrlStatus(TrueOrFalseFlag.FALSE.getCode());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
@@ -641,6 +802,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         		UserProfileContstant.RECEIVED_COUPON_COUNT);
         UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
         		UserProfileContstant.RECEIVED_ORDER_COUNT);
+        UserProfile shakeOpenDoorUser = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+          		UserProfileContstant.SHAKE_OPEN_DOOR);
+        
         if (item != null)
             rsp.setSharedCount(NumberUtils.toInt(item.getItemValue(), 0));
         if (fav != null)
@@ -651,6 +815,13 @@ public class UserActivityServiceImpl implements UserActivityService {
         	rsp.setIsAppliedShop(NumberUtils.toInt(applied.getItemValue(), 0));
         	if (NumberUtils.toInt(applied.getItemValue(), 0) != 0) 
         		rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
+        }
+        //#17132
+        //INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('always.store.management', 'true', '是否始终是店铺管理', 0, NULL);
+        boolean alwaysStoreManage = configurationProvider.getBooleanValue("always.store.management", false);
+        if(alwaysStoreManage){
+        	rsp.setIsAppliedShop(1);
+            rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
         }
         
         if(couponCount != null) {
@@ -671,10 +842,155 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         rsp.setBusinessUrl(getBusinessUrl());
         rsp.setBusinessRealm(getBusinessRealm());
+        
+        //设置活动列表的默认列表样式, add by tt, 20170116
+        rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
+        
+        //设置用户的摇一摇开门是否开启
+        if(shakeOpenDoorUser != null){
+        	rsp.setShakeOpenDoorUser(Byte.parseByte(shakeOpenDoorUser.getItemValue()));
+        }else{
+        	rsp.setShakeOpenDoorUser(Byte.parseByte("0"));
+        }
+        String shakeOpenDoorNamespace = getShakeOpenDoor();
+        if(shakeOpenDoorNamespace != null){
+        	rsp.setShakeOpenDoorNamespace(Byte.parseByte(shakeOpenDoorNamespace));
+        }else{
+        	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
+        }
         return rsp;
     }
-    
-    private String getBusinessRealm() {
+
+    @Override
+    public GetUserTreasureResponse getUserTreasureV2() {
+        GetUserTreasureResponse rsp = new GetUserTreasureResponse();
+
+        UserTreasureDTO coupon = new UserTreasureDTO();
+        coupon.setCount(0L);
+        coupon.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        coupon.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        UserTreasureDTO order = new UserTreasureDTO();
+        order.setCount(0L);
+        order.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        order.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        rsp.setCoupon(coupon);
+        rsp.setOrder(order);
+
+        UserTreasureDTO point = pointService.getPointTreasure();
+        rsp.setPoint(point);
+
+        if(!userService.isLogon()) {
+            return rsp;
+        }
+
+        User user = UserContext.current().getUser();
+
+        BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
+
+        // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        // UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if (response != null && response.getResponse() != null) {
+            long promotionCount = response.getResponse().promotionCount;
+            long shoppingCardCount = response.getResponse().shoppingCardCount;
+            long orderCount = response.getResponse().orderCount;
+
+            coupon.setCount(promotionCount + shoppingCardCount);
+            order.setCount(orderCount);
+        }
+
+        coupon.setUrl(getMyCoupon());
+        coupon.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        order.setUrl(getMyOrderUrl());
+        order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        return rsp;
+    }
+
+    private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", user.getNamespaceId());
+        param.put("userId", user.getId());
+
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("body", param);
+
+        String paramJson = StringHelper.toJsonString(bodyMap);
+
+        BizMyUserCenterCountResponse response = null;
+        try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, param = {}", paramJson);
+            }
+            ResponseEntity<String> responseEntity = bizHttpRestCallProvider.syncRestCall(
+                    "/rest/openapi/myCenter/myUserCenterCount", paramJson);
+
+            String body = responseEntity.getBody();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, response = {}", body);
+            }
+            response = (BizMyUserCenterCountResponse) StringHelper.fromJsonString(body, BizMyUserCenterCountResponse.class);
+        } catch (Exception e) {
+            LOGGER.error("User treasure biz call error", e);
+        }
+        return response;
+    }
+
+    @Override
+	public ListBusinessTreasureResponse getUserBusinessTreasure() {
+    	// 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
+    	if(!userService.isLogon()){
+    		ListBusinessTreasureResponse rsp = new ListBusinessTreasureResponse();
+            rsp.setBusinessUrl(getTouristBusinessUrl());
+            rsp.setBusinessRealm(getBusinessRealm());
+            return rsp;
+        }
+        //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
+        User user = UserContext.current().getUser();
+        ListBusinessTreasureResponse rsp = ConvertHelper.convert(user, ListBusinessTreasureResponse.class);
+        UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
+                UserProfileContstant.IS_APPLIED_SHOP);
+        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+        		UserProfileContstant.RECEIVED_COUPON_COUNT);
+        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+        		UserProfileContstant.RECEIVED_ORDER_COUNT);
+        
+        rsp.setApplyShopUrl(getApplyShopUrl());
+        if (applied != null) {
+        	rsp.setIsAppliedShop(NumberUtils.toInt(applied.getItemValue(), 0));
+        	if (NumberUtils.toInt(applied.getItemValue(), 0) != 0) 
+        		rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
+        }
+        
+        if(couponCount != null) {
+        	rsp.setCouponCount(NumberUtils.toInt(couponCount.getItemValue(), 0));
+        }else {
+        	rsp.setCouponCount(0);
+        }
+        rsp.setMyOrderUrl(getMyOrderUrl());
+        rsp.setMyCoupon(getMyCoupon());
+        
+        if(orderCount != null) {
+        	rsp.setOrderCount(NumberUtils.toInt(orderCount.getItemValue(), 0));
+        } else {
+        	rsp.setOrderCount(0);
+        }
+        
+        rsp.setBusinessUrl(getBusinessUrl());
+        rsp.setBusinessRealm(getBusinessRealm());
+        
+        return rsp;
+	}
+
+	private Byte getActivityDefaultListStyle() {
+    	String activityDefaultListStyle = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.ACTIVITY_DEFAULT_LIST_STYLE, String.valueOf(ActivityListStyleFlag.ZUOLIN_COMMON.getCode()));
+    	return Byte.parseByte(activityDefaultListStyle);
+	}
+
+	private String getBusinessRealm() {
     	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
         if(businessRealm.length() == 0) {
             LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
@@ -983,6 +1299,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        }
         
         Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
         // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
         // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928   
@@ -1014,7 +1336,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
+        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1, ActivityRosterStatus.NORMAL.getCode());
         
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
@@ -1077,7 +1399,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         dto.setPosterUrl(posterUrl);
         fixupVideoInfo(dto); // added by janson
         
-        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid);
+        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid, ActivityRosterStatus.NORMAL.getCode());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         
         List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
@@ -1200,15 +1522,56 @@ public class UserActivityServiceImpl implements UserActivityService {
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
 
-		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
-		handler.addCustomRequest(cmd);
+        //与工作流对接
+        CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
+        Long userId = UserContext.current().getUser().getId();
+        cmd21.setApplyUserId(userId);
+        cmd21.setReferType(cmd.getTemplateType());
+        cmd21.setProjectId(cmd.getOwnerId());
+        cmd21.setProjectType(EhCommunities.class.getName());
+        String content= "";
+        User user = UserContext.current().getUser();
+
+        ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(cmd.getServiceAllianceId(), null, null);
+        if(serviceOrg != null) {
+            content += "服务名称 : " + serviceOrg.getName() + "\n";
+            ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
+            cmd21.setTitle(category.getName());
+        }
+//        if (user.getNickName()!=null)
+//            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
+
+
+        cmd21.setContent(content);
+        cmd21.setCurrentOrganizationId(cmd.getCreatorOrganizationId());
+        RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
+
+
+
+        //创建一个空的flow
+        GeneralModuleInfo gm = new GeneralModuleInfo();
+        gm.setNamespaceId(UserContext.getCurrentNamespaceId());
+        gm.setOrganizationId(cmd.getCreatorOrganizationId());
+        gm.setProjectId(cmd.getOwnerId());
+        gm.setProjectType(EntityType.COMMUNITY.getCode());
+        gm.setOwnerType(FlowOwnerType.CUSTOM_REQUEST.getCode());
+        gm.setOwnerId(template.getId());
+        gm.setModuleId(40500l);//服务联盟id
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(40500l);
+        gm.setModuleType(module.getName());
+
+
+        CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		Long id = handler.addCustomRequest(cmd);
+		cmd21.setReferId(id);
+        flowService.createDumpFlowCase(gm, cmd21);
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
+	public GetRequestInfoResponse getCustomRequestInfo(GetRequestInfoCommand cmd) {
 		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
 		
-		List<RequestFieldDTO> dto = handler.getCustomRequestInfo(cmd.getId());
+		GetRequestInfoResponse dto = handler.getCustomRequestInfo(cmd.getId());
 		return dto;
 	}
 	
@@ -1217,8 +1580,25 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         if(!StringUtils.isEmpty(templateType)) {
             String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
-            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
-            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+//            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
+//            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+//            }
+            if(templateType.startsWith(CustomRequestConstants.RESERVE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.APARTMENT_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SETTLE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SETTLE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.INVEST_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.INVEST_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GOLF_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GOLF_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GYM_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GYM_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SERVER_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SERVER_REQUEST_CUSTOM;
             }
             handler = PlatformContext.getComponent(handlerPrefix + templateType);
         }
@@ -1275,11 +1655,13 @@ public class UserActivityServiceImpl implements UserActivityService {
 	 * */
 	@Scheduled(cron = "0 10 3 * * ?") 
 	public void addAnyDayActive(){
-		Date statDate = new Date();
-		List<NamespaceInfoDTO>  namespaces = namespacesService.listNamespace();
-		for(NamespaceInfoDTO namespace : namespaces){
-			addAnyDayActive(statDate, namespace.getId());
-		}
+        if (Objects.equals(scheduleProvider.getRunningFlag(), RunningFlag.TRUE.getCode())) {
+            Date statDate = new Date();
+            List<NamespaceInfoDTO>  namespaces = namespacesService.listNamespace();
+            for(NamespaceInfoDTO namespace : namespaces){
+                addAnyDayActive(statDate, namespace.getId());
+            }
+        }
 	}
 	
 	@Override
@@ -1362,4 +1744,35 @@ public class UserActivityServiceImpl implements UserActivityService {
             return homeUrl;
         }
 	}
+	
+	private String getShakeOpenDoor() {
+		String shakeOpenDoor = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHAKE_OPEN_DOOR, "");
+		if(shakeOpenDoor.length() == 0) {
+            LOGGER.error("Invalid shake open door configuration, shakeOpenDoor=" + shakeOpenDoor);
+            return null;
+        } else {
+            return shakeOpenDoor;
+        }
+	}
+	
+	@Override
+	public void updateShakeOpenDoor(Byte shakeOpenDoor) {
+		String namespaceOpen = getShakeOpenDoor();
+		User user = UserContext.current().getUser();
+		
+		if("1".equals(namespaceOpen)){
+			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, shakeOpenDoor.toString());
+		}else{
+			LOGGER.error("namespace configuration is false, then user configuration is prohibited");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_FORBIDDEN, "namespace configuration is false, then user configuration is prohibited");
+		}
+		
+	}
+
+    public static void main(String[] args) {
+        System.out.println(ActivityType.fromString("logon").getCode());
+        System.out.println(ActivityType.fromString("1").getCode());
+    }
+
 }

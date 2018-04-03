@@ -24,9 +24,9 @@ import javax.validation.constraints.Size;
 public class UpdateOrganizationOwnerCarCommand {
 
     @NotNull private Long id;
-    @NotNull private Long communityId;
+    private Long communityId;
     @Size(max = 20)
-    @NotNull private String plateNumber;
+    private String plateNumber;
     @NotNull private Long organizationId;
     @Size(max = 20)
     private String brand;

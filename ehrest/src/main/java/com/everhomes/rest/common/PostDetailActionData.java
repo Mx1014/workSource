@@ -19,7 +19,17 @@ public class PostDetailActionData implements Serializable{
     private Long forumId;
     private Long topicId;
     
-    public Long getForumId() {
+    public PostDetailActionData() {
+		super();
+	}
+
+	public PostDetailActionData(Long forumId, Long topicId) {
+		super();
+		this.forumId = forumId;
+		this.topicId = topicId;
+	}
+
+	public Long getForumId() {
         return forumId;
     }
 
@@ -39,4 +49,8 @@ public class PostDetailActionData implements Serializable{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
+	public String toUrlString(String url) {
+		return url.replace("${forumId}", String.valueOf(forumId)).replace("${topicId}", String.valueOf(topicId));
+	}
 }

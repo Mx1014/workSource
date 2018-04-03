@@ -1,40 +1,17 @@
 package com.everhomes.user;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.AddUserFavoriteCommand;
-import com.everhomes.rest.user.CancelUserFavoriteCommand;
-import com.everhomes.rest.user.CommunityStatusResponse;
-import com.everhomes.rest.user.ContactDTO;
-import com.everhomes.rest.user.FeedbackCommand;
-import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
-import com.everhomes.rest.user.GetRequestInfoCommand;
-import com.everhomes.rest.user.InvitationCommandResponse;
-import com.everhomes.rest.user.ListActiveStatCommand;
-import com.everhomes.rest.user.ListPostResponse;
-import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
-import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
-import com.everhomes.rest.user.ListSignupActivitiesCommand;
-import com.everhomes.rest.user.ListTreasureResponse;
-import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
-import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
-import com.everhomes.rest.user.RequestFieldDTO;
-import com.everhomes.rest.user.RequestTemplateDTO;
-import com.everhomes.rest.user.SyncActivityCommand;
-import com.everhomes.rest.user.SyncBehaviorCommand;
-import com.everhomes.rest.user.SyncInsAppsCommand;
-import com.everhomes.rest.user.SyncLocationCommand;
-import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.Tuple;
+
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
 
 public interface UserActivityService {
     CommunityStatusResponse listCurrentCommunityStatus();
@@ -55,7 +32,11 @@ public interface UserActivityService {
 
     List<UserContact> listUserRetainIdentifiers(String identifer);
 
-    void updateFeedback(FeedbackCommand cmd);
+    void addFeedback(FeedbackCommand cmd);
+    
+    ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd);
+    
+    void updateFeedback(UpdateFeedbackCommand cmd);
     
     void cancelFavorite(CancelUserFavoriteCommand cmd);
 
@@ -90,12 +71,17 @@ public interface UserActivityService {
 	RequestTemplateDTO getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd);
 	List<RequestTemplateDTO> getCustomRequestTemplateByNamespace();
 	void addCustomRequest(@Valid AddRequestCommand cmd);
-	List<RequestFieldDTO> getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
+	GetRequestInfoResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
 
 	ListActiveStatResponse listActiveStat(ListActiveStatCommand cmd);
 
 	void addAnyDayActive(Date statDate, Integer namespaceId);
-
+	
 	String getBizUrl();
- 
+
+	ListBusinessTreasureResponse getUserBusinessTreasure();
+	
+	void updateShakeOpenDoor(Byte shakeOpenDoor);
+
+    GetUserTreasureResponse getUserTreasureV2();
 }

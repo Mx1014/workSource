@@ -1,0 +1,34 @@
+package com.everhomes.rest.organization;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+public class ListOrganizationJobPositionResponse {
+	private Long nextPageAnchor;
+	
+	@ItemType(OrganizationJobPositionDTO.class)
+	private List<OrganizationJobPositionDTO>  requests;
+	
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public List<OrganizationJobPositionDTO> getRequests() {
+		return requests;
+	}
+
+	public void setRequests(List<OrganizationJobPositionDTO> requests) {
+		this.requests = requests;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

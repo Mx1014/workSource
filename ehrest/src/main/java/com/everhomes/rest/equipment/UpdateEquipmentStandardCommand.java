@@ -1,15 +1,19 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>id: 标准id</li>
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 标准所属项目id</li>
+ *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>standardSource: 标准来源</li>
@@ -19,6 +23,8 @@ import com.everhomes.util.StringHelper;
  *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>templateId: 巡检项模板id</li>
  *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>communities: 应用项目id列表</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -31,6 +37,12 @@ public class UpdateEquipmentStandardCommand {
 	@NotNull
 	private String ownerType;
 
+	@NotNull
+	private Long targetId;
+
+	@NotNull
+	private String targetType;
+
 	private String name;
 	
 	private String standardNumber;
@@ -42,13 +54,53 @@ public class UpdateEquipmentStandardCommand {
 	private String remarks;
 	
 	private Byte standardType;
-	
+	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	
 	private Long templateId;
 	
 	private Integer reviewExpiredDays;
 	
+	private Long inspectionCategoryId;
+	
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> group;
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public List<StandardGroupDTO> getGroup() {
+		return group;
+	}
+
+	public void setGroup(List<StandardGroupDTO> group) {
+		this.group = group;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -143,6 +195,14 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setReviewExpiredDays(Integer reviewExpiredDays) {
 		this.reviewExpiredDays = reviewExpiredDays;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

@@ -1,0 +1,40 @@
+{
+  "eh_business_promotions": [
+    {
+      "id": 2,
+      "namespace_id": 0,
+      "subject": "简单的土豆泥沙拉",
+      "description": "简单的土豆泥沙拉",
+      "poster_uri": "cs://1/image/aW1hZ2UvTVRvd05tWmpaVFZtWVRkaE0yUTVNMlZpTVdFME9EbG1abVl3WldRMU16RTJZZw",
+      "price": 14.02,
+      "commodity_url": "http://www.baidu.com",
+      "default_order": 10,
+      "create_time": "2017/1/10 16:20:23",
+      "creator_uid": 1
+    },
+    {
+      "id": 3,
+      "namespace_id": 0,
+      "subject": "藜麦减脂沙拉",
+      "description": "藜麦减脂沙拉",
+      "poster_uri": "cs://1/image/aW1hZ2UvTVRvNVpURXdaR0UzT1RjeE5qWXpPV1U1WmpBeE9XSmhPVGs0WldFMFptUXhaUQ",
+      "price": 22.22,
+      "commodity_url": "http://www.baidu.com",
+      "default_order": 9,
+      "create_time": "2017/1/10 16:20:23",
+      "creator_uid": 1
+    },
+    {
+      "id": 4,
+      "namespace_id": 0,
+      "subject": "三色金枪鱼沙拉",
+      "description": "简单的土豆泥沙拉",
+      "poster_uri": "cs://1/image/aW1hZ2UvTVRvME1EZzFZV1JrTnpZNVlqQXlNVGd5WVdZNE1HSmpOR00xWWpnd05HWXlNUQ",
+      "price": 1080.56,
+      "commodity_url": "http://www.baidu.com",
+      "default_order": 8,
+      "create_time": "2017/1/10 16:20:23",
+      "creator_uid": 1
+    }
+  ]
+}

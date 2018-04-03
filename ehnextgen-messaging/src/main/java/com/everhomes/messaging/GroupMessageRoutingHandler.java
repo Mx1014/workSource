@@ -1,24 +1,25 @@
 // @formatter:off
 package com.everhomes.messaging;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupService;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserNotificationSetting;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.Name;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.entity.EntityType;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupService;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.user.UserLogin;
-import com.everhomes.util.Name;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -35,6 +36,9 @@ public class GroupMessageRoutingHandler implements MessageRoutingHandler {
     
     @Autowired
     private MessagingService messagingService;
+
+    @Autowired
+    private UserProvider userProvider;
     
     @Value("${messaging.routing.block.size}")
     private int groupRoutingBlockSize;
@@ -81,9 +85,25 @@ public class GroupMessageRoutingHandler implements MessageRoutingHandler {
             .forEach((m)->{
                 String channelType = entityTypeToChannelType.get(m.getMemberType());
                 if(channelType != null) {
-                    this.messagingService.routeMessage(context, senderLogin, appId, channelType, 
-                            String.valueOf(m.getMemberId()), message, deliveryOption);    
+
+                    // 判断group的成员是否设置了推送免打扰     add by xq.tian 2017/04/17
+                    UserNotificationSetting notificationSetting = userProvider.findUserNotificationSetting(
+                            com.everhomes.rest.common.EntityType.USER.getCode(),
+                            m.getMemberId(),
+                            com.everhomes.rest.common.EntityType.GROUP.getCode(),
+                            groupId
+                    );
+                    int newDeliveryOption = deliveryOption;
+                    if (notificationSetting != null) {
+                        UserMuteNotificationFlag flag = UserMuteNotificationFlag.fromCode(notificationSetting.getMuteFlag());
+                        if (flag == UserMuteNotificationFlag.MUTE) {
+                            newDeliveryOption &= ~MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode();
+                        }
                     }
+
+                    this.messagingService.routeMessage(context, senderLogin, appId, channelType, 
+                           String.valueOf(m.getMemberId()), message, newDeliveryOption);
+                }
             });
             
             if(members.size() < groupRoutingBlockSize)

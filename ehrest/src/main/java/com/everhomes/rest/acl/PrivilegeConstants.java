@@ -2,62 +2,326 @@ package com.everhomes.rest.acl;
 
 public interface PrivilegeConstants {
     // System defined privileges
-    public static final long All = 1L;
-    public static final long Visible = 2L;
-    public static final long Read = 3L; 
-    public static final long Create = 4L;
-    public static final long Write = 5L;
-    public static final long Delete = 6L;
+    long All = 1L;
+    long Visible = 2L;
+    long Read = 3L; 
+    long Create = 4L;
+    long Write = 5L;
+    long Delete = 6L;
 
     // privileges defined by Forum module
-    public static final long ForumNewTopic = 100L;
-    public static final long ForumDeleteTopic = 101L;
-    public static final long ForumNewReply = 102L;
-    public static final long ForumDeleteReply = 103L;
+    long ForumNewTopic = 100L;
+    long ForumDeleteTopic = 101L;
+    long ForumNewReply = 102L;
+    long ForumDeleteReply = 103L;
     
     // privileges defined by Group module
-    public static final long GroupListMember = 151L;
-    public static final long GroupAdminOps = 152L;
-    public static final long GroupInviteJoin = 153L;
-    public static final long GroupUpdateMember = 154L;
-    public static final long GroupApproveMember = 155L;
-    public static final long GroupRejectMember = 156L;
-    public static final long GroupRevokeMember = 157L;
+    long GroupListMember = 151L;
+    long GroupAdminOps = 152L;
+    long GroupInviteJoin = 153L;
+    long GroupUpdateMember = 154L;
+    long GroupApproveMember = 155L;
+    long GroupRejectMember = 156L;
+    long GroupRevokeMember = 157L;
     
-    public static final long GroupRequestAdminRole = 161L;
-    public static final long GroupInviteAdminRole = 162L;
+    long GroupRequestAdminRole = 161L;
+    long GroupInviteAdminRole = 162L;
     
-    public static final long GroupPostTopic = 171L;
+    long GroupPostTopic = 171L;
     
     // privileges defined by Task module
-    public static final long TaskAllListPosts = 305L;
-    public static final long TaskGuaranteeListPosts = 303L; 
-    public static final long TaskSeekHelpListPosts = 304L;
-    public static final long TaskAcceptAndRefuse = 306L;
-    public static final long TaskProcessingAndGrab = 307L; 
+    long TaskAllListPosts = 305L;
+    long TaskGuaranteeListPosts = 303L; 
+    long TaskSeekHelpListPosts = 304L;
+    long TaskAcceptAndRefuse = 306L;
+    long TaskProcessingAndGrab = 307L; 
     
     // privileges defined by pm Task2.0 module
-    public static final long LISTALLTASK = 904L;
-    public static final long LISTUSERTASK = 805L;
-    public static final long ASSIGNTASK = 331L;
-    public static final long COMPLETETASK = 332L; 
-    public static final long CLOSETASK = 333L;
-    public static final long REVISITTASK = 920L;
+    long LISTALLTASK = 904L;
+    long LISTUSERTASK = 805L;
+    long ASSIGNTASK = 331L;
+    long COMPLETETASK = 332L; 
+    long CLOSETASK = 333L;
+    long REVISITTASK = 920L;
+    long PM_TASK_MODULE = 10008L;
+    long REPLACE_CREATE_TASK = 10138L;
+
     
     // privileges defined by Notice module
-    public static final long NoticeManagementPost = 200L;
+    long NoticeManagementPost = 200L;
     
     // privileges defined by Role module
-    public static final long RolePrivilegeList = 606L;
-    public static final long RolePrivilegeUpdate = 607L;
+    long RolePrivilegeList = 606L;
+    long RolePrivilegeUpdate = 607L;
     
     // privileges defined by Admin module
-    public static final long OrgAdminList = 604L;
-    public static final long OrgAdminUpdate = 605L;
+    long OrgAdminList = 604L;
+    long OrgAdminUpdate = 605L;
     
-    public static final long AclinkManager = 720L;
+    long AclinkManager = 720L;
     
-    public static final long AclinkInnerManager = 725L;
+    long AclinkInnerManager = 725L;
     
-    public static final long OfficialActivity = 310L;
+    long OfficialActivity = 310L;
+
+    //超级管理员权限
+    long ORGANIZATION_SUPER_ADMIN = 10L;
+
+    //公司管理员权限
+    long ORGANIZATION_ADMIN = 15L;
+
+    //管理员管理
+    long ADMIN_MANAGE = 10043L;
+
+    //普通管理员管理
+    long ENTERPRISE_ADMIN_MANAGE = 10095L;
+
+    //业务授权
+    long SERVICE_AUTHORIZATION = 10044L;
+
+    //黑名单话题投票发帖、评论、回复评论
+    long BLACKLIST_COMMON_POLLING_POST = 1001L;
+
+    //黑名单活动发帖、评论、回复评论
+    long BLACKLIST_ACTIVITY_POST = 1002L;
+
+    //黑名单公告发帖、评论、回复评论
+    long BLACKLIST_NOTICE_POST = 1003L;
+
+    //黑名单园区快讯发帖、评论、回复评论
+    long BLACKLIST_NEWS = 1004L;
+
+    //黑名单创建俱乐部
+    long BLACKLIST_CLUP = 1005L;
+
+    //黑名单物业发帖、评论、回复评论
+    long BLACKLIST_PROPERTY_POST = 1006L;
+
+    //黑名单发消息
+    long BLACKLIST_SEND_MESSAGE = 1007L;
+
+    //黑名单意见反馈论坛
+    long BLACKLIST_FEEDBACK_FORUM = 1008L;
+
+
+    //11开头是资源预约权限 
+    long RENTAL_CHECK = 1101L;
+
+    // ----------- 客户资料管理权限 --------------
+    long CUSTOMER_CREATE    = 10127L;// 创建客户
+    long CUSTOMER_IMPORT    = 10128L;// 批量导入
+    long CUSTOMER_EXPORT    = 10129L;// 批量导出
+    long CUSTOMER_STATISTIC = 10130L;// 查看统计信息
+    long CUSTOMER_UPDATE    = 10131L;// 修改客户资料
+    long CUSTOMER_LIST      = 10132L;// 查看客户资料
+    long CUSTOMER_MANAGE    = 10133L;// 管理客户资料
+    long CUSTOMER_DELETE    = 10134L;// 删除客户资料
+
+
+    long DELETE_OHTER_TOPIC      = 10140L;// 普通贴删除权限
+    long DELETE_NOTIC_TOPIC    = 10141L;// 公告贴删除权限
+    long DELETE_ACTIVITY_TOPIC0    = 10142L;// 非官方活动贴删除权限
+    long DELETE_ACTIVITY_TOPIC1    = 10143L;// 官方活动贴删除权限
+
+    long DELETE_OHTER_COMMENT      = 10150L;// 普通评论删除权限
+    long DELETE_NOTIC_COMMENT    = 10151L;// 公告评论删除权限
+    long DELETE_ACTIVITY_COMMENT0    = 10152L;// 非官方活动评论删除权限
+    long DELETE_ACTIVITY_COMMENT1    = 10153L;// 官方活动评论删除权限
+
+    long PUBLISH_NOTICE_TOPIC    = 10155L;// 发布公告
+    
+    long FEEDBACK_MANAGEMENT    = 10160L;// 举报管理模块权限
+
+    long ALL_SERVICE_MODULE = 10000L;
+
+    long AUTH_RELATION_LIST = 40001L; //授权关系列表
+    long AUTH_RELATION_CREATE = 40002L; //创建授权关系
+    long AUTH_RELATION_UPDATE = 40003L; //修改授权关系
+    long AUTH_RELATION_DELETE = 40004L; //删除授权关系
+
+    long SUPER_ADMIN_LIST = 40007L; //超级管理员列表
+    long SUPER_ADMIN_CREATE = 40008L; //创建超级管理员
+    long SUPER_ADMIN_UPDATE = 40009L; //修改超级管理员
+    long SUPER_ADMIN_DELETE = 40010L; //删除超级管理员
+
+    long ORG_ADMIN_LIST = 40013L; //公司管理员列表
+    long ORG_ADMIN_CREATE = 40014L; //创建公司管理员
+    long ORG_ADMIN_UPDATE = 40015L; //修改公司管理员
+    long ORG_ADMIN_DELETE = 40016L; //删除公司管理员
+
+    long MODULE_ADMIN_LIST = 40019L; //模块管理员列表
+    long MODULE_ADMIN_CREATE = 40020L; //创建模块管理员
+    long MODULE_ADMIN_UPDATE = 40021L; //修改模块管理员
+    long MODULE_ADMIN_DELETE = 40022L; //删除模块管理员
+
+    long MODULE_CONF_RELATION_LIST = 40023L; //模块配置关系列表
+    long MODULE_CONF_RELATION_CREATE = 40024L; //创建模块配置关系
+    long MODULE_CONF_RELATION_UPDATE = 40025L; //修改模块配置关系
+    long MODULE_CONF_RELATION_DELETE = 40026L; //删除模块配置关系
+
+    // ----------- 物业报修权限 --------------
+    long PMTASK_LIST = 30090L;
+    long PMTASK_AGENCY_SERVICE = 30091L;
+    long PMTASK_SERVICE_CATEGORY_CREATE = 30092L;
+    long PMTASK_SERVICE_CATEGORY_DELETE = 30093L;
+    long PMTASK_DETAIL_CATEGORY_CREATE = 30094L;
+    long PMTASK_DETAIL_CATEGORY_DELETE = 30095L;
+    long PMTASK_TASK_STATISTICS_LIST = 30096L;
+    long PMTASK_ALL_TASK_STATISTICS_LIST = 30097L;
+    
+    // ---------------- 门禁权限 -----------------------
+    long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
+    long MODULE_ACLINK_VISITOR_DENY = 1009L; //禁止门禁访客访问
+
+    // 能耗权限
+    long METER_CREATE = 21000L;
+    long METER_BATCHUPDATE = 21001L;
+    long METER_IMPORT = 21002L;
+    long METER_READ = 21003L;
+    long METER_LIST = 21004L;
+    long METER_CHANGE = 21005L;
+    long METER_INACTIVE = 21006L;
+    long METER_READING_SEARCH = 21007L;
+    long METER_READING_DELETE = 21008L;
+    long ENERGY_STAT_BY_DAY = 21009L;
+    long ENERGY_STAT_BY_MONTH = 21010L;
+    long ENERGY_STAT_BY_YEAR = 21011L;
+    long ENERGY_STAT_BY_YOY = 21012L;
+    long ENERGY_SETTING = 21013L;
+    long ENERGY_PLAN_CREATE = 21014L;
+    long ENERGY_PLAN_LIST = 21015L;
+    long ENERGY_PLAN_DELETE = 21016L;
+    //物业缴费权限 by great wentian
+    long ASSET_MODULE_ID = 20400L;
+    long ASSET_DEAL_VIEW = 204001006L;
+    long ASSET_MANAGEMENT_VIEW = 204001001L;
+    long ASSET_MANAGEMENT_CREATE = 204001002L;
+    long ASSET_MANAGEMENT_NOTICE = 204001003L;
+    long ASSET_MANAGEMENT_CHANGE_STATUS = 204001004L;
+    long ASSET_STATISTICS_VIEW = 204001005L;
+
+    // ---------------- 组织架构权限 -----------------------
+
+    //部门
+    long CREATE_DEPARTMENT = 41001L;//新增部门
+    long MODIFY_DEPARTMENT = 41002L;//修改部门
+    long DELETE_DEPARTMENT = 41003L;//删除部门
+    long CHANGE_DEPARTMENT_ORDER = 41004L;//修改部门顺序
+
+    //岗位
+    long CREATE_JOB_POSITION = 41005L;//创建岗位
+    long MODIFY_JOB_POSITION = 41006L;//修改岗位
+    long DELETE_JOB_POSITION = 41007L;//删除岗位
+    long MODIFY_DEPARTMENT_JOB_POSITION = 41008L;//修改部门岗位
+
+    //人员
+    long CREATE_OR_MODIFY_PERSON = 41009L;//创建或修改人员
+    long DELETE_PERSON = 41010L;//删除人员
+    long BATCH_IMPORT_PERSON = 41011L;//批量导入人员
+    long BATCH_EXPORT_PERSON = 41012L;//批量导出人员
+
+//    -------------- 考勤 ------------ 
+    long PUNCH_RULE_QUERY_ALL = 42000L;//    查看打卡规则 （细化权限，下同）
+    long PUNCH_RULE_QUERY_CREATOR = 42001L;//    查看自己创建的打卡规则
+    long PUNCH_RULE_CREATE = 42002L;//    新建打卡规则
+    long PUNCH_RULE_UPDATE = 42003L;//    编辑打卡规则
+    long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
+    long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
+    long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
+
+
+    //设备巡检权限
+    long EQUIPMENT_STANDARD_UPDATE = 30067L;  //	设备巡检 标准新增修改权限
+    long EQUIPMENT_STANDARD_LIST = 30068L;   //设备巡检 标准查看权限
+    long EQUIPMENT_STANDARD_DELETE = 30069L;  //设备巡检 标准删除权限
+    long EQUIPMENT_RELATION_LIST = 30082L;    //设备巡检 巡检关联审批查看权限
+    long EQUIPMENT_RELATION_REVIEW = 30070L;  //设备巡检 巡检关联审批审核权限
+    long EQUIPMENT_RELATION_DELETE = 30071L;  //设备巡检 巡检关联审批删除失效关联权限
+    long EQUIPMENT_LIST = 30072L;            //设备巡检 巡检对象查看权限
+    long EQUIPMENT_UPDATE = 30073L;        //设备巡检 巡检对象新增修改权限
+    long EQUIPMENT_DELETE = 30074L;          //设备巡检 巡检对象删除权限
+    long EQUIPMENT_TASK_LIST = 30075L;       //设备巡检 任务查询权限
+    long EQUIPMENT_ITEM_LIST = 30076L;        //设备巡检 巡检项查看权限
+    long EQUIPMENT_ITEM_CREATE = 30077L;      //设备巡检 巡检项新增权限
+    long EQUIPMENT_ITEM_DELETE = 30078L;       //设备巡检 巡检项删除权限
+    long EQUIPMENT_ITEM_UPDATE = 30079L;       //设备巡检 巡检项修改权限
+    long EQUIPMENT_STAT_PANDECT = 30080L;      //设备巡检 统计总览权限
+    long EQUIPMENT_STAT_ALLTASK = 30081L;     //设备巡检 统计查看所有任务权限
+
+
+
+
+    //客户和合同的权限
+    long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增加
+    long ENTERPRISE_CUSTOMER_UPDATE = 21102L;//客户的修改
+    long ENTERPRISE_CUSTOMER_IMPORT = 21103L;//客户的导入
+    long ENTERPRISE_CUSTOMER_SYNC = 21104L;//客户的同步
+    long ENTERPRISE_CUSTOMER_DELETE = 21105L;//客户的删
+    long ENTERPRISE_CUSTOMER_LIST = 21106L;//客户的查
+    long ENTERPRISE_CUSTOMER_MANAGE_LIST = 21107L;//管理的查
+    long ENTERPRISE_CUSTOMER_MANAGE_CREATE = 21108L;//管理的新增
+    long ENTERPRISE_CUSTOMER_MANAGE_UPDATE = 21109L;//管理的修改
+    long ENTERPRISE_CUSTOMER_MANAGE_DELETE = 21110L;//管理的删
+    long ENTERPRISE_CUSTOMER_MANAGE_IMPORT = 21111L;//管理的导入
+    long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
+    long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
+
+    long CONTRACT_CREATE = 21201L;//新增合同
+    long CONTRACT_LAUNCH = 21202L;//签约 发起审批
+    long CONTRACT_UPDATE = 21203L;//修改
+    long CONTRACT_DELETE = 21204L;//删除
+    long CONTRACT_INVALID = 21205L;//作废
+    long CONTRACT_ENTRY = 21206L;//入场
+    long CONTRACT_LIST = 21207L;//查看
+    long CONTRACT_RENEW = 21208L;//续约
+    long CONTRACT_CHANGE = 21209L;//变更
+    long CONTRACT_PARAM_LIST = 21210L;//合同参数查看
+    long CONTRACT_PARAM_UPDATE = 21211L;//合同参数修改
+    long CONTRACT_FLOW = 21212L;//合同工作流
+    long CONTRACT_SYNC = 21213L;//从第三方同步合同
+    long CONTRACT_DENUNCIATION = 21214L;//退约
+
+
+//    ----------品质核查----------
+    long QUALITY_CATEGORY_LIST = 30044L;//品质核查 类型管理查看权限
+    long QUALITY_CATEGORY_CREATE = 30045L;//品质核查 类型管理新增权限
+    long QUALITY_CATEGORY_DELETE = 30046L;//品质核查 类型管理删除权限
+    long QUALITY_CATEGORY_UPDATE = 30047L;//品质核查 类型管理修改权限
+    long QUALITY_SPECIFICATION_LIST = 30048L;//品质核查 规范管理查看权限
+    long QUALITY_SPECIFICATION_CREATE = 30049L;//品质核查 规范管理新增权限
+    long QUALITY_SPECIFICATION_DELETE = 30050L;//品质核查 规范管理删除权限
+    long QUALITY_SPECIFICATION_UPDATE = 30051L;//品质核查 规范管理修改权限
+    long QUALITY_STANDARD_LIST = 30052L;//品质核查 标准管理查看权限
+    long QUALITY_STANDARD_CREATE = 30053L;//品质核查 标准管理新增权限
+    long QUALITY_STANDARD_DELETE = 30054L;//品质核查 标准管理删除权限
+    long QUALITY_STANDARD_UPDATE = 30055L;//品质核查 标准管理修改权限
+    long QUALITY_STANDARDREVIEW_LIST = 30056L;//品质核查 标准审批查看权限
+    long QUALITY_STANDARDREVIEW_REVIEW = 30057L;//品质核查 标准审批审核权限
+    long QUALITY_TASK_LIST = 30058L;//品质核查 任务查询权限
+    long QUALITY_STAT_SCORE = 30059L;//品质核查 分数统计查看权限
+    long QUALITY_STAT_TASK = 30060L;//品质核查 任务数统计查看权限
+    long QUALITY_UPDATELOG_LIST = 30061L;//品质核查 修改记录查看权限
+    long QUALITY_SAMPLE_LIST = 30062L;//品质核查 绩效考核查看权限
+    long QUALITY_SAMPLE_CREATE = 30063L;//品质核查 绩效考核新增权限
+    long QUALITY_SAMPLE_UPDATE = 30064L;//品质核查 绩效考核修改权限
+    long QUALITY_SAMPLE_DELETE = 30065L;//品质核查 绩效考核删除权限
+    long QUALITY_STAT_SAMPLE = 30066L;//品质核查 检查统计查看权限
+
+    // 仓库管理
+    long WAREHOUSE_MODULE_ID = 21000L;
+    long WAREHOUSE_REPO_VIEW = 210001001L;
+    long WAREHOUSE_REPO_OPERATION = 210001002L;
+    long WAREHOUSE_MATERIAL_CATEGORY_ALL = 210001003L;
+    long WAREHOUSE_MATERIAL_INFO_ALL = 210001004L;
+    long WAREHOUSE_REPO_MAINTAIN_SEARCH = 210001005L;
+    long WAREHOUSE_REPO_MAINTAIN_INSTOCK = 210001006L;
+    //和210001005L進行合并
+    long WAREHOUSE_REPO_MAINTAIN_LOG_SEARCH = 210001007L;
+    long WAREHOUSE_REPO_MAINTAIN_LOG_EXPORT = 210001008L;
+    long WAREHOUSE_CLAIM_MANAGEMENT_SEARCH = 210001009L;
+    long WAREHOUSE_CLAIM_MANAGEMENT_APPLICATION = 210001010L;
+    long WAREHOUSE_PARAMETER_FLOWCASE_CONFIG = 210001011L;
+    long WAREHOUSE_PARAMETER_CONFIG = 210001012L;
+    long WAREHOUSE_REPO_MAINTAIN_OUTSTOCK = 210001013L;
+
 }

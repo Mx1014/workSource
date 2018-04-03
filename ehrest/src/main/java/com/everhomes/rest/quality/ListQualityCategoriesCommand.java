@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>parentId: 父节点id。全要则不填</li>
+ *  <li>targetId: 项目id</li>
  * </ul>
  */
 public class ListQualityCategoriesCommand {
@@ -26,6 +27,8 @@ public class ListQualityCategoriesCommand {
 	private Integer pageSize;
 	
 	private Long parentId;
+
+	private Long targetId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -65,6 +68,14 @@ public class ListQualityCategoriesCommand {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	@Override

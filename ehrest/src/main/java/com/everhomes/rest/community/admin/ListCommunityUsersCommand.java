@@ -1,33 +1,55 @@
 package com.everhomes.rest.community.admin;
 
 
-
-
 /**
  * <ul>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页的数量</li>
- * <li>communityId: 小区id</li>
- * <li>isAuth: 认证状态  1认证  2非认证</li>
- * <li>keywords: 关键字</li>
+ *     <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ *     <li>pageSize: 每页的数量</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>executiveFlag: 是否高管 0-否 1-是</li>
+ *     <li>gender: gender</li>
+ *     <li>isAuth: 认证状态  1认证  2非认证</li>
+ *     <li>keywords: 关键字</li>
+ *     <li>communityId: 小区id</li>
+ *     <li>organizationId: organizationId</li>
+ *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
+ *     <li>startTime: 注册时间-开始</li>
+ *     <li>endTime: 注册时间-结束</li>
  * </ul>
  */
 public class ListCommunityUsersCommand {
-	
+
 	private Long pageAnchor;
-    
-    private Integer pageSize;
-	
+
+	private Integer pageSize;
+
 	private Integer namespaceId;
-	
+
+	private Byte executiveFlag;
+
+	private Byte gender;
+
 	private Integer isAuth;
-	
+
 	private String keywords;
-	
+
 	private Long communityId;
-	
+
 	private Long organizationId;
-	
+
+	private Byte userSourceType;
+
+	private Long startTime;
+
+	private Long endTime;
+
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
+	}
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -46,7 +68,6 @@ public class ListCommunityUsersCommand {
 	}
 
 
-
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -56,7 +77,7 @@ public class ListCommunityUsersCommand {
 	}
 
 	public Integer getIsAuth() {
-		if(null == this.isAuth){
+		if (null == this.isAuth) {
 			return 0;
 		}
 		return isAuth;
@@ -89,6 +110,36 @@ public class ListCommunityUsersCommand {
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
-	
-	
+
+	public Byte getExecutiveFlag() {
+		return executiveFlag;
+	}
+
+	public void setExecutiveFlag(Byte executiveFlag) {
+		this.executiveFlag = executiveFlag;
+	}
+
+	public Byte getUserSourceType() {
+		return userSourceType;
+	}
+
+	public void setUserSourceType(Byte userSourceType) {
+		this.userSourceType = userSourceType;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
 }

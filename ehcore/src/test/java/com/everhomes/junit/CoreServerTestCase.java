@@ -30,11 +30,11 @@ public class CoreServerTestCase extends TestCase {
             FreeMarkerAutoConfiguration.class
        })
     static class ContextConfiguration {
-        @Bean
-        public TaskScheduler taskScheduler () {
-            ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-            scheduler.setPoolSize(10);
-            return scheduler;
-        }
+//        @Bean
+//        public TaskScheduler taskScheduler () {
+//            ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+//            scheduler.setPoolSize(10);
+//            return scheduler;
+//        }
     }
 }

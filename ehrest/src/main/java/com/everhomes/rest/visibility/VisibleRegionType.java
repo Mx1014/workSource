@@ -6,11 +6,13 @@ package com.everhomes.rest.visibility;
  * <ul>
  * <li>COMMUNITY: 园区（含小区）</li>
  * <li>REGION: 片区（机构）</li>
+ * <li>ORGANIZATION: 公司</li>
+ * <li>ALL: 全部可见</li>
  * </ul>
  *
  */
 public enum VisibleRegionType {
-    COMMUNITY((byte)0), REGION((byte)1); 
+    COMMUNITY((byte)0), REGION((byte)1), ORGANIZATION((byte)2), ALL((byte)99);
     
     private byte code;
     

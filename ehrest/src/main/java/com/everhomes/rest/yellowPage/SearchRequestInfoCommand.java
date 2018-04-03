@@ -6,13 +6,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型：EhOrganizations EhCommunities</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>categoryId: 服务联盟大类id</li>
  *  <li>startDay: 开始时间</li>
  *  <li>endDay：结束时间</li>
  *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
  *  <li>templateType：申请类型 ServiceAlliance/Settle</li>
+ *  <li>approvalType: 审批类型</li>
+ *  <li>approvalStatus: 审批状态</li>
+ *  <li>approvalNumber: 审批编号</li>
+ *  <li>proposer: 申请人</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>

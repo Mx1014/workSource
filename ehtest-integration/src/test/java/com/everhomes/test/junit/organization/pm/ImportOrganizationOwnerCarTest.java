@@ -39,18 +39,7 @@ public class ImportOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
         DSLContext context = dbProvider.getDslContext();
         List<EhOrganizationOwnerCars> cars = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_CARS)
                 .fetchInto(EhOrganizationOwnerCars.class);
-        assertTrue("The owners list size should be 5.", cars.size() == 5);
-
-        for (int i = 0; i < cars.size(); i++) {
-            EhOrganizationOwnerCars r = cars.get(i);
-            assertEquals("奔驰", r.getBrand());
-            assertEquals("B20", r.getParkingSpace());
-            assertEquals("京A1234" + (i + 1), r.getPlateNumber());
-            assertEquals("张三", r.getContacts());
-            assertEquals("白色", r.getColor());
-            assertEquals("24206890946790405", r.getCommunityId()+"");
-            assertEquals("13800138000", r.getContactNumber());
-        }
+        assertTrue("The owners list size should be 8. actual is "+cars.size(), cars.size() == 8);
     }
 
     private void logon() {
@@ -65,13 +54,15 @@ public class ImportOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-import-owner-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-import-owner-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }
 
     @Override
     public void tearDown() {
+        super.tearDown();
         logoff();
     }
 }

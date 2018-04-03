@@ -1,5 +1,6 @@
 package com.everhomes.rest.parking;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -16,6 +17,8 @@ public class ListParkingRechargeOrdersResponse {
 
     @ItemType(ParkingRechargeOrderDTO.class)
     private List<ParkingRechargeOrderDTO> orders;
+    
+    private BigDecimal totalAmount;
     
     public ListParkingRechargeOrdersResponse() {
     }
@@ -41,7 +44,15 @@ public class ListParkingRechargeOrdersResponse {
         this.orders = orders;
     }
 
-    @Override
+    public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

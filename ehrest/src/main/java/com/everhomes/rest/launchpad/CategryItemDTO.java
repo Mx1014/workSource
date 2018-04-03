@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import java.util.List;
 
 /**
- * <p>launchPad信息
+ * <p>launchPad信息</p>
  * <ul>
  * <li>launchPadItems: 服务市场信息，参考{@link LaunchPadItemDTO}</li>
  * <li>categryId: 类别Id</li>

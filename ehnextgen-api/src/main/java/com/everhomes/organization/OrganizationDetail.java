@@ -12,10 +12,6 @@ public class OrganizationDetail extends EhOrganizationDetails {
 	
 	private String enterpriseName;
 	
-	private String avatar;
-	
-	
-
 	public String getBuildingName() {
 		return buildingName;
 	}
@@ -39,18 +35,14 @@ public class OrganizationDetail extends EhOrganizationDetails {
 	}
 
 
-
-	public String getAvatar() {
-		return avatar;
-	}
-
-
-
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
-
-
+    public String getEmailDomain() {
+        return OrganizationCustomField.EMAIL_DOMAIN.getStringValue(this);
+    }
+    
+    public void setEmailDomain(String emailDomain) {
+    	OrganizationCustomField.EMAIL_DOMAIN.setStringValue(this, emailDomain);
+    }
+    
 
 	@Override
     public String toString() {

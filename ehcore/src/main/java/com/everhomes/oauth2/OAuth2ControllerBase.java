@@ -27,7 +27,7 @@ public class OAuth2ControllerBase extends ControllerBase {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleIOException(Exception ex) {
-        LOGGER.error(String.format("Exception in process request [%s]: %s",
+        LOGGER.error(String.format("Exception in processStat request [%s]: %s",
                 WebRequestSequence.current().getRequestSequence(),
                 ex.getMessage() != null ? ex.getMessage() : ""), ex);
 

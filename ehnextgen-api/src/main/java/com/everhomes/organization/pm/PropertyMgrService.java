@@ -2,10 +2,9 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
@@ -22,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public interface PropertyMgrService {
@@ -164,6 +165,7 @@ public interface PropertyMgrService {
      * @return behavior列表
      */
     List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd);
+    List<OrganizationOwnerBehaviorDTO> listApartmentOrganizationOwnerBehaviors(ListApartmentOrganizationOwnerBehaviorsCommand cmd);
 
     /**
      * 修改业主信息
@@ -355,11 +357,14 @@ public interface PropertyMgrService {
     OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
                                                             Long ownerId, OrganizationOwnerAddressAuthType authType);
 
+    void addAddressToOrganizationOwner(Integer namespaceId, Long addressId, Long orgOwnerId);
+
     /**
      * 移除业主与地址的之间的关系
      * @param cmd
      */
     void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd);
+    void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId);
 
     /**
      * 获取业主类型列表
@@ -436,4 +441,36 @@ public interface PropertyMgrService {
      * @param cmd
      */
     void deleteOrganizationOwnerAddressAuthStatus(UpdateOrganizationOwnerAddressAuthTypeCommand cmd);
+
+    /**
+     * 一键推送消息给管理员
+     * 按小区，公司，用户
+     */
+    void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd);
+
+    /**
+     * 一键推送消息给管理员
+     * 按小区，公司，用户
+     */
+    void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd, Timestamp operateTime);
+
+	PropAptStatisticDTO getNewApartmentStatistics(PropCommunityIdCommand cmd);
+
+	GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd);
+
+	ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
+
+	void createApartment(CreateApartmentCommand cmd);
+
+	void updateApartment(UpdateApartmentCommand cmd);
+
+	void deleteApartment(DeleteApartmentCommand cmd);
+
+	GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd);
+
+    ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
+
+    void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
+    DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 }

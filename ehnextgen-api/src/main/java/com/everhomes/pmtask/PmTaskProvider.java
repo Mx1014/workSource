@@ -6,10 +6,8 @@ import java.util.List;
 import com.everhomes.namespace.Namespace;
 
 public interface PmTaskProvider {
-	
-	void createTaskTarget(PmTaskTarget pmTaskTarget);
-	
-	void updateTaskTarget(PmTaskTarget pmTaskTarget);
+
+	void deleteTask(PmTask pmTask);
 	
 	void createTask(PmTask pmTask);
 	
@@ -25,8 +23,8 @@ public interface PmTaskProvider {
 	
 	void createTaskLog(PmTaskLog pmTaskLog);
 	
-	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
-			Long pageAnchor, Integer pageSize);
+//	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Long taskCategoryId,
+//			Long pageAnchor, Integer pageSize);
 	
 	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Long pageAnchor, Integer pageSize);
 	
@@ -43,7 +41,22 @@ public interface PmTaskProvider {
 	
 	Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr);
 	
-	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize);
-	
-	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId);
+//	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Byte roleId, Long pageAnchor, Integer pageSize);
+
+	List<PmTaskLog> listRepairByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<PmTaskLog> listRepairByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	void createTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress);
+
+	List<PmTaskHistoryAddress> listTaskHistoryAddresses(Integer namespaceId, String ownerType, Long ownerId, Long userId,
+														Long pageAnchor, Integer pageSize);
+
+	void updateTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress);
+
+	PmTaskHistoryAddress findTaskHistoryAddressById(Long id);
+
+	List<PmTask> listTasksById(List<Long> ids);
+
+	List<PmTask> findTaskByOrderId(String orderId);
 }

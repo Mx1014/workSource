@@ -1,0 +1,133 @@
+{
+  "eh_parking_clearance_operators": [
+    {
+      "id": 3,
+      "namespace_id": 0,
+      "organization_id": 1,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "operator_type": "HAND",
+      "operator_id": 1001,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2016-12-05 17:26:51"
+    },
+    {
+      "id": 4,
+      "namespace_id": 0,
+      "organization_id": 1000001,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "operator_type": "APPLICANT",
+      "operator_id": 1001,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2016-12-05 17:26:52"
+    },
+    {
+      "id": 5,
+      "namespace_id": 0,
+      "organization_id": 1000001,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "operator_type": "APPLICANT",
+      "operator_id": 1001,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2016-12-05 17:26:53"
+    },
+    {
+      "id": 6,
+      "namespace_id": 0,
+      "organization_id": 1000001,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "operator_type": "APPLICANT",
+      "operator_id": 1001,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2016-12-05 17:26:54"
+    }
+  ],
+  "eh_parking_clearance_logs": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:33333",
+      "apply_time": "2016-12-06 09:56:21",
+      "clearance_time": "1970-01-01 08:00:00",
+      "remarks": "remarks",
+      "status": 4,
+      "creator_uid": 1001,
+      "create_time": "2016-12-03 09:56:21"
+    },{
+      "id": 2,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:22222",
+      "apply_time": "2016-12-06 09:56:21",
+      "clearance_time": "1970-01-01 08:00:00",
+      "remarks": "remarks",
+      "status": 4,
+      "creator_uid": 1001,
+      "create_time": "2016-12-04 09:56:21"
+    },{
+      "id": 3,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:33333",
+      "apply_time": "2016-12-06 09:56:21",
+      "clearance_time": "1970-01-01 08:00:00",
+      "remarks": "remarks",
+      "status": 4,
+      "creator_uid": 1001,
+      "create_time": "2016-12-05 09:56:21"
+    },{
+      "id": 4,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:33333",
+      "apply_time": "2016-12-06 09:56:21",
+      "clearance_time": "1970-01-01 08:00:00",
+      "remarks": "remarks",
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2016-12-06 11:41:56"
+    },{
+      "id": 5,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:33333",
+      "apply_time": "2014-12-06 09:56:21",
+      "clearance_time": "2010-12-06 09:56:21",
+      "remarks": "remarks",
+      "status": 4,
+      "creator_uid": 1001,
+      "create_time": "2016-12-10 09:56:21"
+    },{
+      "id": 6,
+      "namespace_id": 0,
+      "community_id": 1,
+      "parking_lot_id": 1,
+      "applicant_id": 1001,
+      "plate_number": "粤B:33333",
+      "apply_time": "2013-12-06 09:56:21",
+      "clearance_time": "1970-01-01 08:00:00",
+      "remarks": "remarks",
+      "status": 4,
+      "creator_uid": 1001,
+      "create_time": "2016-12-11 09:56:21"
+    }
+  ]
+}

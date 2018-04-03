@@ -2,6 +2,8 @@ package com.everhomes.rest.equipment;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
  *  <li>equipmentId: 设备id</li>
@@ -15,6 +17,8 @@ import com.everhomes.util.StringHelper;
  *  <li>standardName: 标准名称</li>
  *  <li>reviewStatus: 审批状态 参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
  *  <li>reviewResult: 审批结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>reviewer: 审批人</li>
+ *  <li>reviewTime: 审批时间</li>
  * </ul>
  */
 public class EquipmentStandardRelationDTO {
@@ -42,6 +46,10 @@ public class EquipmentStandardRelationDTO {
 	private Byte reviewStatus;
 	
 	private Byte reviewResult;
+
+	private String reviewer;
+
+	private Timestamp reviewTime;
 	
 	public Long getId() {
 		return id;
@@ -138,6 +146,22 @@ public class EquipmentStandardRelationDTO {
 
 	public void setReviewResult(Byte reviewResult) {
 		this.reviewResult = reviewResult;
+	}
+
+	public String getReviewer() {
+		return reviewer;
+	}
+
+	public void setReviewer(String reviewer) {
+		this.reviewer = reviewer;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
 	}
 
 	@Override

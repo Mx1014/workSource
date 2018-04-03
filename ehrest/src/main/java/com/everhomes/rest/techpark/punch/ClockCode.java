@@ -2,7 +2,7 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>
- * <li>NOTINAREA(0): 不在打卡范围内</li>
+ * <li>FAIL(0): 不在打卡范围内</li>
  * <li>SUCESS(1): 正常打卡成功</li>
  * </ul>
  */

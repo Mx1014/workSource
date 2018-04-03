@@ -1,19 +1,5 @@
 package com.everhomes.openapi;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -21,68 +7,55 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
+import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.openapi.BusinessMessageCommand;
-import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.reserver.CreateReserverOrderCommand;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetUserByUuidResponse;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.GetUserDetailByUuidResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserInfoByUuid;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.rest.user.*;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -107,6 +80,12 @@ public class BusinessOpenController extends ControllerBase {
 
 	@Autowired
 	MessagingService messagingService;
+
+	@Autowired
+	private FlowService flowService;
+	
+	@Autowired
+	private OrganizationService organizationService;
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -269,7 +248,31 @@ public class BusinessOpenController extends ControllerBase {
 	@RequestMapping("sendMessageToUser")
 	@RestReturn(value=String.class)
 	public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
+		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
 		sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("sendMessageToUserV2")
+	@RestReturn(value=String.class)
+	public RestResponse sendMessageToUserV2(BusinessMessageV2Command cmd) {
+        Map<String, String> meta = null;
+        if (cmd.getMeta() != null) {
+            meta = (Map<String, String>) StringHelper.fromJsonString(cmd.getMeta(), HashMap.class);
+        }
+        if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+            if (meta == null) {
+                meta = new HashMap<>();
+            }
+            meta.put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
+		sendMessageToUser(cmd.getUserId(), cmd.getContent(), meta);
 
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -417,6 +420,24 @@ public class BusinessOpenController extends ControllerBase {
 		return response;
 	}
 
+	@RequestMapping("getUserAddress")
+	@RestReturn(value=UserAddressDTO.class)
+	public RestResponse getUserAddress(@Valid GetUserDefaultAddressCommand cmd) {
+		RestResponse response =  new RestResponse(businessService.getUserAddress(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("getUserOrganizations")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse getUserOrganizations(@Valid GetUserDefaultAddressCommand cmd) {
+		RestResponse response =  new RestResponse(businessService.getUserOrganizations(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	@RequestMapping("listUser")
 	@RestReturn(value=UserDtoForBiz.class, collection=true)
 	public RestResponse listUser(@Valid ListUserCommand cmd) {
@@ -524,15 +545,43 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	
 	/**
-     * <b>URL: /openapi/listBuildingsByKeyword</b>
-     * <p>根据小区Id和关键字查询小区楼栋</p>
+     * <b>URL: /openapi/listBuildingsByKeywordAndNameSpace</b>
+     * <p>根据关键字查询域空间楼栋</p>
      */
-    @RequestMapping("listBuildingsByKeyword")
+    @RequestMapping("listBuildingsByKeywordAndNameSpace")
     @RestReturn(value=BuildingDTO.class, collection=true)
-    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
-        List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+    public RestResponse listBuildingsByKeywordAndNameSpace(@Valid ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+        List<BuildingDTO> data = this.businessService.listBuildingsByKeywordAndNameSpace(cmd);
         RestResponse response = new RestResponse(data);
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
+	 * <b>URL: /openapi/listBuildingsByKeyword</b>
+	 * <p>根据小区Id和关键字查询小区楼栋</p>
+	 */
+	@RequestMapping("listBuildingsByKeyword")
+	@RestReturn(value=BuildingDTO.class, collection=true)
+	public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
+		List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+		RestResponse response = new RestResponse(data);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <b>URL: /openapi/listApartmentFloor</b>
+     * <p>根据小区Id、楼栋号和关键字查询楼层</p>
+     */
+    @RequestMapping("listApartmentFloor")
+    @RestReturn(value=ApartmentFloorDTO.class, collection=true)
+    public RestResponse listApartmentFloor(@Valid ListApartmentFloorCommand cmd) {
+        Tuple<Integer, List<ApartmentFloorDTO>> data = this.businessService.listApartmentFloor(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
         response.setErrorDescription("OK");
         return response;
     }
@@ -683,4 +732,102 @@ public class BusinessOpenController extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+
+	/**
+	 * 
+	 * <p>创建电商拼单group</p>
+	 * <b>URL: /openapi/createBusinessGroup</b>
+	 */
+    @RequestMapping("createBusinessGroup")
+    @RestReturn(value=CreateBusinessGroupResponse.class)
+    public RestResponse createBusinessGroup(CreateBusinessGroupCommand cmd){
+    	return new RestResponse(businessService.createBusinessGroup(cmd));
+    }
+    
+	/**
+	 * 
+	 * <p>加入电商拼单group</p>
+	 * <b>URL: /openapi/joinBusinessGroup</b>
+	 */
+    @RequestMapping("joinBusinessGroup")
+    @RestReturn(value=String.class)
+    public RestResponse joinBusinessGroup(JoinBusinessGroupCommand cmd){
+    	businessService.joinBusinessGroup(cmd);
+    	return new RestResponse();
+    }
+
+	/**
+	 * <b>URL: /openapi/createReserverOrder</b>
+	 * <p>新建位置预订</p>
+	 */
+	@RequestMapping("createReserverOrder")
+	@RestReturn(value=String.class)
+	public RestResponse createReserverOrder(CreateReserverOrderCommand cmd) {
+
+		//新建flowcase
+
+		UserContext context = UserContext.current();
+		User user = userProvider.findUserById(cmd.getId());
+		context.setUser(user);
+
+		Integer namespaceId = user.getNamespaceId();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RESERVER_PLACE,
+				FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.RESERVER_PLACE.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable reserver flow not found, moduleId={}", FlowConstants.RESERVER_PLACE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable reserver flow not found.");
+		}
+		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		createFlowCaseCommand.setApplyUserId(user.getId());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setReferId(Long.valueOf(cmd.getOrderId()));
+		createFlowCaseCommand.setReferType(FlowOwnerType.RESERVER_PLACE.getCode());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringBuilder sb = new StringBuilder("");
+		sb.append("就餐时间：").append(sdf.format(new Date(cmd.getReserverTime()))).append("\n");
+		sb.append("就餐人数：").append(cmd.getReserverNum()).append("人").append("\n");
+		sb.append("备注说明：").append(cmd.getRemark()).append("\n");
+		sb.append("申请人：").append(cmd.getRequestorName()).append("\n");
+		sb.append("店铺名称：").append(cmd.getShopName());
+		createFlowCaseCommand.setContent(sb.toString());
+//        createFlowCaseCommand.setProjectId(task.getOwnerId());
+//        createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /openapi/listUsersOfEnterprise</b> 
+     */
+    @RequestMapping("listUsersOfEnterprise")
+    @RestReturn(value=OrganizationContactDTO.class)
+    @RequireAuthentication(false)
+    public RestResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd) {
+    	ListOrganizationContactCommandResponse memberResponse = this.organizationService.listUsersOfEnterprise(cmd);
+		RestResponse response =  new RestResponse(memberResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+    	return response;
+    }
+
+	/**
+	 * <p>查看付款方是否有会员</p>
+	 * <b>URL: /business/checkPaymentUser</b>
+	 */
+	@RequestMapping("checkPaymentUser")
+	@RestReturn(value = CheckPaymentUserResponse.class)
+	public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
+		CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 }

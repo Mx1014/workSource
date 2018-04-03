@@ -46,6 +46,23 @@ public class BaseLoginAuthTestCase extends BaseServerTestCase {
         syncSequence();
     }
     
+    public void newSetUp() {
+    	// 清除表数据
+        tuncateDbData();
+        
+        // 初始化系统数据（如系统帐号、权限、配置等）
+        initNewSystemData();
+        
+        // 初始化自定义数据
+        initCustomData();
+        
+        // 清除缓存
+        clearRedisCache();
+        
+        // 同步索引
+        syncSequence();
+    }
+    
     @After
     public void tearDown() {
         
@@ -60,6 +77,13 @@ public class BaseLoginAuthTestCase extends BaseServerTestCase {
     protected void initSystemData() {
         String serverInitfilePath = "data/tables/3.0.x_ehcore-system-init.sql";
         dbProvider.runClassPathSqlFile(serverInitfilePath);
+    }
+    
+    protected void initNewSystemData() {
+    	long start = System.currentTimeMillis();
+    	String serverInitfilePath = "data/tables/init_system_data.sql";
+    	dbProvider.runClassPathSqlFile(serverInitfilePath);
+    	System.err.println("new set up need time: "+(System.currentTimeMillis()-start));
     }
     
     protected void initCustomData() {

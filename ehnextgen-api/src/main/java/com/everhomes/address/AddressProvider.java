@@ -1,12 +1,22 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.util.List;
+import java.util.Map;
+
+import com.everhomes.rest.address.ApartmentAbstractDTO;
+
+import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+
+import org.jooq.Record2;
+import org.jooq.Result;
+
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
-
-import java.util.List;
 
 public interface AddressProvider {
     void createAddress(Address address);
@@ -15,6 +25,9 @@ public interface AddressProvider {
     void deleteAddress(Address address);
     void deleteAddressById(long id);
     Address findAddressById(long id);
+
+    Address findGroupAddress(Long groupId);
+
     Address findApartmentAddress(Integer namespaceId, long communityId, String buildingName, String apartmentName);
     
     List<Address> queryAddress(CrossShardListingLocator locator, int count, 
@@ -38,4 +51,30 @@ public interface AddressProvider {
     List<Address> listAddressByIds(Integer namespaceId, List<Long> ids);
 
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
+	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
+	List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
+	List<Address> listAddressByNamespaceType(Integer namespaceId, String namespaceType);
+	Map<Byte, Integer> countApartmentByLivingStatus(Long communityId);
+	Integer countApartment(Long communityId);
+	void updateOrganizationOwnerAddress(Long id);
+	void updateOrganizationAddress(Long id);
+	void updateOrganizationAddressMapping(Long id);
+
+    Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
+
+    List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count);
+
+
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
+
+
+    List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(String buildingName, Long communityId, Integer currentNamespaceId);
+
+    void createAddressAttachment(AddressAttachment attachment);
+    void updateAddressAttachment(AddressAttachment attachment);
+    void deleteApartmentAttachment(Long id);
+    AddressAttachment findByAddressAttachmentId(Long id);
+    List<AddressAttachment> listAddressAttachments(Long addressId);
+
+    String findLastVersionByNamespace(Integer namespaceId, Long communityId);
 }

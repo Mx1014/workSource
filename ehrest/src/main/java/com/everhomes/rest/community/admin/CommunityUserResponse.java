@@ -4,15 +4,20 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ *     <li>nextPageAnchor: nextPageAnchor</li>
+ *     <li>userCommunities: userCommunities {@link com.everhomes.rest.community.admin.CommunityUserDto}</li>
+ * </ul>
+ */
 public class CommunityUserResponse {
-	
+
 	private Long nextPageAnchor;
-	
+
 	@ItemType(CommunityUserDto.class)
 	private List<CommunityUserDto> userCommunities;
 
 
-	
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
@@ -28,6 +33,6 @@ public class CommunityUserResponse {
 	public void setUserCommunities(List<CommunityUserDto> userCommunities) {
 		this.userCommunities = userCommunities;
 	}
-	
-	
+
+
 }

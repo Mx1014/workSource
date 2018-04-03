@@ -1,17 +1,5 @@
 package com.everhomes.user;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -25,40 +13,21 @@ import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.user.AddAnyDayActiveCommand;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.AddUserFavoriteCommand;
-import com.everhomes.rest.user.CancelUserFavoriteCommand;
-import com.everhomes.rest.user.CommunityStatusResponse;
-import com.everhomes.rest.user.Contact;
-import com.everhomes.rest.user.ContactDTO;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.FeedbackCommand;
-import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
-import com.everhomes.rest.user.GetRequestInfoCommand;
-import com.everhomes.rest.user.InvitationCommandResponse;
-import com.everhomes.rest.user.ListActiveStatCommand;
-import com.everhomes.rest.user.ListContactRespose;
-import com.everhomes.rest.user.ListContactsCommand;
-import com.everhomes.rest.user.ListPostResponse;
-import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
-import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
-import com.everhomes.rest.user.ListRecipientCommand;
-import com.everhomes.rest.user.ListSignupActivitiesCommand;
-import com.everhomes.rest.user.ListTreasureResponse;
-import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
-import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
-import com.everhomes.rest.user.RequestFieldDTO;
-import com.everhomes.rest.user.RequestTemplateDTO;
-import com.everhomes.rest.user.SyncActivityCommand;
-import com.everhomes.rest.user.SyncBehaviorCommand;
-import com.everhomes.rest.user.SyncInsAppsCommand;
-import com.everhomes.rest.user.SyncLocationCommand;
-import com.everhomes.rest.user.SyncUserContactCommand;
-import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * controller
@@ -204,16 +173,44 @@ public class UserActivityController extends ControllerBase {
     /**
      * 用户反馈 <b>url:/user/feedback</b>
      * 
-     * @param cmd {@link FeedbackCommand}
+     * @param cmd {@link com.everhomes.rest.user.FeedbackCommand}
      */
     @RequestMapping("feedback")
     @RequireAuthentication(false)
     @RestReturn(String.class)
     public RestResponse feedback(@Valid FeedbackCommand cmd) {
-        userActivityService.updateFeedback(cmd);
+        userActivityService.addFeedback(cmd);
         return new RestResponse("OK");
     }
 
+    /**
+     * 获取用户反馈 <b>url:/user/listFeedbacks</b>
+     * 
+     * @param cmd {@link ListFeedbacksCommand}
+     */
+    @RequestMapping("listFeedbacks")
+    @RestReturn(ListFeedbacksResponse.class)
+    public RestResponse listFeedbacks(@Valid ListFeedbacksCommand cmd) {
+    	ListFeedbacksResponse result = userActivityService.listFeedbacks(cmd);
+
+    	RestResponse response = new RestResponse(result);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+     * 更新用户反馈 <b>url:/user/updateFeedback</b>
+     * 
+     * @param cmd {@link UpdateFeedbackCommand}
+     */
+    @RequestMapping("updateFeedback")
+    @RestReturn(String.class)
+    public RestResponse updateFeedback(@Valid UpdateFeedbackCommand cmd) {
+        userActivityService.updateFeedback(cmd);
+        return new RestResponse("OK");
+    }
+    
     /**
      * 查询版本信息 <b>url:/user/appversion</b>
      * 
@@ -274,8 +271,28 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("listTreasure")
     @RestReturn(ListTreasureResponse.class)
     @RequireAuthentication(false)
-    public RestResponse listTreasure(){
+    public RestResponse listTreasure() {
         return new RestResponse(userActivityService.getUserTreasure());
+    }
+
+    /**
+     * 用户财富：<b>url:/user/getUserTreasure</b>
+     */
+    @RequestMapping("getUserTreasure")
+    @RestReturn(GetUserTreasureResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse getUserTreasure() {
+        return new RestResponse(userActivityService.getUserTreasureV2());
+    }
+
+    /**
+     * 电商用户财富：<b>url:/user/listBusinessTreasure</b>
+     */
+    @RequestMapping("listBusinessTreasure")
+    @RestReturn(ListBusinessTreasureResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listBusinessTreasure(){
+    	return new RestResponse(userActivityService.getUserBusinessTreasure());
     }
     
     
@@ -378,9 +395,9 @@ public class UserActivityController extends ControllerBase {
 	 * <p> 获取申请信息  </p>
 	 */
     @RequestMapping("getCustomRequestInfo")
-    @RestReturn(value = RequestFieldDTO.class, collection = true)
+    @RestReturn(value = GetRequestInfoResponse.class)
     public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
-    	List<RequestFieldDTO> dto = this.userActivityService.getCustomRequestInfo(cmd);
+    	GetRequestInfoResponse dto = this.userActivityService.getCustomRequestInfo(cmd);
     	RestResponse response = new RestResponse(dto);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
@@ -439,12 +456,27 @@ public class UserActivityController extends ControllerBase {
         try {
             LOGGER.debug("App log report, log={}", scene);
         } catch (Exception e) {
-            LOGGER.error("Failed to process app log reports", e);
+            LOGGER.error("Failed to processStat app log reports", e);
         } 
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+	 * <b>URL: /user/updateShakeOpenDoor</b>
+	 * <p> 更新用户自己的摇一摇开门权限  </p>
+	 */
+    @RequestMapping("updateShakeOpenDoor")
+    @RestReturn(value = String.class )
+    public RestResponse updateShakeOpenDoor(@Valid UpdateShakeOpenDoorCommand cmd) {
+    	
+		this.userActivityService.updateShakeOpenDoor(cmd.getShakeOpenDoor());
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }

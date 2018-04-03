@@ -11,10 +11,14 @@ import com.everhomes.util.StringHelper;
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主</li>
  * <li>payerPhone: 付款人手机号</li>
+ * <li>paidType: 支付类型 {@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>status: 状态值</li>
  * <li>startDate: 开始充值时间</li>
  * <li>endDate: 结束充值时间</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>rechargeType: 充值类型 {@link ParkingRechargeType}</li>
+ * <li>cardNumber: 卡号</li>
  * </ul>
  */
 public class SearchParkingRechargeOrdersCommand {
@@ -23,16 +27,32 @@ public class SearchParkingRechargeOrdersCommand {
     private Long parkingLotId;
     private String plateNumber;
     private String plateOwnerName;
-//    private String plateOwnerPhone;
     private String payerPhone;
-//    private String paidType;
-//    private Byte rechargeStatus;
+    private String paidType;
+    private Byte status;
     private Long startDate;
     private Long endDate;
     private Long pageAnchor;
     private Integer pageSize;
     private Byte rechargeType;
-    
+    private String cardNumber;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
     public SearchParkingRechargeOrdersCommand() {
     }
 
@@ -127,6 +147,14 @@ public class SearchParkingRechargeOrdersCommand {
 
 	public void setRechargeType(Byte rechargeType) {
 		this.rechargeType = rechargeType;
+	}
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
 	}
 
 }

@@ -11,8 +11,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * <li>name: item的类别名称</li>
  * <li>iconUrl: 类别icon</li>
  * <li>order: 排序</li>
- * <li>align: 类别标题位置 @link{com.everhomes.rest.launchpad.ItemServiceCategryAlign}</li>
- * <li>status: item类别状态 @link{com.everhomes.rest.launchpad.ItemServiceCategryStatus}</li>
+ * <li>align: 类别标题位置 {@link com.everhomes.rest.launchpad.ItemServiceCategryAlign}</li>
+ * <li>status: item类别状态 {@link com.everhomes.rest.launchpad.ItemServiceCategryStatus}</li>
  * </ul>
  */
 public class ItemServiceCategryDTO {

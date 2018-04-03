@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestToken: 申请的token</li>
  * <li>approveType: 审批类型，{@link com.everhomes.rest.approval.ApprovalType}</li>
  * <li>categoryName: 具体类型，异常无，请假申请时公出、事假等</li>
+ * <li>title: 申请title内容比如谁申请,反馈等</li>
  * <li>reason: 申请理由</li>
  * <li>description: 描述，请假总时长等</li>
  * <li>approvalStatus: 审批状态，参考{@link com.everhomes.rest.approval.ApprovalStatus}</li>
@@ -29,6 +30,7 @@ public class BriefApprovalRequestDTO {
 	private String description;
 	@ItemType(TimeRange.class)
 	private List<TimeRange> timeRangeList;
+	private String title;
 	private String reason;
 	private Byte approvalStatus;
 	private Timestamp createTime;
@@ -110,6 +112,14 @@ public class BriefApprovalRequestDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 }

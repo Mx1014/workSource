@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
 public class CsFileLocationDTO {
     private String uri;
     private String url;
+    private Integer size;
     
     public String getUri() {
         return uri;
@@ -27,6 +28,14 @@ public class CsFileLocationDTO {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 
     @Override

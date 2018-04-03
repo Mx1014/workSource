@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>cardId: 卡号</li>
  * <li>amount: 充值金额</li>
+ * <li>clientAppName: Realm值，app客户端必传</li>
  * </ul>
  */
 public class RechargeCardCommand {
@@ -17,7 +18,8 @@ public class RechargeCardCommand {
     private Long ownerId;
     private Long cardId;
     private BigDecimal amount;
-    
+	private String clientAppName;
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -43,9 +45,18 @@ public class RechargeCardCommand {
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
-    
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

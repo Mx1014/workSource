@@ -1,0 +1,59 @@
+{
+    "eh_buildings": [
+        {
+            "id": 1,
+            "community_id": 2,
+            "namespace_id": 1000000,
+            "name": "楼栋名-A座",
+            "status": 2
+        }
+    ],
+    "eh_contract_building_mappings": [
+        {
+            "id": 1,
+            "namespace_id": 1000000,
+            "organization_id": 10001,
+            "organization_name": "fascinating",
+            "contract_id": 1,
+            "contract_number": "FFCDSF2223123124124",
+            "building_name": "楼栋名-A座",
+            "apartment_name": "8f2",
+            "area_size": 2,
+            "status": 2,
+            "create_time": "2017/2/17 10:38:44"
+        }
+    ],
+    "eh_contracts": [
+        {
+            "id": 1,
+            "namespace_id": 1000000,
+            "organization_id": 10001,
+            "organization_name": "fascinating",
+            "contract_number": "FFCDSF2223123124124",
+            "contract_end_date": "2017/3/4 10:37:36",
+            "status": 2,
+            "create_time": "2017/2/17 10:37:39"
+        }
+    ],
+    "eh_lease_promotions": [
+        {
+            "id": 51,
+            "namespace_id": 1000000,
+            "community_id": 240111044331048600,
+            "rent_type": "1",
+            "poster_uri": null,
+            "subject": "科技大厦12楼写字楼招租",
+            "rent_areas": "190平方",
+            "description": "190平方，简装写字楼，地理位置优越，位于深南大道旁，临近地铁1号线深大站。",
+            "create_uid": 195506,
+            "create_time": "2016/7/25 09:24:48",
+            "update_time": "2016/7/25 09:24:48",
+            "status": 1,
+            "building_id": 176125,
+            "rent_position": "科技园工业园大厦",
+            "contacts": "张德钦",
+            "contact_phone": "86620287",
+            "enter_time": "2016/7/30 00:00:00"
+        }
+    ]
+}

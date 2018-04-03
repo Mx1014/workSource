@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>buildings: 楼栋信息，参考{@link com.everhomes.building.BuildingDTO}</li>
+ * <li>buildings: 楼栋信息，参考{@link com.everhomes.rest.community.BuildingDTO}</li>
  * </ul>
  */
 public class ListBuildingCommandResponse {

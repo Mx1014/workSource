@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.statistics.terminal.StatTerminalScheduleJob;
+import com.everhomes.util.ExecutorUtil;
 import org.quartz.CalendarIntervalTrigger;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -30,6 +33,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
@@ -46,11 +50,21 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 	
 	@Autowired
 	private SchedulerFactoryBean schedulerFactory;
-	
-	/** 调度器 
+
+    @Value("${schedule.running.flag}")
+    private volatile byte localRunningFlag;
+
+    private volatile byte runningFlag;
+
+    private volatile long latestTime;
+
+	/** 调度器
 	 * @return */
 	//private Scheduler scheduler;
 
@@ -207,7 +221,8 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     public void scheduleCronJob(String triggerName, String jobName, String cronExpression, String jobClassName, Map<String, Object> parameters) {
         scheduleCronJob(triggerName, jobName, cronExpression, createJobClass(jobClassName), parameters);
     }
-    
+
+
     @Override
     @SuppressWarnings("rawtypes")
     public void scheduleCronJob(String triggerName, String jobName, String cronExpression, Class jobClass, Map<String, Object> parameters) {
@@ -404,6 +419,43 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         }
         
         return stateStr;
+    }
+
+    @Override
+    public Byte getRunningFlag() {
+        return localRunningFlag;
+    }
+
+    @Override
+    public void setRunningFlag(Byte runningFlag) {
+        this.runningFlag = runningFlag;
+        setLocalRuningFlag();
+    }
+
+    private void setLocalRuningFlag(){
+        latestTime = System.currentTimeMillis();
+        String delayTimeStr = configurationProvider.getValue("schedule.running.delay.time", "10000");
+        Long delayTime = Long.valueOf(delayTimeStr);
+        LOGGER.debug("set runningFlag. runningFlag = {}", runningFlag);
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Thread.sleep(delayTime);
+                }catch (Exception e){
+                    LOGGER.error("thread sleep error", e);
+                }
+                if(System.currentTimeMillis() - latestTime >= delayTime){
+                    LOGGER.debug("reset local runningFlag. runningFlag = {}, localRunningFlag = {}", runningFlag, localRunningFlag);
+                    if(RunningFlag.fromCode(runningFlag) != RunningFlag.fromCode(localRunningFlag)){
+                        localRunningFlag = runningFlag;
+                    }
+                }else{
+                    LOGGER.debug("Hosts are frequently switched.Not set local runningFlag..");
+                }
+            }
+        });
+
     }
 }
  

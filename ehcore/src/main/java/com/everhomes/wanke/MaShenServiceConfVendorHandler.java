@@ -1,41 +1,5 @@
 package com.everhomes.wanke;
 
-import java.io.UnsupportedEncodingException;
-import java.security.KeyManagementException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
@@ -55,28 +19,44 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.LogonCommandResponse;
-import com.everhomes.rest.user.NamespaceUserType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.wanke.GetSignCommand;
 import com.everhomes.rest.wanke.GetSignDTO;
 import com.everhomes.rest.wanke.ListCommunityCommand;
 import com.everhomes.rest.wanke.ListCommunityResponse;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.wanke.ServiceConfVendorHandler;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component(ServiceConfVendorHandler.SERVICECONF_VENDOR_PREFIX+"wanke")
 public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
@@ -236,7 +216,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	}
 	
 	private LogonCommandResponse login(UserIdentifier identifier, String password, HttpServletRequest req, HttpServletResponse resp){
-		UserLogin login = this.userService.logon(identifier.getNamespaceId(), identifier.getIdentifierToken(), 
+		UserLogin login = this.userService.logon(identifier.getNamespaceId(), identifier.getRegionCode(), identifier.getIdentifierToken(),
 				password, "", "");
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);

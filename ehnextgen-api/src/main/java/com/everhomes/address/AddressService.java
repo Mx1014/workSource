@@ -4,8 +4,13 @@ package com.everhomes.address;
 import java.util.List;
 
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.community.Community;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.CommunityDoc;
@@ -33,6 +38,7 @@ public interface AddressService {
     List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd);
     
     ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
+    ListApartmentByBuildingNameCommandResponse listCommunityApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
 	void importCommunityInfos(MultipartFile[] files);
 	void importAddressInfos(MultipartFile[] files);
 	
@@ -47,8 +53,36 @@ public interface AddressService {
     void importParkAddressData(ImportAddressCommand cmd,MultipartFile[] files);
     
     void importAddressData(MultipartFile[] files);
-    
+
     ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(ListNearbyMixCommunitiesCommand cmd);
 
     List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd);
+    
+    AddressDTO getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd);
+	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd);
+	Tuple<Integer, List<BuildingDTO>> listBuildingsByKeywordForBusiness(ListBuildingByKeywordCommand cmd);
+	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloorForBusiness(ListApartmentFloorCommand cmd);
+	Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd);
+	Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file);
+
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
+
+    List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd);
+
+
+    ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd);
+
+    //获取注册中、已注册、关联最多的社区(园区/xiaoqu)
+    ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd);
+
+    public ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize);
+
+    List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize);
+
+    ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd);
+    void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd);
+    List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd);
+    List<EnterpriseCustomerDTO> listApartmentEnterpriseCustomers(ListApartmentEnterpriseCustomersCommand cmd);
+    void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd);
+
 }

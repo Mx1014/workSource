@@ -1,0 +1,35 @@
+package com.everhomes.rest.organization;
+
+/**
+ * <p>员工类型</p>
+ * <ul>
+ * <li>PROBATION(0): 试用</li>
+ * <li>ON_THE_JOB(1): 正式</li>
+ * <li>INTERSHIP(2): 实习</li>
+ * </ul>
+ */
+public enum EmployeeStatus {
+    PROBATION((byte)0), ON_THE_JOB((byte)1), INTERSHIP((byte)2);
+
+    private byte code;
+
+    private EmployeeStatus(byte code) {
+        this.code = code;
+    }
+
+    public byte getCode() {
+        return this.code;
+    }
+
+    public static EmployeeStatus fromCode(Byte code) {
+        if(code != null) {
+            EmployeeStatus[] values = EmployeeStatus.values();
+            for(EmployeeStatus value : values) {
+                if(code.byteValue() == value.code) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+}

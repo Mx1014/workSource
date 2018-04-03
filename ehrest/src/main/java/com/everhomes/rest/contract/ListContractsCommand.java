@@ -1,0 +1,143 @@
+// @formatter:off
+package com.everhomes.rest.contract;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * 
+ * <ul>参数:
+ * <li>namespaceId: 域空间id</li>
+ * <li>communityId: 园区id</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>keywords: 查询关键词</li>
+ * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
+ * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
+ * <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
+ * <li>categoryItemId: 合同类型</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页大小</li> 
+ * </ul>
+ */
+public class ListContractsCommand {
+
+	private Integer namespaceId;
+
+	private Long communityId;
+	
+	private String buildingName;
+
+	private String keywords;
+
+	private Long categoryItemId;
+
+	private Byte contractType;
+
+	private Byte customerType;
+
+	private Byte status;
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
+	private Long orgId;
+	
+
+	public ListContractsCommand() {
+
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
+	}
+
+	public Byte getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(Byte customerType) {
+		this.customerType = customerType;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getCategoryItemId() {
+		return categoryItemId;
+	}
+
+	public void setCategoryItemId(Long categoryItemId) {
+		this.categoryItemId = categoryItemId;
+	}
+
+	public Byte getContractType() {
+		return contractType;
+	}
+
+	public void setContractType(Byte contractType) {
+		this.contractType = contractType;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	} 
+
+}

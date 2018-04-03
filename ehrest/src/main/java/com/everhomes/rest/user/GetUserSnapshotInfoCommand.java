@@ -3,10 +3,10 @@ package com.everhomes.rest.user;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * @author elians 
- * uid:用户ID
- * uuid:用户唯一的标识
+ * <ul>
+ *     <li>uid:用户ID</li>
+ *     <li>uuid:用户唯一的标识</li>
+ * </ul>
  */
 public class GetUserSnapshotInfoCommand {
     private Long uid;

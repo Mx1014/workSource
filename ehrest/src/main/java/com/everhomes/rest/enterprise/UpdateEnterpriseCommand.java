@@ -23,6 +23,12 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>enterpriseAddress: 公司地址</li>
  *  <li>enterpriseCheckinDate: 公司入驻时间</li>
  *  <li>postUri: 标题图</li>
+ *  <li>emailDomain: 邮箱域名 </li>
+ *  <li>serviceUserId: 客服服务人员id</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
+ *  <li>website: 企业官网</li>
+ *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  * </ul>
  *
  */
@@ -41,6 +47,8 @@ public class UpdateEnterpriseCommand {
     private String checkinDate;
     private String postUri;
     private Integer namespaceId;
+    private String emailDomain;
+    private Long serviceUserId;
 	
 	@ItemType(OrganizationAddressDTO.class)
 	private List<OrganizationAddressDTO> addressDTOs;
@@ -48,6 +56,34 @@ public class UpdateEnterpriseCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
+	private Double   longitude;
+	
+	private Double   latitude;
+	private String website;
+	private String unifiedSocialCreditCode;
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	public Long getServiceUserId() {
+		return serviceUserId;
+	}
+	public void setServiceUserId(Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
 	public Long getMemberCount() {
 		return memberCount;
 	}
@@ -143,6 +179,24 @@ public class UpdateEnterpriseCommand {
 	}
 	public void setAddressDTOs(List<OrganizationAddressDTO> addressDTOs) {
 		this.addressDTOs = addressDTOs;
+	}
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
+	}
+	public Double getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+	public Double getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
    
 }

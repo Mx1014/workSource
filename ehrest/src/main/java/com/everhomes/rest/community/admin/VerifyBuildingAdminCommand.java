@@ -3,7 +3,6 @@ package com.everhomes.rest.community.admin;
 import javax.validation.constraints.NotNull;
 
 /**
- * <p>
  * <ul>
  * <li>buildingId: 被审核楼栋Id</li>
  * </ul>

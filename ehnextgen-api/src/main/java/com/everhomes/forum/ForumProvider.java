@@ -6,6 +6,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 
 /**
  * ForumProvider defines server-side forum API
@@ -274,4 +276,36 @@ public interface ForumProvider {
     void deleteAssignedScopeById(Long id);
     
     void modifyHotPost();
+
+	List<Post> listForumPostByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<Post> listForumPostByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+
+    Forum findForumByNamespaceId(Integer namespaceId);
+
+    List<Post> listPostsByRealPostId(Long realPostId);
+
+    List<ForumCategory> listForumCategoryByForumId(Long forumId);
+
+    ForumCategory findForumCategoryById(Long Id);
+
+    InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long entryId);
+
+    void createInteractSetting(InteractSetting setting);
+
+    void updateInteractSetting(InteractSetting setting);
+
+    void createForumServiceTypes(List<ForumServiceType> list);
+
+    List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId);
+
+    void deleteForumServiceTypes(List<Long> ids);
+
+    //ForumCategory findForumCategory(Long forumId, Long entryId);
+
 }

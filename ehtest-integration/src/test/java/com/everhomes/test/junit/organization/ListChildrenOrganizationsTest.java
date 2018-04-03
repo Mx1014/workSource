@@ -7,13 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
-
-
-
-
-
-
+import com.everhomes.rest.organization.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +21,6 @@ import org.junit.Test;
 
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.admin.OrgListChildrenOrganizationsRestResponse;
 import com.everhomes.rest.ui.launchpad.LaunchpadGetLastLaunchPadLayoutBySceneRestResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -49,7 +40,7 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testListChildrenOrganizations1() {
+    public void testListChildrenOrganizations() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
@@ -62,8 +53,9 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
         List<String> groupTypes = new ArrayList<String>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
         cmd.setGroupTypes(groupTypes);
-        
+
         OrgListChildrenOrganizationsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, OrgListChildrenOrganizationsRestResponse.class, context);
         
         assertNotNull("The reponse of getting user info may not be null", response);
@@ -71,7 +63,24 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
         assertNotNull(response.getResponse());
-        assertEquals(5, response.getResponse().size());
+        assertNotNull(response.getResponse().getDtos());
+        assertEquals(6, response.getResponse().getDtos().size());
+
+        boolean flag = false;
+        for (OrganizationDTO dto: response.getResponse().getDtos()) {
+            if(1000752L == dto.getId()){
+                assertEquals(2, dto.getManagers().size());
+                for (OrganizationManagerDTO managerDto:dto.getManagers()) {
+                    if(managerDto.getMemberId() == 8L || managerDto.getMemberId() == 9L){
+                        flag = true;
+                    }else{
+                        flag = false;
+                    }
+                }
+            }
+        }
+
+        assertEquals(true, flag);
     }
     
     
@@ -81,11 +90,14 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-    	
-        String userInfoFilePath = "data/json/3.8.2-test-data-organizations_160819.txt";
-        String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
-        dbProvider.loadJsonFileToDatabase(filePath, false);
-        
+        String filePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        String file = dbProvider.getAbsolutePathFromClassPath(filePath);
+        dbProvider.loadJsonFileToDatabase(file, false);
+
+        filePath = "data/json/organizations-data-test_20161014.txt";
+        file = dbProvider.getAbsolutePathFromClassPath(filePath);
+        dbProvider.loadJsonFileToDatabase(file, false);
+
     }
 }
 

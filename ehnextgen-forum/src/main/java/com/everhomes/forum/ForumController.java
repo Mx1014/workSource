@@ -3,39 +3,23 @@ package com.everhomes.forum;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.forum.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.comment.CommentService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.CheckUserPostCommand;
-import com.everhomes.rest.forum.CheckUserPostDTO;
-import com.everhomes.rest.forum.DeleteCommentCommand;
-import com.everhomes.rest.forum.DeleteTopicCommand;
-import com.everhomes.rest.forum.FreeStuffCommand;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.IncreasePostViewCountCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
-import com.everhomes.rest.forum.LostAndFoundCommand;
-import com.everhomes.rest.forum.MakeTopCommand;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
-import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
-import com.everhomes.rest.forum.SearchTopicCommand;
-import com.everhomes.rest.forum.UsedAndRentalCommand;
+import com.everhomes.rest.comment.DeleteCommonCommentCommand;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
+import com.everhomes.rest.forum.*;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
@@ -43,6 +27,12 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestDoc(value="Forum controller", site="forum")
 @RestController
@@ -60,7 +50,10 @@ public class ForumController extends ControllerBase {
     
     @Autowired
     private SearchSyncManager searchSyncManager;
-    
+
+    @Autowired
+    private CommentService commentService;
+
     /**
      * <b>URL: /forum/newTopic</b>
      * <p>创建新帖</p>
@@ -85,7 +78,7 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=PostDTO.class)
     public RestResponse getTopic(GetTopicCommand cmd) {
         PostDTO postDto = this.forumService.getTopic(cmd);
-        
+		
         RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -94,14 +87,14 @@ public class ForumController extends ControllerBase {
     
     /**
      * <b>URL: /forum/listTopics</b>
-     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     * <p>查询指定论坛的帖子列表</p>
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse listTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
-        
+		
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -208,7 +201,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteTopic")
     @RestReturn(value=String.class)
     public RestResponse deleteTopic(DeleteTopicCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId());
+        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -303,7 +296,18 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteComment")
     @RestReturn(value=String.class)
     public RestResponse deleteComment(DeleteCommentCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId());
+
+        OwnerTokenDTO tokenDTO = new OwnerTokenDTO();
+        tokenDTO.setId(cmd.getCommentId());
+        tokenDTO.setType(OwnerType.FORUM.getCode());
+
+        DeleteCommonCommentCommand delCmd = new DeleteCommonCommentCommand();
+        delCmd.setId(cmd.getCommentId());
+        delCmd.setOwnerToken(WebTokenGenerator.getInstance().toWebToken(tokenDTO));
+
+        commentService.deleteComment(delCmd);
+
+        // this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -391,4 +395,164 @@ public class ForumController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /forum/publishTopic</b>
+     * <p>发布活动，将后台暂存的活动发布</p>
+     * @return 删除结果
+     */
+    @RequestMapping("publishTopic")
+    @RestReturn(value=String.class)
+    public RestResponse publisTopic(PublishTopicCommand cmd) {
+        this.forumService.publisTopic(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/stickPost</b>
+     * <p>管理员置顶帖子</p>
+     * @param cmd 参数命令
+     * @return
+     */
+    @RequestMapping("stickPost")
+    @RestReturn(value=String.class)
+    public RestResponse stickPost(StickPostCommand cmd) {
+        forumService.stickPost(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /forum/findForumCategory</b>
+     * <p>获取论坛入口</p>
+     * @return ForumCategoryDTO
+     */
+    @RequestMapping("findForumCategory")
+    @RestReturn(value=ForumCategoryDTO.class)
+    public RestResponse findForumCategory(FindForumCategoryCommand cmd) {
+        ForumCategoryDTO dto = this.forumService.findForumCategory(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+	
+    /**
+     * <b>URL: /forum/listForumCategory</b>
+     * <p>获取论坛入口</p>
+     * @return
+     */
+    @RequestMapping("listForumCategory")
+    @RestReturn(value=ListForumCategoryResponse.class)
+    public RestResponse listForumCategory(ListForumCategoryCommand cmd) {
+        ListForumCategoryResponse  res  = this.forumService.listForumCategory(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /forum/getForumSetting</b>
+     * <p>获取论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("getForumSetting")
+    @RestReturn(value=GetForumSettingResponse.class)
+    public RestResponse getForumSetting(GetForumSettingCommand cmd) {
+
+        GetForumSettingResponse res = forumService.getForumSetting(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/updateForumSetting</b>
+     * <p>更新论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("updateForumSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateForumSetting(UpdateForumSettingCommand cmd) {
+        forumService.updateForumSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/listForumServiceTypes</b>
+     * <p>获取论坛服务类型</p>
+     * @return
+     */
+    @RequestMapping("listForumServiceTypes")
+    @RestReturn(value=ListForumServiceTypesResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+
+        ListForumServiceTypesResponse res = forumService.listForumServiceTypes(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /forum/updateInteractSetting</b>
+     * <p>更新评论配置，此为评论配置的通用接口，不要在里面加具体应用的数据。如果页面要扩展参考updateForumSetting新建自己的接口</p>
+     * @return
+     */
+    @RequestMapping("updateInteractSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateInteractSetting(UpdateInteractSettingCommand cmd) {
+        forumService.updateInteractSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/getInteractSetting</b>
+     * <p>查询评论配置，此为评论配置的通用接口，不要在里面加具体应用的数据。如果页面要扩展参考getForumSetting新建自己的接口</p>
+     * @return
+     */
+    @RequestMapping("getInteractSetting")
+    @RestReturn(value=InteractSettingDTO.class)
+    public RestResponse getInteractSetting(GetInteractSettingCommand cmd) {
+        InteractSettingDTO interactSetting = forumService.getInteractSetting(cmd);
+        RestResponse response = new RestResponse(interactSetting);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /forum/checkForumModuleAppAdmin</b>
+     * <p>检查应用管理员权限</p>
+     */
+    @RequestMapping("checkForumModuleAppAdmin")
+    @RestReturn(value=CheckModuleAppAdminResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd) {
+        CheckModuleAppAdminResponse res = forumService.checkForumModuleAppAdmin(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }

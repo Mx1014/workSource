@@ -27,7 +27,12 @@
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="prefixJson" value="false"/>
-                <property name="supportedMediaTypes" value="application/json"/>
+                <property name="supportedMediaTypes">
+                	<list>  
+                        <value>application/json; charset=UTF-8</value>  
+                        <value>text/html;charset=UTF-8</value>  <!-- IE9上传文件必须返回这种类型才能成功，否则会报406错误，add by tt, 20170309 -->
+                   </list>  
+                </property>
                 <property name="objectMapper">
                     <bean class="com.fasterxml.jackson.databind.ObjectMapper">
                         <property name="serializationInclusion" value="NON_NULL"/>

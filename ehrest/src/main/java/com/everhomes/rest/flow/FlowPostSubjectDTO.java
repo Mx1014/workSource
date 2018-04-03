@@ -1,0 +1,62 @@
+package com.everhomes.rest.flow;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+public class FlowPostSubjectDTO {
+	private Long flowEntityId;
+	private String flowEntityType;
+	
+	@ItemType(String.class)
+	private List<String> images;
+	
+	private String title;
+	private String content;
+
+	public Long getFlowEntityId() {
+		return flowEntityId;
+	}
+
+	public void setFlowEntityId(Long flowEntityId) {
+		this.flowEntityId = flowEntityId;
+	}
+
+	public String getFlowEntityType() {
+		return flowEntityType;
+	}
+
+	public void setFlowEntityType(String flowEntityType) {
+		this.flowEntityType = flowEntityType;
+	}
+
+	public List<String> getImages() {
+		return images;
+	}
+
+	public void setImages(List<String> images) {
+		this.images = images;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

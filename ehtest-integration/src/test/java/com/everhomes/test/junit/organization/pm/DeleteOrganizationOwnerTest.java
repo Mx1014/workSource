@@ -25,7 +25,7 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
     // 删除业主及删除业主关联的车辆及附件记录
     @Test
     public void testDeleteOrganizationOwner() {
-        initOwnerData();
+        // initOwnerData();
         DSLContext context = dbProvider.getDslContext();
         EhOrganizationOwnersRecord record = context.selectFrom(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.ID.eq(1L))
@@ -36,13 +36,13 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
 
         EhOrganizationOwnerAttachmentsRecord attachmentsRecord = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)
                 .where(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.OWNER_ID.eq(1L))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The attachmentsRecord should be not null.", attachmentsRecord);
 
         EhOrganizationOwnerOwnerCarRecord ownerOwnerCarRecord = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(1L))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The ownerOwnerCarRecord should be not null.", ownerOwnerCarRecord);
 
@@ -91,7 +91,7 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
     // 删除业主, 同时删除对应的group member
     @Test
     public void testDeleteOrganizationOwnerWithDeleteGroupMember() {
-        initGroupMemberData();
+        // initGroupMemberData();
         DSLContext context = dbProvider.getDslContext();
 
         logon();
@@ -104,7 +104,8 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
 
         assertNotNull("The response should not be null.", response);
 
-        EhGroupMembersRecord membersRecord = context.selectFrom(Tables.EH_GROUP_MEMBERS).where(Tables.EH_GROUP_MEMBERS.ID.eq(100001L)).fetchOne();
+        EhGroupMembersRecord membersRecord = context.selectFrom(Tables.EH_GROUP_MEMBERS)
+                .where(Tables.EH_GROUP_MEMBERS.ID.eq(100001L)).fetchOne();
 
         assertNull("The ownerOwnerCarRecord should be null.", membersRecord);
     }
@@ -121,9 +122,13 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
+
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
     }
 
-    private void initOwnerData() {
+    /*private void initOwnerData() {
         String userInfoFilePath = "data/json/customer-manage-delete-owner-data.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
@@ -133,5 +138,5 @@ public class DeleteOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/customer-manage-update-owner-address-authtype-data.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-    }
+    }*/
 }

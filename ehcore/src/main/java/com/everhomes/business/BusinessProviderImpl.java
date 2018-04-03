@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
+import com.everhomes.server.schema.tables.EhPaymentUsers;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -616,4 +618,27 @@ public class BusinessProviderImpl implements BusinessProvider {
 					return b;
 				}).collect(Collectors.toList());
 	}
+
+	@Override
+	public CheckPaymentUserResponse checkoutPaymentUser(Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentUsers t = Tables.EH_PAYMENT_USERS.as("t");
+        List<CheckPaymentUserResponse> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(userId))
+                .fetch()
+                .map(r -> {
+                    CheckPaymentUserResponse res = new CheckPaymentUserResponse();
+                    res.setCreateTime(r.getValue(t.CREATE_TIME));
+                    res.setId(r.getValue(t.ID));
+                    res.setOwnerId(userId);
+                    res.setOwnerType(r.getValue(t.OWNER_TYPE));
+                    res.setPayment_user_id(r.getValue(t.PAYMENT_USER_ID));
+                    res.setPaymentUserType(r.getValue(t.PAYMENT_USER_TYPE));
+                    list.add(res);
+                    return null;
+                });
+        return list.size()<1?null:list.get(0);
+    }
 }

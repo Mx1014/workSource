@@ -6,12 +6,12 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
- * 
- * @author elians
  *<ul>
- *<li>activity:活动</li>
+ *<li>activity:活动   参考{@link com.everhomes.rest.activity.ActivityDTO}</li>
  *<li>creatorFlag:创建人的标识</li>
  *<li>checkinQRUrl:二维码路径</li>
+ *<li>roster:  参考{@link com.everhomes.rest.activity.ActivityMemberDTO}</li>
+ *<li>nextAnchor: </li>
  *</ul>
  */
 public class ActivityListResponse {

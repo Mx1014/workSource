@@ -1,12 +1,15 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>申请月卡
+ * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
@@ -15,14 +18,23 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerEntperiseName: 车主所在公司名称</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
+ * <li>carBrand: 车品牌</li>
+ * <li>carColor: 车颜色</li>
+ * <li>carSerieName: 车系列</li>
+ * <li>carSerieId: 车系列id</li>
+ * <li>attachments: attachments {@link com.everhomes.rest.parking.AttachmentDescriptor}</li>
+ * <li>cardTypeId: 卡类型id</li>
+ * <li>addressId: 门牌id</li>
+ * <li>invoiceType: 发票类型id</li>
+ * <li>identityCard: 身份证号码</li>
  * </ul>
  */
 public class RequestParkingCardCommand {
-	@NotNull
+    @NotNull
     private String ownerType;
-	@NotNull
+    @NotNull
     private Long ownerId;
-	@NotNull
+    @NotNull
     private Long parkingLotId;
     private Long requestorEnterpriseId;
     @NotNull
@@ -30,7 +42,53 @@ public class RequestParkingCardCommand {
     private String plateOwnerEntperiseName;
     private String plateOwnerName;
     private String plateOwnerPhone;
-    
+
+    private String carBrand;
+    private String carColor;
+    private String carSerieName;
+    private Long carSerieId;
+
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
+
+    private String cardTypeId;
+    private Long addressId;
+    private Long invoiceType;
+
+    private String identityCard;
+
+    public String getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(String identityCard) {
+        this.identityCard = identityCard;
+    }
+
+    public String getCardTypeId() {
+        return cardTypeId;
+    }
+
+    public void setCardTypeId(String cardTypeId) {
+        this.cardTypeId = cardTypeId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(Long invoiceType) {
+        this.invoiceType = invoiceType;
+    }
+
     public RequestParkingCardCommand() {
     }
 
@@ -96,6 +154,46 @@ public class RequestParkingCardCommand {
 
     public void setPlateOwnerPhone(String plateOwnerPhone) {
         this.plateOwnerPhone = plateOwnerPhone;
+    }
+
+    public String getCarBrand() {
+        return carBrand;
+    }
+
+    public void setCarBrand(String carBrand) {
+        this.carBrand = carBrand;
+    }
+
+    public String getCarColor() {
+        return carColor;
+    }
+
+    public void setCarColor(String carColor) {
+        this.carColor = carColor;
+    }
+
+    public String getCarSerieName() {
+        return carSerieName;
+    }
+
+    public void setCarSerieName(String carSerieName) {
+        this.carSerieName = carSerieName;
+    }
+
+    public Long getCarSerieId() {
+        return carSerieId;
+    }
+
+    public void setCarSerieId(Long carSerieId) {
+        this.carSerieId = carSerieId;
+    }
+
+    public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

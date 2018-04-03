@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class SearchSyncAction implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(SearchSyncAction.class);
     
-    //OK can do better for action, using bean resolver. But now, just it.
+    //OK can do better for build, using bean resolver. But now, just it.
     private String actionType;
     
     @Autowired

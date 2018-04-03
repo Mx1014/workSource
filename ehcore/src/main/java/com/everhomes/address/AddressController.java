@@ -6,6 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.address.*;
+
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,32 +23,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.CommunitySummaryDTO;
-import com.everhomes.rest.address.CreateServiceAddressCommand;
-import com.everhomes.rest.address.DeleteServiceAddressCommand;
-import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListCommunityByKeywordCommand;
-import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.SearchCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
@@ -260,6 +242,20 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/getApartmentByBuildingApartmentName</b>
+     * <p>查询门牌</p>
+     */
+    @RequestMapping("getApartmentByBuildingApartmentName")
+    @RestReturn(value=String.class)
+    public RestResponse getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd) {
+    	AddressDTO dto = addressService.getApartmentByBuildingApartmentName(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
      * <b>URL: /address/createServiceAddress</b>
      * <p>创建服务地址</p>
      */
@@ -309,7 +305,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listNearbyMixCommunities</b>
-     * <p>获取附近小区列表</p>
+     * <p>获取附近混合园区/小区列表</p>
      */
     @RequestMapping("listNearbyMixCommunities")
     @RestReturn(value=ListNearbyMixCommunitiesCommandResponse.class)
@@ -323,4 +319,135 @@ public class AddressController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /address/listCommunityApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询门牌列表(因为listApartmentsByBuildingName里面check了用户权限所以要在提供一个)</p>
+     */
+    @RequestMapping("listCommunityApartmentsByBuildingName")
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
+    public RestResponse listCommunityApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        ListApartmentByBuildingNameCommandResponse result = this.addressService.listCommunityApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /address/getApartmentNameByBuildingName</b>
+     * <p>根据域名，小区id，楼栋名查询门牌名和地址id的集合</p>
+     */
+    @RequestMapping("getApartmentNameByBuildingName")
+    @RestReturn(value = GetApartmentNameByBuildingNameDTO.class,collection = true)
+    public RestResponse getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd){
+        List<GetApartmentNameByBuildingNameDTO> result = this.addressService.getApartmentNameByBuildingName(cmd);
+        RestResponse resp = new RestResponse(result);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /address/listNearbyMixCommunitiesV2</b>
+     * <p>选择附近的社区列表</p>
+     */
+    @RequestMapping("listNearbyMixCommunitiesV2")
+    @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
+    public RestResponse listNearbyMixCommunitiesV2(@Valid ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response res = addressService.listNearbyMixCommunitiesV2(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/listPopularCommunitiesWithType</b>
+     * <p>选择热门社区列表</p>
+     */
+    @RequestMapping("listPopularCommunitiesWithType")
+    @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
+    public RestResponse listPopularCommunitiesWithType(@Valid ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response res = addressService.listPopularCommunitiesWithType(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/uploadApartmentAttachment</b>
+     * <p>上传门牌附件</p>
+     */
+    @RequestMapping("uploadApartmentAttachment")
+    @RestReturn(value=ApartmentAttachmentDTO.class)
+    public RestResponse uploadApartmentAttachment(@Valid UploadApartmentAttachmentCommand cmd) {
+        ApartmentAttachmentDTO dto = addressService.uploadApartmentAttachment(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/deleteApartmentAttachment</b>
+     * <p>删除附件</p>
+     */
+    @RequestMapping("deleteApartmentAttachment")
+    @RestReturn(value= java.lang.String.class)
+    public RestResponse deleteApartmentAttachment(@Valid DeleteApartmentAttachmentCommand cmd) {
+        addressService.deleteApartmentAttachment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/downloadApartmentAttachment</b>
+     * <p> 下载门牌附件 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("downloadApartmentAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd) {
+        addressService.downloadApartmentAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/listApartmentAttachments</b>
+     * <p>查询门牌的所有附件列表</p>
+     */
+    @RequestMapping("listApartmentAttachments")
+    @RestReturn(value=ApartmentAttachmentDTO.class, collection = true)
+    public RestResponse listApartmentAttachments(@Valid ListApartmentAttachmentsCommand cmd) {
+        List<ApartmentAttachmentDTO> dtos = addressService.listApartmentAttachments(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/listApartmentEnterpriseCustomers</b>
+     * <p>查询门牌的关联的企业</p>
+     */
+    @RequestMapping("listApartmentEnterpriseCustomers")
+    @RestReturn(value=EnterpriseCustomerDTO.class, collection = true)
+    public RestResponse listApartmentEnterpriseCustomers(@Valid ListApartmentEnterpriseCustomersCommand cmd) {
+        List<EnterpriseCustomerDTO> dtos = addressService.listApartmentEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

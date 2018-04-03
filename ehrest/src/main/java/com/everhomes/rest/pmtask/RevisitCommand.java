@@ -15,6 +15,7 @@ public class RevisitCommand {
     private Long ownerId;
     private Long id;
     private String content;
+    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -33,15 +34,15 @@ public class RevisitCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 	public String getContent() {
 		return content;
 	}
 	public void setContent(String content) {
 		this.content = content;
 	}
-    
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

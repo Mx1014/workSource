@@ -21,6 +21,8 @@ import com.everhomes.util.StringHelper;
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessResult}</li>
  *  <li>processMessage: 操作内容</li>
+ *  <li>templateId: 模板id</li>
+ *  <li>templateName: 模板名称</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
@@ -54,6 +56,10 @@ public class EquipmentTaskLogsDTO {
 	private Byte processResult;
 	
 	private String processMessage;
+	
+	private Long templateId;
+	
+	private String templateName;
 
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
@@ -167,6 +173,22 @@ public class EquipmentTaskLogsDTO {
 
 	public void setProcessMessage(String processMessage) {
 		this.processMessage = processMessage;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
 	}
 
 	public List<InspectionItemResult> getItemResults() {

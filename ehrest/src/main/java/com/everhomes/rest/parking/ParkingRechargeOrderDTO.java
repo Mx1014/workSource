@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 订单ID</li>
+ * <li>orderNo: orderNo</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
@@ -19,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>payerUid: 付款人用户ID</li>
  * <li>payerName: 付款人名称</li>
  * <li>payerPhone: 付款人手机</li>
- * <li>paidType: 支付方式,10001-支付宝，10002-微信</li>
+ * <li>paidType: 支付方式,10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
  * <li>paidTime: 付款时间</li>
  * <li>vendorName: 厂商名称（用于作逻辑，不用于显示），{@link com.everhomes.rest.parking.ParkingLotVendor}</li>
  * <li>cardNumber: 卡号</li>
@@ -28,14 +29,25 @@ import com.everhomes.util.StringHelper;
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
  * <li>status: 订单状态，{@link com.everhomes.rest.parking.ParkingRechargeOrderStatus}</li>
- * <li>rechargeStatus: 充值状态， {@link com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus}</li>
+ * <li>rechargeStatus: 充值状态</li>
  * <li>rechargeTime: 充值时间</li>
  * <li>createTime: 订单创建时间</li>
  * <li>rechargeType: 订单类型， {@link com.everhomes.rest.parking.ParkingRechargeType}}</li>
+ * <li>parkingLotName: 停车场名称</li>
+ * <li>startPeriod: 充值开始时间</li>
+ * <li>endPeriod: 充值结束时间</li>
+ * <li>parkingTime: 临时车停车时间</li>
+ * <li>errorDescription: 异常记录</li>
+ * <li>contact: 客服联系方式，来自停车场配置参数</li>
+ * <li>refundTime: 退款时间</li>
+ * <li>delayTime: 剩余免费总时间</li>
+ * <li>originalPrice: 原价</li>
+ * <li>invoiceName: 发票名称</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
     private Long id;
+    private Long orderNo;
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
@@ -59,7 +71,106 @@ public class ParkingRechargeOrderDTO {
     private Timestamp rechargeTime;
     private Timestamp createTime;
     private Byte rechargeType;
-    
+    private String parkingLotName;
+    private Timestamp startPeriod;
+    private Timestamp endPeriod;
+    private Integer parkingTime;
+    private String errorDescription;
+    private String contact;
+    private Timestamp refundTime;
+    private Integer delayTime;
+
+    private BigDecimal originalPrice;
+    private String invoiceName;
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public String getInvoiceName() {
+        return invoiceName;
+    }
+
+    public void setInvoiceName(String invoiceName) {
+        this.invoiceName = invoiceName;
+    }
+
+    public Integer getDelayTime() {
+        return delayTime;
+    }
+
+    public void setDelayTime(Integer delayTime) {
+        this.delayTime = delayTime;
+    }
+
+    public Long getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(Long orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public Timestamp getRefundTime() {
+        return refundTime;
+    }
+
+    public void setRefundTime(Timestamp refundTime) {
+        this.refundTime = refundTime;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public Timestamp getStartPeriod() {
+        return startPeriod;
+    }
+
+    public void setStartPeriod(Timestamp startPeriod) {
+        this.startPeriod = startPeriod;
+    }
+
+    public Timestamp getEndPeriod() {
+        return endPeriod;
+    }
+
+    public void setEndPeriod(Timestamp endPeriod) {
+        this.endPeriod = endPeriod;
+    }
+
+    public Integer getParkingTime() {
+        return parkingTime;
+    }
+
+    public void setParkingTime(Integer parkingTime) {
+        this.parkingTime = parkingTime;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
+    }
+
+    public String getParkingLotName() {
+        return parkingLotName;
+    }
+
+    public void setParkingLotName(String parkingLotName) {
+        this.parkingLotName = parkingLotName;
+    }
+
     public ParkingRechargeOrderDTO() {
     }
 
@@ -192,14 +303,14 @@ public class ParkingRechargeOrderDTO {
     }
 
     public BigDecimal getMonthCount() {
-		return monthCount;
-	}
+        return monthCount;
+    }
 
-	public void setMonthCount(BigDecimal monthCount) {
-		this.monthCount = monthCount;
-	}
+    public void setMonthCount(BigDecimal monthCount) {
+        this.monthCount = monthCount;
+    }
 
-	public BigDecimal getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -244,19 +355,19 @@ public class ParkingRechargeOrderDTO {
         return StringHelper.toJsonString(this);
     }
 
-	public String getPaidType() {
-		return paidType;
-	}
+    public String getPaidType() {
+        return paidType;
+    }
 
-	public void setPaidType(String paidType) {
-		this.paidType = paidType;
-	}
+    public void setPaidType(String paidType) {
+        this.paidType = paidType;
+    }
 
-	public Byte getRechargeType() {
-		return rechargeType;
-	}
+    public Byte getRechargeType() {
+        return rechargeType;
+    }
 
-	public void setRechargeType(Byte rechargeType) {
-		this.rechargeType = rechargeType;
-	}
+    public void setRechargeType(Byte rechargeType) {
+        this.rechargeType = rechargeType;
+    }
 }

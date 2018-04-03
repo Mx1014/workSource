@@ -2,6 +2,7 @@
 package com.everhomes.community;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -35,12 +36,13 @@ public interface CommunityProvider {
     List<Community> findCommunitiesByNameAndCityId(String name, long cityId, int namespaceId);
     List<Community> findCommunitiesByIds(List<Long> ids);
     Community findCommunityByUuid(String uuid);
-	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i,
-			String keyword);
+	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i, String keyword, Integer namespaceId, Byte communityType);
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
-	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId);
-	
+	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
+
+    List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword);
+
 	Building findBuildingById(Long id);
 	
 	void populateBuildingAttachments(final Building building);
@@ -73,8 +75,70 @@ public interface CommunityProvider {
 	
 	List<CommunityDTO> listCommunitiesByNamespaceId(Byte communityType, Integer namespaceId, ListingLocator locator, int pageSize);
 	
-	List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
+	List<CommunityDTO> listCommunitiesByType(int namespaceId, List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
 
     List<Community> findCommunitiesByCityId(ListingLocator locator, int count, int namespaceId, long cityId);
 
+    /*--------添加修改资源分类 ------*/
+    void createResourceCategory(ResourceCategory resourceCategory);
+    
+    ResourceCategory findResourceCategoryById(Long id);
+    
+    void updateResourceCategory(ResourceCategory resourceCategory);
+    
+    void createResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    ResourceCategoryAssignment findResourceCategoryAssignment(Long resourceId, String resourceType, Integer namespaceId);
+    
+    void deleteResourceCategoryAssignmentById(Long id);
+    
+    ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name, Byte type);
+    
+    void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
+			Integer pageSize);
+    
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type);
+    
+    List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
+
+    List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type);
+    void deleteResourceCategoryById(Long id);
+
+    List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
+
+    Map<Long, Community> listCommunitiesByIds(List<Long> ids);
+    List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
+
+    List<Community> listCommunityByNamespaceType(Integer namespaceId, String namespaceType);
+    Map<String, Long> listCommunityIdByNamespaceType(Integer namespaceId, String namespaceType);
+    CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId);
+    Community findCommunityByNamespaceToken(String namespaceType, String namespaceToken);
+    List<Long> listCommunityByNamespaceToken(String namespaceType, List<String> namespaceToken);
+
+    List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                    ListingQueryBuilderCallback queryBuilderCallback);
+									
+									    //默认园区/小区
+    Community findFirstCommunityByNameSpaceIdAndType(Integer namespaceId, Byte type);
+
+    //获取对应的目标communityId
+    Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
+	List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
+
+    //在给予的communityIds的范围内根据参数中的经纬度进行排序
+    List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
+
+    List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+                                                     Integer pageSize);
+
+
+    String getCommunityToken(String tokenType, Long communityId);
+
+    Community findCommunityByCommunityNumber(String communityNumber, Integer namespaceId);
+    Building findBuildingByCommunityIdAndNumber(Long communityId, String buildingNumber);
+
+    List<Community> listNamespaceCommunities(Integer namespaceId);
 }

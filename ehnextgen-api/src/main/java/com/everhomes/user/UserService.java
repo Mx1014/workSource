@@ -1,67 +1,24 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.util.List;
+import com.everhomes.community.Community;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.openapi.FunctionCardDto;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.admin.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import java.util.List;
 
 /**
  * 
@@ -73,12 +30,12 @@ import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
-    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode);
+    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
     User logonDryrun(String userIdentifierToken, String password);
-    UserLogin logon(int namespaceId, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
+    UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
     void logoff(UserLogin login);
@@ -103,7 +60,7 @@ public interface UserService {
     List<UserIdentifierDTO> listUserIdentifiers();
     void deleteUserIdentifier(long identifierId);
     
-    void resendVerficationCode(UserIdentifier userIdentifier);
+    void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
     
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
     
@@ -129,9 +86,9 @@ public interface UserService {
 	List<UserInfo> listUserByKeyword(String keyword);
 	List<User> listUserByIdentifier(String identifier);
 	List<UserInfo> listUserInfoByIdentifier(String identifier);
-	
 
-	List<SceneDTO> listUserRelatedScenes();
+    List<SceneDTO> listUserRelatedScenes();
+	List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd);
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);
@@ -154,6 +111,9 @@ public interface UserService {
 
     
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+
+    SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
+
     ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
 
 
@@ -193,4 +153,149 @@ public interface UserService {
     ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd);
 	UserLogin reSynThridUser(InitBizInfoCommand cmd);
 	InitBizInfoDTO findInitBizInfo();
+
+    /**
+     * 设置会话消息免打扰
+     * @param cmd
+     * @return
+     */
+    UserNotificationSettingDTO updateUserNotificationSetting(UpdateUserNotificationSettingCommand cmd);
+
+    /**
+     * 获取会话消息免打扰设置
+     * @param cmd
+     * @return
+     */
+    UserNotificationSettingDTO getUserNotificationSetting(GetUserNotificationSettingCommand cmd);
+
+    /**
+     * 根据会话获取用户信息
+     * @param cmd
+     * @return
+     */
+    MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
+    
+    SearchUsersResponse searchUsers(SearchUsersCommand cmd);
+
+    /**
+     * 检查短信黑名单
+     * @param smsAction     标识是从哪里发出的短信，目前没什么用
+     * @param identifierToken   手机号
+     */
+    void checkSmsBlackList(String smsAction, String identifierToken);
+ 
+    /**
+     * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
+     * @param cmd
+     * @param request
+     */
+    void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request);
+
+    /**
+     * 核实修改手机号的验证码
+     * @param cmd
+     */
+    void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd);
+
+    /**
+     * 申诉修改手机号
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd);
+
+    /**
+     * 申诉列表
+     * @param cmd
+     * @return
+     */
+    ListUserAppealLogsResponse listUserAppealLogs(ListUserAppealLogsCommand cmd);
+
+    /**
+     * 修改申诉状态
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd);
+
+    /**
+     * 获取修改手机号的验证码
+     * @param cmd
+     * @return
+     */
+    UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
+	
+	//added by R 20170713, 通讯录2.4增加
+ 
+    SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
+
+	//added by R 20170824, 人事1.4,  判断管理员
+    CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd);
+
+    //added by R 20170803, 消息2.1增加
+    SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);
+
+    ListAuthFormsResponse listAuthForms();
+
+	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+
+    /**
+     *
+     */
+    List<String[]> listBuildingAndApartmentById(Long uid);
+    /**
+     * created by wentian
+     * 根据客户名和地址定位唯一用户
+     */
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType,Integer namespaceId);
+
+    Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
+
+    List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+	
+    UserIdentifier getUserIdentifier(Long userId);
+
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
+
+    SceneDTO getProfileScene();
+
+    List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
+
+    List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
+
+    SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
+
+    List<SceneDTO> listAllCommunityScenes();
+    
+    /**
+     * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+     */
+    String checkServerStatus();
+    
+    /** 
+     * 客户端更新设备信息到服务器端
+     * @param cmd
+     * @param request
+     * @param response
+     * @return 返回服务器端的信息
+     */
+    SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response);
+
+    QRCodeDTO querySubjectIdForScan();
+
+    DeferredResult<Object> waitScanForLogon(String subjectId);
+
+    String getSercetKeyForScan(String args);
+
+    void logonByScan(String subjectId, String message);
+
+    List<FunctionCardDto> listUserRelatedCards();
 }

@@ -1,11 +1,27 @@
 package com.everhomes.equipment;
 
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.search.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,72 +30,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
-import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentParameterDTO;
-import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.ImportOwnerCommand;
-import com.everhomes.rest.equipment.InspectionItemDTO;
-import com.everhomes.rest.equipment.InspectionTemplateDTO;
-import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
-import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
-import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
-import com.everhomes.rest.equipment.ListTaskByIdCommand;
-import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
-import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
-import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
-import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
-import com.everhomes.rest.equipment.SearchEquipmentsResponse;
-import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentsCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.search.EquipmentAccessoriesSearcher;
-import com.everhomes.search.EquipmentSearcher;
-import com.everhomes.search.EquipmentStandardMapSearcher;
-import com.everhomes.search.EquipmentStandardSearcher;
-import com.everhomes.search.EquipmentTasksSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.RuntimeErrorException;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "Equipment Controller", site = "core")
 @RestController
@@ -137,7 +90,7 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /equipment/findEquipmentStandard</b>
 	 * <p>根据id查询巡检标准</p>
@@ -289,12 +242,12 @@ public class EquipmentController extends ControllerBase {
 	 * <p>创建或修改设备</p>
 	 */
 	@RequestMapping("updateEquipments")
-	@RestReturn(value = EquipmentsDTO.class)
+	@RestReturn(value = String.class)
 	public RestResponse updateEquipments(UpdateEquipmentsCommand cmd) {
 		
-		EquipmentsDTO equipment = equipmentService.updateEquipments(cmd);
+		equipmentService.updateEquipments(cmd);
 		
-		RestResponse response = new RestResponse(equipment);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -369,11 +322,15 @@ public class EquipmentController extends ControllerBase {
 	 * <p>导出设备列表</p>
 	 */
 	@RequestMapping("exportEquipments")
-	public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse response) {
+	@RestReturn(String.class)
+	public RestResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse httpResponse) {
 		
-		HttpServletResponse commandResponse = equipmentService.exportEquipments(cmd, response);
-		
-		return commandResponse;
+		equipmentService.exportEquipments(cmd, httpResponse);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+
 	}
 	
 	/**
@@ -382,7 +339,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("importEquipments")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "_attachment") MultipartFile[] files){
+    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -390,8 +347,8 @@ public class EquipmentController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.equipmentService.importEquipments(cmd, files[0], userId);
-        RestResponse response = new RestResponse(importDataResponse);
+		ImportDataResponse importResponse = this.equipmentService.importEquipments(cmd, files[0], userId);
+        RestResponse response = new RestResponse(importResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -617,7 +574,23 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /equipment/reviewEquipmentTasks</b>
+	 * <p>任务批量审阅</p>
+	 */
+	@RequestMapping("reviewEquipmentTasks")
+	@RestReturn(value = String.class)
+	public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+
+		equipmentService.reviewEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /equipment/createEquipmentTask</b>
 	 * <p>创建某设备的任务</p>
@@ -941,4 +914,251 @@ public class EquipmentController extends ControllerBase {
         return response;
     }
     
+    /**
+	 * <b>URL: /equipment/listTasksByToken</b>
+	 * <p>扫码查看设备任务</p>
+	 */
+	@RequestMapping("listTasksByToken")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
+		
+		ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/getInspectionObjectByQRCode</b>
+	 * <p>扫码查看巡检对象</p>
+	 */
+	@RequestMapping("getInspectionObjectByQRCode")
+	@RestReturn(value = EquipmentsDTO.class)
+	public RestResponse getInspectionObjectByQRCode(GetInspectionObjectByQRCodeCommand cmd) {
+		
+		EquipmentsDTO equipment = equipmentService.getInspectionObjectByQRCode(cmd);
+		
+		RestResponse response = new RestResponse(equipment);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listEquipmentInspectionCategories</b>
+	 * <p>查看巡检对象类型</p>
+	 */
+	@RequestMapping("listEquipmentInspectionCategories")
+	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
+	public RestResponse listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
+		
+		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories(cmd);
+		
+		RestResponse response = new RestResponse(categories);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listUserHistoryTasks</b>
+	 * <p>个人执行过的历史任务</p>
+	 */
+	@RequestMapping("listUserHistoryTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
+		
+		ListEquipmentTasksResponse tasks = equipmentService.listUserHistoryTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/statEquipmentTasks</b>
+	 * <p>任务数统计</p>
+	 */
+	@RequestMapping("statEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
+		
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+		
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/exportEquipmentsCard</b>
+	 * <p>导出设备卡</p>
+	 */
+	@RequestMapping("exportEquipmentsCard")
+	@RestReturn(value = String.class)
+	public RestResponse exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response) {
+
+		equipmentService.exportEquipmentsCard(cmd, response);
+
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /equipment/statTodayEquipmentTasks</b>
+	 * <p>当天任务数统计</p>
+	 */
+	@RequestMapping("statTodayEquipmentTasks")
+	@RestReturn(value = StatTodayEquipmentTasksResponse.class)
+	public RestResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
+
+		StatTodayEquipmentTasksResponse stat = equipmentService.statTodayEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statLastDaysEquipmentTasks</b>
+	 * <p>最近几天任务数统计</p>
+	 */
+	@RequestMapping("statLastDaysEquipmentTasks")
+	@RestReturn(value = StatLastDaysEquipmentTasksResponse.class)
+	public RestResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
+
+		StatLastDaysEquipmentTasksResponse stat = equipmentService.statLastDaysEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statIntervalAllEquipmentTasks</b>
+	 * <p>区间任务数统计</p>
+	 */
+	@RequestMapping("statIntervalAllEquipmentTasks")
+	@RestReturn(value = StatIntervalAllEquipmentTasksResponse.class)
+	public RestResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
+
+		StatIntervalAllEquipmentTasksResponse stat = equipmentService.statIntervalAllEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+	 * <p>按设备-标准统计任务的细项</p>
+	 */
+	@RequestMapping("statItemResultsInEquipmentTasks")
+	@RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+	public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+
+		StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/listAbnormalTasks</b>
+	 * <p>查看异常任务列表</p>
+	 */
+	@RequestMapping("listAbnormalTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listAbnormalTasks(ListAbnormalTasksCommand cmd) {
+
+		ListEquipmentTasksResponse tasks = equipmentService.listAbnormalTasks(cmd);
+
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/setPmNotifyParams</b>
+	 * <p>设置通知参数</p>
+	 */
+	@RequestMapping("setPmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		equipmentService.setPmNotifyParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/listPmNotifyParams</b>
+	 * <p>列出通知参数</p>
+	 */
+	@RequestMapping("listPmNotifyParams")
+	@RestReturn(value = PmNotifyParamDTO.class, collection = true)
+	public RestResponse listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		RestResponse response = new RestResponse(equipmentService.listPmNotifyParams(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/deletePmNotifyParams</b>
+	 * <p>删除通知参数</p>
+	 */
+	@RequestMapping("deletePmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		equipmentService.deletePmNotifyParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/findScopeFieldItemByBusinessValue</b>
+	 * <p>根据业务值获取item信息</p>
+	 */
+	@RequestMapping("findScopeFieldItemByBusinessValue")
+	@RestReturn(value = FieldItemDTO.class)
+	public RestResponse findScopeFieldItemByBusinessValue (findScopeFieldItemCommand cmd) {
+		RestResponse response = new RestResponse(equipmentService.findScopeFieldItemByFieldItemId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/syscTemplates</b>
+	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
+	 */
+	@RequestMapping("distributeTemplates")
+	@RestReturn(value = String.class)
+	public RestResponse distribute () {
+
+		equipmentService.distributeTemplates();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
 }

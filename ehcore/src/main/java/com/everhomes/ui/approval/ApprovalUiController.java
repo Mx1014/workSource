@@ -10,6 +10,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
@@ -25,6 +26,8 @@ import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
+import com.everhomes.rest.approval.ListMyApprovalsBySceneCommand;
+import com.everhomes.rest.approval.RejectApprovalRequestBySceneCommand;
 
 /**
  * <ul>
@@ -73,7 +76,7 @@ public class ApprovalUiController extends ControllerBase {
 	}
 
 	/**
-	 * 
+	 * 未用
 	 * <p>4.获取申请的审批日志列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalLogOfRequestByScene</b>
 	 */
@@ -84,7 +87,7 @@ public class ApprovalUiController extends ControllerBase {
 	}
 
 	/**
-	 * 
+	 * 未用
 	 * <p>5.获取申请的审批流程列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalFlowOfRequestByScene</b>
 	 */
@@ -127,4 +130,43 @@ public class ApprovalUiController extends ControllerBase {
 	public RestResponse listApprovalCategoryByScene(ListApprovalCategoryBySceneCommand cmd){
 		return new RestResponse(approvalService.listApprovalCategoryByScene(cmd));
 	}
+	
+	/**
+	 * 
+	 * <p>9.查询我的审批列表</p>
+	 * <b>URL: /ui/approval/listMyApprovalsByScene</b>
+	 */
+	@RequestMapping("listMyApprovalsByScene")
+	@RestReturn(ListApprovalRequestBySceneResponse.class)
+	public RestResponse listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd){
+		return new RestResponse(approvalService.listMyApprovalsByScene(cmd));
+	}
+		
+	
+
+	/**
+	 * 
+	 * <p>10.同意申请</p>
+	 * <b>URL: /ui/approval/approveApprovalRequestByScene</b>
+	 */
+	@RequestMapping("approveApprovalRequestByScene")
+	@RestReturn(String.class)
+	public RestResponse approveApprovalRequestByScene(ApproveApprovalRequesBySceneCommand cmd){
+		approvalService.approveApprovalRequest(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * 
+	 * <p>11.驳回申请</p>
+	 * <b>URL: /ui/approval/rejectApprovalRequestByScene</b>
+	 */
+	@RequestMapping("rejectApprovalRequestByScene")
+	@RestReturn(String.class)
+	public RestResponse rejectApprovalRequestByScene(RejectApprovalRequestBySceneCommand cmd){
+		approvalService.rejectApprovalRequest(cmd);
+		return new RestResponse();
+	}
+
+
 }

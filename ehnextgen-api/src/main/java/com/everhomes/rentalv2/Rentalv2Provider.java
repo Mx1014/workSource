@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.rentalv2.MaxMinPrice;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 
 public interface Rentalv2Provider {
@@ -90,8 +91,8 @@ public interface Rentalv2Provider {
 
 	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalOrder> listRentalBills(Long userId, Long resourceTypeId, ListingLocator locator,
-			int count, List<Byte> status);
+	List<RentalOrder> listRentalBills(Long id,Long userId, Long resourceTypeId, ListingLocator locator,
+			int count, List<Byte> status, Byte payMode);
 
 	int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds);
 
@@ -103,6 +104,8 @@ public interface Rentalv2Provider {
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId);
 
+	List<RentalOrder> listSuccessRentalBills();
+	
 	List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId);
  
@@ -121,7 +124,7 @@ public interface Rentalv2Provider {
 
 	RentalItem getRentalSiteItemById(Long id);
 
- 
+    void setAuthDoorId(Long rentalId,Long AuthDoorId);
 
 	void createRentalDefaultRule(RentalDefaultRule defaultRule);
 
@@ -148,7 +151,7 @@ public interface Rentalv2Provider {
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String ownerType, Long ownerId);
 
- 
+	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
 
 	void createRentalSiteOwner(RentalSiteRange siteOwner);
 
@@ -234,7 +237,7 @@ public interface Rentalv2Provider {
 	void updateRentalResourceType(RentalResourceType resourceType);
 
 
-	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator);
+	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator);
 
 
 	List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,
@@ -258,11 +261,34 @@ public interface Rentalv2Provider {
 
 
 	RentalCell getRentalCellById(Long cellId);
-
  
+	void deleteRentalCellsByResourceId(Long rentalSiteId); 
 
- 
- 
+	List<RentalOrder> listSiteRentalByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 
+
+	List<RentalOrder> listSiteRentalByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+
+	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
+
+	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
+
+
+	Double countRentalSiteBillBySiteRuleId(Long cellId);
+
+
+	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
+
+
+	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
+
+
+	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
+			List<Rentalv2PriceRule> priceRules);
+
+	RentalResourceType findRentalResourceTypeById (Long resoureceTypeId);
+
+	List<Long> listCellPackageId (Long ownerId, Byte rentalType);
 
 }

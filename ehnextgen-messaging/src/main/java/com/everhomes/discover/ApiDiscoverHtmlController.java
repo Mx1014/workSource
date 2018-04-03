@@ -31,7 +31,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api/**")
     @RequireAuthentication(false)
     public String apiDiscover(HttpServletRequest request, HttpServletResponse response, Model model) {
-/*        
+        
         response.addHeader("Content-Type", "text/html; charset=utf-8");
         String uri = request.getRequestURI().toString();
         
@@ -44,7 +44,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             else
                 model.addAttribute("index", "0");
                 
-            model.addAttribute("restMethods", ControllerBase.getRestMethodList());
+            model.addAttribute("restMethods", ControllerBase.getRestMethodList(javadocRoot, "core"));
             model.addAttribute("javadocRoot", javadocRoot);
             
             String contextPath = request.getContextPath();
@@ -59,15 +59,21 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             model.addAttribute("contextPath", contextPath);            
             return "api-input";
         }
-*/
-        return "api-react";
+
+//        String uri = request.getRequestURI().toString();
+//        int pos = uri.indexOf("/api");
+//        if(uri.substring(pos + 4).length() > 0) {
+//            return "redirect:/api";
+//        }
+        
+//        return "api-react";
     }
     
     @SuppressDiscover
     @RequestMapping("/api-menu")
     @RequireAuthentication(false)
     public String apiIndex(HttpServletRequest request, HttpServletResponse response, Model model) {
-        model.addAttribute("restMethods", ControllerBase.getRestMethodList());
+        model.addAttribute("restMethods", ControllerBase.getRestMethodList(javadocRoot, "core"));
         return "api-menu";
     }
     
@@ -80,7 +86,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
         if(index != null)
             methodIndex = Integer.parseInt(index);
         
-        model.addAttribute("restMethod", ControllerBase.getRestMethodList().get(methodIndex));
+        model.addAttribute("restMethod", ControllerBase.getRestMethodList(javadocRoot, "core").get(methodIndex));
         model.addAttribute("javadocRoot", javadocRoot);
         
         String contextPath = request.getContextPath();

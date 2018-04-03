@@ -78,20 +78,45 @@ public class DbProviderImpl implements DbProvider {
 	        }
 	    }
 	    
+	    // For InnoDB tables, the row count is only a rough estimate used in SQL optimization. 
+	    // 即在InnoDB中，从information_schema数据库中读取tables表得到的rowcount是一个大致值，并不准确的的，
+	    // 这会导致有的时候测试用例由于导入数据仍然存在则报错 by lqs 20161102
+//	    List<Table<?>> tables = this.dslContext.select(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA,
+//	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME,
+//	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS)
+//	        .from(org.jooq.util.mysql.information_schema.Tables.TABLES)
+//	        .where(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA.in(dbMappingName))
+//	        .fetch().stream().map((r) -> {
+//	            String tableName = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME);
+//	            long rowCount = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS).longValue();
+//	            if(!excludeTables.contains(tableName) && rowCount > 0) {
+//	                return DSL.table(tableName);
+//	            } else {
+//	                return null;
+//	            }
+//	        }).filter(Objects::nonNull).collect(Collectors.toList());
+	    
+//	    String tableName = "";
+//	    Result<Record> x = this.dslContext.fetch("SELECT EXISTS(SELECT 1 FROM " + tableName + ")");
+//        if(x.size() == 0 || x.get(0).getValue(0)) {
+//            
+//        }
+	    
+	    // 改用每张表都查询的方式，但为了减少时间，使用SELECT EXISTS(SELECT 1 FROM table_name)的方式，如果表有行则返回1、否则返回0；
+	    // 这样查询时间也比较短； by lqs 20161102
 	    List<Table<?>> tables = this.dslContext.select(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA,
-	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME,
-	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS)
-	        .from(org.jooq.util.mysql.information_schema.Tables.TABLES)
-	        .where(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA.in(dbMappingName))
-	        .fetch().stream().map((r) -> {
-	            String tableName = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME);
-	            long rowCount = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS).longValue();
-	            if(!excludeTables.contains(tableName) && rowCount > 0) {
-	                return DSL.table(tableName);
-	            } else {
-	                return null;
-	            }
-	        }).filter(Objects::nonNull).collect(Collectors.toList());
+               org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME)
+           .from(org.jooq.util.mysql.information_schema.Tables.TABLES)
+           .where(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA.in(dbMappingName))
+           .fetch().stream().map((r) -> {
+               String tableName = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME);
+               Result<Record> x = this.dslContext.fetch("SELECT EXISTS(SELECT 1 FROM " + tableName + ")");
+               if(x.size() != 0 && !x.get(0).getValue(0).equals(0L) && !excludeTables.contains(tableName)) {
+                   return DSL.table(tableName);
+               } else {
+                   return null;
+               }
+           }).filter(Objects::nonNull).collect(Collectors.toList());
 	    
 	    truncateTable(tables);
 	}

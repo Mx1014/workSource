@@ -2,6 +2,7 @@ package com.everhomes.util;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -17,6 +18,21 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 public class QRCodeEncoder
 {
+
+	/**
+	 * 生成二维码图片[带logo小图片]，默认内容编码字符集、图片格式和图片前背景色,图片大小,格式png。
+	 *
+	 * @param content 二维码文字内容
+	 * @throws WriterException 如果对二维码进行编码出错则抛该异常
+	 * @throws IOException 如果写文件出错则抛该异常
+	 * @return 二进制流
+	 */
+	public static ByteArrayOutputStream createSimpleQrCode(String content) throws IOException, WriterException {
+		BufferedImage image = createQrCode(content, 270, 270, null);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+		return out;
+	}
 	/**
 	 * 生成二维码图片[带logo小图片]，默认内容编码字符集、图片格式和图片前背景色。
 	 * 

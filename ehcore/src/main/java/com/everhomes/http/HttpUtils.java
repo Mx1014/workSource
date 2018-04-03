@@ -9,9 +9,11 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.annotation.NotThreadSafe;
+//import org.apache.http.annotation.Contract;
+//import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -224,6 +226,43 @@ public class HttpUtils {
 			HttpGet httpget = new HttpGet(url);
 			ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			retVal = httpclient.execute(httpget, responseHandler);
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
+		return retVal;
+	}
+	
+	/**
+	 * get请求
+	 * 
+	 * @param url
+	 * @param params
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource")
+	public static String get(String url, Map<String, String> params, Header[] headers) throws IOException {
+		HttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setIntParameter("http.socket.timeout", 100000);
+		String retVal = "";
+		try {
+			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+			if (params != null) {
+				for (Map.Entry<String, String> param : params.entrySet()) {
+					qparams.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+				}
+			}
+			String paramstr = URLEncodedUtils.format(qparams, HTTP.UTF_8);
+			if (StringUtils.isNotEmpty(paramstr)) {
+				url = url + "?" + paramstr;
+			}
+			HttpGet httpget = new HttpGet(url);
+			httpget.setHeaders(headers);
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			retVal = httpclient.execute(httpget, responseHandler);
+			retVal = new String(retVal.getBytes(HTTP.ISO_8859_1), HTTP.UTF_8);
 		} catch (IOException e) {
 			throw e;
 		} finally {
@@ -483,7 +522,7 @@ public class HttpUtils {
 		/**
 		 * 没有现成的delete可以带json的，自己实现一个，参考HttpPost的实现
 		 */
-		@NotThreadSafe
+		//@Contract(threading = ThreadingBehavior.UNSAFE)
 		class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 			public static final String METHOD_NAME = "DELETE";
 

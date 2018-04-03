@@ -1,37 +1,39 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.activity.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.hotTag.HotTags;
+import com.everhomes.hotTag.HotTag;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityLocalStringCode;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.hotTag.HotTagServiceType;
-import com.everhomes.rest.hotTag.HotTagStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
 
@@ -57,6 +59,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private LocaleStringProvider localeStringProvider;
+
+	@Autowired
+	private ActivityProivider activityProivider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -137,12 +142,76 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOldPostContent(ActivityDTO activityDTO){
-    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + activityDTO.getStartTime()+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + activityDTO.getStopTime()+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
-    				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    	return formatDate(activityDTO) + "\n"
+    			+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
+    			(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+
     }
     
+    // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
+    private String formatDate(String time) {
+    	if (time.contains(".")) {
+			return time.substring(0,time.lastIndexOf("."));
+		}
+    	return time;
+    }
+    
+	//    1 若活动发布时全天开关开启，则活动时间显示为： 
+	//    #活动开始时间# 年-月-日 ~ #活动结束时间# 年-月-日；
+	//     1.1 若为同一天，则简化为  年-月-日 
+	//     1.2 若为同年，则简化为  年-月-日 ~ 月-日
+	//  2. 若活动发布时全天开关关闭，则活动时间显示为： 
+	//       #活动开始时间# 年-月-日 时 : 分  ~ #活动结束时间# 年-月-日 时 : 分；
+	//     2.1 若开始时间与结束时间为同一天，则简化为：年-月-日  时 : 分  ~ 时 : 分 
+	//     2.2 若为同年，则简化  年-月-日  时 : 分  ~ 月-日   时 : 分  
+    private String formatDate(ActivityDTO activityDTO){
+    	
+    	//如果时间字符串有异常，保持原样
+    	if(activityDTO.getStartTime() == null || activityDTO.getStartTime().length() < 16 || 
+    			activityDTO.getStopTime() == null || activityDTO.getStartTime().length() < 16){
+    		
+    		return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
+    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime());
+    	}
+    	
+    	
+    	String startYear = activityDTO.getStartTime().substring(0, 4);
+    	String startMon = activityDTO.getStartTime().substring(5, 7);
+    	String startDay = activityDTO.getStartTime().substring(8, 10);
+    	String startHourAndMin = activityDTO.getStartTime().substring(11, 16);
+    	
+    	String stopYear = activityDTO.getStopTime().substring(0, 4);
+    	String stopMon = activityDTO.getStopTime().substring(5, 7);
+    	String stopDay = activityDTO.getStopTime().substring(8, 10);
+    	String stopHourAndMin = activityDTO.getStopTime().substring(11, 16);
+    	
+    	
+    	
+    	String res = "";
+    	String activityTimeStr = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_TIME);
+    	if(activityDTO.getAllDayFlag() != null && activityDTO.getAllDayFlag() == 1){
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " ~ " + stopMon + "-" + stopDay;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + "\n"
+    					+ getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + " ~ " + stopMon + "-" + stopDay;
+    		}
+    	}else{
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopHourAndMin;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopMon + "-" + stopDay + " " + stopHourAndMin;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin +"\n"
+    					+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + "-" + stopMon + "-" + stopDay + " "+ stopHourAndMin;
+    		}
+    	}
+
+    	return res;
+    }
+
     private boolean isOld(String versionString){
     	if (versionString == null || versionString.equals("")) {
 			return true;
@@ -177,6 +246,11 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
         
+        if (StringUtils.isNotBlank(cmd.getSignupEndTime()) && cmd.getSignupEndTime().compareTo(cmd.getEndTime()) > 0) {
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_SIGNUP_END_TIME,
+					"signup end time must less or equal to end time");
+		}
+        
         if(null == cmd.getNamespaceId()){
         	Forum forum = forumProvider.findForumById(post.getForumId());
         	if(null != forum)
@@ -188,15 +262,122 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
+
+        //保证帖子和活动的clone状态是一致的  add by yanjun 20170807
+        cmd.setCloneFlag(post.getCloneFlag());
+
         
-        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
-			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
-			post.setOfficialFlag(OfficialFlag.NO.getCode());
-		}else {
-			post.setOfficialFlag(cmd.getOfficialFlag());
+//        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
+//			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
+//			post.setOfficialFlag(OfficialFlag.NO.getCode());
+//		}else {
+//			post.setOfficialFlag(cmd.getOfficialFlag());
+//		}
+        
+        // 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
+        // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+        // add by tt, 20170116
+//        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+//        Long categoryId = cmd.getCategoryId();
+//        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
+//			categoryId = 1L;
+//		}else {
+//			if (categoryId == null) {
+//				if(officialFlag == null) officialFlag = OfficialFlag.NO;
+//				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//			}else {
+//				if (categoryId.longValue() == 1L) {
+//					officialFlag = OfficialFlag.YES;
+//				}else if (categoryId.longValue() == 0L) {
+//					officialFlag = OfficialFlag.NO;
+//				}else {
+//					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
+//					officialFlag = OfficialFlag.UNKOWN;
+//				}
+//			}
+//		}
+
+		// 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
+		// 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+		// add by tt, 20170116
+		// 因为旧版本的app在其他入口的情况下仍然会传OfficialFlag.YES，因此在上面规则的情况下，使用新的方法
+		// 1、OfficialFlag为1时判断categoryId，如果是其他入口则使用OfficialFlag.UNKOWN，不然默认1
+		// 2、officialFlag不是1时，根据categoryId给officialFlag赋值
+		OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+		Long categoryId = cmd.getCategoryId();
+		if(officialFlag == OfficialFlag.YES){
+			if(categoryId != null && categoryId.longValue() == 0) {
+				categoryId = 1L;
+			}else {
+				officialFlag = OfficialFlag.UNKOWN;
+			}
+		}else{
+			if(categoryId == null){
+				categoryId = 0L;
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 0){
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 1){
+				officialFlag = OfficialFlag.YES;
+			}else{
+				officialFlag = OfficialFlag.UNKOWN;
+			}
 		}
+
+
+        cmd.setOfficialFlag(officialFlag.getCode());
+        post.setOfficialFlag(officialFlag.getCode());
+        cmd.setCategoryId(categoryId);
+        post.setActivityCategoryId(categoryId);
+        if (cmd.getContentCategoryId() == null) {
+			cmd.setContentCategoryId(0L);
+		}
+        post.setActivityContentCategoryId(cmd.getContentCategoryId());
+        
         
         cmd.setVideoState(VideoState.UN_READY.getCode());
+        
+        cmd.setForumId(post.getForumId());
+        cmd.setCreatorTag(post.getCreatorTag());
+        cmd.setTargetTag(post.getTargetTag());
+        cmd.setVisibleRegionType(post.getVisibleRegionType());
+        cmd.setVisibleRegionId(post.getVisibleRegionId());
+        
+        if(cmd.getChargeFlag() == null){
+        	cmd.setChargeFlag((byte)0);
+        }
+        
+        
+        //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
+		//产品要求：去除“官方活动”这个条件，对所有活动适应    add by yanjun 20170629
+        try {
+        	if(null != cmd.getStartTime()){
+        		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        		Date startTime= f.parse(cmd.getStartTime());
+            	if(startTime.before(DateHelper.currentGMTTime())){
+            		post.setCreateTime(new Timestamp(startTime.getTime() - 24*60*60*1000));
+            	}
+        	}
+        	
+        } catch (ParseException e) {
+        	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+
+        //发布活动的时候没有选择是否支持微信，则选择改与空间默认的， add by yanjun 20170627
+        if(cmd.getWechatSignup() == null){
+			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
+			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			getRosterOrderSettingCommand.setCategoryId(cmd.getCategoryId());
+			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
+
+			if(rosterOrderSettingDTO != null){
+				cmd.setWechatSignup(rosterOrderSettingDTO.getWechatSignup());
+			}else{
+				cmd.setWechatSignup(WechatSignupFlag.YES.getCode());
+			}
+
+		}
+        
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         
         return post;
@@ -209,18 +390,39 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+            //comment by tt, 已经在preProcess里面处理过了
+//            if(cmd.getCategoryId() == null) {
+//            	cmd.setCategoryId(0L);
+//            }
+//            if (cmd.getContentCategoryId() == null) {
+//				cmd.setContentCategoryId(0L);
+//			}
+            
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());
             }
             else{
             	activityService.createPost(cmd, post.getId()); 
             }
-            
-            HotTags tag = new HotTags();
-            tag.setName(cmd.getTag());
-            tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
-            tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
-            hotTagSearcher.feedDoc(tag);
+
+            //if 与 try 防止tag保存Elastic异常导致发布活动的失败   add by yanjun
+			if(StringUtils.isNotEmpty(cmd.getTag())){
+				try{
+					HotTag tag = new HotTag();
+					Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+					tag.setNamespaceId(namespaceId);
+					//TODO 业务类型、入口ID
+
+					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+					tag.setName(cmd.getTag());
+					tag.setHotFlag(HotFlag.NORMAL.getCode());
+
+
+					hotTagSearcher.feedDoc(tag);
+				}catch (Exception e){
+					LOGGER.error("feedDoc activity tag error",e);
+				}
+			}
             
         }catch(Exception e){
             LOGGER.error("create activity error",e);
@@ -229,4 +431,41 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         return post;
     }
 
+	@Override
+	public void beforePostDelete(Post post) {
+
+	}
+
+	@Override
+	public void afterPostDelete(Post post) {
+		ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+				ActivityPostCommand.class);
+		cmd.setId(post.getEmbeddedId());
+		cmd.setMaxQuantity(post.getMaxQuantity());
+		activityService.updatePost(cmd, post.getId());
+
+
+		Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+
+		if (activity != null) {
+			List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+			for( int i=0; i< activityRosters.size(); i++){
+				//如果有退款，先退款再取消订单
+				ActivityRoster tempRoster = activityRosters.get(i);
+				if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+					activityService.signupOrderRefund(activity, tempRoster.getUid());
+
+					tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+					tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					activityProivider.updateRoster(tempRoster);
+				}
+
+			}
+
+			activity.setStatus(PostStatus.INACTIVE.getCode());
+			activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			activityProivider.updateActivity(activity);
+		}
+
+	}
 }

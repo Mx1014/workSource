@@ -65,8 +65,10 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
             if(visitor.getPushCount() > 0) {
                 promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
                 visitor.setPushCount(0);
-                promotionService.finishOpPromotion(c.getPromotion());
             }            
+            promotionService.finishOpPromotion(c.getPromotion());
+            
+            LOGGER.info("finished promotion id=" + c.getPromotion().getId());
         } catch(Exception ex) {
             LOGGER.error("promotion list all error", ex);
         }
@@ -91,11 +93,13 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         if(visitor.getPushCount() % 100 == 0) {
             promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
             visitor.setPushCount(0);
+            
+            //TODO better 目前简单粗暴的方法，sleep 方式来减少 cpu 占用。
             try {
             	Thread.sleep(10*1000L);
-			} catch (Exception e) {
-				LOGGER.error("sleep error", e);
-			}
+				} catch (Exception e) {
+					LOGGER.error("sleep error", e);
+				}
             
         }
     }

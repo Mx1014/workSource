@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li> id: id</li>
- *  <li> ownerType: 拥有者类型：现在是community</li>
+ *  <li> ownerType: 拥有者类型 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li> ownerId: 拥有者ID</li>
  * </ul>
  */

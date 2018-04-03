@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 园区id</li>
  * <li>namespaceId: 域空间</li>
  * <li>dataStr: 日期</li>
+ * <li>currentOrgId: 当前机构id</li>
  * </ul>
  */
 public class GetStatisticsCommand {
@@ -15,7 +16,16 @@ public class GetStatisticsCommand {
 	private String ownerType;
 	private Integer namespaceId;
 	private Long dateStr;
-	
+	private  Long currentOrgId;
+
+	public Long getCurrentOrgId() {
+		return currentOrgId;
+	}
+
+	public void setCurrentOrgId(Long currentOrgId) {
+		this.currentOrgId = currentOrgId;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}

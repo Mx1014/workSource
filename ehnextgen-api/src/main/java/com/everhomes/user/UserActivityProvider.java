@@ -1,13 +1,12 @@
 package com.everhomes.user;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Set;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.UserFavoriteDTO;
+import org.jooq.Condition;
+
+import java.util.List;
+import java.util.Set;
 
 public interface UserActivityProvider {
     List<User> listUsers(List<Long> uids);
@@ -38,9 +37,13 @@ public interface UserActivityProvider {
 
     List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens);
 
+    List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator);
+
     void addUserProfile(UserProfile userProfile);
 
     List<UserProfile> findProfileByUid(Long uid);
+
+    List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize,  Byte CommunityType, Byte userSourceType, String keywords);
 
     void updateUserProfile(UserProfile userProfile);
 
@@ -53,6 +56,14 @@ public interface UserActivityProvider {
     void updateUserCurrentEntityProfile(Long uid, String key, Long entityId, Long timestemp, Integer namespaceId);
 
     void addFeedback(Feedback feedback,Long uid);
+    
+    List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte targetType, Byte status, int pageSize);
+    
+    void updateFeedback(Feedback feedback);
+    
+    void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType);
+    
+    Feedback findFeedbackById(Long id);
 
     List<UserFavoriteDTO> findFavorite(Long uid);
     
@@ -101,4 +112,10 @@ public interface UserActivityProvider {
 	StatActiveUser findStatActiveUserByDate(java.sql.Date date, Integer namespaceId);
 
 	void createStatActiveUser(StatActiveUser stat);
+
+    List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
+
+    UserActivity findLastUserActivity(Long uid);
+
+    List<User> listNotInUserActivityUsers(Integer namespaceId);
 }

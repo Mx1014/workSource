@@ -82,13 +82,13 @@ public class AclinkUtils {
     //DoorMessage is just for debug!!!, and should be removed later.
     public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid, DoorMessage doorMessage) {
         String pub = StringHelper.toHexString(Base64.decodeBase64(rsaAclinkPub));
-        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
+        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, (devName+"\0\0\0\0\0\0").substring(0, 6), (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
         return Base64.encodeBase64String(result);
     }
     
     public static String packUpdateDeviceName(Byte ver, String aesKey, String aesIv, String devName) {
         byte[] key = Base64.decodeBase64(aesKey);
-        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"            ").substring(0, 12));
+        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"\0\0\0\0\0\0\0\0\0\0\0\0").substring(0, 12));
         return Base64.encodeBase64String(binaryData);
     }
     
@@ -111,7 +111,7 @@ public class AclinkUtils {
             data[11] = 0x3a;
             byte[] keyIdBytes = DataUtil.shortToByteArray(keyId.shortValue());
             System.arraycopy(keyIdBytes, 0, data, 12, keyIdBytes.length);
-            byte[] checkSum = DataUtil.shortToByteArray(CmdUtil.getCheckSum(data));
+            byte[] checkSum = DataUtil.shortToByteArray(CmdUtil.getCheckSum(data, data.length));
             System.arraycopy(checkSum, 0, data, 14, checkSum.length);
             
             return Base64.encodeBase64String(cipher.doFinal(data));   
@@ -147,4 +147,70 @@ public class AclinkUtils {
         
         return false;
     }
+    
+    public static String packSetServerKeyCmd(Byte ver, String oldKey, String newKey) {
+    	byte[] key0 = Base64.decodeBase64(oldKey);
+    	byte[] key1 = Base64.decodeBase64(newKey);
+    	return Base64.encodeBase64String(CmdUtil.setServerKeyCmd(ver, key0, key1));
+    }
+    
+    private static short getCheckSum(byte[] data1, byte[] data2) {
+        short sum = 0;
+        for (int i = 0; i < data1.length; i++) {
+            sum += (data1[i] & 0xFF);
+            }
+        for (int i = 0; i < data2.length; i++) {
+            sum += (data2[i] & 0xFF);
+            }
+        return sum;
+    }
+    
+    public static String createZlQrCodeForFlapDoor(byte[] qrArr, long curTime, long qrImagePeriod) {
+        String resultCode = null;
+        byte[] type = new byte[]{0, 1};
+        byte[] cmdArr = new byte[]{9, 0};
+        byte[] currTimeArr = DataUtil.intToByteArray((int) (curTime / 1000));
+        int imageTimeout = (int) ((curTime + qrImagePeriod) / 1000);
+        byte[] imageTimeArr = DataUtil.intToByteArray(imageTimeout);
+
+        short checkSum = getCheckSum(currTimeArr, imageTimeArr);
+        byte[] checkSumArr = DataUtil.shortToByteArray(checkSum);
+        byte[] randomArr = {0, 0, 0, 0, 0, 0, 0, 0};
+        if (null != checkSumArr && checkSumArr.length == 2) {
+            randomArr[0] = checkSumArr[0];
+            randomArr[1] = checkSumArr[1];
+        }
+
+        byte[] encryptArr = new byte[currTimeArr.length + imageTimeArr.length + randomArr.length];
+        System.arraycopy(currTimeArr, 0, encryptArr, 0, currTimeArr.length);
+        System.arraycopy(imageTimeArr, 0, encryptArr, currTimeArr.length, imageTimeArr.length);
+        System.arraycopy(randomArr, 0, encryptArr, currTimeArr.length + imageTimeArr.length, randomArr.length);
+
+        encryptArr = xorResult(encryptArr);
+
+        byte[] lengthArr = DataUtil.shortToByteArray((short) (cmdArr.length + qrArr.length + encryptArr.length));
+        byte[] resultArr = new byte[type.length + lengthArr.length + cmdArr.length + qrArr.length + encryptArr.length];
+        System.arraycopy(type, 0, resultArr, 0, type.length);
+        System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+        System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+        System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+        System.arraycopy(encryptArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, encryptArr.length);
+        resultCode = Base64.encodeBase64String(resultArr);
+        return resultCode;
+    }
+
+    private static byte[] xorResult(byte[] srcData) {
+        String key = "thisjustfortime!";//TODO use constants
+        byte[] keyData = key.getBytes();
+
+        if (null == srcData || null == keyData || srcData.length < 16 || keyData.length < 16) {
+            return srcData;
+        }
+        byte[] resData = new byte[srcData.length];
+        for (int i = 0; i < srcData.length; i++) {
+            resData[i] = (byte) (srcData[i] ^ keyData[i]);
+        }
+        return resData;
+    }
+
 }

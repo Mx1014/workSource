@@ -1,10 +1,8 @@
 package com.everhomes.rest.common;
 
-import java.io.Serializable;
-
-
-
 import com.everhomes.util.StringHelper;
+
+import java.io.Serializable;
 
 
 /**
@@ -16,15 +14,21 @@ import com.everhomes.util.StringHelper;
 public class ServiceAllianceActionData implements Serializable{
     private static final long serialVersionUID = -742724365939053762L;
     
-    private Byte type;
+    private Long type;
     
     private Long parentId;
 
-    public Byte getType() {
+    private String displayType;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public Long getType() {
         return type;
     }
 
-    public void setType(Byte type) {
+    public void setType(Long type) {
         this.type = type;
     }
 
@@ -34,6 +38,14 @@ public class ServiceAllianceActionData implements Serializable{
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public String getDisplayType() {
+        return displayType;
+    }
+
+    public void setDisplayType(String displayType) {
+        this.displayType = displayType;
     }
 
     @Override

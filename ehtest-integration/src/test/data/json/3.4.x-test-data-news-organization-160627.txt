@@ -76,5 +76,19 @@
       "id": "-99",
       "value": "/web/lib/html/news_text_review.html"
     }
-  ]
+  ],
+  
+	"eh_user_identifiers":[
+		{
+		"id":0,
+		"owner_uid":1,
+		"identifier_type":0,
+		"identifier_token":"10000000000", 
+		"claim_status":3,
+		"create_time":"2015\/9\/25 11:14:23",
+		"notify_time":null,
+		"namespace_id":0,
+		"region_code":86
+		}
+	]
 }

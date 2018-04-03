@@ -10,6 +10,7 @@ import com.everhomes.discover.ItemType;
  * 楼栋信息
  * <ul>
  *  <li>id:楼栋id</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>communityId:楼栋所属园区or小区id</li>
  *  <li>name:楼栋名</li>
  *  <li>aliasName:楼栋别名</li>
@@ -35,12 +36,15 @@ import com.everhomes.discover.ItemType;
  *  <li>creatorAvatarUrl:创建楼栋地址用户头像URL</li>
  *  <li>createTime:创建楼栋地址时间</li>
  *  <li>attachments:楼栋附件信息</li>
+ *  <li>buildingNumber:楼栋编号</li>
  * </ul>
  *
  */
 public class BuildingDTO {
 
 	private Long id; 
+
+    private Integer namespaceId;
 	
 	private Long communityId;
 	
@@ -49,11 +53,17 @@ public class BuildingDTO {
 	private String buildingName;
 	
 	private String aliasName;
+
+	private String buildingNumber;
 	
 	private Long managerUid;
-	
+
+	private String managerName;
+
 	private String managerNickName;
     
+	private String managerContact;
+	
     private String managerAvatar;
     
     private String managerAvatarUrl;
@@ -70,8 +80,8 @@ public class BuildingDTO {
 	
 	private String description;
 
-	private String posterUri;
 	private String posterUrl;
+	private String posterUri;
 	
 	private Long operatorUid;
 	
@@ -93,10 +103,29 @@ public class BuildingDTO {
 	
 	private Timestamp createTime;
 	
-	
+	private String detailUrl;
+
+	private String floorCount;
+	private String trafficDescription;
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getOperateNickName() {
 		return operateNickName;
@@ -130,7 +159,15 @@ public class BuildingDTO {
 		this.id = id;
 	}
 
-	public Long getCommunityId() {
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
 		return communityId;
 	}
 
@@ -145,8 +182,6 @@ public class BuildingDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	
 	
 	public String getBuildingName() {
 		return buildingName;
@@ -308,14 +343,6 @@ public class BuildingDTO {
 		this.attachments = attachments;
 	}
 
-	public String getPosterUri() {
-		return posterUri;
-	}
-
-	public void setPosterUri(String posterUri) {
-		this.posterUri = posterUri;
-	}
-
 	public String getPosterUrl() {
 		return posterUrl;
 	}
@@ -323,6 +350,44 @@ public class BuildingDTO {
 	public void setPosterUrl(String posterUrl) {
 		this.posterUrl = posterUrl;
 	}
-	
-	
+
+	public String getManagerContact() {
+		return managerContact;
+	}
+
+	public void setManagerContact(String managerContact) {
+		this.managerContact = managerContact;
+	}
+
+	public String getTrafficDescription() {
+		return trafficDescription;
+	}
+
+	public void setTrafficDescription(String trafficDescription) {
+		this.trafficDescription = trafficDescription;
+	}
+
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
+	}
+
+	public String getManagerName() {
+		return managerName;
+	}
+
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
+
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
+
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
+	}
 }

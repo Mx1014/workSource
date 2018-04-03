@@ -17,10 +17,10 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskByUserRestResponse;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryRestResponse;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskRestResponse;
 import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesRestResponse;
@@ -68,7 +68,7 @@ public class CreateTaskTest extends BaseLoginAuthTestCase {
         cmd.setAddress(address);
         
         String commandRelativeUri = "/pmtask/createTask";
-        CreateTaskRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, CreateTaskRestResponse.class,context);
+        CreateTaskByUserRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, CreateTaskByUserRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 

@@ -21,6 +21,36 @@ public class OrganizationOwnerAddressDTO {
     private String livingStatus;
     private String authType;
 
+    private Byte apartmentLivingStatus;
+
+    private Double chargeArea;
+
+    private String orientation;
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public Byte getApartmentLivingStatus() {
+        return apartmentLivingStatus;
+    }
+
+    public void setApartmentLivingStatus(Byte apartmentLivingStatus) {
+        this.apartmentLivingStatus = apartmentLivingStatus;
+    }
+
+    public Double getChargeArea() {
+        return chargeArea;
+    }
+
+    public void setChargeArea(Double chargeArea) {
+        this.chargeArea = chargeArea;
+    }
+
     public String getBuilding() {
         return building;
     }

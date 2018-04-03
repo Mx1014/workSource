@@ -1,10 +1,10 @@
 package com.everhomes.oauth2;
 
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +13,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.everhomes.app.App;
-import com.everhomes.app.AppProvider;
-import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 
 public class WebRequestOAuth2Interceptor implements HandlerInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebRequestOAuth2Interceptor.class);

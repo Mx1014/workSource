@@ -10,65 +10,132 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
- * <li>count: 天数</li>
+ * <li>expiredRechargeFlag: 是否支持过期充值</li>
+ * <li>maxExpiredDay: 最多过期天数</li>
+ * <li>expiredRechargeMonthCount: 过期续交时，预交月数</li>
+ * <li>expiredRechargeType: 预交，计费方式 1: 整月，2:实际天数   {@link ParkingCardExpiredRechargeType}</li>
+ * <li>monthlyDiscountFlag: 月卡是否启用优惠 0：不启用，1：启用 {@link ParkingConfigFlag}</li>
+ * <li>monthlyDiscount: 月卡优惠折扣</li>
+ * <li>tempFeeDiscountFlag: 临时车是否启用优惠 0：不启用，1：启用 {@link ParkingConfigFlag}</li>
+ * <li>tempFeeDiscount: 临时车优惠折扣</li>
  * </ul>
  */
 public class SetParkingLotConfigCommand {
 	@NotNull
-    private String ownerType;
+	private String ownerType;
 	@NotNull
-    private Long ownerId;
+	private Long ownerId;
 	@NotNull
-    private Long parkingLotId;
-	@NotNull
-    private Integer reserveDay;
-	private Integer requestNum;
-    
-    public SetParkingLotConfigCommand() {
-    }
-    
-    public String getOwnerType() {
-        return ownerType;
-    }
+	private Long parkingLotId;
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
+	//是否支持过期充值
+	private Byte expiredRechargeFlag;
+	//支持过期充值时，最多过期天数
+	private Integer maxExpiredDay;
+	//支持过期充值时，至少充值几个月
+	private Integer expiredRechargeMonthCount;
+	//支持过期充值时，按照什么模式充值 {@link ParkingCardExpiredRechargeType}
+	private Byte expiredRechargeType;
 
-    public Long getOwnerId() {
-        return ownerId;
-    }
+	private Byte monthlyDiscountFlag;
+	private String monthlyDiscount;
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
+	private Byte tempFeeDiscountFlag;
+	private String tempFeeDiscount;
 
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
-
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
-    }
-
-    public Integer getReserveDay() {
-		return reserveDay;
+	public Byte getMonthlyDiscountFlag() {
+		return monthlyDiscountFlag;
 	}
 
-	public void setReserveDay(Integer reserveDay) {
-		this.reserveDay = reserveDay;
+	public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
+		this.monthlyDiscountFlag = monthlyDiscountFlag;
 	}
 
-	public Integer getRequestNum() {
-		return requestNum;
+	public Byte getTempFeeDiscountFlag() {
+		return tempFeeDiscountFlag;
 	}
 
-	public void setRequestNum(Integer requestNum) {
-		this.requestNum = requestNum;
+	public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
+		this.tempFeeDiscountFlag = tempFeeDiscountFlag;
+	}
+
+	public String getMonthlyDiscount() {
+		return monthlyDiscount;
+	}
+
+	public void setMonthlyDiscount(String monthlyDiscount) {
+		this.monthlyDiscount = monthlyDiscount;
+	}
+
+	public String getTempFeeDiscount() {
+		return tempFeeDiscount;
+	}
+
+	public void setTempFeeDiscount(String tempFeeDiscount) {
+		this.tempFeeDiscount = tempFeeDiscount;
+	}
+
+	public SetParkingLotConfigCommand() {
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getParkingLotId() {
+		return parkingLotId;
+	}
+
+	public void setParkingLotId(Long parkingLotId) {
+		this.parkingLotId = parkingLotId;
+	}
+
+	public Byte getExpiredRechargeFlag() {
+		return expiredRechargeFlag;
+	}
+
+	public void setExpiredRechargeFlag(Byte expiredRechargeFlag) {
+		this.expiredRechargeFlag = expiredRechargeFlag;
+	}
+
+	public Integer getMaxExpiredDay() {
+		return maxExpiredDay;
+	}
+
+	public void setMaxExpiredDay(Integer maxExpiredDay) {
+		this.maxExpiredDay = maxExpiredDay;
+	}
+
+	public Integer getExpiredRechargeMonthCount() {
+		return expiredRechargeMonthCount;
+	}
+
+	public void setExpiredRechargeMonthCount(Integer expiredRechargeMonthCount) {
+		this.expiredRechargeMonthCount = expiredRechargeMonthCount;
+	}
+
+	public Byte getExpiredRechargeType() {
+		return expiredRechargeType;
+	}
+
+	public void setExpiredRechargeType(Byte expiredRechargeType) {
+		this.expiredRechargeType = expiredRechargeType;
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

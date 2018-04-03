@@ -2,7 +2,7 @@ package com.everhomes.rest.statistics.transaction;
 
 /**
  *<ul>
- *<li>startDate:开始时间 由選擇日期當天的凌晨開始<li>
+ *<li>startDate:开始时间 由選擇日期當天的凌晨開始</li>
  *<li>endDate:结束时间 到選擇日期當天凌晨+1天結束</li>
  *<li>communityId:小區ID</li>
  *<li>namespaceId:域id</li>

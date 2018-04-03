@@ -49,7 +49,8 @@ public class PunchStatisticsDTO{
 	private java.lang.Byte     afternoonApprovalStatus;
 	private java.lang.Byte     viewFlag;
 	private java.lang.Byte     punchTimesPerDay;
-	
+
+	 private String statusList;
 	
 	
 	
@@ -300,5 +301,11 @@ public class PunchStatisticsDTO{
 	}
 
 
+	 public String getStatusList() {
+		 return statusList;
+	 }
 
+	 public void setStatusList(String statusList) {
+		 this.statusList = statusList;
+	 }
  }

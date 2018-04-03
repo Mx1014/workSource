@@ -1,22 +1,6 @@
 package com.everhomes.user.base;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.everhomes.acl.Acl;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
-import com.everhomes.acl.Role;
-import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.*;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.junit.CoreServerTestCase;
@@ -24,15 +8,18 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserStatus;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RandomGenerator;
+import org.junit.Assert;
+import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginAuthTestCase extends CoreServerTestCase {
 
@@ -61,7 +48,7 @@ public class LoginAuthTestCase extends CoreServerTestCase {
      * @param password 密码
      */
     protected User logon(String phone, String password) {
-    	UserLogin login = userService.logon(0, phone, EncryptionUtils.hashPassword(password), null, null);
+    	UserLogin login = userService.logon(0, 86, phone, EncryptionUtils.hashPassword(password), null, null);
         Assert.assertNotNull(login);
         Assert.assertTrue(login.getLoginId() > 0);
         

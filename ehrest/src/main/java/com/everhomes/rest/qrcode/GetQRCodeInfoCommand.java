@@ -5,12 +5,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>qrid: 二维码ID</li>
+ *     <li>qrid: 二维码ID</li>
+ *     <li>source: 扫一扫的来源 {@link com.everhomes.rest.qrcode.QRCodeSource}</li>
  * </ul>
  */
 public class GetQRCodeInfoCommand {
+
     private String qrid;
-    
+    private String source;
+
     public GetQRCodeInfoCommand() {
     }
 
@@ -20,6 +23,14 @@ public class GetQRCodeInfoCommand {
 
     public void setQrid(String qrid) {
         this.qrid = qrid;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     @Override

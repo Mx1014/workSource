@@ -574,7 +574,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 5, 'zh_CN', '物业一键推送消息', '左邻温馨提醒您：${msg}祝您生活愉快。');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 5, 'zh_CN', '物业一键推送消息', '');
 
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'sms.handler.type', 'YZX', 'sms handler');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'sms.itemName.type', 'YZX', 'sms itemName');
 
 ALTER TABLE `eh_organizations` ADD COLUMN `department_type` VARCHAR(64);
 

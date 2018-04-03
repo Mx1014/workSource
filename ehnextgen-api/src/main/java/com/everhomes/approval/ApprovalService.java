@@ -3,6 +3,8 @@ package com.everhomes.approval;
 
 import java.util.List;
 
+import com.everhomes.rest.approval.ApprovalOwnerInfo;
+import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -22,6 +24,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
+import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
@@ -52,6 +56,9 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.ListMyApprovalsBySceneCommand;
+import com.everhomes.rest.approval.ListTargetUsersCommand;
+import com.everhomes.rest.approval.RejectApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
@@ -62,7 +69,9 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 public interface ApprovalService {
 
@@ -137,5 +146,27 @@ public interface ApprovalService {
 	void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd);
 
 	String getUserName(Long userId, Long organizationId);
+
+	GetTargetApprovalRuleResponse getTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
+
+	void updateTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd);
+
+	void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
+
+	ListApprovalRequestBySceneResponse listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd);
+
+	void approveApprovalRequest(ApproveApprovalRequesBySceneCommand cmd);
+
+	void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd);
+
+	ApprovalCategory findApprovalCategoryById(Long id);
+
+	List<OrganizationMemberDTO> listTargetUsers(ListTargetUsersCommand cmd);
+
+	ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType);
+
+	void finishApproveApprovalRequest(ApprovalRequest approvalRequest);
+
+	ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString);
 
 }

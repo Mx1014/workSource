@@ -1,0 +1,19 @@
+// @formatter:off
+package com.everhomes.flow;
+
+import java.util.List;
+
+public interface FlowBranchProvider {
+
+	void createFlowBranch(FlowBranch flowBranch);
+
+	void updateFlowBranch(FlowBranch flowBranch);
+
+	FlowBranch findById(Long id);
+
+    void deleteFlowBranch(Long flowMainId, Integer flowVersion);
+
+    List<FlowBranch> listFlowBranch(Long flowId, Integer flowVersion);
+
+    FlowBranch findBranchByOriginalNodeId(Long flowMainId, Integer flowVersion, Long originalNodeId);
+}

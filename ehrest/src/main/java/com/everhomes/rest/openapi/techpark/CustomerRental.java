@@ -6,17 +6,39 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class CustomerRental {
-    /** 客户名称 */
     private String name;
-    
-    /** 客户编号 */
     private String number;
-    
-    /** 客户合同，多个 */
+    private String contact;
+    private String contactPhone;
     @ItemType(CustomerContract.class)
     private List<CustomerContract> contracts;
+    private Boolean dealed;
+    
+    public Boolean getDealed() {
+		return dealed;
+	}
 
-    public String getName() {
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
+	}
+
+	public String getContact() {
+		return contact;
+	}
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+	public String getContactPhone() {
+		return contactPhone;
+	}
+
+	public void setContactPhone(String contactPhone) {
+		this.contactPhone = contactPhone;
+	}
+
+	public String getName() {
         return name;
     }
 

@@ -28,6 +28,8 @@ public class CreateDoorVisitorCommand {
     private String description;
     private Long doorNumber;
     private String authMethod;
+	private Long validFromMs;
+	private Long validEndMs;
     
     public String getPhone() {
         return phone;
@@ -84,7 +86,19 @@ public class CreateDoorVisitorCommand {
     public void setAuthMethod(String authMethod) {
         this.authMethod = authMethod;
     }
-    @Override
+    public Long getValidFromMs() {
+		return validFromMs;
+	}
+	public void setValidFromMs(Long validFromMs) {
+		this.validFromMs = validFromMs;
+	}
+	public Long getValidEndMs() {
+		return validEndMs;
+	}
+	public void setValidEndMs(Long validEndMs) {
+		this.validEndMs = validEndMs;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

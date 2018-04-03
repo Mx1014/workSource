@@ -36,8 +36,8 @@
         [jsonObject setObject: self.entityType forKey: @"entityType"];
     if(self.entityId)
         [jsonObject setObject: self.entityId forKey: @"entityId"];
-    if(self.entityName)
-        [jsonObject setObject: self.entityName forKey: @"entityName"];
+    if(self.groupEntityName)
+        [jsonObject setObject: self.groupEntityName forKey: @"groupEntityName"];
     if(self.timestamp)
         [jsonObject setObject: self.timestamp forKey: @"timestamp"];
     if(self.directlyEnterpriseId)
@@ -59,9 +59,9 @@
         if(self.entityId && [self.entityId isEqual:[NSNull null]])
             self.entityId = nil;
 
-        self.entityName = [jsonObject objectForKey: @"entityName"];
-        if(self.entityName && [self.entityName isEqual:[NSNull null]])
-            self.entityName = nil;
+        self.groupEntityName = [jsonObject objectForKey: @"groupEntityName"];
+        if(self.groupEntityName && [self.groupEntityName isEqual:[NSNull null]])
+            self.groupEntityName = nil;
 
         self.timestamp = [jsonObject objectForKey: @"timestamp"];
         if(self.timestamp && [self.timestamp isEqual:[NSNull null]])

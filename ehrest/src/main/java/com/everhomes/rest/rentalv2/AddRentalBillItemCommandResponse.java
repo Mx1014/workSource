@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>randomNum：randomNum </li> 
  * <li>timestamp： timestamp</li> 
  * <li>signature：signature </li>  
+ * <li>flowCaseUrl : payMode 为1线下支付的时候,需要url跳转工作流 </li>  
  * </ul>
  */
 public class AddRentalBillItemCommandResponse {
@@ -27,6 +28,7 @@ public class AddRentalBillItemCommandResponse {
 	private Integer randomNum;
 	private Long timestamp;
 	private String signature;
+	private String flowCaseUrl;
 
 	@Override
     public String toString() {
@@ -86,5 +88,11 @@ public class AddRentalBillItemCommandResponse {
 	}
 	public void setSignature(String signature) {
 		this.signature = signature;
+	}
+	public String getFlowCaseUrl() {
+		return flowCaseUrl;
+	}
+	public void setFlowCaseUrl(String flowCaseUrl) {
+		this.flowCaseUrl = flowCaseUrl;
 	} 
 }

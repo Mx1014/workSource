@@ -3,85 +3,113 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetParkingActivityCommand;
-import com.everhomes.rest.parking.GetParkingTempFeeCommand;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
-import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.ParkingActivityDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.SetParkingActivityCommand;
-import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingLotConfigCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.parking.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {
-	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
+    List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
+
+    List<ParkingCardDTO> getParkingCards(ListParkingCardsCommand cmd);
 
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
-    
+
     List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd);
-    
+
     ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd);
-    
+
     ParkingCardRequestDTO requestParkingCard(RequestParkingCardCommand cmd);
-    
+
     ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd);
-    
+
     CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd);
-    
+
+    PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd);
+
+    PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd);
+
     ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd);
-    
+
     boolean deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd);
-    
+
     ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd);
-    
+
     ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd);
-    
+
+    void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response);
+
     void setParkingLotConfig(SetParkingLotConfigCommand cmd);
-    
-    void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd);
-    
-    void issueParkingCards(IssueParkingCardsCommand cmd);
-    
+
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
-    
-    void invalidApplier();
-    
-    ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd);
-    
-    ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd);
-    
-    HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
-    		HttpServletResponse response);
-    
+
+    HttpServletResponse exportParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd,
+                                                    HttpServletResponse response);
+
     void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd);
-    
+
     ListCardTypeResponse listCardType(ListCardTypeCommand cmd);
-    
+
     ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd);
-    
+
     CommonOrderDTO createParkingTempOrder(CreateParkingTempOrderCommand cmd);
+
+    ListParkingCarSeriesResponse listParkingCarSeries(ListParkingCarSeriesCommand cmd);
+
+    ParkingRequestCardConfigDTO getParkingRequestCardConfig(HttpServletRequest request, GetParkingRequestCardConfigCommand cmd);
+
+    void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
+
+    ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd);
+
+    void issueParkingCards(IssueParkingCardsCommand cmd);
+
+    OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
+
+    SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd);
+
+    ParkingRequestCardAgreementDTO getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd);
+
+    ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd);
+
+    void synchronizedData(ListParkingCardRequestsCommand cmd);
+
+    ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd);
+
+    void lockParkingCar(LockParkingCarCommand cmd);
+
+    GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
+
+    ParkingRechargeOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
+
+    void refundParkingOrder(RefundParkingOrderCommand cmd);
+
+    DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
+
+    ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd);
+
+    ParkingCarLocationDTO getCarLocation(GetCarLocationCommand cmd);
+
+    List<ParkingCardRequestTypeDTO> listParkingCardRequestTypes(ListParkingCardRequestTypesCommand cmd);
+
+    List<ParkingInvoiceTypeDTO> listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd);
+
+    ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
+
+    ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd);
+
+    SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd);
+
+    ListParkingCarVerificationsResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd);
+
+    ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd);
+
+    ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd);
+
+    void deleteCarVerification(DeleteCarVerificationCommand cmd);
+
 }

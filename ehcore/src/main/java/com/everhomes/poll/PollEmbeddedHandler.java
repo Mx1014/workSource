@@ -1,8 +1,18 @@
 package com.everhomes.poll;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.everhomes.hotTag.HotTag;
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.hotTag.HotTagServiceType;
+import com.everhomes.search.HotTagSearcher;
+import com.everhomes.user.UserContext;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +20,6 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.poll.PollDTO;
 import com.everhomes.rest.poll.PollPostCommand;
@@ -22,6 +31,8 @@ import com.everhomes.util.StringHelper;
 @Component(ForumEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_POLL)
 public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
+    private static final Logger LOGGER= LoggerFactory.getLogger(PollEmbeddedHandler.class);
+
     @Autowired
     private PollService pollService;
     
@@ -30,6 +41,12 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private ForumProvider forumProvider;
+
+    @Autowired
+    private HotTagSearcher hotTagSearcher;
+
+    @Autowired
+    private PollProvider pollProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -66,6 +83,11 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         	else
 				cmd.setNamespaceId(0);
         }
+
+        // 投票添加标签   add by yanjun 20170613
+        if(cmd.getTag() != null) {
+            post.setTag(cmd.getTag());
+        }
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         return post;
@@ -77,7 +99,43 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
                 PollPostCommand.class);
         cmd.setId(post.getEmbeddedId());
         pollService.createPoll(cmd, post.getId());
+
+        post.setTag(cmd.getTag());
+
+        // 将tag保存到搜索引擎  add by yanjun 20170613
+        if(StringUtils.isNotEmpty(cmd.getTag())){
+            try{
+                HotTag tag = new HotTag();
+                Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+                //TODO 业务类型、入口ID
+                tag.setServiceType(HotTagServiceType.POLL.getCode());
+
+                tag.setName(cmd.getTag());
+                tag.setHotFlag(HotFlag.NORMAL.getCode());
+
+                tag.setNamespaceId(namespaceId);
+
+                hotTagSearcher.feedDoc(tag);
+            }catch (Exception e){
+                LOGGER.error("feedDoc poll tag error",e);
+            }
+        }
+
         return post;
     }
 
+    @Override
+    public void beforePostDelete(Post post) {
+    }
+
+    @Override
+    public void afterPostDelete(Post post) {
+        PollPostCommand cmd = (PollPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+                PollPostCommand.class);
+        cmd.setId(post.getEmbeddedId());
+        Poll poll = pollProvider.findByPostId(post.getId());
+        poll.setStatus(PostStatus.INACTIVE.getCode());
+        poll.setDeleteTime(new Timestamp(System.currentTimeMillis()));
+        pollProvider.updatePoll(poll);
+    }
 }

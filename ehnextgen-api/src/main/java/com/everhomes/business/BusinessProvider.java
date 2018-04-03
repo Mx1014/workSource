@@ -1,5 +1,7 @@
 package com.everhomes.business;
 
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
+
 import java.util.List;
 
 public interface BusinessProvider {
@@ -50,4 +52,6 @@ public interface BusinessProvider {
 	List<BusinessAssignedNamespace> listBusinessAssignedNamespaceByOwnerId(Long ownerId,Byte visibleFlag);
 	List<BusinessAssignedNamespace> listBusinessAssignedNamespaceByNamespaceId(Integer namespaceId,Byte visibleFlag);
 	List<Business> listBusinessByCategorys(List<Long> categoryIds,List<Long> bizIds);
+
+    CheckPaymentUserResponse checkoutPaymentUser(Long userId);
 }

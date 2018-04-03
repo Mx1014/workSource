@@ -181,9 +181,15 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("ListEnterpriseVideoConfAccount query : {}", builder);
+		}
         SearchResponse rsp = builder.execute().actionGet();
 
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("ListEnterpriseVideoConfAccount query result: {}", rsp);
+		}
         List<Long> ids = getIds(rsp);
         
         ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
@@ -199,6 +205,8 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         for(Long id : ids) {
         	ConfAccountDTO dto = new ConfAccountDTO();
         	ConfAccounts account = vcProvider.findVideoconfAccountById(id);
+        	if(null == account)
+        		continue;
         	dto.setId(account.getId());
 			dto.setUserId(account.getOwnerId());
 			dto.setValidDate(account.getExpiredDate());
@@ -251,16 +259,21 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			
 			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
 			if(org != null) {
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
+//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
 				dto.setEnterpriseName(org.getName());
-				if (member != null) {
-					dto.setUserName(member.getContactName());
-					dto.setMobile(member.getContactToken());
-					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
-					if (dept != null) {
-						dto.setDepartment(dept.getName());
-					}
+				//分公司和总公司的问题 在分公司通讯录而不在总公司通讯录中 用总公司机构id 拿不到通讯录信息 暂只根据用户id取 by xiongying20170327
+				List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(account.getOwnerId());
+				if(members != null && members.size() > 0) {
+//					if (member != null) {
+						dto.setUserName(members.get(0).getContactName());
+						dto.setMobile(members.get(0).getContactToken());
+						Organization dept = organizationProvider.findOrganizationById(members.get(0).getGroupId());
+						if (dept != null) {
+							dto.setDepartment(dept.getName());
+						}
+//					}
 				}
+
 			}
 			confAccounts.add(dto);
         }
@@ -309,18 +322,19 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 //					b.field("userType", 2);
 //				}
 //			}
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), account.getEnterpriseId());
-            if(null != member) {
-                b.field("userName", member.getContactName());
-                Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
-                if (null != dept) {
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), account.getEnterpriseId());
+			//分公司和总公司的问题 在分公司通讯录而不在总公司通讯录中 用总公司机构id 拿不到通讯录信息 暂只根据用户id取 by xiongying20170327
+			List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(account.getOwnerId());
+			if(members != null && members.size() > 0) {
+				b.field("userName", members.get(0).getContactName());
+				Organization dept = organizationProvider.findOrganizationById(members.get(0).getGroupId());
+				if (null != dept) {
 					b.field("department", dept.getName());
 				} else {
 					b.field("department", "");
 				}
-                b.field("contact", member.getContactToken());
-    			
-            } else {
+				b.field("contact", members.get(0).getContactToken());
+			} else {
                 b.field("userName", "");
                 b.field("department", "");
                 b.field("contact", "");

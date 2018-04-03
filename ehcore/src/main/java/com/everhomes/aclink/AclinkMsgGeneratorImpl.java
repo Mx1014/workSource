@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
@@ -35,6 +40,12 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
     
     @Autowired
     AesUserKeyProvider aesUserKeyProvider;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+    final String MESSAGE_SYNC = "dooraccess:%d:msgsync";
     
     private void genDefaultMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
         if(!cmd.getStatus().equals(DoorCommandStatus.SENDING.getCode())) {
@@ -137,6 +148,7 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         }
     }
     
+    //从待处理的消息里，拿到所有的消息并发回给门禁
     @Override
     public List<DoorMessage> generateMessages(Long doorId) {
         ListingLocator locator = new ListingLocator();
@@ -160,8 +172,17 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
                 }
         }
         
+        String key = String.format(MESSAGE_SYNC, doorId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object v = redisTemplate.opsForValue().get(key);
+        if(v == null || v.toString().equals("0")) {
+        	redisTemplate.opsForValue().set(key, "1", 3600, TimeUnit.SECONDS);
+        	v = null;
+        }
+        
         List<DoorCommand> cmds = ctx.getOrderMessages();
-        if(cmds.size() > 0) {
+        if(cmds.size() > 0 || v == null) {
             //fake time message, the sequence is 0
             AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorId);
             byte[] serverKey = Base64.decodeBase64(aesServerKey.getSecret());
@@ -183,7 +204,7 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         }
         
         List<DoorMessage> results = ctx.getDoorMessages();
-        if(results.size() == 1) {
+        if(results.size() == 1 && v != null) {
             LOGGER.warn("some message loss because of something error!");
             return new ArrayList<DoorMessage>();
         }
@@ -236,5 +257,13 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         smsg.setSeq(new Long(r.nextInt(300)));
         
         return smsg;
+    }
+    
+    @Override
+    public void invalidSyncTimer(Long doorId) {
+        String key = String.format(MESSAGE_SYNC, doorId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        redisTemplate.opsForValue().set(key, "0", 3600, TimeUnit.SECONDS);
     }
 }

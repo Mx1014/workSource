@@ -42,4 +42,40 @@ public interface GroupNotificationTemplateCode {
     
     static final int GROUP_MEMBER_DELETED_CLUB_ADMIN = 34;  
     static final int GROUP_MEMBER_DELETED_CLUB_OPERATOR = 35;
+    
+    
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_OTHERS = 36;  //${newCreator}已成为“${groupName}”的创建者
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_NEW_CREATOR = 37;  //你已成为“${groupName}”的创建者
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL = 38;  //你创建“俱乐部A”的申请已通过
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_NO_APPROVAL = 39;  //你已成功创建“${groupName}”
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_NEED_APPROVAL = 40;  //你提交了创建“${groupName}”的申请，需要人工审核，请耐心等候
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_REJECTED = 41;  //你创建“${groupName}”的申请被拒绝
+    static final int GROUP_MEMBER_TO_ALL_WHEN_DELETE = 42;  //你加入的“${groupName}”已解散
+    static final int GROUP_NOT_ALLOW_TO_CREATE_GROUP = 43;  //不允许创建${clubPlaceholderName}
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN = 44;  //${userName}申请加入“${groupName}”，理由：${reason}
+    static final int GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN = 45;  //你加入“${groupName}”的申请已通过
+    static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN = 46;  //你加入“${groupName}”的申请被拒绝
+
+
+    static final int GROUP_INVITE_USERS_TO_JOIN = 50;  //你邀请${userNameList}加入了群聊
+    static final int GROUP_OTHER_INVITE_USERS_TO_JOIN = 51;  //${inviterName}邀请${userNameList}加入了群聊
+    static final int GROUP_BE_INVITE_TO_JOIN = 52;  //${inviterName}邀请你加入了群聊
+    static final int GROUP_MEMBER_LEAVE = 53;  //${userName}已退出群聊
+    static final int GROUP_RENAME = 54;  //群聊名称已修改为“${groupName}”
+    static final int GROUP_REMOVE_MEMBERS = 55;  //你将${userNameList}移出了群聊
+    static final int GROUP_BE_REMOVE = 56;  //你被${userName}移出了群聊
+    static final int GROUP_DELETE = 57;  //你加入的群聊“${groupName}”已解散
+
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD = 60;  //${申请人昵称}申请${企业名}加入${协会名}，是否同意？
+    static final int GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN_FOR_GUILD = 61;  //您提交的申请：{企业名}加入{行业协会名}，已被管理员通过。
+    static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN_FOR_GUILD = 62;  //您提交的申请：{企业名}加入{行业协会名}，已被管理员拒绝，理由：{拒绝理由}。
+    static final int GROUP_DELETE_FOR_GUILD = 63;  //您加入的行业协会“${groupName}”已解散
+    static final int GROUP_DELETE_FOR_CLUB = 64;  //您加入的俱乐部“${groupName}”已解散
+    static final int GROUP_MEMBER_DELETE_MEMBER_FOR_CLUB = 65;   //您已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_DELETE_MEMBER_FOR_GUILD = 66;   //您已退出行业协会“${groupName}”
+    static final int GROUP_MEMBER_LEAVE_FOR_CLUB = 67;  //${userName}已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_LEAVE_FOR_GUILD = 68;  //${userName}已退出行业协会“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_CLUB = 69;  //${userName}已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_GUILD = 70;  //${userName}已退出行业协会“${groupName}”
+
 }

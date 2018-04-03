@@ -1,0 +1,165 @@
+package com.everhomes.contract;
+
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.contract.ContractParamDTO;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.ContractSearcher;
+import com.everhomes.util.DateHelper;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by ying.xiong on 2017/8/26.
+ */
+@Component
+@Scope("prototype")
+public class ContractScheduleJob extends QuartzJobBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractScheduleJob.class);
+
+    public static final String SCHEDELE_NAME = "contract-";
+
+    public static String CRON_EXPRESSION = "0 0 2 * * ?";
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractSearcher contractSearcher;
+
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+    @Override
+    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("ContractScheduleJob" + now);
+        }
+        Map<Long, List<Contract>> contracts = contractProvider.listContractGroupByCommunity();
+        if(contracts != null && contracts.size() > 0) {
+            contracts.forEach((communityId, contractList) -> {
+                Community community = communityProvider.findCommunityById(communityId);
+                if(community == null) {
+                    return;
+                }
+
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId);
+                if(communityExist == null && communityId != null) {
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
+                }
+                ContractParam param = communityExist;
+
+                if(contractList != null) {
+                    contractList.forEach(contract -> {
+                        LOGGER.debug("ContractScheduleJob contract id: {}, number: {}, expiredDate: {}", contract.getId(),
+                                contract.getContractNumber(), contract.getContractEndDate());
+                        //当前时间在合同到期时间之后 直接过期
+                        if(now.after(contract.getContractEndDate())) {
+                            contract.setStatus(ContractStatus.EXPIRED.getCode());
+                            contractProvider.updateContract(contract);
+                            contractSearcher.feedDoc(contract);
+                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+                        }
+                        else if(param != null) {
+                            if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //正常合同转即将过期
+                                Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
+                                if(time.after(contract.getContractEndDate())) {
+                                    contract.setStatus(ContractStatus.EXPIRING.getCode());
+                                    contractProvider.updateContract(contract);
+                                    contractSearcher.feedDoc(contract);
+                                }
+
+                            } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //审批通过没有转为正常合同 过期
+                                if(contract.getReviewTime() != null) {
+                                    Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
+                                    if(time.before(now)) {
+                                        contract.setStatus(ContractStatus.EXPIRED.getCode());
+                                        contractProvider.updateContract(contract);
+                                        contractSearcher.feedDoc(contract);
+                                        dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
+        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
+        mappings.forEach(mapping -> {
+            CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
+            addressMapping.setLivingStatus(livingStatus);
+            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+            if(individualFlag) {
+                propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+            }
+        });
+    }
+
+    private Timestamp addPeriod(Timestamp startTime, int period, Byte unit) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startTime);
+        if(PeriodUnit.MINUTE.equals(PeriodUnit.fromStatus(unit))) {
+            calendar.add(Calendar.MINUTE, period);
+        }
+        else if(PeriodUnit.HOUR.equals(PeriodUnit.fromStatus(unit))) {
+            calendar.add(Calendar.HOUR, period);
+        }
+        else if(PeriodUnit.DAY.equals(PeriodUnit.fromStatus(unit))) {
+            calendar.add(Calendar.DATE, period);
+        }
+        else if(PeriodUnit.MONTH.equals(PeriodUnit.fromStatus(unit))) {
+            calendar.add(Calendar.MONTH, period);
+        }
+        else if(PeriodUnit.YEAR.equals(PeriodUnit.fromStatus(unit))) {
+            calendar.add(Calendar.YEAR, period);
+        }
+        Timestamp time = new Timestamp(calendar.getTimeInMillis());
+
+        return time;
+    }
+
+}

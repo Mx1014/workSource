@@ -32,24 +32,16 @@ public class ListOrganizationOwnerStatisticByAgeTest extends BaseLoginAuthTestCa
         assertNotNull("response should not be null.1", response);
         assertNotNull("response should not be null.2", response.getResponse());
 
-        assertTrue("The male list size should be 3", response.getResponse().getMale().size() == 3);
+        assertTrue("The male list size should be 3", response.getResponse().getMale().size() == 1);
         assertTrue("The female list size should be 1", response.getResponse().getFemale().size() == 1);
-        assertTrue("The female list size should be 1", response.getResponse().getTotal().size() == 4);
+        assertTrue("The female list size should be 1", response.getResponse().getTotal().size() == 1);
 
         assertEquals(response.getResponse().getMale().get(0).getFirst(), "0-10");
-        assertEquals(response.getResponse().getMale().get(0).getSecond(), "2");
-        assertEquals(response.getResponse().getMale().get(0).getThird(), "50");
+        assertEquals(response.getResponse().getMale().get(0).getSecond()+"", "2");
+        assertEquals(response.getResponse().getMale().get(0).getThird(), "100");
 
-        assertEquals(response.getResponse().getMale().get(1).getFirst(), "21-30");
-        assertEquals(response.getResponse().getMale().get(1).getSecond(), "1");
-        assertEquals(response.getResponse().getMale().get(1).getThird(), "25");
-
-        assertEquals(response.getResponse().getMale().get(2).getFirst(), "31-40");
-        assertEquals(response.getResponse().getMale().get(2).getSecond(), "1");
-        assertEquals(response.getResponse().getMale().get(2).getThird(), "25");
-
-        assertEquals(response.getResponse().getFemale().get(0).getFirst(), "31-40");
-        assertEquals(response.getResponse().getFemale().get(0).getSecond(), "2");
+        assertEquals(response.getResponse().getFemale().get(0).getFirst(), "0-10");
+        assertEquals(response.getResponse().getFemale().get(0).getSecond()+"", "1");
         assertEquals(response.getResponse().getFemale().get(0).getThird(), "100");
     }
 
@@ -65,7 +57,8 @@ public class ListOrganizationOwnerStatisticByAgeTest extends BaseLoginAuthTestCa
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-list-statistic-by-age-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-list-statistic-by-age-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

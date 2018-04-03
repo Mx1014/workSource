@@ -71,7 +71,7 @@ public class UserGenerator extends CoreServerTestCase {
             Assert.assertNotEquals(ownId, 0L);
             LOGGER.info("----------------------------ownId={}", ownId);
             // login
-            UserLogin login = userService.logon(0, phone, password, null, null);
+            UserLogin login = userService.logon(0, cmd.getRegionCode(), phone, password, null, null);
 
             LOGGER.info("----------------------------login={}", ownId);
             Assert.assertEquals(login.getUserId(), ownId);

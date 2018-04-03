@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.banner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
@@ -16,6 +9,12 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BannerTest extends CoreServerTestCase {
     

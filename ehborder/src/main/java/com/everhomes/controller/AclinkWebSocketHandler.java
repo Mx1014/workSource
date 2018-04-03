@@ -124,12 +124,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         LOGGER.info("Aclink connected: id= " + sInfo.getDto().getId() + ", uuid=" + uuid);
     }
     
-    private void disConnected(WebSocketSession session) throws Exception {
+    private void disConnected(WebSocketSession session, String info) throws Exception {
         String uuid = uuidFromSession(session);
         AclinkWebSocketState state = session2State.remove(session);
         uuid2Session.remove(uuid);
         
-        LOGGER.info("Aclink disConnected: uuid= " + uuid);
+        LOGGER.info("Aclink disConnected: uuid= " + uuid + " info=" + info);
         
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
@@ -150,12 +150,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
-        disConnected(session);
+        disConnected(session, "normal closed");
     }
     
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
-        disConnected(session);
+        disConnected(session, "error closed=" + arg1.getMessage());
     }
     
     @Scheduled(fixedDelay=20000, initialDelay=5000)
@@ -182,30 +182,30 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
                 SyncWebsocketMessagesRestResponse resp = (SyncWebsocketMessagesRestResponse)StringHelper.fromJsonString(result.getBody()
                         , SyncWebsocketMessagesRestResponse.class);
                 if(resp.getErrorCode().equals(200) && resp.getResponse() != null) {
-                    
+
                     AclinkWebSocketMessage respCmd = resp.getResponse();
                     state.onServerMessage(resp.getResponse(), session, handler);
-                    
+
                     byte[] bPayload = Base64.decodeBase64(respCmd.getPayload());
                     byte[] bSeq = DataUtil.intToByteArray(respCmd.getSeq().intValue());
                     byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
                     byte[] mBuf = new byte[bPayload.length + 10];
-                    
+
                     System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
                     System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
                     System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
-                    
+
                     BinaryMessage wsMessage = new BinaryMessage(mBuf);
                     try {
                         synchronized(session) {
-                            session.sendMessage(wsMessage);    
+                            session.sendMessage(wsMessage);
                         }
-                        
+
                     } catch (IOException e) {
                         LOGGER.error("sendMessage error", e);
                     }
                 }
-                
+
             }
             
         }

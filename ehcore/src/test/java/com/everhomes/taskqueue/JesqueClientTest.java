@@ -62,7 +62,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
         try {
             Thread.sleep(1000);
         } catch (Exception e) {
-        } // Give worker time to process
+        } // Give worker time to processStat
         worker.end(now);
         try {
             workerThread.join();
@@ -98,7 +98,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
      try {
          int delay = 5;
          Thread.sleep((delay * 1000) + 5000); 
-    } catch (Exception e){} // Give ourselves time to process
+    } catch (Exception e){} // Give ourselves time to processStat
      worker.end(true);
      
      try { 
@@ -121,7 +121,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
         try {
             int delay = 500;
             Thread.sleep((delay * 1000) + 5000); 
-       } catch (Exception e){} // Give ourselves time to process
+       } catch (Exception e){} // Give ourselves time to processStat
         workerPool.end(true);
         }
     
@@ -138,7 +138,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
         try {
             int delay = 500;
             Thread.sleep((delay * 1000) + 5000); 
-        } catch (Exception e){} // Give ourselves time to process
+        } catch (Exception e){} // Give ourselves time to processStat
         
         recommendWorkerPool.end(true);
     }

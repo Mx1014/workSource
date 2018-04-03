@@ -13,7 +13,8 @@ public class ServiceAlliances extends EhServiceAlliances {
 	private String posterUrl;
 	
 	private List<ServiceAllianceAttachment> attachments =  new ArrayList<ServiceAllianceAttachment>();
-	
+	private List<ServiceAllianceAttachment> fileAttachments =  new ArrayList<ServiceAllianceAttachment>();
+
 	public String getPosterUrl() {
 		return posterUrl;
 	}
@@ -29,7 +30,15 @@ public class ServiceAlliances extends EhServiceAlliances {
 	public void setAttachments(List<ServiceAllianceAttachment> attachments) {
 		this.attachments = attachments;
 	}
-	
+
+	public List<ServiceAllianceAttachment> getFileAttachments() {
+		return fileAttachments;
+	}
+
+	public void setFileAttachments(List<ServiceAllianceAttachment> fileAttachments) {
+		this.fileAttachments = fileAttachments;
+	}
+
 	public String getEmail() {
         return NewServiceAllianceCustomField.EMAIL.getStringValue(this);
     }
@@ -45,6 +54,22 @@ public class ServiceAlliances extends EhServiceAlliances {
     public void setTemplateType(String templateType) {
     	NewServiceAllianceCustomField.TEMPLATETYPE.setStringValue(this, templateType);
     }
+
+	public Long getJumpType() {
+		return NewServiceAllianceCustomField.JUMPTYPE.getIntegralValue(this);
+	}
+
+	public void setJumpType(Long jumpType) {
+		NewServiceAllianceCustomField.JUMPTYPE.setIntegralValue(this, jumpType);
+	}
+
+	public Long getJumpId() {
+		return NewServiceAllianceCustomField.JUMPID.getIntegralValue(this);
+	}
+
+	public void setJumpId(Long jumpId) {
+		NewServiceAllianceCustomField.JUMPID.setIntegralValue(this, jumpId);
+	}
 
 	@Override
     public String toString() {

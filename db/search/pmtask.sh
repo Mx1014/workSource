@@ -10,9 +10,12 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
           "address" : {
             "type" : "string"
           },
-          "categoryId" : {
-            "type" : "long",
-            "index": "not_analyzed"
+          "addressId" : {
+            "type" : "long"
+          },
+          "buildingName" : {
+            "type" : "string",
+			"index": "not_analyzed"
           },
           "content" : {
             "type" : "string"
@@ -21,26 +24,30 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
             "type" : "long"
           },
           "creatorUid" : {
-            "type" : "long",
-            "index": "not_analyzed"
+            "type" : "long"
           },
-          "mobile" : {
-            "type" : "string"
+          "flowCaseId" : {
+            "type" : "long"
           },
           "namespaceId" : {
             "type" : "long"
           },
-          "nickName" : {
-            "type" : "string"
-          },
           "ownerId" : {
-            "type" : "long",
-            "index": "not_analyzed"
+            "type" : "long"
           },
           "ownerType" : {
             "type" : "string"
           },
+          "requestorName" : {
+            "type" : "string"
+          },
+          "requestorPhone" : {
+            "type" : "string"
+          },
           "status" : {
+            "type" : "long"
+          },
+          "taskCategoryId" : {
             "type" : "long"
           }
         }

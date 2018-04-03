@@ -2,6 +2,23 @@ package com.everhomes.rest.address;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>uuid: uuid</li>
+ *     <li>communityId: 小区id</li>
+ *     <li>cityId: 城市id</li>
+ *     <li>address: 地址</li>
+ *     <li>longitude: 经度</li>
+ *     <li>latitude: 纬度</li>
+ *     <li>addressAlias: 地址别名</li>
+ *     <li>buildingName: 楼栋名称</li>
+ *     <li>buildingAliasName: 楼栋别名</li>
+ *     <li>apartmentName: 门牌名称</li>
+ *     <li>apartmentFloor: 楼层</li>
+ *     <li>userAuth: 附加信息，指定的用户是否已经认证</li>
+ * </ul>
+ */
 public class AddressDTO {
     private java.lang.Long     id;
     private java.lang.String   uuid;
@@ -22,6 +39,37 @@ public class AddressDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private Byte memberStatus;
+    private Double areaSize;
+
+    private Long buildingId;
+
+    private Long areaId;
+
+    private String areaName;
+
+    private String cityName;
+
+    private String communityName;
+
+    private String provinceName;
+
+    private Byte userAuth;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Double getAreaSize() {
+        return areaSize;
+    }
+
+    public void setAreaSize(Double areaSize) {
+        this.areaSize = areaSize;
+    }
 
     public AddressDTO() {
     }
@@ -179,7 +227,55 @@ public class AddressDTO {
 		this.memberStatus = memberStatus;
 	}
 
-	@Override
+    public Long getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Long areaId) {
+        this.areaId = areaId;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
+    }
+
+    public Byte getUserAuth() {
+        return userAuth;
+    }
+
+    public void setUserAuth(Byte userAuth) {
+        this.userAuth = userAuth;
+    }
+
+    @Override
     public String toString(){
         return StringHelper.toJsonString(this);
         

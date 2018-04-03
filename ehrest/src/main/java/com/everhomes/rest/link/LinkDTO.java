@@ -38,6 +38,7 @@ public class LinkDTO{
 	private Timestamp createTime;
 	private Long     deleterUid;
 	private Timestamp deleteTime;
+	private String   richContent;
 	
 	 public Long getId() {
         return id;
@@ -151,7 +152,15 @@ public class LinkDTO{
         this.deleteTime = deleteTime;
     }
 
-    @Override
+    public String getRichContent() {
+		return richContent;
+	}
+
+	public void setRichContent(String richContent) {
+		this.richContent = richContent;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
 
+ * <li>id：成员的detailId</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>memberGroup：组织角色类型 参考{@link com.everhomes.rest.organization.pm.PmMemberGroup}</li>
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * <li>status：状态</li>
+ * <li>department：部门</li>
  * </ul>
  */
 public class OrganizationMemberDetailDTO {
@@ -33,6 +35,7 @@ public class OrganizationMemberDetailDTO {
 	private String   avatar;
 	private Long   employeeNo;
 	private Byte   gender;
+	private String department;
 	
 	private OrganizationDetailDTO organizationDetailDTO;
 	
@@ -225,4 +228,16 @@ public class OrganizationMemberDetailDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public String getDepartment() {
+		return department;
+	}
+
+
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
 }

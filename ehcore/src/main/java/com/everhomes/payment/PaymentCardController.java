@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.order.PreOrderDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -149,6 +150,21 @@ public class PaymentCardController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /payment/rechargeCardV2</b>
+     * <p>一卡通充值</p>
+     */
+    @RequestMapping("rechargeCardV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse rechargeCardV2(RechargeCardCommand cmd) {
+        PreOrderDTO dto = paymentCardService.rechargeCardV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
      * <b>URL: /payment/setCardPassword</b>
      * <p>修改密码</p>

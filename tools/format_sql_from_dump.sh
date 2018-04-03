@@ -31,6 +31,7 @@ sed -i 's# AUTO_INCREMENT=[0-9]\{1,\}##g' $TARGET_FILE
 sed -i "s/ DEFAULT NULL//g" $TARGET_FILE
 sed -i "s/bigint(20)/BIGINT/g" $TARGET_FILE
 sed -i "s/bigint(11)/BIGINT/g" $TARGET_FILE
+sed -i "s/bigint(22)/BIGINT/g" $TARGET_FILE
 sed -i "s/int(11)/INTEGER/g" $TARGET_FILE
 sed -i "s/tinyint(4)/TINYINT/g" $TARGET_FILE
 sed -i "s/DEFAULT '0'/DEFAULT 0/g" $TARGET_FILE

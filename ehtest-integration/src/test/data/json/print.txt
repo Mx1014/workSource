@@ -1,0 +1,202 @@
+{
+	"eh_configurations":
+	[
+		{
+			"id": 63,
+			"name": "pay.appKey",
+			"value": "7bbb5727-9d37-443a-a080-55bbf37dc8e1",
+			"description": "pay.appKey",
+			"namespace_id": 0
+		},
+		{
+			"id": 124,
+			"name": "pay.appKey",
+			"value": "7bbb5727-9d37-443a-a080-55bbf37dc8e1",
+			"description": "pay.appKey",
+			"namespace_id": 999989
+		}
+	],
+	"eh_apps":
+	[
+		{
+			"id": 1,
+			"creator_uid": 1,
+			"app_key": "44952417-b120-4f41-885f-0c1110c6aece",
+			"secret_key": "gPVzYlvWb1z7zPZkQTFX1W92xqnKgBL3yy5aL/foPRdOuGmXeKvQ5lH1zEV8XqeN5zEACaOCeoWh6ezPv31kaw==",
+			"name": "sign app",
+			"description": "getBizsignature interface use it",
+			"status": 1,
+			"create_time": "2016-03-23 00:00:00",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 2,
+			"creator_uid": 1,
+			"app_key": "f9392ce2-341b-40c1-9c2c-99c702215535",
+			"secret_key": "COTFiIlZ8mZ3b8w3AS84c6b4XE3yx+raanCIJHClxjRTBqpFoyqYrP9VukWclmqI7Qk3WH36IWfN3Xdps3I4rQ==",
+			"name": "zuolin app",
+			"description": "signLogon or oauth2Logon interface use it",
+			"status": 1,
+			"create_time": "2016-03-23 00:00:00",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 100,
+			"creator_uid": 1,
+			"app_key": "b86ddb3b-ac77-4a65-ae03-7e8482a3db70",
+			"secret_key": "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ",
+			"name": "SystemExtension",
+			"description": null,
+			"status": 1,
+			"create_time": "2015-08-24 14:14:16",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 101,
+			"creator_uid": 1,
+			"app_key": "d80e06ca-3766-11e5-b18f-b083fe4e159f",
+			"secret_key": "g1JOZUM3BYzWpZD5Q7p3z+i/z0nj2TcokTFx2ic53FCMRIKbMhSUCi7fSu9ZklFCZ9tlj68unxur9qmOji4tNg==",
+			"name": "test",
+			"description": "dianshang test",
+			"status": 1,
+			"create_time": "2015-08-24 14:17:53",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 102,
+			"creator_uid": 1,
+			"app_key": "93e8275c-31e2-11e5-b7ad-b083fe4e159f",
+			"secret_key": "2nDpmzJj63Un0GzXyeZKUKlVSOKzNHv4FidFL9uCpNaLq6rqE0VAOv3uPaR0jWIRMNqedgci3vzLPAkaX1jg6Q==",
+			"name": "door",
+			"description": "door open",
+			"status": 1,
+			"create_time": "2015-09-01 14:39:18",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 103,
+			"creator_uid": 1,
+			"app_key": "cePPQVM-I4cN73W_ZQZ6VkISDgHNAvUBZPjH2J",
+			"secret_key": "Jm38pWr5XEvdXnHmNuBb4PbzaP-sIpEZvcmvxC9S4ypDVRql-KUbN0Dq_Djv-GxZ",
+			"name": "common-pay",
+			"description": "",
+			"status": 1,
+			"create_time": "2015-09-01 17:43:53",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 104,
+			"creator_uid": 1,
+			"app_key": "bf925ea0-a5e0-11e4-a67c-00163e024631",
+			"secret_key": "PTarHLLhkVDFPQr8PrIjEt8gRROv0uy7gUZSyNOOqZneuUJwxTlwzmfPXUiTCaWFQqYT6+V0lHyY3oEGZOVr3w==",
+			"name": "zl-app",
+			"description": "",
+			"status": 1,
+			"create_time": "2015-09-01 17:43:53",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 105,
+			"creator_uid": 1,
+			"app_key": "bf925ea0-a5e0-11e4-a68c-00163e024632",
+			"secret_key": "g1JOZUM3BYzWpZD5Q7p3z+i/z0nj2TcokTFx2ic53FCMRIKbMhSUCi7fSu9ZklFCZ9tlj68unxur9qmOji4tNg==",
+			"name": "ubive",
+			"description": "",
+			"status": 1,
+			"create_time": "2015-09-01 17:43:53",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 4096,
+			"creator_uid": 1,
+			"app_key": "ff9a46a2-7e12-11e5-b400-b083fe4e159f",
+			"secret_key": "brl0GPh/2yOIZBot7FUJxDvcgnav79fSRCQRIB3i4CGfnY8BA/+3btZHScmrCQIOKdd+sbjlCGI147n6E5KQ4A==",
+			"name": "huawei.app",
+			"description": "huawei.app",
+			"status": 1,
+			"create_time": "2015-11-23 11:28:47",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 4097,
+			"creator_uid": 1,
+			"app_key": "sdr231e5-b1gr24-xfgert-5n32ber-fgrt434gf0sd",
+			"secret_key": "5RA05HiNmN6LLObmFTg7tcLoAnNhVcZiIE3L6AovxT/0hUWjUxTjbc+DZHQle2XjQXTpq5M2zzN6gIj2EtgbNg==",
+			"name": "huawei.client",
+			"description": "huawei.client",
+			"status": 1,
+			"create_time": "2015-11-23 11:29:23",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 4098,
+			"creator_uid": 1,
+			"app_key": "7bbb5727-9d37-443a-a080-55bbf37dc8e1",
+			"secret_key": "1k0ty3aZPC8bjMm8V9+pFmsU5B7cImfQXB4GUm4ACSFPP1IhZI5basNbUBXe7p6gJ7OC8J03DW1U8fvvtpim6Q==",
+			"name": "pay.app",
+			"description": "pay.app",
+			"status": 1,
+			"create_time": "2016-01-12 14:52:06",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 4099,
+			"creator_uid": 1,
+			"app_key": "f52b877e-9a28-4e2c-840e-8ff934c7ea46",
+			"secret_key": "0k8CU5z/9GUIR+qW6jeRq01WBjlmNOaLNeP2/Ap3e3HXfHEda7m1n9t2nagAr0umYGWAqyKa/uG00jCEFf+fYQ==",
+			"name": "",
+			"description": "OA",
+			"status": 1,
+			"create_time": "2016-09-27 13:56:13",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 5000,
+			"creator_uid": 1,
+			"app_key": "f892f8f2-3ea1-488c-9df4-f4e942057d0d",
+			"secret_key": "Tp3hj2tWRBQlKWDK/AoN9vyvpku4Cq5hB9b/leRmk1ayGqyMkpefArlQzFHHYqir/W7k4rqvEW8G09fSx10CjA==",
+			"name": "dudu.app",
+			"description": "dudu.app",
+			"status": 1,
+			"create_time": "2016-01-12 14:52:06",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 5001,
+			"creator_uid": 1,
+			"app_key": "dca1f405-7675-4ac2-ab72-e16c918fd7c2",
+			"secret_key": "VgAddn6IGPK/gO44eUWutfjLuotMcyKz3ZpwAr2jAUSsJgIi50cvntxL4QOqgZYEXkcislDwrDmLzSeHuFWQgQ==",
+			"name": "jin di idata proxy",
+			"description": "jin di idata proxy",
+			"status": 1,
+			"create_time": "2016-11-09 11:49:16",
+			"update_uid": null,
+			"update_time": null
+		},
+		{
+			"id": 5002,
+			"creator_uid": 1,
+			"app_key": "7757a75f-b79a-42fd-896e-107f4bfedd59",
+			"secret_key": "nM9PpqGaV2Qe5QqmNSHfWEJyvJjyo0r0f1wJgRadN9zWqcIwdU08FZYjyRSpa2vKmC/Mblh535WMKLiG/Ymr2Q==",
+			"name": "jin die",
+			"description": "kingdee",
+			"status": 1,
+			"create_time": "2016-11-09 11:49:16",
+			"update_uid": null,
+			"update_time": null
+		}
+	]
+}

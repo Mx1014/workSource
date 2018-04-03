@@ -28,10 +28,10 @@ import com.everhomes.util.StringHelper;
  * <li>	cancelFlag：       	是否允许取消 1是 0否	</li>
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
  * <li>anchorTime：规则日期</li>  
- * <li>siteDays：List<RentalSiteDayRulesDTO>  每一天的单元格</li> 
- * <li>sitePics：List<RentalSitePicDTO> 详情图片多张 </li> 
- * <li>attachments：List<AttachmentDTO> 附件列表 </li> 
- * <li>siteItems：List<SiteItemDTO> 商品列表</li> 
+ * <li>siteDays：每一天的单元格，参考{@link com.everhomes.rest.rentalv2.RentalSiteDayRulesDTO}</li> 
+ * <li>sitePics：详情图片多张，参考{@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li> 
+ * <li>attachments：附件列表，参考{@link com.everhomes.rest.rentalv2.AttachmentDTO} </li> 
+ * <li>siteItems：商品列表，参考{@link com.everhomes.rest.rentalv2.SiteItemDTO}</li> 
  * </ul>
  */
 public class FindRentalSiteMonthStatusCommandResponse {
@@ -40,8 +40,8 @@ public class FindRentalSiteMonthStatusCommandResponse {
 	private String introduction;  
 	private String notice;
 	private String address;
-	private double longitude;
-	private double latitude;
+	private java.lang.Double longitude;
+	private java.lang.Double latitude;
 	private String contactPhonenum;
 	private java.lang.Byte       discountType;
 	private java.math.BigDecimal fullPrice;
@@ -282,25 +282,21 @@ public class FindRentalSiteMonthStatusCommandResponse {
 	}
 
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
-
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
-
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-
 
 	public String getContactPhonenum() {
 		return contactPhonenum;

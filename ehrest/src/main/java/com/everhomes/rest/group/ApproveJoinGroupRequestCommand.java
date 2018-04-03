@@ -7,15 +7,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>groupId：group id</li>
- * <li>userId: 被批准加入group的用户ID</li>
+ *     <li>groupId: group id</li>
+ *     <li>userId: 被批准加入group的用户ID</li>
+ *     <li>organizationId: 行业协会专用</li>
  * </ul>
  */
 public class ApproveJoinGroupRequestCommand {
     @NotNull
     private Long groupId;
-    
+
     private Long userId;
+
+    private Long organizationId;
 
     public ApproveJoinGroupRequestCommand() {
     }
@@ -29,14 +32,22 @@ public class ApproveJoinGroupRequestCommand {
     }
 
     public Long getUserId() {
-		return userId;
-	}
+        return userId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	@Override
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

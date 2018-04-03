@@ -15,4 +15,6 @@ public interface ForumServiceErrorCode {
 
     static final int ERROR_FORUM_TOPIC_NOT_ASSIGNED = 10011;
     static final int ERROR_FORUM_TOPIC_ALREADY_ASSIGNED = 10012;
+
+    static final int ERROR_BLACK_LIST_USER_CREATE_TOPIC = 10021;// 对不起,您已被禁止发帖
 }

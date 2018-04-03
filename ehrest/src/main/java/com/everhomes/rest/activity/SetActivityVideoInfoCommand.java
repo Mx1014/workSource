@@ -10,11 +10,13 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class SetActivityVideoInfoCommand {
+
     private Integer namespaceId;
     private Long activityId;
     private String roomId;
     private String vid;
     private Byte isContinue;
+    private Byte state;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -46,7 +48,15 @@ public class SetActivityVideoInfoCommand {
     public void setIsContinue(Byte isContinue) {
         this.isContinue = isContinue;
     }
-    
+
+    public Byte getState() {
+        return state;
+    }
+
+    public void setState(Byte state) {
+        this.state = state;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

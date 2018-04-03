@@ -6,9 +6,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>某日某场所预定状态
- * <li>ownerType：所有者类型 参考{@link com.everhomes.rest.techpark.rental.RentalOwnerType}}</li>
+ * <li>ownerType：所有者类型，参考{@link com.everhomes.rest.techpark.rental.RentalOwnerType}}</li>
  * <li>ownerId：园区id</li>
- * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.techpark.rental.RentalType} </li> 
+ * <li>rentalType： time(0)，halfday(1)，参考{@link com.everhomes.rest.techpark.rental.RentalType} </li> 
  * <li>ruleDate：日期</li> 
  * </ul>
  */

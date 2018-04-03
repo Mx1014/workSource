@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+<!--
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+-->
+    <property resource="logback.properties" />
+
+    <appender name="filelog"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/core-server.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>logs/core-server.%d{yyyy-MM-dd}.%i.log
+                        </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+
+    </appender>
+
+    <appender name="restlog"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/core-server-rest.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>logs/core-server-rest.%d{yyyy-MM-dd}.%i.log
+                        </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <appender name="statisticslog"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>statistics/useractivities.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level [%X{ip}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </encoder>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover monthly -->
+            <fileNamePattern>statistics/useractivities.%d{yyyy-MM}.%i.log
+                        </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <appender name="schedulelog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/schedule.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level [%X{ip}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </encoder>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover monthly -->
+            <fileNamePattern>logs/schedule.%d{yyyy-MM}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <!-- This is the kafkaAppender -->
+    <appender name="kafkaAppender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <!-- This is the default encoder that encodes every log message to an utf8-encoded string  -->
+        <encoder class="com.github.danielwegener.logback.kafka.encoding.LayoutKafkaMessageEncoder">
+            <!--<layout class="net.logstash.logbak.layout.LogcstashLayout" />-->
+            <!--<layout class="ch.qos.logback.classic.PatternLayout">-->
+            <layout class="com.github.danielwegener.logback.kafka.custom.CustomLogstashLayout" >
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <!--<topic>${kafka.topic}</topic> -->
+        <topic>core-logs</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.RoundRobinKeyingStrategy" />
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+
+        <!-- each <producerConfig> translates to regular kafka-client config (format: key=value) -->
+        <!-- producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs -->
+        <!-- bootstrap.servers is the only mandatory producerConfig -->
+        <producerConfig>bootstrap.servers=10.1.10.102:9092</producerConfig>
+        <!--<producerConfig>bootstrap.servers=${kafka.bootstrap.servers}</producerConfig> -->
+        <!-- don't wait for a broker to ack the reception of a batch.  -->
+<!--
+        <producerConfig>acks=0</producerConfig>
+-->
+        <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
+<!--
+        <producerConfig>linger.ms=1000</producerConfig>
+-->
+        <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
+        <producerConfig>block.on.buffer.full=false</producerConfig>
+        <!-- define a client-id that you use to identify yourself against the kafka broker -->
+        <!--<producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback-relaxed</producerConfig> -->
+
+        <!-- this is the fallback appender if kafka is not available. -->
+        <appender-ref ref="filelog"/>
+    </appender>
+
+    <appender name="ASYNCkafkaAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="kafkaAppender" />
+    </appender>
+
+    <logger name="com.everhomes.controller.WebRequestInterceptor" level="DEBUG">
+        <appender-ref ref="restlog" />
+    </logger>
+
+    <logger name="com.everhomes.controller.ResponseLoggingFilter" level="DEBUG">
+        <appender-ref ref="restlog" />
+    </logger>
+
+    <logger name="com.everhomes" level="DEBUG">
+        <appender-ref ref="console" />
+        <appender-ref ref="filelog" />
+        <appender-ref ref="ASYNCkafkaAppender" />
+    </logger>
+    
+    <logger name="statisticslog" level="DEBUG">
+    	<appender-ref ref="statisticslog"/>
+    </logger>
+
+    <logger name="schedulelog" level="INFO">
+        <appender-ref ref="console" />
+        <appender-ref ref="schedulelog" />
+    </logger>
+    
+    <logger name="org.apache" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="com.atomikos" level="WARN"/>
+</configuration>
+

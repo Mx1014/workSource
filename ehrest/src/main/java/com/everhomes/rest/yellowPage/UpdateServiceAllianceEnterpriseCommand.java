@@ -11,8 +11,9 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>id: id</li>
  *  <li>parentId: 父id</li>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
+ *  <li>range: 可见范围</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
@@ -22,15 +23,24 @@ import com.everhomes.util.StringHelper;
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
  *  <li>contactName: 负责人</li>
+ *  <li>contactMemid: 负责人企业通讯录id</li>
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
- *  <li>attachments: 附件</li>
+ *  <li>attachments: banners</li>
+ *  <li>fileAttachments: 附件</li>
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
  *  <li>type:类型  </li>
  *  <li>email: 邮箱地址</li>
  *  <li>templateType : 模板类型</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>moduleUrl : 跳转模块路径</li>
+ *  <li>jumpId : 跳转模块id</li>
+ *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ *  <li>summaryDescription : 概要描述</li>
+ *  <li>onlineServiceUid : 在线服务用户的id</li>
+ *  <li>onlineServiceUname : 在线服务用户的名称</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -42,7 +52,9 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+
+	private String   range;
+
 	private String   name;
 	
 	private String   displayName;
@@ -61,12 +73,17 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private String   contactName;
 	
+	private Long contactMemid;
+	
 	private String   contactMobile;
 	
 	private Long     categoryId;
 	
 	@ItemType(ServiceAllianceAttachmentDTO.class)
 	private List<ServiceAllianceAttachmentDTO> attachments;
+
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> fileAttachments;
 	
 	private Long discount;
 	
@@ -79,7 +96,45 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String templateType;
 	
 	private String email;
+
+	private Long jumpType;
+
+	private Long jumpId;
+
+	private String moduleUrl;
 	
+	private Byte supportType;
+
+	private String buttonTitle;
+	
+	private String summaryDescription;
+	private Long onlineServiceUid;
+	private String onlineServiceUname;
+	
+	public Long getOnlineServiceUid() {
+		return onlineServiceUid;
+	}
+
+	public void setOnlineServiceUid(Long onlineServiceUid) {
+		this.onlineServiceUid = onlineServiceUid;
+	}
+
+	public String getOnlineServiceUname() {
+		return onlineServiceUname;
+	}
+
+	public void setOnlineServiceUname(String onlineServiceUname) {
+		this.onlineServiceUname = onlineServiceUname;
+	}
+
+	public String getButtonTitle() {
+		return buttonTitle;
+	}
+
+	public void setButtonTitle(String buttonTitle) {
+		this.buttonTitle = buttonTitle;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -110,6 +165,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
 	}
 
 	public String getName() {
@@ -184,6 +247,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 		this.contactName = contactName;
 	}
 
+	public Long getContactMemid() {
+		return contactMemid;
+	}
+
+	public void setContactMemid(Long contactMemid) {
+		this.contactMemid = contactMemid;
+	}
+
 	public String getContactMobile() {
 		return contactMobile;
 	}
@@ -206,6 +277,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setAttachments(List<ServiceAllianceAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public List<ServiceAllianceAttachmentDTO> getFileAttachments() {
+		return fileAttachments;
+	}
+
+	public void setFileAttachments(List<ServiceAllianceAttachmentDTO> fileAttachments) {
+		this.fileAttachments = fileAttachments;
 	}
 
 	public Long getDiscount() {
@@ -254,6 +333,46 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
+	}
+
+	public String getModuleUrl() {
+		return moduleUrl;
+	}
+
+	public void setModuleUrl(String moduleUrl) {
+		this.moduleUrl = moduleUrl;
+	}
+
+	public Byte getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(Byte supportType) {
+		this.supportType = supportType;
+	}
+
+	public Long getJumpId() {
+		return jumpId;
+	}
+
+	public void setJumpId(Long jumpId) {
+		this.jumpId = jumpId;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
 	}
 
 	@Override

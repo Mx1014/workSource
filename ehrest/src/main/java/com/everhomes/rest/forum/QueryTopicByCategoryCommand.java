@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>excludeCategories: 排除类型[{@link com.everhomes.rest.category.CategoryConstants}]</li>
  * <li>pageAnchor: 开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>publishStatus: 帖子发布状态，{@link com.everhomes.rest.forum.TopicPublishStatus}</li>
  * </ul>
  */
 public class QueryTopicByCategoryCommand {
@@ -31,6 +32,8 @@ public class QueryTopicByCategoryCommand {
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
+
+    private String publishStatus;
     
     public QueryTopicByCategoryCommand() {
     }
@@ -109,7 +112,15 @@ public class QueryTopicByCategoryCommand {
 		this.embeddedAppId = embeddedAppId;
 	}
 
-	@Override
+    public String getPublishStatus() {
+        return publishStatus;
+    }
+
+    public void setPublishStatus(String publishStatus) {
+        this.publishStatus = publishStatus;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

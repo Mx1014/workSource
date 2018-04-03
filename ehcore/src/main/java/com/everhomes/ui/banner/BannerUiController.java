@@ -20,6 +20,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
@@ -43,6 +44,10 @@ public class BannerUiController extends ControllerBase {
    
     @Autowired
     private BannerService bannerService;
+
+    @Autowired
+    private MessagingKickoffService kickoffService;
+    
     /**
      * <b>URL: /ui/banner/getBannersByScene</b>
      * <p>获取指定位置、layout组、场景、实体对象相关的banner</p>
@@ -51,7 +56,6 @@ public class BannerUiController extends ControllerBase {
     @RestReturn(value=BannerDTO.class,collection=true)
     @RequireAuthentication(false)
     public RestResponse getBannersByScene(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        
         List<BannerDTO> result = bannerService.getBannersByScene(cmd, request);
         RestResponse resp =  new RestResponse(result);
         // 在多场景的情况下，etag不能使用，以免不同的场景拿不到数据 by lqs 20160617

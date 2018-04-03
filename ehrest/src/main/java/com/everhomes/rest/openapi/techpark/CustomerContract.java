@@ -6,17 +6,21 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class CustomerContract {
-    /** 合同编号 */
     private String contractNumber;
-    
-    /** 合同到期日 */
     private String contractEndDate;
-    
-    /** 楼栋门牌列表 */
-    @ItemType(CustomerBuilding.class)
-    private List<CustomerBuilding> buildings;
+    @ItemType(CustomerContractBuilding.class)
+    private List<CustomerContractBuilding> buildings;
+    private Boolean dealed;
 
-    public String getContractNumber() {
+    public Boolean getDealed() {
+		return dealed;
+	}
+
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
+	}
+
+	public String getContractNumber() {
         return contractNumber;
     }
 
@@ -32,15 +36,15 @@ public class CustomerContract {
         this.contractEndDate = contractEndDate;
     }
 
-    public List<CustomerBuilding> getBuildings() {
-        return buildings;
-    }
+    public List<CustomerContractBuilding> getBuildings() {
+		return buildings;
+	}
 
-    public void setBuildings(List<CustomerBuilding> buildings) {
-        this.buildings = buildings;
-    }
+	public void setBuildings(List<CustomerContractBuilding> buildings) {
+		this.buildings = buildings;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

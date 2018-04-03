@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>anchor: 锚点</li>
  * <li>pageSize: 每页个数</li>
- * <li>status: 状态码，List<Byte></li>
+ * <li>status: 状态码</li>
  * </ul>
  */
 public class FindRentalSitesCommand {
@@ -23,6 +23,9 @@ public class FindRentalSitesCommand {
 	private Long communityId; 
 	private Long resourceTypeId;
 	private String keyword;
+
+	private String sceneToken;
+
 	private Long anchor;
 	private Integer pageSize;
 	@ItemType(Byte.class)
@@ -83,5 +86,13 @@ public class FindRentalSitesCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
-	} 
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
 }

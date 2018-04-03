@@ -3,12 +3,12 @@ package com.everhomes.rest.wx;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * url:调用JS接口页面的完整URL
- *
+ * <ul>
+ *     <li>url: 调用JS接口页面的完整URL</li>
+ * </ul>
  */
 public class GetSignatureCommand {
-	
+
 	private String url;
 
 	public String getUrl() {
@@ -20,7 +20,7 @@ public class GetSignatureCommand {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

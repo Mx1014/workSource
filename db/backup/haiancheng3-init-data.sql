@@ -24,7 +24,7 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 	VALUES(240111044331050438, 240111044331054835, '', 113.944794, 22.523969, 'ws100uk5dhhk');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1004937, 240111044331054835);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
 	VALUES(2111853, 1004937, 'USER', 233182  , 'manager', '黄锡杨', 0, '13714562296', 3, 999993);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
@@ -3546,3 +3546,37 @@ INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `commun
 	VALUES ('1', '0', '240111044331054835', '00100120131200000015', '075523685550', '<p>请在每月20日之前及时缴纳上月费用，否则将产生滞纳金。</p>');
 
 
+-- 海岸增加打卡
+SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+ 
+INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES ((@id := @id + 1), 999993, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwa05ERTJaRGN4TXpZME5USXdNR0V4TlRkbU1HRTNaR1U0TVdZNVpHUTFOdw', '1', '1', '23', '', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+
+INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES ((@id := @id + 1), 999993, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwa05ERTJaRGN4TXpZME5USXdNR0V4TlRkbU1HRTNaR1U0TVdZNVpHUTFOdw', '1', '1', '23', '', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+  
+  
+  
+-- added by wh  2017-4-18 去掉优惠券入口，左邻小站ICON图片更换
+DELETE FROM eh_launch_pad_items WHERE namespace_id = 999993 AND item_label = '优惠券';
+UPDATE eh_launch_pad_items SET item_width = 1, icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpUYzBOakJsTW1aak9URmxZV1ZqTnpZNFpXSmxNREJsTURNd05EbGxZUQ' WHERE namespace_id = 999993 AND item_label = '左邻小站';
+UPDATE eh_launch_pad_layouts SET version_code ='2017041802', layout_json ='{"versionCode":"2017041802","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Coupons"},"style":"Gallery","defaultOrder":3,"columnCount":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' WHERE  namespace_id = 999993 AND NAME ='ServiceMarketLayout' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_layouts SET version_code ='2017041802', layout_json ='{"versionCode":"2017041802","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Coupons"},"style":"Gallery","defaultOrder":3,"columnCount":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' WHERE  namespace_id = 999993 AND NAME ='ServiceMarketLayout' AND scene_type = 'park_tourist';
+
+
+-- added by wh 2017-4-21  add door managerment 海岸加门禁
+SET @id = (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ((@id := @id +1), '999993', '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRwak9EbGhPVE16TTJWa05UTTVZbVUwWVRRM04ySTBORGt4WWpFME1UVmxaQQ', '1', '1', '40', '{\"isSupportQR\":1,\"isSupportSmart\":1}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ((@id := @id +1), '999993', '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRwak9EbGhPVE16TTJWa05UTTVZbVUwWVRRM04ySTBORGt4WWpFME1UVmxaQQ', '1', '1', '40', '{\"isSupportQR\":1,\"isSupportSmart\":1}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1', NULL);
+
+
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41000','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41010','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41020','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41030','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41040','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41050','','EhNamespaces','999993','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id := @id +1),'41060','','EhNamespaces','999993','2');

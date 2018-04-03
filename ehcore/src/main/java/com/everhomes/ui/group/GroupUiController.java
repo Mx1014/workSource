@@ -48,8 +48,8 @@ public class GroupUiController extends ControllerBase {
     private GroupService groupService;
 
     /**
+     * <b>URL: /ui/group/listNearbyGroupsByScene</b>
      * <p>根据指定的场景查询周边兴趣圈。</p>
-     * <p>url:/ui/group/listNearbyGroupsByScene</p>
      */
     @RequestMapping(value = "listNearbyGroupsByScene")
     @RestReturn(value=ListNearbyGroupCommandResponse.class)

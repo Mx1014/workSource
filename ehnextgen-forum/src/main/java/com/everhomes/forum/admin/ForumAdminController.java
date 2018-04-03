@@ -4,6 +4,7 @@ package com.everhomes.forum.admin;
 
 import java.util.List;
 
+import com.everhomes.rest.forum.admin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,6 @@ import com.everhomes.rest.forum.AssignedScopeDTO;
 import com.everhomes.rest.forum.DeleteCommentCommand;
 import com.everhomes.rest.forum.DeleteTopicCommand;
 import com.everhomes.rest.forum.ListTopicAssignedScopeCommand;
-import com.everhomes.rest.forum.admin.DeleteCommentAdminCommand;
-import com.everhomes.rest.forum.admin.DeleteTopicAdminCommand;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
 import com.everhomes.user.UserContext;

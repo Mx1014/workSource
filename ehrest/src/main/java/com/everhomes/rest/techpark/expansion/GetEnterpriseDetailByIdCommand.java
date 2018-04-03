@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 public class GetEnterpriseDetailByIdCommand {
@@ -14,7 +16,10 @@ public class GetEnterpriseDetailByIdCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	
 
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

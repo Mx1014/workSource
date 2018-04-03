@@ -30,10 +30,9 @@ import com.everhomes.rest.pushmessage.ListPushMessageResultResponse;
 import com.everhomes.rest.pushmessage.PushMessageDTO;
 import com.everhomes.rest.pushmessage.PushMessageResultDTO;
 import com.everhomes.rest.pushmessage.UpdatePushMessageCommand;
-import com.everhomes.rest.recommend.RecommendConfigDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Address admin controller", site="core")
@@ -51,7 +50,7 @@ public class PushMessageAdminController extends ControllerBase {
     @RequestMapping("createPushMessage")
     @RestReturn(Long.class)
     public RestResponse createPushMessage(CreatePushMessageCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         PushMessage pushMessage = ConvertHelper.convert(cmd, PushMessage.class);
@@ -69,7 +68,7 @@ public class PushMessageAdminController extends ControllerBase {
     @RequestMapping("updatePushMessage")
     @RestReturn(String.class)
     public RestResponse updatePushMessage(UpdatePushMessageCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         RestResponse res = new RestResponse();
@@ -89,7 +88,7 @@ public class PushMessageAdminController extends ControllerBase {
     @RequestMapping("deletePushMessage")
     @RestReturn(String.class)
     public RestResponse deletePushMessage(DeletePushMessageCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.pushMessageService.deleteByPushMesageId(cmd.getId());
@@ -103,7 +102,7 @@ public class PushMessageAdminController extends ControllerBase {
     @RequestMapping("listPushMessage")
     @RestReturn(ListPushMessageResponse.class)
     public RestResponse listPushMessages(ListPushMessageCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         RestResponse res = new RestResponse();
@@ -133,7 +132,7 @@ public class PushMessageAdminController extends ControllerBase {
     @RequestMapping("listPushMessageResult")
     @RestReturn(ListPushMessageResultResponse.class)
     public RestResponse listPushMessages(ListPushMessageResultCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListPushMessageResultResponse respObj = new ListPushMessageResultResponse();

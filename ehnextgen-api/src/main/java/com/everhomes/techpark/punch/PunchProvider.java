@@ -2,13 +2,14 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.util.Calendar;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
  
@@ -101,6 +102,9 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay);
 
+	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
+													Long companyId, String startDay, String endDay);
+
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay);
 
@@ -111,7 +115,7 @@ public interface PunchProvider {
  
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay);
 
-	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId, String name);
+	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId,String targetType , Long targetId, String name);
 
 	PunchTimeRule getPunchTimeRuleById(Long id);
 
@@ -253,10 +257,10 @@ public interface PunchProvider {
 
 	Long createPunchStatistic(PunchStatistic obj);
 
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
-	public void deletePunchStatisticByUser(String ownerType, Long ownerId, String punchMonth, Long userId);
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
@@ -265,16 +269,87 @@ public interface PunchProvider {
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-			Byte exceptionRequestType);
+														   Integer intervalTimeNo);
 
-	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
+	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long enterpriseId, Long userId, Long requestId);
 
 	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
 	public PunchExceptionApproval findPunchExceptionApproval(Long creatorUid, Long ownerId, Date date);
 
 	public PunchDayLog findPunchDayLog(Long userId, Long enterpriseId, Date punchDate);
- 
- 
- 
+
+
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId, List<Long> userIds, CrossShardListingLocator locator, int i);
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(String ownerType,
+			Long ownerId, String listType);
+
+	public Integer countPunchLogDevice(Long userId, Long companyId,
+			java.sql.Date beginDate , java.sql.Date endDate);
+
+	PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType, Long targetId);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType,
+			Long targetId, CrossShardListingLocator locator, int pageSize);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(Long startTimeLong, Long endTimeLong);
+
+	void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId);
+
+	public void createPunchTimeInterval(PunchTimeInterval ptInterval);
+
+	public void createPunchSpecialDay(PunchSpecialDay psd);
+
+	public void deletePunchGeopointsByOwnerId(Long id);
+
+	public void deletePunchWifisByOwnerId(Long id);
+
+	public PunchRule getPunchruleByPunchOrgId(Long id);
+
+	public void deletePunchTimeRuleByPunchOrgId(Long id);
+
+	public void deletePunchSpecialDaysByPunchOrgId(Long id);
+
+	public void deletePunchTimeIntervalByPunchRuleId(Long id);
+
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status);
+
+	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
+
+	public List<PunchGeopoint> listPunchGeopointsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId);
+
+	public PunchSpecialDay findSpecialDayByDateAndOrgId(Long punchOrganizationId,
+			java.util.Date date);
+
+	public PunchHoliday findHolidayByDate(java.sql.Date punchDate);
+
+
+	List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime);
+
+	void deletePunchTimeRuleByRuleId(Long id);
+
+	Integer approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
+
+	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
+
+	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
+
+	Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth);
+
+	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth);
+	
+	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
+
+	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
+
+	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType);
+
+	PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo);
+
+	void updatePunchLog(PunchLog onDutyLog);
 }

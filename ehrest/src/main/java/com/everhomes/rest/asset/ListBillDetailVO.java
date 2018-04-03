@@ -1,0 +1,115 @@
+//@formatter:off
+package com.everhomes.rest.asset;
+
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
+/**
+ * Created by Wentian Wang on 2017/8/18.
+ */
+
+public class ListBillDetailVO {
+    private Long billId;
+    private Long billGroupId;
+    private String dateStr;
+    private String noticeTel;
+    private String targetName;
+    private String targetType;
+    private String buildingName;
+    private String apartmentName;
+    private Long targetId;
+    @ItemType(BillGroupDTO.class)
+    private BillGroupDTO billGroupDTO;
+    private String contractNum;
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
+    }
+
+
+    public String getNoticeTel() {
+        return noticeTel;
+    }
+
+    public void setNoticeTel(String noticeTel) {
+        this.noticeTel = noticeTel;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public BillGroupDTO getBillGroupDTO() {
+        return billGroupDTO;
+    }
+
+    public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
+        this.billGroupDTO = billGroupDTO;
+    }
+}

@@ -2,6 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
@@ -13,6 +14,7 @@ import org.jooq.RecordMapper;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public interface PropertyMgrProvider {
@@ -198,6 +200,8 @@ public interface PropertyMgrProvider {
      * @return
      */
     List<OrganizationOwnerBehavior> listOrganizationOwnerBehaviors(Integer namespaceId, Long ownerId);
+
+    List<OrganizationOwnerBehavior> listApartmentOrganizationOwnerBehaviors(Long addressId);
 
     /**
      * 创建地址与业主对应记录
@@ -481,4 +485,16 @@ public interface PropertyMgrProvider {
     List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds);
 
     ParkingCardCategory findParkingCardCategory(Byte cardType);
+
+	public Map<Long, Integer> mapOrganizationOwnerCountByAddressIds(Integer namespaceId, List<Long> addressIds);
+
+	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds);
+
+	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
+
+	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
+
+	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
+
+	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 }

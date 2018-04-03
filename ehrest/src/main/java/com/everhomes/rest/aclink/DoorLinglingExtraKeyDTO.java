@@ -3,6 +3,7 @@ package com.everhomes.rest.aclink;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -24,6 +25,11 @@ public class DoorLinglingExtraKeyDTO {
     private Long authStorey;
     
     private Long authLevel;
+    
+    private String linglingId;
+    
+    @ItemType(DoorLinglingAuthStoreyInfo.class)
+    private List<DoorLinglingAuthStoreyInfo> storeyInfos;
 
     public List<String> getKeys() {
         return keys;
@@ -55,5 +61,26 @@ public class DoorLinglingExtraKeyDTO {
 
     public void setAuthLevel(Long authLevel) {
         this.authLevel = authLevel;
+    }
+
+	public String getLinglingId() {
+		return linglingId;
+	}
+
+	public void setLinglingId(String linglingId) {
+		this.linglingId = linglingId;
+	}
+
+    public List<DoorLinglingAuthStoreyInfo> getStoreyInfos() {
+        return storeyInfos;
+    }
+
+    public void setStoreyInfos(List<DoorLinglingAuthStoreyInfo> storeyInfos) {
+        this.storeyInfos = storeyInfos;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

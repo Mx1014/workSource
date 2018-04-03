@@ -14,6 +14,7 @@ public class RentalSiteDayRulesDTO {
 	private Long rentalDate;
 	@ItemType(RentalSiteRulesDTO.class)
 	private List<RentalSiteRulesDTO> siteRules;
+
 	
 	@Override
     public String toString() {
@@ -35,6 +36,5 @@ public class RentalSiteDayRulesDTO {
 	public void setRentalDate(Long rentalDate) {
 		this.rentalDate = rentalDate;
 	}
- 
- 
+
 }

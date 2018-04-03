@@ -1,10 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -19,6 +19,12 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
+ * <li>categoryId: 活动类型id</li>
+ * <li>contentCategoryId: 活动主题分类id</li>
+ * <li>needTemporary: 0-已发布， 1-全部，2-仅仅暂存，不填默认0 参考{@link NeedTemporaryType}</li>
+ * <li>tag: 标签</li>
+ * <li>namespaceId: 域空间id</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -33,15 +39,46 @@ public class QueryOrganizationTopicCommand {
     private Long embeddedAppId; 
     private Byte officialFlag;
     private Byte privateFlag;
+    private Long categoryId;
+    private Byte orderByCreateTime;
+    private Integer namespaceId;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
     
+    private Long contentCategoryId;
+
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
+    
+    private Byte needTemporary;
+
+    private String tag;
+
+    private Long forumEntryId;
+
     public QueryOrganizationTopicCommand() {
     }
-    
 
-    public Byte getOfficialFlag() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+
+	public Byte getOfficialFlag() {
 		return officialFlag;
 	}
 
@@ -55,14 +92,27 @@ public class QueryOrganizationTopicCommand {
 	}
 
 
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
 
-	public void setCommunityId(Long communityId) {
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
+    }
+
+    public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 
+    public Byte getOrderByCreateTime() {
+        return orderByCreateTime;
+    }
 
+    public void setOrderByCreateTime(Byte orderByCreateTime) {
+        this.orderByCreateTime = orderByCreateTime;
+    }
 
-	public Long getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
@@ -162,8 +212,39 @@ public class QueryOrganizationTopicCommand {
 		this.privateFlag = privateFlag;
 	}
 
+	public Byte getNeedTemporary() {
+		return needTemporary;
+	}
 
-	@Override
+	public void setNeedTemporary(Byte needTemporary) {
+		this.needTemporary = needTemporary;
+	}
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

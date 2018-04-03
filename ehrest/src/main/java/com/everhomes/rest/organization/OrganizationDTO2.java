@@ -28,7 +28,8 @@ public class OrganizationDTO2 {
 	String cityName;
 	Long areaId;
 	String areaName;
-	
+
+    private String emailDomain;
 	
 	public Long getOrgId() {
 		return orgId;
@@ -123,6 +124,12 @@ public class OrganizationDTO2 {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
 	}
 	
 	

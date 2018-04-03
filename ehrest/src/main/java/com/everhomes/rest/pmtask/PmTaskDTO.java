@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryName: 分类名称</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭  5:已回访{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
+ * <li>status: 状态 1: 待处理  2: 处理中 3: 已完成  4: 已关闭  5:已回访{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * <li>star: 评价分数</li>
  * <li>unprocessedTime: 未处理</li>
  * <li>processingTime: 处理中时间</li>
@@ -35,6 +35,12 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 门牌id</li>
  * <li>revisitContent: 回访内容</li>
  * <li>revisitTime: 回访时间</li>
+ * <li>operatorStar: 操作人员评价分数</li>
+ * <li>flowCaseId: 工作流flowCaseId</li>
+ * <li>remarkSource: 处理意见来源</li>
+ * <li>remark: 处理意见</li>
+ * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * <li>organizationName: 公司名称</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -67,11 +73,23 @@ public class PmTaskDTO {
 	private String revisitContent;
 	private Timestamp revisitTime;
 	
+	private Byte operatorStar;
+	
+	private Long flowCaseId;
+	
+	private String buildingName;
+
+	private String remarkSource;
+
+	private String remark;
+	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
 	
 	@ItemType(PmTaskLogDTO.class)
 	private List<PmTaskLogDTO> taskLogs;
+	
+	private String organizationName;
 	public Long getId() {
 		return id;
 	}
@@ -245,14 +263,55 @@ public class PmTaskDTO {
 	public void setRevisitContent(String revisitContent) {
 		this.revisitContent = revisitContent;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 	public Timestamp getRevisitTime() {
 		return revisitTime;
 	}
 	public void setRevisitTime(Timestamp revisitTime) {
 		this.revisitTime = revisitTime;
+	}
+	public Byte getOperatorStar() {
+		return operatorStar;
+	}
+	public void setOperatorStar(Byte operatorStar) {
+		this.operatorStar = operatorStar;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getRemarkSource() {
+		return remarkSource;
+	}
+
+	public void setRemarkSource(String remarkSource) {
+		this.remarkSource = remarkSource;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+	public String getOrganizationName() {
+		return organizationName;
+	}
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 }

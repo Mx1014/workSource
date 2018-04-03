@@ -1,6 +1,5 @@
 package com.everhomes.rest.rentalv2;
 
-import com.everhomes.rest.techpark.punch.PunchStatus;
 /**
  * <ul>
  * <li>NONEED(0): </li>

@@ -5,12 +5,12 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
- * 
- * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页的数量</li>
+ * <ul> 
+ * <li>ownerType：所属对象类型organization</li>
+ * <li>ownerId：所属对象id</li> 
+ * <li>pageAnchor：pageAnchor</li> 
+ * <li>pageSize：pageSize </li> 
+ *  
  * </ul>
  */
 public class ListPunchRulesCommonCommand {
@@ -19,6 +19,8 @@ public class ListPunchRulesCommonCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+	private String targetType;
+	private Long targetId;
 
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -58,6 +60,22 @@ public class ListPunchRulesCommonCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 }

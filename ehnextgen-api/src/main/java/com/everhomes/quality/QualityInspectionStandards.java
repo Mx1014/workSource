@@ -21,6 +21,9 @@ public class QualityInspectionStandards extends EhQualityInspectionStandards {
 	@ItemType(QualityInspectionStandardGroupMap.class)
 	private List<QualityInspectionStandardGroupMap> reviewGroup;
 	
+	@ItemType(QualityInspectionSpecifications.class)
+	private List<QualityInspectionSpecifications> specifications;
+	
 	public RepeatSettings getRepeat() {
 		return repeat;
 	}
@@ -43,6 +46,15 @@ public class QualityInspectionStandards extends EhQualityInspectionStandards {
 
 	public void setReviewGroup(List<QualityInspectionStandardGroupMap> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+	public List<QualityInspectionSpecifications> getSpecifications() {
+		return specifications;
+	}
+
+	public void setSpecifications(
+			List<QualityInspectionSpecifications> specifications) {
+		this.specifications = specifications;
 	}
 
 	@Override

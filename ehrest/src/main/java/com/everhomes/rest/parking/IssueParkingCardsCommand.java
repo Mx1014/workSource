@@ -11,21 +11,27 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>count: 发放卡的张数</li>
+ * <li>flowId: flowId</li>
+ * <li>status: status {@link ParkingCardRequestStatus}</li>
  * </ul>
  */
 public class IssueParkingCardsCommand {
-	@NotNull
+    @NotNull
     private String ownerType;
-	@NotNull
+    @NotNull
     private Long ownerId;
-	@NotNull
+    @NotNull
     private Long parkingLotId;
-	@NotNull
+    @NotNull
     private Integer count;
-    
+
+    private Long flowId;
+
+    private Byte status;
+
     public IssueParkingCardsCommand() {
     }
-    
+
     public String getOwnerType() {
         return ownerType;
     }
@@ -61,5 +67,21 @@ public class IssueParkingCardsCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 }

@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
  *      <li>id: 附件Id</li>
  *      <li>carId: 车辆Id</li>
  *      <li>organizationId: 公司Id</li>
+ *      <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
+ *      <li>ownerId: ownerId, communityId</li>
  *  </ul>
  */
 public class DeleteOrganizationOwnerCarAttachmentCommand {
@@ -14,6 +16,25 @@ public class DeleteOrganizationOwnerCarAttachmentCommand {
     @NotNull private Long id;
     @NotNull private Long carId;
     @NotNull private Long organizationId;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public Long getId() {
         return id;

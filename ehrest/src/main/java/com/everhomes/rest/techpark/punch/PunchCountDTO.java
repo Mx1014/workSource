@@ -11,23 +11,27 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>userId：用户id</li>
  * <li>userName：名称</li>
+ * <li>punchMonth：打卡月份</li>
  * <li>token：联系电话</li>
  * <li>deptName：部门</li>
+ * <li>punchOrgName：所属规则</li>
  * <li>workDayCount:应上班天数</li>
- * <li>workCount:实际上班天数</li>
+ * <li>exceptionDayCount:异常天数</li>
+ * <li>workCount:正常天数</li>
  * <li>belateCount：迟到天数</li>
  * <li>leaveEarlyCount：早退天数</li>
  * <li>unPunchCount：未打卡天数</li>
- * <li>blandleCount：迟到且早退天数</li>
- * <li>absenceCount：事假天数</li>
- * <li>sickCount：病假天数</li>
- * <li>exchangeCount：调休天数</li>
- * <li>outworkCount：公出天数</li>
+ * <li>blandleCount：迟到且早退天数</li> 
+ * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
+ * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
+ * <li>exceptionRequestCount：异常天数 </li>
  * </ul>
  */
 public class PunchCountDTO {
 	private Long userId;
 	private String userName;
+	private String punchMonth;
+	private String punchOrgName;
 	private String token;
 	private String deptName;
     private Integer workDayCount;
@@ -45,8 +49,21 @@ public class PunchCountDTO {
 	private String userEnterpriseGroup;
 	@ItemType(AbsenceTimeDTO.class)
 	private List<AbsenceTimeDTO> absenceTimeList;
-	
-	
+	@ItemType(ExtDTO.class)
+	private List<ExtDTO> exts;
+	private Byte userStatus;
+	private Integer exceptionDayCount;
+	private Integer exceptionRequestCount;
+
+
+	public Integer getExceptionDayCount() {
+		return exceptionDayCount;
+	}
+
+	public void setExceptionDayCount(Integer exceptionDayCount) {
+		this.exceptionDayCount = exceptionDayCount;
+	}
+
     public List<AbsenceTimeDTO> getAbsenceTimeList() {
 		return absenceTimeList;
 	}
@@ -159,5 +176,37 @@ public class PunchCountDTO {
 	}
 	public void setOverTimeSum(Double overTimeSum) {
 		this.overTimeSum = overTimeSum;
+	}
+	public List<ExtDTO> getExts() {
+		return exts;
+	}
+	public void setExts(List<ExtDTO> exts) {
+		this.exts = exts;
+	}
+	public Byte getUserStatus() {
+		return userStatus;
+	}
+	public void setUserStatus(Byte userStatus) {
+		this.userStatus = userStatus;
+	}
+	public String getPunchOrgName() {
+		return punchOrgName;
+	}
+	public void setPunchOrgName(String punchOrgName) {
+		this.punchOrgName = punchOrgName;
+	}
+	public String getPunchMonth() {
+		return punchMonth;
+	}
+	public void setPunchMonth(String punchMonth) {
+		this.punchMonth = punchMonth;
+	}
+
+	public Integer getExceptionRequestCount() {
+		return exceptionRequestCount;
+	}
+
+	public void setExceptionRequestCount(Integer exceptionRequestCount) {
+		this.exceptionRequestCount = exceptionRequestCount;
 	}
 }

@@ -1,0 +1,40 @@
+// @formatter:off
+package com.everhomes.rest.print;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * 
+ * <ul>
+ * <li>jobs : 任务列表，参考 {@link com.everhomes.rest.print.ListQueueJobsDTO}</li>
+ * </ul>
+ *
+ */
+public class ListQueueJobsResponse {
+	@ItemType(ListQueueJobsDTO.class)
+	private List<ListQueueJobsDTO> jobs;
+
+	public ListQueueJobsResponse(List<ListQueueJobsDTO> jobs) {
+		this.jobs = jobs;
+	}
+	
+	public ListQueueJobsResponse() {
+	}
+
+	public List<ListQueueJobsDTO> getJobs() {
+		return jobs;
+	}
+
+	public void setJobs(List<ListQueueJobsDTO> jobs) {
+		this.jobs = jobs;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+	
+}

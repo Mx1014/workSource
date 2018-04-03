@@ -9,7 +9,7 @@ package com.everhomes.rest.organization;
  */
 public enum VisibleFlag {
 
-    SHOW((byte)0), HIDE((byte)1);
+    SHOW((byte)0), HIDE((byte)1), ALL((byte)3);
 
     private byte code;
 

@@ -3,52 +3,30 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
+import com.everhomes.entity.EntityType;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AssignTaskCommand;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CloseTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesDTO;
-import com.everhomes.rest.pmtask.GetTaskLogCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetStatisticsCommand;
-import com.everhomes.rest.pmtask.GetStatisticsResponse;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.RevisitCommand;
-import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.CompleteTaskCommand;
-import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 
 @RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
@@ -57,25 +35,28 @@ public class PmTaskController extends ControllerBase {
 
 	@Autowired
 	private PmTaskService pmTaskService;
-	
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 
-	/**
-     * <b>URL: /pmtask/getPrivileges</b>
-     * <p>获取权限列表</p>
-     */
-    @RequestMapping("getPrivileges")
-    @RestReturn(value=GetPrivilegesDTO.class)
-    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
-  	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+	@Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+//	/**
+//     * <b>URL: /pmtask/getPrivileges</b>
+//     * <p>获取权限列表</p>
+//     */
+//    @RequestMapping("getPrivileges")
+//    @RestReturn(value=GetPrivilegesDTO.class)
+//    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
+//  	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 	
       /**
        * <b>URL: /pmtask/listTaskCategories</b>
@@ -104,35 +85,6 @@ public class PmTaskController extends ControllerBase {
           response.setErrorDescription("OK");
           return response;
       }
-      
-      /**
-       * <b>URL: /pmtask/createTaskOperatePerson</b>
-       * <p>新增任务人员</p>
-       */
-      @RequestMapping("createTaskOperatePerson")
-      @RestReturn(value=String.class)
-      public RestResponse createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
-    	  pmTaskService.createTaskOperatePerson(cmd);
-          RestResponse response = new RestResponse();
-          response.setErrorCode(ErrorCodes.SUCCESS);
-          response.setErrorDescription("OK");
-          return response;
-      }
-      
-      /**
-       * <b>URL: /pmtask/deleteTaskOperatePerson</b>
-       * <p>删除任务人员</p>
-       */
-      @RequestMapping("deleteTaskOperatePerson")
-      @RestReturn(value=String.class)
-      public RestResponse deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
-    	  pmTaskService.deleteTaskOperatePerson(cmd);
-          RestResponse response = new RestResponse();
-          response.setErrorCode(ErrorCodes.SUCCESS);
-          response.setErrorDescription("OK");
-          return response;
-      }
-      
       
       /**
        * <b>URL: /pmtask/createTaskCategory</b>
@@ -169,13 +121,29 @@ public class PmTaskController extends ControllerBase {
       @RequestMapping("createTaskByUser")
       @RestReturn(value=PmTaskDTO.class)
       public RestResponse createTaskByUser(CreateTaskCommand cmd) {
+    	  //TODO: 添加服务地点类型
     	  PmTaskDTO dto = pmTaskService.createTask(cmd);
           RestResponse response = new RestResponse(dto);
           response.setErrorCode(ErrorCodes.SUCCESS);
           response.setErrorDescription("OK");
           return response;
       }
-      
+
+    /**
+     * <b>URL: /pmtask/liskPmtaskBuildings</b>
+     * <p>查询报修楼栋</p>
+     */
+    @RequestMapping("liskPmtaskBuildings")
+    @RestReturn(value=ListBuildingCommandResponse.class)
+    public RestResponse liskPmtaskBuildings(ListBuildingCommand cmd) {
+
+        ListBuildingCommandResponse buildings = pmTaskService.listBuildings(cmd);
+        RestResponse response = new RestResponse(buildings);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
       /**
        * <b>URL: /pmtask/createTaskByOrg</b>
        * <p>创建新任务</p>
@@ -191,8 +159,23 @@ public class PmTaskController extends ControllerBase {
       }
       
       /**
+       * <b>URL: /pmtask/updateTaskByOrg</b>
+       * <p>编辑任务 管理员</p>
+       */
+      @RequestMapping("updateTaskByOrg")
+      @RestReturn(value=String.class)
+      public RestResponse updateTaskByOrg(UpdateTaskCommand cmd) {
+
+    	  pmTaskService.updateTaskByOrg(cmd);
+          RestResponse response = new RestResponse();
+          response.setErrorCode(ErrorCodes.SUCCESS);
+          response.setErrorDescription("OK");
+          return response;
+      }
+      
+      /**
        * <b>URL: /pmtask/getTaskDetail</b>
-       * <p>获取任务详情</p>
+       * <p>获取任务详情-越空间</p>
        */
       @RequestMapping("getTaskDetail")
       @RestReturn(value=PmTaskDTO.class)
@@ -204,107 +187,139 @@ public class PmTaskController extends ControllerBase {
           return response;
       }
       
-  	/**
-  	 * <b>URL: /pmtask/assignTask</b>
-  	 * <p>报修贴分配人员</p>
-  	 */
-  	@RequestMapping("assignTask")
-  	@RestReturn(value=String.class)
-  	public RestResponse assignTask(@Valid AssignTaskCommand cmd) {
-  		pmTaskService.assignTask(cmd);
-  		RestResponse response = new RestResponse();
-  		response.setErrorCode(ErrorCodes.SUCCESS);
-  		response.setErrorDescription("OK");
-  		return response;
-  	}
+//  	/**
+//  	 * <b>URL: /pmtask/assignTask</b>
+//  	 * <p>报修贴分配人员</p>
+//  	 */
+//  	@RequestMapping("assignTask")
+//  	@RestReturn(value=String.class)
+//  	public RestResponse assignTask(@Valid AssignTaskCommand cmd) {
+//  		pmTaskService.assignTask(cmd);
+//  		RestResponse response = new RestResponse();
+//  		response.setErrorCode(ErrorCodes.SUCCESS);
+//  		response.setErrorDescription("OK");
+//  		return response;
+//  	}
      
-	/**
-	 * <b>URL: /pmtask/completeTask</b>
-	 * <p>完成任务</p>
-	 */
-	@RequestMapping("completeTask")
-	@RestReturn(value=String.class)
-	public RestResponse completeTask(CompleteTaskCommand cmd) {
-		pmTaskService.completeTask(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /pmtask/completeTask</b>
+//	 * <p>完成任务</p>
+//	 */
+//	@RequestMapping("completeTask")
+//	@RestReturn(value=String.class)
+//	public RestResponse completeTask(CompleteTaskCommand cmd) {
+//		pmTaskService.completeTask(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+//	/**
+//	 * <b>URL: /pmtask/closeTask</b>
+//	 * <p>关闭任务</p>
+//	 */
+//	@RequestMapping("closeTask")
+//	@RestReturn(value=String.class)
+//	public RestResponse closeTask(CloseTaskCommand cmd) {
+//		pmTaskService.closeTask(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+//	/**
+//	 * <b>URL: /pmtask/cancelTask</b>
+//	 * <p>取消任务</p>
+//	 */
+//	@RequestMapping("cancelTask")
+//	@RestReturn(value=String.class)
+//	public RestResponse cancelTask(CancelTaskCommand cmd) {
+//		pmTaskService.cancelTask(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+//	/**
+//	 * <b>URL: /pmtask/revisit</b>
+//	 * <p>回访</p>
+//	 */
+//	@RequestMapping("revisit")
+//	@RestReturn(value=String.class)
+//	public RestResponse revisit(RevisitCommand cmd) {
+//		pmTaskService.revisit(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+//	/**
+//	 * <b>URL: /pmtask/evaluateTask</b>
+//	 * <p>评价任务</p>
+//	 */
+//	@RequestMapping("evaluateTask")
+//	@RestReturn(value=String.class)
+//	public RestResponse evaluateTask(EvaluateTaskCommand cmd) {
+//
+//		pmTaskService.evaluateTask(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
-	 * <b>URL: /pmtask/closeTask</b>
-	 * <p>关闭任务</p>
+	 * <b>URL: /pmtask/listOrganizationCommunityByUser</b>
+	 * <p>获取机构人员 办公地点小区列表</p>
 	 */
-	@RequestMapping("closeTask")
-	@RestReturn(value=String.class)
-	public RestResponse closeTask(CloseTaskCommand cmd) {
-		pmTaskService.closeTask(cmd);
-		RestResponse response = new RestResponse();
+	@RequestMapping("listOrganizationCommunityByUser")
+	@RestReturn(value=ListOrganizationCommunityByUserResponse.class)
+	public RestResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd) {
+        //TODO:
+		ListAuthorizationCommunityByUserResponse resp = pmTaskService.listOrganizationCommunityByUser(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
+     * <p>授权人员 管理小区列表</p>
+     */
+    @RequestMapping("listAuthorizationCommunityByUser")
+    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+        //TODO:
+        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	
-	/**
-	 * <b>URL: /pmtask/cancelTask</b>
-	 * <p>取消任务</p>
-	 */
-	@RequestMapping("cancelTask")
-	@RestReturn(value=String.class)
-	public RestResponse cancelTask(CancelTaskCommand cmd) {
-		pmTaskService.cancelTask(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /pmtask/revisit</b>
-	 * <p>回访</p>
-	 */
-	@RequestMapping("revisit")
-	@RestReturn(value=String.class)
-	public RestResponse revisit(RevisitCommand cmd) {
-		pmTaskService.revisit(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /pmtask/evaluateTask</b>
-	 * <p>评价任务</p>
-	 */
-	@RequestMapping("evaluateTask")
-	@RestReturn(value=String.class)
-	public RestResponse evaluateTask(EvaluateTaskCommand cmd) {
-		pmTaskService.evaluateTask(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /pmtask/getTaskLog</b>
-	 * <p>获取任务完成详情或任务关闭理由</p>
-	 */
-	@RequestMapping("getTaskLog")
-	@RestReturn(value=PmTaskLogDTO.class)
-	public RestResponse getTaskLog(GetTaskLogCommand cmd) {
-		PmTaskLogDTO dto = pmTaskService.getTaskLog(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /pmtask/getTaskLog</b>
+//	 * <p>获取任务完成详情或任务关闭理由</p>
+//	 */
+//	@RequestMapping("getTaskLog")
+//	@RestReturn(value=PmTaskLogDTO.class)
+//	public RestResponse getTaskLog(GetTaskLogCommand cmd) {
+//		PmTaskLogDTO dto = pmTaskService.getTaskLog(cmd);
+//		RestResponse response = new RestResponse(dto);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
   	
 	/**
      * <b>URL: /pmtask/listUserTasks</b>
-     * <p>获取任务列表</p>
+     * <p>获取任务列表-越空间使用</p>
      */
     @RequestMapping("listUserTasks")
     @RestReturn(value=ListUserTasksResponse.class)
@@ -317,19 +332,17 @@ public class PmTaskController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pmtask/listOperatePersonnels</b>
-     * <p>查看任务执行人员或维修人员</p>
+     * <b>URL: /pmtask/getUserRelatedAddressesByCommunity</b>
+     * <p>根据园区/小区 获取用户相关的地址列表</p>
      */
-    @RequestMapping("listOperatePersonnels")
-    @RestReturn(value=ListOperatePersonnelsResponse.class)
-    public RestResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd){
-    	
-    	ListOperatePersonnelsResponse resp = pmTaskService.listOperatePersonnels(cmd);
-  	  	RestResponse res = new RestResponse(resp);
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
-        
-        return res;
+    @RequestMapping("getUserRelatedAddressesByCommunity")
+    @RestReturn(value=GetUserRelatedAddressByCommunityResponse.class)
+    public RestResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
+    	GetUserRelatedAddressByCommunityResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**
@@ -345,14 +358,42 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/searchTasksWithoutAuth</b>
+     * <p>搜索任务(无权限校验)</p>
+     */
+    @RequestMapping("searchTasksWithoutAuth")
+    @RestReturn(value=SearchTasksResponse.class)
+    public RestResponse searchTasksWithoutAuth(SearchTasksCommand cmd) {
+        SearchTasksResponse res = pmTaskService.searchTasksWithoutAuth(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pmtask/getNamespaceHandler</b>
+     * <p>获取handler</p>
+     */
+    @RequestMapping("getNamespaceHandler")
+    @RestReturn(value=NamespaceHandlerDTO.class)
+    public RestResponse getNamespaceHandler(GetNamespaceHandlerCommand cmd) {
+    	NamespaceHandlerDTO dto = pmTaskService.getNamespaceHandler(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /pmtask/exportTasks</b>
      * <p>任务导出</p>
      */
     @RequestMapping("exportTasks")
-    public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp) {
-  	  	pmTaskService.exportTasks(cmd, resp);
+    public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
+  	  	pmTaskService.exportTasks(cmd, resp, req);
     }
     
     /**
@@ -434,13 +475,9 @@ public class PmTaskController extends ControllerBase {
      * <p>导出统计详情</p>
      */
     @RequestMapping("exportStatistics")
-    @RestReturn(value=GetStatisticsResponse.class)
-    public RestResponse exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
+    public void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
     	pmTaskService.exportStatistics(cmd, resp);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+
     }
     
     /**
@@ -449,25 +486,148 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("syncFromDb")
     @RestReturn(value=String.class)
-    public RestResponse syncFromDb() {
-    	pmTaskSearch.syncFromDb();
+    public RestResponse syncPmTask() {
+    	pmTaskSearch.syncPmTask();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    } 
+    }
+
+//    /**
+//     * <b>URL: /pmtask/synchronizedData</b>
+//     * <p>迁移数据</p>
+//     */
+//    @RequestMapping("synchronizedData")
+//    @RestReturn(value=String.class)
+//    public RestResponse synchronizedData(SearchTasksCommand cmd) {
+//        pmTaskService.synchronizedData(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
-     * <b>URL: /pmtask/createStatistics</b>
+     * <b>URL: /pmtask/syncTaskStatistics</b>
      * <p>统计</p>
      */
-    @RequestMapping("createStatistics")
+    @RequestMapping("syncTaskStatistics")
+    public void createStatistics(HttpServletResponse resp) {
+    	pmTaskService.syncTaskStatistics(resp);
+    }
+
+    /**
+     * <b>URL: /pmtask/deleteTaskHistoryAddress</b>
+     * <p>删除物业服务历史地址</p>
+     */
+    @RequestMapping("deleteTaskHistoryAddress")
     @RestReturn(value=String.class)
-    public RestResponse createStatistics() {
-    	pmTaskService.createStatistics();
+    public RestResponse deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd) {
+
+        pmTaskService.deleteTaskHistoryAddress(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/createTaskHistoryAddress</b>
+     * <p>添加物业服务历史地址</p>
+     */
+    @RequestMapping("createTaskHistoryAddress")
+    @RestReturn(value=PmTaskHistoryAddressDTO.class)
+    public RestResponse createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
+
+        RestResponse response = new RestResponse(pmTaskService.createTaskHistoryAddress(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/exportTasksCard</b>
+     * <p>导出维修单</p>
+     */
+    @RequestMapping("exportTasksCard")
+    @RestReturn(value = String.class)
+    public RestResponse exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response) {
+
+        pmTaskService.exportTasksCard(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/changeTaskState</b>
+     * <p>提供给一碑的回调接口</p>
+     */
+    @RequestMapping("changeTaskState")
+    @RestReturn(value = String.class)
+    public RestResponse changeTaskState(UpdateTasksStatusCommand cmd){
+        pmTaskService.changeTasksStatus(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /*---------------------------- start 以下接口是为了给客户端打rest包，已经废弃----------------------------------*/
+	/**
+     * <b>URL: /pmtask/getPrivileges</b>
+     * <p>获取权限列表</p>
+     */
+    @RequestMapping("getPrivileges")
+    @RestReturn(value=GetPrivilegesDTO.class)
+    @Deprecated
+    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /pmtask/listOperatePersonnels</b>
+     * <p>查看任务执行人员或维修人员</p>
+     */
+    @RequestMapping("listOperatePersonnels")
+    @RestReturn(value=ListOperatePersonnelsResponse.class)
+    @Deprecated
+    public RestResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd){
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+
+        return res;
+    }
+    /**
+     * <b>URL: /pmtask/testcheck</b>
+     * <p>提供给一碑的回调接口</p>
+     */
+    @RequestMapping("testcheck")
+    @RestReturn(value = String.class)
+    public RestResponse testcheck(SearchTasksCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Boolean flag =false;
+        if (null != cmd.getTaskCategoryId()) {
+            ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+            listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+            listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+            listServiceModuleAppsCommand.setCustomTag(String.valueOf(cmd.getTaskCategoryId()));
+            ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+            if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null,cmd.getCurrentCommunityId());
+                System.out.print(flag) ;
+            }
+        }
+        RestResponse resp = new RestResponse(flag);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
 }

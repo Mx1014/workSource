@@ -28,8 +28,16 @@ public class EhPunchExceptionRequestMapper implements RecordMapper<Record, EhPun
         post.setProcessDetails(r.getValue((Field<String>)r.field("process_details"))); 
         post.setPunchDate(r.getValue((Field<Date>)r.field("punch_date"))); 
         post.setRequestType(r.getValue((Field<Byte>)r.field("request_type"))); 
-        post.setStatus(r.getValue((Field<Byte>)r.field("status"))); 
-        post.setUserId(r.getValue((Field<Long>)r.field("user_id"))); 
+        post.setStatus(r.getValue((Field<Byte>)r.field("status")));
+        post.setUserId(r.getValue((Field<Long>)r.field("user_id")));
+        post.setRequestId(r.getValue((Field<Long>)r.field("request_id")));
+        post.setPunchIntervalNo(r.getValue((Field<Integer>)r.field("punch_interval_no")));
+        post.setPunchType(r.getValue((Field<Byte>)r.field("punch_type")));
+        post.setBeginTime(r.getValue((Field<Timestamp>)r.field("begin_time")));
+        post.setEndTime(r.getValue((Field<Timestamp>)r.field("end_time")));
+        post.setDuration(r.getValue((Field<Double>)r.field("duration")));
+        post.setCategoryId(r.getValue((Field<Long>)r.field("category_id")));
+        post.setApprovalAttribute(r.getValue((Field<String>)r.field("approval_attribute")));
         return post;
     }
 }

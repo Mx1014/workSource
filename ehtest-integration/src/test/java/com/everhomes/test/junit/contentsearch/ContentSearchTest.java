@@ -54,7 +54,7 @@ public class ContentSearchTest extends BaseLoginAuthTestCase {
         SearchContentsBySceneCommand cmd = new SearchContentsBySceneCommand();
         
         cmd.setSceneToken("ttggEZEFyEgKvu073JVxBn1_OqS9rU7TbTaqQJCuumwXQrEitiL9miy4GHhPjtpTkV50vhe84lSqx1AjJHupXhUJVr-EwUdkmafZaDG2aawEtYcN8vXWBmKu2SHmUDj7s6JJa6btlzpKXroEngpiLNk06w5MEGg4r-Jpc5VEMWk");
-        cmd.setKeyword(keyword);
+        //cmd.setKeyword(keyword);
         cmd.setContentType(SearchContentType.ACTIVITY.getCode());
         
         UserSearchContentsBySceneRestResponse response = httpClientService.restGet(SEARCH_CONTENTS_URI, cmd, UserSearchContentsBySceneRestResponse.class, context);

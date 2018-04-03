@@ -1,22 +1,10 @@
 // @formatter:off
 package com.everhomes.entity;
 
+import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhAppUrls;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhNews;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhRegions;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
-import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.techpark.expansion.LeasePromotion;
 
 /**
  * <p>实体类型:</p>
@@ -36,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
  * <li>NEWS: 新闻</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
@@ -57,7 +46,49 @@ public enum EntityType {
     APPURLS(EhAppUrls.class.getSimpleName()),
     NEWS(EhNews.class.getSimpleName()),
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
-    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName());
+    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
+    ROLE(EhAclRoles.class.getSimpleName()),
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName()),
+    PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName()),
+    PARKING_LOT(EhParkingLots.class.getSimpleName()),
+    PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
+    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
+    PM_TASK(EhPmTasks.class.getSimpleName()),
+    SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
+    AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    ALL("EhAll"),
+    LEASE_PROMOTION(EhLeasePromotions.class.getSimpleName()),
+    WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    CONTRACT(EhContracts.class.getSimpleName()),
+    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName()),
+    PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
+    PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
+    PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
+    PORTAL_ITEM_GROUP(EhPortalItemGroups.class.getSimpleName()),
+    SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
+    SERVICE_ALLIANCE(EhServiceAlliances.class.getSimpleName()),
+    BIZ("EhBizs"),
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
+	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
+
+	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
+    CHILD_PROJECT("child_project"),
+    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
+
+    LEASE_PROJECT(EhLeaseProjects.class.getSimpleName()),
+	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName()),
+
+    PARKING_CAR_VERIFICATION(EhParkingCarVerifications.class.getSimpleName()),
+
+    ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName()),
+    RELOCATION_REQUEST(EhRelocationRequests.class.getSimpleName()),
+    RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName());
+
+
+
+
     private String code;
     
     private EntityType(String code) {
@@ -90,6 +121,10 @@ public enum EntityType {
             return FAMILY;
         else if(code.equalsIgnoreCase(POST.getCode()))
             return POST;
+        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
+            return ORGANIZATIONS;
+        else if(code.equalsIgnoreCase(ROLE.getCode()))
+            return ROLE;
         else if(code.equalsIgnoreCase("EhFamilies"))
             return FAMILY;
         else if(code.equalsIgnoreCase("EhFleaMarkets"))
@@ -101,7 +136,11 @@ public enum EntityType {
         else if(code.equalsIgnoreCase(IMPERSONATION.getCode())) {
             return IMPERSONATION;
         }
-        
+        for (EntityType entityType : EntityType.values()) {
+            if (entityType.getCode().equals(code)) {
+                return entityType;
+            }
+        }
         return null;
     }
 }

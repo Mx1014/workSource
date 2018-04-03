@@ -50,6 +50,7 @@ public class ThirdUserOpenController extends ControllerBase {
 
 	/**
 	 * <b>URL: /openapi/user/initCoupon</b>
+     * <p>初始化用户信息</p>
 	 */
 	@RequestMapping("initCoupon")
 	@RestReturn(String.class)

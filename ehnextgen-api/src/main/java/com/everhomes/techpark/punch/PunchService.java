@@ -1,76 +1,42 @@
 package com.everhomes.techpark.punch;
 
+import java.io.OutputStream;
 import java.sql.Time;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.organization.Organization;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.*;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.approval.ApprovalRule;
-import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommandResponse;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchClockResponse;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.PunchRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
-import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 
 public interface PunchService {
-	 
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(ListYearPunchLogsCommand cmd);
 
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd);
 	
-	public void createPunchRule(AddPunchRuleCommand cmd);
-	public void updatePunchRule(UpdatePunchRuleCommand cmd);
-	public void deletePunchRule(DeletePunchRuleCommand cmd);
-	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd);
+//	public void createPunchRule(AddPunchRuleCommand cmd);
+//	public void updatePunchRule(UpdatePunchRuleCommand cmd);
+//	public void deletePunchRule(DeletePunchRuleCommand cmd);
+//	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd);
  
 	ListYearPunchLogsCommandResponse getlistPunchLogsBetweenTwoCalendar(
 			ListYearPunchLogsCommandResponse pyl, long CompanyId, Calendar start,
 			Calendar end);
 
-	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd);
+//	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd);
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(ListPunchExceptionRequestCommand cmd);
 //	void approvePropFamilyMember(PunchExceptionRequest cmd);
 //	void rejectPropFamilyMember(PunchExceptionRequest cmd);
@@ -85,8 +51,11 @@ public interface PunchService {
 
 	public GetPunchNewExceptionCommandResponse getPunchNewException( GetPunchNewExceptionCommand cmd);
 
+	PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
+								   Calendar logDay) throws ParseException;
+
 	public PunchLogsDay makePunchLogsDayListInfo(Long userId, Long companyId,
-			Calendar logDay) throws ParseException;
+												 Calendar logDay) throws ParseException;
 
 	public PunchLogsDay getDayPunchLogs(GetDayPunchLogsCommand cmd);
 
@@ -94,6 +63,8 @@ public interface PunchService {
 
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
 			ListMonthPunchLogsCommand cmd);
+
+	List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt);
 
 	public HttpServletResponse exportPunchDetails(
 			ListPunchDetailsCommand cmd,
@@ -146,11 +117,20 @@ public interface PunchService {
 
 	public ListPunchMonthLogsResponse listPunchMonthLogs(ListPunchMonthLogsCommand cmd);
 
+	void refreshPunchDayLog(Long userId, Long companyId, Long startDay, Long endDay);
+
+	void refreshPunchDayLog(Long userId, Long companyId, Date startDay, Date endDay);
+
 	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
 
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
 
+	@Scheduled(cron = "1 50 5 * * ?")
+	void dayRefreshPunchGroupScheduled();
+
 	void dayRefreshLogScheduled();
+
+	void testDayRefreshLogs(Long runDate);
 
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
@@ -160,16 +140,125 @@ public interface PunchService {
 
 	PunchRule getPunchRule(String ownerType, Long ownerId, Long userId);
 
-	boolean isWorkDay(Date date1, PunchRule punchRule);
 
-	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
+//	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
 
-	boolean isWorkTime(Time time, PunchRule punchRule);
-
-	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule);
+//	boolean isWorkTime(Time time, PunchRule punchRule);
+ 
 
 	boolean isSameDay(Date date1, Date date2);
 
 	Time getEndTime(Time startTime, Time workTime);
 
+	public GetTargetPunchAllRuleResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
+
+	public void updateTargetPunchAllRule(UpdateTargetPunchAllRuleCommand cmd);
+
+	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
+
+	List<String> getTimeIntervalApprovalAttribute();
+
+	String statusToString(Byte status);
+ 
+
+	public void updatePunchPoint(UpdatePunchPointCommand cmd);
+
+	public void addPunchPoint(AddPunchPointCommand cmd);
+
+	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd);
+
+	public void addPunchWiFi(AddPunchWiFiCommand cmd);
+
+	public void updatePunchWiFi(PunchWiFiDTO cmd);
+
+	public void deletePunchWiFi(PunchWiFiDTO cmd);
+
+	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd);
+ 
+
+	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
+			HttpServletResponse response);
+
+	public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files);
+
+	public void updatePunchRuleMap(PunchRuleMapDTO cmd);
+
+	public void deletePunchPoint(DeleteCommonCommand cmd);
+
+	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
+
+	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd);
+
+
+	java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId);
+
+	Long convertTimeToGMTMillisecond(Time time);
+
+	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd);
+
+	Long getTopEnterpriseId(Long organizationId);
+
+	void importPunchLogs(MultipartFile[] files);
+
+	void refreshPunchDayLogs(ListPunchDetailsCommand cmd);
+
+	//  punch 2.8 added by R 20170725
+	ListPunchSupportiveAddressCommandResponse listPunchSupportiveAddress(ListPunchSupportiveAddressCommand cmd);
+
+	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd);
+
+	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
+
+	ListApprovalCategoriesResponse listApprovalCategories();
+
+	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd);
+
+	public void deletePunchGroup(DeleteCommonCommand cmd);
+
+	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd);
+
+	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd); 
+
+	PunchTimeRule getPunchTimeRuleByRuleIdAndDate(PunchRule pr, Date date, Long userId);
+
+	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule, Long userId);
+
+	boolean isWorkTime(Time time, PunchRule punchRule, Date date, Long userId);
+
+	boolean isWorkDay(Date date1, PunchRule punchRule, Long userId);
+
+	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd);
+
+	public String getPunchQRCode(GetPunchQRCodeCommand cmd,
+			HttpServletResponse response);
+
+	public void addPunchPoints(AddPunchPointsCommand cmd);
+ 
+	public void addPunchWifis(AddPunchWifisCommand cmd);
+
+	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd);
+
+	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
+
+	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
+
+	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd);
+
+	void approveAbnormalPunch(PunchExceptionRequest request);
+	
+	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
+
+	PunchLog getAbnormalPunchLog(PunchExceptionRequest request);
+
+	void punchGroupAddNewEmployee(Long groupId);
+
+	ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd);
+
+	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
+
+	OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
+			String userName, String ownerType, Long ownerId, Long taskId);
+
+	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
+			String userName, String ownerType, Long ownerId, Long taskId);
 }

@@ -122,7 +122,7 @@ public class DispatchQueueImpl implements DispatchQueue {
                     1000, TimeUnit.MILLISECONDS);
                 
                 if(commandPdu != null) {
-                    LOGGER.trace("process request {}", commandPdu.getOriginationSequence());
+                    LOGGER.trace("processStat request {}", commandPdu.getOriginationSequence());
                     
                     DispatchQueueCommandResponsePdu responsePdu = new DispatchQueueCommandResponsePdu();
                     try {

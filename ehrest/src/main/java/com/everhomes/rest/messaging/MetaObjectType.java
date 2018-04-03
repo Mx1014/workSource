@@ -11,6 +11,11 @@ package com.everhomes.rest.messaging;
  * <li>ENTERPRISE_REQUEST_TO_JOIN: 主动申请加入企业需要审核</li>
  * <li>ENTERPRISE_INVITE_TO_JOIN: 邀请用户加入企业需要同意</li>
  * <li>ENTERPRISE_AGREE_TO_JOIN: 同意加入了公司</li>
+ * <li>BIZ_NEW_ORDER: 有新的电商订单</li>
+ * <li>MESSAGE_ROUTER: 路由跳转</li>
+ * <li>FAMILY_AGREE_TO_JOIN: 同意加入了家庭</li>
+ * <li>GROUP_MEMBER_DELETE: 用户被踢出</li>
+ * <li>GROUP_INVITE_TO_JOIN_FREE: 被邀请进群，直接进去</li>
  * </ul>
  */
 public enum MetaObjectType {
@@ -21,7 +26,13 @@ public enum MetaObjectType {
     ENTERPRISE_REQUEST_TO_JOIN("enterprise.requestToJoin"), 
     ENTERPRISE_INVITE_TO_JOIN("enterprise.inviteToJoin"),
     ENTERPRISE_AGREE_TO_JOIN("enterprise.agreeToJoin"),
-    ACLINK_AUTH_CHANGED("aclink.authChanged");
+    ACLINK_AUTH_CHANGED("aclink.authChanged"),
+    BIZ_NEW_ORDER("biz.new.order"),
+    MESSAGE_ROUTER("message.router"),
+    ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob"),
+    FAMILY_AGREE_TO_JOIN("family.agreeToJoin"),
+    GROUP_MEMBER_DELETE("group.member.delete"),
+    GROUP_INVITE_TO_JOIN_FREE("group.inviteToJoin.free");
     
     private String code;
     private MetaObjectType(String code) {

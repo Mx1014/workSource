@@ -2,6 +2,8 @@ package com.everhomes.rest.device;
 
 import java.sql.Timestamp;
 
+import com.everhomes.util.StringHelper;
+
 public class DeviceDTO {
     private Long     id;
     private String   deviceId;
@@ -86,5 +88,9 @@ public class DeviceDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

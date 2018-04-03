@@ -1,0 +1,146 @@
+package com.everhomes.flow;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowButtonStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowButtonsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowButtons;
+import com.everhomes.server.schema.tables.records.EhFlowButtonsRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+@Component
+public class FlowButtonProviderImpl implements FlowButtonProvider {
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private ShardingProvider shardingProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+    @Override
+    public Long createFlowButton(FlowButton obj) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowButtons.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowButtons.class));
+        obj.setId(id);
+        prepareObj(obj);
+        EhFlowButtonsDao dao = new EhFlowButtonsDao(context.configuration());
+        dao.insert(obj);
+        return id;
+    }
+
+    @Override
+    public void updateFlowButton(FlowButton obj) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowButtons.class));
+        EhFlowButtonsDao dao = new EhFlowButtonsDao(context.configuration());
+        dao.update(obj);
+    }
+
+    @Override
+    public void deleteFlowButton(FlowButton obj) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowButtons.class));
+        EhFlowButtonsDao dao = new EhFlowButtonsDao(context.configuration());
+        dao.deleteById(obj.getId());
+    }
+
+    @Override
+    public FlowButton getFlowButtonById(Long id) {
+        try {
+            FlowButton[] result = new FlowButton[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowButtons.class));
+
+            result[0] = context.select().from(Tables.EH_FLOW_BUTTONS)
+                    .where(Tables.EH_FLOW_BUTTONS.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, FlowButton.class);
+                    });
+
+            return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
+
+    @Override
+    public List<FlowButton> queryFlowButtons(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowButtons.class));
+
+        SelectQuery<EhFlowButtonsRecord> query = context.selectQuery(Tables.EH_FLOW_BUTTONS);
+        if (queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.ID.gt(locator.getAnchor()));
+        }
+
+        query.addLimit(count);
+        List<FlowButton> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, FlowButton.class);
+        });
+
+        if (objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+
+    private void prepareObj(FlowButton obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+        if (obj.getDefaultOrder() == null) {
+            obj.setDefaultOrder(obj.getId().intValue());
+        }
+    }
+
+    @Override
+    public FlowButton findFlowButtonByStepType(Long flowMainId, Long flowNodeId, Integer flowVer, String flowStepType, String userType) {
+        List<FlowButton> buttons = this.queryFlowButtons(new ListingLocator(), 100, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_MAIN_ID.eq(flowMainId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_STEP_TYPE.eq(flowStepType));
+            if (userType != null) {
+                query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));
+            }
+            query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+            return query;
+        });
+        if (buttons == null || buttons.size() == 0) {
+            return null;
+        }
+        return buttons.get(0);
+    }
+
+    @Override
+    public List<FlowButton> findFlowButtonsByUserType(Long flowMainId, Long flowNodeId, Integer flowVer, String userType) {
+        return this.queryFlowButtons(new ListingLocator(), 20, (locator1, query) -> {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_MAIN_ID.eq(flowMainId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+            if (userType != null) {
+                query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));
+            }
+            query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+            return query;
+        });
+    }
+}

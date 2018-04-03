@@ -1,7 +1,7 @@
 package com.everhomes.user;
 
 public enum ActivityType {
-    UNKNOW((byte) 0), LOGON((byte) 1), LOGOFF((byte) 2);
+    UNKNOW((byte) 0), LOGON((byte) 1), LOGOFF((byte) 2), BORDER_REGISTER((byte) 3);
     private Byte code;
 
     ActivityType(Byte code) {
@@ -19,6 +19,14 @@ public enum ActivityType {
             }
 
         }
+
+        for (ActivityType activity : ActivityType.values()) {
+            if (activity.getCode().toString().equals(val)) {
+                return activity;
+            }
+        }
+
         return UNKNOW;
     }
+
 }

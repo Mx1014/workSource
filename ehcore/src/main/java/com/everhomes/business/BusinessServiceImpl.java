@@ -2,12 +2,72 @@
 package com.everhomes.business;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import ch.hsr.geohash.GeoHash;
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.RoleAssignment;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.address.AddressService;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.*;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.core.AppConfig;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
+import com.everhomes.http.HttpUtils;
+import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.oauth2.Clients;
+import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.user.BusinessUserType;
+import com.everhomes.promotion.BizHttpRestCallProvider;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
+import com.everhomes.rest.business.*;
+import com.everhomes.rest.business.admin.*;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.region.*;
+import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganizations;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -18,139 +78,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import ch.hsr.geohash.GeoHash;
-
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RoleAssignment;
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityGeoPoint;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.core.AppConfig;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupProvider;
-import com.everhomes.launchpad.LaunchPadConstants;
-import com.everhomes.launchpad.LaunchPadItem;
-import com.everhomes.launchpad.LaunchPadProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.oauth2.Clients;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.AddressType;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BaiduGeocoderResponse;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
-import com.everhomes.rest.business.BusinessAssignedScopeDTO;
-import com.everhomes.rest.business.BusinessCommand;
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.business.BusinessFavoriteStatus;
-import com.everhomes.rest.business.BusinessRecommendStatus;
-import com.everhomes.rest.business.BusinessScope;
-import com.everhomes.rest.business.BusinessServiceErrorCode;
-import com.everhomes.rest.business.BusinessTargetType;
-import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
-import com.everhomes.rest.business.DeleteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessDTO;
-import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.business.FavoriteFlagType;
-import com.everhomes.rest.business.FindBusinessByIdCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
-import com.everhomes.rest.business.GetBusinessesByScopeCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.admin.BusinessAdminDTO;
-import com.everhomes.rest.business.admin.BusinessPromoteScopeDTO;
-import com.everhomes.rest.business.admin.CreateBusinessAdminCommand;
-import com.everhomes.rest.business.admin.DeletePromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommandResponse;
-import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.launchpad.ApplyPolicy;
-import com.everhomes.rest.launchpad.DeleteFlagType;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.ItemGroup;
-import com.everhomes.rest.launchpad.ItemTargetType;
-import com.everhomes.rest.launchpad.ScaleType;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
-import com.everhomes.rest.region.ListRegionByKeywordCommand;
-import com.everhomes.rest.region.ListRegionCommand;
-import com.everhomes.rest.region.RegionAdminStatus;
-import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.region.RegionScope;
-import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceAddress;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BusinessServiceImpl implements BusinessService {
@@ -202,7 +132,20 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	private GroupService groupService;
 
+    @Autowired
+    private BusinessPromotionProvider businessPromotionProvider;
+
+    @Autowired
+    private BizHttpRestCallProvider bizHttpRestCallProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	@Autowired
+	private PayService payService;
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
 		if(cmd.getUserId() == null){
@@ -612,6 +555,7 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		
 		Community community = communityProvider.findCommunityById(communityId);
+		LOGGER.debug("processStat communityId is :" + communityId);
 		
 		if(community == null){
 			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
@@ -915,7 +859,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//recommand business first
 		/*dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
-			public int compare(BusinessDTO o1, BusinessDTO o2) {
+			public int compareTo(BusinessDTO o1, BusinessDTO o2) {
 				return o2.getRecommendStatus() - o1.getRecommendStatus();
 			}
 		});*/
@@ -960,25 +904,25 @@ public class BusinessServiceImpl implements BusinessService {
 				.filter(r ->{
 					if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
 						return true;
-					removeIds.add(r.getTargetId());
+					removeIds.add(Long.valueOf(r.getTargetId()));
 					return false;
-				}).map(r ->r.getTargetId()).collect(Collectors.toList());
+				}).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> cmmtyBizIds = null;
 		if(cmmtyId!=0){
 			cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.COMMUNITY.getCode(), cmmtyId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r -> Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> cityBizIds = null;
 		if(cityId!=0){
 			cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.CITY.getCode(), cityId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 				0, ScopeType.ALL.getCode(), 0,namesapceId).stream()
-				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> favoriteBizIds = new ArrayList<Long>();
 		if(userBizIds != null && !userBizIds.isEmpty())
@@ -1583,6 +1527,92 @@ public class BusinessServiceImpl implements BusinessService {
 
 	}
 
+	/**
+	 * 获取用户家庭地址
+	 * @param userId
+	 * @return
+     */
+	private List<FamilyAddressDTO> listUserFamilyAddresses(Long userId){
+		List<FamilyAddressDTO> dtos = new ArrayList<>();
+		List<UserGroup> userGroups = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+		if(userGroups != null && !userGroups.isEmpty()){
+			for (UserGroup userGroup: userGroups) {
+				Group group = groupProvider.findGroupById(userGroup.getGroupId());
+				if(group == null){
+					LOGGER.error("listUserFamilyAddresses-group=group is empty,groupId=" +userGroup.getGroupId());
+					continue;
+				}
+				Address address = addressProvider.findAddressById(group.getIntegralTag1());
+				if(address == null){
+					LOGGER.error("listUserFamilyAddresses-address=address is empty,addressId=" +group.getIntegralTag1());
+					continue;
+				}
+				FamilyAddressDTO dto = new FamilyAddressDTO();
+				dto.setFamilyId(userGroup.getGroupId());
+				dto.setAdddress(processAddressDTO(address));
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	/**
+	 * 获取用户公司地址
+	 * @param userId
+	 * @return
+     */
+	private List<OrganizationAddressDTO> listUserOrganizationAddresses(Long userId){
+		List<OrganizationAddressDTO> dtos = new ArrayList<>();
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(userId);
+		for (OrganizationMember member: members) {
+			Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(null != org && OrganizationStatus.fromCode(org.getStatus()) == OrganizationStatus.ACTIVE && OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationAddressDTO dto = new OrganizationAddressDTO();
+				dto.setOrganizastionId(org.getId());
+				dto.setOrganizationName(org.getName());
+				List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(member.getOrganizationId());
+				List<AddressDTO> adddresses = new ArrayList<>();
+				if(null != orgAddresses && orgAddresses.size() > 0){
+					for (OrganizationAddress orgAddress: orgAddresses) {
+						Address address = addressProvider.findAddressById(orgAddress.getAddressId());
+						if(address == null){
+							LOGGER.error("listUserOrganizationAddresses-address=address is empty,addressId = {}", orgAddress.getAddressId());
+							continue;
+						}
+						adddresses.add(processAddressDTO(address));
+					}
+				}
+				dto.setAdddresses(adddresses);
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	private AddressDTO processAddressDTO(Address address){
+		AddressDTO dto = ConvertHelper.convert(address, AddressDTO.class);
+		Region city = regionProvider.findRegionById(address.getCityId());
+		if(null != city){
+			dto.setCityName(city.getName());
+		}
+
+		Region area = regionProvider.findRegionById(address.getAreaId());
+		if(null != area){
+			dto.setAreaName(area.getName());
+		}
+		Community community = this.communityProvider.findCommunityById(address.getCommunityId());
+		if(community != null){
+			dto.setCommunityName(community.getName());
+		}
+
+		Region province = regionProvider.findRegionById(city.getParentId());
+		if(null != province){
+			dto.setProvinceName(province.getName());
+		}
+		return dto;
+	}
+
+
 	@Override
 	public UserServiceAddressDTO getUserDefaultAddress(GetUserDefaultAddressCommand cmd) {
 		//List<UserServiceAddressDTO> dtos = new ArrayList<UserServiceAddressDTO>();
@@ -1597,7 +1627,7 @@ public class BusinessServiceImpl implements BusinessService {
 				for(int i=0;i<list.size();i++){
 					UserGroup uGroup = list.get(i);
 					Group group = groupProvider.findGroupById(uGroup.getGroupId());
-					if(group == null){	
+					if(group == null){
 						LOGGER.error("getUserDefaultAddress-group=group is empty,groupId=" +uGroup.getGroupId());
 						continue;
 					}
@@ -1669,6 +1699,89 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 		}
 		return dto;
+	}
+
+	@Override
+	public UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+
+		UserAddressDTO dto = new UserAddressDTO();
+		Long userId = cmd.getUserId();
+		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
+		List<UserServiceAddressDTO> userServiceAddressDTOs = new ArrayList<>();
+		for (UserServiceAddress userServiceAddress: serviceAddresses) {
+			UserServiceAddressDTO userServiceAddressDTO = ConvertHelper.convert(userServiceAddress, UserServiceAddressDTO.class);
+			Address addr = this.addressProvider.findAddressById(userServiceAddress.getAddressId());
+			if(addr == null){
+				LOGGER.error("getUserAddress-error=Address is not found,addressId = {}", userServiceAddress.getAddressId());
+				continue;
+			}
+			Region city = this.regionProvider.findRegionById(addr.getCityId());
+			if(city != null){
+				Region province = this.regionProvider.findRegionById(city.getParentId());
+				if(province != null)
+					userServiceAddressDTO.setProvince(province.getName());
+			}
+			userServiceAddressDTO.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
+			userServiceAddressDTO.setId(addr.getId());
+			userServiceAddressDTO.setCity(addr.getCityName());
+			userServiceAddressDTO.setArea(addr.getAreaName());
+			userServiceAddressDTO.setAddress(addr.getAddress());
+			if(addr.getCommunityId() != null){
+				Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+				if(com != null){
+					userServiceAddressDTO.setCommunityId(addr.getCommunityId());
+					userServiceAddressDTO.setCommunityName(com.getName());
+				}
+			}
+			userServiceAddressDTO.setUserName(userServiceAddress.getContactName());
+			userServiceAddressDTO.setCallPhone(userServiceAddress.getContactToken());
+			userServiceAddressDTOs.add(userServiceAddressDTO);
+		}
+		dto.setServiceAddresses(userServiceAddressDTOs);
+		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
+		dto.setFamilyAddresses(familyAddresses);
+
+		List<OrganizationAddressDTO> orgAddresses = listUserOrganizationAddresses(userId);
+		dto.setOrganizationAddresses(orgAddresses);
+
+		return dto;
+	}
+
+	@Override
+	public List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+		List<OrganizationDTO> dtos = new ArrayList<>();
+		List<UserOrganizations> userOrganizations = organizationProvider.listUserOrganizationByUserId(cmd.getUserId());
+		for (UserOrganizations userOrganization: userOrganizations) {
+			Organization organizaiton = organizationProvider.findOrganizationById(userOrganization.getOrganizationId());
+			if(null != organizaiton && OrganizationStatus.fromCode(organizaiton.getStatus()) == OrganizationStatus.ACTIVE){
+				dtos.add(ConvertHelper.convert(organizaiton, OrganizationDTO.class));
+			}
+		}
+		return dtos;
+	}
+
+	@Override
+	public CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd) {
+		CheckPaymentUserResponse res = businessProvider.checkoutPaymentUser(cmd.getUserId());
+		if(res==null){
+			res = new CheckPaymentUserResponse();
+			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
+			res.setCreateTime(paymentUser.getCreateTime());
+			res.setId(paymentUser.getId());
+			res.setOwnerId(paymentUser.getOwnerId());
+			res.setOwnerType(paymentUser.getOwnerType());
+			res.setPayment_user_id(paymentUser.getPaymentUserId());
+			res.setPaymentUserType(paymentUser.getPaymentUserType());
+		}
+		return res;
 	}
 
 	@Override
@@ -1955,7 +2068,7 @@ public class BusinessServiceImpl implements BusinessService {
 		subcmd.setNamespaceId(cmd.getNamespaceId());
 		for(Long r:cmd.getCommunityIds()){
 			subcmd.setCommunityId(r);
-			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeywordForBusiness(subcmd);
 			if(result.second()!=null&&!result.second().isEmpty()){
 				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
 					r2.setCommunityId(r);
@@ -1968,9 +2081,21 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 
 	@Override
+	public List<BuildingDTO> listBuildingsByKeywordAndNameSpace(ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+		List<Building> buildings = communityProvider.ListBuildingsBykeywordAndNameSpace(cmd.getNamespaceId(), cmd.getKeyword());
+		return buildings.stream().map(r -> {
+			BuildingDTO dto = new BuildingDTO();
+			dto.setBuildingId(r.getId());
+			dto.setBuildingName(r.getName());
+			dto.setCommunityId(r.getCommunityId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
 	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
 			ListPropApartmentsByKeywordCommand cmd) {
-		return addressService.listApartmentsByKeyword(cmd);
+		return addressService.listApartmentsByKeywordForBusiness(cmd);
 	}
 
 	@Override
@@ -2156,4 +2281,272 @@ public class BusinessServiceImpl implements BusinessService {
 					"password is null");
 		}
 	}
+
+	@Override
+	public CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		String groupName = cmd.getGroupName();
+		if (StringUtils.isBlank(groupName)) {
+			groupName = "group-"+UUID.randomUUID().toString();
+		}
+		
+		return new CreateBusinessGroupResponse(groupService.createBusinessGroup(groupName));
+	}
+
+	@Override
+	public void joinBusinessGroup(JoinBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null || cmd.getGroupId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId or groupId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		groupService.joinBusinessGroup(cmd.getGroupId());
+	}
+
+	@Override
+	public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(
+			ListApartmentFloorCommand cmd) {
+		return addressService.listApartmentFloorForBusiness(cmd);
+	}
+
+	private String source = "biz";// 电商运营数据获取来源 biz：从电商那里获取数据， db: 从数据库获取数据
+
+    @Override
+    public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("list business promotion namespaceId={}", namespaceId);
+
+        if ("biz".equals(source)) {// 从电商服务器获取数据
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize, cmd.getRecommendType());
+        }
+        // 从数据库获取数据
+        else {
+            ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+
+            List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
+                    namespaceId, pageSize, cmd.getPageAnchor());
+
+            List<ModulePromotionEntityDTO> entities =
+                    promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+
+            reponse.setEntities(entities);
+            return reponse;
+        }
+    }
+
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize, Byte recommendType) {
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
+
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+
+        Map<String, String> param = new HashMap<>();
+        param.put("namespaceId", String.valueOf(namespaceId));
+        param.put("pageSize", String.valueOf(pageSize));
+        if (recommendType != null) {
+            param.put("recommendType", String.valueOf(recommendType));
+        }
+
+        ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+        try {
+            String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
+            CommodityRespDTO resp = (CommodityRespDTO) StringHelper.fromJsonString(jsonStr, CommodityRespDTO.class);
+            if (resp != null) {
+                reponse.setEntities(resp.getResponse());
+            }
+            return reponse;
+        } catch (Exception e) {
+            LOGGER.error("biz server response error", e);
+        }
+        return reponse;
+    }
+
+    @Override
+    public void createBusinessPromotion(CreateBusinessPromotionCommand cmd) {
+        if (cmd.getId() != null) {
+            BusinessPromotion promotion = businessPromotionProvider.findById(cmd.getId());
+            if (cmd.getPrice() != null) {
+                promotion.setPrice(cmd.getPrice());
+            }
+            if (cmd.getCommodityUrl() != null) {
+                promotion.setCommodityUrl(cmd.getCommodityUrl());
+            }
+            if (cmd.getDefaultOrder() != null) {
+                promotion.setDefaultOrder(cmd.getDefaultOrder());
+            }
+            if (cmd.getSubject() != null) {
+                promotion.setSubject(cmd.getSubject());
+            }
+            if (cmd.getDescription() != null) {
+                promotion.setDescription(cmd.getDescription());
+            }
+            if (cmd.getPosterUri() != null) {
+                promotion.setPosterUri(cmd.getPosterUri());
+            }
+            businessPromotionProvider.updateBusinessPromotion(promotion);
+        } else {
+            BusinessPromotion promotion = ConvertHelper.convert(cmd, BusinessPromotion.class);
+            promotion.setNamespaceId(UserContext.getCurrentNamespaceId());
+            businessPromotionProvider.createBusinessPromotion(promotion);
+        }
+    }
+
+    @Override
+    public void testTransaction() {
+        dbProvider.execute(s -> test());
+    }
+
+    private List<String> test() {
+        for (int i = 0; i < 10; i++) {
+            BusinessPromotion promotion = new BusinessPromotion();
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            promotion.setNamespaceId(namespaceId);
+            promotion.setSubject("comm:" + i);
+            businessPromotionProvider.createBusinessPromotion(promotion);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("create business promotion {} {} {}", i, namespaceId, promotion);
+            // try {
+            //     Thread.sleep(5000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
+            if (i == 9) {
+                throw RuntimeErrorException.errorWith("err", i, "error");
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd) {
+        if (cmd.getSource() != null) {
+            this.source = cmd.getSource();
+        }
+    }
+
+    private ModulePromotionEntityDTO toModulePromotionEntityDTO(BusinessPromotion promotion) {
+        ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+        dto.setId(promotion.getId());
+        dto.setSubject(promotion.getSubject());
+        dto.setDescription(promotion.getDescription());
+        dto.setPosterUrl(parserUri(promotion.getPosterUri(), EhBusinessPromotions.class.getSimpleName(), promotion.getId()));
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("url", promotion.getCommodityUrl());
+
+        dto.setMetadata(StringHelper.toJsonString(metadata));
+
+        ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
+        infoDTO.setContent("¥" + promotion.getPrice().toString());
+        infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
+        dto.setInfoList(Collections.singletonList(infoDTO));
+        return dto;
+    }
+
+	@Override
+	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		SearchTypes searchType =  userService.getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
+
+		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
+
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+//        bizApi = "/zl-ec/rest/openapi/shop/listByKeyword";
+//        bizServer = "https://biz-beta.zuolin.com";
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+    	
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", namespaceId);
+		param.put("buildingId", cmd.getBuildingId());
+        param.put("keyword", cmd.getKeyword()==null?"":cmd.getKeyword());
+//        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
+//        param.put("shopName", String.valueOf(searchShopsCommand.getShopName()));
+        Integer pageNo = cmd.getPageAnchor() == null ? 1 : cmd.getPageAnchor().intValue();
+        Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        param.put("pageNo", pageNo);
+        param.put("pageSize", pageSize);
+        SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+        try {
+            String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 1000, "UTF-8");
+
+            SearchShopsResponse searchShopsResponse = (SearchShopsResponse) StringHelper.fromJsonString(jsonStr, SearchShopsResponse.class);
+
+            if(searchShopsResponse != null && searchShopsResponse.getResult() && searchShopsResponse.getBody() != null){
+            	searchShopsResponse.getBody().getRows().forEach(r ->{
+            		r.setSearchTypeId(searchType.getId());
+        			r.setSearchTypeName(searchType.getName());
+        			r.setContentType(searchType.getContentType());
+            	});
+            	response.setShopDTOs(searchShopsResponse.getBody().getRows());
+            	
+            	if(searchShopsResponse.getBody().getHasNext())
+            	response.setNextPageAnchor(cmd.getPageAnchor()==null ? 2: cmd.getPageAnchor() + 1);
+            }
+//            if (resp != null) {
+//                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
+//                for (Commodity commodity : resp.commodities) {
+//                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+//                    // dto.setId(commodity.id);
+//                    dto.setSubject(commodity.commoName);
+//                    dto.setPosterUrl(commodity.defaultPic);
+//                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
+//                    dto.setInfoList(Collections.singletonList(infoDTO));
+//
+//                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
+//
+//                    dtoList.add(dto);
+//                }
+//                reponse.setEntities(dtoList);
+//            }
+            
+            
+            return response;
+        } catch (Exception e) {
+            // e.printStackTrace();
+            LOGGER.error("biz server response error", e);
+        }
+        return response;
+	}
+    
 }

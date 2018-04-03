@@ -8,6 +8,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.family.*;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,7 +174,7 @@ public class FamilyController extends ControllerBase {
     
     /**
      * <b>URL: /family/rejectMember</b>
-     * <p>拒绝加入家庭（自己拒绝<别人邀请>或家庭成员拒绝）</p>
+     * <p>拒绝加入家庭（自己拒绝"别人邀请"或家庭成员拒绝）</p>
      */
     @RequestMapping("rejectMember")
     @RestReturn(value=String.class)
@@ -435,6 +436,16 @@ public class FamilyController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
-    
+    @RequireAuthentication(false)
+    @RequestMapping("testLockAquiring")
+    @RestReturn(value=String.class)
+    public RestResponse testLockAquiring(TestLockAquiringCommand cmd) {
+        this.familyService.testLockAquiring(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
     
 }

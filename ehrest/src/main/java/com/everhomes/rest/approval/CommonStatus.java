@@ -22,7 +22,7 @@ public enum CommonStatus {
 		return this.code;
 	}
 	
-	public CommonStatus fromCode(Byte code){
+	public static CommonStatus fromCode(Byte code){
 		if (code != null) {
 			for (CommonStatus status : CommonStatus.values()) {
 				if (code.byteValue() == status.getCode()) {

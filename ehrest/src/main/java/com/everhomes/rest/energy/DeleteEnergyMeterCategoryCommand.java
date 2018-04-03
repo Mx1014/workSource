@@ -1,0 +1,57 @@
+
+package com.everhomes.rest.energy;
+
+import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+
+/**
+ * <ul>
+ *     <li>organizationId: 组织id</li>
+ *     <li>categoryId: 分类id</li>
+ * </ul>
+ */
+public class DeleteEnergyMeterCategoryCommand {
+
+    private Long communityId;
+    @NotNull private Long organizationId;
+    @NotNull private Long categoryId;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

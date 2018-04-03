@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.util.RecordHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -11,26 +12,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.quality.QualityInspectionTasks;
 import com.everhomes.rest.hotTag.HotTagStatus;
 import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhHotTagsDao;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhHotTags;
 import com.everhomes.server.schema.tables.records.EhHotTagsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -45,15 +38,25 @@ public class HotTagProviderImpl implements HotTagProvider {
 	private DbProvider dbProvider;
 
 	@Override
-	public List<TagDTO> listHotTag(String serviceType, Integer pageSize) {
+	public List<TagDTO> listHotTag(Integer nameSpaceId, Byte moduleType, Long categoryId, String serviceType, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
+		if(moduleType != null){
+			query.addConditions(Tables.EH_HOT_TAGS.MODULE_TYPE.eq(moduleType));
+		}
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
-		query.addLimit(pageSize);
-		
+		query.addOrderBy(Tables.EH_HOT_TAGS.ID.asc());
+
+		if(pageSize != null){
+			query.addLimit(pageSize);
+		}
+
 		List<TagDTO> result = new ArrayList<TagDTO>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, TagDTO.class));
@@ -64,7 +67,30 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public void updateHotTag(HotTags tag) {
+	public List<TagDTO> listDistinctAllHotTag(String serviceType, Integer pageSize, Integer pageOffset) {
+		List<TagDTO> result = new ArrayList<TagDTO>();
+
+		if(pageOffset == null){
+			pageOffset = 1;
+		}
+		Integer offset =  (int) ((pageOffset - 1 ) * (pageSize-1));
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.selectDistinct(Tables.EH_HOT_TAGS.NAME)
+				.from(Tables.EH_HOT_TAGS)
+				.where(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType)
+						.and(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode())))
+				.limit(offset, pageSize)
+				.fetch().map(r ->{
+					result.add(RecordHelper.convert(r, TagDTO.class));
+					return null;
+				});
+
+		return result;
+	}
+
+	@Override
+	public void updateHotTag(HotTag tag) {
 		assert(tag.getId() != null);
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhHotTags.class, tag.getId()));
@@ -75,7 +101,18 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public void createHotTag(HotTags tag) {
+	public void deleteHotTag(HotTag tag) {
+		assert(tag.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhHotTags.class, tag.getId()));
+		EhHotTagsDao dao = new EhHotTagsDao(context.configuration());
+		dao.delete(tag);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhHotTags.class, tag.getId());
+	}
+
+	@Override
+	public void createHotTag(HotTag tag) {
 		
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhHotTags.class));
 		
@@ -93,26 +130,35 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public HotTags findById(Long id) {
+	public HotTag findById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhHotTags.class, id));
 		EhHotTagsDao dao = new EhHotTagsDao(context.configuration());
 		EhHotTags result = dao.findById(id);
         if (result == null) {
             return null;
         }
-        return ConvertHelper.convert(result, HotTags.class);
+        return ConvertHelper.convert(result, HotTag.class);
 	}
 
 	@Override
-	public HotTags findByName(String serviceType, String name) {
+	public HotTag findByName(Integer namespaceId, Byte moduleType, Long categoryId, String serviceType, String name) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
-		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
+
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(namespaceId));
+
+		if(moduleType != null){
+			query.addConditions(Tables.EH_HOT_TAGS.MODULE_TYPE.eq(moduleType));
+		}
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
+
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		 
-		List<HotTags> result = new ArrayList<HotTags>();
+		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
+		List<HotTag> result = new ArrayList<HotTag>();
 		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, HotTags.class));
+			result.add(ConvertHelper.convert(r, HotTag.class));
 			return null;
 		});
 		if(result.size()==0)

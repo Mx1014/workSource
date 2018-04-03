@@ -1,0 +1,129 @@
+package com.everhomes.flow;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+/**
+ * <ul>
+ *     <li>flowCaseId: flowCaseId</li>
+ *     <li>flowNodeId: flowNodeId</li>
+ *     <li>flowMainId: flowMainId</li>
+ *     <li>flowVersion: flowVersion</li>
+ *     <li>stepCount: 当前跳转的次数，通过这个值可以避免多次跳转</li>
+ *     <li>autoStepType: {@link com.everhomes.rest.flow.FlowStepType}</li>
+ *     <li>eventType: 本次事件类型 {@link com.everhomes.rest.flow.FlowEventType}</li>
+ *     <li>operatorId: operatorId</li>
+ *     <li>eventLogs: 事件跟踪</li>
+ * </ul>
+ */
+public class FlowAutoStepDTO {
+
+    private Long flowCaseId;
+    private Long flowNodeId;
+    private Long flowMainId;
+    private Integer flowVersion;
+    private Long stepCount;
+    private String autoStepType;
+    private String eventType;
+    private Long flowTargetId;
+    private Long operatorId;
+    private Long subjectId;
+
+    @ItemType(FlowEventLog.class)
+    private List<FlowEventLog> eventLogs;
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
+
+    public Long getFlowNodeId() {
+        return flowNodeId;
+    }
+
+    public void setFlowNodeId(Long flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public Long getFlowMainId() {
+        return flowMainId;
+    }
+
+    public void setFlowMainId(Long flowMainId) {
+        this.flowMainId = flowMainId;
+    }
+
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
+
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
+
+    public Long getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(Long stepCount) {
+        this.stepCount = stepCount;
+    }
+
+    public String getAutoStepType() {
+        return autoStepType;
+    }
+
+    public void setAutoStepType(String autoStepType) {
+        this.autoStepType = autoStepType;
+    }
+
+    public Long getFlowTargetId() {
+        return flowTargetId;
+    }
+
+    public void setFlowTargetId(Long flowTargetId) {
+        this.flowTargetId = flowTargetId;
+    }
+
+    public Long getOperatorId() {
+        return operatorId;
+    }
+
+    public void setOperatorId(Long operatorId) {
+        this.operatorId = operatorId;
+    }
+
+    public Long getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public List<FlowEventLog> getEventLogs() {
+        return eventLogs;
+    }
+
+    public void setEventLogs(List<FlowEventLog> eventLogs) {
+        this.eventLogs = eventLogs;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

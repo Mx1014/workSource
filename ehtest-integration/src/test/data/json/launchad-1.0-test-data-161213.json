@@ -1,0 +1,44 @@
+{
+  "eh_launch_advertisements": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "content_type": "IMAGE",
+      "content_uri": "cs://1/image/aW1hZ2UvTVRvNE9XSTFaakU1WWprNE4yVTFPV0pqT1dNMk9XWXlPRGN5WVdFMU1qUXpaZw",
+      "times_per_day": 3,
+      "display_interval": 2,
+      "duration_time": 3,
+      "skip_flag": 1,
+      "action_type": 14,
+      "action_data": "{\"link\":\"www.zuolin.com\"}",
+      "status": 2,
+      "creator_uid": 0
+    },{
+      "id": 2,
+      "namespace_id": 0,
+      "content_type": "VIDEO",
+      "content_uri": "cs://1/image/aW1hZ2UvTVRvNE9XSTFaakU1WWprNE4yVTFPV0pqT1dNMk9XWXlPRGN5WVdFMU1qUXpaZw",
+      "times_per_day": 3,
+      "display_interval": 2,
+      "duration_time": 3,
+      "skip_flag": 1,
+      "action_type": 14,
+      "action_data": "{\"link\":\"www.zuolin.com\"}",
+      "status": 2,
+      "creator_uid": 0
+    },{
+      "id": 3,
+      "namespace_id": 999992,
+      "content_type": "IMAGE",
+      "content_uri": "cs://1/image/aW1hZ2UvTVRvNE9XSTFaakU1WWprNE4yVTFPV0pqT1dNMk9XWXlPRGN5WVdFMU1qUXpaZw",
+      "times_per_day": 3,
+      "display_interval": 2,
+      "duration_time": 3,
+      "skip_flag": 1,
+      "action_type": 14,
+      "action_data": "{\"link\":\"www.zuolin.com\"}",
+      "status": 2,
+      "creator_uid": 0
+    }
+  ]
+}

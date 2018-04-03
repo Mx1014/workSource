@@ -1,0 +1,14 @@
+package com.everhomes.energy;
+
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
+import com.everhomes.util.StringHelper;
+
+/**
+ * Created by xq.tian on 2016/10/31.
+ */
+public class EnergyMeterFormula extends EhEnergyMeterFormulas {
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

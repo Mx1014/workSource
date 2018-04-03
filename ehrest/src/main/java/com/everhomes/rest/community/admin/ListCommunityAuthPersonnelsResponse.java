@@ -7,7 +7,7 @@ import com.everhomes.discover.ItemType;
 /**
  * <ul>
  * <li>nextPageAnchor: 下一页</li>
- * <li>members: 参考{@com.everhomes.rest.community.admin.ComOrganizationMemberDTO}</li>
+ * <li>members: 参考{@link com.everhomes.rest.community.admin.ComOrganizationMemberDTO}</li>
  * </ul>
  */
 public class ListCommunityAuthPersonnelsResponse {

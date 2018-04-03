@@ -20,6 +20,10 @@ import com.everhomes.util.StringHelper;
  * <li>sourceType: 报事来源</li>
  * <li>requestorName: 联系人名称</li>
  * <li>requestorPhone: 联系方式</li>
+ * <li>requestorPhone: 联系方式</li>
+ * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * <li>organizationName: 公司名称</li>
+ * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
  * </ul>
  */
 public class CreateTaskCommand {
@@ -28,9 +32,8 @@ public class CreateTaskCommand {
 	private Long categoryId;
 	private String address;
 	private String content;
-//	private String nickName;
-//	private String mobile;
 	private Long organizationId;
+
 	
 	private Long taskCategoryId;
 	private Long addressId;
@@ -40,8 +43,23 @@ public class CreateTaskCommand {
 	private String requestorName;
 	private String requestorPhone;
 	
+	private Byte addressType;
+	private Long addressOrgId;
+	private String buildingName;
+	private Long flowOrganizationId;
+	private Integer namespaceId;
+	private String organizationName;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
+
+	public Long getFlowOrganizationId() {
+		return flowOrganizationId;
+	}
+
+	public void setFlowOrganizationId(Long flowOrganizationId) {
+		this.flowOrganizationId = flowOrganizationId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -54,7 +72,6 @@ public class CreateTaskCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -79,7 +96,6 @@ public class CreateTaskCommand {
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
-	
 	public Long getTaskCategoryId() {
 		return taskCategoryId;
 	}
@@ -92,7 +108,6 @@ public class CreateTaskCommand {
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
-	
 	public Long getReserveTime() {
 		return reserveTime;
 	}
@@ -123,16 +138,52 @@ public class CreateTaskCommand {
 	public void setRequestorPhone(String requestorPhone) {
 		this.requestorPhone = requestorPhone;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public Long getOrganizationId() {
 		return organizationId;
 	}
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
-	
+	public Byte getAddressType() {
+		return addressType;
+	}
+	public void setAddressType(Byte addressType) {
+		this.addressType = addressType;
+	}
+	public Long getAddressOrgId() {
+		return addressOrgId;
+	}
+	public void setAddressOrgId(Long addressOrgId) {
+		this.addressOrgId = addressOrgId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+
 }

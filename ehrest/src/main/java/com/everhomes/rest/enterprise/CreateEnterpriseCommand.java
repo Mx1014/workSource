@@ -24,6 +24,10 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>postUri: 标题图</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>emailDomain: 邮箱域名 -非必填</li>
+ *  <li>serviceUserId: 客服服务人员id</li>
+ *  <li>website: 企业官网</li>
+ *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  * </ul>
  * @author janson
  *
@@ -49,14 +53,40 @@ public class CreateEnterpriseCommand {
     private String longitude;
     
     private String latitude;
+    private String emailDomain;
+    private Long serviceUserId;
     
     @ItemType(OrganizationAddressDTO.class)
 	private List<OrganizationAddressDTO> addressDTOs;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
-    
-    
+
+	private String website;
+	private String unifiedSocialCreditCode;
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	public Long getServiceUserId() {
+		return serviceUserId;
+	}
+	public void setServiceUserId(Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
 	public Long getMemberCount() {
 		return memberCount;
 	}
@@ -166,6 +196,12 @@ public class CreateEnterpriseCommand {
 	}
 	public void setLatitude(String latitude) {
 		this.latitude = latitude;
+	}
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
 	}
     
 }

@@ -1,93 +1,67 @@
 package com.everhomes.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 
 public class LeasePromotion extends EhLeasePromotions {
-	
-	/**
-	 * 
-	 */
 
-	private java.lang.String   posterUrl;
 	private static final long serialVersionUID = -5199936376319201329L;
-	
-	
-	private String buildingName;
-	
-	private String address;
-	
-	private Double longitude;
-	
-	private Double latitude;
-	
-	
-	private List<LeasePromotionAttachment> attachments;
-	
 
+	private Long communityId;
+	private String posterUrl;
 
-	public List<LeasePromotionAttachment> getAttachments() {
-		return attachments;
+	private BigDecimal startRentArea;
+	private BigDecimal endRentArea;
+	private BigDecimal startRentAmount;
+	private BigDecimal endRentAmount;
+
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-
-	public void setAttachments(List<LeasePromotionAttachment> attachments) {
-		this.attachments = attachments;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
-
 
 	public java.lang.String getPosterUrl() {
 		return posterUrl;
 	}
 
-
 	public void setPosterUrl(java.lang.String posterUrl) {
 		this.posterUrl = posterUrl;
 	}
 
-
-	public String getBuildingName() {
-		return buildingName;
+	public BigDecimal getStartRentArea() {
+		return startRentArea;
 	}
 
-
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
+	public void setStartRentArea(BigDecimal startRentArea) {
+		this.startRentArea = startRentArea;
 	}
 
-
-	public String getAddress() {
-		return address;
+	public BigDecimal getEndRentArea() {
+		return endRentArea;
 	}
 
-
-	public void setAddress(String address) {
-		this.address = address;
+	public void setEndRentArea(BigDecimal endRentArea) {
+		this.endRentArea = endRentArea;
 	}
 
-
-	public Double getLongitude() {
-		return longitude;
+	public BigDecimal getStartRentAmount() {
+		return startRentAmount;
 	}
 
-
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
+	public void setStartRentAmount(BigDecimal startRentAmount) {
+		this.startRentAmount = startRentAmount;
 	}
 
-
-	public Double getLatitude() {
-		return latitude;
+	public BigDecimal getEndRentAmount() {
+		return endRentAmount;
 	}
 
-
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
+	public void setEndRentAmount(BigDecimal endRentAmount) {
+		this.endRentAmount = endRentAmount;
 	}
-	
-	
-	
-	
-
 }

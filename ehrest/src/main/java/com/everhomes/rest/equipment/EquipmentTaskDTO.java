@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>standardDescription: 标准内容</li>
+ *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
@@ -67,6 +68,10 @@ public class EquipmentTaskDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private String targetType;
+
+	private Long targetId;
 	
 	private Byte taskType;
 	
@@ -115,7 +120,9 @@ public class EquipmentTaskDTO {
 	private String standardDescription;
 	
 	private Byte qrCodeFlag;
-	
+
+	private Byte pictureFlag;
+
 	public Long getId() {
 		return id;
 	}
@@ -210,6 +217,22 @@ public class EquipmentTaskDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public Byte getTaskType() {
@@ -402,6 +425,14 @@ public class EquipmentTaskDTO {
 
 	public void setQrCodeFlag(Byte qrCodeFlag) {
 		this.qrCodeFlag = qrCodeFlag;
+	}
+
+	public Byte getPictureFlag() {
+		return pictureFlag;
+	}
+
+	public void setPictureFlag(Byte pictureFlag) {
+		this.pictureFlag = pictureFlag;
 	}
 
 	@Override

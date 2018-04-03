@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>contactToken：手机号码</li>
  * <li>organizationId：机构Id</li>
+ * <li>scopeType：删除人员范围{@link com.everhomes.rest.organization.DeleteOrganizationContactScopeType}</li>
  * </ul>
  */
 public class DeleteOrganizationPersonnelByContactTokenCommand {
@@ -18,6 +19,8 @@ public class DeleteOrganizationPersonnelByContactTokenCommand {
 	
 	@NotNull
 	private Long organizationId;
+
+	private String scopeType;
 	
 	public DeleteOrganizationPersonnelByContactTokenCommand() {
 		
@@ -47,7 +50,13 @@ public class DeleteOrganizationPersonnelByContactTokenCommand {
 		this.organizationId = organizationId;
 	}
 
+	public String getScopeType() {
+		return scopeType;
+	}
 
+	public void setScopeType(String scopeType) {
+		this.scopeType = scopeType;
+	}
 
 	@Override
     public String toString() {

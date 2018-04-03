@@ -50,7 +50,7 @@
       "namespace_id": "0",
       "owner_uid": "1001",
       "identifier_type": "0",
-      "id": "0"
+      "id": 1
     },
     {
       "identifier_token": "12900000001",
@@ -59,59 +59,61 @@
       "namespace_id": "0",
       "owner_uid": "1002",
       "identifier_type": "0",
-      "id": "1"
+      "id": 2
     }
   ],
   "eh_acl_role_assignments": [
     {
       "create_time": "2015-09-29 17:24:44",
-      "role_id": "2",
+      "role_id": "1001",
       "target_type": "EhUsers",
       "target_id": "1001",
       "creator_uid": "1025",
       "id": "1001",
-      "owner_type": "system"
+      "owner_type": "EhOrganizations",
+      "owner_id": "1000001"
     },
     {
       "create_time": "2015-09-21 20:17:51",
-      "role_id": "2",
+      "role_id": "1005",
       "target_type": "EhUsers",
       "target_id": "1002",
       "creator_uid": "1",
       "id": "1002",
-      "owner_type": "system"
+      "owner_type": "EhOrganizations",
+      "owner_id": "1000001"
     }
   ],
   "eh_organizations": [
-        {
-          "id": 1000001,
-          "parent_id": 0,
-          "organization_type": "GACW",
-          "name": "东海社区工作站",
-          "address_id": 239825274387039452,
-          "path": "/6",
-          "level": 1,
-          "status": 2,
-          "group_type": "ENTERPRISE",
-          "update_time": "2016-02-29 16:48:53",
-          "directly_enterprise_id": 0,
-          "namespace_id": 0
-        }
-      ],
-    "eh_organization_members": [
-          {
-            "id": 1000001,
-            "organization_id": 1000001,
-            "target_type": "USER",
-            "target_id": 1001,
-            "member_group": "manager",
-            "contact_name": "徐明晓",
-            "contact_type": 0,
-            "contact_token": "12900000001",
-            "status": 3,
-            "group_id": 0,
-            "gender": 0,
-            "namespace_id": 0
-          }
-        ]
+    {
+      "id": 1000001,
+      "parent_id": 0,
+      "organization_type": "GACW",
+      "name": "东海社区工作站",
+      "address_id": 239825274387039452,
+      "path": "/6",
+      "level": 1,
+      "status": 2,
+      "group_type": "ENTERPRISE",
+      "update_time": "2016-02-29 16:48:53",
+      "directly_enterprise_id": 0,
+      "namespace_id": 0
+    }
+  ],
+  "eh_organization_members": [
+    {
+      "id": 1000001,
+      "organization_id": 1000001,
+      "target_type": "USER",
+      "target_id": 1001,
+      "member_group": "manager",
+      "contact_name": "徐明晓",
+      "contact_type": 0,
+      "contact_token": "12900000001",
+      "status": 3,
+      "group_id": 0,
+      "gender": 0,
+      "namespace_id": 0
+    }
+  ]
 }

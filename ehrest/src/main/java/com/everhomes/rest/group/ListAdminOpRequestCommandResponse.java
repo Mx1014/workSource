@@ -7,7 +7,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>成为group管理员的申请信息
+ * <p>成为group管理员的申请信息</p>
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>requests: 申请信息，参考{@link com.everhomes.rest.group.GroupOpRequestDTO}</li>

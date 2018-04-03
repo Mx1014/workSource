@@ -7,10 +7,11 @@ package com.everhomes.rest.launchpad;
  * <li>METRO("Metro"): Metro</li>
  * <li>LIGHT("Light"): Light</li>
  * <li>GALLERY("Gallery"): Gallery</li>
+ * <li>COLLECTION("Collection"): Collection</li>
  * </ul>
  */
 public enum Style {
-    DEFAULT("Default"),METRO("Metro"),LIGHT("Light"),GALLERY("Gallery");
+    DEFAULT("Default"),METRO("Metro"),LIGHT("Light"),GALLERY("Gallery"),COLLECTION("Collection");
     
     private String code;
        

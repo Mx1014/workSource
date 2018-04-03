@@ -58,6 +58,7 @@ public class FamilyDTO {
     private String address;
     private Long communityId;
     private String communityName;
+    private String communityAliasName;
     private Long cityId;
     private String cityName;
     private Long areaId;
@@ -374,5 +375,13 @@ public class FamilyDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getCommunityAliasName() {
+        return communityAliasName;
+    }
+
+    public void setCommunityAliasName(String communityAliasName) {
+        this.communityAliasName = communityAliasName;
     }
 }

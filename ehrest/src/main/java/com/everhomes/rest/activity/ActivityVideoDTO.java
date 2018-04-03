@@ -15,7 +15,6 @@ import com.everhomes.util.StringHelper;
  * <li>endTime: 视频结束时间 </li>
  * <li>roomId: 视频流 ID，或房间号 ID </li>
  * <li>manufacturerType: 厂家，暂时不用，默认 YZB（易直播） </li>
- * <li>
  * </ul>
  * @author janson
  *

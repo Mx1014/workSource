@@ -1,73 +1,22 @@
 package com.everhomes.aclink.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.everhomes.aclink.AclinkLog;
-import com.everhomes.aclink.AclinkLogProvider;
-import com.everhomes.aclink.AesServerKeyProvider;
-import com.everhomes.aclink.AesUserKey;
-import com.everhomes.aclink.DoorAccess;
-import com.everhomes.aclink.DoorAccessProvider;
-import com.everhomes.aclink.DoorAccessService;
-import com.everhomes.aclink.DoorAuthMethodType;
-import com.everhomes.aclink.DoorAuthProvider;
+import com.everhomes.aclink.*;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
-import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
-import com.everhomes.rest.aclink.AclinkFirmwareDTO;
-import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogDTO;
-import com.everhomes.rest.aclink.AclinkLogDeleteCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogResponse;
-import com.everhomes.rest.aclink.AclinkUserResponse;
-import com.everhomes.rest.aclink.AesUserKeyDTO;
-import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
-import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
-import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
-import com.everhomes.rest.aclink.CreateDoorAccessGroup;
-import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
-import com.everhomes.rest.aclink.CreateDoorAuthCommand;
-import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
-import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DeleteDoorAccessById;
-import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
-import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.DoorUserPermissionDTO;
-import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
-import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
-import com.everhomes.rest.aclink.GetShortMessageCommand;
-import com.everhomes.rest.aclink.GetShortMessageResponse;
-import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserIdCommand;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.ListDoorAuthResponse;
-import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
-import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageResponse;
-import com.everhomes.rest.aclink.SearchDoorAuthCommand;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestDoc(value="Aclink Admin controller", site="core")
 @RestController
@@ -145,6 +94,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse listAclinkUsers(@Valid ListAclinkUserCommand cmd) {
 //        cmd.setIsOpenAuth((byte)0);
         RestResponse response = new RestResponse(doorAccessService.listAclinkUsers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/exportAclinkUsersXls</b>
+     * <p>导出門禁授權用戶列表</p>
+     */
+    @RequestMapping("exportAclinkUsersXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportAclinkUsersXls(@Valid ListAclinkUserCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportAclinkUsersXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -316,7 +279,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("getCurrentFirmware")
     @RestReturn(value=ListDoorAccessResponse.class)
-    public RestResponse listDoorAccessGroup(@Valid GetCurrentFirmwareCommand cmd) {
+    public RestResponse getCurrentFirmware(@Valid GetCurrentFirmwareCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getCurrentFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -337,7 +300,37 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
-    
+
+    /**
+     *
+     * <b>URL: /admin/aclink/createAllAuthList</b>
+     * <p>全部查询结果授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAllAuthList")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse createAllAuthList(@Valid AclinkCreateAllDoorAuthListCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createAllDoorAuthList(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /admin/aclink/checkAllAuthList</b>
+     * <p>校验能不能全部授权</p>
+     * @return
+     */
+    @RequestMapping("checkAllAuthList")
+    @RestReturn(value=String.class)
+    public RestResponse checkAllAuthList() {
+        RestResponse response = new RestResponse(doorAccessService.checkAllDoorAuthList());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/searchVisitorDoorAuth</b>
      * <p>获取门禁列表</p>
@@ -347,6 +340,48 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAuthResponse.class)
     public RestResponse searchVisitorDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchVisitorDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/exportVisitorDoorAuthByAdmin</b>
+     * <p>导出访客授权记录</p>
+     */
+    @RequestMapping("exportVisitorDoorAuthByAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse exportVisitorDoorAuthByAdmin(@Valid ExportDoorAuthCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportVisitorDoorAuth(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listDoorAuthLogs</b>
+     * <p>授权记录</p>
+     * @return
+     */
+    @RequestMapping("listDoorAuthLogs")
+    @RestReturn(value=ListDoorAuthLogResponse.class)
+    public RestResponse listDoorAuthLogs(@Valid ListDoorAuthLogCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAuthLogs(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/qryDoorAuthStatistics</b>
+     * <p>授权用户统计</p>
+     * @return
+     */
+    @RequestMapping("qryDoorAuthStatistics")
+    @RestReturn(value=DoorAuthStatisticsDTO.class)
+    public RestResponse qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.qryDoorAuthStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -459,5 +494,67 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/getServerKey</b>
+     * <p>测试专用</p>
+     * @return 
+     */
+    @RequestMapping("getServerKey")
+    @RestReturn(value=AclinkGetServerKeyResponse.class)
+    public RestResponse getServerKey(@Valid AclinkGetServerKeyCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.getServerKey(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createAuthLevel</b>
+     * <p>创建不同层级的授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAuthLevel")
+    @RestReturn(value=DoorAuthLevelDTO.class)
+    public RestResponse createDoorAuthLevel(@Valid CreateDoorAuthLevelCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorAuthLevel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/listDoorAuthLevel</b>
+     * <p>显示门禁下的公司授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listDoorAuthLevel")
+    @RestReturn(value=ListDoorAuthLevelResponse.class)
+    public RestResponse getDoorAuthLevel(@Valid ListDoorAuthLevelCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAuthLevel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/deleteDoorAuthLevel</b>
+     * <p>删除某个公司的授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteDoorAuthLevel")
+    @RestReturn(value=String.class)
+    public RestResponse getDoorAuthLevel(@Valid DeleteDoorAuthLevelCommand cmd) {
+        doorAccessService.deleteDoorAuthLevel(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+
+
 }

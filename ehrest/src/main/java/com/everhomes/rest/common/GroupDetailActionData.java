@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: 圈ID</li>
  * <li>inviterId: 邀请人用户ID，有值时认为是邀请的，调邀请接口</li>
  * <li>privateFlag: group公有、私有标记，0-公有、1-私有</li>
+ * <li>scanJoinUrl: 扫描入群的web_url</li>
  * </ul>
  */
 public class GroupDetailActionData implements Serializable{
@@ -18,6 +19,7 @@ public class GroupDetailActionData implements Serializable{
     private Long groupId;
     private Long inviterId;
     private Byte privateFlag;
+    private String scanJoinUrl;
     public Long getGroupId() {
         return groupId;
     }
@@ -40,6 +42,14 @@ public class GroupDetailActionData implements Serializable{
 
     public void setPrivateFlag(Byte privateFlag) {
         this.privateFlag = privateFlag;
+    }
+
+    public String getScanJoinUrl() {
+        return scanJoinUrl;
+    }
+
+    public void setScanJoinUrl(String scanJoinUrl) {
+        this.scanJoinUrl = scanJoinUrl;
     }
 
     @Override

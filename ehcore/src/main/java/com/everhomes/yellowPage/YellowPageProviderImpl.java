@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -9,8 +10,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.yellowPage.YellowPageStatus;
-import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -23,18 +23,20 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.elasticsearch.common.lang3.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -223,23 +225,28 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 	}
 
-
+//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
+//			"#categoryId,#keywords,#condition}", unless="#result == null")
 	@Override
 	public List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords) {
+			Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
- 
-        if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
-        
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
-        
+
+        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%").or(Tables.EH_SERVICE_ALLIANCES.RANGE.
+					eq("all")));
+		}else{
+//        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
+//					and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId)));
+			query.addConditions(conditionOR);
+		}
+
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
             }
         
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
@@ -257,8 +264,67 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         } else {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
 		}
+
+
+        //by dengs,按照defaultorder排序，20170525
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
         query.addLimit(pageSize);
-       
+
+        LOGGER.info(query.toString());
+
+        query.fetch().map((r) -> {
+        	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
+            return null;
+        });
+        
+        if(saList != null && saList.size() > 0) {
+            return saList;
+        }
+        return saList;
+	}
+//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
+//			"#categoryId,#keywords,#organizationId,#organizationType}", unless="#result == null")
+	@Override
+	public List<ServiceAlliances> queryServiceAlliance(
+			CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, String keywords, Long organizationId,String organizationType) {
+		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+ 
+
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%")
+						.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))
+						.and(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")))
+		);
+        
+        if(locator.getAnchor() != null) {
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
+            }
+        
+        query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+        
+        if(!org.springframework.util.StringUtils.isEmpty(keywords)){
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
+        }
+        
+        if(categoryId != null) {
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
+        }
+        
+        if(null!=parentId){
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
+        } else {
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
+		}
+        //by dengs,客户端不能查看displayFlag为 HIDE的服务联盟
+        query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
+        query.addLimit(pageSize);
+
+        LOGGER.info(query.toString());
+
         query.fetch().map((r) -> {
         	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
             return null;
@@ -309,7 +375,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategoriesDao.class));
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
 		category.setId(id);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
@@ -332,12 +398,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceAllianceCategories.class, category.getId());
 	}
 
-
+	@Caching(evict = { @CacheEvict(value="queryServiceAlliance", allEntries=true)})
 	@Override
 	public void createServiceAlliances(ServiceAlliances sa) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAlliances.class));
         sa.setId(id);
+      //设置序号默认是id，by dengs,20170524.
+        sa.setDefaultOrder(id);
         if(sa.getStatus() == null) {
             sa.setStatus(YellowPageStatus.ACTIVE.getCode());    
         }
@@ -348,6 +416,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 
+	@Caching(evict = { @CacheEvict(value="queryServiceAlliance", allEntries=true)})
 	@Override
 	public void updateServiceAlliances(ServiceAlliances sa) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -400,10 +469,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
         
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
-
-    	if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+//
+//    	if (!StringUtils.isEmpty(ownerType) )
+//    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
         //topic
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(0L));
@@ -438,7 +507,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.in(sa.getId()));
         query.fetch().map((EhServiceAllianceAttachmentsRecord record) -> {
-        	 sa.getAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			if(ServiceAllianceAttachmentType.BANNER.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
+				sa.getAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			} else if(ServiceAllianceAttachmentType.FILE_ATTACHMENT.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
+				sa.getFileAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			}
+
              return null;
          });
 		
@@ -461,7 +535,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceCategories> listChildCategories(
-			Integer namespaceId, Long parentId, CategoryAdminStatus status) {
+			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
         
@@ -477,12 +551,24 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(status.getCode()));
 
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        
+        if(ownerId != null && ownerId != 0L)
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+
+    	if (!StringUtils.isEmpty(ownerType) )
+    		condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+
+		if(displayDestination != null && displayDestination.size() > 0) {
+			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
+		}
+
         if(condition != null) {
         	query.addConditions(condition);
         }
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+            LOGGER.debug("Query child categories, sql=" + query.getSQL());
+            LOGGER.debug("Query child categories, bindValues=" + query.getBindValues());
         }
 
         query.fetch().map((EhServiceAllianceCategoriesRecord record) -> {
@@ -506,6 +592,38 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		
 	}
 
+	@Override
+	public void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		serviceAllianceCategories.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
+		dao.insert(serviceAllianceCategories);
+
+	}
+
+	@Override
+	public void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceSkipRule.class));
+		serviceAllianceSkipRule.setId(id);
+		EhServiceAllianceSkipRuleDao dao = new EhServiceAllianceSkipRuleDao(context.configuration());
+		dao.insert(serviceAllianceSkipRule);
+
+	}
+
+	@Override
+	public void deleteServiceAllianceSkipRule(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceAllianceSkipRule.class));
+		EhServiceAllianceSkipRuleDao dao = new EhServiceAllianceSkipRuleDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
+		dao.update(serviceAllianceCategories);
+	}
 
 	@Override
 	public void updateNotifyTarget(ServiceAllianceNotifyTargets target) {
@@ -546,19 +664,20 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceNotifyTargets> listNotifyTargets(
-			String ownerType, Long ownerId, Byte contactType, Long categoryId,
+			Integer namespaceId, Byte contactType, Long categoryId,
 			CrossShardListingLocator locator, int pageSize) {
 		List<ServiceAllianceNotifyTargets> targets = new ArrayList<ServiceAllianceNotifyTargets>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhServiceAllianceNotifyTargetsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS);
  
-        if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
-        
-        if(ownerId != null)
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
-        
+//        if (!StringUtils.isEmpty(ownerType) )
+//    		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
+//        
+//        if(ownerId != null)
+//        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
+//        
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.NAMESPACE_ID.eq(namespaceId));
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.gt(locator.getAnchor()));
             
@@ -603,7 +722,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createServiceAllianceRequests(ServiceAllianceRequests request) {
+	public Long createServiceAllianceRequests(ServiceAllianceRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceRequests.class));
 		request.setId(id);
@@ -611,7 +730,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
         dao.insert(request);
-		
+		return id;
 	}
 
 
@@ -660,7 +779,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createSettleRequests(SettleRequests request) {
+	public Long createSettleRequests(SettleRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSettleRequests.class));
 		request.setId(id);
@@ -668,6 +787,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhSettleRequestsDao dao = new EhSettleRequestsDao(context.configuration());
         dao.insert(request);
+        return id;
 		
 	}
 
@@ -718,7 +838,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createReservationRequests(ReservationRequests request) {
+	public Long createReservationRequests(ReservationRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceReservationRequests.class));
 		request.setId(id);
@@ -726,6 +846,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
         dao.insert(request);
+        return id;
 	}
 
 
@@ -770,5 +891,340 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 
         return requests;
+	}
+
+
+	@Override
+	public Long createApartmentRequests(ServiceAllianceApartmentRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceApartmentRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceApartmentRequestsDao dao = new EhServiceAllianceApartmentRequestsDao(context.configuration());
+        dao.insert(request);
+        return id;
+	}
+
+
+	@Override
+	public ServiceAllianceApartmentRequests findApartmentRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceApartmentRequestsDao dao = new EhServiceAllianceApartmentRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceAllianceApartmentRequests.class);
+	}
+
+
+	@Override
+	public List<ServiceAllianceApartmentRequests> listApartmentRequests(
+			CrossShardListingLocator locator, int pageSize) {
+
+		List<ServiceAllianceApartmentRequests> requests = new ArrayList<ServiceAllianceApartmentRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceApartmentRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceApartmentRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ServiceAllianceApartmentRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
+	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId) {
+
+		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.NAMESPACE_ID.eq(namespaceId));
+
+		List<ServiceAllianceSkipRule> result = new ArrayList<ServiceAllianceSkipRule>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ServiceAllianceSkipRule.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+		return getCateorySkipRule(categoryId, null);
+	}
+
+	@Override
+	public Long createInvestRequests(ServiceAllianceInvestRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceInvestRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceInvestRequestsDao dao = new EhServiceAllianceInvestRequestsDao(context.configuration());
+		dao.insert(request);
+		return id;
+	}
+
+	@Override
+	public ServiceAllianceInvestRequests findInvestRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceInvestRequestsDao dao = new EhServiceAllianceInvestRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceInvestRequests.class);
+	}
+
+	@Override
+	public Long createGolfRequest(ServiceAllianceGolfRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceGolfRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		dao.insert(request);
+		return id;
+	}
+
+	@Override
+	public ServiceAllianceGolfRequest findGolfRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceGolfRequest.class);
+	}
+
+	@Override
+	public Long createGymRequest(ServiceAllianceGymRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceGymRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceGymRequestsDao dao = new EhServiceAllianceGymRequestsDao(context.configuration());
+		dao.insert(request);
+		return id;
+	}
+
+	@Override
+	public ServiceAllianceGymRequest findGymRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceGymRequestsDao dao = new EhServiceAllianceGymRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceGymRequest.class);
+	}
+
+	@Override
+	public Long createServerRequest(ServiceAllianceServerRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceServerRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceServerRequestsDao dao = new EhServiceAllianceServerRequestsDao(context.configuration());
+		dao.insert(request);
+		return id;
+	}
+
+	@Override
+	public ServiceAllianceServerRequest findServerRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceServerRequestsDao dao = new EhServiceAllianceServerRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceServerRequest.class);
+	}
+
+	@Override
+	public List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize) {
+		List<ServiceAllianceInvestRequests> requests = new ArrayList<ServiceAllianceInvestRequests>();
+
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceInvestRequests.class);
+			ShardIterator shardIterator = new ShardIterator(accessSpec);
+			locator.setShardIterator(shardIterator);
+		}
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+			SelectQuery<EhServiceAllianceInvestRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS);
+			if(locator.getAnchor() != null)
+				query.addConditions(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.ID.gt(locator.getAnchor()));
+
+			query.addLimit(pageSize - requests.size());
+
+			query.fetch().map((r) -> {
+
+				requests.add(ConvertHelper.convert(r, ServiceAllianceInvestRequests.class));
+				return null;
+			});
+
+			if (requests.size() >= pageSize) {
+				locator.setAnchor(requests.get(requests.size() - 1).getId());
+				return AfterAction.done;
+			} else {
+				locator.setAnchor(null);
+			}
+			return AfterAction.next;
+		});
+
+		return requests;
+	}
+
+	@Override
+	public List<JumpModuleDTO> jumpModules(Integer namespaceId) {
+		List<JumpModuleDTO> modules = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceJumpModuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE);
+		Condition condition = (Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.NAMESPACE_ID.eq(namespaceId).and(
+				Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.ne(SignalEnum.DELETE.getCode()))).
+				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
+		);
+		query.addConditions(condition);
+
+
+		query.fetch().map((r) -> {
+			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));
+			return null;
+		});
+
+		return modules;
+	}
+
+	@Override
+	public List<ServiceAllianceAttachment> listAttachments(
+			CrossShardListingLocator locator, int count, Long ownerId) {
+		List<ServiceAllianceAttachment> attachments = new ArrayList<ServiceAllianceAttachment>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivityAttachments.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.gt(locator.getAnchor()));
+
+            query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.eq(ownerId));
+            query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ATTACHMENT_TYPE.eq(ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode()));
+
+            query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.asc());
+            query.addLimit(count - attachments.size());
+
+            query.fetch().map((r) -> {
+                attachments.add(ConvertHelper.convert(r, ServiceAllianceAttachment.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return attachments;
+	}
+
+
+	/**
+	 * by dengs, 20170525，查询在idList中的服务联盟
+	 */
+	@Override
+	public List<ServiceAlliances> listServiceAllianceSortOrders(List<Long> idList) {
+		Long timestart = System.currentTimeMillis();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.in(idList));
+		LOGGER.debug("Query organization, sql={}, values ={}",query.getSQL(),query.getBindValues());
+		List<ServiceAlliances>  serviceAllianceList = query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+		Long timeend = System.currentTimeMillis();
+		LOGGER.debug("listServiceAllianceSortOrders , time = {}ms", timeend-timestart);
+		return serviceAllianceList;
+	}
+
+
+	/**
+	 * 更新defaultorder
+	 */
+	@Override
+	public void updateOrderServiceAllianceDefaultOrder(List<ServiceAlliances> ServiceAllianceList) {
+		List<Query> queryList = new ArrayList<Query>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		for (ServiceAlliances serviceAlliances : ServiceAllianceList) {
+			Query query = context.update(Tables.EH_SERVICE_ALLIANCES)
+					.set(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER, serviceAlliances.getDefaultOrder())
+					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(serviceAlliances.getId()));
+			queryList.add(query);
+			LOGGER.debug("update serviceAlliance default order, sql = {}, values = {}",query.getSQL(),query.getBindValues());
+		}
+		Long timestart = System.currentTimeMillis();
+		dbProvider.execute(status->{
+			return context.batch(queryList).execute();
+		});
+		Long timeend = System.currentTimeMillis();
+		LOGGER.debug("updateOrderServiceAllianceDefaultOrder , time = {}ms", timeend-timestart);
+	}
+
+
+	@Override
+	public void updateServiceAlliancesDisplayFlag(Long id, Byte displayFlag) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateConditionStep<EhServiceAlliancesRecord> updatesql = context.update(Tables.EH_SERVICE_ALLIANCES).set(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG, displayFlag).where(Tables.EH_SERVICE_ALLIANCES.ID.eq(id));
+		LOGGER.debug("update showFlag, sql = {}, values = {}",updatesql.getSQL(),updatesql.getBindValues());
+		updatesql.execute();
+	}
+
+
+	@Override
+	public ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAllianceCategories.class));
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != EntryId)
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.eq(EntryId));
+        
+        return ConvertHelper.convert(query.fetchOne(), ServiceAllianceCategories.class);
+	}
+
+
+	@Override
+	public List<Integer> listAscEntryIds(int namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAllianceCategories.class));
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.isNotNull());
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.asc());
+        
+        return query.fetch().map(r->r.getEntryId());
+	
+	}
+	
+	@Override
+	public void updateEntryIdNullByNamespaceId(Integer namespaceId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+		.update(Tables.EH_SERVICE_ALLIANCE_CATEGORIES)
+		.set(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID,(Integer)null)
+		.where(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L))
+		.execute();
 	}
 }

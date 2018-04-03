@@ -6,67 +6,103 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>plateNumber: 车牌号</li>
+ * <li>payerEnterpriseId: 付款人所在公司ID</li>
+ * <li>orderToken: 临时费用订单token，来自第三方</li>
+ * <li>price: 金额</li>
+ * <li>clientAppName: clientAppName</li>
+ * </ul>
+ */
 public class CreateParkingTempOrderCommand {
 	@NotNull
-    private String ownerType;
+	private String ownerType;
 	@NotNull
-    private Long ownerId;
+	private Long ownerId;
 	@NotNull
-    private Long parkingLotId;
+	private Long parkingLotId;
 	@NotNull
-    private String plateNumber;
+	private String plateNumber;
 	@NotNull
-    private Long payerEnterpriseId;
+	private Long payerEnterpriseId;
 	@NotNull
-    private String orderToken;
+	private String orderToken;
 	@NotNull
-    private BigDecimal price;
-	
+	private BigDecimal price;
+
+	private String clientAppName;
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
+
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
+
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+
 	public Long getParkingLotId() {
 		return parkingLotId;
 	}
+
 	public void setParkingLotId(Long parkingLotId) {
 		this.parkingLotId = parkingLotId;
 	}
+
 	public String getPlateNumber() {
 		return plateNumber;
 	}
+
 	public void setPlateNumber(String plateNumber) {
 		this.plateNumber = plateNumber;
 	}
+
 	public Long getPayerEnterpriseId() {
 		return payerEnterpriseId;
 	}
+
 	public void setPayerEnterpriseId(Long payerEnterpriseId) {
 		this.payerEnterpriseId = payerEnterpriseId;
 	}
+
 	public String getOrderToken() {
 		return orderToken;
 	}
+
 	public void setOrderToken(String orderToken) {
 		this.orderToken = orderToken;
 	}
+
 	public BigDecimal getPrice() {
 		return price;
 	}
+
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-	
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

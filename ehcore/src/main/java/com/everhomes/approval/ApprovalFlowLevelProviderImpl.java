@@ -177,4 +177,11 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public void deleteApprovalLevels(List<Long> flowIds) {
+		getReadWriteContext().delete(Tables.EH_APPROVAL_FLOW_LEVELS)
+		.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.in(flowIds)) 
+		.execute();
+	}
 }

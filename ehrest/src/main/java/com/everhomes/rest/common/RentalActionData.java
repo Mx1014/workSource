@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>resourceTypeId: 资源类型的id</li>
  * <li>pageType: 预定展示0代表默认页面DefaultType, 1代表定制页面CustomType</li>
  * <li>communityFilterFlag: 是否有园区筛选器 0-没有 1-有</li>
+ * <li>payMode: 支付模式 (工作流模式) {@link com.everhomes.rest.rentalv2.admin.PayMode}</li>
  * </ul>
  */
 public class RentalActionData implements Serializable  {
@@ -21,6 +22,7 @@ public class RentalActionData implements Serializable  {
 	private Long resourceTypeId;
 	private Byte pageType;
 	private Byte communityFilterFlag; 
+	private Byte payMode;
 	
 	
     public Long getResourceTypeId() {
@@ -62,5 +64,17 @@ public class RentalActionData implements Serializable  {
 
 	public void setCommunityFilterFlag(Byte communityFilterFlag) {
 		this.communityFilterFlag = communityFilterFlag;
+	}
+
+
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
 	}
 }

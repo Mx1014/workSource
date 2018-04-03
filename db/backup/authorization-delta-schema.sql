@@ -1,0 +1,1 @@
+ALTER TABLE `eh_service_module_assignments` ADD COLUMN `assignment_type` TINYINT NOT NULL DEFAULT '0';

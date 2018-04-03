@@ -1,38 +1,8 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USERS;
-import static com.everhomes.server.schema.Tables.EH_USER_COMMUNITIES;
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.aclink.AclinkUser;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -44,54 +14,55 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhUserCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhUserGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserLikesDao;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
 import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
 import com.everhomes.server.schema.tables.pojos.EhUserLikes;
+import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
-import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.util.MapReduceCallback;
+import com.everhomes.util.RecordHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.*;
 
 import static com.everhomes.server.schema.Tables.*;
 
@@ -159,6 +130,7 @@ public class UserProviderImpl implements UserProvider {
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.setUpdateTime(user.getCreateTime());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -175,6 +147,7 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
+        user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
@@ -286,7 +259,22 @@ public class UserProviderImpl implements UserProvider {
             });
         return identifiers;
     }
-    
+
+    @Override
+    public UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
+        List<UserIdentifier> identifiers = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(userId))
+                .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                .fetch().map((Record record) -> {
+                    return ConvertHelper.convert(record, UserIdentifier.class);
+                });
+        if(identifiers == null || identifiers.size() == 0) {
+            return null;
+        }
+        return identifiers.get(0);
+    }
+
     @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
     @Override
     public void createIdentifier(UserIdentifier userIdentifier) {
@@ -407,7 +395,27 @@ public class UserProviderImpl implements UserProvider {
         
         return result;
     }
-    
+
+    @Override
+    public List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId, List<String> identifiers) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.in(identifiers))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        return result;
+    }
+
     @Override
     public UserIdentifier findClaimedIdentifierByToken(String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();
@@ -460,7 +468,44 @@ public class UserProviderImpl implements UserProvider {
         
         return null;
     }
-    
+
+    @Override
+    public UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.OWNER_UID.ne(userId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+        if(result.size() > 0){
+            return result.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType){
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_USERS)
+                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                            .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+
+        return count[0];
+    }
     @Cacheable(value = "UserIdentifier-OwnerAndType", key="{#ownerUid, #identifierType}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerUid, byte identifierType) {
@@ -470,6 +515,17 @@ public class UserProviderImpl implements UserProvider {
             .and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(identifierType))
             .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
             .fetchAny();
+        return ConvertHelper.convert(record, UserIdentifier.class);
+    }
+
+    @Override
+    public UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
+        Record record = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+                .and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(identifierType))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(claimStatus))
+                .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
     }
     
@@ -839,7 +895,13 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		
+		return listUserByKeyword(null, null, null, keyword, null, namespaceId, locator, pageSize);
+	}
+	
+	@Override
+	public List<User> listUserByKeyword(Integer isAuth, Byte gender, Long organizationId, String keyword, Byte executiveFlag,
+			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
+
 		List<User> list = new ArrayList<User>();
 		
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
@@ -849,13 +911,55 @@ public class UserProviderImpl implements UserProvider {
 				 cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
 				 cond = cond.and(cond1);
 			}
+			if(executiveFlag != null){ 
+				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
+			}
+
+            if(gender != null){
+                cond = cond.and(Tables.EH_USERS.GENDER.eq(gender));
+            }
 			 
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		    }
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
-            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
-            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+
+            SelectOnConditionStep query = context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+            SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+            byte orgQueryFlag = 0;
+
+            //查询认证用户，用左连接
+            if (null != isAuth && 0 != isAuth) {
+                if (1 == isAuth) {
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                }else if (2 == isAuth){
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode())
+                            .or(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())));
+
+                }
+                orgQueryFlag = 1;
+            }
+
+            //公司，用自然连接
+            if (null != organizationId) {
+
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+                orgQueryFlag = 2;
+
+		    }
+
+            if (1 == orgQueryFlag) {
+                query.leftOuterJoin(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+            }
+		    if (2 == orgQueryFlag) {
+                query.join(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+
+            }
+
+            query.where(cond).groupBy(Tables.EH_USERS.ID).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);
@@ -866,6 +970,9 @@ public class UserProviderImpl implements UserProvider {
             	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
             	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
             	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	user.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
+            	user.setPositionTag(r.getValue(Tables.EH_USERS.POSITION_TAG));
+            	user.setIdentityNumberTag(r.getValue(Tables.EH_USERS.IDENTITY_NUMBER_TAG));
             	list.add(user);
             	return null;
             });
@@ -881,6 +988,7 @@ public class UserProviderImpl implements UserProvider {
 		return list;
 	}
 	
+	
 	   @Override
 	    public List<User> listUserByNamespace(String keyword, Integer namespaceId,
 	            CrossShardListingLocator locator, int pageSize) {
@@ -890,7 +998,8 @@ public class UserProviderImpl implements UserProvider {
 	        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
 	            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
 	            if(!StringUtils.isEmpty(keyword)){
-	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword + "%");
+	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
+                    cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword + "%"));
 	                 cond = cond.and(cond1);
 	            }
 	             
@@ -932,7 +1041,7 @@ public class UserProviderImpl implements UserProvider {
     public List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize) {
 	    Integer namespaceId = cmd.getNamespaceId();
 	    Long organizationId = cmd.getOrganizationId();
-	    Long buildingId = cmd.getBuildingId();
+//	    Long buildingId = cmd.getBuildingId();
 	    String buildingName =  cmd.getBuildingName();
 	    Byte isAuth = cmd.getIsAuth();
 	    String keyword = cmd.getKeyword();
@@ -993,11 +1102,11 @@ public class UserProviderImpl implements UserProvider {
                     cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
                     }
                 
-                if(buildingId != null) {
-                    useAddress = true;
-                    useMembers = true;
-                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
-                    }
+//                if(buildingId != null) {
+//                    useAddress = true;
+//                    useMembers = true;
+//                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
+//                    }
                 
                 if(buildingName != null && !buildingName.isEmpty()) {
                     useAddress = true;
@@ -1186,7 +1295,38 @@ public class UserProviderImpl implements UserProvider {
 		return list;
 	}
 
-	@Override
+//    @Override
+//    public int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType){
+//        final Integer[] count = new Integer[1];
+//        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+//                (DSLContext context, Object reducingContext)-> {
+//                    count[0] = context.selectCount().from(Tables.EH_USERS)
+//                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+//                            .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType))
+//                            .fetchOneInto(Integer.class);
+//                    return true;
+//        });
+//
+//        return count[0];
+//    }
+
+    @Override
+    public int countUserByNamespaceIdAndGender(Integer namespaceId, Byte gender){
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_USERS)
+                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                            .and(Tables.EH_USERS.GENDER.eq(gender))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+
+        return count[0];
+    }
+
+
+    @Override
 	public int countUserByNamespaceId(Integer namespaceId, Boolean isAuth) {
 		
 		final Integer[] count = new Integer[1];
@@ -1334,5 +1474,249 @@ public class UserProviderImpl implements UserProvider {
         });
         
         return list;
+    }
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.ID.gt(pageAnchor))
+			.and(Tables.EH_USERS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.UPDATE_TIME.asc(), Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     * 随便找一个用户所在的组织
+     */
+	@Override
+	public Organization findAnyUserRelatedOrganization(Long userId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select(Tables.EH_ORGANIZATIONS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_MEMBERS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+			.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATIONS.LEVEL.eq(1))
+			.fetchAny();
+		
+		if (record != null) {
+			return RecordHelper.convert(record, Organization.class);
+		}
+		
+		return null;
+	}
+
+    @Override
+    public List<User> listUserByNickName(String keyword) {
+        long startTime = System.currentTimeMillis();
+        List<User> list = new ArrayList<User>();
+        if(keyword == null)
+            return null;
+
+        String str = "%"+keyword+"%";
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+                    .where(Tables.EH_USERS.NICK_NAME.like(str))
+                    .fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                list.add(user);
+                return null;
+            });
+            return true;
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.debug("listUserByNickName size = " + list.size() + ", elapse=" + (endTime - startTime));
+        return list;
+    }
+
+    @Override
+    public List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+
+        if(groupDiscriminator != null) {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(groupDiscriminator))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        } else {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        }
+
+    }
+
+    @Override
+    public UserNotificationSetting findUserNotificationSetting(String ownerType, Long ownerId, String targetType, Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_USER_NOTIFICATION_SETTINGS)
+                .where(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_ID.eq(targetId))
+                .fetchAnyInto(UserNotificationSetting.class);
+    }
+
+    @Override
+    public void updateUserNotificationSetting(UserNotificationSetting setting) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.update(setting);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserNotificationSettings.class, setting.getId());
+    }
+
+    @Override
+    public long createUserNotificationSetting(UserNotificationSetting setting) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserNotificationSettings.class));
+        setting.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.insert(setting);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserNotificationSettings.class, id);
+        return id;
+    }
+
+    @Override
+    public List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<TargetDTO> list = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhUsers r = Tables.EH_USERS.as("r");
+        com.everhomes.server.schema.tables.EhUserIdentifiers o = Tables.EH_USER_IDENTIFIERS.as("o");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID);
+        query.addSelect(r.NICK_NAME);
+        query.addSelect(o.IDENTIFIER_TOKEN);
+        query.addFrom(r);
+        query.addFrom(o);
+        query.addConditions(r.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        if(tel!=null){
+            query.addConditions(o.IDENTIFIER_TOKEN.eq(tel));
+        }
+        if(targetName!=null){
+            query.addConditions(r.NICK_NAME.eq(targetName));
+        }
+        query.addConditions(r.ID.eq(o.OWNER_UID));
+        if(ids.size() == 1){
+            query.addConditions(r.ADDRESS_ID.eq(ids.get(0)));
+        }
+        if(ids.size() > 1){
+            query.addConditions(r.ADDRESS_ID.in(ids));
+        }
+        query.fetch()
+                .map(f -> {
+                    TargetDTO dto = new TargetDTO();
+                    dto.setTargetId(f.getValue(r.ID));
+                    dto.setTargetName(f.getValue(r.NICK_NAME));
+                    dto.setTargetType("eh_user");
+                    dto.setUserIdentifier(f.getValue(o.IDENTIFIER_TOKEN));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public TargetDTO findUserByToken(String tel,Integer namespaceId) {
+        TargetDTO dto = new TargetDTO();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        com.everhomes.server.schema.tables.EhUsers t1 = Tables.EH_USERS.as("t1");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.OWNER_UID);
+        query.addFrom(t);
+        query.addConditions(t.IDENTIFIER_TOKEN.eq(tel));
+        query.addConditions(t.CLAIM_STATUS.eq((byte)3));
+        query.addConditions(t.IDENTIFIER_TYPE.eq((byte)0));
+        if(namespaceId!=null) query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        Long userId = query.fetchOne(0,Long.class);
+        if(userId==null){
+            return null;
+        }
+        SelectQuery<Record> queryUser = context.selectQuery();
+        queryUser.addSelect(t1.NICK_NAME);
+        queryUser.addFrom(t1);
+        queryUser.addConditions(t1.ID.eq(userId));
+        String nameFound = queryUser.fetchOne(0, String.class);
+        if(nameFound != null){
+            dto.setUserIdentifier(tel);
+            dto.setTargetId(userId);
+            dto.setTargetType(AssetPaymentStrings.EH_USER);
+            dto.setTargetName(nameFound);
+            return dto;
+        }
+        return null;
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Cacheable(value = "checkCacheStatus", key="'cache.heartbeat'", unless="#result == null")
+    @Override
+    public String checkCacheStatus() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Caching(evict={@CacheEvict(value="checkCacheStatus", key="'cache.heartbeat'")})
+    @Override
+    public void updateCacheStatus() {
+        // 只需要去掉缓存，使可缓存可测
+    }
+
+    @Override
+    public String findMobileByUid(Long contactId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String s = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(contactId))
+                .and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte) 0))
+                .fetchOne(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+        return s;
     }
 }

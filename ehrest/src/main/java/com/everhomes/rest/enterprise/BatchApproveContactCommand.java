@@ -6,36 +6,25 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
 * <ul>  
-* <li>enterpriseId：企业Id</li>
-* <li>userIds: 用户id list</li> 
+* <li>approveInfo：每一个审批的对象{@link com.everhomes.rest.enterprise.ApproveContactCommand}</li> 
 * </ul>
 */
-public class BatchApproveContactCommand {
-    private Long enterpriseId;
-    
-    @ItemType(Long.class)
-    private List<Long> userIds;
-
-    public Long getEnterpriseId() {
-        return enterpriseId;
-    }
-
-    public void setEnterpriseId(Long enterpriseId) {
-        this.enterpriseId = enterpriseId;
-    }
+public class BatchApproveContactCommand { 
+    @ItemType(ApproveContactCommand.class)
+    private List<ApproveContactCommand> approveInfo;
  
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-	public List<Long> getUserIds() {
-		return userIds;
+	public List<ApproveContactCommand> getApproveInfo() {
+		return approveInfo;
 	}
 
-	public void setUserIds(List<Long> userIds) {
-		this.userIds = userIds;
+	public void setApproveInfo(List<ApproveContactCommand> approveInfo) {
+		this.approveInfo = approveInfo;
 	}
+ 
 
 }

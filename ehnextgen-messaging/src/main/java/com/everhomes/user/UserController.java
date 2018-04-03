@@ -1,30 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -36,6 +12,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -44,61 +21,51 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.oauth2.OAuth2Service;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
-import com.everhomes.rest.user.AppIdStatusCommand;
-import com.everhomes.rest.user.AppIdStatusResponse;
-import com.everhomes.rest.user.AppServiceAccessCommand;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CheckVerifyCodeCommand;
-import com.everhomes.rest.user.DeleteUserIdentifierCommand;
-import com.everhomes.rest.user.FetchMessageCommandResponse;
-import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
-import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetAppAgreementCommand;
-import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.LogonByTokenCommand;
-import com.everhomes.rest.user.LogonCommand;
-import com.everhomes.rest.user.LogonCommandResponse;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.ResendVerificationCodeCommand;
-import com.everhomes.rest.user.ResetPasswordCommand;
-import com.everhomes.rest.user.SendMessageCommand;
-import com.everhomes.rest.user.SetCurrentCommunityCommand;
-import com.everhomes.rest.user.SetPasswordCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.VerifyAndResetPasswordCommand;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * User management API controller
@@ -278,6 +245,48 @@ public class UserController extends ControllerBase {
 		SignupToken token = userService.signup(cmd, request);
 		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
 	}
+	
+    /**
+     * <b>URL: /user/signupByAppKey</b>
+     * <p>注册，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 注册临时token
+     */
+    @RequestMapping("signupByAppKey")
+    @RestReturn(String.class)
+    public RestResponse signupByAppKey(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+        // 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+        // 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+        // by lqs 20170714
+        SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+        newCmd.setToken(cmd.getUserIdentifier());
+        
+        SignupToken token = userService.signup(newCmd, request);
+        return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+    }
+
+	@RequestMapping("signupForCodeRequest")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse signupForCodeRequest(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+		// 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+		// 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+		// by lqs 20170714
+
+
+		// 敢哥说开一个口给创业场用
+		if(cmd.getNamespaceId().intValue() != 999964){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					100000000, "Forbidden");
+		}
+		SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+		newCmd.setToken(cmd.getUserIdentifier());
+
+		SignupToken token = userService.signup(newCmd, request);
+		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+	}
 
 	/**
 	 * <b>URL: /user/resendVerificationCode</b>
@@ -287,7 +296,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping("resendVerificationCode")
 	@RequireAuthentication(false)
 	@RestReturn(String.class)
-	public RestResponse resendVerificationCode(@Valid ResendVerificationCodeCommand cmd) {
+	public RestResponse resendVerificationCode(@Valid ResendVerificationCodeCommand cmd, HttpServletRequest request) {
 		SignupToken token = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
 		if(token == null) {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
@@ -295,9 +304,32 @@ public class UserController extends ControllerBase {
 		}
 
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode());
+		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/resendVerificationCodeByAppKey</b>
+     * <p>重新发送验证码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 如果正常则返回OK，错误则返回错误信息
+     */
+    @RequestMapping("resendVerificationCodeByAppKey")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByAppKey(@Valid ResendVerificationCodeCommand cmd, HttpServletRequest request) {
+        SignupToken token = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
+        if(token == null) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+        }
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
+        return new RestResponse("OK");
+    }
 
 	/**
 	 * <b>URL: /user/verifyAndLogon</b>
@@ -367,10 +399,11 @@ public class UserController extends ControllerBase {
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse logon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 	    long startTime = System.currentTimeMillis();
-	    
 	    long loginStartTime = System.currentTimeMillis();
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
+                regionCode, cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 		long loginEndTime = System.currentTimeMillis();
 		
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
@@ -543,6 +576,43 @@ public class UserController extends ControllerBase {
 	    return new RestResponse(community);
 	}
 
+    /**
+     * <b>URL: /user/updateUserNotificationSetting</b>
+     * <p>设置会话推送免打扰</p>
+     */
+    @RequestMapping("updateUserNotificationSetting")
+    @RestReturn(UserNotificationSettingDTO.class)
+    public RestResponse updateUserNotificationSetting(@Valid UpdateUserNotificationSettingCommand cmd) {
+        UserNotificationSettingDTO dto = this.userService.updateUserNotificationSetting(cmd);
+        return new RestResponse(dto);
+    }
+
+    /**
+     * <b>URL: /user/getUserNotificationSetting</b>
+     * <p>获取会话推送免打扰设置</p>
+     */
+    @RequestMapping("getUserNotificationSetting")
+    @RestReturn(UserNotificationSettingDTO.class)
+    public RestResponse getUserNotificationSetting(@Valid GetUserNotificationSettingCommand cmd) {
+        UserNotificationSettingDTO dto = this.userService.getUserNotificationSetting(cmd);
+        return new RestResponse(dto);
+    }
+
+    /**
+     * <b>URL: /user/getMessageSessionInfo</b>
+     * <p>获取消息会话所需的信息</p>
+     */
+    @RequestMapping("getMessageSessionInfo")
+    @RestReturn(MessageSessionInfoDTO.class)
+    public RestResponse getMessageSessionInfo(@Valid GetMessageSessionInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        MessageSessionInfoDTO dto = this.userService.getMessageSessionInfo(cmd);
+        String eTag = DigestUtils.md5Hex(dto.toString().getBytes(Charset.forName("UTF-8")));
+        if(!EtagHelper.checkHeaderEtagOnly(30, eTag, request, response)) {
+            return null;
+        }
+        return new RestResponse(dto);
+    }
+
 	/**
 	 * <b>URL: /user/sendMessage</b>
 	 * <p>发送消息</p>
@@ -553,6 +623,9 @@ public class UserController extends ControllerBase {
 		if(cmd.getChannels() == null || cmd.getChannels().size() == 0) {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_MISSING_MESSAGE_CHANNEL, "Missing message target channel");
 		}
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(cmd.getSenderUid(), "", 0L, PrivilegeConstants.BLACKLIST_SEND_MESSAGE);
 
 		MessageChannel mainChannel = cmd.getChannels().get(0);
 		MessageDTO message = new MessageDTO();
@@ -582,7 +655,7 @@ public class UserController extends ControllerBase {
 		long senderBoxSequence = this.userService.getNextStoreSequence(UserContext.current().getLogin(),
 				UserContext.current().getLogin().getNamespaceId(), message.getAppId());
 
-		cmd.getChannels().stream().forEach((channel) -> {
+		cmd.getChannels().forEach((channel) -> {
 			messagingService.routeMessage(UserContext.current().getLogin(),
 					cmd.getAppId() != null ? cmd.getAppId() : App.APPID_MESSAGING,
 							channel.getChannelType(), channel.getChannelToken(), message,
@@ -690,19 +763,85 @@ public class UserController extends ControllerBase {
 	@RequestMapping("resendVerificationCodeByIdentifier")
 	@RequireAuthentication(false)
 	@RestReturn(String.class)
-	public RestResponse resendByVerifyCodeByIdentifier(@Valid ResendVerificationCodeByIdentifierCommand cmd){
+	public RestResponse resendByVerifyCodeByIdentifier(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
 		assert StringUtils.isNotEmpty(cmd.getIdentifier());
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
-		if(userIdentifier==null){
-			LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
-		}
-		userIdentifier.setRegionCode(cmd.getRegionCode());
-		userService.resendVerficationCode(userIdentifier);
+
+		userService.resendVerficationCode(cmd, request);
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/resendVerificationCodeByIdentifierAndAppKey</b>
+     * <p>忘记密码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return OK
+     */
+    @RequestMapping("resendVerificationCodeByIdentifierAndAppKey")
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByIdentifierAndAppKey(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
+        assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+        userService.resendVerficationCode(cmd, request);
+        return new RestResponse("OK");
+    }
+
+	/**
+	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
+	 * <p>发送修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("sendVerificationCodeByResetIdentifier")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByResetIdentifier(@Valid SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request){
+		userService.sendVerificationCodeByResetIdentifier(cmd, request);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/verifyResetIdentifierCode</b>
+	 * <p>核实修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("verifyResetIdentifierCode")
+	@RestReturn(String.class)
+	public RestResponse verifyResetIdentifierCode(@Valid VerifyResetIdentifierCodeCommand cmd){
+		userService.verifyResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/listResetIdentifierCode</b>
+	 * <p>获取修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("listResetIdentifierCode")
+	@RestReturn(value = UserIdentifierLogDTO.class)
+	public RestResponse listResetIdentifierCode(@Valid ListResetIdentifierCodeCommand cmd){
+		UserIdentifierLogDTO log = userService.listResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse(log);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/createResetIdentifierAppeal</b>
+	 * <p>申诉修改手机号</p>
+	 */
+	@RequestMapping("createResetIdentifierAppeal")
+	@RestReturn(UserAppealLogDTO.class)
+	public RestResponse createResetIdentifierAppeal(@Valid CreateResetIdentifierAppealCommand cmd){
+        UserAppealLogDTO dto = userService.createResetIdentifierAppeal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /user/verfiyAndReset</b>
@@ -751,18 +890,22 @@ public class UserController extends ControllerBase {
 		    return response;
 		}
 
-		for(Long appId : cmd.getAppIds()) {
-			FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
-			messageCmd.setAppId(appId);
-			messageCmd.setAnchor(0l);
-			messageCmd.setCount(1);
-			messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-			messageCmd.setRemoveOld((byte)0);
-			FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
+		try {
+			for(Long appId : cmd.getAppIds()) {
+				FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
+				messageCmd.setAppId(appId);
+				messageCmd.setAnchor(0l);
+				messageCmd.setCount(1);
+				messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+				messageCmd.setRemoveOld((byte)0);
+				FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
 
-			if(resp.getMessages().size() > 0) {
-				cmdResponse.getAppIds().add(appId);
-			}
+				if(resp.getMessages().size() > 0) {
+					cmdResponse.getAppIds().add(appId);
+				}
+			}			
+		} catch(Exception ex) {
+			LOGGER.error("getAppIds error", ex);
 		}
 
 		return response;
@@ -777,6 +920,7 @@ public class UserController extends ControllerBase {
 	public RestResponse getFamilyMemberInfo(GetFamilyMemberInfoCommand cmd){
 		return new RestResponse(userService.getUserInfo(cmd.getUid()));
 	}
+
 	/**
 	 * 查询个人简介
 	 * 返回值有：
@@ -809,6 +953,11 @@ public class UserController extends ControllerBase {
 	public RestResponse oauth2Authorize(@Valid AuthorizationCommand cmd) throws URISyntaxException {
 		User user = UserContext.current().getUser();
 
+		if(cmd.getclient_id() == null) {
+            throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
+                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "OAuth2 client id is null");		    
+		}
+		
 		// double check in confirmation call to protect against tampering in confirmation callback
 		App app = this.appProvider.findAppByKey(cmd.getclient_id());
 		if(app == null) {
@@ -925,8 +1074,10 @@ public class UserController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse adminLogon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        UserLogin login = this.userService.logon(namespaceId, regionCode, cmd.getUserIdentifier(),
+                cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(login.getUserId(), 0);
@@ -967,7 +1118,7 @@ public class UserController extends ControllerBase {
 
 		//TODO use uri parser to do better hear.
 		String uri = cmd.getUri();
-		int i = uri.indexOf("#");
+		int i =  uri.indexOf("#");
 		if(i > 0) {
 			uri = uri.substring(0, i);
 		}
@@ -1160,4 +1311,210 @@ public class UserController extends ControllerBase {
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
 	}
+
+	/**
+	 * <b>URL: /user/searchUsers</b>
+	 * <p>搜索用户</p>
+	 */
+	@RequestMapping(value = "searchUsers")
+	@RestReturn(value = SearchUsersResponse.class)
+	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
+		RestResponse resp = new RestResponse(userService.searchUsers(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/findTargetByNameAndAddress</b>
+	 * <p>根据个人用户电话，客户名称，合同号，来确认唯一用户，若无法定位到改域空间下指定园区的唯一用户，则返回null</p>
+	 */
+	@RequestMapping(value = "findTargetByNameAndAddress")
+	@RestReturn(value = TargetDTO.class)
+	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getNamespaceId()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+/**
+	 * <b>URL: /user/verificationCodeForBindPhone</b>
+	 * <p>发送验证码</p>
+	 */
+	@RequestMapping("verificationCodeForBindPhone")
+	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)
+	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
+		VerificationCodeForBindPhoneResponse response = userService.verificationCodeForBindPhone(cmd);
+		RestResponse resp = new RestResponse(response);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/bindPhone</b>
+	 * <p>验证并登录</p>
+	 * @return
+	 */
+	@RequestMapping("bindPhone")
+	@RestReturn(String.class)
+	public RestResponse bindPhone(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhone(cmd);
+		if(login != null){
+
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		}
+
+
+//		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
+//		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+//		cmdResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
+	 * <p>校验验证码并重置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
+		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/checkUserTemporaryToken</b>
+	 * 检验用户临时token，标准是：1、是本系统加密的token，2、token未过期
+	 * 成功会返回改token内容
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkUserTemporaryToken")
+	@RequireAuthentication(false)
+	@RestReturn(UserTemporaryTokenDTO.class)
+	public RestResponse checkUserTemporaryToken(@Valid CheckUserTemporaryTokenCommand cmd) {
+		UserTemporaryTokenDTO token =  userService.checkUserTemporaryToken(cmd);
+		RestResponse resp = new RestResponse(token);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+	}
+	
+	/**
+     * <b>URL: /user/systemInfo</b>
+     * <p>SystemInfo</p>
+     * @return {@link SystemInfoResponse}
+     */
+    @RequestMapping("systemInfo")
+    @RestReturn(SystemInfoResponse.class)
+    public RestResponse systemInfo(@Valid SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        SystemInfoResponse obj = userService.updateUserBySystemInfo(cmd, request, response);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/genAppKey</b>
+     * <p>test</p>
+     * @return
+     */
+    @RequestMapping("genAppKey")
+    @RestReturn(String.class)
+    public RestResponse genAppKey() {
+        String s = UUID.randomUUID().toString() + " " + SignatureHelper.generateSecretKey();
+        RestResponse resp = new RestResponse(s);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+
+	/**
+	 * <b>URL: /user/querySubjectIdForScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("querySubjectIdForScan")
+	@RequireAuthentication(false)
+	@RestReturn(QRCodeDTO.class)
+	public RestResponse querySubjectIdForScan() {
+		RestResponse resp = new RestResponse(userService.querySubjectIdForScan());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/waitScanForLogon</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("waitScanForLogon")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public DeferredResult waitScanForLogon(BlockingEventCommand cmd) {
+		return userService.waitScanForLogon(cmd.getSubjectId());
+	}
+
+
+	/**
+	 * <b>URL: /user/getSercetKeyForScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("getSercetKeyForScan")
+	@RestReturn(String.class)
+	public RestResponse getSercetKeyForScan(GetSercetKeyForScanCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(cmd.getArgs()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/logonByScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("logonByScan")
+	@RestReturn(String.class)
+	public RestResponse logonByScan(BlockingEventCommand cmd) {
+		userService.logonByScan(cmd.getSubjectId(), cmd.getMessage());
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/listUserRelatedCards</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("listUserRelatedCards")
+	@RestReturn(String.class)
+	public RestResponse listUserRelatedCards() {
+		RestResponse resp = new RestResponse(userService.listUserRelatedCards());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 }

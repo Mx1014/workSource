@@ -5,13 +5,13 @@ import javax.validation.constraints.NotNull;
 /**
  *  <ul>
  *      <li>organizationId: 公司id</li>
- *      <li>ownerId: 业主id</li>
+ *      <li>orgOwnerId: 业主id</li>
  *  </ul>
  */
 public class ListOrganizationOwnerCarByOrgOwnerCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Long ownerId;
+    @NotNull private Long orgOwnerId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -21,11 +21,11 @@ public class ListOrganizationOwnerCarByOrgOwnerCommand {
         this.organizationId = organizationId;
     }
 
-    public Long getOwnerId() {
-        return ownerId;
+    public Long getOrgOwnerId() {
+        return orgOwnerId;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
+    public void setOrgOwnerId(Long orgOwnerId) {
+        this.orgOwnerId = orgOwnerId;
     }
 }

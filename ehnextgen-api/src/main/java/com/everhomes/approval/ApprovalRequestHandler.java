@@ -6,6 +6,9 @@ import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.RequestDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
 
 public interface ApprovalRequestHandler {
 	static final String APPROVAL_REQUEST_OBJECT_PREFIX = "ApprovalRequestHandler_";
@@ -16,16 +19,30 @@ public interface ApprovalRequestHandler {
 
 	ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, CreateApprovalRequestBySceneCommand cmd);
 
-	void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest, CreateApprovalRequestBySceneCommand cmd);
+	String postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest, CreateApprovalRequestBySceneCommand cmd);
 
 	void processCancelApprovalRequest(ApprovalRequest approvalRequest);
 
 	void processFinalApprove(ApprovalRequest approvalRequest);
 
-	String processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
+	List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
 
 	String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason);
 
 	String processMessageToNextLevelBody(ApprovalRequest approvalRequest);
+
+	String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest approvalRequest);
+
+	ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
+			ApprovalRequest approvalRequest);
+
+	BriefApprovalRequestDTO processApprovalRequestByScene(
+			ApprovalRequest approvalRequest);
+
+	void calculateRangeStat(ApprovalRequest approvalRequest);
+
+	List<FlowCaseEntity> getFlowCaseEntities(ApprovalRequest approvalRequest);
 	
 }

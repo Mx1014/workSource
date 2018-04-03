@@ -1,31 +1,6 @@
 // @formatter:off
 package com.everhomes.enterprise;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -36,7 +11,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
@@ -46,73 +20,48 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationRoleMap;
-import com.everhomes.organization.OrganizationRoleMapProvider;
+import com.everhomes.organization.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.enterprise.AddContactCommand;
-import com.everhomes.rest.enterprise.AddContactGroupCommand;
-import com.everhomes.rest.enterprise.ApproveContactCommand;
-import com.everhomes.rest.enterprise.CreateContactByUserIdCommand;
-import com.everhomes.rest.enterprise.DeleteContactByIdCommand;
-import com.everhomes.rest.enterprise.DeleteContactGroupByIdCommand;
-import com.everhomes.rest.enterprise.EnterpriseContactDTO;
-import com.everhomes.rest.enterprise.EnterpriseContactEntryType;
-import com.everhomes.rest.enterprise.EnterpriseContactGroupDTO;
-import com.everhomes.rest.enterprise.EnterpriseGroupMemberStatus;
-import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
-import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
-import com.everhomes.rest.enterprise.GetUserEnterpriseContactCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListContactGroupNamesByEnterpriseIdCommand;
-import com.everhomes.rest.enterprise.ListContactGroupNamesByEnterpriseIdCommandResponse;
-import com.everhomes.rest.enterprise.ListContactGroupsByEnterpriseIdCommand;
-import com.everhomes.rest.enterprise.ListContactGroupsByEnterpriseIdCommandResponse;
-import com.everhomes.rest.enterprise.RejectContactCommand;
-import com.everhomes.rest.enterprise.UpdateContactCommand;
-import com.everhomes.rest.enterprise.importContactsCommand;
+import com.everhomes.rest.common.QuestionMetaActionData;
+import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.QuestionMetaObject;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 public class EnterpriseContactServiceImpl implements EnterpriseContactService {
@@ -240,7 +189,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	            }
 	        }
 		} catch(Exception e) {
-		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+		    LOGGER.error("Failed to processStat the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
 		return null;
 	}
@@ -279,7 +228,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 申请加入企业
 	 * 
-	 * @param contact
+	 * @param
 	 */
 	@Override
 	public EnterpriseContactDTO applyForContact(CreateContactByUserIdCommand cmd) {
@@ -390,11 +339,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                         + ", contactId=" + requestor.getId() + ", userId=" + requestor.getUserId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getUserId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;
@@ -492,7 +443,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 当企业成员加入group或者接受别人邀请加入group时，成员状态则待审核变为active，
      * 此时group里的成员数需要增加，为了保证成员数的正确性，需要添加锁；
-     * @param member 成员
+     * @param
      */
     private void updatePendingEnterpriseContactToAuthenticated(EnterpriseContact contact) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
@@ -580,7 +531,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 对于通信录联系人，如果是主动申请进来的，若处理待审核状态则可直接删除
      * @param operatorUid 操作者
-     * @param member 成员
+     * @param
      */
     private void deletePendingEnterpriseContact(Long operatorUid, EnterpriseContact contact, boolean removeFromDb) {
         this.dbProvider.execute((status) -> {
@@ -647,7 +598,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 * 
 	 * @param locator
 	 * @param enterpriseId
-	 * @param count
+	 * @param
 	 * @return
 	 */
 	@Override
@@ -892,8 +843,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             includeList = getEnterpriseAdminIncludeList(enterprise.getId(), user.getId(), user.getId());
             if(includeList.size() > 0) {
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(enterprise, contact, null);
-                sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, 
-                    MetaObjectType.ENTERPRISE_REQUEST_TO_JOIN, metaObject);
+                metaObject.setRequestInfo(notifyTextForApplicant);
+
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.ENTERPRISE_MEMBER_APPLY, actionData);
+                sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant, routerUri);
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Send waiting approval message to admin contact in enterprise, userId=" + user.getId() 
                         + ", enterpriseId=" + enterprise.getId() + ", adminList=" + includeList);
@@ -1064,6 +1020,39 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					AppConstants.APPID_MESSAGING, channelType, channelToken,
 					messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 		}
+	}
+
+	private void sendRouterEnterpriseNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if(message == null || message.isEmpty()) {
+            // return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+
+            RouterMetaObject mo = new RouterMetaObject();
+            mo.setUrl(routerUri);
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+            messageDto.setMeta(meta);
+
+            includeList.stream().distinct().forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
 	}
 
 	private void sendUserNotification(Long userId, String message) {
@@ -1661,7 +1650,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		contact.setRole(cmd.getRole());
 		contact.setSex(cmd.getSex());
 		contact.setEmployeeNo(cmd.getEmployeeNo());
-		//phone num change
+		//phone num changeEnergyMeter
 		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), cmd.getContactId());
 		if(null!=cmd.getContactGroupId()){
 			if(null == enterpriseContactGroupMember){
@@ -1763,7 +1752,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 申请加入企业
 	 * 
-	 * @param contact
+	 * @param
 	 */
 	@Override
 	public EnterpriseContactDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
@@ -1906,6 +1895,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	
 	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -1921,7 +1915,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.ACTIVE.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, null,null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+				cmd.getKeywords(),orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -1936,6 +1931,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	
 	@Override
 	public ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -1951,7 +1951,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null,null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+				cmd.getKeywords(), orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -2020,7 +2021,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		member.setContactName(cmd.getContactName());
 		organizationProvider.updateOrganizationMember(member);
 	}
-	
+
 	@Override
 	public OrganizationMemberDTO createOrganizationPersonnel(
 			CreateOrganizationMemberCommand cmd) {
@@ -2137,12 +2138,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 补充返回用户信息，部门 角色
 	 * @param organizationMembers
-	 * @param depts
+	 * @param
 	 * @return
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		
+		List<Organization> depts = organizationProvider.listDepartments(org.getPath().split("/")[1]+"/%", 1, 1000);
 		Long orgId = null;
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
@@ -2151,9 +2151,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			orgId = org.getId();
 		}
 		
-		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
+//		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
 		
-	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
+//	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
 		
 		Map<Long, Organization> deptMaps = this.convertListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
@@ -2176,8 +2176,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					for (Long roleId : resources) {
 						AclRoleAssignmentsDTO aclRoleAssignmentsDTO = new AclRoleAssignmentsDTO();
 						aclRoleAssignmentsDTO.setRoleId(roleId);
-						OrganizationRoleMap role = roleMap.get(roleId);
-						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
+//						OrganizationRoleMap role = roleMap.get(roleId);
+//						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
 						aclRoles.add(aclRoleAssignmentsDTO);
 					}
 //					dto.setAclRoles(aclRoles);

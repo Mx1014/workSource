@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>scopeType: banner可见范围类型 参考{@link com.everhomes.banner.BannerScopeType}</li>
  * <li>scopeId: 可见范围具体Id，全国为0,城市或小区Id</li>
  * <li>bannerLocation: banner所在路径，如/home，/home/Pm</li>
- * <li>bannerGroup: banner所在的组，参考{@link com.everhomes.rest.banner.BannerGroup}</li>
+ * <li>bannerGroup: banner所在的组，参考{@link BannerGroup}</li>
  * <li>name: 名称</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>

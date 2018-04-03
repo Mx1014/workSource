@@ -1,0 +1,1 @@
+ALTER TABLE eh_news_categories ADD COLUMN `entry_id` INTEGER;

@@ -1,11 +1,13 @@
 package com.everhomes.activity;
 
 public enum ConfirmStatus {
-    UN_CONFIRMED((byte) 0), CONFIRMED((byte) 1);
+    UN_CONFIRMED((byte) 0, "待确认"), CONFIRMED((byte) 1, "已确认"), REJECT((byte) 2, "已驳回");
     private Byte code;
+    private String text;
 
-    ConfirmStatus(byte code) {
+    ConfirmStatus(byte code, String text) {
         this.code = code;
+        this.text = text;
     }
 
     public Byte getCode() {
@@ -32,4 +34,8 @@ public enum ConfirmStatus {
         }
         return null;
     }
+
+	public String getText() {
+		return text;
+	}
 }

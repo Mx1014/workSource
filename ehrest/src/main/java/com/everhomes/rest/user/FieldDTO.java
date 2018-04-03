@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>fieldContentType:字段内容类型 参考{@link com.everhomes.rest.user.FieldContentType}</li>
  *  <li>fieldDesc:字段描述</li>
  *  <li>requiredFlag: 是否必填 0-否 1-是</li>
+ *  <li>dynamicFlag: 是否动态字段 0-否，显示fieldDesc 1-是，显示动态值</li>
  * </ul>
  */
 public class FieldDTO {
@@ -25,6 +26,8 @@ public class FieldDTO {
 	private String fieldDesc;
 	
 	private Byte requiredFlag;
+	
+	private Byte dynamicFlag;
 
 	public String getFieldName() {
 		return fieldName;
@@ -74,6 +77,14 @@ public class FieldDTO {
 		this.requiredFlag = requiredFlag;
 	}
 	
+	public Byte getDynamicFlag() {
+		return dynamicFlag;
+	}
+
+	public void setDynamicFlag(Byte dynamicFlag) {
+		this.dynamicFlag = dynamicFlag;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

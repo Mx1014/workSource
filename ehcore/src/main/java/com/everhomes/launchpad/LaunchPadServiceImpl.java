@@ -1,30 +1,7 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.Convert;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import com.everhomes.rest.launchpad.*;
-import com.everhomes.rest.ui.launchpad.*;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.business.BusinessService;
@@ -37,6 +14,9 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.http.HttpUtils;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResourceProvider;
@@ -47,45 +27,63 @@ import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.BizDetailActionData;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
-import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.DeleteLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand;
-import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommandResponse;
-import com.everhomes.rest.launchpad.admin.LaunchPadItemAdminDTO;
-import com.everhomes.rest.launchpad.admin.ListLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.UpdateLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
+import com.everhomes.rest.ui.launchpad.*;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.LaunchPadItemSort;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.statistics.transaction.BizBusinessInfo;
+import com.everhomes.statistics.transaction.ListBusinessInfoResponse;
+import com.everhomes.statistics.transaction.ListModelInfoResponse;
+import com.everhomes.statistics.transaction.StatTransactionConstant;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
+import static com.everhomes.rest.ui.user.SceneType.PM_ADMIN;
 
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
@@ -168,11 +166,42 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		//            result = getLaunchPadItems(cmd,community,request);
 		//        }
 		result = getItemsByCommunity(cmd, request, ItemDisplayFlag.DISPLAY);
+
+		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+		setDefaultEditFlag(result);
+
 		response.setLaunchPadItems(result);
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
 		return response;
 
+	}
+
+
+	/**
+	 * 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+	 * @param dtos
+	 */
+	private void setDefaultEditFlag(List<LaunchPadItemDTO> dtos){
+		if(dtos == null){
+			return;
+		}
+
+		boolean deleteFlag = false;
+		for (LaunchPadItemDTO dto: dtos){
+			if(ActionType.fromCode(dto.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(dto.getActionType()) == ActionType.ALL_BUTTON){
+				deleteFlag = true;
+				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
+				break;
+			}
+		}
+		if(!deleteFlag){
+			for (LaunchPadItemDTO dto: dtos){
+				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
+			}
+		}
 	}
 	
 	
@@ -190,22 +219,73 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		long startTime = System.currentTimeMillis();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), null, cmd.getCommunityId());
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
-			categryItemDTO.setCategryName(categry.getName());
+			categryItemDTO.setCategryName(categry.getLabel());
 			categryItemDTO.setCategryIconUrl(parserUri(categry.getIconUri(),EntityType.USER.getCode(),userId));
 			categryItemDTO.setCategryAlign(categry.getAlign());
 			cmd.setCategryId(categry.getId());
+			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByCommunity(cmd, request, null);
-			categryItemDTO.setLaunchPadItems(result);
-			categryItemDTOs.add(categryItemDTO);
+			if(result != null && result.size() > 0){
+				categryItemDTO.setLaunchPadItems(result);
+				categryItemDTOs.add(categryItemDTO);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
 		return categryItemDTOs;
 
+	}
+
+	private List<ItemServiceCategry> getItemServiceCategriesByScopeType(Integer namespaceId, String itemLocation,String itemGroup, String sceneType, Long organizationId, Long communityId){
+		return launchPadProvider.listItemServiceCategries(namespaceId, itemLocation, itemGroup, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				ScopeType communityScopeType= ScopeType.COMMUNITY;
+				SceneType communitySceneType= SceneType.PARK_TOURIST;
+				if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+					communityScopeType = ScopeType.RESIDENTIAL;
+					communitySceneType = SceneType.DEFAULT;
+				}
+
+				Condition condDefCommunity = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(communityScopeType.getCode());
+				condDefCommunity = condDefCommunity.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(0L));
+				condDefCommunity = condDefCommunity.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(communitySceneType.getCode()));
+				Condition cond = condDefCommunity;
+
+				if(null != communityId) {
+					Condition condCommunity = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(communityScopeType.getCode());
+					condCommunity = condCommunity.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(communityId));
+					condCommunity = condCommunity.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(communitySceneType.getCode()));
+					cond = cond.or(condCommunity);
+				}
+
+				if(null != organizationId){
+					ScopeType orgScopeType = ScopeType.ORGANIZATION;
+
+					if(SceneType.fromCode(sceneType) == PM_ADMIN){
+						orgScopeType = ScopeType.PM;
+					}
+
+					Condition condDefOrg = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(orgScopeType.getCode());
+					condDefOrg = condDefOrg.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(0L));
+					condDefOrg = condDefOrg.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+					cond = cond.or(condDefOrg);
+
+					Condition condOrg = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(orgScopeType.getCode());
+					condOrg = condOrg.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(organizationId));
+					condOrg = condOrg.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+					cond = cond.or(condOrg);
+				}
+				query.addConditions(cond);
+				query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);
+				query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -221,18 +301,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					"Invalid itemGroup paramter,itemGroup is null");
 		}
 		long startTime = System.currentTimeMillis();
+		OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+		Long communityId = null;
+		if(null != org)
+			communityId = org.getCommunityId();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), cmd.getOrganizationId(), communityId);
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
-			categryItemDTO.setCategryName(categry.getName());
+			categryItemDTO.setCategryName(categry.getLabel());
 			categryItemDTO.setCategryIconUrl(parserUri(categry.getIconUri(),EntityType.USER.getCode(),userId));
 			categryItemDTO.setCategryAlign(categry.getAlign());
 			cmd.setCategryId(categry.getId());
+			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByOrg(cmd, request, null);
-			categryItemDTO.setLaunchPadItems(result);
-			categryItemDTOs.add(categryItemDTO);
+			if(result != null && result.size() > 0) {
+				categryItemDTO.setLaunchPadItems(result);
+				categryItemDTOs.add(categryItemDTO);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
@@ -260,32 +347,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	}
 	
-   public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request){
-        if(cmd.getItemLocation() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid itemLocation paramter,itemLocation is null");
-        }
-        if(cmd.getItemGroup() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid itemGroup paramter,itemGroup is null");
-        }
-        
-        long startTime = System.currentTimeMillis();
-        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
-        List<LaunchPadItemDTO> result = null;
-        //        if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
-        //            result = getBusinessItems(cmd,community);
-        //        }else{
-        //            result = getLaunchPadItems(cmd,community,request);
-        //        }
-        result = getItemsByOrg(cmd, request,ItemDisplayFlag.DISPLAY);
-        response.setLaunchPadItems(result);
-        long endTime = System.currentTimeMillis();
-        LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
-        return response;
-
-    }
-   
    public GetLaunchPadItemsCommandResponse getMoreItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request){
        if(cmd.getItemLocation() == null){
            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -295,7 +356,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                    "Invalid itemGroup paramter,itemGroup is null");
        }
-       
+
        long startTime = System.currentTimeMillis();
        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
        List<LaunchPadItemDTO> result = getItemsByOrg(cmd, request,ItemDisplayFlag.HIDE);
@@ -305,7 +366,37 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        return response;
 
    }
-	
+
+	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request){
+		if(cmd.getItemLocation() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid itemLocation paramter,itemLocation is null");
+		}
+		if(cmd.getItemGroup() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid itemGroup paramter,itemGroup is null");
+		}
+
+		long startTime = System.currentTimeMillis();
+		GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
+		List<LaunchPadItemDTO> result = null;
+		//        if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
+		//            result = getBusinessItems(cmd,community);
+		//        }else{
+		//            result = getLaunchPadItems(cmd,community,request);
+		//        }
+		result = getItemsByOrg(cmd, request,ItemDisplayFlag.DISPLAY);
+
+		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+		setDefaultEditFlag(result);
+
+		response.setLaunchPadItems(result);
+		long endTime = System.currentTimeMillis();
+		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
+		return response;
+
+	}
+
    // 场景需要同时支持小区和园区 by lqs 20160511
 //	@Override
 //	public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
@@ -368,7 +459,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
    public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
        User user = UserContext.current().getUser();
        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-       
        GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
        getCmd.setItemGroup(cmd.getItemGroup());
        getCmd.setItemLocation(cmd.getItemLocation());
@@ -385,13 +475,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
        }
        getCmd.setSceneType(baseScene);
-       
+
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 
 	   //检查游客是否能继续访问此场景 by sfyan 20161009
 	   userService.checkUserScene(sceneType);
+	   LOGGER.debug("Scene type is" + sceneType);
 
        switch(sceneType) {
        case DEFAULT:
@@ -433,7 +524,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
-       
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        return cmdResponse;
    }
    
@@ -503,6 +595,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        
        return cmdResponse;
    }
@@ -573,6 +667,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 				break;
 		}
+
+		//刷新actionData
+		if(categryItemDTOs != null && categryItemDTOs.size() > 0){
+			List<LaunchPadItemDTO> dtos  = new ArrayList<>();
+			categryItemDTOs.forEach(r ->
+				dtos.addAll(r.getLaunchPadItems())
+			);
+			refreshActionData(dtos, sceneToken);
+		}
+
 
 		return categryItemDTOs;
 	}
@@ -704,10 +808,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 sceneType = SceneType.DEFAULT.getCode();
             }
         }
+
+		ScopeType communityScopeType= ScopeType.COMMUNITY;
+		SceneType communitySceneType= SceneType.PARK_TOURIST;
+		if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+			communityScopeType = ScopeType.RESIDENTIAL;
+			communitySceneType = SceneType.DEFAULT;
+		}
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 		
         //增加定制item流程 by sfyan 20160607
-		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, communitySceneType.getCode(), cmd.getItemLocation(),cmd.getItemGroup(),communityScopeType.getCode(),community.getId(),null, cmd.getCategryName());
 
 		List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
 		
@@ -722,36 +833,26 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		if(customizedItems.size() > 0){
 			allItems = customizedItems;
 		}else{
-			List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
-			List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
-			
-			//获取小区场景默认的item
-			List<LaunchPadItem> communityDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), 0L, null);
-			
+//			List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+//			//没有根据城市配置的item 暂时不用 add by sfyan 20170811
+////			List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
+//			List<LaunchPadItem> communityDefaultItems = null;
+//			//获取场景获取园区或者小区默认的item add by sfyan 20170811
+//			if(SceneType.PARK_TOURIST == SceneType.fromCode(sceneType))
+//				communityDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), 0L, null);
+//			else
+//				communityDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(), ScopeType.RESIDENTIAL.getCode(), 0L, null);
+//
+//			allItems = overrideOrRevertItems(defaultItems, communityDefaultItems);
+//			allItems = overrideOrRevertItems(defaultItems, communityItems);
 
-			if(defaultItems == null || defaultItems.isEmpty()){
-				defaultItems = cityItems;
-				if(defaultItems == null || defaultItems.isEmpty()){
-					defaultItems = communityDefaultItems;
-					if(communityItems == null || communityItems.isEmpty())
-						defaultItems = communityItems;
-				}
-			}
-			if(defaultItems != null && !defaultItems.isEmpty()){
-				allItems = defaultItems;
-				if(cityItems != null && !cityItems.isEmpty())
-					allItems = overrideOrRevertItems(allItems,cityItems);
-				if(communityDefaultItems != null && !communityDefaultItems.isEmpty())
-					allItems = overrideOrRevertItems(allItems, communityDefaultItems);
-				if(communityItems != null && !communityItems.isEmpty())
-					allItems = overrideOrRevertItems(allItems, communityItems);
-			}
+			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), ApplyPolicy.DEFAULT.getCode(), sceneType, null, communityId, cmd.getCategryName());
 		}
 		
 		
 		if(allItems!=null&&!allItems.isEmpty()){
 			List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.COMMUNITY.getCode(), community.getId());
-			
+
 			allItems = overrideUserItems(allItems, userLaunchPadItems);
 
 			if(null != itemDisplayFlag){
@@ -759,9 +860,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 
 			// 根据类别过滤出item by sfyan 20161020
-			if(null != cmd.getCategryId()){
-				allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
-			}
+//			if(null != cmd.getCategryId()){
+//				allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+//			}
 		}
 
 		// 把对item的处理独立成一个新的方法，供公共调用 by lqs 20160324
@@ -783,9 +884,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //						jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
 //						itemDTO.setActionData(jsonObject.toJSONString());
 //						if(b.getCreatorUid().longValue() == userId)
-//							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
+//							itemDTO.setItemName(b.getName() == null ? itemDTO.getItemName() : b.getName()+"(店铺)");
 //						else
-//							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
+//							itemDTO.setItemName(b.getName() == null ? itemDTO.getItemName() : b.getName());
 //					}
 //				}else{
 //					itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
@@ -823,29 +924,51 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
         Long communityId = null;
         OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+
         if(org != null) {
             communityId = org.getCommunityId();
         } else {
             LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
         }
-        
+		ScopeType communityScopeType= ScopeType.COMMUNITY;
+		SceneType communitySceneType= SceneType.PARK_TOURIST;
+		if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+			communityScopeType = ScopeType.RESIDENTIAL;
+			communitySceneType = SceneType.DEFAULT;
+		}
+
+		ScopeType orgScopeType = ScopeType.ORGANIZATION;
+
+		if(SceneType.fromCode(sceneType) == PM_ADMIN){
+			orgScopeType = ScopeType.PM;
+		}
+
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
         
         //增加定制item流程 by sfyan 20160607
-      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null);
+      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),orgScopeType.getCode(),cmd.getOrganizationId(),null, cmd.getCategryName());
 
         // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160729
-      	int orgItemSize = (orgItems == null) ? 0 : orgItems.size();
+      	int orgItemSize = orgItems.size();
       	int cmntyItemSize = 0;
-      	if((orgItems == null || orgItems.size() == 0) && communityId != null) {
-      	    orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null);
-            cmntyItemSize = (orgItems == null) ? 0 : orgItems.size();
+
+		List<LaunchPadItem> communityItems = null;
+      	if(communityId != null) {
+			communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, communitySceneType.getCode(), cmd.getItemLocation(), cmd.getItemGroup(), communityScopeType.getCode(), communityId, null, cmd.getCategryName());
+			if(0 == orgItemSize)
+				orgItems = communityItems;
+
+			cmntyItemSize = communityItems.size();
       	}
       	if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Check custom launchpad items, namespaceId={}, sceneType={}, organizationId={}, communityId={}, orgItemsize={}, cmntyItemSize={}", 
                 namespaceId, sceneType, cmd.getOrganizationId(), communityId, orgItemSize, cmntyItemSize);
         }
-
+//		ScopeType copeType = ScopeType.ORGANIZATION;
+//
+//		if(SceneType.fromCode(sceneType) == SceneType.PM_ADMIN){
+//			copeType = ScopeType.PM;
+//		}
       	List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
       		
       	//筛选出小区定制的item sfyan 20160607
@@ -859,46 +982,100 @@ public class LaunchPadServiceImpl implements LaunchPadService {
       	if(customizedItems.size() > 0){
       		allItems = customizedItems;
       	}else{
-      		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
-            List<LaunchPadItem> orgDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(), 0L ,null);
-            
 
-            if(defaultItems == null || defaultItems.isEmpty()){
-                defaultItems = orgDefaultItems;
-                if(orgItems == null || orgItems.isEmpty())
-					defaultItems = orgItems;
-            }
-            if(defaultItems != null && !defaultItems.isEmpty()){
-                allItems = defaultItems;
-                if(orgDefaultItems != null && !orgDefaultItems.isEmpty())
-                    allItems = overrideOrRevertItems(allItems, orgDefaultItems);
-                if(orgItems != null && !orgItems.isEmpty())
-					allItems = overrideOrRevertItems(allItems, orgItems);
-            }
-            
-            if(allItems!=null&&!allItems.isEmpty()){
-            	List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
-				allItems = overrideUserItems(allItems, userLaunchPadItems);
+//      		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+//			List<LaunchPadItem> communityDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, SceneType.PARK_TOURIST.getCode(), cmd.getItemLocation(),cmd.getItemGroup(),copeType.getCode(), 0L ,null);
+//			List<LaunchPadItem> orgDefaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),copeType.getCode(), 0L ,null);
+//			allItems = overrideOrRevertItems(defaultItems, communityDefaultItems);
+//			allItems = overrideOrRevertItems(allItems, orgDefaultItems);
+//			allItems = overrideOrRevertItems(allItems, communityItems);
+//			allItems = overrideOrRevertItems(allItems, orgItems);
 
-				if(null != itemDisplayFlag){
-					allItems = allItems.stream().filter(r -> r.getDisplayFlag()==itemDisplayFlag.getCode()).collect(Collectors.toList());
-				}
-
-				// 根据类别过滤出item by sfyan 20161020
-				if(null != cmd.getCategryId()){
-					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
-				}
-            }
-            	
+			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(),ApplyPolicy.DEFAULT.getCode(), sceneType, cmd.getOrganizationId(), communityId, cmd.getCategryName());
       	}
-        
+
+		if(allItems!=null&&!allItems.isEmpty()){
+			List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+			allItems = overrideUserItems(allItems, userLaunchPadItems);
+
+			if(null != itemDisplayFlag){
+				allItems = allItems.stream().filter(r -> r.getDisplayFlag()==itemDisplayFlag.getCode()).collect(Collectors.toList());
+			}
+			// 根据类别过滤出item by sfyan 20161020
+//				if(null != cmd.getCategryId()){
+//					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+//				}
+		}
+
+
+
         return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag);
     }
-	
+
+	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation, String itemGroup, String sceneType, Long organizationId, Long communityId){
+		return getLaunchPadItemsByScopeType(namespaceId, itemLocation, itemGroup, ApplyPolicy.DEFAULT.getCode(), sceneType, organizationId, communityId, null);
+	}
+
+	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, String sceneType, Long organizationId, Long communityId, String categryName){
+		return launchPadProvider.listLaunchPadItemsByScopeType(namespaceId, itemLocation, itemGroup, applyPolicy, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				Condition cond = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode());
+				cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+				cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+
+
+				ScopeType communityScopeType= ScopeType.COMMUNITY;
+				SceneType communitySceneType= SceneType.PARK_TOURIST;
+				if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+					communityScopeType = ScopeType.RESIDENTIAL;
+					communitySceneType = SceneType.DEFAULT;
+				}
+
+				Condition condDefCommunity = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(communityScopeType.getCode());
+				condDefCommunity = condDefCommunity.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+				condDefCommunity = condDefCommunity.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(communitySceneType.getCode()));
+				cond = cond.or(condDefCommunity);
+
+				if(null != communityId) {
+					Condition condCommunity = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(communityScopeType.getCode());
+					condCommunity = condCommunity.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(communityId));
+					condCommunity = condCommunity.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(communitySceneType.getCode()));
+					cond = cond.or(condCommunity);
+				}
+
+				if(null != organizationId){
+					ScopeType orgScopeType = ScopeType.ORGANIZATION;
+
+					if(SceneType.fromCode(sceneType) == PM_ADMIN){
+						orgScopeType = ScopeType.PM;
+					}
+
+					Condition condDefOrg = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(orgScopeType.getCode());
+					condDefOrg = condDefOrg.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+					condDefOrg = condDefOrg.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+					cond = cond.or(condDefOrg);
+
+					Condition condOrg = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(orgScopeType.getCode());
+					condOrg = condOrg.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(organizationId));
+					condOrg = condOrg.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+					cond = cond.or(condOrg);
+				}
+
+				if(!StringUtils.isEmpty(categryName))
+					cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categryName));
+				query.addConditions(cond);
+				query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
+				query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER);
+				return query;
+			}
+		});
+	}
+
+
 	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag) {
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        
-	    try{ 
+	    try{
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
@@ -913,7 +1090,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         	}
             LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
             List<Long> bizIds = businessIds;
-            
+
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 if(null != request){
@@ -922,38 +1099,78 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 if(null == itemDTO.getScaleType()){
                 	itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 }
-                
-                if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
-                	
-                	Business b = this.businessProvider.findBusinessById(r.getTargetId());
-                	if(b != null){
-                		if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
-                				|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN 
-                				|| (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
-                            itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
-                            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
-                            itemDTO.setActionData(jsonObject.toJSONString());
-                            if(b.getCreatorUid().longValue() == userId)
-                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
-                            else
-                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
-                            
-                            itemDTO.setEditFlag(r.getDeleteFlag());
-                            distinctDto.add(itemDTO);
-                        }
-                	}
-                }else{
-                    String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
-                    itemDTO.setIconUrl(url);
+
+
+				if(null != ItemTargetType.fromCode(r.getTargetType())){
+					if(ItemTargetType.BIZ == ItemTargetType.fromCode(r.getTargetType())){
+						Long businessId = Long.valueOf(r.getTargetId());
+						Business b = this.businessProvider.findBusinessById(businessId);
+						if(b != null){
+							if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
+									|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN
+									|| (bizIds.contains(businessId) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
+								itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
+								JSONObject jsonObject = new JSONObject();
+								jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
+								jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+								itemDTO.setActionData(jsonObject.toJSONString());
+								if(b.getCreatorUid().longValue() == userId)
+									itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
+								else
+									itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
+
+								itemDTO.setEditFlag(r.getDeleteFlag());
+								distinctDto.add(itemDTO);
+							}
+						}
+					}else if(ItemTargetType.ZUOLIN_SHOP == ItemTargetType.fromCode(r.getTargetType())){
+						List<String> businessNos = new ArrayList<>();
+						businessNos.add(r.getTargetId());
+						List<BusinessDTO> businesses = this.getBusinessesInfo(businessNos);
+						if(businesses.size() > 0){
+							BusinessDTO business = businesses.get(0);
+							itemDTO.setIconUrl(business.getLogoUrl());
+							BizDetailActionData actionData = (BizDetailActionData)StringHelper.fromJsonString(r.getActionData(), BizDetailActionData.class);
+							JSONObject jsonObject = new JSONObject();
+							if(null != actionData){
+								jsonObject.put(LaunchPadConstants.URL, actionData.getUrl());
+							}else{
+								LOGGER.error("item build data error. itemId = {}, actionData= {}", r.getId(), r.getActionData());
+							}
+							jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+							itemDTO.setActionData(jsonObject.toJSONString());
+							itemDTO.setItemLabel(business.getDisplayName());
+							itemDTO.setEditFlag(r.getDeleteFlag());
+							distinctDto.add(itemDTO);
+						}
+					}else{
+						String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+						itemDTO.setIconUrl(url);
+						if (StringUtils.isNotBlank(itemDTO.getSelectedIconUri())) {
+							String selectedUrl = parserUri(itemDTO.getSelectedIconUri(),EntityType.USER.getCode(),userId);
+							itemDTO.setSelectedIconUrl(selectedUrl);
+						}else {
+							itemDTO.setSelectedIconUrl(itemDTO.getIconUrl());
+						}
+						itemDTO.setEditFlag(r.getDeleteFlag());
+						distinctDto.add(itemDTO);
+					}
+				}else{
+					String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+					itemDTO.setIconUrl(url);
+					if (StringUtils.isNotBlank(itemDTO.getSelectedIconUri())) {
+						String selectedUrl = parserUri(itemDTO.getSelectedIconUri(),EntityType.USER.getCode(),userId);
+						itemDTO.setSelectedIconUrl(selectedUrl);
+					}else {
+						itemDTO.setSelectedIconUrl(itemDTO.getIconUrl());
+					}
+					
 //                    if(LOGGER.isDebugEnabled()) {
 //                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
 //                    }
-                    itemDTO.setEditFlag(r.getDeleteFlag());
-                    distinctDto.add(itemDTO);
-                }
-                
+					itemDTO.setEditFlag(r.getDeleteFlag());
+					distinctDto.add(itemDTO);
+				}
             });
             if(distinctDto != null && !distinctDto.isEmpty()){
                 distinctDto.forEach(r ->{
@@ -963,12 +1180,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 });
             }
 
-			//查询全部的item的时候不需要排序 by sfyan 20161020
+			//一般按item的defaultOrder排序 by sfyan 20170323
 			if(null != itemDisplayFlag){
 				if(result != null && !result.isEmpty())
 					sortLaunchPadItems(result);
+			}else{
+				//查询全部的item的时候按moreOrder排序 by sfyan 20170323
+				if(result != null && !result.isEmpty())
+					Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+						@Override
+						public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+							return o1.getMoreOrder().intValue() - o2.getMoreOrder().intValue();
+						}
+					});
 			}
-
 
         }catch(Exception e){
             LOGGER.error("Process item aciton data is error.",e);
@@ -976,6 +1201,99 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         return result;
 	}
+
+	private void refreshActionData(List<LaunchPadItemDTO> dtos, SceneTokenDTO sceneToken){
+		if(dtos != null && dtos.size() > 0){
+			dtos.forEach(r ->{
+				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
+					//调用各个业务的handler处理action
+					JSONObject jsonObject = (JSONObject) JSONValue.parse(r.getActionData());
+					if(jsonObject.get("handler") != null){
+						LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
+						if(handler != null){
+							String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+							r.setActionData(newActionData);
+						}
+					}
+
+					//调用默认的default_host handler处理url，将{key}等转换成实际的host
+					LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
+					String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+					r.setActionData(newActionData);
+				}
+			});
+		}
+
+	}
+
+	private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
+		List<BusinessDTO> businesses = new ArrayList<>();
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
+		if(org.springframework.util.StringUtils.isEmpty(serverURL)){
+			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz serverURL not configured.");
+		}
+
+		String paidOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_BUSINESSES_INFO_API, "");
+
+		if(org.springframework.util.StringUtils.isEmpty(paidOrderApi)){
+			LOGGER.error("biz paid ware info api not configured, param = {}", StatTransactionConstant.BIZ_WARE_INFO_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz paid  ware info api not configured.");
+		}
+
+		try {
+			String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
+			String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
+			Integer nonce = (int)(Math.random()*1000);
+			Long timestamp = System.currentTimeMillis();
+			Map<String,Object> params = new HashMap<String, Object>();
+			params.put("nonce", nonce);
+			params.put("timestamp", timestamp);
+			params.put("appKey", appKey);
+			params.put("shopNos", businessIds);
+			Map<String, String> mapForSignature = new HashMap<String, String>();
+			for(Map.Entry<String, Object> entry : params.entrySet()) {
+				if(!entry.getKey().equals("shopNos")) {
+					mapForSignature.put(entry.getKey(), entry.getValue().toString());
+				}
+			}
+			mapForSignature.put("modelIds", org.apache.commons.lang.StringUtils.join(businessIds, ","));
+			String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+			params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			String url = serverURL + paidOrderApi;
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("request url = {}, params = {}", url, params);
+			}
+
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("response result = {}", result);
+			}
+			ListBusinessInfoResponse response= (ListBusinessInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
+
+			if(null != response){
+				List<BizBusinessInfo> bizBusinessInfos = response.getResponse();
+				if(null != bizBusinessInfos){
+					for (BizBusinessInfo bizBusinessInfo: bizBusinessInfos) {
+						BusinessDTO business = new BusinessDTO();
+						business.setName(bizBusinessInfo.getShopName());
+						business.setAddress(bizBusinessInfo.getShopAddress());
+						business.setPhone(bizBusinessInfo.getPhone());
+						business.setLogoUrl(bizBusinessInfo.getShopLogo());
+						business.setDisplayName(bizBusinessInfo.getShopName());
+						businesses.add(business);
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Get business info error e = {}");
+		}
+
+		return businesses;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private String parserJson(String userToken,long userId, Long communityId,LaunchPadItem launchPadItem, HttpServletRequest request) {
@@ -1128,12 +1446,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
 
-		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
-			@Override
-			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
-				return o1.getId().intValue() - o2.getId().intValue();
-			}
-		});
+		// 按id排序 可以去掉 by sfyan
+//		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+//			@Override
+//			public int compareTo(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+//				return o1.getId().intValue() - o2.getId().intValue();
+//			}
+//		});
 		//优先根据defaultOrder排序显示
 		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
 			@Override
@@ -1165,19 +1484,31 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	 */
 	private List<LaunchPadItem> overrideOrRevertItems(List<LaunchPadItem> defalultItems, List<LaunchPadItem> overrideItems) {
 
-		if(defalultItems == null || overrideItems == null) return null;
+		if(null == defalultItems || defalultItems.size() == 0){
+			defalultItems = overrideItems;
+			return defalultItems;
+		}
+
+		if(null == overrideItems || overrideItems.size() == 0){
+			return defalultItems;
+		}
+
 		boolean flag = false;
 		List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 		for(LaunchPadItem d : defalultItems){
 			for(LaunchPadItem o : overrideItems){
 				//非覆盖
 				if(o.getApplyPolicy() == ApplyPolicy.DEFAULT.getCode() && !allItems.contains(o)){
-						allItems.add(o);
-				}else if(!allItems.contains(o)&&o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode()&&d.getItemLabel().equals(o.getItemLabel()) && d.getItemGroup().equals(o.getItemGroup())){
-					o.setId(d.getId());
+					if(d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())){
+						 continue;
+					}
 					allItems.add(o);
-					flag = true;
-					break;
+				}else if(o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode() && !allItems.contains(o)){
+					if(d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())){
+						o.setId(d.getId());
+						allItems.add(o);
+						flag = true;
+					}
 				}
 			}
 			if(!flag)
@@ -1232,7 +1563,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		if(defalultItems == null || userItems == null) return null;
 		for(LaunchPadItem d : defalultItems){
 			for(UserLaunchPadItem o : userItems){
-				if(d.getId().equals(o.getItemId())){
+				if(d.getItemName().equals(o.getItemName())){
 					if(ApplyPolicy.fromCode(o.getApplyPolicy()) == ApplyPolicy.OVERRIDE){
 						d.setDisplayFlag(o.getDisplayFlag());
 						d.setDefaultOrder(o.getDefaultOrder());
@@ -1487,11 +1818,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
+			populateLaunchPadLayoutDTO(dto);
 			return dto;
 		}
 		return null;
 	}
-	
+
+	private void populateLaunchPadLayoutDTO(LaunchPadLayoutDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getBgImageUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getBgImageUri(), LaunchPadLayoutDTO.class.getSimpleName(), dto.getId());
+
+		dto.setBgImageUrl(url);
+	}
+
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
 	    User user = UserContext.current().getUser();
@@ -2007,9 +2349,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 	}
 
-
-	
-	@Override
+    @Override
 	public UserLaunchPadItemDTO deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd){
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
@@ -2163,7 +2503,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 	           break;
 	       }
-	       
+
 	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
 
@@ -2171,7 +2511,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	public List<ItemServiceCategryDTO> listItemServiceCategries(){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
-		List<ItemServiceCategry> itemServiceCategries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> itemServiceCategries = new ArrayList<>();
 		return itemServiceCategries.stream().map( r -> {
 			ItemServiceCategryDTO dto = ConvertHelper.convert(r, ItemServiceCategryDTO.class);
 			dto.setIconUrl(parserUri(r.getIconUri(), EntityType.USER.getCode(), userId));
@@ -2200,9 +2540,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 	
 	private UserLaunchPadItem updateUserLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, Integer order, Long itemId, ItemDisplayFlag itemDisplayFlag){
-		UserLaunchPadItem userItem = launchPadProvider.getUserLaunchPadItemByOwner(userId, sceneType, ownerType, ownerId, itemId);
+		LaunchPadItem padItem = checkLaunchPadItem(itemId, true);
+		UserLaunchPadItem userItem = launchPadProvider.getUserLaunchPadItemByOwner(userId, sceneType, ownerType, ownerId, padItem.getItemName());
 		if(userItem == null){
 			userItem = new UserLaunchPadItem();
+			userItem.setItemName(padItem.getItemName());
 			userItem.setItemId(itemId);
 			userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 			userItem.setDefaultOrder(order);
@@ -2281,5 +2623,101 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 			return null;
 		});
+	}
+
+
+	@Override
+	public SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+		
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		String sceneType = sceneTokenDto.getScene();
+		
+		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+
+		//根据场景获取应用scope：配置为all和user的固定选择，配置为organization和community的根据场景sceneType获取 
+		//switch内的逻辑根据this.getLaunchPadItemsByScene方法改编
+		//add by yanjun 20170419
+		Map<Byte, Long> scopeMap = new HashMap<Byte, Long>();		
+		scopeMap.put(ScopeType.USER.getCode(), userId);
+
+		//园区的item包括当前园区和0园区的，不能使用一个map  add by yanjun
+		Map<Byte, Long> defaultScopeMap = new HashMap<Byte, Long>();
+		defaultScopeMap.put(ScopeType.ALL.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.COMMUNITY.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.RESIDENTIAL.getCode(), 0L);
+
+		if(SceneType.fromCode(sceneType) != null){
+			switch(SceneType.fromCode(sceneType)) {
+			case DEFAULT:
+			case PARK_TOURIST:
+				scopeMap.put(ScopeType.COMMUNITY.getCode(), sceneTokenDto.getEntityId());
+				break;
+			case FAMILY:
+				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+				if(family != null) {
+					scopeMap.put(ScopeType.COMMUNITY.getCode(), family.getCommunityId());
+				}
+				break;
+			case PM_ADMIN:// 无小区ID
+			case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+				scopeMap.put(ScopeType.ORGANIZATION.getCode(), sceneTokenDto.getEntityId());
+				OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDto.getEntityId());
+				if(org != null) {
+					scopeMap.put(ScopeType.COMMUNITY.getCode(), org.getCommunityId());
+				} 
+				break;
+			}
+		}
+		
+		//SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+		SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(namespaceId, sceneType);
+		if(sceneInfo != null) {
+			sceneType = sceneInfo.getName();
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneTokenDto, sceneInfo.getName());
+			}
+		} else {
+			LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneTokenDto);
+		}
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
+		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
+
+		//如果没有PM_ADMIN定制的，同样的范围查询PARK_TOURIST
+		if((launchPadItems == null || launchPadItems.size() == 0) && SceneType.fromCode(sceneType) == PM_ADMIN){
+			launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, PARK_TOURIST.getCode(), scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
+		}
+
+		// 处理分页
+		Long nextPageAnchor = null;
+		if (launchPadItems.size() > pageSize) {
+			launchPadItems.remove(launchPadItems.size() - 1);
+			nextPageAnchor = pageAnchor + 1;
+		}
+		
+		List<LaunchPadItemDTO> dtos = new ArrayList<LaunchPadItemDTO>();
+		launchPadItems.forEach(r ->{
+			//如果item有别名AliasIconUri，则使用别名替换IconUri，得到统一的圆形风格图标
+			LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+			if(itemDTO.getAliasIconUri() != null && !itemDTO.getAliasIconUri().equals("")){
+				itemDTO.setIconUri(itemDTO.getAliasIconUri());
+			}
+			itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+			itemDTO.setAliasIconUrl(parserUri(itemDTO.getAliasIconUri(),EntityType.USER.getCode(),userId));
+			
+			itemDTO.setSearchTypeId(searchType.getId());
+			itemDTO.setSearchTypeName(searchType.getName());
+			itemDTO.setContentType(searchType.getContentType());
+			dtos.add(itemDTO);
+		});
+		response.setLaunchPadItemDtos(dtos);
+		response.setNextPageAnchor(nextPageAnchor);
+		return response;
 	}
 }

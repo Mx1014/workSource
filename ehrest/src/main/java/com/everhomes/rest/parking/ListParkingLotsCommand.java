@@ -12,17 +12,17 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListParkingLotsCommand {
-	/**
-	 * 小区类型
-	 */
-	@NotNull
+    /**
+     * 小区类型
+     */
+    @NotNull
     private String ownerType;
     /**
      * 小区id
      */
-	@NotNull
+    @NotNull
     private Long ownerId;
-    
+
     public ListParkingLotsCommand() {
     }
 

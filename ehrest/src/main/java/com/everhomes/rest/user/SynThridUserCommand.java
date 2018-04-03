@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>userName : 用户名</li>
  * 	<li>deviceIdentifier : 设备标识</li>
  * 	<li>pusherIdentify : </li>
- * <ul>
+ * </ul>
  * 
  */
 public class SynThridUserCommand {

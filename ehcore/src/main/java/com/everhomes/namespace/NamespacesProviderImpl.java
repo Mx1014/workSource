@@ -1,23 +1,11 @@
 package com.everhomes.namespace;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.sql.Select;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.namespace.MaskDTO;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
@@ -28,6 +16,15 @@ import com.everhomes.server.schema.tables.pojos.EhNamespaceDetails;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class NamespacesProviderImpl implements NamespacesProvider {
@@ -64,7 +61,7 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		com.everhomes.schema.tables.EhNamespaces t1 = com.everhomes.schema.Tables.EH_NAMESPACES.as("t1");
 		com.everhomes.server.schema.tables.EhNamespaceDetails t2 = Tables.EH_NAMESPACE_DETAILS.as("t2");
-		Record record = context.select()
+		Record record = context.select(t1.ID, t1.NAME, t2.RESOURCE_TYPE)
 							.from(t1)
 							.leftOuterJoin(t2)
 							.on(t1.ID.eq(t2.NAMESPACE_ID))
@@ -72,11 +69,12 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 							.orderBy(t1.ID)
 							.fetchOne();
 		if(record != null){
-			return ConvertHelper.convert(record, NamespaceInfoDTO.class);
+			return RecordHelper.convert(record, NamespaceInfoDTO.class);
 		}
 		return null;
 	}
 
+	
 	@Override
 	public List<NamespaceInfoDTO> listNamespace() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -130,6 +128,15 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 		.fetch()
 		.map(r->ConvertHelper.convert(r, NamespaceResource.class));
 	}
-	
-	
+
+	@Override
+	public List<MaskDTO> listNamespaceMasks(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select().from(Tables.EH_NAMESPACE_MASKS)
+				.where(Tables.EH_NAMESPACE_MASKS.NAMESPACE_ID.eq(namespaceId))
+				.fetch()
+				.map(r -> ConvertHelper.convert(r, MaskDTO.class));
+	}
+
+
 }

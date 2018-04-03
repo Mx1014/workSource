@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>nonceStr: 生成签名的随机串</li>
  *  <li>signature: 签名</li>
  *  <li>ticket: jsapi ticket</li>
+ *  <li>appId: appId ticket</li>
  * </ul>
  *
  */
@@ -20,6 +21,8 @@ public class GetSignatureResponse {
 	private String signature;
 	
 	private String ticket;
+
+	private String appId;
 	
 	public String getTimestamp() {
 		return timestamp;
@@ -51,6 +54,14 @@ public class GetSignatureResponse {
 
 	public void setTicket(String ticket) {
 		this.ticket = ticket;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 	@Override

@@ -1,9 +1,13 @@
 package com.everhomes.equipment;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.equipment.*;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public interface EquipmentProvider {
@@ -19,6 +23,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionStandards findStandardById(Long id);
 	EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionEquipments findEquipmentById(Long id);
+	EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId);
 	EquipmentInspectionAccessories findAccessoryById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionAccessories findAccessoryById(Long id);
 	EquipmentInspectionTasks findEquipmentTaskById(Long id, String ownerType, Long ownerId);
@@ -30,7 +35,8 @@ public interface EquipmentProvider {
 	void updateEquipmentAccessoryMap(EquipmentInspectionAccessoryMap map);
 	void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment);
 	void deleteEquipmentAttachmentById(Long id);
-	
+	List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId);
+
 	List<EquipmentStandardMap> findByStandardId(Long standardId);
 	List<EquipmentStandardMap> findByTarget(Long targetId, String targetType);
 	
@@ -46,15 +52,18 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionAccessories> listEquipmentInspectionAccessories(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
-	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, 
-			List<String> targetType, List<Long> targetId, CrossShardListingLocator locator, Integer pageSize);
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
+			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize);
+	List<EquipmentInspectionTasks> listEquipmentInspectionReviewTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
+			List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);
 	
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
-	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, CrossShardListingLocator locator, Integer pageSize);
+	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
+	List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(Long equipmentId, List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listTasksByStandardId(Long standardId, CrossShardListingLocator locator, Integer pageSize);
 
 	List<Long> listStandardIdsByType(Byte type);
@@ -66,7 +75,7 @@ public interface EquipmentProvider {
 	Long createEquipmentInspectionTemplates(EquipmentInspectionTemplates template);
 	void updateEquipmentInspectionTemplates(EquipmentInspectionTemplates template);
 	EquipmentInspectionTemplates findEquipmentInspectionTemplate(Long id, Long ownerId, String ownerType);
-	
+
 	Long createEquipmentInspectionItems(EquipmentInspectionItems item);
 	Long updateEquipmentInspectionItems(EquipmentInspectionItems item);
 	EquipmentInspectionItems findEquipmentInspectionItem(Long id);
@@ -76,21 +85,74 @@ public interface EquipmentProvider {
 	EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(Long id);
 	List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId);
 	List<EquipmentInspectionTemplates> listInspectionTemplates(Long ownerId, String ownerType, String name);
+	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name ,Long  targetId);
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(Long templateId);
 	
 	void createEquipmentStandardMap(EquipmentStandardMap map);
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
-	
+	List<EquipmentStandardMap> findEquipmentStandardMap( Long standardId, Long targetId, String targetType);
+
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
 	
-	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(String targetType);
+	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(Long equipmentId);
+
 	List<EquipmentStandardMap> listEquipmentStandardMap(CrossShardListingLocator locator, Integer pageSize);
 	
 	void closeDelayTasks();
 	void closeExpiredReviewTasks();
 	void closeReviewTasks(EquipmentInspectionTasks task);
 	void closeTask(EquipmentInspectionTasks task);
+	
+	EquipmentInspectionEquipments findEquipmentByQrCodeToken(String qrCodeToken);
+	
+	List<EquipmentInspectionCategories> listEquipmentInspectionCategories(Long ownerId, Integer namespaceId);
+	
+	Set<Long> listRecordsTaskIdByOperatorId(Long uId, Long pageAnchor);
+	
+	List<TaskCountDTO> statEquipmentTasks(Long ownerId, String ownerType, Long targetId, String targetType, 
+			Long inspectionCategoryId, Long startTime, Long endTime, Integer offset, Integer pageSize);
+	
+	void createEquipmentInspectionStandardGroupMap(EquipmentInspectionStandardGroupMap standardGroup);
+	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
+	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
+	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, Byte groupType );
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
+	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
+	void populateStandardGroups(EquipmentInspectionStandards standard);
+
+	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType);
+	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
+
+
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
+		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag);
+
+
+	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
+	List<EquipmentInspectionEquipments> listEquipmentsById(List<Long> ids);
+
+	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
+
+	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
+	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
+	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
+
+	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+
+	void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map);
+
+	List<EquipmentModelCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType);
+
+	void deleteModelCommunityMapByModelIdAndCommunityId(Long modelId, Long targetId, byte modelType);
+
+	List<Integer> listDistinctNameSpace();
+
+	List<Long> listModelCommunityMapByModelId(Long modelId, byte modelType);
+
+	void deleteModelCommunityMapByModelId(Long modelId, byte modelType);
+
 }

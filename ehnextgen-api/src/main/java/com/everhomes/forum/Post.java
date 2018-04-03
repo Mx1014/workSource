@@ -31,6 +31,8 @@ public class Post extends EhForumPosts {
     
     private Byte creatorAdminFlag;
     
+    private String creatorCommunityName;
+    
     private String forumName;
     
     private Byte likeFlag;
@@ -40,7 +42,11 @@ public class Post extends EhForumPosts {
     private String shareUrl;
     
     private Long communityId;
-        
+
+    private Integer namespaceId;
+
+    private String ownerToken;
+
     public Post() {
     }
 
@@ -94,7 +100,15 @@ public class Post extends EhForumPosts {
         this.creatorAdminFlag = creatorAdminFlag;
     }
 
-    public String getForumName() {
+    public String getCreatorCommunityName() {
+		return creatorCommunityName;
+	}
+
+	public void setCreatorCommunityName(String creatorCommunityName) {
+		this.creatorCommunityName = creatorCommunityName;
+	}
+
+	public String getForumName() {
         return forumName;
     }
 
@@ -160,6 +174,22 @@ public class Post extends EhForumPosts {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
     }
 
     public String toString() {

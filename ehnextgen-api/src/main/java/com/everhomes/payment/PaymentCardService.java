@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardIssuerDTO;
@@ -42,6 +43,8 @@ public interface PaymentCardService {
 	CardInfoDTO applyCard(ApplyCardCommand cmd);
 	
 	CommonOrderDTO rechargeCard(RechargeCardCommand cmd);
+
+    PreOrderDTO rechargeCardV2(RechargeCardCommand cmd);
 	
 	SearchCardUsersResponse searchCardUsers(SearchCardUsersCommand cmd);
 	

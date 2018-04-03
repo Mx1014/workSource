@@ -20,6 +20,8 @@ public class ListPropApartmentsByKeywordCommand {
 
 	@NotNull
     private String buildingName;
+	
+	private String apartmentFloor;
     
     private String keyword;
     
@@ -52,7 +54,15 @@ public class ListPropApartmentsByKeywordCommand {
         this.buildingName = buildingName;
     }
 
-    public String getKeyword() {
+    public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public String getKeyword() {
         return keyword;
     }
 

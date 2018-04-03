@@ -7,6 +7,12 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.category.CategoryDTO;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor: 下一页瞄</li>
+ * <li>requests: 列表 {@link com.everhomes.rest.category.CategoryDTO}</li>
+ * </ul>
+ */
 public class ListTaskCategoriesResponse {
 	private Long nextPageAnchor;
 	@ItemType(CategoryDTO.class)

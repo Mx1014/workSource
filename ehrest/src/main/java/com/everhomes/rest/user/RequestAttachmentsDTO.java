@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetFieldName:字段展示名</li>
  *  <li>contentType:附件类型</li>
  *  <li>contentUri:附件上传后的url地址 </li>
+ *  <li>fileName:附件的名称（带格式的名称） </li>
  * </ul>
  */
 public class RequestAttachmentsDTO {
@@ -16,6 +17,16 @@ public class RequestAttachmentsDTO {
 	private String contentType;
 	
 	private String contentUri;
+
+	private String fileName;
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 
 	public String getTargetFieldName() {
 		return targetFieldName;

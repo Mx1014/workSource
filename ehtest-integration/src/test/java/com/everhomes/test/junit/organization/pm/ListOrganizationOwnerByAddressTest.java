@@ -21,19 +21,14 @@ public class ListOrganizationOwnerByAddressTest extends BaseLoginAuthTestCase {
         String api = "/pm/listOrganizationOwnersByAddress";
         ListOrganizationOwnersByAddressCommand cmd = new ListOrganizationOwnersByAddressCommand();
         cmd.setOrganizationId(1000001L);
-        cmd.setAddressId(1L);
+        cmd.setAddressId(24206890946797814L);
 
         ListOrganizationOwnersByAddressRestResponse response = httpClientService.restPost(api, cmd, ListOrganizationOwnersByAddressRestResponse.class);
 
         assertNotNull("response should not be null.1", response);
         assertNotNull("response should not be null.2", response.getResponse());
 
-        assertTrue("The orgOwnerAddressDTOList size should be 1", response.getResponse().size() == 1);
-
-        assertEquals("1", response.getResponse().get(0).getId()+"");
-        assertEquals("张三", response.getResponse().get(0).getContactName());
-        assertEquals("未认证", response.getResponse().get(0).getAuthType());
-        assertEquals("是", response.getResponse().get(0).getLivingStatus());
+        assertTrue("The orgOwnerAddressDTOList size should be 3, actual is "+response.getResponse().size(), response.getResponse().size() == 3);
     }
 
     private void logon() {
@@ -48,7 +43,8 @@ public class ListOrganizationOwnerByAddressTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }
