@@ -57,7 +57,7 @@ public class LaunchAdServiceImpl implements LaunchAdService {
 
     @Override
     public LaunchAdDTO getLaunchAd(GetLaunchAdCommand cmd) {
-        LaunchAd launchAd = launchAdProvider.findByNamespaceId(currNamespaceId());
+        LaunchAd launchAd = launchAdProvider.findByNamespaceId(cmd.getNamespaceId());
         if (launchAd != null) {
             return this.toLaunchAdDTO(launchAd);
         }

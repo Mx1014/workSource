@@ -7,10 +7,13 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.launchad.LaunchAdService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
 import com.everhomes.rest.launchad.GetLaunchAdCommand;
 import com.everhomes.rest.launchad.LaunchAdDTO;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +32,9 @@ public class LaunchAdAdminController extends ControllerBase {
     @Autowired
     private LaunchAdService launchAdService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
     /**
      * <b>URL: /admin/launchad/getLaunchad</b>
      * <p>获取启动广告数据</p>
@@ -36,6 +42,18 @@ public class LaunchAdAdminController extends ControllerBase {
     @RequestMapping("getLaunchad")
     @RestReturn(value = LaunchAdDTO.class)
     public RestResponse geLaunchAd(GetLaunchAdCommand cmd) {
+        // userId：用户id
+        Long userId = UserContext.currentUserId();
+        // currentOrgId：当前物业公司的id
+        Long currentOrgId = cmd.getCurrentOrgId();
+        // privilegeId：需要校验的权限项id
+        Long privilegeId = PrivilegeConstants.LAUNCHAD_ALL;
+        // appId：应用id
+        Long appId = cmd.getAppId();
+        // checkOrgId：如果OA控制的模块，填写需要检测权限的organization节点，否则传null
+        // checkCommunityId: 如果是园区控制的模块，填写需要检测权限的园区id，否则传null
+        userPrivilegeMgr.checkUserPrivilege(userId, currentOrgId, privilegeId, appId, null, null);
+
         return response(launchAdService.getLaunchAd(cmd));
     }
 
@@ -46,6 +64,13 @@ public class LaunchAdAdminController extends ControllerBase {
     @RequestMapping("createOrUpdateLaunchAd")
     @RestReturn(value = LaunchAdDTO.class)
     public RestResponse createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
+
+        Long userId = UserContext.currentUserId();
+        Long currentOrgId = cmd.getCurrentOrgId();
+        Long privilegeId = PrivilegeConstants.LAUNCHAD_ALL;
+        Long appId = cmd.getAppId();
+        userPrivilegeMgr.checkUserPrivilege(userId, currentOrgId, privilegeId, appId, null, null);
+
         return response(launchAdService.createOrUpdateLaunchAd(cmd));
     }
 

@@ -360,4 +360,7 @@ public interface PrivilegeConstants {
     long ORGANIZATION_IMPORT = 33005L;
     long ORGANIZATION_EXPORT = 33006L;
     long ORGANIZATION_SET_ADMIN = 33007L;
+
+    // ------- 启动广告权限 --------
+    long LAUNCHAD_ALL = 33001L;
 }
