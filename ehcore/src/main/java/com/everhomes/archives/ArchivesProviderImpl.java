@@ -329,10 +329,11 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesNotifications> listArchivesNotificationsByDay(Integer weekDay){
+    public List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesNotificationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_NOTIFICATIONS);
         query.addConditions(Tables.EH_ARCHIVES_NOTIFICATIONS.NOTIFY_DAY.eq(weekDay));
+        query.addConditions(Tables.EH_ARCHIVES_NOTIFICATIONS.NOTIFY_TIME.eq(time));
         List<ArchivesNotifications> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ArchivesNotifications.class));

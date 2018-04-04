@@ -55,14 +55,16 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -79,6 +81,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     private static final String ARCHIVES_FORM = "archives_form";
 
     private static final String ARCHIVES_OWNER_TYPE = "archives_owner_type";
+
+    private static final String ARCHIVES_NOTIFICATION = "archives_notification";
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -117,9 +121,6 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
-
-    @Autowired
-    private ArchivesConfigurationService archivesConfigurationService;
 
     @Autowired
     private LocaleStringService localeStringService;
@@ -2535,6 +2536,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         return new ArrayList<>();
     }
 
+    /********************    version2.6    ********************/
+
     @Override
     public void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
@@ -2556,19 +2559,19 @@ public class ArchivesServiceImpl implements ArchivesService {
             newNotify.setNotifyTime(cmd.getRemindTime());
             newNotify.setMailFlag(cmd.getMailFlag());
             newNotify.setMessageFlag(cmd.getMessageFlag());
-            newNotify.setNotifyTarget(getNotificationTarget(cmd).toString());
+            newNotify.setNotifyTarget(JSON.toJSONString((cmd.getDetailIds())));
             archivesProvider.createArchivesNotifications(newNotify);
         } else {
             originNotify.setNotifyDay(cmd.getRemindDay());
             originNotify.setNotifyTime(cmd.getRemindTime());
             originNotify.setMailFlag(cmd.getMailFlag());
             originNotify.setMessageFlag(cmd.getMessageFlag());
-            originNotify.setNotifyTarget(getNotificationTarget(cmd).toString());
+            originNotify.setNotifyTarget(JSON.toJSONString((cmd.getDetailIds())));
             archivesProvider.updateArchivesNotifications(originNotify);
         }
     }
 
-    private ArchivesNotificationTarget getNotificationTarget(ArchivesNotificationCommand cmd) {
+/*    private ArchivesNotificationTarget getNotificationTarget(ArchivesNotificationCommand cmd) {
         ArchivesNotificationTarget target = new ArchivesNotificationTarget();
         if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0)
             return target;
@@ -2584,24 +2587,43 @@ public class ArchivesServiceImpl implements ArchivesService {
         target.setEmailList(mailList);
         target.setMessageList(messageList);
         return target;
+    }*/
+
+    @PostConstruct
+    @Override
+    public void initArchivesNotification() {
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDateTime nowDateTime = LocalDateTime.now();
+        LocalDateTime nextDateTime = LocalDateTime.of(nowDateTime.getYear(), nowDateTime.getMonthValue(), nowDateTime.getDayOfMonth(), nowDateTime.getHour() + 1, 0);
+        ZonedDateTime zdt = nextDateTime.atZone(zoneId);
+        java.util.Date date = java.util.Date.from(zdt.toInstant());
+        scheduleProvider.scheduleSimpleJob(
+                ARCHIVES_NOTIFICATION,
+                ARCHIVES_NOTIFICATION,
+                date,
+                ArchivesNotificationJob.class,
+                new HashMap<>());
     }
 
     @Override
-    public void executeArchivesNotification() {
-        List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByDay(LocalDateTime.now().getDayOfWeek().getValue());
-        if (results != null && results.size() > 0) {
-            //  2.按照时间归类，来启动对应时间点的定时器
-            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
-                    (ArchivesNotifications::getNotifyTime));
-            for (Integer hour : notifyMap.keySet()) {
-//                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
-            }
+    public void executeArchivesNotification(Integer day, Integer time) {
+        List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
+        if (results == null)
+            return;
+        for(ArchivesNotifications result : results){
+            sendArchivesNotification(result);
         }
-
     }
 
-    private void sendArchivesNotification(){
-        // set the time
+    private void sendArchivesNotification(ArchivesNotifications notification){
+        Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
+        if(company == null)
+            LOGGER.error("Company not found!");
+        //  1.resolve targets
+        List<Long> detailIds = JSON.parseArray(notification.getNotifyTarget(), Long.class);
+
+
+        //  2.get employee's names
         Date firstOfWeek = ArchivesUtil.currentDate();
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
@@ -2609,8 +2631,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (int i = 0; i < 7; i++) {
             weekScopes.add(formatter.format(ArchivesUtil.plusDate(firstOfWeek, i).toLocalDate()));
         }
-
-        List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
+        List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), company.getId(), (locator, query) -> {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
             Condition con = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME_INDEX.in(weekScopes));
@@ -2620,19 +2641,19 @@ public class ArchivesServiceImpl implements ArchivesService {
             query.addConditions(con);
             return query;
         });
-
         if (employees == null) {
             LOGGER.error("Nothing needs to be sent.");
             return;
         }
-
-        //  1.set the target email or userId
+/*
+        //  3.set the target email or userId
         Long ryanId = 309154L;
         List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com", "hao.yang@zuolin.com");
         String contactName = "Ronny";
         String organizationName = "Google";
+*/
 
-        //  2.get the notification body.
+        //  3.get the notification body.
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("contactName", contactName);
         map.put("companyName", organizationName);
@@ -2729,22 +2750,24 @@ public class ArchivesServiceImpl implements ArchivesService {
         );
     }
 
-    /*//    @Scheduled(cron = "0 0 * * * ?")
-    private void sendArchivesNotification() {
-        //  1.读取当天 week
-        Calendar c = Calendar.getInstance();
-        int weekDay = c.get(Calendar.DAY_OF_WEEK);
-        List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
+    /*
+        if (results != null && results.size() > 0) {
+            //  2.按照时间归类，来启动对应时间点的定时器
+            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
+                    (ArchivesNotifications::getNotifyTime));
+            for (Integer hour : notifyMap.keySet()) {
 
-    }
-
-    private void sendEmails(List<ArchivesNotifications> notifyLists) {
-
-    }
+                scheduleProvider.scheduleSimpleJob(
+                        ARCHIVES_NOTIFICATION + hour,
+                        ARCHIVES_NOTIFICATION + hour,
+                        );
+//                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
+            }
+        }
 */
-    @Override
+    /*@Override
     public void syncArchivesDismissStatus() {
-        /*List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
+        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
         if (results != null) {
             for (ArchivesDismissEmployees result : results) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(result.getDetailId());
@@ -2762,6 +2785,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
             }
-        }*/
-    }
+        }
+    }*/
 }

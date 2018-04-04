@@ -104,7 +104,9 @@ public interface ArchivesService {
 
     void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
 
-    void executeArchivesNotification();
+    void initArchivesNotification();
 
-    void syncArchivesDismissStatus();
+    void executeArchivesNotification(Integer day, Integer time);
+
+//    void syncArchivesDismissStatus();
 }

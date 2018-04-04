@@ -428,10 +428,10 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /archives/syncArchivesDismissStatus</b>
      * <p>同步员工的离职状态（上线时执行一次）</p>
-     */
+     *//*
     @RequestMapping("syncArchivesDismissStatus")
     @RestReturn(value = String.class)
     public RestResponse syncArchivesDismissStatus(){
@@ -440,12 +440,12 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     @RequestMapping("testNotification")
     @RestReturn(value = String.class)
     public RestResponse testNotification(){
-        archivesService.executeArchivesNotification();
+        archivesService.initArchivesNotification();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -55,5 +55,5 @@ public interface ArchivesProvider {
 
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 
-    List<ArchivesNotifications> listArchivesNotificationsByDay(Integer weekDay);
+    List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
 }
