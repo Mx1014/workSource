@@ -16,7 +16,9 @@ public interface GroupProvider {
     Group findGroupById(long id);
     Group findGroupByUuid(String uuid);
     List<Group> findGroupByCreatorId(long creatorId);
-    
+
+    Group findGroupByForumId(long forumId);
+
     List<Group> queryPulbicGroups(int maxCount, ListingQueryBuilderCallback callback);
     List<Group> queryGroups(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback);
     /**
