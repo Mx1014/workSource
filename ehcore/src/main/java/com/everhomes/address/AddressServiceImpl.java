@@ -949,6 +949,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long communityId = family.getIntegralTag2();
         Community community = this.communityProvider.findCommunityById(communityId);
         if (community != null) {
+
             familyDTO.setCommunityId(communityId);
             familyDTO.setCommunityName(community.getName());
             familyDTO.setCityId(community.getCityId());
@@ -974,8 +975,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
         Address address = null;
 
+        Integer namespaceId = UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId());
         if (null == address) {
-            address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(),
+            address = this.addressProvider.findApartmentAddress(namespaceId, cmd.getCommunityId(),
                     cmd.getBuildingName(), cmd.getApartmentName());
         }
 
@@ -990,7 +992,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             Tuple<Address, Boolean> result = this.coordinationProvider
                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(() -> {
                         long lqStartTime = System.currentTimeMillis();
-                        Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(),
+                        Address addr = this.addressProvider.findApartmentAddress(namespaceId, cmd.getCommunityId(),
                                 cmd.getBuildingName(), cmd.getApartmentName());
                         long lqEndTime = System.currentTimeMillis();
                         LOGGER.info("find address ,in the lock,elapse=" + (lqEndTime - lqStartTime));
@@ -1008,6 +1010,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             addr.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
                             addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
                             addr.setCreatorUid(userId);
+                            addr.setNamespaceId(namespaceId);
                             this.addressProvider.createAddress(addr);
                         }
                         long lcEndTime = System.currentTimeMillis();
@@ -1141,6 +1144,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return null;
     }
 
+    /**
+     * 搜索小区
+     * @param cmd
+     * @return
+     */
     @Override
     public List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd) {
         /*if (cmd.getKeyword() == null) {
