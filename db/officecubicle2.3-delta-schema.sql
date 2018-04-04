@@ -1,4 +1,4 @@
-ALTER TABLE eh_office_cubicle_categories ADD COLUMN  `unit_price`  decimal;
+ALTER TABLE eh_office_cubicle_categories ADD COLUMN  `unit_price`  DECIMAL;
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN  `employee_number`  INTEGER;
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN  `financing_flag`  TINYINT;
 

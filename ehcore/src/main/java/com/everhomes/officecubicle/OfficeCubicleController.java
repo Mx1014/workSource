@@ -3,6 +3,7 @@ package com.everhomes.officecubicle;
 import java.util.List;
 
 import com.everhomes.rest.officecubicle.*;
+import com.everhomes.rest.officecubicle.admin.CityDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class OfficeCubicleController extends ControllerBase {
     private OfficeCubicleService officeCubicleService;
     /**
      * <b>URL: /officecubicle/getCityList</b> 
-     * <p>工位预定-获取城市列表</p>
+     * <p>工位预定-app端获取城市列表</p>
      */
     @RequestMapping("queryCities")
     @RestReturn(value=CityDTO.class ,collection=true)
