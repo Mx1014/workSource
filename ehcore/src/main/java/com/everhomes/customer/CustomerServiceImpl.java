@@ -2835,12 +2835,16 @@ public class CustomerServiceImpl implements CustomerService {
             if(talent == null) {
                 talent = new CustomerTalent();
                 talent.setNamespaceId(customer.getNamespaceId());
-                talent.setCustomerId(customer.getId());
+                 talent.setCustomerId(customer.getId());
                 talent.setCustomerType(CustomerType.ENTERPRISE.getCode());
                 talent.setName(member.getContactName());
                 talent.setPhone(member.getContactToken());
-//            talent
+//            talent.setmem
                 enterpriseCustomerProvider.createCustomerTalent(talent);
+            } else {
+
+//            talent
+                enterpriseCustomerProvider.updateCustomerTalent(talent);
             }
 
         }
