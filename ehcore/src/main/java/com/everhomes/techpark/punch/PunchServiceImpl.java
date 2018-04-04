@@ -681,8 +681,13 @@ public class PunchServiceImpl implements PunchService {
 		return newPunchDayLog;
 	}
 	/**
-	 *
+	 * 刷新一个pdl记录
+	 * @param userId : 要刷新的用户id
+	 * @param companyId : 公司id
+	 * @param punchDayLog : 旧的pdl,为null就新增,不为null就覆盖(只用到id)
+	 * @param logDay : 打卡日期
 	 * @param ptr : 传参就是保持原本的打卡规则,不传参就是用新的打卡规则
+	 * @param newPunchDayLog : 方法会计算出新的值写入这个对象
 	 * */
 	private void refreshPunchDayLog(Long userId, Long companyId, PunchDayLog punchDayLog, Calendar logDay, PunchTimeRule ptr,PunchDayLog newPunchDayLog ) {
 
@@ -7941,7 +7946,10 @@ public class PunchServiceImpl implements PunchService {
         if (null != pr  ) {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
-        String[] statusList =null;
+		if (null != ptr && pdl == null) {
+			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, pdl);
+		}
+		String[] statusList =null;
         String[] approvalStatus = null;
         if(null != pdl) {
             if(pdl.getTimeRuleId() != null && pdl.getTimeRuleId()>0L){
