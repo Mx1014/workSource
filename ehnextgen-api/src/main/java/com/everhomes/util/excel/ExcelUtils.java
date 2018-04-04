@@ -21,8 +21,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import static org.elasticsearch.common.lang3.ArrayUtils.toArray;
-
 /**
  * Created by xq.tian on 2016/9/8.
  */
@@ -198,6 +196,16 @@ public class ExcelUtils {
 	public OutputStream getOutputStream(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes, List<?> dataList){
         try {
             ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), false, ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
+            return excelStream;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+	public OutputStream getOutputStream(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList){
+        try {
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleNames, titleSize, dataList);
             return excelStream;
         } catch (Exception ex) {
             ex.printStackTrace();

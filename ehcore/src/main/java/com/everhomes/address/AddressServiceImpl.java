@@ -84,6 +84,7 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -96,6 +97,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -288,7 +290,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<CommunityDTO>> listNearbyCommunities(ListNearbyCommunityCommand cmd) {
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId();
         final List<CommunityDTO> results = new ArrayList<>();
 
         if (cmd.getCityId() == null && cmd.getLatigtue() == null && cmd.getLongitude() == null)
@@ -303,9 +305,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //        CommunityDTO testDto = ConvertHelper.convert(communityProvider.findCommunityById(240111044331051304l), CommunityDTO.class);
 //        results.add(testDto);
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
-        List<Long> communityIds = getAllCommunityIds(pointList);
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(null);
+        List<Community> coms = this.communityProvider.listCommunitiesByKeyWord(locator, 100, null, namespaceId, cmd.getCommunityType());
+        for(Community r : coms) {
+            CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+            if(cmd.getCityId() != null && !cmd.getCityId().equals(community.getCityId())) {
+                continue;
+            }
+            
+            if (null == cmd.getCommunityType()) {
+                results.add(community);
+            } else {
+                if (cmd.getCommunityType().equals(community.getCommunityType())) {
+                    results.add(community);
+                }
+            }
+        }
 
+        /* List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
         //select active community by xiongying 20160516
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null,
                 (DSLContext context, Object reducingContext) -> {
@@ -329,7 +349,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     });
 
                     return true;
-                });
+                }); */
+        
+        for(CommunityDTO result : results) {
+            if(result.getName() != null && result.getName().length() > 1) {
+                result.setFirstLatterOfName(PinYinHelper.getCapitalInitial(PinYinHelper.getPinYin(result.getName().substring(0, 1))));    
+            }
+            
+        }
 
 
         return new Tuple<>(ErrorCodes.SUCCESS, results);

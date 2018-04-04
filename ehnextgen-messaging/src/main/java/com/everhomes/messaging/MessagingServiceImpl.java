@@ -5,9 +5,11 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
@@ -298,13 +300,18 @@ public class MessagingServiceImpl implements MessagingService {
         return dto;
     }
 
+    static DeferredResult.DeferredResultHandler staticHandler;
+
     @Override
-    public DeferredResult<Object>  blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler) {
+    public DeferredResult<RestResponse> blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler) {
         if(timeOut == 0 || timeOut > MAX_TIME_OUT){
             return null;
         }
         String subject = "blockingEventKey." + subjectId;
         DeferredResult deferredResult = new DeferredResult();
+//        staticHandler = handler;
+//        deferredResult.setResultHandler(handler);
+        RestResponse restResponse = new RestResponse();
         BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
 
         //信号延迟生效的判断
@@ -314,8 +321,11 @@ public class MessagingServiceImpl implements MessagingService {
                 if(Long.valueOf((stored.get(subject + ".expireTime").toString())) > System.currentTimeMillis()){
                     blockingEventOnSignal(response, subject, stored.get(subject + ".message"));
                     removeEverythingWithKey(subject);
-                    deferredResult.setResult(response);
-                    deferredResult.setResultHandler(handler);
+                    restResponse.setResponseObject(response);
+                    restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                    restResponse.setErrorDescription("OK");
+                    deferredResult.setResult(restResponse);
+//                    deferredResult.setResultHandler(handler);
                     return deferredResult;
                 }
             }
@@ -325,8 +335,11 @@ public class MessagingServiceImpl implements MessagingService {
             RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
             if(redisTemplate.opsForValue().get(key) != null){
                 blockingEventOnSignal(response, subject, redisTemplate.opsForValue().get(key));
-                deferredResult.setResult(response);
-                deferredResult.setResultHandler(handler);
+                restResponse.setResponseObject(response);
+                restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                restResponse.setErrorDescription("OK");
+                deferredResult.setResult(restResponse);
+//                deferredResult.setResultHandler(handler);
                 return deferredResult;
             }
         }
@@ -337,7 +350,12 @@ public class MessagingServiceImpl implements MessagingService {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
                         blockingEventOnSignal(response, subject, dtoResp);
-                        deferredResult.setResult(response);
+                        restResponse.setResponseObject(response);
+                        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                        restResponse.setErrorDescription("OK");
+                        handler.handleResult(restResponse);
+                        deferredResult.setResult(restResponse);
+//                        deferredResult.setResultHandler(handler);
                         return null;
                     }
                     @Override
@@ -345,8 +363,10 @@ public class MessagingServiceImpl implements MessagingService {
                         //wait again
                         response.setStatus(BlockingEventStatus.TIMEOUT);
                         removeEverythingWithKey(subject);
-                        deferredResult.setResult(response);
-                        deferredResult.setResultHandler(handler);
+                        restResponse.setResponseObject(response);
+                        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                        restResponse.setErrorDescription("OK");
+                        deferredResult.setResult(restResponse);
                     }
 
                 }).setTimeout(timeOut).create();
@@ -357,8 +377,12 @@ public class MessagingServiceImpl implements MessagingService {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
                         blockingEventOnSignal(response, subject, dtoResp);
-                        deferredResult.setResult(response);
-                        deferredResult.setResultHandler(handler);
+                        restResponse.setResponseObject(response);
+                        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                        restResponse.setErrorDescription("OK");
+                        handler.handleResult(restResponse);
+                        deferredResult.setResult(restResponse);
+//                        deferredResult.setResultHandler(handler);
                         return null;
                     }
                 });
@@ -369,7 +393,10 @@ public class MessagingServiceImpl implements MessagingService {
                             localBusProvider.unsubscribe(subject, (LocalBusSubscriber)stored.get(subject+"subscriber"));
                             removeEverythingWithKey(subject);
                             response.setStatus(BlockingEventStatus.TIMEOUT);
-                            deferredResult.setResult(response);
+                            restResponse.setResponseObject(response);
+                            restResponse.setErrorCode(ErrorCodes.SUCCESS);
+                            restResponse.setErrorDescription("OK");
+                            deferredResult.setResult(restResponse);
                         }
                     }, startTime);
                 }

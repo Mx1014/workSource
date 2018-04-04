@@ -592,14 +592,16 @@ public class FamilyProviderImpl implements FamilyProvider {
 		if(group != null){
 			family = ConvertHelper.convert(group,FamilyDTO.class);
 			family.setAddressId(group.getIntegralTag1());
-			long communityId = group.getIntegralTag2();
-			Community community = this.communityProvider.findCommunityById(communityId);
-			if(community != null){
-				family.setCommunityId(communityId);
-				family.setCommunityName(community.getName());
-				family.setCommunityAliasName(community.getAliasName());
-				family.setCityId(community.getCityId());
-				family.setCityName(community.getCityName());
+			Long communityId = group.getIntegralTag2();
+			if(communityId != null) {
+			    Community community = this.communityProvider.findCommunityById(communityId);
+	            if(community != null){
+	                family.setCommunityId(communityId);
+	                family.setCommunityName(community.getName());
+	                family.setCommunityAliasName(community.getAliasName());
+	                family.setCityId(community.getCityId());
+	                family.setCityName(community.getCityName());
+	            }    
 			}
 		}
 
