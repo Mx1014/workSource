@@ -2670,7 +2670,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				dto.setOfflinePayName(member.getContactName());
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());
 				if (userIdentifier!=null)
-					dto.setOfflinePayName(userIdentifier.getIdentifierToken());
+					dto.setOfflinePayPhone(userIdentifier.getIdentifierToken());
 			}
 		}
 		return dto;
