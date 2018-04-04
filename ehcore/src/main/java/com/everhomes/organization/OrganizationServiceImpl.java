@@ -14,6 +14,7 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.common.IdentifierTypeEnum;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -9221,6 +9222,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             metaObject.setRequestorUid(requestor.getTargetId());
             metaObject.setRequestTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             metaObject.setRequestorNickName(requestor.getNickName());
+            //add by yuanlei
+            metaObject.setContactName(requestor.getContactName());
+            metaObject.setContactDescription(requestor.getContactDescription());
             String avatar = requestor.getAvatar();
             metaObject.setRequestorAvatar(avatar);
             if (avatar != null && avatar.length() > 0) {
@@ -9233,6 +9237,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
+
+            //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(
+                    requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());
+            if((userIdentifier != null) && !"".equals(userIdentifier)){
+                metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
+            }
         }
 
         if (target != null) {
@@ -9243,6 +9254,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return metaObject;
     }
+
+
 
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
