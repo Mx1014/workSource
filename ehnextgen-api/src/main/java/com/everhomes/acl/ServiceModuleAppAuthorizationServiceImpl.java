@@ -107,32 +107,37 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd) {
+        List<Long> create_community_ids = new ArrayList<>();
         assert cmd.getProjectIds() != null;
         // 1.先查出对应原公司 + appId 是否有匹配的园区。如果有就更新，没有就新建
         List<ServiceModuleAppAuthorization> all_authorization = this.listCommunityRelationOfOwnerIdAndAppId(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getAppId());
-       if(all_authorization != null && all_authorization.size() > 0){
-           List<ServiceModuleAppAuthorization> update_authorization = all_authorization.stream().filter(r-> cmd.getProjectIds().contains(r.getProjectId())).collect(Collectors.toList());
-           update_authorization.forEach(r->{
-               r.setOrganizationId(cmd.getToOrgId());
-           });
-           serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorizations(update_authorization);
+        if (all_authorization != null && all_authorization.size() > 0) {
+            List<ServiceModuleAppAuthorization> update_authorization = all_authorization.stream().filter(r -> cmd.getProjectIds().contains(r.getProjectId())).collect(Collectors.toList());
+            update_authorization.forEach(r -> {
+                r.setOrganizationId(cmd.getToOrgId());
+            });
+            // 如果cmd中的园区已经在这个(公司 + 应用)中分配过，则更新
+            serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorizations(update_authorization);
+            List<Long> all_community_ids = all_authorization.stream().map(ServiceModuleAppAuthorization::getProjectId).collect(Collectors.toList());
+            create_community_ids = cmd.getProjectIds().stream().filter(r -> !all_community_ids.contains(r)).collect(Collectors.toList());
+        } else {
+            create_community_ids = cmd.getProjectIds();
+        }
 
-           List<Long> all_community_ids = all_authorization.stream().map(ServiceModuleAppAuthorization::getProjectId).collect(Collectors.toList());
-           List<Long> create_community_ids = cmd.getProjectIds().stream().filter(r-> !all_community_ids.contains(r)).collect(Collectors.toList());
-           if(create_community_ids != null && create_community_ids.size() > 0){
-               List<ServiceModuleAppAuthorization> create_authorization = new ArrayList<>();
-               create_community_ids.forEach(r->{
-                   ServiceModuleAppAuthorization authorization = new ServiceModuleAppAuthorization();
-                   authorization.setOwnerId(cmd.getOwnerId());
-                   authorization.setOrganizationId(cmd.getToOrgId());
-                   authorization.setAppId(cmd.getAppId());
-                   authorization.setNamespaceId(cmd.getNamespaceId());
-                   authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
-                   create_authorization.add(authorization);
-               });
-               serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(create_authorization);
-           }
-       }
+        // 如果存在需要新增的分配关系，则进行新增
+        if (create_community_ids != null && create_community_ids.size() > 0) {
+            List<ServiceModuleAppAuthorization> create_authorization = new ArrayList<>();
+            create_community_ids.forEach(r -> {
+                ServiceModuleAppAuthorization authorization = new ServiceModuleAppAuthorization();
+                authorization.setOwnerId(cmd.getOwnerId());
+                authorization.setOrganizationId(cmd.getToOrgId());
+                authorization.setAppId(cmd.getAppId());
+                authorization.setNamespaceId(cmd.getNamespaceId());
+                authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+                create_authorization.add(authorization);
+            });
+            serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(create_authorization);
+        }
     }
 
 }
