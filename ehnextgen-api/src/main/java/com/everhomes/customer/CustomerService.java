@@ -1,6 +1,7 @@
 package com.everhomes.customer;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -145,6 +146,8 @@ public interface CustomerService {
 
     void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist);
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
+
+    void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member);
 
 
 

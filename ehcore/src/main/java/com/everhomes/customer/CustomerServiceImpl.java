@@ -2827,7 +2827,26 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
 	}
 
-	@Override
+    @Override
+    public void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member) {
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(orgId);
+        if(customer != null) {
+            CustomerTalent talent = enterpriseCustomerProvider.findCustomerTalentByPhone(member.getContactToken(), customer.getId());
+            if(talent == null) {
+                talent = new CustomerTalent();
+                talent.setNamespaceId(customer.getNamespaceId());
+                talent.setCustomerId(customer.getId());
+                talent.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                talent.setName(member.getContactName());
+                talent.setPhone(member.getContactToken());
+//            talent
+                enterpriseCustomerProvider.createCustomerTalent(talent);
+            }
+
+        }
+    }
+
+    @Override
 	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
 		//checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());

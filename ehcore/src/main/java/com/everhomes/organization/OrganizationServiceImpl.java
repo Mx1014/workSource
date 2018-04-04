@@ -23,10 +23,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.CustomerEntryInfo;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.*;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -5572,6 +5569,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                         orgLog.setOperatorUid(UserContext.current().getUser().getId());
                         orgLog.setContactDescription(member.getContactDescription());
                         this.organizationProvider.createOrganizationMemberLog(orgLog);
+
+                        //通过认证的同步到企业客户的人才团队中 21710
+                        customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
                     }
                 } else {
                     LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
@@ -5612,6 +5612,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             event.setEntityId(cmd.getUserId());
             event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
         });
+
     }
 
     /**
@@ -7536,6 +7537,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                         }
                         //自动加入公司的门禁 add by lei.lv
                         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+
+                        //通过认证的同步到企业客户的人才团队中 21710
+                        customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
                     } else {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.debug("organization group type not enterprise, organizationId={}, groupType={}, memberId={}", member.getOrganizationId(), member.getStatus(), member.getId());
