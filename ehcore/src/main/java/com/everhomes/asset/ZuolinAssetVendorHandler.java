@@ -318,7 +318,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             pageSize = 20;
         }
         List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageNum,pageSize);
-        if(list.size() < pageSize) {
+        if(list.size() <= pageSize) {
             response.setNextPageAnchor(null);
         }else {
             Integer nextPageNum = pageNum + 1;
