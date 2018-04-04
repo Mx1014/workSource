@@ -46,7 +46,6 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
 
     @Override
     public void updateOrderResourceInfo(RentalOrder order) {
-
         updateOrderResourceInfo(order, false);
     }
 
@@ -65,8 +64,18 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
             parkingSpace = parkingProvider.getAnyFreeParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
                     parkingLot.getOwnerId(),parkingLot.getId());
         }else {
+            //先寻找 在指定时间段是否有没有被预约过的车位
+            List<RentalResourceOrder> rsbs = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
+            List<Long> ids = rsbs.stream().map(RentalResourceOrder::getRentalResourceRuleId).collect(Collectors.toList());
+            List<String> bookedSpaces = rentalv2Provider.listParkingNoInUsed(order.getNamespaceId(),order.getResourceTypeId(),
+                    order.getResourceType(),order.getRentalResourceId(),ids);
+            bookedSpaces.addAll(spaces);
             parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
-                    parkingLot.getOwnerId(),parkingLot.getId(), spaces);
+                    parkingLot.getOwnerId(),parkingLot.getId(), bookedSpaces);
+            //没有的话随便选一个
+            if (parkingSpace==null)
+                parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                        parkingLot.getOwnerId(),parkingLot.getId(), spaces);
         }
 
 
