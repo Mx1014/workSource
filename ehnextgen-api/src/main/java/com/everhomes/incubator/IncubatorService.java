@@ -14,6 +14,8 @@ public interface IncubatorService {
 
 	IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd);
 
+	IncubatorApplyDTO updateIncubatorApply(UpdateIncubatorApplyCommand cmd);
+
 	void cancelIncubatorApply(CancelIncubatorApplyCommand cmd);
 
 	void approveIncubatorApply(ApproveIncubatorApplyCommand cmd);
@@ -22,5 +24,5 @@ public interface IncubatorService {
 
 	void exportIncubatorApply(ExportIncubatorApplyCommand cmd);
 
-	IncubatorApplyDTO findIncubatorAppling();
+	IncubatorApplyDTO findIncubatorAppling(FindIncubatorApplingCommand cmd);
 }

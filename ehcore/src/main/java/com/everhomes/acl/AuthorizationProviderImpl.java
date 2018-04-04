@@ -179,6 +179,41 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<Project> getAuthorizationProjectsByAppIdAndTargets(String identityType, String authType, Long authId, Long appId, List<Target> targets){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Project> result  = new ArrayList<>();
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
+		if(null != authId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
+		if(null != appId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
+		}
+		if(null != identityType){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+		}
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		context.select(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.from(Tables.EH_AUTHORIZATIONS)
+				.where(cond)
+				.groupBy(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.orderBy(Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.fetch().map((r) -> {
+			result.add(new Project(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE).toString(), Long.valueOf(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID).toString())));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
 	public List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<String> result  = new ArrayList<>();

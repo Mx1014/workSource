@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2018/1/16.
  */
 public enum CustomerDynamicSheetClass {
+    CUSTOMER("com.everhomes.customer.EnterpriseCustomer"),
     CUSTOMER_TAX("com.everhomes.customer.CustomerTax"),
     CUSTOMER_ACCOUNT("com.everhomes.customer.CustomerAccount"),
     CUSTOMER_TALENT("com.everhomes.customer.CustomerTalent"),
@@ -17,7 +18,9 @@ public enum CustomerDynamicSheetClass {
     CUSTOMER_PATENT("com.everhomes.customer.CustomerPatent"),
     CUSTOMER_CERTIFICATE("com.everhomes.customer.CustomerCertificate"),
     CUSTOMER_ENTRY_INFO("com.everhomes.customer.CustomerEntryInfo"),
-    CUSTOMER_DEPARTURE_INFO("com.everhomes.customer.CustomerDepartureInfo");
+    CUSTOMER_DEPARTURE_INFO("com.everhomes.customer.CustomerDepartureInfo"),
+    CUSTOMER_TRACKING("com.everhomes.customer.CustomerTracking"),
+    CUSTOMER_TRACKING_PLAN("com.everhomes.customer.CustomerTrackingPlan");
 
     private String code;
 
@@ -30,9 +33,11 @@ public enum CustomerDynamicSheetClass {
     }
 
     public static CustomerDynamicSheetClass fromStatus(String code) {
-        for(CustomerDynamicSheetClass v : CustomerDynamicSheetClass.values()) {
-            if(v.getCode().equals(code))
-                return v;
+        if(code != null) {
+            for(CustomerDynamicSheetClass v : CustomerDynamicSheetClass.values()) {
+                if(v.getCode().equals(code))
+                    return v;
+            }
         }
         return null;
     }

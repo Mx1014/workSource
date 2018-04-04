@@ -17,3 +17,6 @@ update eh_configurations SET `value`='/park-news-web/build/index.html?ns=%s&isFS
 -- by xiongying 加上对象名
 update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTax' where title = '税务信息';
 update eh_var_field_groups set name = 'com.everhomes.customer.CustomerAccount' where title = '银行账号';
+
+-- by st.zheng 增加正中会园区id映射
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`) VALUES ('pmtask.projectId.mapping', '{"科兴科学园": "240111044331055940","正中科技园":"400016453453534534","正中时代广场":"400033876543213456","中科大厦":"500025323562146634","同方信息港":"500026342342363543","华美产业园":"500027434534234324","云升科学园":"115058601234567890"}', 'ebei projectId mapping', '0');

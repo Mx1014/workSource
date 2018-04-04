@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
  */
 public class FindAutoAssignRentalSiteMonthStatusByWeekCommand {
 
+    private String resourceType;
     @NotNull
     private Long siteId;
     @NotNull
@@ -23,6 +24,14 @@ public class FindAutoAssignRentalSiteMonthStatusByWeekCommand {
     private Byte priceType;
     private String packageName;
     private String sceneToken;
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
 
     public Long getSiteId() {
         return siteId;

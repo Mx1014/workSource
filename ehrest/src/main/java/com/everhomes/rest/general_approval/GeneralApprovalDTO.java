@@ -20,12 +20,17 @@ import com.everhomes.discover.ItemType;
  * <li>projectId : </li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>approvalName : 审批名称</li>
+ * <li>approvalRemark : 审批备注</li>
  * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
+ * <li>scopes : 可见范围 参考{@link com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO}</li>
+ * <li>defaultOrder : 默认顺序</li>
  * <li>approvalAttribute: 审批属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * <li>iconUri: 图标的uri</li>
  * <li>iconUrl: 图标的url</li>
+ * <li>operatorUid: 更新人id</li>
+ * <li>iconUrl: 更新人名称</li>
  * </ul>
  * @author janson
  *
@@ -52,11 +57,17 @@ public class GeneralApprovalDTO {
     private Timestamp     updateTime;
 
     //	added by R.
+	@ItemType(GeneralApprovalScopeMapDTO.class)
+	private List<GeneralApprovalScopeMapDTO> scopes;
+	private Integer defaultOrder;
+	private String approvalRemark;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
     private String approvalAttribute;
 	private String iconUri;
 	private String iconUrl;
+	private Long operatorUid;
+	private String operatorName;
 
     public Byte getStatus() {
 		return status;
@@ -170,11 +181,6 @@ public class GeneralApprovalDTO {
 		this.moduleId = moduleId;
 	}
 
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
 	public Byte getSupportType() {
 		return supportType;
 	}
@@ -207,7 +213,31 @@ public class GeneralApprovalDTO {
 		this.flowName = flowName;
 	}
 
-    public Byte getModifyFlag() {
+	public List<GeneralApprovalScopeMapDTO> getScopes() {
+		return scopes;
+	}
+
+	public void setScopes(List<GeneralApprovalScopeMapDTO> scopes) {
+		this.scopes = scopes;
+	}
+
+	public Integer getDefaultOrder() {
+		return defaultOrder;
+	}
+
+	public void setDefaultOrder(Integer defaultOrder) {
+		this.defaultOrder = defaultOrder;
+	}
+
+	public String getApprovalRemark() {
+		return approvalRemark;
+	}
+
+	public void setApprovalRemark(String approvalRemark) {
+		this.approvalRemark = approvalRemark;
+	}
+
+	public Byte getModifyFlag() {
         return modifyFlag;
     }
 
@@ -246,5 +276,26 @@ public class GeneralApprovalDTO {
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
     }
+
+	public Long getOperatorUid() {
+		return operatorUid;
+	}
+
+	public void setOperatorUid(Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
 

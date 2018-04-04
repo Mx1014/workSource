@@ -50,7 +50,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 		PmTask task1 = dbProvider.execute((TransactionStatus status) -> {
 			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 			Flow flow = null;
 
             Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
@@ -81,7 +81,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());
-			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+			createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());

@@ -554,5 +554,22 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /forum/findDefaultForum</b>
+     * <p>查询默认园区论坛、意见反馈论坛</p>
+     */
+    @RequestMapping("findDefaultForum")
+    @RestReturn(value=FindDefaultForumResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse findDefaultForum(FindDefaultForumCommand cmd) {
+        FindDefaultForumResponse res = forumService.findDefaultForum(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
 
 }

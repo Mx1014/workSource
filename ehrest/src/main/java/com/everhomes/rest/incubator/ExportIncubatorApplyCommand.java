@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *     <li>keyWord: keyWord</li>
  *     <li>orderBy: 排序方式，0-创建时间，1-审核时间</li>
  *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园，不传则不限{@link ApplyType}</li>
+ *     <li>startTime: startTime</li>
+ *     <li>endTime: endTime</li>
  * </ul>
  */
 public class ExportIncubatorApplyCommand {
@@ -23,6 +25,8 @@ public class ExportIncubatorApplyCommand {
 	private String keyWord;
 	private Byte orderBy;
 	private Byte applyType;
+	private Long startTime;
+	private Long endTime;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -78,6 +82,22 @@ public class ExportIncubatorApplyCommand {
 
 	public void setApplyType(Byte applyType) {
 		this.applyType = applyType;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 
 	@Override

@@ -1,11 +1,12 @@
 package com.everhomes.rest.repeat;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *  <li>id:  循环周期id</li>
  *  <li>ownerId:  循环周期所属的主体id</li>
  *  <li>ownerType: 循环周期所属的主体，如QA</li>
  *  <li>foreverFlag: 是否永不过期，0-会过期 1-永不过期</li>
@@ -21,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class RepeatSettingsDTO {
+
+	private Long id;
 	
 	@NotNull
 	private Long ownerId;
@@ -47,6 +50,14 @@ public class RepeatSettingsDTO {
 	private String expression;
 	
 	private Byte status;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;

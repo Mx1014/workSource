@@ -237,7 +237,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
     }
 
     private FlowDTO createFlow(Long communityId) {
-        Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
+        Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, null, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
         if(flow != null) {
             flowService.disableFlow(flow.getId());
             flowService.deleteFlow(flow.getId());

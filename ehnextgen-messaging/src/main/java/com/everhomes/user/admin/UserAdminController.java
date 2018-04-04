@@ -499,4 +499,17 @@ public class UserAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    @RequestMapping("searchUserByIdentifier")
+    @RestReturn(value=SearchUserByIdentifierResponse.class)
+    public RestResponse searchUserByIdentifier(@Valid SearchUserByIdentifierCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        SearchUserByIdentifierResponse res = this.userService.searchUserByIdentifier(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -77,6 +77,7 @@ public class RentalSiteRulesDTO {
 	private BigDecimal halfApprovingUserPrice;
 	@ItemType(RentalSitePackagesDTO.class)
 	private List<RentalSitePackagesDTO> sitePackages;
+	private Byte userPriceType;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -436,5 +437,13 @@ public class RentalSiteRulesDTO {
 
 	public void setApprovingUserPrice(BigDecimal approvingUserPrice) {
 		this.approvingUserPrice = approvingUserPrice;
+	}
+
+	public Byte getUserPriceType() {
+		return userPriceType;
+	}
+
+	public void setUserPriceType(Byte userPriceType) {
+		this.userPriceType = userPriceType;
 	}
 }

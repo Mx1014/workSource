@@ -318,6 +318,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        Organization org = checkOrganization(cmd.getOrganizationId());
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
         Long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
         Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 9999;
@@ -330,7 +331,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
                 //:todo 寻找部门名
-                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailIdAndOrgId(r.getId(), cmd.getOrganizationId(), groupTypes);
+                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailIdAndPath(r.getId(), org.getPath(), groupTypes);
                 if(departments != null && departments.size() > 0){
                     for(OrganizationMember d: departments){
                         Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());

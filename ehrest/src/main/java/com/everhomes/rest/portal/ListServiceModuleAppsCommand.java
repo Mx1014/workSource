@@ -4,13 +4,13 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>moduleId: 模块id</li>
- * <li>actionType：模块action类型</li>
- * <li>customTag：业务Tag</li>
- * <li>customPath：业务参数</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>moduleId: 模块id</li>
+ *     <li>actionType: 模块action类型</li>
+ *     <li>customTag: 业务Tag</li>
+ *     <li>customPath: 业务参数</li>
+ *     <li>versionId: versionId</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
@@ -24,6 +24,8 @@ public class ListServiceModuleAppsCommand {
 	private String customTag;
 
 	private String customPath;
+
+	private Long versionId;
 
 	public ListServiceModuleAppsCommand() {
 
@@ -77,5 +79,13 @@ public class ListServiceModuleAppsCommand {
 
 	public void setCustomPath(String customPath) {
 		this.customPath = customPath;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
 	}
 }

@@ -4,21 +4,22 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>label: 门户导航栏名称</li>
- * <li>description: 门户itemGroup描述</li>
- * <li>targetType: 对象类型</li>
- * <li>targetId: 对象id</li>
- * <li>iconUri: icon 图片</li>
- * <li>selectedIconUri: icon选中图片</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>versionId: versionId</li>
+ *     <li>label: 门户导航栏名称</li>
+ *     <li>description: 门户itemGroup描述</li>
+ *     <li>targetType: 对象类型</li>
+ *     <li>targetId: 对象id</li>
+ *     <li>iconUri: icon 图片</li>
+ *     <li>selectedIconUri: icon选中图片</li>
  * </ul>
  */
 public class CreatePortalNavigationBarCommand {
 
 	private Integer namespaceId;
 
+	private Long versionId;
 
 	private String label;
 
@@ -101,6 +102,13 @@ public class CreatePortalNavigationBarCommand {
 		this.selectedIconUri = selectedIconUri;
 	}
 
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
+	}
 
 	@Override
 	public String toString() {

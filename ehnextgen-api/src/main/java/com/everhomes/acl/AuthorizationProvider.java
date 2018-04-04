@@ -35,6 +35,7 @@ public interface AuthorizationProvider {
 
     List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
 
+    //根据targets获取关联的应用管理员记录
     List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
 
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
@@ -61,9 +62,14 @@ public interface AuthorizationProvider {
 
     AuthorizationRelation findAuthorizationRelationById(Long id);
 
+    // 根据模块id和targets获取授权记录
     List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets);
 
+    // 根据模块id和targets获取授权记录
     List<Project> getAuthorizationProjectsByAuthIdAndTargets(String identityType, String authType, Long authId, List<Target> targets);
+
+    // 根据应用id和targets获取授权记录
+    List<Project> getAuthorizationProjectsByAppIdAndTargets(String identityType, String authType, Long authId, Long appId, List<Target> targets);
 
     List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
 

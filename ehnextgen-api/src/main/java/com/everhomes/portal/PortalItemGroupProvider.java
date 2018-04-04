@@ -9,10 +9,15 @@ public interface PortalItemGroupProvider {
 
 	void updatePortalItemGroup(PortalItemGroup portalItemGroup);
 
-	PortalItemGroup findPortalItemGroupById(Long id);
+    void deleteByVersionId(Long versionId);
 
-	List<PortalItemGroup> listPortalItemGroup(Long layoutId);
+    PortalItemGroup findPortalItemGroupById(Long id);
+
+    Integer findMaxDefaultOrder(Long layoutId);
+
+    List<PortalItemGroup> listPortalItemGroup(Long layoutId);
 
 	void createPortalItemGroups(List<PortalItemGroup> portalItemGroups);
 
+    List<PortalItemGroup> listPortalItemGroupByVersion(Integer namespaceId, Long versionId);
 }

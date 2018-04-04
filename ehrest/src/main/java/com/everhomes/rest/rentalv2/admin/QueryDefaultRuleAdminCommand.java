@@ -2,15 +2,18 @@ package com.everhomes.rest.rentalv2.admin;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 添加默认规则
- * <li>ownerType: 所有者类型 参考
- * {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
+ * <li>ownerType: ownerType</li>
  * <li>ownerId: 园区id</li>
  * <li>resourceTypeId: 图标id</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
+ * <li>sourceType: sourceType 默认规则：default_rule， 资源规则：resource_rule{@link RuleSourceType}</li>
+ * <li>sourceId: sourceId</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminCommand {
@@ -21,10 +24,41 @@ public class QueryDefaultRuleAdminCommand {
 	@NotNull
 	private Long resourceTypeId;
 
+	private String resourceType;
+
+	private String sourceType;
+
+	private Long sourceId;
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

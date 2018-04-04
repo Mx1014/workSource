@@ -3,16 +3,19 @@ package com.everhomes.rest.quality;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * standardId: 标准的主键id
- * targetId :项目id
- *
+ * <ul>
+ * <li> standardId: 标准的主键id </li>
+ * <li> targetId :项目id </li>
+ * </li> namespaceId :namespaceId </li>
+ * </ul>
  */
 public class DeleteQualityStandardCommand {
 	
 	private Long standardId;
 
 	private  Long targetId;
+
+	private Integer namespaceId;
 
 	public Long getStandardId() {
 		return standardId;
@@ -28,6 +31,14 @@ public class DeleteQualityStandardCommand {
 
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

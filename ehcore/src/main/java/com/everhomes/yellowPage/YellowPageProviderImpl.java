@@ -542,8 +542,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
         Condition condition = null;
         
-        if(parentId != null)
+        if(parentId != null){
             condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(parentId);
+            if(parentId==0){
+            	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.isNotNull());
+            }
+        }
         else
             condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
             
@@ -954,7 +958,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId) {
 
-		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+		if(namespaceId == null)
+			namespaceId = UserContext.getCurrentNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
 		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
@@ -1226,5 +1231,16 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		.where(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
 		.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L))
 		.execute();
+	}
+	
+	@Override
+	public List<ServiceAlliances> findOldFormServiceAlliance() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAlliances.class));
+        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG1.eq(1L));
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.ID.asc());
+        
+        return query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+	
 	}
 }

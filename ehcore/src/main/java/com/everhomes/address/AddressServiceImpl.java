@@ -1156,6 +1156,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
+        if (userId == 1) //超级管理员
+            return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -1181,7 +1183,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId, buildingName parameter");
 
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        long userId = cmd.getUserId()==null?user.getId():cmd.getUserId();
 
         checkUserPrivilege(userId, cmd.getCommunityId());
 
@@ -1191,9 +1193,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
         ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
-        //修改为整个小区有人住门牌数
+
         int totalCount = this.addressProvider.countApartmentsByBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
-        if (totalCount == 0) return response;
+//        if (totalCount == 0) return response;
 
         List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
                 cmd.getBuildingName(), offset, pageSize);
@@ -1920,10 +1922,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				errorLogs.add(log);
 				continue;
 			}
-			
+
+            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+			if(address != null) {
+                log.setData(data);
+                log.setErrorLog("apartment name is exist in building");
+                log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);
+                errorLogs.add(log);
+                continue;
+            }
+
+            double areaSize = 0;
+            double chargeArea = 0;
+            double rentArea = 0;
+            double shareArea = 0;
+
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
-					Double.parseDouble(data.getAreaSize());
+                    areaSize = Double.parseDouble(data.getAreaSize());
 				} catch (Exception e) {
 					log.setData(data);
 					log.setErrorLog("area size is not number");
@@ -1935,7 +1951,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getChargeArea())) {
                 try {
-                    Double.parseDouble(data.getChargeArea());
+                    chargeArea = Double.parseDouble(data.getChargeArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("charge area is not number");
@@ -1947,7 +1963,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getRentArea())) {
                 try {
-                    Double.parseDouble(data.getRentArea());
+                    rentArea = Double.parseDouble(data.getRentArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("rent area is not number");
@@ -1959,7 +1975,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getSharedArea())) {
                 try {
-                    Double.parseDouble(data.getSharedArea());
+                    shareArea = Double.parseDouble(data.getSharedArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("share area is not number");
@@ -1969,7 +1985,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
             }
 			
-			importApartment(community, data);
+			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
 
         updateCommunityAptCount(community);
@@ -1977,7 +1993,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data) {
+	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double shareArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
         Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
@@ -1993,18 +2009,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
             }
-        }
-
-        double areaSize = 0;
-        double chargeArea = 0;
-        double rentArea = 0;
-        double shareArea = 0;
-        try {
-            areaSize = Double.parseDouble(data.getAreaSize());
-            chargeArea = Double.parseDouble(data.getChargeArea());
-            rentArea = Double.parseDouble(data.getRentArea());
-            shareArea = Double.parseDouble(data.getSharedArea());
-        } catch (Exception e) {
         }
 
         Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());

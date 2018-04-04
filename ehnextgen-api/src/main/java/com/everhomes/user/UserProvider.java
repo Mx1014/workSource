@@ -83,8 +83,10 @@ public interface UserProvider {
 	List<User> listUserByNickNameOrIdentifier(String keyword);
 	List<UserIdentifier> listUserIdentifierByIdentifier(String identifier);
 	List<User> listUserByIds(Integer namespaceId, List<Long> userIds);
-	
-	/**
+
+    List<User> searchUserByIdentifier(String identifier, Integer namespaceId, int pageSize);
+
+    /**
 	 * Added by Janson
 	 * @param locator
 	 * @param pageSize

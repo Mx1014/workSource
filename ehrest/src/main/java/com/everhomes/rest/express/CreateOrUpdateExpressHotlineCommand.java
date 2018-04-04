@@ -10,6 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>id: 热线id，创建热线不传值，更新需传值</li>
  * <li>serviceName: 服务热线名称</li>
  * <li>hotline: 热线</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  *
  *  @author:dengs 2017年7月19日
@@ -20,6 +23,33 @@ public class CreateOrUpdateExpressHotlineCommand {
 	private Long id;
 	private String serviceName;
 	private String hotline;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public CreateOrUpdateExpressHotlineCommand() {
 	}

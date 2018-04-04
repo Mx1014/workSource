@@ -29,6 +29,16 @@ public class SearchWarehousesCommand {
 
     private Long communityId;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getPageAnchor() {
         return pageAnchor;
     }

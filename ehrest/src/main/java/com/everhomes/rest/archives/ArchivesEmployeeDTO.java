@@ -13,7 +13,7 @@ import java.util.List;
  * <li>targetId: targetId</li>
  * <li>targetType: targetType</li>
  * <li>contactName: 姓名</li>
- * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
+ * <li>employeeStatus: 成员状态: 0-试用, 1-正式, </li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>

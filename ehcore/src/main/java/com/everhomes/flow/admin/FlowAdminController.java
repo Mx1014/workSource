@@ -62,7 +62,31 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/flow/getFlowCaseDetailByRefer</b>
+     * <p> 根据refer获取FlowCase详情</p>
+     */
+    @RequestMapping("getFlowCaseDetailByRefer")
+    @RestReturn(value=FlowCaseDetailDTOV2.class)
+    public RestResponse getFlowCaseDetailByRefer(@Valid GetFlowCaseDetailByReferCommand cmd) {
+        Long userId = UserContext.current().getUser().getId();
+        boolean needFlowButton = TrueOrFalseFlag.fromCode(cmd.getNeedFlowButton()) == TrueOrFalseFlag.TRUE;
+
+        FlowCaseDetailDTOV2 detailDTOV2 = flowService.getFlowCaseDetailByRefer(
+                cmd.getModuleId(),
+                FlowUserType.fromCode(cmd.getFlowUserType()),
+                userId,
+                cmd.getReferType(),
+                cmd.getReferId(),
+                needFlowButton);
+
+        RestResponse response = new RestResponse(detailDTOV2);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/flow/createFlow</b>
      * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>

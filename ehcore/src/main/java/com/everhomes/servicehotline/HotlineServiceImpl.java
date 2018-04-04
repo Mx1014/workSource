@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.community.Community;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
@@ -65,7 +66,10 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+		@Autowired
+	private ConfigurationProvider configProvider;
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(
 			GetHotlineSubjectCommand cmd) {
@@ -147,6 +151,9 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4030040300L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
+		}
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		GetHotlineListResponse resp = new GetHotlineListResponse();
 		List<HotlineDTO> hotlines = new ArrayList<HotlineDTO>();
