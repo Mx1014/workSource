@@ -7946,6 +7946,7 @@ public class PunchServiceImpl implements PunchService {
         if (null != pr  ) {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
+		LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
 		if (null != ptr && pdl == null) {
 			pdl = new PunchDayLog();
 			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, pdl);
@@ -8096,7 +8097,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
-		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
+//		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
 		if(null == ptr){
 			return null;
 		}
