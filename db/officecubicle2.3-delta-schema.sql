@@ -12,7 +12,7 @@ CREATE TABLE `eh_office_cubicle_cities` (
   `city_id` bigint(20) DEFAULT NULL COMMENT '城市id',
   `city_name` varchar(128) DEFAULT NULL COMMENT '城市名称',
 	`icon_uri` VARCHAR(1024) COMMENT '城市图片uri',
-  `default_order` INTEGER,
+  `default_order` BIGINT,
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0:INACTIVE,2:ACTIVE',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
