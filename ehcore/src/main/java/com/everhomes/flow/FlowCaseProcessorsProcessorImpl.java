@@ -37,7 +37,11 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
 
         List<UserInfo> userInfoList = new ArrayList<>();
         for (Long userId : getProcessorIdList()) {
-            userInfoList.add(fixupUserInfo(organizationId, userId));
+            UserInfo ui = fixupUserInfo(organizationId, userId);
+            if(ui != null) {
+                userInfoList.add(ui);    
+            }
+            
         }
         return userInfoList;
     }

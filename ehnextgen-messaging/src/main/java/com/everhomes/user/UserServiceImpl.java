@@ -3183,7 +3183,9 @@ public class UserServiceImpl implements UserService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		checkSceneToken(userId, cmd.getSceneToken());
+		if(!StringUtils.isEmpty(cmd.getSceneToken())) {
+		    checkSceneToken(userId, cmd.getSceneToken());    
+		}
 
 		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
 		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
@@ -5699,6 +5701,8 @@ public class UserServiceImpl implements UserService {
 	    }
 	    
 	    builder.queryParam("ns", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("namespaceId", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("userId", userId);
 	    
 	    for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
 	        if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && !entry.getKey().equals("abtoken")) {
@@ -5904,12 +5908,19 @@ public class UserServiceImpl implements UserService {
 					old_user.setNamespaceUserToken(user.getNamespaceUserToken());
 					old_user.setNamespaceUserType(user.getNamespaceUserType());
 					this.userProvider.updateUser(old_user);
+					
+               old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+               old_userIdentifier.setRegionCode(86);
+               old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+               this.userProvider.updateIdentifierByUid(old_userIdentifier);
+				} else {
+				    old_userIdentifier.setClaimStatus(IdentifierClaimStatus.FREE_STANDING.getCode());
+				    this.userProvider.deleteIdentifier(old_userIdentifier);
+				    old_userIdentifier = null;
 				}
-				old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-				old_userIdentifier.setRegionCode(86);
-				old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				this.userProvider.updateIdentifierByUid(old_userIdentifier);
-			}else{
+			}
+			
+			if(old_userIdentifier == null) {
 				this.userProvider.createUser(user);
 				UserIdentifier userIdentifier = new UserIdentifier();
 				userIdentifier.setOwnerUid(user.getId());
