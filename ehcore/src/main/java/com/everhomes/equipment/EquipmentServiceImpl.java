@@ -3580,12 +3580,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -6);
 		Integer offset = cmd.getPageAnchor().intValue();
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listPersonalDoneTasks(cmd.getTargetId(), cmd.getInspectionCategoryId(), pageSize + 1, offset, startTime);
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (tasks != null && tasks.size() > 0) {
+			dtos = tasks.stream().map((r) ->
+					ConvertHelper.convert(r, EquipmentTaskDTO.class))
+					.collect(Collectors.toList());
+			response.setTasks(dtos);
+		}
 		if (tasks != null && tasks.size() > pageSize) {
 			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		} else {
 			response.setNextPageAnchor(null);
-
 		}
+
 		return response;
 	}
 
