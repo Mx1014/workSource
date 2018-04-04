@@ -1,0 +1,54 @@
+package com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade;
+
+public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy {
+  private String _endpoint = null;
+  private com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy wSWSSyncMyBayFacadeSrvProxy = null;
+  
+  public WSWSSyncMyBayFacadeSrvProxyProxy() {
+    _initWSWSSyncMyBayFacadeSrvProxyProxy();
+  }
+  
+  public WSWSSyncMyBayFacadeSrvProxyProxy(String endpoint) {
+    _endpoint = endpoint;
+    _initWSWSSyncMyBayFacadeSrvProxyProxy();
+  }
+  
+  private void _initWSWSSyncMyBayFacadeSrvProxyProxy() {
+    try {
+      wSWSSyncMyBayFacadeSrvProxy = (new com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator()).getWSWSSyncMyBayFacade();
+      if (wSWSSyncMyBayFacadeSrvProxy != null) {
+        if (_endpoint != null)
+          ((javax.xml.rpc.Stub)wSWSSyncMyBayFacadeSrvProxy)._setProperty("javax.xml.rpc.service.endpoint.address", _endpoint);
+        else
+          _endpoint = (String)((javax.xml.rpc.Stub)wSWSSyncMyBayFacadeSrvProxy)._getProperty("javax.xml.rpc.service.endpoint.address");
+      }
+      
+    }
+    catch (javax.xml.rpc.ServiceException serviceException) {}
+  }
+  
+  public String getEndpoint() {
+    return _endpoint;
+  }
+  
+  public void setEndpoint(String endpoint) {
+    _endpoint = endpoint;
+    if (wSWSSyncMyBayFacadeSrvProxy != null)
+      ((javax.xml.rpc.Stub)wSWSSyncMyBayFacadeSrvProxy)._setProperty("javax.xml.rpc.service.endpoint.address", _endpoint);
+    
+  }
+  
+  public com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacadeSrvProxy() {
+    if (wSWSSyncMyBayFacadeSrvProxy == null)
+      _initWSWSSyncMyBayFacadeSrvProxyProxy();
+    return wSWSSyncMyBayFacadeSrvProxy;
+  }
+  
+  public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
+    if (wSWSSyncMyBayFacadeSrvProxy == null)
+      _initWSWSSyncMyBayFacadeSrvProxyProxy();
+    return wSWSSyncMyBayFacadeSrvProxy.sync_TenancyContractData(params);
+  }
+  
+  
+}
