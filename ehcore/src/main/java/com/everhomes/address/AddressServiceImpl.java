@@ -1143,10 +1143,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd) {
-        if (cmd.getKeyword() == null) {
+        /*if (cmd.getKeyword() == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid keyword paramter.");
-        }
+        }*/
         int pageNum = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();

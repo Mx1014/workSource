@@ -127,7 +127,18 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
 
         return null;
     }
-    
+
+    /**
+     * 搜索小区
+     * @param queryString
+     * @param communityType
+     * @param t
+     * @param cityId
+     * @param regionId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     private List<CommunityDoc> searchDocsByType(String queryString,Byte communityType, EnterpriseCommunityType t, Long cityId, Long regionId, int pageNum, int pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
@@ -135,10 +146,16 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         
         //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-dis-max-query.html
         //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
-        qb = QueryBuilders.multiMatchQuery(queryString)
-                .field("name", 5.0f)
-                .field("name.pinyin_prefix", 2.0f)
-                .field("name.pinyin_gram", 1.0f);
+        //modify by yuanlei
+        //既可以根据关键字来进行搜索，也可以不根据关键字来进行搜索
+        if (queryString != null && queryString.length() > 0) {
+            qb = QueryBuilders.multiMatchQuery(queryString)
+                    .field("name", 5.0f)
+                    .field("name.pinyin_prefix", 2.0f)
+                    .field("name.pinyin_gram", 1.0f);
+        } else {
+            qb = QueryBuilders.matchAllQuery();
+        }
 
         int namespaceId = UserContext.getCurrentNamespaceId();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
