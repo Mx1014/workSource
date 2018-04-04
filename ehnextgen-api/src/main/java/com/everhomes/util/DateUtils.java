@@ -51,65 +51,110 @@ public class DateUtils {
 
 
 
+//	/**
+//	 * 将不明格式的日期转给指定格式的日期，如果所提供日期不是有效输入，返回null by wentian 2018/3/29
+//	 * @param dateStr 不明格式的日期
+//	 * @param format 想要获得的日期格式
+//	 */
+//    public static String guessDateTimeFormatAndFormatIt(String dateStr, String format) {
+//		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
+//		SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+//		SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//		SimpleDateFormat formatter3 = new SimpleDateFormat("yyyy-MM-dd");
+//		SimpleDateFormat formatter4 = new SimpleDateFormat("yyyy/MM/dd");
+//		SimpleDateFormat formatter5 = new SimpleDateFormat("yyyy/MM");
+//		SimpleDateFormat mdyy = new SimpleDateFormat("M/d/yy");
+//
+//
+//		String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";   // 2018/02/12 12:12
+//		String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";   // 2018-02-12 12:12
+//		String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";				 // 2018-02-12
+//		String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";                // 2018/12/31
+//        String regex5 = "\\d+";                                      // 时间戳
+//		String regex6 = "\\d{2}/\\d+/\\d{2}";                      // 12/1/18
+////		String regex7 = "\\d{2}-\\d+-\\d{2}";                      // 12-1-18
+//		Pattern pattern1 = Pattern.compile(regex1);
+//		Pattern pattern2 = Pattern.compile(regex2);
+//		Pattern pattern3 = Pattern.compile(regex3);
+//		Pattern pattern4 = Pattern.compile(regex4);
+//		Pattern pattern5 = Pattern.compile(regex5);
+//		Pattern pattern6 = Pattern.compile(regex6);
+////		Pattern pattern7 = Pattern.compile(regex7);
+//		SimpleDateFormat desired_format = new SimpleDateFormat(format);
+//		Date q = null;
+//		try{
+//            if(pattern1.matcher(dateStr).matches()){
+//                q = formatter1.parse(dateStr);
+//            }else if(pattern2.matcher(dateStr).matches()){
+//                q =formatter2.parse(dateStr);
+//            }else if(pattern3.matcher(dateStr).matches()){
+//                q = formatter3.parse(dateStr);
+//            }else if(pattern4.matcher(dateStr).matches()){
+//                q = formatter4.parse(dateStr);
+//            }else if(pattern5.matcher(dateStr).matches()){
+//                Long l = Long.parseLong(dateStr);
+//                Date date = new Date(l);
+//                SimpleDateFormat sdf = new SimpleDateFormat(format);
+//                return sdf.format(date);
+//            }else if(dateStr.contains("月")){
+//            	String rephrased = "20" + dateStr.substring(dateStr.lastIndexOf("月")+2) + "/" + getNumber(dateStr.substring(0, dateStr.indexOf("月")));
+//				q = formatter5.parse(rephrased);
+//			}else if(pattern6.matcher(dateStr).matches()){
+//				q = mdyy.parse(dateStr);
+//			}
+//
+//            String result = desired_format.format(q);
+//            return result;
+//        }catch (Exception e){
+//		    e.printStackTrace();
+//        }
+//        return null;
+//    }
+
 	/**
 	 * 将不明格式的日期转给指定格式的日期，如果所提供日期不是有效输入，返回null by wentian 2018/3/29
 	 * @param dateStr 不明格式的日期
 	 * @param format 想要获得的日期格式
 	 */
-    public static String guessDateTimeFormatAndFormatIt(String dateStr, String format) {
+	public static String guessDateTimeFormatAndFormatIt(String dateStr, String format) {
 		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
-		SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		SimpleDateFormat formatter3 = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat formatter4 = new SimpleDateFormat("yyyy/MM/dd");
-		SimpleDateFormat formatter5 = new SimpleDateFormat("yyyy/MM");
-		SimpleDateFormat mdyy = new SimpleDateFormat("M/d/yy");
+		DateTimeFormatter yyyyMMddDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//		DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		DateTimeFormatter yyyyMMDash = DateTimeFormatter.ofPattern("yyyy-MM");
+//		DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyy/MM");
 
-
-		String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";   // 2018/02/12 12:12
-		String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";   // 2018-02-12 12:12
-		String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";				 // 2018-02-12
-		String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";                // 2018/12/31
-        String regex5 = "\\d+";                                      // 时间戳
-		String regex6 = "\\d{2}/\\d+/\\d{2}";                      // 12/1/18
-//		String regex7 = "\\d{2}-\\d+-\\d{2}";                      // 12-1-18
-		Pattern pattern1 = Pattern.compile(regex1);
-		Pattern pattern2 = Pattern.compile(regex2);
-		Pattern pattern3 = Pattern.compile(regex3);
-		Pattern pattern4 = Pattern.compile(regex4);
-		Pattern pattern5 = Pattern.compile(regex5);
-		Pattern pattern6 = Pattern.compile(regex6);
-//		Pattern pattern7 = Pattern.compile(regex7);
-		SimpleDateFormat desired_format = new SimpleDateFormat(format);
-		Date q = null;
+		String yyyyMMddDash_ = "^\\d{4}-\\d{2}-\\d{2}$";				 // 2018-02-12
+//		String yyyyMMdd_ = "^\\d{4}/\\d{2}/\\d{2}$";                // 2018/12/31
+		String yyyyMMDash_ = "^\\d{4}-\\d{2}$";                      // 2018-02
+//		String yyyyMM_ = "^\\d{4}/\\d{2}$";                   // 2018/12
+		Pattern pattern1 = Pattern.compile(yyyyMMddDash_);
+//		Pattern pattern2 = Pattern.compile(yyyyMMdd_);
+		Pattern pattern3 = Pattern.compile(yyyyMMDash_);
+//		Pattern pattern4 = Pattern.compile(yyyyMM_);
+		TemporalAccessor q = null;
 		try{
-            if(pattern1.matcher(dateStr).matches()){
-                q = formatter1.parse(dateStr);
-            }else if(pattern2.matcher(dateStr).matches()){
-                q =formatter2.parse(dateStr);
-            }else if(pattern3.matcher(dateStr).matches()){
-                q = formatter3.parse(dateStr);
-            }else if(pattern4.matcher(dateStr).matches()){
-                q = formatter4.parse(dateStr);
-            }else if(pattern5.matcher(dateStr).matches()){
-                Long l = Long.parseLong(dateStr);
-                Date date = new Date(l);
-                SimpleDateFormat sdf = new SimpleDateFormat(format);
-                return sdf.format(date);
-            }else if(dateStr.contains("月")){
-            	String rephrased = "20" + dateStr.substring(dateStr.lastIndexOf("月")+2) + "/" + getNumber(dateStr.substring(0, dateStr.indexOf("月")));
-				q = formatter5.parse(rephrased);
-			}else if(pattern6.matcher(dateStr).matches()){
-				q = mdyy.parse(dateStr);
+			if(pattern1.matcher(dateStr).matches()){
+				q = yyyyMMddDash.parse(dateStr);
+			}
+//			else if(pattern2.matcher(dateStr).matches()){
+//				q =yyyyMMdd.parse(dateStr);
+//			}
+			else if(pattern3.matcher(dateStr).matches()){
+				q = yyyyMMDash.parse(dateStr);
+			}
+//			else if(pattern4.matcher(dateStr).matches()){
+//				q = yyyyMM.parse(dateStr);
+//			}
+			else{
+				return null;
 			}
 
-            String result = desired_format.format(q);
-            return result;
-        }catch (Exception e){
-		    e.printStackTrace();
-        }
-        return null;
-    }
+			return dateStr;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	private static String getNumber(String c) {
     	switch (c){
@@ -130,7 +175,7 @@ public class DateUtils {
 			case "八":
 				return "08";
 			case "九":
-				return "08";
+				return "09";
 			case "十一":
 				return "11";
 			case "十二":
