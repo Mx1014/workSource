@@ -5926,7 +5926,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
 			if (itemDTOS != null && itemDTOS.size() > 0) {
-				items.addAll(itemDTOS);
+				items.addAll(itemDTOS.stream().sorted(Comparator.comparing(InspectionItemDTO::getDefaultOrder)).collect(Collectors.toList()));
 			}
 		});
 

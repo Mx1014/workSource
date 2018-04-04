@@ -130,11 +130,13 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @DependsOn("platformContext")
@@ -1511,7 +1513,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             items.add(findEquipmentInspectionItem(r.getItemId()));
             return null;
         });
-        standard.setItems(items);
+        if (items.size() > 0) {
+            List<EquipmentInspectionItems> sortedItems = new ArrayList<>();
+            sortedItems = items.stream().sorted(Comparator.comparing(EquipmentInspectionItems::getDefaultOrder)).collect(Collectors.toList());
+            standard.setItems(sortedItems);
+        }
     }
 
     @Override
