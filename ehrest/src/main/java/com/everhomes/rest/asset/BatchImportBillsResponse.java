@@ -6,17 +6,17 @@ package com.everhomes.rest.asset;
  */
 /**
  *<ul>
- * <li>taskId:任务id</li>
+ * <li>id:任务id</li>
  *</ul>
  */
 public class BatchImportBillsResponse {
-    private Long taskId;
+    private Long id;
 
-    public Long getTaskId() {
-        return taskId;
+    public Long getId() {
+        return id;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setId(Long id) {
+        this.id = id;
     }
 }

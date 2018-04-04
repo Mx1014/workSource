@@ -3008,7 +3008,7 @@ public class AssetServiceImpl implements AssetService {
             importTaskResponse.setLogs(datas);
             return importTaskResponse;
         }, task);
-        response.setTaskId(task.getId());
+        response.setId(task.getId());
         return response;
     }
 
