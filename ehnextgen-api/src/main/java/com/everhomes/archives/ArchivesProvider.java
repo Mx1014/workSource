@@ -23,11 +23,15 @@ public interface ArchivesProvider {
 
     void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee);
 
-    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId);
+    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long detailId);
 
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 
+    void updateArchivesDismissEmployee(ArchivesDismissEmployees dismissEmployee);
+
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
+
+    List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
 
     void createArchivesForm(ArchivesFroms form);
 

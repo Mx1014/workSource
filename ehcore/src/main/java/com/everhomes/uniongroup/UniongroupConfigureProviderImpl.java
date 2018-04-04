@@ -834,9 +834,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
 
 
-        List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("detail_id")).orderBy(t1.field("id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
+        List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("id")).orderBy(t1.field("id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
+        LOGGER.debug("listDetailNotInUniongroup 's real sql is :" + step);
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
-
         locator.setAnchor(null);
         if (details.size() >= pageSize) {
             details.remove(details.size() - 1);

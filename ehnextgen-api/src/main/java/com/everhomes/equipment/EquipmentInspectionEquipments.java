@@ -9,10 +9,7 @@ public class EquipmentInspectionEquipments extends EhEquipmentInspectionEquipmen
 
 	//invoke 赋值时候防止异常
 	private  String attachments;
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
+	//private  String geohash;
 
     public String getAttachments() {
         return attachments;

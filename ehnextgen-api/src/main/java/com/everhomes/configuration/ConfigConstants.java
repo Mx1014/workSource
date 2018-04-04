@@ -77,6 +77,8 @@ public interface ConfigConstants {
 	
 	public static final String ACTIVITY_CONTENT_URL = "activity.content.url";
 
+    public static final String RICH_TEXT_CONTENT_URL = "rich.text.content.url";
+
     public static final String CLUB_DESCRIPTION_URL = "club.description.url";
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
@@ -147,6 +149,7 @@ public interface ConfigConstants {
     public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
 	public static final String MY_PUBLISH_FLAG = "my.publish.flag";
 
+    String RENTAL_ORDER_DETAIL_URL = "rental.order.detail.url";
 	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
 	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";

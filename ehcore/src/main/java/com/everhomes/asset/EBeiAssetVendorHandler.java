@@ -295,7 +295,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountOwed(amount2);
             amountOwed = amountOwed.add(amount2);
             dto.setBillItemName(source.getFiCategory());
-            dto.setAddressName(source.getBuildingRename());
+            dto.setAddressName(source.getBuildingRename()==null?"":source.getBuildingRename());
             list.add(dto);
         }
         response.setShowBillDetailForClientDTOList(list);

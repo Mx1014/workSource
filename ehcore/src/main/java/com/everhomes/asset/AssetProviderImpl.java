@@ -554,7 +554,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.BILL_ID.eq(billId))
                 .limit(firstOffset,pageSize+1)
                 .getSQL();
-        context.fetch(sql,billId,pageSize,firstOffset)
+        context.fetch(sql,billId,pageSize+1,firstOffset)
                 .forEach(r ->{
                     BillDTO dto =new BillDTO();
                     dto.setDateStr(r.getValue(t.DATE_STR));
@@ -632,6 +632,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_APP_URLS)
                 .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetch(Tables.EH_APP_URLS.NAME);
+        if(fetch.size()<1){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION, "该域空间没有" +
+                    "在app地址表中进行注册，无法获得域空间名称，请联系左邻管理员，域空间id为"+UserContext.getCurrentNamespaceId());
+        }
         String appName = fetch.get(0);
         for(int i = 0; i < list.size(); i++){
             list.get(i).setAppName(appName);
@@ -767,7 +771,8 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-                    String address = r.getValue(t.BUILDING_NAME) + r.getValue(t.APARTMENT_NAME);
+                    String address = r.getValue(t.BUILDING_NAME)==null?"":r.getValue(t.BUILDING_NAME)
+                            + r.getValue(t.APARTMENT_NAME)==null?"":r.getValue(t.APARTMENT_NAME);
                     dto.setAddressName(org.apache.commons.lang.StringUtils.isEmpty(address)?"":address);
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
@@ -2461,18 +2466,18 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        if(c!=null){
+//        if(c!=null){
             EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
             ChargingStandardsDao.insert(c);
-        }
-        if(s != null){
+//        }
+//        if(s != null){
             EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
             chargingStandardsScopesDao.insert(s);
-        }
-        if(f!=null){
+//        }
+//        if(f!=null){
             EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
             paymentFormulaDao.insert(f);
-        }
+//        }
     }
 
     @Override
@@ -3702,6 +3707,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(bill.TARGET_ID.eq(targetId));
         query.addConditions(bill.SWITCH.eq((byte)1));
         query.addOrderBy(bill.DATE_STR.desc());
+
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();

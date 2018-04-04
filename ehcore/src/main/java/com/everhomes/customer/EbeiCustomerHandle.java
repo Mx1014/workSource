@@ -444,7 +444,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
         DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
         deleteOrganizationIdCommand.setId(customer.getOrganizationId());
-        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand,false);
 
     }
 

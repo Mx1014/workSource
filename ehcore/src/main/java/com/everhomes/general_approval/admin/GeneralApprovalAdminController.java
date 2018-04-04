@@ -150,7 +150,23 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	
     	return response;
     }
-    
+
+	/**
+	 * <b>URL: /admin/general_approval/setGeneralApprovalForm</b>
+	 * <p> 设置审批表单 </p>
+	 * @return
+	 */
+	@RequestMapping("setGeneralApprovalForm")
+	@RestReturn(value=GeneralApprovalDTO.class)
+	public RestResponse setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd) {
+		GeneralApprovalDTO result = generalApprovalService.setGeneralApprovalForm(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
     /**
      * <b>URL: /admin/general_approval/deleteGeneralApproval</b>
      * <p> 删除审批 </p>
@@ -224,6 +240,36 @@ public class GeneralApprovalAdminController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 
+		return response;
+	}
+
+	/**
+	 * <b>URL: /admin/general_approval/orderGeneralApprovals</b>
+	 * <p> 审批排序 </p>
+	 * @return
+	 */
+	@RequestMapping("orderGeneralApprovals")
+	@RestReturn(value=String.class)
+	public RestResponse orderGeneralApprovals(OrderGeneralApprovalsCommand cmd) {
+		generalApprovalService.orderGeneralApprovals(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /admin/general_approval/initializeGeneralApprovalScope</b>
+	 * <p> 初始化审批可见范围（上线时执行一次） </p>
+	 * @return
+	 */
+	@RequestMapping("initializeGeneralApprovalScope")
+	@RestReturn(value=String.class)
+	public RestResponse initializeGeneralApprovalScope() {
+		generalApprovalService.initializeGeneralApprovalScope();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
 	}
 }

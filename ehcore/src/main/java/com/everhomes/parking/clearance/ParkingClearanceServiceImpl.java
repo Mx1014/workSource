@@ -152,6 +152,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2090020900L, cmd.getAppId(), null,cmd.getCurrentProjectId());//车辆放行权限
+		}
 
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -434,6 +437,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2090020900L, cmd.getAppId(), null,cmd.getCurrentProjectId());//车辆放行权限
+		}
 
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -460,6 +466,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
 	public void exportClearanceLog(SearchClearanceLogCommand cmd, HttpServletResponse response) {
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2090020900L, cmd.getAppId(), null,cmd.getCurrentProjectId());//车辆放行权限
+		}
     	cmd.setPageAnchor(null);
     	cmd.setPageSize(10000);
     	SearchClearanceLogsResponse searchClearanceLogsResponse = searchClearanceLog(cmd);

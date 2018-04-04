@@ -81,7 +81,7 @@ public interface EnterpriseContactService {
 			ListOrganizationContactCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+//	ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	EnterpriseContactDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
 	void approveForEnterpriseContact(OrganizationMember member);

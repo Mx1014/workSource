@@ -43,6 +43,7 @@ public class CreateFlowCaseCommand {
     @NotNull
     private Long currentOrganizationId;
     private String serviceType;
+    private Long applierOrganizationId;
 
     private String routeUri;
 
@@ -177,7 +178,15 @@ public class CreateFlowCaseCommand {
         this.flowCaseId = flowCaseId;
     }
 
-    @Override
+    public Long getApplierOrganizationId() {
+		return applierOrganizationId;
+	}
+
+	public void setApplierOrganizationId(Long applierOrganizationId) {
+		this.applierOrganizationId = applierOrganizationId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

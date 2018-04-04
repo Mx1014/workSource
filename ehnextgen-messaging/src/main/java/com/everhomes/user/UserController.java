@@ -787,6 +787,24 @@ public class UserController extends ControllerBase {
         return new RestResponse("OK");
     }
 
+
+	/**
+	 * <b>URL: /user/resendVerificationCodeByIdentifierAndAppKey</b>
+	 * <p></p>
+	 * @return OK
+	 */
+	@RequestMapping("sendCodeWithPictureValidate")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
+		assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+		userService.sendCodeWithPictureValidate(cmd, request);
+		return new RestResponse("OK");
+	}
+
+
+
 	/**
 	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
 	 * <p>发送修改手机号的短信验证码</p>
@@ -1388,6 +1406,7 @@ public class UserController extends ControllerBase {
 	 * @return  OK
 	 */
 	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RequireAuthentication(false)
 	@RestReturn(String.class)
 	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
 		userService.checkVerifyCodeAndResetPassword(cmd);

@@ -33,6 +33,7 @@ public class ContractChargingItemDTO {
     private String chargingStandardName;
     private Long lateFeeStandardId;
     private String lateFeeStandardName;
+    private String lateFeeformula;
     private String formula;
     private Byte formulaType;
     private Byte billingCycle;
@@ -41,6 +42,14 @@ public class ContractChargingItemDTO {
     private Long chargingExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
+
+    public String getLateFeeformula() {
+        return lateFeeformula;
+    }
+
+    public void setLateFeeformula(String lateFeeformula) {
+        this.lateFeeformula = lateFeeformula;
+    }
 
     public Long getId() {
         return id;

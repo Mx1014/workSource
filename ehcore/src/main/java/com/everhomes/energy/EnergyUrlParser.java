@@ -16,11 +16,11 @@ public class EnergyUrlParser implements PortalUrlParser {
     @Override
     public Long getModuleId(Integer namespaceId, String actionData, Byte actionType, String itemLabel) {
         Long res = null;
-        if(actionType == 13){
+        if(actionType == 44){
             Map<String,String> data= new Gson().fromJson(actionData,new TypeToken<HashMap<String,String>>(){}.getType());
-            if(data!=null && data.size() > 0 && data.get("url")!=null){
-                String wd = data.get("url").split("/")[3];
-                if( wd.equals("energy-management") || wd.equals("energy-management")) res = 49100l;
+            if(data!=null && data.size() > 0 && data.get("entryUrl")!=null){
+                String wd = data.get("entryUrl").split("/")[4];
+                if( wd.equals("energyManagement") || wd.equals("energyManagement")) res = 49100l;
             }
         }
         return res;
