@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
@@ -312,7 +313,7 @@ public interface UserService {
 
     QRCodeDTO querySubjectIdForScan();
 
-    DeferredResult<Object> waitScanForLogon(String subjectId);
+    DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest request, HttpServletResponse response);
 
     String getSercetKeyForScan(String args);
 

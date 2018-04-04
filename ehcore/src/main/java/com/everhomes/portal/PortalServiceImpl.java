@@ -1745,7 +1745,8 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			for (SceneType sceneType: SceneType.values()) {
-				if(sceneType == SceneType.PARK_TOURIST ||
+				if(sceneType == SceneType.DEFAULT ||
+						sceneType == SceneType.PARK_TOURIST ||
 						sceneType == SceneType.PM_ADMIN){
 					item.setSceneType(sceneType.getCode());
 					launchPadProvider.createLaunchPadItem(item);
@@ -1803,7 +1804,8 @@ public class PortalServiceImpl implements PortalService {
 			setItemModuleAppActionData(item, instanceConfig.getModuleAppId());
 		}
 		for (SceneType sceneType: SceneType.values()) {
-			if(sceneType == SceneType.PARK_TOURIST ||
+			if(sceneType == SceneType.DEFAULT ||
+					sceneType == SceneType.PARK_TOURIST ||
 					sceneType == SceneType.PM_ADMIN){
 				item.setSceneType(sceneType.getCode());
 				launchPadProvider.createLaunchPadItem(item);
@@ -2842,7 +2844,7 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
 			if(null != handler){
 				customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), moduleApp.getInstanceConfig());
-				LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
+				LOGGER.debug("get customTag from handler = {}, customTag = {}",handler,customTag);
 			}
 			moduleApp.setCustomTag(customTag);
 
@@ -2929,6 +2931,7 @@ public class PortalServiceImpl implements PortalService {
 		return scope;
 	}
 
+	@Override
 	public PortalPublishHandler getPortalPublishHandler(Long moduleId) {
 		PortalPublishHandler handler = null;
 

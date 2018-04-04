@@ -55,6 +55,11 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
+		//关联到主页签活动
+		if(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode().equals(config.getIndexFlag())){
+			config.setCategoryId(1L);
+		}
+
 		//保存应用入口的信息，不存在则新增，存在则更新
 		ActivityCategories activityCategory = saveEntry(namespaceId, config.getCategoryId(), appName);
 

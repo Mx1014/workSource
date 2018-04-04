@@ -8,6 +8,7 @@ import com.everhomes.oauth2.OAuth2UserContext;
 import com.everhomes.oauth2.RequireOAuth2Authentication;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserInfoDTO;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
@@ -48,23 +49,23 @@ public class OAuth2ApiController extends ControllerBase {
 
     /**
      * <b>URL: /oauth2api/trd/userInfo</b>
-     * <p>给第三方的获取用户信息，把一些敏感信息去掉了</p>
+     * <p>给第三方的获取用户信息</p>
      */
     @RequestMapping("trd/userInfo")
-    @RestReturn(value=UserInfo.class)
+    @RestReturn(value=UserInfoDTO.class)
     public RestResponse userInfo() {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
         UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
-        info = sensitiveClean(info);
-        return new RestResponse(info);
+        UserInfoDTO dto = sensitiveClean(info);
+        return new RestResponse(dto);
     }
 
-    private UserInfo sensitiveClean(UserInfo info) {
-        // 把一些敏感信息去掉    add by xq.tian  2017/06/16
-        UserInfo newInfo = new UserInfo();
-        newInfo.setAvatarUrl(info.getAvatarUrl());
-        newInfo.setNickName(info.getNickName());
-        newInfo.setAccountName(info.getAccountName());
-        return newInfo;
+    private UserInfoDTO sensitiveClean(UserInfo info) {
+        UserInfoDTO dto = new UserInfoDTO();
+        dto.setAvatarUrl(info.getAvatarUrl());
+        dto.setNickName(info.getNickName());
+        dto.setAccountName(info.getAccountName());
+        dto.setPhone((info.getPhones() != null && info.getPhones().size() > 0) ? info.getPhones().iterator().next() : null);
+        return dto;
     }
 }

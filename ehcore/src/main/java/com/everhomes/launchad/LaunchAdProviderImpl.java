@@ -28,10 +28,21 @@ public class LaunchAdProviderImpl implements LaunchAdProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public LaunchAd getLaunchAd(Integer namespaceId) {
+    public LaunchAd findById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_LAUNCH_ADVERTISEMENTS)
-                .where(Tables.EH_LAUNCH_ADVERTISEMENTS.NAMESPACE_ID.eq(namespaceId))
+                .where(Tables.EH_LAUNCH_ADVERTISEMENTS.ID.eq(id))
+                // .and(Tables.EH_LAUNCH_ADVERTISEMENTS.STATUS.eq(LaunchAdStatus.ACTIVE.getCode()))
+                .fetchAnyInto(LaunchAd.class);
+    }
+
+    @Override
+    public LaunchAd findByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhLaunchAdvertisements t = Tables.EH_LAUNCH_ADVERTISEMENTS;
+        return context.selectFrom(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .orderBy(t.ID.desc())
                 // .and(Tables.EH_LAUNCH_ADVERTISEMENTS.STATUS.eq(LaunchAdStatus.ACTIVE.getCode()))
                 .fetchAnyInto(LaunchAd.class);
     }

@@ -1811,9 +1811,16 @@ public class WarehouseServiceImpl implements WarehouseService {
             response.setNextPageAnchor(null);
         }
         List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(ids, ownerType, ownerId, communityId);
-
         if (requestMaterials != null && requestMaterials.size() > 0) {
-            List<WarehouseRequestMaterialDTO> requestDTOs = requestMaterials.stream().map(requestMaterial -> {
+            HashSet<Long> repeatedFilter = new HashSet<>();
+            List<WarehouseRequestMaterialDTO> requestDTOs = new ArrayList<>();
+            requestMaterials.stream().forEach(requestMaterial -> {
+                if(repeatedFilter.contains(requestMaterial.getRequestId())){
+                    // move to next iteration, return from lambda expression
+                    return;
+                }else{
+                    repeatedFilter.add(requestMaterial.getRequestId());
+                }
                 WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
                 dto.setRequestAmount(requestMaterial.getAmount());
                 //增加flowCaseId
@@ -1856,8 +1863,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                         }
                     }
                 }
-                return dto;
-            }).collect(Collectors.toList());
+                requestDTOs.add(dto);
+            });
             response.setRequestDTOs(requestDTOs);
         }
 

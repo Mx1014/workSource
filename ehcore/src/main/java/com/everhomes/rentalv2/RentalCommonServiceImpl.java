@@ -174,7 +174,7 @@ public class RentalCommonServiceImpl {
         sendMessageToUser(uid, notifyText);
     }
 
-    public BigDecimal calculateOverTimeFee(RentalOrder order, long now) {
+    public BigDecimal calculateOverTimeFee(RentalOrder order,BigDecimal amount, long now) {
 
         if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
             RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
@@ -223,9 +223,20 @@ public class RentalCommonServiceImpl {
                     }
                 }
             }
-            return order.getPaidMoney();
+
+            amount = amount.multiply(new BigDecimal(orderRule.getFactor()))
+                    .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
+            BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
+            order.setResourceTotalMoney(totalAmount);
+            order.setPayTotalMoney(totalAmount);
+            return amount;
+        }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()){
+            BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
+            order.setResourceTotalMoney(totalAmount);
+            order.setPayTotalMoney(totalAmount);
         }
-        return order.getPaidMoney();
+
+        return new BigDecimal(0);
     }
 
     public void refundOrder(RentalOrder order, long timestamp, BigDecimal orderAmount) {
@@ -363,6 +374,8 @@ public class RentalCommonServiceImpl {
                 return amount;
             }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
                 return order.getPaidMoney();
+            }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
+                processOrderNotRefundTip(order);
             }
         }
 
@@ -392,38 +405,39 @@ public class RentalCommonServiceImpl {
 
         StringBuilder sb = new StringBuilder();
         sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
-        sb.append("\r\n");
-        sb.append("\r\n");
-        for (int i = 0, size = outerRules.size(); i < size; i++) {
-            sb.append(i + 1);
+        //sb.append("\r\n");
+        //sb.append("\r\n");
+        int i = 0;
+        for (int  size = outerRules.size(); i < size; i++) {
+            sb.append(i+1);
             sb.append("，");
             sb.append("订单开始前");
             sb.append(outerRules.get(i).getDuration());
             sb.append("小时外取消，退还");
-            sb.append(outerRules.get(i).getFactor());
-            sb.append("%订单金额");
-            sb.append("\r\n");
+            sb.append(outerRules.get(i).getFactor().intValue());
+            sb.append("%订单金额;");
+          //  sb.append("\r\n");
         }
 
-        for (int i = 0, size = innerRules.size(); i < size; i++) {
-            sb.append(i + 1);
+        for (int j=0, size = innerRules.size(); j < size; j++) {
+            sb.append(i+j+1);
             sb.append("，");
             sb.append("订单开始前");
-            sb.append(innerRules.get(i).getDuration());
+            sb.append(innerRules.get(j).getDuration());
             sb.append("小时内取消，退还");
-            sb.append(innerRules.get(i).getFactor());
-            sb.append("%订单金额");
-            sb.append("\r\n");
+            sb.append(innerRules.get(j).getFactor().intValue());
+            sb.append("%订单金额;");
+         //   sb.append("\r\n");
         }
-        sb.append("\r\n");
+       // sb.append("\r\n");
         sb.append("如果您现在取消订单，将退还");
         sb.append(amount);
         sb.append("元（");
-        sb.append(orderRule.getFactor());
+        sb.append(orderRule.getFactor().intValue());
         sb.append("%）。");
 
         if (order.getPayMode() == PayMode.OFFLINE_PAY.getCode()){
-            sb.append("\r\n");
+           // sb.append("\r\n");
             sb.append("请在确认后联系客服线下退款:");
             RentalResource rs = getRentalResource(order.getResourceType(),order.getRentalResourceId());
             if (rs.getOfflinePayeeUid()!=null){

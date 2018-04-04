@@ -1630,15 +1630,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
-            organizationSearcher.feedDoc(organization);
+            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+            if (null != addressDTOs && 0 != addressDTOs.size()) {
+                this.addAddresses(organization.getId(), addressDTOs, user.getId());
+                organizationSearcher.feedDoc(organization);
+            }
 
             //没有有关联的客户则新增一条
             if(customer == null) {
-                List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-                if (null != addressDTOs && 0 != addressDTOs.size()) {
-                    this.addAddresses(organization.getId(), addressDTOs, user.getId());
-                }
-
                 EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
                 enterpriseCustomer.setCommunityId(cmd.getCommunityId());
                 enterpriseCustomer.setNamespaceId(organization.getNamespaceId());
@@ -1665,16 +1664,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 //			if(null != attachments && 0 != attachments.size()){
             this.addAttachments(organization.getId(), attachments, user.getId());
-//			}
-
-            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-//			if(null != addressDTOs && 0 != addressDTOs.size()){
-            this.addAddresses(organization.getId(), addressDTOs, user.getId());
-            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-            if(customer != null) {
-                this.updateCustomerEntryInfo(customer, addressDTOs);
-            }
-//			}
         }
     }
 
@@ -8896,6 +8885,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             for (OrganizationMember member : members) {
                 OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
                 managerDTO.setMemberId(member.getId());
+                managerDTO.setDetailId(member.getDetailId());
+                managerDTO.setContactName(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()).getContactName());
                 dtos.add(managerDTO);
             }
         }

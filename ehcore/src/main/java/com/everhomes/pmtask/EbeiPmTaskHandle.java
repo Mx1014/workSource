@@ -509,7 +509,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                     FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         else
              flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+                 FlowModuleType.REPAIR_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,

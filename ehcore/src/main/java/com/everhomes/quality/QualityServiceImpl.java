@@ -5120,4 +5120,27 @@ Long nextPageAnchor = null;
 		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 		record.setProcessMessage(msg);
 	}
+
+	@Override
+	public void startCrontabTask() {
+		LOGGER.info("================================================ starting quality manual job... ");
+		qualityProvider.closeDelayTasks();
+
+		List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
+
+		for (QualityInspectionStandards standard : activeStandards) {
+			boolean isRepeat = false;
+			try {
+				isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+			} catch (Exception e) {
+				LOGGER.info("repeatSetting  analyzed erro :", e.getMessage());
+			}
+			LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId()
+					+ "repeat setting id = " + standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+			if (isRepeat) {
+				createTaskByStandardId(standard.getId());
+			}
+
+		}
+	}
 }

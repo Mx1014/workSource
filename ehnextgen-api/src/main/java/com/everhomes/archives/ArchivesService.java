@@ -43,9 +43,6 @@ public interface ArchivesService {
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
-    //  获取员工在企业的真实名称
-    String getEmployeeRealName(Long userId, Long organizationId);
-
     //  获取员工的部门
     Map<Long, String> getEmployeeDepartment(Long detailId);
 

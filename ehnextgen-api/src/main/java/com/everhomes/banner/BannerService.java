@@ -1,26 +1,14 @@
 package com.everhomes.banner;
 
-import java.util.List;
+import com.everhomes.rest.banner.*;
+import com.everhomes.rest.banner.admin.CreateBannerCommand;
+import com.everhomes.rest.banner.admin.DeleteBannerCommand;
+import com.everhomes.rest.banner.admin.*;
+import com.everhomes.rest.banner.admin.UpdateBannerCommand;
+import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.everhomes.rest.banner.BannerClickDTO;
-import com.everhomes.rest.banner.BannerDTO;
-import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
-import com.everhomes.rest.banner.CreateBannerClickCommand;
-import com.everhomes.rest.banner.DeleteBannerByOwnerCommand;
-import com.everhomes.rest.banner.GetBannerByIdCommand;
-import com.everhomes.rest.banner.GetBannersCommand;
-import com.everhomes.rest.banner.ListBannersByOwnerCommand;
-import com.everhomes.rest.banner.ListBannersByOwnerCommandResponse;
-import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
-import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
-import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
-import com.everhomes.rest.banner.admin.DeleteBannerAdminCommand;
-import com.everhomes.rest.banner.admin.ListBannersAdminCommand;
-import com.everhomes.rest.banner.admin.ListBannersAdminCommandResponse;
-import com.everhomes.rest.banner.admin.UpdateBannerAdminCommand;
-import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
+import java.util.List;
 
 public interface BannerService {
 
@@ -28,11 +16,11 @@ public interface BannerService {
     
     List<BannerDTO> getBannersByScene(GetBannersBySceneCommand cmd, HttpServletRequest request);
 
-    void createBanner(CreateBannerAdminCommand cmd);
+    void createBanner(CreateBannerCommand cmd);
 
-    void updateBanner(UpdateBannerAdminCommand cmd);
+    BannerDTO updateBanner(UpdateBannerCommand cmd);
 
-    void deleteBannerById(DeleteBannerAdminCommand cmd);
+    void deleteBannerById(DeleteBannerCommand cmd);
 
     String createOrUpdateBannerClick(CreateBannerClickCommand cmd);
 
@@ -40,7 +28,7 @@ public interface BannerService {
 
     BannerDTO getBannerById(GetBannerByIdCommand cmd);
 
-    ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd);
+    ListBannersResponse listBanners(ListBannersCommand cmd);
     
     ListBannersByOwnerCommandResponse listBannersByOwner(ListBannersByOwnerCommand cmd);
 
@@ -51,5 +39,12 @@ public interface BannerService {
 	void createBannerByOwner(CreateBannerByOwnerCommand cmd);
 
 	void reorderBannerByOwner(ReorderBannerByOwnerCommand cmd);
-    
+
+    List<BannerDTO> getBannersBySceneNew(GetBannersBySceneCommand cmd);
+
+    CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd);
+
+    void reorderBanners(ReorderBannersCommand cmd);
+
+    BannerDTO updateBannerStatus(UpdateBannerStatusCommand cmd);
 }
