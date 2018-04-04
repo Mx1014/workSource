@@ -9,27 +9,32 @@ import javax.validation.constraints.NotNull;
  *     <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>contentType: 广告类型 {@link com.everhomes.rest.launchad.LaunchAdType}</li>
- *     <li>contentUri: 广告文件uri</li>
+ *     <li>contentUriOrigin: 广告文件uri</li>
  *     <li>timesPerDay: 每天显示次数, 为 0 则不限制</li>
  *     <li>displayInterval: 最小的显示间隔时间, 单位为分钟, 为 0 则不限制</li>
  *     <li>durationTime: 显示时间, 单位 秒</li>
  *     <li>skipFlag: 是否支持跳过 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- *     <li>actionType: 点击动作 {@link com.everhomes.rest.launchpad.ActionType}</li>
- *     <li>actionData: 链接示例: {"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}</li>
+ *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
+ *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
  * </ul>
  */
-public class SetLaunchAdCommand {
+public class CreateOrUpdateLaunchAdCommand {
 
-    @NotNull private Integer namespaceId;
+    private Long id;
+    @NotNull
+    private Integer namespaceId;
     private String contentType;
-    private String contentUri;
+    private String contentUriOrigin;
     private Integer timesPerDay;
     private Integer displayInterval;
     private Integer durationTime;
     private Byte skipFlag;
-    private Byte actionType;
-    private String actionData;
+
+    @NotNull
+    private String targetType;
+    private String targetData;
+
     private Byte status;
 
     public Integer getNamespaceId() {
@@ -48,12 +53,20 @@ public class SetLaunchAdCommand {
         this.contentType = contentType;
     }
 
-    public String getContentUri() {
-        return contentUri;
+    public String getContentUriOrigin() {
+        return contentUriOrigin;
     }
 
-    public void setContentUri(String contentUri) {
-        this.contentUri = contentUri;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setContentUriOrigin(String contentUriOrigin) {
+        this.contentUriOrigin = contentUriOrigin;
     }
 
     public Integer getTimesPerDay() {
@@ -88,28 +101,28 @@ public class SetLaunchAdCommand {
         this.skipFlag = skipFlag;
     }
 
-    public Byte getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(Byte actionType) {
-        this.actionType = actionType;
-    }
-
-    public String getActionData() {
-        return actionData;
-    }
-
-    public void setActionData(String actionData) {
-        this.actionData = actionData;
-    }
-
     public Byte getStatus() {
         return status;
     }
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getTargetData() {
+        return targetData;
+    }
+
+    public void setTargetData(String targetData) {
+        this.targetData = targetData;
     }
 
     @Override
