@@ -7950,6 +7950,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null != ptr && pdl == null) {
 			pdl = new PunchDayLog();
 			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, pdl);
+			LOGGER.debug("pdl is {}",StringHelper.toJsonString(pdl));
 		}
 		String[] statusList =null;
         String[] approvalStatus = null;
