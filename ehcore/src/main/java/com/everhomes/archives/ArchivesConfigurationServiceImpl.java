@@ -33,9 +33,9 @@ public class ArchivesConfigurationServiceImpl implements ArchivesConfigurationSe
     }
 
 
-    @Override
+/*    @Override
     public void sendingMailJob(Integer hour, List<ArchivesNotifications> notifyLists) {
         final Job job = new Job(ArchivesNotificationAction.class.getName(), new Object[]{StringHelper.toJsonString(notifyLists)});
         jesqueClientFactory.getClientPool().delayedEnqueue(ARCHIVES_NOTIFICATION, job, System.currentTimeMillis() + hour * 60 * 60 * 1000);
-    }
+    }*/
 }

@@ -27,6 +27,8 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -59,6 +61,8 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -122,6 +126,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private MessagingService messagingService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -1600,6 +1607,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Scheduled(cron = "0 0 4 * * ?")
     @Override
     public void executeArchivesConfiguration() {
+        if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
+            return;
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
         if (configurations != null && configurations.size() > 0) {
             for (ArchivesConfigurations configuration : configurations) {
@@ -2579,6 +2588,19 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void executeArchivesNotification() {
+        List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByDay(LocalDateTime.now().getDayOfWeek().getValue());
+        if (results != null && results.size() > 0) {
+            //  2.按照时间归类，来启动对应时间点的定时器
+            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
+                    (ArchivesNotifications::getNotifyTime));
+            for (Integer hour : notifyMap.keySet()) {
+//                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
+            }
+        }
+
+    }
+
+    private void sendArchivesNotification(){
         // set the time
         Date firstOfWeek = ArchivesUtil.currentDate();
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
@@ -2713,14 +2735,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
-        if (results != null && results.size() > 0) {
-            //  2.按照时间归类，来启动对应时间点的定时器
-            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
-                    (ArchivesNotifications::getNotifyHour));
-            for (Integer hour : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
-            }
-        }
+
     }
 
     private void sendEmails(List<ArchivesNotifications> notifyLists) {
