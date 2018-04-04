@@ -71,6 +71,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
@@ -327,13 +328,13 @@ public class UserServiceImpl implements UserService {
 	private NamespaceResourceService namespaceResourceService;
 
 	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-
-	@Autowired
 	List<FunctionCardHandler> functionCardHandlers;
 
 	@Autowired
 	private QRCodeService qrCodeService;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 //
 //    @Autowired
@@ -5514,6 +5515,8 @@ public class UserServiceImpl implements UserService {
 		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
 
+		resp.setScanForLogonServer("https://web.zuolin.com");
+
 		// 客户端资源缓存配置
 		String clientCacheConfig = configurationProvider.getValue(
 		        namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
@@ -5537,13 +5540,15 @@ public class UserServiceImpl implements UserService {
 
 	// 登录等待
 	@Override
-	public DeferredResult<Object> waitScanForLogon(String subjectId){
+	public DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest contextRequest, HttpServletResponse contextResponse){
 
-		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
+		DeferredResult<RestResponse> finalResult =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
 
 			@Override
 			public void handleResult(Object result) {
-				BlockingEventResponse response = (BlockingEventResponse)result;
+				RestResponse restResponse = (RestResponse)result;
+				BlockingEventResponse response = (BlockingEventResponse)restResponse.getResponseObject();
 				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
 					LOGGER.error("waitScanForLogon failure");
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5557,35 +5562,55 @@ public class UserServiceImpl implements UserService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
 				}
 
+				String token = null;
 				try {
-					String token = URLDecoder.decode(response.getMessage(), "utf-8");
-					String[] tokenParam = token.split("&");
-					String salt = tokenParam[0];
-					if (salt.equals(SALT)) {
-						Long userId = Long.valueOf(tokenParam[1]);
-						Integer namespaceId = Integer.valueOf(tokenParam[2]);
-						String userToken = tokenParam[3];
-						LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
-						//todo 验证
-						UserLogin userLogin = logonByToken(logintoken);
-						Map valueMap = new HashMap();
-						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
-						valueMap.put("args",tokenParam[4]);
-						response.setMessage(GsonUtil.toJson(valueMap));
-					} else {
-						LOGGER.error("waitScanForLogon failure");
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
-					}
+					token = URLDecoder.decode(response.getMessage(), "utf-8");
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
+				}
+//					String[] tokenParam = token.substring(1,token.length()-2).split("&");
+				if(token.indexOf("\"") == 0)
+					token = token.substring(1, token.length());
+				if(token.indexOf("\"") == token.length() - 1)
+					token = token.substring(0, token.length() -1);
+				String[] tokenParam = token.trim().split("&");
+				String salt = tokenParam[0];
+				if (salt.equals(SALT)) {
+					Long userId = Long.valueOf(tokenParam[1]);
+					Integer namespaceId = Integer.valueOf(tokenParam[2]);
+					String userToken = tokenParam[3];
+					LOGGER.debug("userLoginToken = {}", userToken);
+
+					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+					Map valueMap = new HashMap();
+					valueMap.put("userLogin", GsonUtil.toJson(logintoken));
+					valueMap.put("args",tokenParam[4]);
+					valueMap.put("contentServer",contentServerService.getContentServer());
+					response.setMessage(GsonUtil.toJson(valueMap));
+					restResponse.setResponseObject(response);
+					restResponse.setErrorCode(ErrorCodes.SUCCESS);
+					restResponse.setErrorDescription("OK");
+
+//					//todo 验证
+					UserLogin origin_login = logonByToken(logintoken);
+					User user = userProvider.findUserById(origin_login.getUserId());
+					UserLogin login = createLogin(namespaceId, user, null, null);
+					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
+					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
+				} else {
+					restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
 				}
 			}
 
 		});
-		return result;
+
+		return finalResult;
 	}
 
-	private static final String SALT = "this is salt";
+	private static final String SALT = "salt";
 
 	// 获取当前准备登录用户的混淆key
 	@Override
