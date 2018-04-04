@@ -856,19 +856,19 @@ public class BusinessOpenController extends ControllerBase {
         return restResponse;
     }
 
-    @RequestMapping("verifyUserByTokenFromAnBang")
-    @RequireAuthentication(false)
-    @RestReturn(value = UserLogin.class)
-    public RestResponse verifyUserByTokenFromAnBang(LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-        UserLogin login = this.userService.verifyUserByTokenFromAnBang(cmd.getUserIdentifier());
-        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
-        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
-        setCookieInResponse("token", tokenString, request, response);
-        RestResponse restResponse = new RestResponse(login);
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
+//    @RequestMapping("verifyUserByTokenFromAnBang")
+//    @RequireAuthentication(false)
+//    @RestReturn(value = UserLogin.class)
+//    public RestResponse verifyUserByTokenFromAnBang(LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+//        UserLogin login = this.userService.verifyUserByTokenFromAnBang(cmd.getUserIdentifier());
+//        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+//        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+//        setCookieInResponse("token", tokenString, request, response);
+//        RestResponse restResponse = new RestResponse(login);
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
     
     @RequestMapping("abdir")
     @RequireAuthentication(false)
