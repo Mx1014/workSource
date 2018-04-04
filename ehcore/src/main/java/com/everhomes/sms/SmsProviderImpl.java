@@ -2,7 +2,6 @@
 package com.everhomes.sms;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -94,36 +93,7 @@ public class SmsProviderImpl implements SmsProvider {
 
     private void doSend(String handlerName, Integer namespaceId, String[] phoneNumbers,
             String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        Map<SmsHandler, String[]> handlersMap;
-
-        phoneNumbers = normalize(phoneNumbers);
-        validate(phoneNumbers);
-
-        handlersMap = getSmsHandlerMap(handlerName, namespaceId, phoneNumbers);
-
-        handlersMap.forEach((handler, phones) -> {
-            publishEvent(() -> {
-                List<SmsLog> logs = handler.doSend(namespaceId, phones,
-                                templateScope, templateId, templateLocale, variables);
-                if (logs != null) {
-                    saveSmsLog(logs, null);
-                }
-            });
-        });
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.info(
-                    "Send sms message, namespaceId="
-                            + namespaceId
-                            + ", phoneNumbers=["
-                            + StringUtils.join(phoneNumbers, ",")
-                            + "], templateScope="
-                            + templateScope
-                            + ", templateId="
-                            + templateId
-                            + ", templateLocale="
-                            + templateLocale);
-        }
+        doSendWhenFailedRetry(handlerName, namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables, 0);
     }
 
     private void doSendWhenFailedRetry(String handlerName, Integer namespaceId,
@@ -133,7 +103,7 @@ public class SmsProviderImpl implements SmsProvider {
         Map<SmsHandler, String[]> handlersMap;
 
         phoneNumbers = normalize(phoneNumbers);
-        validate(phoneNumbers);
+        // validate(phoneNumbers);
 
         handlersMap = getSmsHandlerMap(handlerName, namespaceId, phoneNumbers);
 
@@ -188,15 +158,27 @@ public class SmsProviderImpl implements SmsProvider {
             throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
         }
         List<String> normalizedPhones = new ArrayList<>(phoneNumbers.length);
-        Pattern pattern = testPhonePattern();
+        Pattern testPattern = testPhonePattern();
+        Pattern strictPattern = strictPhonePattern();
         for (String phoneNumber : phoneNumbers) {
             if (phoneNumber == null) {
                 continue;
             }
             phoneNumber = phoneNumber.replaceAll("[_,.\\s+]", "");
+
+            // 前缀带00的可能是国际手机号，国际手机号格式不确定，所以不做校验
+            if (phoneNumber.startsWith("00")) {
+                normalizedPhones.add(phoneNumber);
+                continue;
+            }
             // 测试手机号，跳过
-            if (pattern.matcher(phoneNumber).matches()) {
-                LOGGER.debug("Test phone '{}' were found while send sms, SKIPPED.", phoneNumber);
+            if (testPattern.matcher(phoneNumber).matches()) {
+                LOGGER.info("Test phone '{}' were found while send sms, SKIPPED.", phoneNumber);
+                continue;
+            }
+            // 空号，跳过
+            if (!strictPattern.matcher(phoneNumber).matches()) {
+                LOGGER.info("Invalid phone '{}' were found while send sms, SKIPPED.", phoneNumber);
                 continue;
             }
             normalizedPhones.add(phoneNumber);
@@ -204,7 +186,7 @@ public class SmsProviderImpl implements SmsProvider {
         return normalizedPhones.toArray(new String[normalizedPhones.size()]);
     }
 
-    private void validate(String[] phoneNumbers) {
+    /*private void validate(String[] phoneNumbers) {
         Pattern pattern = strictPhonePattern();
         for (String phoneNumber : phoneNumbers) {
             if (phoneNumber.startsWith("00")) {
@@ -219,7 +201,7 @@ public class SmsProviderImpl implements SmsProvider {
                         phoneNumber);
             }
         }
-    }
+    }*/
 
     private Pattern testPhonePattern() {
         try {

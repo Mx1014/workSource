@@ -2390,9 +2390,30 @@ public class CustomerServiceImpl implements CustomerService {
         return response;
     }
 
+    /**
+     * 每天早上2点20,自动客户合同信息
+     * */
+    @Scheduled(cron = "1 20 2 * * ?")
+    public void customerAutoSync() {
+        List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+        if(communities != null) {
+            for(Community community : communities) {
+                SyncCustomersCommand command = new SyncCustomersCommand();
+                command.setNamespaceId(community.getNamespaceId());
+                command.setCommunityId(community.getId());
+                syncEnterpriseCustomers(command, false);
+                syncIndividualCustomers(command);
+            }
+
+        }
+    }
+
     @Override
-    public String syncEnterpriseCustomers(SyncCustomersCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+    public String syncEnterpriseCustomers(SyncCustomersCommand cmd, Boolean authFlag) {
+        if(authFlag) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+        }
+
         if(cmd.getNamespaceId() == 999971) {
 
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());

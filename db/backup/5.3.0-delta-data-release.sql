@@ -1536,7 +1536,7 @@ SET @realm_id = (SELECT MAX(id) FROM `eh_version_realm`);
 SET @url_id = (SELECT MAX(id) FROM `eh_version_urls`);
 SET @upgrade_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@realm_id := @realm_id + 1), 'energyManagement', NULL, NOW(), '0');
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', NULL, '0', NULL, NULL, NULL, '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0.zip', NULL, '0', NULL, NULL, NULL, '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES ((@upgrade_id := @upgrade_id + 1), @realm_id, '-0.1', '1048576', '0', '1.0.0', '0', NOW(), '0');
 
 -- fix 26107 by xiongying
@@ -1691,3 +1691,73 @@ UPDATE eh_service_modules set type = 0 where id in (70000, 70200, 70300, 70100, 
 
 -- 更新"入驻申请"菜单的路由 add by yanjun 201803281414
 UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
+
+-- 更新成都创业场的“入驻申请”的actionType为71
+UPDATE eh_launch_pad_items set action_type = 71 where action_type = 68  and namespace_id = 999964;
+
+-- 增加一个模块“企业信息”及其菜单 add by yanjun 201803281519
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('21400', '企业信息【企业后台】', '110000', '/110000/21400', '1', '2', '2', '35', '2018-03-28 14:49:34', NULL, '13', '2018-03-28 14:49:45', '0', '0', '0', '0', 'community_control');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76000000', '基础信息', '0', NULL, NULL, '1', '2', '/76000000', 'organization', '6', NULL, '1', 'system', 'classify', '2');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76010000', '企业信息', '76000000', NULL, 'customer-management', '1', '2', '/76000000/76010000', 'organization', '10', '21400', '2', 'system', 'module', '2');
+
+-- 部分企业管理应用的名称为空导致菜单名称为空。add by yanjun 201803281555
+UPDATE eh_reflection_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+
+-- 调整模块属性
+update eh_service_modules set module_control_type = 'community_control' where id in (10100,10600,10300);
+
+
+-- 更新一些应用名字   add by yanjun 201803301855
+UPDATE eh_service_modules SET `name` = '门禁【app应用必选】' WHERE id = 41000;
+UPDATE eh_service_modules SET `name` = '请示单管理【深业定制】', default_order = 80 WHERE id = 25000;
+
+-- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如："表单管理"
+UPDATE eh_service_modules set type = 0 where id in (50900, 10850);
+
+
+-- 一些普通公司菜单的处理  add by yanjun 201804010308
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in (71000000, 71010000, 71020000, 71030000, 71040000, 72040000,72050000,72060000,72070000,72080000,72090000,72100000,72110000,72120000,72130000,72140000,72160000,73000000,73010000,76000000,76010000);
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id  = 75000000;
+
+UPDATE eh_web_menus set `status` = 0, `name` = '管理员管理' where type = 'organization' and id  = 75010000;
+
+UPDATE eh_web_menus set `status` = 0 where type = 'organization' and id in  (74010000, 74040000, 74050000, 74020000, 74030000, 74060000);
+
+UPDATE eh_service_module_apps set `name` = '员工认证' WHERE module_id = 50500;
+
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72140000;
+
+-- 纠正军哥调整模块的坑爹错误
+update eh_service_modules t1 set path = concat('/110000/20400',"/",t1.id) where t1.parent_id in (20400);
+update eh_service_modules t1 set path = concat('/110000/32500',"/",t1.id) where t1.parent_id in (32500);
+update eh_service_modules t1 set path = concat('/110000/40900',"/",t1.id) where t1.parent_id in (40900);
+update eh_service_modules t1 set path = concat('/110000/21300',"/",t1.id) where t1.parent_id in (21300);
+update eh_service_modules t1 set path = concat('/110000/21200',"/",t1.id) where t1.parent_id in (21200);
+update eh_service_modules t1 set path = concat('/110000/37000',"/",t1.id) where t1.parent_id in (37000);
+update eh_service_modules t1 set path = concat('/110000/21100',"/",t1.id) where t1.parent_id in (21100);
+
+update eh_service_modules t1 set path = concat('/100000/40100',"/",t1.id) where t1.parent_id in (40100);
+update eh_service_modules t1 set path = concat('/100000/36000',"/",t1.id) where t1.parent_id in (36000);
+update eh_service_modules t1 set path = concat('/100000/40200',"/",t1.id) where t1.parent_id in (40200);
+update eh_service_modules t1 set path = concat('/100000/22000',"/",t1.id) where t1.parent_id in (22000);
+update eh_service_modules t1 set path = concat('/100000/23000',"/",t1.id) where t1.parent_id in (23000);
+update eh_service_modules t1 set path = concat('/100000/24000',"/",t1.id) where t1.parent_id in (24000);
+
+
+-- 公司门禁改dataType add by yanjun 201804021557
+UPDATE eh_web_menus SET data_type = 'entrance-guard' where `name` = '公司门禁' and id in (16041400, 48140000, 72140000);
+
+-- 更新企业管理应用的ActionData和ActionType  add by yanjun 201804030945  已经在现网执行
+UPDATE eh_service_module_apps set action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
+UPDATE eh_reflection_service_module_apps SET action_type = 34, instance_config = '{"type":3}' WHERE module_id = 33000;
+
+-- 开放普通公司文件管理菜单  add by yanjun 201804030945  已经在现网、清华执行
+UPDATE eh_web_menus set `name` = '文件管理', data_type = 'file-management', `status` = 2, module_id = 41500 where type = 'organization' and id  = 74030000 ;
+
+-- 图片验证码错误提醒  add by yanjun 201804031355
+SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id := @id +1, 'picturevalidate', '10000', 'zh_CN', '请输入正确的字母或数字');

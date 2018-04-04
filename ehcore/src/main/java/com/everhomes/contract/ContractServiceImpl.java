@@ -890,14 +890,14 @@ public class ContractServiceImpl implements ContractService {
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setCurrentOrganizationId(contract.getPartyAId());
-		createFlowCaseCommand.setTitle(contract.getName() + "合同申请");
+		createFlowCaseCommand.setTitle(contract.getCustomerName() + "的合同申请");
 		createFlowCaseCommand.setApplyUserId(contract.getCreateUid());
 		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-		createFlowCaseCommand.setServiceType("合同申请");
+		createFlowCaseCommand.setServiceType("合同管理");
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 

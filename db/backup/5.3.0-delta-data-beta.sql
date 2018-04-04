@@ -45,9 +45,17 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 */
 
 -- 5、在运营后台添加活动或论坛的主页签应用后需要刷新应用id，配置为空的应用设置为'{}'
--- UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
--- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
--- UPDATE eh_service_module_apps set instance_config = '{}' where instance_config is NULL or instance_config = '';
+/*
+
+ UPDATE eh_service_module_apps set instance_config = replace(instance_config, '"entryId":2,', '"categoryId":2,') where module_id = 10600 and  custom_tag = '2' and instance_config NOT LIKE '%"categoryId":2%';
+ UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
+ UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
+ UPDATE eh_service_module_apps set custom_tag = 0 where module_id = 10100 and (instance_config = '{"forumEntryId":"0"}' OR instance_config = '{"forumEntryId":0}');
+ UPDATE eh_service_module_apps set custom_tag = 1 where module_id = 10100 and (instance_config = '{"forumEntryId":"1"}' OR instance_config = '{"forumEntryId":1}');
+ UPDATE eh_service_module_apps set custom_tag = 2 where module_id = 10100 and (instance_config = '{"forumEntryId":"2"}' OR instance_config = '{"forumEntryId":2}');
+ UPDATE eh_service_module_apps set instance_config = '{}' where instance_config is NULL or instance_config = '';
+
+*/
 
 -- 6、同步数据库id
 -- /evh/admin/syncSequence
@@ -109,6 +117,12 @@ enterprise.sh
 /customer/syncEnterpriseCustomer
 /payment_application/syncIndex
 */
+
+
+-- 11、同步审批范围及离职人员状态
+-- /admin/general_approval/initializeGeneralApprovalScope
+-- /archives/syncArchivesDismissStatus
+
 -- 12、以下按照顺序执行
 
 -- flush redis    清空掉redis
@@ -143,3 +157,27 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
     VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'flow.stepname.approve_step', '下一步', 'approve-step', 0, NULL);
 
 UPDATE eh_flow_buttons SET button_name = '下一步' WHERE button_name = 'approve_step';
+
+
+-- 基线现网 CDN SQL
+-- CDN 配置   add by xq.tian
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.url.vendor', 'SimpleAndAliCDN', '资源URL解析器, 注意：这里的配置改了，对应的contentServer的配置也要改', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.privateKey', 'ehdjlajgls39hdsfjwl2', 'AliCDN URL鉴权 privateKey', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.domain', 'content-1-cdn.zuolin.com', 'AliCDN 域名', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.expireSeconds', '1800', 'AliCDN 资源链接过期时间', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.client.cacheConfig', '{"ignoreParameters":["token","auth_key"]}', '客户端资源的Cache配置', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.cdn.separation_version', '5.3.0', '新旧版本客户端cdn支持的分界版本', 0, NULL);
+
+-- 2. 替换现网的的contentserver, 目录在 ehnextgen/contentserver/release/server/contentserver
+
+-- 3. 修改contentserver的配置文件：
+-- auth = 3
+
+-- 4. 在阿里云上配置cdn content-1.zuolin.com -> content-1-cdn.zuolin.com

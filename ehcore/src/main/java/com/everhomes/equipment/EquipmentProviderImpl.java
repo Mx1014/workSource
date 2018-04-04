@@ -3336,4 +3336,25 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
                 .execute();
     }
+
+    @Override
+    public List<EquipmentInspectionTasks> listPersonalDoneTasks(Long targetId, Long inspectionCategoryId, int pageSize, Integer offset, Timestamp startTime) {
+        List<EquipmentInspectionTasks> tasksList = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTOR_ID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+        query.addLimit(offset * (pageSize - 1), pageSize);
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.desc());
+
+        query.fetch().map((r) -> {
+            tasksList.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+            return null;
+        });
+
+
+        return tasksList;
+    }
 }

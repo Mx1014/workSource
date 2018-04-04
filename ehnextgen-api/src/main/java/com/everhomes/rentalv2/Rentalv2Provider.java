@@ -199,4 +199,6 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> listOverTimeRentalOrders(Integer namespaceId, Long resourceTypeId, String resourceType,
 											   Long rentalSiteId, String spaceNo);
+	List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
+									 Long rentalSiteId,List<Long> cellIds);
 }

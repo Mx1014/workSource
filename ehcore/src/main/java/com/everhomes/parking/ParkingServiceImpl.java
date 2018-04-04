@@ -1986,9 +1986,9 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"time out.");
-		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L, exceptionResult);
+		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.RECHARE_TIME_OUT,
+				"回调超时，请稍后再试");
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(60000L, exceptionResult);
 //        System.out.println(Thread.currentThread().getName());
 //        map.put("test", deferredResult);
 
@@ -2095,13 +2095,30 @@ public class ParkingServiceImpl implements ParkingService {
 				}
 			}
 		}else {
-			String json = configProvider.getValue("parking.default.card.type", "");
-			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
-			ParkingCardRequestTypeDTO dto = ConvertHelper.convert(cmd, ParkingCardRequestTypeDTO.class);
-			dto.setCardTypeId(cardType.getTypeId());
-			dto.setCardTypeName(cardType.getTypeName());
-			dto.setNamespaceId(UserContext.getCurrentNamespaceId());
-			dtos.add(dto);
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+			ListCardTypeResponse listCardTypeResponse = handler.listCardType(null);
+			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
+			if(list==null || list.size()==0){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,
+						"未查询到月卡类型信息");
+			}
+
+			dtos = list.stream().map(r ->{
+				ParkingCardRequestTypeDTO dto = new ParkingCardRequestTypeDTO();
+				dto.setCardTypeId(r.getTypeId());
+				dto.setCardTypeName(r.getTypeName());
+				return dto;
+			}).collect(Collectors.toList());
+
+//			String json = configProvider.getValue("parking.default.card.type", "");
+//			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+//			ParkingCardRequestTypeDTO dto = ConvertHelper.convert(cmd, ParkingCardRequestTypeDTO.class);
+//			dto.setCardTypeId(cardType.getTypeId());
+//			dto.setCardTypeName(cardType.getTypeName());
+//			dto.setNamespaceId(UserContext.getCurrentNamespaceId());
+//			dtos.add(dto);
 		}
 
 		return dtos;

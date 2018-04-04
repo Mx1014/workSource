@@ -38,7 +38,7 @@ public class CancelUnsuccessRentalOrderAction implements Runnable {
 		RentalOrder rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
 		if(null == rentalBill)
 			return ;
-		if (!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) ) {
+		if (rentalBill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ) {
 
 			dbProvider.execute((TransactionStatus status) -> {
 						rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
