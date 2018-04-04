@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
-
+import com.alibaba.fastjson.JSON;
 import com.everhomes.PictureValidate.PictureValidateService;
 import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
 import com.everhomes.acl.AclProvider;
@@ -67,6 +67,7 @@ import com.everhomes.news.NewsService;
 import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.point.UserLevel;
 import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
@@ -75,6 +76,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
@@ -114,6 +117,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -125,10 +129,19 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -139,7 +152,11 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -186,7 +203,16 @@ public class UserServiceImpl implements UserService {
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @Autowired
+
+	private static String ANBANG_CLIENTID = "zuolin";
+	private static String ANBANG_CLIENTSECRET = "enVvbGluMjAxODAxMDI=";
+	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
+	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
+	private static String ANBANG_CURRENT_USER_URL = "http://139.196.255.176:8000/api/auth/current-user";
+	private static Integer ANBANG_NAMESPACE_ID = 999949;
+
+
+	@Autowired
 	private DbProvider dbProvider;
 
 	@Autowired
@@ -3157,7 +3183,9 @@ public class UserServiceImpl implements UserService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		checkSceneToken(userId, cmd.getSceneToken());
+		if(!StringUtils.isEmpty(cmd.getSceneToken())) {
+		    checkSceneToken(userId, cmd.getSceneToken());    
+		}
 
 		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
 		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
@@ -4865,6 +4893,22 @@ public class UserServiceImpl implements UserService {
 
 		return communityId;
 	}
+	
+	   private Long getOrgIdBySceneToken(SceneTokenDTO sceneTokenDTO) {
+	        SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+
+	        switch (sceneType) {
+	            case PM_ADMIN:// 无小区ID
+	            case ENTERPRISE: // 增加两场景，与园区企业保持一致
+	            case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致
+	                return sceneTokenDTO.getEntityId();
+	            default:
+	                break;
+	        }
+
+	        return null;
+	    }
+
 
 	public List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		if(cmd.getSceneType() == null){
@@ -5527,6 +5571,372 @@ public class UserServiceImpl implements UserService {
 
         return resp;
     }
+
+	@Override
+	public void syncUsersFromAnBangWuYe( SyncUsersFromAnBangWuYeCommand cmd) {
+		//调用授权接口
+		String timestamp = null;
+		if(cmd.getIsAll() == 1){//全量
+			timestamp = null;
+		}else if(cmd.getIsAll() == 0){//从上次同步时间的增量
+			SimpleDateFormat  formatter = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
+			timestamp = formatter.format(DateHelper.currentGMTTime());
+		}
+		List<String> timestampList = new ArrayList<>();
+		timestampList.add(timestamp);
+
+		String secret = String.format("%s:%s", ANBANG_CLIENTID, ANBANG_CLIENTSECRET);
+		String baseStr = new String(Base64.getEncoder().encode(secret.getBytes()));
+
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+		headerParam.add("Authorization", "Basic " + baseStr);
+
+
+
+		MultiValueMap<String, Object> bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("client_id", ANBANG_CLIENTID);
+		bodyParam.add("client_secret", ANBANG_CLIENTSECRET);
+		bodyParam.add("grant_type", "client_credentials");
+
+		dbProvider.execute(r -> {
+			try {
+				restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+					@Override
+					public void onSuccess(ResponseEntity<String> result) {
+						Map resultMap = JSON.parseObject(result.getBody().toString());
+						String acess_token = String.valueOf(resultMap.get("access_token"));
+
+
+						Map headerParam = new HashMap();
+						headerParam.put("Authorization", "bearer "+ acess_token);
+
+						StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+						if(timestampList.get(0) != null){
+							getUrl.append("?").append("startDate=").append(timestampList.get(0));
+						}
+
+						try {
+							ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString() , headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
+
+								@Override
+								public void onSuccess(ResponseEntity<String> result) {
+									List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
+									if(userList != null && userList.size() > 0) {
+//										if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
+//											// 删除全部的用户
+//											userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
+//										}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+//											//如果有之前同步过的用户，删掉重建
+//											List<String> namespaceUserTokens = new ArrayList<>();
+//											for (Map userInfo : userList) {
+//												namespaceUserTokens.add(userInfo.get("id").toString());
+//											}
+//											userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
+//										}
+										LOGGER.debug("AnBang user size" + userList.size());
+
+										List<User> users = userList.stream().map(r2 -> {
+											User user = new User();
+											user.setNamespaceId(ANBANG_NAMESPACE_ID);
+											user.setNickName(r2.get("nickname") != null ? r2.get("nickname").toString() : "");
+											user.setIdentifierToken(r2.get("login") != null ? r2.get("login").toString() : "");
+											user.setAvatar(r2.get("avatar") != null ? r2.get("avatar").toString() : "");
+											user.setCreateTime(r2.get("createdDate") != null ?Timestamp.valueOf(r2.get("createdDate").toString()) : null);
+											user.setPasswordHash(r2.get("password") != null ? r2.get("password").toString() : "");
+											user.setStatus(UserStatus.ACTIVE.getCode());
+											user.setLocale(Locale.CHINA.toString());
+											user.setNamespaceUserToken(r2.get("id") != null ? r2.get("id").toString() : "");
+											user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+											user.setThirdData(r2.toString());
+											return user;
+										}).collect(Collectors.toList());
+
+										//create
+										createUsersAndUserIdentifiers(users);
+										LOGGER.debug("AnBang createUsersAndUserIdentifiers completed");
+									}
+								}
+
+								@Override
+								public void onFailure(Throwable ex) {
+									LOGGER.error(ex.getMessage());
+									throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+											"Unable to sync2");
+								}
+							});
+						} catch (UnsupportedEncodingException e) {
+							e.printStackTrace();
+						}
+					}
+
+					@Override
+					public void onFailure(Throwable ex) {
+						LOGGER.error(ex.getMessage());
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								"Unable to sync1");
+					}
+				});
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
+	}
+	
+	@Override
+	public String makeAnbangRedirectUrl(Long userId, String location, Map<String, String[]> paramMap) {
+	    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+	    
+	    if(paramMap.get("sceneToken") != null) {
+	        String sceneToken = StringUtils.join(paramMap.get("sceneToken"));
+	        SceneTokenDTO sceneDTO = checkSceneToken(userId, sceneToken);
+	        Long communityId = getCommunityIdBySceneToken(sceneDTO);
+	        Long orgId = getOrgIdBySceneToken(sceneDTO);
+	        if(communityId != null) {
+	            builder.queryParam("communityId", communityId);
+	        }
+	        if(orgId != null) {
+	            builder.queryParam("organizationId", orgId);
+	        }
+	    }
+	    
+	    builder.queryParam("ns", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("namespaceId", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("userId", userId);
+	    
+	    for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+	        if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && !entry.getKey().equals("abtoken")) {
+	            builder.queryParam(entry.getKey(), entry.getValue());
+	           }
+	    }
+	    
+	    return builder.build().toUriString();
+	}
+
+	@Override
+	public void pushUserDemo() {
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+
+		Map bodyMap = new HashMap();
+		bodyMap.put("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+//		bodyMap.put("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyMap.put("timestamp", "1515490912375");
+		bodyMap.put("nonce", "10036426855237293345");
+		bodyMap.put("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyMap.put("nickName", "慧盟管家");
+		bodyMap.put("identifierToken", "18844157372");
+		bodyMap.put("avatar", null);
+		bodyMap.put("namespaceUserToken", "2018103116310798698");
+
+		MultiValueMap bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+//		bodyParam.add("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyParam.add("timestamp", "1515490912375");
+		bodyParam.add("nonce", "10036426855237293345");
+		bodyParam.add("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyParam.add("nickName", "慧盟管家");
+		bodyParam.add("identifierToken", "18844157372");
+		bodyParam.add("avatar", null);
+		bodyParam.add("namespaceUserToken", "2018103116310798698");
+
+		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
+
+
+		try {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://printtest.zuolin.com/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                    LOGGER.debug(result.toString());
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error(ex.getMessage());
+                }
+            });
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
+		dbProvider.execute(r -> {
+			List<String> tokens = Collections.singletonList(cmd.getNamespaceUserToken());
+//			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
+			User user = new User();
+			user.setStatus(UserStatus.ACTIVE.getCode());
+			user.setNamespaceId(0);
+			user.setNickName(cmd.getNickName());
+			user.setGender(UserGender.UNDISCLOSURED.getCode());
+			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+			user.setNamespaceUserToken(cmd.getNamespaceUserToken());
+			user.setLevel(UserLevel.L1.getCode());
+			user.setAvatar(cmd.getAvatar() != null ? cmd.getAvatar() : "");
+			String salt = EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			try {
+				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
+			} catch (Exception e) {
+				LOGGER.error("encode password failed");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+			}
+
+			List<User> users = new ArrayList<>();
+			users.add(user);
+			createUsersAndUserIdentifiers(users);
+			return null;
+		});
+		return null;
+	}
+	
+	@Override
+	public User getUserFromAnBangToken(String token) {
+        StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
+        Map headerParam = new HashMap();
+        headerParam.put("Authorization", "bearer " + token);
+
+	    try {
+            ResponseEntity<String> result = restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null);
+            Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
+            String userIdentifierToken = currentUser.get("login").toString();
+            int regionCode = 86;
+            int namespaceId = ANBANG_NAMESPACE_ID;
+            User user = userProvider.findUserByAccountName(userIdentifierToken);
+            if (user == null) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+                // 把 regionCode 的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+                if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
+                    user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                }
+                
+            }
+            
+            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+                return null;
+            }
+            
+            return user;
+            
+	    } catch(Exception ex) {
+	        LOGGER.error("anbang error", ex);
+	        return null;
+	    }
+	    
+	}
+
+	@Override
+	public UserLogin verifyUserByTokenFromAnBang(String token) {
+		List<UserLogin> logins = new ArrayList<>();
+		User user = getUserFromAnBangToken(token);
+		if(user == null) {
+		    return null;
+		}
+		
+		dbProvider.execute(r -> {
+				UserLogin login = createLogin(ANBANG_NAMESPACE_ID, user, null, null);
+				login.setStatus(UserLoginStatus.LOGGED_IN);
+				logins.add(login);
+				return null;
+		});
+		return logins.size() > 0 ? logins.get(0) : null;
+
+	}
+	
+	@Override
+	public List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
+        User user = getUserFromAnBangToken(cmd.getAbtoken());
+        if(user != null) {
+            ListUserRelatedScenesCommand cmd2 = new ListUserRelatedScenesCommand();
+            cmd2.setDefaultFlag(0);
+            UserContext.current().setUser(user);
+            UserContext.current().setNamespaceId(ANBANG_NAMESPACE_ID);
+            List<SceneDTO> sceneDtoList = listUserRelatedScenes(cmd2);
+            return sceneDtoList;
+        }
+        
+        return null;
+   }
+
+	@Override
+	public void logonBuAnBangToken() {
+
+	}
+
+	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
+
+ 		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
+		ListenableFuture<ResponseEntity<String>> future = template.exchange(url, method, requestEntity, String.class);
+
+		if(responseCallback != null) {
+			future.addCallback(responseCallback);
+		}
+
+		return future;
+	}
+
+	public ResponseEntity<String> restCallSync(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam) throws UnsupportedEncodingException {
+		RestTemplate template = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
+
+		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
+		ResponseEntity<String> future = template.exchange(url, method, requestEntity, String.class);
+
+		return future;
+	}
+
+	private void createUsersAndUserIdentifiers(List<User> users){
+		for (User user : users) {
+			UserIdentifier old_userIdentifier = this.userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), user.getIdentifierToken());
+
+			if(old_userIdentifier != null){
+				User old_user = this.userProvider.findUserById(old_userIdentifier.getOwnerUid());
+				if(old_user != null){
+					old_user.setUpdateTime(user.getUpdateTime());
+					old_user.setNamespaceUserToken(user.getNamespaceUserToken());
+					old_user.setNamespaceUserType(user.getNamespaceUserType());
+					this.userProvider.updateUser(old_user);
+					
+               old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+               old_userIdentifier.setRegionCode(86);
+               old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+               this.userProvider.updateIdentifierByUid(old_userIdentifier);
+				} else {
+				    old_userIdentifier.setClaimStatus(IdentifierClaimStatus.FREE_STANDING.getCode());
+				    this.userProvider.deleteIdentifier(old_userIdentifier);
+				    old_userIdentifier = null;
+				}
+			}
+			
+			if(old_userIdentifier == null) {
+				this.userProvider.createUser(user);
+				UserIdentifier userIdentifier = new UserIdentifier();
+				userIdentifier.setOwnerUid(user.getId());
+				userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				userIdentifier.setIdentifierToken(user.getIdentifierToken());
+				userIdentifier.setNamespaceId(user.getNamespaceId());
+				userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userIdentifier.setRegionCode(86);
+				userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				this.userProvider.createIdentifier(userIdentifier);
+			}
+		}
+	}
 
 	// 生成随机key
 	@Override

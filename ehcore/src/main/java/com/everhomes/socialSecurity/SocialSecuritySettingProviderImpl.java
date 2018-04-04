@@ -148,7 +148,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
             step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds));
         }
         return step.orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.asc())
-                .fetch().map(Record1::value1);
+                .fetch().map(Record1<Long>::value1);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.everhomes.asset.AssetService;
 import com.everhomes.community.Community;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.rest.asset.SelectedNoticeCommand;
@@ -57,7 +58,7 @@ public class SelectNoticeTest extends CoreServerTestCase {
             cmd.setCommunityId(c.getId());
             cmd.setNamespaceId(999971);
             customerService.syncIndividualCustomers(cmd);
-            // customerService.syncEnterpriseCustomers(cmd);
+//            customerService.syncEnterpriseCustomers(cmd);
         }
     }
 }

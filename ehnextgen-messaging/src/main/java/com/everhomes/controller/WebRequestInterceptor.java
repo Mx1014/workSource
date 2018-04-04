@@ -227,7 +227,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 LoginToken token = userService.getLoginToken(request);
                 if (token != null && userService.isValid(token)) {
                     setupUserContext(token);
-                    MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    
+                    if(UserContext.current().getUser() != null) {
+                        MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));    
+                    }
+                    
                 } else {
                     setupAnnonymousUserContext();
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));

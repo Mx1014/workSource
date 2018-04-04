@@ -762,7 +762,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
         for (Long id : rlt.getIds()) {
-            dtos.add(toOrganizationDetailDTO(id, false));
+            OrganizationDetailDTO detail = toOrganizationDetailDTO(id, false);
+            if(detail != null) {
+                dtos.add(detail);    
+            }
+            
         }
         dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
         LOGGER.debug("searchEnterprise result = {}", dtos.toString());
@@ -8566,8 +8570,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     @Override
-    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
-                                                                     List<String> groupTypes, Byte naviFlag) {
+    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
         if (null == naviFlag) {
             naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
@@ -11334,6 +11337,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd2.setOrganizationId(cmd.getOrganizationId());
         cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
         cmd2.setTargetId(userId);
+        cmd2.setContactDescription(cmd.getContactDescription());
+        cmd2.setContactName(cmd.getContactName());
         applyForEnterpriseContact(cmd2);
         //目前写死30分钟
         dto.setEndTime(DateHelper.currentGMTTime().getTime() + 30 * 60 * 1000L);
