@@ -3003,7 +3003,7 @@ public class AssetServiceImpl implements AssetService {
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());
             datas.remove(0);
-//            importTaskResponse.setTotalCount((long)datas.size());
+            importTaskResponse.setTotalCount((long)(finalResultList.size() - 2));
             importTaskResponse.setFailCount((long)datas.size());
             importTaskResponse.setLogs(datas);
             return importTaskResponse;
