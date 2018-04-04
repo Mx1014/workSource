@@ -3582,9 +3582,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listPersonalDoneTasks(cmd.getTargetId(), cmd.getInspectionCategoryId(), pageSize + 1, offset, startTime);
 		List<EquipmentTaskDTO> dtos = new ArrayList<>();
 		if (tasks != null && tasks.size() > 0) {
-			dtos = tasks.stream().map((r) ->
-					ConvertHelper.convert(r, EquipmentTaskDTO.class))
-					.collect(Collectors.toList());
+			dtos = tasks.stream().map((r) -> {
+				EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+				dto.setStatus(EquipmentTaskStatus.PERSONAL_DONE.getCode());
+				return dto;
+			}).collect(Collectors.toList());
 			response.setTasks(dtos);
 		}
 		if (tasks != null && tasks.size() > pageSize) {
