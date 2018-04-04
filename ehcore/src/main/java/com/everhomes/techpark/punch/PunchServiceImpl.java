@@ -7947,6 +7947,7 @@ public class PunchServiceImpl implements PunchService {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
 		if (null != ptr && pdl == null) {
+			pdl = new PunchDayLog();
 			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, pdl);
 		}
 		String[] statusList =null;
