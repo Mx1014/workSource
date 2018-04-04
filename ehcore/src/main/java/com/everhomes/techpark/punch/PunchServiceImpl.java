@@ -7947,9 +7947,9 @@ public class PunchServiceImpl implements PunchService {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
 		if (null != ptr && pdl == null) {
-			LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
+//			LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
 			pdl = new PunchDayLog();
-			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, pdl);
+			refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
 			LOGGER.debug("pdl is {}",StringHelper.toJsonString(pdl));
 		}
 		String[] statusList =null;
