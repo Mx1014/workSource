@@ -2993,7 +2993,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
-		return result; 
+		return result;
 
 	}
 }
