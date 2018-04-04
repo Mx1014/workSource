@@ -17,6 +17,8 @@ import javax.validation.constraints.NotNull;
  *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
  *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
+ *     <li>appId: appId</li>
+ *     <li>currentOrgId: 物业公司id</li>
  * </ul>
  */
 public class CreateOrUpdateLaunchAdCommand {
@@ -36,6 +38,9 @@ public class CreateOrUpdateLaunchAdCommand {
     private String targetData;
 
     private Byte status;
+
+    private Long appId;
+    private Long currentOrgId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -123,6 +128,22 @@ public class CreateOrUpdateLaunchAdCommand {
 
     public void setTargetData(String targetData) {
         this.targetData = targetData;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getCurrentOrgId() {
+        return currentOrgId;
+    }
+
+    public void setCurrentOrgId(Long currentOrgId) {
+        this.currentOrgId = currentOrgId;
     }
 
     @Override
