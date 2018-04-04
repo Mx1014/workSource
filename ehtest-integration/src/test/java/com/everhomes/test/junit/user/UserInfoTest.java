@@ -6,6 +6,7 @@ import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.test.core.util.EncryptionUtils;
 import org.jooq.DSLContext;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +27,8 @@ public class UserInfoTest extends BaseLoginAuthTestCase {
     public void setUp() {
         super.setUp();
     }
-    
+
+
     @Test
     public void testZuolinNamespaceUserInfo() {
         Integer namespaceId = 0;

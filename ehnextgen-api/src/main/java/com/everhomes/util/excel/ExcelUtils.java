@@ -653,7 +653,7 @@ public class ExcelUtils {
                 sdf = new SimpleDateFormat("yyyy-MM-dd");
             }
         }
-
+//
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
         if(cell == null){
             return "";
@@ -665,7 +665,7 @@ public class ExcelUtils {
             case Cell.CELL_TYPE_NUMERIC:
                 if("General".equals(cell.getCellStyle().getDataFormatString())){
                     value = df.format(cell.getNumericCellValue());
-                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                }else if(cell.getCellStyle().getDataFormatString().startsWith("m/d/yy")){
                     value = sdf.format(cell.getDateCellValue());
                 }else{
                     value = df2.format(cell.getNumericCellValue());

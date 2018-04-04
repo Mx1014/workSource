@@ -20,7 +20,7 @@ import java.util.List;
  *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>communities: 应用到的项目id列表</li>
- *
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class CreatQualityStandardCommand {
@@ -50,6 +50,8 @@ public class CreatQualityStandardCommand {
 
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private Integer namespaceId;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -137,6 +139,14 @@ public class CreatQualityStandardCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

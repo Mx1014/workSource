@@ -18,10 +18,13 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ import java.util.Map;
  */
 @Component
 public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyMeterTaskProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
 
@@ -111,6 +115,38 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
                 .and(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId))
                 .orderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER)
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
+    }
+
+    @Override
+    public List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize, Timestamp lastUpdateTime) {
+        List<EnergyMeterTask> tasks = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+
+        if(lastUpdateTime != null) {
+            query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
+                    .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.gt(lastUpdateTime)));
+        }
+
+        query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
+        query.addLimit(pageSize);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnergyMeterTasksByPlan, sql=" + query.getSQL());
+            LOGGER.debug("listEnergyMeterTasksByPlan, bindValues=" + query.getBindValues());
+        }
+        query.fetch().map((r) -> {
+            tasks.add(ConvertHelper.convert(r, EnergyMeterTask.class));
+            return null;
+        });
+
+        return tasks;
     }
 
     @Override

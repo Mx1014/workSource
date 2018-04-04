@@ -25,6 +25,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,6 +68,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private RegionProvider regionProvider;
 	@Autowired
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -75,7 +79,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
 		}
@@ -108,6 +114,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -144,7 +154,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	@Override
 	public LeaseBuildingDTO updateLeaseBuilding(UpdateLeaseBuildingCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+		}
 		LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getId());
 
 		BeanUtils.copyProperties(cmd, leaseBuilding);
@@ -366,6 +378,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
+		
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null,0L);//项目介绍权限
+		}
 
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -380,13 +396,21 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		int size = communities.size();
 
-		response.setProjects(communities.stream().map(r -> {
+		response.setProjects(new ArrayList<>());
+		for (Community community:communities){
+			LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(community.getId(), cmd.getCategoryId());
+			if (leaseProject!=null && cmd.getCommunityId()!=null){
+				List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId(),cmd.getCategoryId());
+				if (!communityIds.contains(cmd.getCommunityId()))
+					continue;
+			}
+
 			LeaseProjectDTO dto = new LeaseProjectDTO();
-			populateProjectBasicInfo(dto, r, cmd.getCategoryId());
+			populateProjectBasicInfo(dto, community, cmd.getCategoryId());
 
 			processProjectDetailUrl(dto, cmd.getCategoryId());
-			return dto;
-		}).collect(Collectors.toList()));
+			response.getProjects().add(dto);
+		}
 
 		if(size != pageSize){
 			response.setNextPageAnchor(null);

@@ -1,15 +1,16 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
+ *  <li>taskId: 任务id (批量审批改成id列表)</li>
+ *  <li>equipmentId: 设备id (有id则是查看具体设备下的log)</li>
+ *  <li>standardId: 标准id (有id则是查看具体设备下的log)</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>processType: 操作类型 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessType}</li>
@@ -18,8 +19,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListLogsByTaskIdCommand {
-	@NotNull
-	private Long taskId;
+	@ItemType(Long.class)
+	private List<Long> taskId;
 	@NotNull
 	private Long ownerId;
 	
@@ -27,16 +28,20 @@ public class ListLogsByTaskIdCommand {
 	private String ownerType;
 	@ItemType(Byte.class)
 	private List<Byte> processType;
-	
+
+	private Long equipmentId;
+
+	private Long standardId;
+
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
-	public Long getTaskId() {
+
+	public List<Long> getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(Long taskId) {
+	public void setTaskId(List<Long> taskId) {
 		this.taskId = taskId;
 	}
 
@@ -78,6 +83,22 @@ public class ListLogsByTaskIdCommand {
 
 	public void setProcessType(List<Byte> processType) {
 		this.processType = processType;
+	}
+
+	public Long getEquipmentId() {
+		return equipmentId;
+	}
+
+	public void setEquipmentId(Long equipmentId) {
+		this.equipmentId = equipmentId;
+	}
+
+	public Long getStandardId() {
+		return standardId;
+	}
+
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
 	}
 
 	@Override

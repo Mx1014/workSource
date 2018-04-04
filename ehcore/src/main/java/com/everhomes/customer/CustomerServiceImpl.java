@@ -38,6 +38,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.*;
 
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -46,6 +47,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 
 
+import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
@@ -99,9 +101,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.everhomes.varField.FieldProvider;
-import com.everhomes.varField.FieldService;
-import com.everhomes.varField.ScopeFieldItem;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -277,7 +276,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
-        command.setIncludedGroupIds("10,11,12");
+//        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
@@ -285,6 +284,14 @@ public class CustomerServiceImpl implements CustomerService {
             }).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
+    }
+
+    @Override
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        List<String> sheetNames = new ArrayList<>();
+        sheetNames.add("客户信息");
+        String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
     }
 
     @Override
@@ -418,7 +425,8 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
-    private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+    @Override
+    public OrganizationDTO createOrganization(EnterpriseCustomer customer) {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
@@ -592,7 +600,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
             command.setId(customer.getOrganizationId());
-            organizationService.deleteEnterpriseById(command);
+            organizationService.deleteEnterpriseById(command, false);
         }
 
     }
@@ -2120,12 +2128,13 @@ public class CustomerServiceImpl implements CustomerService {
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("专利");
             dto.setPropertyCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
-                dto.setPropertyType(item.getItemDisplayName());
-            }
+//            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
+//            if(item != null) {
+//                dto.setPropertyType(item.getItemDisplayName());
+//            }
             dtos.add(dto);
             response.setPropertyTotalCount(response.getPropertyTotalCount() + count);
         });
@@ -2381,9 +2390,30 @@ public class CustomerServiceImpl implements CustomerService {
         return response;
     }
 
+    /**
+     * 每天早上2点20,自动客户合同信息
+     * */
+    @Scheduled(cron = "1 20 2 * * ?")
+    public void customerAutoSync() {
+        List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+        if(communities != null) {
+            for(Community community : communities) {
+                SyncCustomersCommand command = new SyncCustomersCommand();
+                command.setNamespaceId(community.getNamespaceId());
+                command.setCommunityId(community.getId());
+                syncEnterpriseCustomers(command, false);
+                syncIndividualCustomers(command);
+            }
+
+        }
+    }
+
     @Override
-    public String syncEnterpriseCustomers(SyncCustomersCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+    public String syncEnterpriseCustomers(SyncCustomersCommand cmd, Boolean authFlag) {
+        if(authFlag) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+        }
+
         if(cmd.getNamespaceId() == 999971) {
 
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -2562,7 +2592,7 @@ public class CustomerServiceImpl implements CustomerService {
 		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> {
-                return convertCustomerTrackingDTO(tracking);
+                return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -2572,14 +2602,23 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerTrackingDTO(tracking);
+        return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
 	}
 
-	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking talent) {
-		CustomerTrackingDTO dto = ConvertHelper.convert(talent, CustomerTrackingDTO.class);
+	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
+		CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
         if(dto.getTrackingType() != null) {
-        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-        	dto.setTrackingTypeName(trackingTypeName);
+//        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+
+            FieldGroup group = fieldProvider.findGroupByGroupLogicName("com.everhomes.customer.CustomerTracking");
+            if(group != null) {
+                Field field = fieldProvider.findField(ModuleName.ENTERPRISE_CUSTOMER.getName(), "trackingType", group.getPath());
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(),communityId,ModuleName.ENTERPRISE_CUSTOMER.getName(),field.getId(),dto.getTrackingType().byteValue());
+                if(item != null) {
+                    dto.setTrackingTypeName(item.getItemDisplayName());
+                }
+            }
+
         }
         if(dto.getTrackingUid() != null) {
         	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
@@ -2592,10 +2631,19 @@ public class CustomerServiceImpl implements CustomerService {
             	}
         	}
         }
+        if(dto.getIntentionGrade() != null) {
+            Field field = fieldProvider.findField(19L, "intentionGrade");
+            if(field != null) {
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getIntentionGrade().byteValue());
+                if(item != null) {
+                    dto.setIntentionGradeName(item.getItemDisplayName());
+                }
+            }
+        }
         List<String> urlList = new ArrayList<>();
         List<String> uriList = new ArrayList<>();
-        if(StringUtils.isNotEmpty(talent.getContentImgUri())){
-        	String[] uriArray = talent.getContentImgUri().split(",");
+        if(StringUtils.isNotEmpty(tracking.getContentImgUri())){
+        	String[] uriArray = tracking.getContentImgUri().split(",");
         	for(String  uri : uriArray){
         		uriList.add(uri);
         		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
@@ -2747,7 +2795,8 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
 
-	private void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
+    @Override
+	public void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
 		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
 	}
 	

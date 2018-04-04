@@ -84,6 +84,15 @@ public class CreatAssetBillCommand {
     private BigDecimal parkingFee;
     private BigDecimal other;
     private Long templateVersion;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getOwnerId() {
         return ownerId;

@@ -67,7 +67,15 @@ public class QualityInspectionSpecificationDTO {
 	private Long creatorUid;
   
 	private Timestamp createTime;
-  
+
+	private Long updateUid;
+
+	private Timestamp updateTime;
+
+	private Long deleteUid;
+
+	private Timestamp deleteTime;
+
 	private Byte status;
 	
 	@ItemType(QualityInspectionSpecificationDTO.class)
@@ -231,6 +239,38 @@ public class QualityInspectionSpecificationDTO {
 
 	public void setScopeName(String scopeName) {
 		this.scopeName = scopeName;
+	}
+
+	public Long getUpdateUid() {
+		return updateUid;
+	}
+
+	public void setUpdateUid(Long updateUid) {
+		this.updateUid = updateUid;
+	}
+
+	public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public Long getDeleteUid() {
+		return deleteUid;
+	}
+
+	public void setDeleteUid(Long deleteUid) {
+		this.deleteUid = deleteUid;
+	}
+
+	public Timestamp getDeleteTime() {
+		return deleteTime;
+	}
+
+	public void setDeleteTime(Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 
 	@Override

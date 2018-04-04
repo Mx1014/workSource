@@ -39,6 +39,7 @@ public class DefaultChargingItemDTO {
     private Byte formulaType;
     private Long lateFeeStandardId;
     private String lateFeeStandardName;
+    private String lateFeeformula;
     private String chargingVariables;
     private Timestamp chargingStartTime;
     private Timestamp chargingExpiredTime;
@@ -48,6 +49,14 @@ public class DefaultChargingItemDTO {
 
     public List<DefaultChargingItemPropertyDTO> getApartments() {
         return apartments;
+    }
+
+    public String getLateFeeformula() {
+        return lateFeeformula;
+    }
+
+    public void setLateFeeformula(String lateFeeformula) {
+        this.lateFeeformula = lateFeeformula;
     }
 
     public Byte getBillingCycle() {

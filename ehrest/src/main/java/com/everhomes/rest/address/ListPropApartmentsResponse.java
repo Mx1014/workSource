@@ -32,8 +32,17 @@ public class ListPropApartmentsResponse {
 	private Integer defaultCount;
 	private Integer hasOwnerCount;
 	private Integer noOwnerCount;
+	private Integer occupiedCount;
 	@ItemType(PropFamilyDTO.class)
 	private List<PropFamilyDTO> resultList;
+
+	public Integer getOccupiedCount() {
+		return occupiedCount;
+	}
+
+	public void setOccupiedCount(Integer occupiedCount) {
+		this.occupiedCount = occupiedCount;
+	}
 
 	public Integer getAptCount() {
 		return aptCount;

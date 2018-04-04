@@ -14,9 +14,13 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>addressId: 门牌id</li>
+ * <li>creatorType: 来源类型{@link com.everhomes.rest.pmtask.PmtaskCreatorType}</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
  * <li>currentOrgId: 当前机构id</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class SearchTasksCommand {
@@ -30,12 +34,40 @@ public class SearchTasksCommand {
 	private String keyword;
 	private String buildingName;
 	private Long addressId;
+	private Byte creatorType;
 	private Long pageAnchor;
 	private Integer pageSize;
 
 	private  Long currentOrgId;
 
 	private Long currentCommunityId;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -123,6 +155,14 @@ public class SearchTasksCommand {
 
 	public void setCurrentOrgId(Long currentOrgId) {
 		this.currentOrgId = currentOrgId;
+	}
+
+	public Byte getCreatorType() {
+		return creatorType;
+	}
+
+	public void setCreatorType(Byte creatorType) {
+		this.creatorType = creatorType;
 	}
 
 	public Long getCurrentCommunityId() {

@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>approvalNo: 审批编号</li>
  * <li>approvalStatus: 审批状态 参考{@link com.everhomes.rest.flow.FlowCaseStatus}</li>
  * <li>flowCaseId: 工作流id</li>
+ * <li>approvalId: 所属审批id</li>
  * </ul>
  */
 public class GeneralApprovalRecordDTO {
@@ -42,6 +43,9 @@ public class GeneralApprovalRecordDTO {
     private Byte approvalStatus;
 
     private Long flowCaseId;
+
+    //  add by nan.rong at 02/27/2018
+    private Long approvalId;
 
     public GeneralApprovalRecordDTO() {
     }
@@ -148,6 +152,14 @@ public class GeneralApprovalRecordDTO {
 
     public void setFlowCaseId(Long flowCaseId) {
         this.flowCaseId = flowCaseId;
+    }
+
+    public Long getApprovalId() {
+        return approvalId;
+    }
+
+    public void setApprovalId(Long approvalId) {
+        this.approvalId = approvalId;
     }
 
     @Override

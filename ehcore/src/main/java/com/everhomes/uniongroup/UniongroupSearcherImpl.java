@@ -74,12 +74,12 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
         //  查询所有员工工资明细情况
         List<Long> wageDetailIds = new ArrayList<>();
-        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId());
-        if (wageResults != null)
-            wageDetailIds = wageResults.stream().map(r -> {
-                Long id = (Long) r[0];
-                return id;
-            }).collect(Collectors.toList());
+//        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId());
+//        if (wageResults != null)
+//            wageDetailIds = wageResults.stream().map(r -> {
+//                Long id = (Long) r[0];
+//                return id;
+//            }).collect(Collectors.toList());
 
         for (UniongroupMemberDetail detail : uniongroupMemberDetails) {
             XContentBuilder source = createDoc(detail, groupDetailIds, wageDetailIds);
@@ -116,12 +116,12 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
         //  查询所有员工工资明细情况
         List<Long> wageDetailIds = new ArrayList<>();
-        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(detail.getNamespaceId(), detail.getEnterpriseId());
-        if (wageResults != null)
-            wageDetailIds = wageResults.stream().map(r -> {
-            Long id = (Long) r[0];
-            return id;
-        }).collect(Collectors.toList());
+//        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(detail.getNamespaceId(), detail.getEnterpriseId());
+//        if (wageResults != null)
+//            wageDetailIds = wageResults.stream().map(r -> {
+//            Long id = (Long) r[0];
+//            return id;
+//        }).collect(Collectors.toList());
 
         XContentBuilder source = createDoc(detail, groupDetailIds, wageDetailIds);
         feedDoc(detail.getId().toString(), source);

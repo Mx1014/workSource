@@ -126,10 +126,10 @@ objc.response.base: EvhRestResponseBase
 
 class.name.prefix: Evh
 
-source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.4.0-SNAPSHOT.jar
+source.jars:
 source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
-destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
-destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
+destination.dir:
+destination.dir.java:
 
 equipment.ip: 127.0.0.1
 schedule.running.flag: 1

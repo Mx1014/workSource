@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>startTime: 起始月份  </li>
  *  <li>endTime: 截止月份  </li>
+ *  <li>namespaceId: namespaceId  </li>
  * </ul>
  * Created by ying.xiong on 2017/4/18.
  */
@@ -29,6 +30,8 @@ public class StatIntervalAllEquipmentTasksCommand {
     private Long startTime;
 
     private Long endTime;
+
+    private Integer namespaceId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -84,6 +87,14 @@ public class StatIntervalAllEquipmentTasksCommand {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

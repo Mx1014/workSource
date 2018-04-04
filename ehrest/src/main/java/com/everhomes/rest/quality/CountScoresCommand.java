@@ -1,11 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -18,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>endTime: 截止月份  </li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>allFlag: 是否为全部</li>
  * </ul>
  */
 public class CountScoresCommand {
@@ -41,6 +41,8 @@ public class CountScoresCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+
+	private Byte allFlag;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -113,7 +115,15 @@ public class CountScoresCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
+	public Byte getAllFlag() {
+		return allFlag;
+	}
+
+	public void setAllFlag(Byte allFlag) {
+		this.allFlag = allFlag;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

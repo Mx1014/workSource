@@ -19,6 +19,8 @@ public class EquipmentAccessoryMapDTO {
 	private Long equipmentId;
 	
 	private Long id;
+
+	private String communityName;
 	
 	public Long getId() {
 		return id;
@@ -51,6 +53,14 @@ public class EquipmentAccessoryMapDTO {
 
 	public void setEquipmentId(Long equipmentId) {
 		this.equipmentId = equipmentId;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import java.util.List;
  * <li>gender: 性别: 1-男, 2-女</li>
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>jobLevels: 岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
  * <li>contactShortToken: 短号</li>
@@ -45,6 +46,8 @@ public class ArchivesContactDTO {
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> jobPositions;
+
+    private List<OrganizationDTO> jobLevels;
 
     private String regionCode;
 
@@ -216,5 +219,13 @@ public class ArchivesContactDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<OrganizationDTO> getJobLevels() {
+        return jobLevels;
+    }
+
+    public void setJobLevels(List<OrganizationDTO> jobLevels) {
+        this.jobLevels = jobLevels;
     }
 }

@@ -35,7 +35,7 @@ public interface UserService {
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
-    User logonDryrun(String userIdentifierToken, String password);
+    User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
@@ -62,7 +62,9 @@ public interface UserService {
     void deleteUserIdentifier(long identifierId);
     
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
-    
+
+    void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
     
     void assumePortalRole(AssumePortalRoleCommand cmd);
@@ -289,6 +291,8 @@ public interface UserService {
      */
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
+
+    SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
 
     QRCodeDTO querySubjectIdForScan();
 

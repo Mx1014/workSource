@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
  *  <li>communityId: 项目id</li>
  *  <li>moduleName: 模块名</li>
  *  <li>groupPath: 所属字段组在系统中的path</li>
+ *  <li>equipmentIds: 设备id列表用于导出excel  get 方式 传入类型为String</li>
  * </ul>
  */
 public class SearchEquipmentsCommand {
@@ -58,6 +59,9 @@ public class SearchEquipmentsCommand {
 	private String moduleName;
 
 	private String groupPath;
+
+//	@ItemType(Long.class)
+	private String equipmentIds;
 
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -185,6 +189,14 @@ public class SearchEquipmentsCommand {
 
 	public void setGroupPath(String groupPath) {
 		this.groupPath = groupPath;
+	}
+
+	public String getEquipmentIds() {
+		return equipmentIds;
+	}
+
+	public void setEquipmentIds(String equipmentIds) {
+		this.equipmentIds = equipmentIds;
 	}
 
 	@Override

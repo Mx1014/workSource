@@ -12,6 +12,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId : 所属id</li>
  * <li>startTime : 开始统计时间</li>
  * <li>endTime : 结束统计时间</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -22,6 +25,33 @@ public class GetPrintStatCommand {
     private Long startTime;
     private Long endTime;
 	private Integer namespaceId;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;

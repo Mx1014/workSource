@@ -2,6 +2,7 @@
 package com.everhomes.filedownload;
 
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.scheduler.ScheduleJobInfoDTO;
@@ -105,8 +106,13 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         }
 
         //取消任务
-        String taskName = "fileDownload_" + task.getId();
-        scheduleProvider.unscheduleJob(taskName);;
+        String taskName = "task_" + task.getType() + "_" + task.getId();
+        boolean result = scheduleProvider.unscheduleJob(taskName);
+        if(!result){
+            LOGGER.error("task cancel fail, taskId={}", taskId);
+            throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
+                    TaskServiceErrorCode.TASK_CANCEL_FAIL, "task cancel fail");
+        }
 
         updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
@@ -115,9 +121,14 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public void updateTaskStatus(Long taskId, Byte status, String errorDesc) {
         Task task = taskProvider.findById(taskId);
+        //已经取消的不能再操作
+        if(TaskStatus.fromCode(task.getStatus()) == TaskStatus.CANCEL){
+            return;
+        }
         task.setStatus(status);
         if(TaskStatus.fromCode(status) == TaskStatus.SUCCESS){
             task.setProcess(100);
+            task.setFinishTime(new Timestamp(System.currentTimeMillis()));
         }
         task.setErrorDescription(errorDesc);
         taskProvider.updateTask(task);
@@ -150,7 +161,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         parameters.put("process", task.getProcess() == null ? 0: task.getProcess());
         parameters.put("className", task.getClassName());
         parameters.put("params", task.getParams());
-        String taskName = "task_" + task.getType() + task.getId();
+        String taskName = "task_" + task.getType() + "_" + task.getId();
         scheduleProvider.scheduleSimpleJob(taskName, taskName, new Date(), TaskScheduleJob.class, parameters);
     }
 
@@ -162,6 +173,19 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public List<Long> listWaitingTaskIds() {
         return taskProvider.listWaitingTaskIds();
+    }
+
+    @Override
+    public void processUpdateTask(Long taskId, CsFileLocationDTO fileLocationDTO){
+        Task task = findById(taskId);
+        if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+            task.setProcess(100);
+            task.setResultString1(fileLocationDTO.getUri());
+            if(fileLocationDTO.getSize() != null){
+                task.setResultLong1(fileLocationDTO.getSize().longValue());
+            }
+            updateTask(task);
+        }
     }
 
 }

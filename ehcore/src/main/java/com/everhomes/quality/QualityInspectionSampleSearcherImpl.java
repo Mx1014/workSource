@@ -6,11 +6,19 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.quality.*;
+import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
+import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.quality.SampleQualityInspectionDTO;
+import com.everhomes.rest.quality.SampleTaskScoreDTO;
+import com.everhomes.rest.quality.SearchSampleQualityInspectionCommand;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -19,7 +27,11 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +59,9 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public String getIndexType() {
@@ -85,11 +100,12 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
     @Override
     public ListSampleQualityInspectionResponse query(SearchSampleQualityInspectionCommand cmd) {
+        LOGGER.debug("SearchSampleQualityInspectionCommand time :{}"+System.currentTimeMillis());
         SearchResponse rsp = search(cmd);
         List<Long> ids = getIds(rsp);
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -105,8 +121,16 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
             SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
             List<OrganizationMember> creator = organizationProvider.listOrganizationMembersByUId(sample.getCreatorUid());
-            if(creator != null && creator.size() > 0) {
-                dto.setCreatorName(creator.get(0).getContactName());
+            if (creator != null && creator.size() > 0) {
+                String userName = creator.get(0).getContactName();
+                if (userName != null && !userName.equals("")) {
+                    dto.setCreatorName(userName);
+                }
+            } else {
+                User user = userProvider.findUserById(sample.getCreatorUid());
+                if (user != null) {
+                    dto.setCreatorName(user.getNickName());
+                }
             }
 
             dtos.add(dto);
@@ -138,14 +162,17 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         List<SampleTaskScoreDTO> dtos = new ArrayList<>();
         //可能是这里导致Alpha环境空指针
         if (ids.size() > 0) {
-            for(Long id : ids) {
+            for (Long id : ids) {
                 QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
-                SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
-                List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
-                if(members != null && members.size() > 0) {
-                    dto.setCreatorName(members.get(0).getContactName());
+                if (sample != null) {
+                    SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
+                    if (members != null && members.size() > 0) {
+                        dto.setCreatorName(members.get(0).getContactName());
+                    }
+                    dtos.add(dto);
                 }
-                dtos.add(dto);
+
             }
         }
         response.setSampleTasks(dtos);

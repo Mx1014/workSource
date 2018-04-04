@@ -15,7 +15,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteMonthStatusCommand {
-	  
+
+	private String resourceType;
 	@NotNull
 	private Long siteId;
 	@NotNull
@@ -24,6 +25,14 @@ public class FindRentalSiteMonthStatusCommand {
 	private Byte priceType;
 	private String packageName;
 	private String sceneToken;
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Byte getRentalType() {
 		return rentalType;

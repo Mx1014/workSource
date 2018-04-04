@@ -10,6 +10,7 @@ package com.everhomes.rest.rentalv2;
 public class RentalGoodItem {
     private Long id;
     private String itemName;
+    private Integer defaultOrder;
 
     public Long getId() {
         return id;
@@ -25,5 +26,13 @@ public class RentalGoodItem {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
+    }
+
+    public Integer getDefaultOrder() {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
     }
 }

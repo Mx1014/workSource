@@ -3,6 +3,8 @@ package com.everhomes.varField;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
@@ -48,27 +50,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.varField.*;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -155,6 +137,9 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private AddressProvider addressProvider;
 
+    @Autowired
+    private CommunityProvider communityProvider;
+
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
         List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
@@ -197,7 +182,7 @@ public class FieldServiceImpl implements FieldService {
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
-            String excelTemplateName = null;
+            String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
                 sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
@@ -275,8 +260,39 @@ public class FieldServiceImpl implements FieldService {
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allParentGroups = listFieldGroups(cmd1);
-        List<FieldGroupDTO> allGroups = new ArrayList<>();
-        getAllGroups(allParentGroups,allGroups);
+
+        // 传来的cmd中有子节点，所以先得到所有子节点group，的version
+        //然后拓展为子节点
+//        List<FieldGroupDTO> allGroups = new ArrayList<>();
+//        getAllGroups(allParentGroups,allGroups);
+//        List<FieldGroupDTO> targetGroups = new ArrayList<>();
+//        if(filter){
+//            //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+//            if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
+//                return targetGroups;
+//            }
+//            String[] split = cmd.getIncludedGroupIds().split(",");
+//            for(int i = 0 ; i < split.length; i ++){
+//                long targetGroupId = Long.parseLong(split[i]);
+//                for(int j = 0; j < allGroups.size(); j++){
+//                    Long id = allGroups.get(j).getGroupId();
+//                    if(id.compareTo(targetGroupId) == 0){
+//                        targetGroups.add(allGroups.get(j));
+//                    }
+//                }
+//            }
+//        }else{
+//            targetGroups = allGroups;
+//        }
+//        return targetGroups;
+//        if(onlyLeaf){
+//            getAllGroups(targetGroups,groups);
+//        }else{
+//            groups = targetGroups;
+//        }
+//        return groups;
+
+        // 先匹配目标父节点，再得到所有子节点， 的 version
 //        List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
         if(filter){
@@ -287,17 +303,20 @@ public class FieldServiceImpl implements FieldService {
             String[] split = cmd.getIncludedGroupIds().split(",");
             for(int i = 0 ; i < split.length; i ++){
                 long targetGroupId = Long.parseLong(split[i]);
-                for(int j = 0; j < allGroups.size(); j++){
-                    Long id = allGroups.get(j).getGroupId();
+                for(int j = 0; j < allParentGroups.size(); j++){
+                    Long id = allParentGroups.get(j).getGroupId();
                     if(id.compareTo(targetGroupId) == 0){
-                        targetGroups.add(allGroups.get(j));
+                        targetGroups.add(allParentGroups.get(j));
                     }
                 }
             }
         }else{
-            targetGroups = allGroups;
+            targetGroups = allParentGroups;
         }
-        return targetGroups;
+        //前面匹配父节点的group，得到目标节点，然后拓展为子节点
+        List<FieldGroupDTO> allGroups = new ArrayList<>();
+        getAllGroups(targetGroups,allGroups);
+        return allGroups;
 //        if(onlyLeaf){
 //            getAllGroups(targetGroups,groups);
 //        }else{
@@ -454,6 +473,19 @@ public class FieldServiceImpl implements FieldService {
             return dtos;
         }
 
+        return null;
+    }
+
+    @Override
+    public List<FieldItemDTO> listScopeFieldItems(ListScopeFieldItemCommand cmd) {
+        Field field = fieldProvider.findField(cmd.getGroupId(), cmd.getFieldName());
+        if(field != null) {
+            ListFieldItemCommand command = new ListFieldItemCommand();
+            command.setCommunityId(cmd.getCommunityId());
+            command.setNamespaceId(cmd.getNamespaceId());
+            command.setFieldId(field.getId());
+            return listFieldItems(command);
+        }
         return null;
     }
 
@@ -634,6 +666,7 @@ public class FieldServiceImpl implements FieldService {
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
         switch (sheetName){
+            case "客户信息":
             case "基本信息":
             case "企业情况":
             case "员工情况":
@@ -905,10 +938,12 @@ public class FieldServiceImpl implements FieldService {
             fieldName += "Name";
         }
 
-        if(fieldName.equals("addressId")){
-            fieldName = "addressName";
-        }
-
+//        if(fieldName.equals("addressId")){
+//            fieldName = "addressName";
+//        }
+//        if(fieldName.equals("buildingId")){
+//            fieldName = "buildingName";
+//        }
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
@@ -940,7 +975,12 @@ public class FieldServiceImpl implements FieldService {
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
-                SimpleDateFormat sdf = new SimpleDateFormat(field.getDateFormat());
+                SimpleDateFormat sdf = null;
+                if(field.getDateFormat() == null){
+                    sdf = new SimpleDateFormat("yyyy-MM-dd");
+                }else{
+                    sdf = new SimpleDateFormat(field.getDateFormat());
+                }
                 Timestamp var = (Timestamp)invoke;
                 invoke = sdf.format(var.getTime());
             }
@@ -1006,6 +1046,7 @@ public class FieldServiceImpl implements FieldService {
         }
 
         //处理uid的
+        LOGGER.debug("field name: {} index uid: {}, fieldName length-3: {}", fieldName, fieldName.indexOf("Uid"), fieldName.length()-3);
         if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             long uid = Long.parseLong(invoke.toString());
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
@@ -1019,6 +1060,8 @@ public class FieldServiceImpl implements FieldService {
                     } else {
                         LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
                     }
+                } else {
+                    invoke = "";
                 }
 
             }
@@ -1029,9 +1072,20 @@ public class FieldServiceImpl implements FieldService {
             long addressId = Long.parseLong(invoke.toString());
             Address address = addressProvider.findAddressById(addressId);
             if(address != null){
-                invoke = String.valueOf(address.getAddress());
+                invoke = String.valueOf(address.getApartmentName());
             }else{
                 LOGGER.error("field "+ fieldName+" find name in address failed ,addressId is "+ addressId);
+            }
+        }
+
+        //处理buildingId
+        if("buildingId".equals(fieldName)) {
+            long buildingId = Long.parseLong(invoke.toString());
+            Building building = communityProvider.findBuildingById(buildingId);
+            if(building != null){
+                invoke = String.valueOf(building.getName());
+            }else{
+                LOGGER.error("field "+ fieldName+" find name in building failed ,buildingId is "+ buildingId);
             }
         }
         return String.valueOf(invoke);
@@ -1442,7 +1496,7 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;
@@ -1507,9 +1561,9 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void updateFieldGroups(UpdateFieldGroupsCommand cmd) {
         List<ScopeFieldGroupInfo> groups = cmd.getGroups();
+        Map<Long, ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
         if(groups != null && groups.size() > 0) {
             Long userId = UserContext.currentUserId();
-            Map<Long, ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             //查出所有符合的map列表
             //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
             //将map列表中剩下的置为inactive
@@ -1536,18 +1590,18 @@ public class FieldServiceImpl implements FieldService {
                     }
                 }
             });
+        }
 
-            if(existGroups.size() > 0) {
-                existGroups.forEach((id, group) -> {
-                    group.setStatus(VarFieldStatus.INACTIVE.getCode());
-                    fieldProvider.updateScopeFieldGroup(group);
+        if(existGroups.size() > 0) {
+            existGroups.forEach((id, group) -> {
+                group.setStatus(VarFieldStatus.INACTIVE.getCode());
+                fieldProvider.updateScopeFieldGroup(group);
 
-                    FieldGroup systemGroup = fieldProvider.findFieldGroup(group.getGroupId());
-                    //删除组下的字段和选项
-                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
-                    inactiveScopeField(scopeFieldMap);
-                });
-            }
+                FieldGroup systemGroup = fieldProvider.findFieldGroup(group.getGroupId());
+                //删除组下的字段和选项
+                Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
+                inactiveScopeField(scopeFieldMap);
+            });
         }
     }
 

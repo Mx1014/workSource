@@ -14,16 +14,13 @@ import java.util.List;
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 标准所属项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>name: 标准名称</li>
- *  <li>standardNumber: 标准编号</li>
+ *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>standardSource: 标准来源</li>
- *  <li>description: 具体内容</li>
- *  <li>remarks: 备注</li>
- *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
- *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
- *  <li>templateId: 巡检项模板id</li>
- *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
+ *  <li>equipments: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  *  <li>communities: 应用项目id列表</li>
  * </ul>
  */
@@ -38,36 +35,50 @@ public class UpdateEquipmentStandardCommand {
 	private String ownerType;
 
 	@NotNull
+
 	private Long targetId;
 
 	@NotNull
 	private String targetType;
 
+	private Integer namespaceId;
+
 	private String name;
-	
-	private String standardNumber;
-	
+
+	private  Byte repeatType ;
+
 	private String standardSource;
-	
+
+	@Deprecated
+	private String standardNumber;
+	@Deprecated
 	private String description;
-	
+	@Deprecated
 	private String remarks;
-	
+	@Deprecated
 	private Byte standardType;
+	@Deprecated
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
-	
+	@Deprecated
 	private Long templateId;
-	
+	@Deprecated
 	private Integer reviewExpiredDays;
 	
 	private Long inspectionCategoryId;
 	
+	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
 
 	@ItemType(Long.class)
 	private  List<Long> communities;
+
+	@ItemType(InspectionItemDTO.class)
+	private  List<InspectionItemDTO>  items;
+
+	@ItemType(EquipmentsDTO.class)
+	private List<EquipmentsDTO> equipments;
 
 	public Long getTargetId() {
 		return targetId;
@@ -197,12 +208,44 @@ public class UpdateEquipmentStandardCommand {
 		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
+    public Byte getRepeatType() {
+        return repeatType;
+    }
+
+    public void setRepeatType(Byte repeatType) {
+        this.repeatType = repeatType;
+    }
+
+    public List<InspectionItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<InspectionItemDTO> items) {
+        this.items = items;
+    }
+
+	public List<EquipmentsDTO> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentsDTO> equipments) {
+		this.equipments = equipments;
+	}
+
 	public List<Long> getCommunities() {
 		return communities;
 	}
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

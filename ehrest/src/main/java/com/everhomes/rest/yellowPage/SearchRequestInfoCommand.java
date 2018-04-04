@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 拥有者类型：EhOrganizations EhCommunities</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>categoryId: 服务联盟大类id</li>
+ *  <li>secondCategoryId: 服务联盟小类id</li>
+ *  <li>workflowStatus: 工作流状态，{@link com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus}</li>
  *  <li>startDay: 开始时间</li>
  *  <li>endDay：结束时间</li>
  *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
@@ -19,6 +21,9 @@ import com.everhomes.util.StringHelper;
  *  <li>proposer: 申请人</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class SearchRequestInfoCommand {
@@ -29,6 +34,10 @@ public class SearchRequestInfoCommand {
 	private Long     ownerId;
 	
 	private Long categoryId;
+	
+	private Long secondCategoryId;
+	
+	private Byte workflowStatus;
 	
 	private Long startDay;
 	
@@ -41,7 +50,50 @@ public class SearchRequestInfoCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
 	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+	
+	public Long getSecondCategoryId() {
+		return secondCategoryId;
+	}
+
+	public void setSecondCategoryId(Long secondCategoryId) {
+		this.secondCategoryId = secondCategoryId;
+	}
+
+	public Byte getWorkflowStatus() {
+		return workflowStatus;
+	}
+
+	public void setWorkflowStatus(Byte workflowStatus) {
+		this.workflowStatus = workflowStatus;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

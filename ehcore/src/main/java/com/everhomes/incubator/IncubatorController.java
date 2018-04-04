@@ -104,6 +104,22 @@ public class IncubatorController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /incubator/updateIncubatorApply</b>
+     * <p>更新入孵申请</p>
+     */
+    @RequestMapping("updateIncubatorApply")
+    @RestReturn(value=IncubatorApplyDTO.class)
+    public RestResponse updateIncubatorApply(UpdateIncubatorApplyCommand cmd) {
+
+        IncubatorApplyDTO dto = incubatorService.updateIncubatorApply(cmd);
+
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /incubator/cancelIncubatorApply</b>
      * <p>入孵申请</p>
      */
@@ -154,8 +170,8 @@ public class IncubatorController extends ControllerBase {
      */
     @RequestMapping("findIncubatorAppling")
     @RestReturn(value=IncubatorApplyDTO.class)
-    public RestResponse findIncubatorAppling(){
-        IncubatorApplyDTO dto = incubatorService.findIncubatorAppling();
+    public RestResponse findIncubatorAppling(FindIncubatorApplingCommand cmd){
+        IncubatorApplyDTO dto = incubatorService.findIncubatorAppling(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

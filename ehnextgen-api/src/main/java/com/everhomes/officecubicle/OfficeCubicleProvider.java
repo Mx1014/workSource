@@ -19,10 +19,10 @@ public interface OfficeCubicleProvider {
 
 	void deleteCategoriesBySpaceId(Long id);
 
-	List<OfficeCubicleOrder> searchOrders(Long beginDate, Long endDate, String reserveKeyword, String spaceName,
-			CrossShardListingLocator locator, Integer pageSize,Integer currentNamespaceId );
+	List<OfficeCubicleOrder> searchOrders(String ownerType,Long ownerId,Long beginDate, Long endDate, String reserveKeyword, String spaceName,
+			CrossShardListingLocator locator, Integer pageSize,Integer currentNamespaceId, Byte workFlowStatus);
 
-	List<OfficeCubicleSpace> searchSpaces(String keyWords, CrossShardListingLocator locator, int pageSize, Integer currentNamespaceId);
+	List<OfficeCubicleSpace> searchSpaces(String ownerType,Long ownerId,String keyWords, CrossShardListingLocator locator, int pageSize, Integer currentNamespaceId);
 
 	void createOrder(OfficeCubicleOrder order);
 
@@ -30,7 +30,7 @@ public interface OfficeCubicleProvider {
 
 	void updateOrder(OfficeCubicleOrder order);
 
-	List<OfficeCubicleSpace> querySpacesByCityId(Long cityId, CrossShardListingLocator locator, int i, Integer currentNamespaceId);
+	List<OfficeCubicleSpace> querySpacesByCityId(String ownerType,Long ownerId,Long cityId, CrossShardListingLocator locator, int i, Integer currentNamespaceId);
 
 	List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId);
 
@@ -39,6 +39,10 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleOrder> listStationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 
-	List<OfficeCubicleOrder> listStationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize); 
+	List<OfficeCubicleOrder> listStationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 
+
+	List<OfficeCubicleSpace> listEmptyOwnerSpace();
+
+    List<OfficeCubicleOrder> listEmptyOwnerOrders();
 }
