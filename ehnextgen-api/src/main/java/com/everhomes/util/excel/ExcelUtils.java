@@ -205,7 +205,7 @@ public class ExcelUtils {
 
 	public OutputStream getOutputStream(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList){
         try {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleNames, titleSize, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleNames, false, titleSize, dataList);
             return excelStream;
         } catch (Exception ex) {
             ex.printStackTrace();
