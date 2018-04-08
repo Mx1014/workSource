@@ -2689,13 +2689,13 @@ public class ArchivesServiceImpl implements ArchivesService {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
-                map.put("count", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
+                map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
                 anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
             }
             if (df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
-                map.put("count", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
+                map.put("year", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
                 birthday += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, "");
             }
         }
