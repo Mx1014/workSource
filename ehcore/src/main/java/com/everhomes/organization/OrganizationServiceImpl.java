@@ -5561,7 +5561,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void rejectForEnterpriseContact(RejectContactCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
-        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
+        OrganizationMember member = checkEnterpriseContactParameterContainReject(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
         if (OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL) {
             //不抛异常会导致客户端小黑条消不掉 by sfyan 20170120
             LOGGER.debug("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
@@ -9207,10 +9207,43 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND,
                     "Unable to find the enterprise contact");
         }
-        //add by yuanlei
 
         return member;
     }
+
+    /**
+     * add by yuanlei
+     * 查询OrganizationMember对象的方法
+     * @param enterpriseId
+     * @param targetId
+     * @param operatorUid
+     * @param tag
+     * @return
+     */
+    private OrganizationMember checkEnterpriseContactParameterContainReject(Long enterpriseId, Long targetId, Long operatorUid, String tag){
+        //1.首先需要对参数进行非空校验
+        if (targetId == null) {
+            //说明参数为空
+            LOGGER.info("Enterprise contact target user id is null, operatorUid=" + operatorUid
+                    + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
+            //返回给前端信息
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Enterprise contact target user id can not be null");
+        }
+        //说明参数不为空,那么我们根据targetId和enterpriseId来查询数据库得到OrganizationMember对象
+        OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUidAndOrgId(targetId, enterpriseId);
+        //对OrganizationMember对象进行非空校验
+        if (organizationMember == null) {
+            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid
+                    + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND,
+                    "Unable to find the enterprise contact");
+        }
+
+        return organizationMember;
+
+    }
+
 
     private QuestionMetaObject createGroupQuestionMetaObject(Organization org, OrganizationMember requestor, OrganizationMember target) {
         QuestionMetaObject metaObject = new QuestionMetaObject();

@@ -1,6 +1,7 @@
 package com.everhomes.rest.enterprise;
 
 import com.everhomes.util.StringHelper;
+import com.sun.istack.internal.NotNull;
 
 /**
  * <ul>
@@ -10,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class RejectContactCommand {
+    @NotNull
     private Long enterpriseId;
     
     private Long userId;
