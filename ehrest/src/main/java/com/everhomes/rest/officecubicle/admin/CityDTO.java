@@ -20,7 +20,7 @@ public class CityDTO {
     private String cityName;
     private String iconUri;
     private String iconUrl;
-    private Integer defaultOrder;
+    private Long defaultOrder;
     private Byte selectFlag;
 
     public Byte getSelectFlag() {
@@ -71,11 +71,11 @@ public class CityDTO {
         this.iconUrl = iconUrl;
     }
 
-    public Integer getDefaultOrder() {
+    public Long getDefaultOrder() {
         return defaultOrder;
     }
 
-    public void setDefaultOrder(Integer defaultOrder) {
+    public void setDefaultOrder(Long defaultOrder) {
         this.defaultOrder = defaultOrder;
     }
 

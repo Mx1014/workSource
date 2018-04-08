@@ -336,8 +336,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	@Override
 	public List<OfficeCubicleSpace> listAllSpaces(long pageAnchor, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
-				.where(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.gt(pageAnchor))
+		return context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES)
+				.where(Tables.EH_OFFICE_CUBICLE_SPACES.ID.gt(pageAnchor))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq((byte)2))
 				.limit(pageSize)
 				.fetch().map(r->ConvertHelper.convert(r,OfficeCubicleSpace.class));
 

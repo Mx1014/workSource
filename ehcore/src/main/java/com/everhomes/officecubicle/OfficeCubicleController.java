@@ -55,7 +55,7 @@ public class OfficeCubicleController extends ControllerBase {
     @RestReturn(value=QuerySpacesResponse.class )
     public RestResponse querySpaces(QuerySpacesCommand cmd) {
     	QuerySpacesResponse resp = this.officeCubicleService.querySpaces(cmd);
-    	
+    	this.officeCubicleService.updateCurrentUserSelectedCity(cmd.getProvinceName(),cmd.getCityName());
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

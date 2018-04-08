@@ -59,11 +59,12 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 	}
 
 	@Override
-	public OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String cityName,String provinceName,Integer namespaceId) {
+	public OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName,String cityName,Integer namespaceId) {
 		List<OfficeCubicleCity> map = getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
 				.where(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
-				.and(Tables.EH_OFFICE_CUBICLE_CITIES.CITY_NAME.lt(cityName))
-				.and(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.lt(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.CITY_NAME.eq(cityName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 		if(map!=null && map.size()>0){
 			return map.get(0);

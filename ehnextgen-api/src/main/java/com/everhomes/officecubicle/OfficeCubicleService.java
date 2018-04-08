@@ -51,4 +51,6 @@ public interface OfficeCubicleService {
 	void createOrUpdateCity(CreateOrUpdateCityCommand cmd);
 
 	void reOrderCity(ReOrderCityCommand cmd);
+
+	void updateCurrentUserSelectedCity(String provinceName, String cityName);
 }

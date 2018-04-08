@@ -745,25 +745,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeSpaceDTO dto = convertSpaceDTO(other);
 			response.getSpaces().add(dto);
 		});
-		updateCurrentUserSelectedCity(cmd.getProvinceName(),cmd.getCityName());
 
 		return response;
 	}
-
-	private void updateCurrentUserSelectedCity(String provinceName, String cityName) {
+	
+	@Override
+	public void updateCurrentUserSelectedCity(String provinceName, String cityName) {
 		OfficeCubicleSelectedCity selectedCity = new OfficeCubicleSelectedCity();
 		selectedCity.setCityName(cityName);
 		selectedCity.setProvinceName(provinceName);
 		selectedCity.setNamespaceId(UserContext.getCurrentNamespaceId());
 		cubicleSelectedCityProvider.deleteSelectedCityByCreator(UserContext.current().getUser().getId());
 		cubicleSelectedCityProvider.createOfficeCubicleSelectedCity(selectedCity);
-		
 	}
 
 	@Override
 	public void dataMigration() {
 		List<OfficeCubicleSpace> allspaces =officeCubicleProvider.listAllSpaces(0L,100);
-		if (allspaces!=null && allspaces.size()>0) {
+		if (allspaces==null || allspaces.size()==0) {
 			return;
 		}
 
@@ -855,7 +854,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public ListCitiesResponse listCities(ListCitiesCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long pageAnchor = cmd.getNextPageAnchor()==null?Long.MAX_VALUE:cmd.getNextPageAnchor();
-		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(cmd.getNamespaceId(),cmd.getNextPageAnchor(),pageSize+1);
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId==null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,pageAnchor,pageSize+1);
 
 		if (null == cities || cities.size()==0)
 			return null;
@@ -892,6 +895,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
 			OfficeCubicleCity officeCubicleCity = ConvertHelper.convert(cmd,OfficeCubicleCity.class);
+			officeCubicleCity.setNamespaceId(UserContext.getCurrentNamespaceId());
 			officeCubicleCityProvider.createOfficeCubicleCity(officeCubicleCity);
 		}
 	}
