@@ -6,3 +6,31 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 -- 增加扫码登录的域空间配置项、
 set @c_id = (select max(id) from eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@c_id:= @c_id +1, 'scanForLogonServer', 'https://web.zuolin.com', NULL, '999971', NULL);
+
+-- 删除没用的 banner    add by xq.tian   2018/04/08
+DELETE FROM eh_banners WHERE status = 0;
+
+DROP PROCEDURE if exists delete_banner;
+delimiter //
+CREATE PROCEDURE `delete_banner` ()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE scene VARCHAR(128);
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select namespace_id, scene_type from eh_banners where status = 2 AND scene_type IS NOT NULL GROUP BY namespace_id;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO ns,scene;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+
+        DELETE FROM eh_banners WHERE namespace_id = ns AND scene_type <> scene;
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL delete_banner;
+DROP PROCEDURE if exists create_admin;
