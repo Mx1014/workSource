@@ -5561,7 +5561,7 @@ public class UserServiceImpl implements UserService {
 		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
 
-		resp.setScanForLogonServer(SCAN_FOR_LOGON_SERVER);
+		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", "SCAN_FOR_LOGON_SERVER"));
 
 		// 客户端资源缓存配置
 		String clientCacheConfig = configurationProvider.getValue(

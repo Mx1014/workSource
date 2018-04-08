@@ -470,9 +470,6 @@ public interface OrganizationProvider {
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
 
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
-	
-	// 通讯录查询最新方法
-	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeTypes);
 
 	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes);
 	// path查询接口
