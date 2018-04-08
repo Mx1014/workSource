@@ -1181,4 +1181,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
     }
 
+	@Override
+	public List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

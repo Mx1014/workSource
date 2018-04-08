@@ -89,4 +89,7 @@ INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`
 INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES('EhUsers', 10000);
 INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES('EhForums', 10000);
 
+----新增深圳湾对接
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ('124123214124124124', 'community', '0', '深圳湾物业缴费对接', 'szy', '0', '66666');
+
 SET foreign_key_checks = 1;

@@ -156,6 +156,8 @@ public interface AssetService {
     CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
     List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
+    
+    List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
 

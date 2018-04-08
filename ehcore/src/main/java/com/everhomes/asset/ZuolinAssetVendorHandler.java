@@ -934,4 +934,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);
     }
+
+	@Override
+	public List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

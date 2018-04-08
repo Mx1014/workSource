@@ -2774,6 +2774,13 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
     }
+    
+    public List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
+	    AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
+	    String vendorName = assetVendor.getVendorName();
+	    AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+	    return handler.showBillForClientSZY(cmd);
+    }
 
     /**
      *

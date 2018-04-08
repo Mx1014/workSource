@@ -555,4 +555,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         }
         return null;
     }
+
+	@Override
+	public List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

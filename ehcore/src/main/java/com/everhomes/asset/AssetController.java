@@ -934,6 +934,20 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+    
+    /**
+     * <p>显示一个用户的物业账单（深圳湾物业缴费对接）</p>
+     * <b>URL: /asset/showBillForClientSZY</b>
+     */
+    @RequestMapping("showBillForClientSZY")
+    @RestReturn(value = ShowBillForClientSZYDTO.class,collection = true)
+    public RestResponse showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
+        List<ShowBillForClientSZYDTO> dtos = assetService.showBillForClientSZY(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
     // this is for 显示一个用户的物业账单          4
     /**
