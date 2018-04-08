@@ -9,6 +9,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -20,6 +21,8 @@ import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.pmNotify.PmNotifyRecord;
+import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
@@ -43,6 +46,15 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverDTO;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.pmNotify.ReceiverName;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
@@ -274,6 +286,11 @@ public class QualityServiceImpl implements QualityService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private EquipmentService equipmentService;
+	@Autowired
+	private PmNotifyService pmNotifyService;
 
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -1734,55 +1751,88 @@ Long nextPageAnchor = null;
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-//			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
-//
-//				task.setExecutiveGroupId(executiveGroup.getGroupId());
-//				task.setExecutivePositionId(executiveGroup.getPositionId());
-//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
-//																	, executiveGroup.getGroupId());
-//				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
-//														executiveGroup.getGroupId(), OrganizationMemberGroupType.HECHA.getCode());
-//				if(members != null) {
-//					task.setExecutorType(member.getTargetType());
-//					task.setExecutorId(member.getTargetId());
-				List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
+			List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
 
-				if(timeRanges != null && timeRanges.size() > 0) {
-					for(TimeRangeDTO timeRange : timeRanges) {
-						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
-							String duration = timeRange.getDuration();
-							String start = timeRange.getStartTime();
-							String str = day + " " + start;
-							Timestamp startTime = strToTimestamp(str);
-							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-							task.setExecutiveStartTime(startTime);
-							task.setExecutiveExpireTime(expiredTime);
-							long now = System.currentTimeMillis();
-							String taskNum = timestampToStr(new Timestamp(now)) + now;
-							task.setTaskNumber(taskNum);
-							qualityProvider.createVerificationTasks(task);
-							taskSearcher.feedDoc(task);
-						});
-					}
-
+			if (timeRanges != null && timeRanges.size() > 0) {
+				for (TimeRangeDTO timeRange : timeRanges) {
+					this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(() -> {
+						String duration = timeRange.getDuration();
+						String start = timeRange.getStartTime();
+						String str = day + " " + start;
+						Timestamp startTime = strToTimestamp(str);
+						Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+						task.setExecutiveStartTime(startTime);
+						task.setExecutiveExpireTime(expiredTime);
+						long now = System.currentTimeMillis();
+						String taskNum = timestampToStr(new Timestamp(now)) + now;
+						task.setTaskNumber(taskNum);
+						qualityProvider.createVerificationTasks(task);
+						taskSearcher.feedDoc(task);
+					});
 				}
 
-//				} else {
-//					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
-////					throw RuntimeErrorException
-////							.errorWith(
-////									QualityServiceErrorCode.SCOPE,
-////									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
-////									localeStringService.getLocalizedString(
-////											String.valueOf(QualityServiceErrorCode.SCOPE),
-////											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
-////											UserContext.current().getUser().getLocale(),
-////											"the group don't have any hecha member!"));
-//
-//				}
-
 			}
-//		}
+
+			ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+			command.setCommunityId(task.getTargetId());
+			command.setNamespaceId(task.getNamespaceId());
+			command.setOwnerType(EntityType.QUALITY_TASK.getCode());
+			//此处为拿到自定义通知参数的接收人ids
+			List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+			if (paramDTOs != null && paramDTOs.size() > 0) {
+				for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+					List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+					if (receivers != null && receivers.size() > 0) {
+						PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+						PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+						List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+						receivers.forEach(receiver -> {
+							PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+							if (receiver != null) {
+								pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+								if (receiver.getReceivers() != null) {
+									List<Long> ids = receiver.getReceivers()
+											.stream().map(ReceiverName::getId)
+											.collect(Collectors.toList());
+									pmNotifyReceiver.setReceiverIds(ids);
+								}
+								pmNotifyReceivers.add(pmNotifyReceiver);
+							}
+						});
+						receiverList.setReceivers(pmNotifyReceivers);
+						record.setReceiverJson(receiverList.toString());
+						record.setOwnerType(EntityType.QUALITY_TASK.getCode());
+						record.setOwnerId(task.getId());
+
+						//notify_time
+						PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+						switch (notify) {
+							case BEFORE_START:
+								Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+								record.setNotifyTime(starttime);
+								break;
+							case BEFORE_DELAY:
+								Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+								record.setNotifyTime(delaytime);
+								break;
+							case AFTER_DELAY:
+								record.setNotifyTime(task.getExecutiveExpireTime());
+								break;
+							default:
+								break;
+						}
+						pmNotifyService.pushPmNotifyRecord(record);
+					}
+				}
+			}
+		}
+	}
+
+	private Timestamp minusMinutes(Timestamp startTime, Integer minus) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.MINUTE, -minus);
+		return new Timestamp(calendar.getTimeInMillis());
 	}
 
 
@@ -5142,5 +5192,62 @@ Long nextPageAnchor = null;
 			}
 
 		}
+	}
+
+	@Override
+	public void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		equipmentService.deletePmNotifyParams(cmd);
+
+	}
+
+	@Override
+	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		return  equipmentService.listPmNotifyParams(cmd);
+	}
+
+	@Override
+	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		equipmentService.setPmNotifyParams(cmd);
+	}
+
+	@Override
+	public Set<Long> getTaskGroupUsers(Long ownerId) {
+		QualityInspectionTasks tasks = qualityProvider.findVerificationTaskById(ownerId);
+		List<QualityInspectionStandardGroupMap> groupMaps = qualityProvider.listPlanGroupMapsByPlanId(tasks.getStandardId());
+		//增加具体到个人
+		if(groupMaps!=null && groupMaps.size()>0){
+			Set<Long> userIds = new HashSet<>();
+			groupMaps.forEach(map -> {
+				//部门
+				if (map.getPositionId() == null || map.getPositionId() == 0L) {
+					if (map.getGroupId() != null && map.getGroupId() != 0L) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
+						if (members != null) {
+							for (OrganizationMember member : members) {
+								userIds.add(member.getTargetId());
+							}
+						} else {
+							//增加具体到个人
+							userIds.add(map.getInspectorUid());
+						}
+					}
+
+				} else {
+					//通用岗位
+					ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+					command.setOrganizationId(map.getGroupId());
+					command.setJobPositionId(map.getPositionId());
+					List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+
+					if (contacts != null && contacts.size() > 0) {
+						for (OrganizationContactDTO contact : contacts) {
+							userIds.add(contact.getTargetId());
+						}
+					}
+				}
+			});
+			return userIds;
+		}
+		return null;
 	}
 }

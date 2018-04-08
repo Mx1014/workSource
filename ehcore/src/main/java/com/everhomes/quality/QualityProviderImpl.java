@@ -455,9 +455,18 @@ public class QualityProviderImpl implements QualityProvider {
 			maps.add(ConvertHelper.convert(r, QualityInspectionStandardGroupMap.class));
 			return null;
 		});
-
-
+		List<QualityInspectionStandardGroupMap> personalGroupMap = listPersonalGroupMaps();
+		if (personalGroupMap != null && personalGroupMap.size() > 0) {
+			maps.addAll(personalGroupMap);
+		}
 		return maps;
+	}
+
+	private List<QualityInspectionStandardGroupMap> listPersonalGroupMaps() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.INSPECTOR_UID.eq(UserContext.currentUserId()));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 
 	@Override
@@ -3043,5 +3052,13 @@ public class QualityProviderImpl implements QualityProvider {
 		todayStart.set(Calendar.SECOND, 0);
 		todayStart.set(Calendar.MILLISECOND, 0);
 		return new Timestamp(todayStart.getTime().getTime());
+	}
+
+	@Override
+	public List<QualityInspectionStandardGroupMap> listPlanGroupMapsByPlanId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 }

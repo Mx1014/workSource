@@ -11,6 +11,10 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
 import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
@@ -991,6 +995,49 @@ public class QualityController extends ControllerBase {
 		UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		qualityService.startCrontabTask();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+
+	/**
+	 * <b>URL: /quality/setPmNotifyParams</b>
+	 * <p>设置通知参数</p>
+	 */
+	@RequestMapping("setPmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		qualityService.setPmNotifyParams(cmd);
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/listPmNotifyParams</b>
+	 * <p>列出通知参数</p>
+	 */
+	@RequestMapping("listPmNotifyParams")
+	@RestReturn(value = PmNotifyParamDTO.class, collection = true)
+	public RestResponse listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		List<PmNotifyParamDTO> pmNotifyParams = qualityService.listPmNotifyParams(cmd);
+		RestResponse res = new RestResponse(pmNotifyParams);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/deletePmNotifyParams</b>
+	 * <p>删除通知参数</p>
+	 */
+	@RequestMapping("deletePmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		qualityService.deletePmNotifyParams(cmd);
 		RestResponse res = new RestResponse();
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
