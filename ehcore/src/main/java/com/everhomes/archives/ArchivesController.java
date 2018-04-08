@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 
 /**
  * 2017.08.11
@@ -445,7 +446,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("testNotification")
     @RestReturn(value = String.class)
     public RestResponse testNotification(){
-        archivesService.initArchivesNotification();
+        archivesService.executeArchivesNotification(7, 12, LocalDateTime.now());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
