@@ -493,19 +493,6 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /rental/admin/listRentalBillsByOrganizationId</b>
-	 * <p>通过企业id查询订单</p>
-	 */
-	@RequestMapping("listRentalBillsByOrganizationId")
-	@RestReturn(value = ListRentalBillsCommandResponse.class)
-	public RestResponse searchRentalOrders(ListRentalBillsByOrdIdCommand cmd) {
-		RestResponse response = new RestResponse(rentalService.listRentalBillsByOrdId(cmd));
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /rental/admin/listActiveRentalBills</b>
 	 * <p>
 	 * 查询正在进行中的订单
