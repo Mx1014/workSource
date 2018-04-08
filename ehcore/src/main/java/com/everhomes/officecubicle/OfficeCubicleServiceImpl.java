@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.alipay.api.domain.CardBinVO;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
@@ -101,6 +102,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private OfficeCubicleProvider officeCubicleProvider;
 	@Autowired
 	private OfficeCubicleCityProvider officeCubicleCityProvider;
+	@Autowired
+	private OfficeCubicleSelectedCityProvider cubicleSelectedCityProvider;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
@@ -193,12 +196,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});
 		}
 		List<OfficeCubicleCategory> categories = this.officeCubicleProvider.queryCategoriesBySpaceId(dto.getId());
+		dto.setAllPositionNums(0);
 		if (null != categories){
 			dto.setCategories(new ArrayList<OfficeCategoryDTO>());
 			categories.forEach((category) -> {
 				OfficeCategoryDTO categoryDTO = ConvertHelper.convert(category, OfficeCategoryDTO.class);
 				categoryDTO.setSize(category.getSpaceSize());
+				if(category.getPositionNums()!=null){
+					dto.setAllPositionNums(dto.getAllPositionNums()+category.getPositionNums());
+				}
 				dto.getCategories().add(categoryDTO);
+				if(dto.getMinUnitPrice()==null || (category.getUnitPrice()!=null 
+						&& dto.getMinUnitPrice()!=null 
+						&& category.getUnitPrice().doubleValue()<dto.getMinUnitPrice().doubleValue())
+						){
+					dto.setMinUnitPrice(category.getUnitPrice());
+				}
 			});
 			Collections.sort(dto.getCategories(),new Comparator<OfficeCategoryDTO>(){
 				public int compare(OfficeCategoryDTO s1, OfficeCategoryDTO s2) {
@@ -206,9 +219,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            }
 			});	
 		}
+		
 
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
+		
 		return dto;
 	}
 
@@ -520,24 +535,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
-		List<CityDTO> resp = new ArrayList<CityDTO>();
-		CityDTO dto = new CityDTO();
-//		dto.setCityId(0L);
-		dto.setCityName("全国");
-		resp.add(dto);
-		Set<Long> cityIds = new HashSet<Long>();
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(cmd.getOwnerType(),cmd.getOwnerId(),null, new CrossShardListingLocator(),
-				Integer.MAX_VALUE, getNamespaceId(cmd.getNamespaceId()));
-		if (null != spaces) {
-			spaces.forEach((space) -> {
-				if (!cityIds.contains(space.getCityId())) {
-					cityIds.add(space.getCityId());
-					CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
-					resp.add(cityDTO);
-				}
-			});
-		}
-		return resp;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId);
+		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
+		
+		return cities.stream().map(r->{
+			CityDTO dto = ConvertHelper.convert(r, CityDTO.class);
+			//根据上次用户选中的城市，这里设置当前选中的城市。
+			if(selecetedCity!=null 
+					&& selecetedCity.getProvinceName().equals(dto.getProvinceName()) 
+					&& selecetedCity.getCityName().equals(dto.getCityName())){
+				dto.setSelectFlag((byte)1);
+			}
+			return dto;
+		}).collect(Collectors.toList());
 	}
 
 	@Override
@@ -660,6 +672,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setCategoryName(cmd.getCategoryName());
 		order.setCategoryId(cmd.getCategoryId());
 		order.setContactPhone(cmd.getReserveContactToken());
+		order.setEmployeeNumber(cmd.getEmployeeNumber());
+		order.setFinancingFlag(cmd.getFinancingFlag());
 		return order;
 	}
 
@@ -716,9 +730,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-//		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
-//			cmd.setCityId(null);
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getOwnerType(),cmd.getOwnerId(),0L, locator, pageSize + 1,
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityName(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getProvinceName(),cmd.getCityName(), locator, pageSize + 1,
 				getNamespaceId(UserContext.getCurrentNamespaceId()));
 		if (null == spaces)
 			return response;
@@ -733,8 +745,19 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeSpaceDTO dto = convertSpaceDTO(other);
 			response.getSpaces().add(dto);
 		});
+		updateCurrentUserSelectedCity(cmd.getProvinceName(),cmd.getCityName());
 
 		return response;
+	}
+
+	private void updateCurrentUserSelectedCity(String provinceName, String cityName) {
+		OfficeCubicleSelectedCity selectedCity = new OfficeCubicleSelectedCity();
+		selectedCity.setCityName(cityName);
+		selectedCity.setProvinceName(provinceName);
+		selectedCity.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cubicleSelectedCityProvider.deleteSelectedCityByCreator(UserContext.current().getUser().getId());
+		cubicleSelectedCityProvider.createOfficeCubicleSelectedCity(selectedCity);
+		
 	}
 
 	@Override

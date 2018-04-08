@@ -342,4 +342,27 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 				.fetch().map(r->ConvertHelper.convert(r,OfficeCubicleSpace.class));
 
 	}
+
+	@Override
+	public List<OfficeCubicleSpace> querySpacesByCityName(String ownerType, Long ownerId, String provinceName,
+			String cityName, CrossShardListingLocator locator, int pageSize, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_RANGES,Tables.EH_OFFICE_CUBICLE_SPACES);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_TYPE.eq(ownerType);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_ID.eq(ownerId));
+		condition =  condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.ID));
+
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_NAME.eq(cityName));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.PROVINCE_NAME.eq(provinceName));
+		if (null != locator && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
+		step.limit(pageSize);
+		step.where(condition);
+		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map(new DefaultRecordMapper(Tables.EH_OFFICE_CUBICLE_SPACES.recordType(), OfficeCubicleSpace.class));
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
 }

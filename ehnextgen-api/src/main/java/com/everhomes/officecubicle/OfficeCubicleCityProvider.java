@@ -13,7 +13,7 @@ public interface OfficeCubicleCityProvider {
 
 	OfficeCubicleCity findOfficeCubicleCityById(Long id);
 
-	List<OfficeCubicleCity> listOfficeCubicleCity();
+	List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId);
 
 	List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId, Long nextPageAnchor, int pageSize);
 

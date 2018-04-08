@@ -73,9 +73,11 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 
 
 	@Override
-	public List<OfficeCubicleCity> listOfficeCubicleCity() {
+	public List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId) {
 		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
-				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.ID.asc())
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.and((Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId)))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
 
