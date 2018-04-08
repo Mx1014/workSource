@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *     <li>customerType: 所属客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId：所属客户id</li>
  *     <li>communityId：所属项目id</li>
+ *     <li>orgId：物业公司id</li>
+ *     <li>namespaceId：域空间id</li>
  *     <li>pageAnchor：锚点</li>
  *     <li>pageSize：页面大小</li>
  * </ul>
