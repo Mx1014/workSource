@@ -15,7 +15,6 @@ CREATE TABLE `eh_organization_apps` (
   `id` bigint(20) NOT NULL,
   `app_origin_id` bigint(20) DEFAULT NULL,
   `org_id` bigint(20) DEFAULT NULL,
-  `app_type` varchar(255) DEFAULT NULL,
   `alias_name` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
@@ -68,3 +67,4 @@ CREATE TABLE `eh_service_module_app_profile` (
 
 -- 增加应用类型字段 0-oa应用、1-园区应用、2-服务应用   add by yanjun 201804081501
 ALTER TABLE `eh_service_modules` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
