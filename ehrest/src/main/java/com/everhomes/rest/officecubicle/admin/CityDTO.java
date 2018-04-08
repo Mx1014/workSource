@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>iconUri: 图片uri</li>
  * <li>iconUrl: 图片url</li>
  * <li>defaultOrder: 顺序</li>
+ * <li>selectFlag: 是否被选中，1选中，0未选中</li>
  * </ul>
  */
 public class CityDTO {
@@ -20,6 +21,15 @@ public class CityDTO {
     private String iconUri;
     private String iconUrl;
     private Integer defaultOrder;
+    private Byte selectFlag;
+
+    public Byte getSelectFlag() {
+        return selectFlag;
+    }
+
+    public void setSelectFlag(Byte selectFlag) {
+        this.selectFlag = selectFlag;
+    }
 
     public Long getId() {
         return id;
@@ -71,6 +81,6 @@ public class CityDTO {
 
     @Override
     public String toString() {
-        return StringHelper.toJsonString(this)
+        return StringHelper.toJsonString(this);
     }
 }

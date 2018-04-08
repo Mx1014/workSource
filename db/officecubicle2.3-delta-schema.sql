@@ -21,3 +21,18 @@ CREATE TABLE `eh_office_cubicle_cities` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 用户选中城市表 , add by dengs, 20180403
+-- DROP TABLE IF EXISTS `eh_office_cubicle_selected_cities`;
+CREATE TABLE `eh_office_cubicle_selected_cities` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `province_name` varchar(100) DEFAULT NULL COMMENT '省份名称',
+  `city_name` varchar(128) DEFAULT NULL COMMENT '城市名称',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

@@ -45,4 +45,6 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleSpace> listEmptyOwnerSpace();
 
     List<OfficeCubicleOrder> listEmptyOwnerOrders();
+
+	List<OfficeCubicleSpace> listAllSpaces(long pageAnchor, int pageSize);
 }

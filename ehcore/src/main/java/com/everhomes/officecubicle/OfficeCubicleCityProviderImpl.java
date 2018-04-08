@@ -34,9 +34,10 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 	public void createOfficeCubicleCity(OfficeCubicleCity officeCubicleCity) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleCities.class));
 		officeCubicleCity.setId(id);
+		officeCubicleCity.setDefaultOrder(id);
 		officeCubicleCity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		officeCubicleCity.setCreatorUid(UserContext.current().getUser().getId());
-		officeCubicleCity.setUpdateTime(officeCubicleCity.getCreateTime());
+		officeCubicleCity.setOperateTime(officeCubicleCity.getCreateTime());
 		officeCubicleCity.setOperatorUid(officeCubicleCity.getCreatorUid());
 		getReadWriteDao().insert(officeCubicleCity);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleCities.class, null);
@@ -45,7 +46,7 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 	@Override
 	public void updateOfficeCubicleCity(OfficeCubicleCity officeCubicleCity) {
 		assert (officeCubicleCity.getId() != null);
-		officeCubicleCity.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		officeCubicleCity.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		officeCubicleCity.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(officeCubicleCity);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleCities.class, officeCubicleCity.getId());
@@ -56,14 +57,47 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), OfficeCubicleCity.class);
 	}
-	
+
+	@Override
+	public OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String cityName,String provinceName,Integer namespaceId) {
+		List<OfficeCubicleCity> map = getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.CITY_NAME.lt(cityName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.lt(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+		if(map!=null && map.size()>0){
+			return map.get(0);
+		}
+		return null;
+	}
+
+
 	@Override
 	public List<OfficeCubicleCity> listOfficeCubicleCity() {
 		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
-	
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId, Long nextPageAnchor, int pageSize) {
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.lt(nextPageAnchor))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+	}
+
+	@Override
+	public void deleteOfficeCubicleCity(Long cityId) {
+		getReadWriteContext().update(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.set(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS,(byte)0)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.ID.eq(cityId))
+				.execute();
+	}
+
 	private EhOfficeCubicleCitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

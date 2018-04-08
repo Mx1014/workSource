@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.officecubicle;
 
+import com.everhomes.rest.officecubicle.admin.CityDTO;
+
 import java.util.List;
 
 public interface OfficeCubicleCityProvider {
@@ -13,4 +15,9 @@ public interface OfficeCubicleCityProvider {
 
 	List<OfficeCubicleCity> listOfficeCubicleCity();
 
+	List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId, Long nextPageAnchor, int pageSize);
+
+	void deleteOfficeCubicleCity(Long cityId);
+
+	OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName, String cityName, Integer namespaceId);
 }

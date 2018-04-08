@@ -26,6 +26,8 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -33,6 +35,9 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.officecubicle.*;
+import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionScope;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -58,12 +63,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
-import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -101,6 +100,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Autowired
 	private OfficeCubicleProvider officeCubicleProvider;
 	@Autowired
+	private OfficeCubicleCityProvider officeCubicleCityProvider;
+	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private AttachmentProvider attachmentProvider;
@@ -110,7 +111,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private OfficeCubicleRangeProvider officeCubicleRangeProvider;
 	@Autowired
 	private FlowService flowService;
-	
+
+	@Autowired
+	private RegionProvider regionProvider;
+
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 
@@ -324,6 +328,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
 		category.setPositionNums(dto.getPositionNums());
+		category.setUnitPrice(dto.getUnitPrice());
 		this.officeCubicleProvider.createCategory(category);
 
 	}
@@ -517,7 +522,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
 		List<CityDTO> resp = new ArrayList<CityDTO>();
 		CityDTO dto = new CityDTO();
-		dto.setCityId(0L);
+//		dto.setCityId(0L);
 		dto.setCityName("全国");
 		resp.add(dto);
 		Set<Long> cityIds = new HashSet<Long>();
@@ -711,9 +716,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
-			cmd.setCityId(null);
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCityId(), locator, pageSize + 1,
+//		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
+//			cmd.setCityId(null);
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getOwnerType(),cmd.getOwnerId(),0L, locator, pageSize + 1,
 				getNamespaceId(UserContext.getCurrentNamespaceId()));
 		if (null == spaces)
 			return response;
@@ -734,47 +739,158 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void dataMigration() {
+		List<OfficeCubicleSpace> allspaces =officeCubicleProvider.listAllSpaces(0L,100);
+		if (allspaces!=null && allspaces.size()>0) {
+			return;
+		}
 
-		//owner刷入space
-		List<OfficeCubicleSpace> emptyOwnerList = officeCubicleProvider.listEmptyOwnerSpace();
-		if(emptyOwnerList!=null) {
-			for (OfficeCubicleSpace r : emptyOwnerList) {
-				ListingLocator locator = new ListingLocator();
-				locator.setAnchor(0L);
-				List<CommunityDTO> communityDTOS = communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), r.getNamespaceId(), locator, 10);
-				if(communityDTOS!=null && communityDTOS.size()>0){
-					r.setOwnerId(communityDTOS.get(0).getId());
-					r.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
-
-					//owner刷入ranges
-					for (CommunityDTO communityDTO : communityDTOS) {
-						OfficeCubicleRange range = officeCubicleRangeProvider.findOfficeCubicleRangeByOwner(communityDTO.getId(),OfficeSpaceOwner.COMMUNITY.getCode(),r.getId(),r.getNamespaceId());
-						if(range==null) {
-							range = new OfficeCubicleRange();
-							range.setNamespaceId(r.getNamespaceId());
-							range.setOwnerId(communityDTO.getId());
-							range.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
-							range.setSpaceId(r.getId());
-							officeCubicleRangeProvider.createOfficeCubicleRange(range);
-						}
-
-					}
-					officeCubicleProvider.updateSpace(r);
+		boolean continueFlag = true;
+		while(continueFlag) {
+			for (OfficeCubicleSpace allspace : allspaces) {
+				OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(allspace.getProvinceName(), allspace.getCityName(), allspace.getNamespaceId());
+				if (city == null) {
+					city = new OfficeCubicleCity();
+					city.setNamespaceId(allspace.getNamespaceId());
+					city.setProvinceName(allspace.getProvinceName());
+					city.setCityName(allspace.getCityName());
+					officeCubicleCityProvider.createOfficeCubicleCity(city);
 				}
+			}
+			if (allspaces.size() == 100) {
+				allspaces = officeCubicleProvider.listAllSpaces(allspaces.get(99).getId(), 100);
+			} else {
+				continueFlag=false;
 			}
 		}
 
-		List<OfficeCubicleOrder> emptyOwnerOrders = officeCubicleProvider.listEmptyOwnerOrders();
-		if(emptyOwnerOrders!=null){
-			for (OfficeCubicleOrder order : emptyOwnerOrders) {
-				OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
-				if(space==null) {
-					continue;
-				}
-				order.setOwnerType(space.getOwnerType());
-				order.setOwnerId(space.getOwnerId());
-				officeCubicleProvider.updateOrder(order);
-			}
+
+	}
+	//	@Override
+//	public void dataMigration() {
+//
+//		//owner刷入space
+//		List<OfficeCubicleSpace> emptyOwnerList = officeCubicleProvider.listEmptyOwnerSpace();
+//		if(emptyOwnerList!=null) {
+//			for (OfficeCubicleSpace r : emptyOwnerList) {
+//				ListingLocator locator = new ListingLocator();
+//				locator.setAnchor(0L);
+//				List<CommunityDTO> communityDTOS = communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), r.getNamespaceId(), locator, 10);
+//				if(communityDTOS!=null && communityDTOS.size()>0){
+//					r.setOwnerId(communityDTOS.get(0).getId());
+//					r.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
+//
+//					//owner刷入ranges
+//					for (CommunityDTO communityDTO : communityDTOS) {
+//						OfficeCubicleRange range = officeCubicleRangeProvider.findOfficeCubicleRangeByOwner(communityDTO.getId(),OfficeSpaceOwner.COMMUNITY.getCode(),r.getId(),r.getNamespaceId());
+//						if(range==null) {
+//							range = new OfficeCubicleRange();
+//							range.setNamespaceId(r.getNamespaceId());
+//							range.setOwnerId(communityDTO.getId());
+//							range.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
+//							range.setSpaceId(r.getId());
+//							officeCubicleRangeProvider.createOfficeCubicleRange(range);
+//						}
+//
+//					}
+//					officeCubicleProvider.updateSpace(r);
+//				}
+//			}
+//		}
+//
+//		List<OfficeCubicleOrder> emptyOwnerOrders = officeCubicleProvider.listEmptyOwnerOrders();
+//		if(emptyOwnerOrders!=null){
+//			for (OfficeCubicleOrder order : emptyOwnerOrders) {
+//				OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+//				if(space==null) {
+//					continue;
+//				}
+//				order.setOwnerType(space.getOwnerType());
+//				order.setOwnerId(space.getOwnerId());
+//				officeCubicleProvider.updateOrder(order);
+//			}
+//		}
+//	}
+
+	@Override
+	public ListRegionsResponse listRegions(ListRegionsCommand cmd) {
+		List<Region> entityResultList;
+		if(cmd.getParentId()==null) {
+			entityResultList = this.regionProvider.listRegions(0, RegionScope.PROVINCE, RegionAdminStatus.ACTIVE, null);
+		}else{
+			entityResultList = this.regionProvider.listChildRegions(0, cmd.getParentId(),RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+
 		}
+		if(entityResultList==null || entityResultList.size()==0){
+			return null;
+		}
+		ListRegionsResponse response = new ListRegionsResponse();
+		response.setRegions(entityResultList.stream().map(r->ConvertHelper.convert(r,RegionDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public ListCitiesResponse listCities(ListCitiesCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long pageAnchor = cmd.getNextPageAnchor()==null?Long.MAX_VALUE:cmd.getNextPageAnchor();
+		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(cmd.getNamespaceId(),cmd.getNextPageAnchor(),pageSize+1);
+
+		if (null == cities || cities.size()==0)
+			return null;
+		Long nextPageAnchor = null;
+		if (cities != null && cities.size() > pageSize) {
+			cities.remove(cities.size() - 1);
+			nextPageAnchor = cities.get(cities.size() - 1).getDefaultOrder();
+		}
+		ListCitiesResponse response = new ListCitiesResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setCities(cities.stream().map(r->ConvertHelper.convert(r,CityDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public void deleteCity(DeleteCityCommand cmd) {
+		if(cmd.getCityId()==null)
+			return ;
+		officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+	}
+
+	@Override
+	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
+		if(cmd.getId()!=null){
+			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
+			if(officeCubicleCity==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"city id is not find");
+			}
+			officeCubicleCity.setCityName(cmd.getCityName());
+			officeCubicleCity.setProvinceName(cmd.getProvinceName());
+			officeCubicleCity.setIconUri(cmd.getIconUri());
+			officeCubicleCity.setStatus((byte)2);
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
+		}else{
+			OfficeCubicleCity officeCubicleCity = ConvertHelper.convert(cmd,OfficeCubicleCity.class);
+			officeCubicleCityProvider.createOfficeCubicleCity(officeCubicleCity);
+		}
+	}
+
+	@Override
+	public void reOrderCity(ReOrderCityCommand cmd) {
+		OfficeCubicleCity officeCubicleCity1 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid1());
+		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
+
+		if(officeCubicleCity1==null || officeCubicleCity2==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city id is not find");
+		}
+		Long order  = officeCubicleCity1.getDefaultOrder();
+		officeCubicleCity1.setDefaultOrder(officeCubicleCity2.getDefaultOrder());
+		officeCubicleCity2.setDefaultOrder(order);
+
+		dbProvider.execute(r->{
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity1);
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity2);
+			return null;
+		});
+
 	}
 }

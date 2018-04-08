@@ -332,4 +332,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		});
 		return result;
 	}
+
+	@Override
+	public List<OfficeCubicleSpace> listAllSpaces(long pageAnchor, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
+				.where(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.gt(pageAnchor))
+				.limit(pageSize)
+				.fetch().map(r->ConvertHelper.convert(r,OfficeCubicleSpace.class));
+
+	}
 }
