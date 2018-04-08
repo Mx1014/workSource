@@ -10,7 +10,7 @@ import java.util.List;
  *     <li>dtos: 园区和用户的相关信息 参考{@link CommunityUserDTO}</li>
  * </ul>
  */
-public class ListCommunitiesByUserResponse {
+public class ListAllCommunitiesResponse {
     private List<CommunityUserDTO> dtos;
 
     public List<CommunityUserDTO> getDtos() {

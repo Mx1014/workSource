@@ -1541,10 +1541,10 @@ public class UserController extends ControllerBase {
 	 * <p>根据用户域空间场景获取用户相关的地址列表</p>
 	 */
 	@RequestMapping("listUserAddress")
-	@RestReturn(value=ListUserAddressResponse.class)
-	public RestResponse listUserAddress() {
+	@RestReturn(value=ListAddressUsersResponse.class)
+	public RestResponse listAddressUsers(ListAddressUsersCommand cmd) {
 		//List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
-		ListUserAddressResponse res = null;
+		ListAddressUsersResponse res = null;
 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);

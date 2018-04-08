@@ -3,7 +3,7 @@ package com.everhomes.rest.launchpadbase;
 
 /**
  * <ul>
- *     <li>WORK((byte) 1): 工作台</li>
+ *     <li>WORKPLATFORM((byte) 1): 工作台</li>
  *     <li>SQUARE((byte) 2): 广场</li>
  *     <li>MESSAGE((byte) 3): 消息</li>
  *     <li>ME((byte) 4): 我的</li>
@@ -11,7 +11,7 @@ package com.everhomes.rest.launchpadbase;
  * </ul>
  */
 public enum IndexType {
-    WORK((byte) 1), SQUARE((byte) 2), MESSAGE((byte) 3), ME((byte) 4), CONTAINER((byte) 5);
+    WORKPLATFORM((byte) 1), SQUARE((byte) 2), MESSAGE((byte) 3), ME((byte) 4), CONTAINER((byte) 5);
 
     private byte code;
 

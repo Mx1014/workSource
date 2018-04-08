@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>layoutId: layoutId</li>
  * </ul>
  */
-public class Work {
+public class WorkPlatform {
 
     private Long layoutId;
 
