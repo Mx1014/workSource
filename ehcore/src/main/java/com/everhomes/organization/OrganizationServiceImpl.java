@@ -5565,8 +5565,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL) {
             //不抛异常会导致客户端小黑条消不掉 by sfyan 20170120
             LOGGER.debug("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
-					"organization member status error.");
+//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+//					"organization member status error.");
         } else {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
