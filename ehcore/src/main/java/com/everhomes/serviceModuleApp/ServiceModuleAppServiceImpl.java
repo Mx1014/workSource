@@ -9,6 +9,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -236,18 +237,56 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public void uninstallApp(UninstallAppCommand cmd) {
 
-		OrganizationApp orgapps = organizationAppProvider.getOrganizationAppById(cmd.getOrgAppId());
+		OrganizationApp orgapp = organizationAppProvider.getOrganizationAppById(cmd.getOrgAppId());
 
-		if(orgapps == null){
+		if(orgapp == null || OrganizationAppStatus.INVALID == OrganizationAppStatus.fromCode(orgapp.getStatus())){
 			LOGGER.error("org app not found, orgAppId = {}", cmd.getOrgAppId());
 			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
 					ServiceModuleAppServiceErrorCode.ERROR_ORG_APP_NOT_FOUND, "org app not found, orgAppId = " + cmd.getOrgAppId());
 		}
 
-		orgapps.setStatus(OrganizationAppStatus.INVALID.getCode());
-		orgapps.setOperatorUid(UserContext.currentUserId());
-		orgapps.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-		organizationAppProvider.updateOrganizationApp(orgapps);
+		orgapp.setStatus(OrganizationAppStatus.INVALID.getCode());
+		orgapp.setOperatorUid(UserContext.currentUserId());
+		orgapp.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+		organizationAppProvider.updateOrganizationApp(orgapp);
 
+	}
+
+	@Override
+	public ListServiceModuleAppsByOrgIdResponse listServiceModuleAppsByOrgId(ListServiceModuleAppsByOrgIdCommand cmd) {
+
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+
+		//获取所有应用，在内存中处理。
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByAppTypeAndKeyword(releaseVersion.getId(), cmd.getAppType(), cmd.getKeyword());
+		if(apps == null){
+			return null;
+		}
+
+		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+		for (ServiceModuleApp app: apps){
+			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrgId());
+
+			ServiceModuleAppDTO dto = null;
+			//已安装的、未安装的、全部
+			if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.TRUE && orgapp != null){
+				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+				dto.setOrgAppId(orgapp.getId());
+				dtos.add(dto);
+			}else if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.FALSE && orgapp == null) {
+				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+				dtos.add(dto);
+			}else if(cmd.getInstallFlag() == null){
+				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+				if (orgapp != null){
+					dto.setOrgAppId(orgapp.getId());
+				}
+				dtos.add(dto);
+			}
+		}
+
+		ListServiceModuleAppsByOrgIdResponse response = new  ListServiceModuleAppsByOrgIdResponse();
+		response.setServiceModuleApps(dtos);
+		return response;
 	}
 }

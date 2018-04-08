@@ -34,4 +34,6 @@ public interface ServiceModuleAppProvider {
 	ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Byte actionType, String instanceConfig);
 
 	List<ServiceModuleApp> listServiceModuleAppByOriginId(Long originId);
+
+    List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword);
 }

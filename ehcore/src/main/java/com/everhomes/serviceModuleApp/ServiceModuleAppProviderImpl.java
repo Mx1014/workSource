@@ -257,4 +257,21 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return  apps;
 	}
 
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_SERVICE_MODULE_APPS);
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		if(appType != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
+		}
+		if(keyword != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAME.like("%" + keyword + "%"));
+		}
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
+		List<ServiceModuleApp> apps = query.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
 }

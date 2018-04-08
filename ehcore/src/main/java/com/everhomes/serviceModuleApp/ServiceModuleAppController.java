@@ -6,10 +6,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.servicemoduleapp.InstallAppCommand;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
-import com.everhomes.rest.servicemoduleapp.UninstallAppCommand;
+import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
@@ -30,9 +27,8 @@ public class ServiceModuleAppController extends ControllerBase {
 
 
 	/**
-	 * banner定制的查询应用信息
-	 * @param cmd
-	 * @return
+	 * <p>banner定制的查询应用信息</p>
+	 * <b>URL: /servicemoduleapp/listServiceModuleAppsForBanner</b>
 	 */
 	@RequestMapping("listServiceModuleAppsForBanner")
 	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
@@ -46,9 +42,8 @@ public class ServiceModuleAppController extends ControllerBase {
 
 
 	/**
-	 * 给公司安装应用
-	 * @param cmd
-	 * @return
+	 * <p>给公司安装应用</p>
+	 * <b>URL: /servicemoduleapp/installApp</b>
 	 */
 	@RequestMapping("installApp")
 	@RestReturn(value=ServiceModuleAppDTO.class)
@@ -61,9 +56,8 @@ public class ServiceModuleAppController extends ControllerBase {
 	}
 
 	/**
-	 * 给公司安装应用
-	 * @param cmd
-	 * @return
+	 * <p>给公司卸载应用</p>
+	 * <b>URL: /servicemoduleapp/uninstallApp</b>
 	 */
 	@RequestMapping("uninstallApp")
 	@RestReturn(value=String.class)
@@ -74,4 +68,19 @@ public class ServiceModuleAppController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <p>查询公司应用，按照类型、是否安装等条件查询</p>
+	 * <b>URL: /servicemoduleapp/listServiceModuleApps</b>
+	 */
+	@RequestMapping("listServiceModuleApps")
+	@RestReturn(value=ListServiceModuleAppsByOrgIdResponse.class)
+	public RestResponse listServiceModuleAppsByOrganization(ListServiceModuleAppsByOrgIdCommand cmd) {
+		ListServiceModuleAppsByOrgIdResponse res = serviceModuleAppService.listServiceModuleAppsByOrgId(cmd);
+		RestResponse response =  new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
