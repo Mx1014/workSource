@@ -3,11 +3,11 @@ package com.everhomes.oauth2;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -36,26 +36,20 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private AppProvider appProvider;
 
     @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Override
-    public URI confirmAuthorization(String identifier, String password, AuthorizationCommand cmd) {
-        //Added by Janson, MUST be changed when xiaoqiang comeback
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals(AppConstants.APPKEY_BIZ)) {
-            namespaceId = 2;
-        }
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals("f32e706e-28f6-11e8-a883-b083fe4e159f")) {
-            namespaceId = 999972;
-        }
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals("d2e8e7c7-cc48-4b93-9b1b-29fcaaa967bc")) {
-            namespaceId = 999953;
-        }
-        User user = userService.logonDryrun(namespaceId, identifier, password);
-        if(user == null)
+    public ConfirmAuthorizationVO confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
+        UserLogin login = userService.logonDryrun(namespaceId, identifier, password);
+        if (login == null) {
             return null;
-
-        return confirmAuthorization(user, cmd);
+        }
+        User user = userProvider.findUserById(login.getUserId());
+        URI uri = confirmAuthorization(user, cmd);
+        return new ConfirmAuthorizationVO(uri, login);
     }
    
     @Override

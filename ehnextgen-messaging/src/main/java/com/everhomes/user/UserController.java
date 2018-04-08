@@ -1048,9 +1048,7 @@ public class UserController extends ControllerBase {
 		return null;
 	}
 
-	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
-			HttpServletResponse response) {
-
+	private static void setCookieInResponse(String name, String value, HttpServletRequest request, HttpServletResponse response) {
 		Cookie cookie = findCookieInRequest(name, request);
 		if(cookie == null)
 			cookie = new Cookie(name, value);
