@@ -2737,6 +2737,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private void sendArchivesMessages(Long userId, String body) {
+        if(userId == 0)
+            return;
         MessageDTO message = new MessageDTO();
         message.setBodyType(MessageBodyType.TEXT.getCode());
         message.setBody(body);
