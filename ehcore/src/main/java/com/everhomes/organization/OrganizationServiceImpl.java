@@ -1627,10 +1627,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-            if (null != addressDTOs && 0 != addressDTOs.size()) {
-                this.addAddresses(organization.getId(), addressDTOs, user.getId());
-                organizationSearcher.feedDoc(organization);
-            }
+            // fix 26997 不管有没有传门牌 都要处理
+            this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            organizationSearcher.feedDoc(organization);
 
             //没有有关联的客户则新增一条
             if(customer == null) {
