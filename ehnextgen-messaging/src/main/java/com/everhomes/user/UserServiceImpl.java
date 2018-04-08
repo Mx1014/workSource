@@ -195,6 +195,8 @@ public class UserServiceImpl implements UserService {
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 	private static final Byte SCENE_EXAMPLE = 5;
 
+	private static final String SCAN_FOR_LOGON_SERVER = "https://web.zuolin.com";
+
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
@@ -5559,7 +5561,7 @@ public class UserServiceImpl implements UserService {
 		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
 
-		resp.setScanForLogonServer("https://web.zuolin.com");
+		resp.setScanForLogonServer(SCAN_FOR_LOGON_SERVER);
 
 		// 客户端资源缓存配置
 		String clientCacheConfig = configurationProvider.getValue(
