@@ -34,7 +34,7 @@ public class ArchivesNotificationJob extends QuartzJobBean {
         try {
             ZoneId zoneId = ZoneId.systemDefault();
             LocalDateTime nowDateTime = LocalDateTime.now();
-            archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour());
+            archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
             LOGGER.info("ArchivesNotificationJob Success!");
 
             LocalDateTime nextDateTime = LocalDateTime.of(nowDateTime.getYear(), nowDateTime.getMonthValue(), nowDateTime.getDayOfMonth(), nowDateTime.getHour() + 1, 0);

@@ -11,6 +11,7 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +107,7 @@ public interface ArchivesService {
 
     void initArchivesNotification();
 
-    void executeArchivesNotification(Integer day, Integer time);
+    void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
 //    void syncArchivesDismissStatus();
 }

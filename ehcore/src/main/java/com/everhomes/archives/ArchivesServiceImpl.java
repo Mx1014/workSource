@@ -19,6 +19,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
@@ -2559,35 +2560,35 @@ public class ArchivesServiceImpl implements ArchivesService {
             newNotify.setNotifyTime(cmd.getRemindTime());
             newNotify.setMailFlag(cmd.getMailFlag());
             newNotify.setMessageFlag(cmd.getMessageFlag());
-            newNotify.setNotifyTarget(JSON.toJSONString((cmd.getDetailIds())));
+            newNotify.setNotifyTarget(JSON.toJSONString(getNotificationTarget(cmd)));
             archivesProvider.createArchivesNotifications(newNotify);
         } else {
             originNotify.setNotifyDay(cmd.getRemindDay());
             originNotify.setNotifyTime(cmd.getRemindTime());
             originNotify.setMailFlag(cmd.getMailFlag());
             originNotify.setMessageFlag(cmd.getMessageFlag());
-            originNotify.setNotifyTarget(JSON.toJSONString((cmd.getDetailIds())));
+            originNotify.setNotifyTarget(JSON.toJSONString(getNotificationTarget(cmd)));
             archivesProvider.updateArchivesNotifications(originNotify);
         }
     }
 
-/*    private ArchivesNotificationTarget getNotificationTarget(ArchivesNotificationCommand cmd) {
-        ArchivesNotificationTarget target = new ArchivesNotificationTarget();
+    private List<ArchivesNotificationTarget> getNotificationTarget(ArchivesNotificationCommand cmd) {
+        List<ArchivesNotificationTarget> results = new ArrayList<>();
         if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0)
-            return target;
-        List<String> mailList = new ArrayList<>();
-        List<Long> messageList = new ArrayList<>();
+            return results;
         for (Long detailId : cmd.getDetailIds()) {
+            ArchivesNotificationTarget target = new ArchivesNotificationTarget();
             OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            if (null != employee.getWorkEmail())
-                mailList.add(employee.getWorkEmail());
-            if (0 != employee.getTargetId())
-                messageList.add(employee.getTargetId());
+            if (employee == null)
+                continue;
+            target.setDetailId(employee.getId());
+            target.setUserId(employee.getTargetId());
+            target.setContactName(employee.getContactName());
+            target.setWorkEmail(employee.getWorkEmail());
+            results.add(target);
         }
-        target.setEmailList(mailList);
-        target.setMessageList(messageList);
-        return target;
-    }*/
+        return results;
+    }
 
     @PostConstruct
     @Override
@@ -2606,25 +2607,31 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void executeArchivesNotification(Integer day, Integer time) {
+    public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
         if (results == null)
             return;
         for(ArchivesNotifications result : results){
-            sendArchivesNotification(result);
+            sendArchivesNotification(result, nowDateTime);
         }
     }
 
-    private void sendArchivesNotification(ArchivesNotifications notification){
+    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime nowDateTime){
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
-        if(company == null)
+        if(company == null) {
             LOGGER.error("Company not found!");
-        //  1.resolve targets
-        List<Long> detailIds = JSON.parseArray(notification.getNotifyTarget(), Long.class);
+            return;
+        }
 
+        //  1.resolve targets
+        List<ArchivesNotificationTarget> targets = JSON.parseArray(notification.getNotifyTarget(), ArchivesNotificationTarget.class);
+        if(targets == null || targets.size() == 0){
+            LOGGER.error("No targets!");
+            return;
+        }
 
         //  2.get employee's names
-        Date firstOfWeek = ArchivesUtil.currentDate();
+        Date firstOfWeek = Date.valueOf(nowDateTime.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();
@@ -2645,25 +2652,22 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.error("Nothing needs to be sent.");
             return;
         }
-/*
-        //  3.set the target email or userId
-        Long ryanId = 309154L;
-        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "nan.rong@zuolin.com", "jun.yan@zuolin.com", "hao.yang@zuolin.com");
-        String contactName = "Ronny";
-        String organizationName = "Google";
-*/
 
-        //  3.get the notification body.
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("contactName", contactName);
-        map.put("companyName", organizationName);
-        String body = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, "");
-        for (int n = 0; n < 7; n++)
-            body += processNotificationBody(employees, organizationName, ArchivesUtil.plusDate(firstOfWeek, n));
-
-        //  3.send it
-        sendArchivesEmails(emails, body);
-//        sendArchivesMessages(ryanId, body);
+        //  3.send notifications
+        for(ArchivesNotificationTarget target : targets){
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("contactName", target.getContactName());
+            map.put("companyName", company.getName());
+            //  3-1.get the notification body.
+            String body = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, "");
+            for (int n = 0; n < 7; n++)
+                body += processNotificationBody(employees, company.getName(), ArchivesUtil.plusDate(firstOfWeek, n));
+            //  3-2.send it
+            if(notification.getMailFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
+                sendArchivesEmails(target.getWorkEmail(), body);
+            if(notification.getMessageFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
+                sendArchivesMessages(target.getUserId(), body);
+        }
     }
 
     private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date) {
@@ -2724,11 +2728,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         return body;
     }
 
-    private void sendArchivesEmails(List<String> emails, String body) {
+    private void sendArchivesEmails(String email, String body) {
+        if (email == null)
+            return;
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
-        for (String email : emails)
-            handler.sendMail(UserContext.getCurrentNamespaceId(), null, email, "人事提醒", body, null);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, email, "人事提醒", body, null);
     }
 
     private void sendArchivesMessages(Long userId, String body) {
@@ -2737,8 +2742,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         message.setBody(body);
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(userId)));
-
-
         //  send the message
         messagingService.routeMessage(
                 User.SYSTEM_USER_LOGIN,
@@ -2749,42 +2752,4 @@ public class ArchivesServiceImpl implements ArchivesService {
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
     }
-
-    /*
-        if (results != null && results.size() > 0) {
-            //  2.按照时间归类，来启动对应时间点的定时器
-            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
-                    (ArchivesNotifications::getNotifyTime));
-            for (Integer hour : notifyMap.keySet()) {
-
-                scheduleProvider.scheduleSimpleJob(
-                        ARCHIVES_NOTIFICATION + hour,
-                        ARCHIVES_NOTIFICATION + hour,
-                        );
-//                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
-            }
-        }
-*/
-    /*@Override
-    public void syncArchivesDismissStatus() {
-        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
-        if (results != null) {
-            for (ArchivesDismissEmployees result : results) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(result.getDetailId());
-                if (detail == null)
-                    continue;
-                result.setEmployeeStatus(detail.getEmployeeStatus());
-                result.setDepartment(detail.getDepartment());
-                List<Long> departmentIds = JSONObject.parseArray(detail.getDepartmentIds(), Long.class);
-                if (departmentIds != null && departmentIds.size() > 0)
-                    result.setDepartmentId(departmentIds.get(0));
-                result.setJobPosition(detail.getJobPosition());
-                result.setJobLevel(detail.getJobLevel());
-                archivesProvider.updateArchivesDismissEmployee(result);
-                detail.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
-                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
-
-            }
-        }
-    }*/
 }
