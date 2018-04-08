@@ -25,6 +25,7 @@ import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.acl.PrivilegeConstants;
 
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -38,7 +39,10 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.user.*;
 
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -48,6 +52,7 @@ import com.everhomes.user.UserProvider;
 
 
 import com.everhomes.varField.*;
+import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
@@ -196,6 +201,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private DynamicExcelService dynamicExcelService;
+
+    @Autowired
+    private Rentalv2Service rentalv2Service;
+
+    @Autowired
+    private YellowPageService yellowPageService;
 
 
     @Override
@@ -2092,6 +2103,30 @@ public class CustomerServiceImpl implements CustomerService {
         });
         response.setDtos(dtos);
         return response;
+    }
+
+    @Override
+    public ListRentalBillsCommandResponse listCustomerRentalBills(ListCustomerRentalBillsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            ListRentalBillsByOrdIdCommand command = new ListRentalBillsByOrdIdCommand();
+            command.setOrganizationId(customer.getOrganizationId());
+            command.setPageSize(cmd.getPageSize());
+            command.setPageAnchor(cmd.getPageAnchor());
+            return rentalv2Service.listRentalBillsByOrdId(command);
+        }
+        return null;
+    }
+
+    @Override
+    public SearchRequestInfoResponse listCustomerSeviceAllianceAppRecords(ListCustomerSeviceAllianceAppRecordsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            return yellowPageService.listSeviceAllianceAppRecordsByEnterpriseId(customer.getOrganizationId(), cmd.getPageAnchor(), cmd.getPageSize());
+        }
+        return null;
     }
 
     @Override

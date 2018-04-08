@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1371,6 +1373,33 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = CustomerDepartureInfoDTO.class, collection = true)
     public RestResponse listCustomerDepartureInfos(@Valid ListCustomerDepartureInfosCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCustomerDepartureInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    //资源预定和服务联盟
+    /**
+     * <b>URL: /customer/listCustomerSeviceAllianceAppRecords</b>
+     * <p>列出服务联盟信息</p>
+     */
+    @RequestMapping("listCustomerSeviceAllianceAppRecords")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse listCustomerSeviceAllianceAppRecords (@Valid ListCustomerSeviceAllianceAppRecordsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerSeviceAllianceAppRecords(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerRentalBills</b>
+     * <p>列出资源预定信息</p>
+     */
+    @RequestMapping("listCustomerRentalBills")
+    @RestReturn(value = ListRentalBillsCommandResponse.class)
+    public RestResponse listCustomerRentalBills (@Valid ListCustomerRentalBillsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerRentalBills(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
