@@ -8,11 +8,11 @@ public interface SdkConstants {
 
     //#oauth2_redirect
     //http://qidixiangshan-beta.zuolin.com
-    public static final String API_AUTHORIZE_SERVICE_URI = "http://10.1.10.94/evh/oauth2/authorize";
+    public static final String API_AUTHORIZE_SERVICE_URI = "http://aclinktest.zuolin.com/evh/oauth2/authorize";
 
-    public static final String API_TOKEN_SERVICE_URI = "http://10.1.10.94/evh/oauth2/token";
+    public static final String API_TOKEN_SERVICE_URI = "http://aclinktest.zuolin.com/evh/oauth2/token";
 
-    public static final String API_OAUTH2API_URI = "http://10.1.10.94/evh/oauth2api";
+    public static final String API_OAUTH2API_URI = "http://aclinktest.zuolin.com/evh/oauth2api";
 
     // 本地 url 地址
     public static final String CLIENT_REDIRECT_URI = "http://10.1.110.13:7788/redirect";
