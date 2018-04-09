@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 	private static final Byte SCENE_EXAMPLE = 5;
 
-	private static final String SCAN_FOR_LOGON_SERVER = "https://web.zuolin.com";
+	private static final String SCAN_FOR_LOGON_SERVER = "http://web.zuolin.com";
 
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
