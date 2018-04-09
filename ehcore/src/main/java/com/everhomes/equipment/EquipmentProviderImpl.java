@@ -2489,9 +2489,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
                                                                                List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
-                                                                               Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
+                                                                               Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
-        List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
+        List<EquipmentInspectionTasks> result = new ArrayList<>();
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
                 && (executeStandardIds == null || executeStandardIds.size() == 0)
                 && (reviewStandardIds == null || reviewStandardIds.size() == 0)) {
@@ -2513,7 +2513,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (inspectionCategoryId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
-
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(offset));
 
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
@@ -2554,7 +2554,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                      .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.gt(lastSyncTime)));
         }
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
-        query.addLimit(offset * (pageSize-1), pageSize);
+        query.addLimit(pageSize);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
