@@ -47,6 +47,7 @@ import com.everhomes.rest.widget.NewsInstanceConfig;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPortalItemCategories;
 import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
@@ -161,6 +162,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private ServiceModuleAppService serviceModuleAppService;
+
+	@Autowired
+	private SequenceService sequenceService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1338,6 +1342,11 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public PortalPublishLogDTO publish(PublishCommand cmd) {
+
+		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
+		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
+		sequenceService.syncSequence();
+
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
@@ -2051,6 +2060,11 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+
+		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
+		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
+		sequenceService.syncSequence();
+
 
 		//同步和发布的时候不用预览账号
 		UserContext.current().setPreviewPortalVersionId(null);
