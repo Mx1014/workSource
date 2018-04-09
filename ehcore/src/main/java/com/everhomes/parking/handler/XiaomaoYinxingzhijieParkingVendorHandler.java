@@ -210,8 +210,10 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
         for(YinxingzhijieXiaomaoCardType t: types) {
             if(t.getStandardId().equals(r.getCardType())) {
                 temp = t;
+                break;
             }
         }
+        
         dto.setCardTypeId(temp.getStandardId());
         dto.setCardType(temp.getStandardType());
         dto.setRateToken(r.getId().toString());
