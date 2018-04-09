@@ -2483,6 +2483,9 @@ public class PortalServiceImpl implements PortalService {
 				itemCategory.setCreateTime(createTimestamp);
 				itemCategory.setUpdateTime(createTimestamp);
 			}
+			//复制item，未分组
+			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, 0L, id, newVersionId);
+
 			portalItemCategoryProvider.createPortalItemCategories(portalItemCategories);
 		}
 
