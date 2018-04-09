@@ -8090,16 +8090,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 			processCells(rs, bill.getRentalType());
 			updateRentalOrder(rs,bill,new BigDecimal(0),cmd.getCellCount(),false);
+			//发消息
+			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+
+			handler.renewRentalOrderSendMessage(bill);
 		}
 		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
 
-		//发消息
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
-		handler.renewRentalOrderSendMessage(bill);
 
 		return bill;
 	}
@@ -8110,6 +8111,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		processCells(rs, rentalBill.getRentalType());
 		updateRentalOrder(rs, rentalBill, null, rentalCount, false);
 		rentalBill.setResourceTotalMoney(rentalBill.getPayTotalMoney());
+
+		//发消息
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
+
+		handler.renewRentalOrderSendMessage(rentalBill);
 	}
 
 	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
