@@ -5,13 +5,13 @@ import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.archives.ListArchivesContactsCommand;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
-import java.util.Collections;
 import java.util.Map;
 
+@Component
 public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandler{
 
     @Autowired

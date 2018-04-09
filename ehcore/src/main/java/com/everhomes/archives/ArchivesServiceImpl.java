@@ -620,7 +620,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         params.put("organizationId", cmd.getOrganizationId());
         params.put("keywords", cmd.getKeywords());
         params.put("namespaceId", UserContext.getCurrentNamespaceId());
-        String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.CONTACT_LIST, "zh_CN", "userLists");
+        String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.CONTACT_LIST, "zh_CN", "userLists") + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 
