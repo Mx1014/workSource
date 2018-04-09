@@ -358,8 +358,8 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("exportArchivesEmployees")
     @RestReturn(value = String.class)
-    public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse){
-        archivesService.exportArchivesEmployees(cmd,httpResponse);
+    public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd){
+        archivesService.exportArchivesEmployees(cmd);
         return new RestResponse();
     }
 

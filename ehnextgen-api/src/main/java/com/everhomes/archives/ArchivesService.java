@@ -35,7 +35,7 @@ public interface ArchivesService {
 
     void exportArchivesContacts(ExportArchivesContactsCommand cmd);
 
-    OutputStream getArchivesContactsOutputStream(ListArchivesContactsCommand cmd, Long taskId);
+    OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
@@ -96,7 +96,9 @@ public interface ArchivesService {
 
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 
-    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse);
+    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
+
+    OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId);
 
     void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
 

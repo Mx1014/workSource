@@ -1079,7 +1079,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId) {
+    public OutputStream getGeneralApprovalExportStream(ListGeneralApprovalRecordsCommand cmd, Long taskId) {
         cmd.setPageAnchor(null);
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);

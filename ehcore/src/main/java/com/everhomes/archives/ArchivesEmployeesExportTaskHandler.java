@@ -3,8 +3,9 @@ package com.everhomes.archives;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.rest.archives.ListArchivesContactsCommand;
+import com.everhomes.rest.archives.ExportArchivesEmployeesCommand;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandler{
+public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandler{
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;
@@ -32,23 +33,37 @@ public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandle
     @Override
     public void execute(Map<String, Object> params) {
 
+
         Long organizationId = null;
         if(params.get("organizationId") != null)
             organizationId = (Long) params.get("organizationId");
+        Long formOriginId = null;
+        if(params.get("formOriginId") != null)
+            formOriginId = (Long) params.get("formOriginId");
         String keywords = null;
         if(params.get("keywords") != null)
             keywords = (String) params.get("keywords");
         Integer namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
+        Long userId = (Long) params.get("userId");
+
+        //  set the basic data
+        User user = new User();
+        user.setNamespaceId(namespaceId);
+        user.setId(userId);
+
+        UserContext.setCurrentUser(user);
         UserContext.setCurrentNamespaceId(namespaceId);
 
-        ListArchivesContactsCommand cmd = new ListArchivesContactsCommand();
+
+        ExportArchivesEmployeesCommand cmd = new ExportArchivesEmployeesCommand();
         cmd.setOrganizationId(organizationId);
+        cmd.setFormOriginId(formOriginId);
         cmd.setKeywords(keywords);
         cmd.setNamespaceId(namespaceId);
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        OutputStream outputStream = archivesService.getArchivesContactsExportStream(cmd, taskId);
+        OutputStream outputStream = archivesService.getArchivesEmployeesExportStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

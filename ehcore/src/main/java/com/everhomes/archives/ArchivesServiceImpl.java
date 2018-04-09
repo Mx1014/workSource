@@ -299,7 +299,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
 
-        Integer namespaceId = cmd.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() == null)
@@ -627,7 +627,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public OutputStream getArchivesContactsOutputStream(ListArchivesContactsCommand cmd, Long taskId){
+    public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId){
         OutputStream outputStream = null;
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         cmd.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
@@ -2197,8 +2197,23 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse) {
+    public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd) {
 
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("formOriginId", cmd.getFormOriginId());
+        params.put("keywords", cmd.getKeywords());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        params.put("userId", UserContext.current().getUser().getId());
+        String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.EMPLOYEE_LIST, "zh_CN", "EmployeeList") + ".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesEmployeesExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    @Override
+    public OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId){
         //  此处的数据类型不好调用晓强哥的 ExcelUtil, 所以使用原始的导出方法
         GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
         formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
@@ -2206,9 +2221,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.设置导出标题
         List<String> titles = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
+        taskService.updateTaskProcess(taskId, 10);
 
         //  2.设置导出变量值
         List<Long> detailIds = organizationService.ListDetailsByEnterpriseId(cmd.getOrganizationId());
+        taskService.updateTaskProcess(taskId, 20);
 
         List<ExportArchivesEmployeesDTO> values = new ArrayList<>();
         for (Long detailId : detailIds) {
@@ -2220,8 +2237,11 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setVals(employeeValues);
             values.add(dto);
         }
+        taskService.updateTaskProcess(taskId, 70);
+
         XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(titles, values);
-        writeExcel(workbook, httpResponse);
+        taskService.updateTaskProcess(taskId, 95);
+        return writeExcel(workbook);
     }
 
     private XSSFWorkbook exportArchivesEmployeesFiles(List<String> titles, List<ExportArchivesEmployeesDTO> values) {
@@ -2269,30 +2289,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
-        ByteArrayOutputStream out = null;
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
-            out = new ByteArrayOutputStream();
             workbook.write(out);
-            String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.EMPLOYEE_LIST, "zh_CN", "EmployeeList") + ".xlsx";
-            httpResponse.setContentType("application/msexcel");
-            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            //response.addHeader("Content-Length", "" + out.);
-            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
-            httpResponse.setContentType("application/msexcel");
-            excelStream.write(out.toByteArray());
-            excelStream.flush();
-            excelStream.close();
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        } finally {
-            try {
-                workbook.close();
-                out.close();
-            } catch (IOException e) {
-                LOGGER.error("close error", e);
-            }
         }
+        return out;
     }
 
     @Override
