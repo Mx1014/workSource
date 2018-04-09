@@ -3303,9 +3303,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void addCommunityInfoToUserRelaltedOrgsByOrgId(OrganizationSimpleDTO org) {
-        OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(org.getId());
-        if (orgComm != null) {
-            Long communityId = orgComm.getCommunityId();
+//        OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(org.getId());
+        Long communityId = this.getOrganizationActiveCommunityId(org.getId());
+        if (communityId != null) {
             Community community = this.communityProvider.findCommunityById(communityId);
             if (community != null) {
                 org.setCommunityId(communityId);
