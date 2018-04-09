@@ -120,13 +120,13 @@ public class DateUtils {
 	public static String guessDateTimeFormatAndFormatIt(String dateStr, String desired_format) {
 		if(StringUtils.isEmpty(dateStr)) return null;
 		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
-		DateTimeFormatter yyyyMMddDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-		DateTimeFormatter yyyyMMDash = DateTimeFormatter.ofPattern("yyyy-MM");
-		DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyy/MM");
-		DateTimeFormatter mdyy = DateTimeFormatter.ofPattern("M/d/yy");
-		DateTimeFormatter myy = DateTimeFormatter.ofPattern("M/yy");
-		DateTimeFormatter request = DateTimeFormatter.ofPattern(desired_format);
+		SimpleDateFormat yyyyMMddDash = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy/MM/dd");
+		SimpleDateFormat yyyyMMDash = new SimpleDateFormat("yyyy-MM");
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy/MM");
+		SimpleDateFormat mdyy = new SimpleDateFormat("M/d/yy");
+		SimpleDateFormat myy = new SimpleDateFormat("M/yy");
+		SimpleDateFormat request = new SimpleDateFormat(desired_format);
 
 
 		String yyyyMMddDash_ = "^\\d{4}-\\d{2}-\\d{2}$";				 // 2018-02-12
@@ -142,7 +142,7 @@ public class DateUtils {
 		Pattern pattern5 = Pattern.compile(mdyy_);
 		Pattern pattern6 = Pattern.compile(myy_);
 
-		TemporalAccessor q = null;
+		Date q = null;
 		String formatted = dateStr;
 		try{
 			if(pattern1.matcher(dateStr).matches()){

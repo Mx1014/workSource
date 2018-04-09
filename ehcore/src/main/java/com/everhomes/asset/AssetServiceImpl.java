@@ -3030,6 +3030,7 @@ public class AssetServiceImpl implements AssetService {
         String[] headers = getOrderedCellValues(headerRow, null);
         //datas的第一行
         ImportFileResultLog<List<String>> headLog = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
+        headLog.setData(Arrays.asList(headers));
         datas.add(headLog);
         int itemStart = 8;
         int itemEnd = 0;
