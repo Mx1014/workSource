@@ -1,6 +1,8 @@
 package com.everhomes.util;
 
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -116,6 +118,7 @@ public class DateUtils {
 	 * @param dateStr 不明格式的日期
 	 */
 	public static String guessDateTimeFormatAndFormatIt(String dateStr, String desired_format) {
+		if(StringUtils.isEmpty(dateStr)) return null;
 		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
 		DateTimeFormatter yyyyMMddDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyy/MM/dd");
@@ -138,7 +141,6 @@ public class DateUtils {
 		Pattern pattern4 = Pattern.compile(yyyyMM_);
 		Pattern pattern5 = Pattern.compile(mdyy_);
 		Pattern pattern6 = Pattern.compile(myy_);
-
 
 		TemporalAccessor q = null;
 		String formatted = dateStr;
