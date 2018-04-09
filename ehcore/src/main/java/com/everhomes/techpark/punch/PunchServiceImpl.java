@@ -693,8 +693,13 @@ public class PunchServiceImpl implements PunchService {
         return newPunchDayLog;
     }
 
-    /**
+	 * 刷新一个pdl记录
+	 * @param userId : 要刷新的用户id
+	 * @param companyId : 公司id
+	 * @param punchDayLog : 旧的pdl,为null就新增,不为null就覆盖(只用到id)
+	 * @param logDay : 打卡日期
      * @param ptr : 传参就是保持原本的打卡规则,不传参就是用新的打卡规则
+	 * @param newPunchDayLog : 方法会计算出新的值写入这个对象
      */
     private void refreshPunchDayLog(Long userId, Long companyId, PunchDayLog punchDayLog, Calendar logDay, PunchTimeRule ptr, PunchDayLog newPunchDayLog) {
 
@@ -8007,6 +8012,7 @@ public class PunchServiceImpl implements PunchService {
             }
         } else {
             punchTime = new Date(cmd.getQueryTime());
+			punCalendar.setTime(punchTime);
         }
         response.setIntervals(new ArrayList<>());
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
@@ -8017,7 +8023,13 @@ public class PunchServiceImpl implements PunchService {
         if (null != pr) {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
-        String[] statusList = null;
+		if (null != ptr && pdl == null) {
+//			LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
+			pdl = new PunchDayLog();
+			refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
+			LOGGER.debug("pdl is {}",StringHelper.toJsonString(pdl));
+		}
+		String[] statusList =null;
         String[] approvalStatus = null;
         if (null != pdl) {
             if (pdl.getTimeRuleId() != null && pdl.getTimeRuleId() > 0L) {
@@ -8163,7 +8175,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
-        LOGGER.debug("find rule time ptr:" + JSON.toJSONString(ptr));
+//		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
         if (null == ptr) {
             return null;
         }
