@@ -1323,7 +1323,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		//3.组装查询条件
 		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
 		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-		Record record = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+		Record record = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+				.fetchAny();
 		//判断record是否为空
 		if (record != null){
 			//说明record对象不为空，那么就将record对象转换为OrganizationMember对象
