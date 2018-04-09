@@ -509,14 +509,6 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
     }
-    
-    @Override
-    public ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(BillIdSZYCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        String vendorName = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.getBillDetailForClientSZY(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
-    }
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
@@ -2776,20 +2768,13 @@ public class AssetServiceImpl implements AssetService {
                         "not valid corp manager");
             }
         }
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
     }
     
-    public List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
-	    AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
-	    String vendorName = assetVendor.getVendorName();
-	    AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-	    return handler.showBillForClientSZY(cmd);
-    }
-
     /**
      *
      * @modify 2018/1/16
@@ -2825,13 +2810,6 @@ public class AssetServiceImpl implements AssetService {
         return handler.listAllBillsForClient(cmd);
     }
     
-    public List<ListAllBillsForClientSZYDTO> listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd){
-	    AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
-	    String vendorName = assetVendor.getVendorName();
-	    AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-	    return handler.listAllBillsForClientSZY(cmd);
-    }
-
     /**
      * 暂时性方案，通过域空间来定义功能是否可用
      */

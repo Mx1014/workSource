@@ -30,8 +30,6 @@ public interface AssetVendorHandler {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType);
     
-    ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(Long ownerId, String billId,String targetType);
-
     ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId);
 
     FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
@@ -66,9 +64,6 @@ public interface AssetVendorHandler {
 
     List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
     
-    List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd);
-
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
     
-    List<ListAllBillsForClientSZYDTO> listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd);
 }

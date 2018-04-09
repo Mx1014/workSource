@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
@@ -15,6 +16,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -935,20 +937,6 @@ public class AssetController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <p>显示一个用户的物业账单（深圳湾物业缴费对接）</p>
-     * <b>URL: /asset/showBillForClientSZY</b>
-     */
-    @RequestMapping("showBillForClientSZY")
-    @RestReturn(value = ShowBillForClientSZYDTO.class,collection = true)
-    public RestResponse showBillForClientSZY(ShowBillForClientSZYCommand cmd) {
-        List<ShowBillForClientSZYDTO> dtos = assetService.showBillForClientSZY(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
-
     // this is for 显示一个用户的物业账单          4
     /**
      * <p>显示一个用户的物业账单</p>
@@ -964,20 +952,6 @@ public class AssetController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <p>显示一个用户的全部账单（深圳湾物业缴费对接）</p>
-     * <b>URL: /asset/listAllBillsForClientSZY</b>
-     */
-    @RequestMapping("listAllBillsForClientSZY")
-    @RestReturn(value = ListAllBillsForClientSZYDTO.class,collection = true)
-    public RestResponse listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd) {
-        List<ListAllBillsForClientSZYDTO> dtos = assetService.listAllBillsForClientSZY(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
-
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>
@@ -999,21 +973,6 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-    
-    /**
-     * <p>用户的账单的收费细项（深圳湾物业缴费对接）</p>
-     * <b>URL: /asset/showBillDetailForClientSZY</b>
-     */
-    @RequestMapping("showBillDetailForClientSZY")
-    @RestReturn(value = ShowBillDetailForClientSZYResponse.class, collection = true)
-    public RestResponse showBillDetailForClientSZY(BillIdSZYCommand cmd) {
-    	ShowBillDetailForClientSZYResponse res = assetService.getBillDetailForClientSZY(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
-
 
     //this is for app选择切换月份查看账单      4
     /**
@@ -1029,7 +988,6 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-
 
 //    /**
 //     * <p>测试清单产生</p>

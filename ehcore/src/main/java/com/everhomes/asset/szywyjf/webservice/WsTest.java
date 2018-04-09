@@ -4,6 +4,10 @@ import java.rmi.RemoteException;
 
 import javax.xml.rpc.ServiceException;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy;
 import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyServiceLocator;
 import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
@@ -29,17 +33,24 @@ public class WsTest {
 			result = accountProxy.getAccountBalance(null);
 			System.out.println(result);*/
 			
-			
 			WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
 			WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 			
-			String result = accountProxy.sync_TenancyContractData("{" + 
-					"	\"cusName\": \"122312\",\r\n" + 
-					"	\"startDate\": \"2018-03-26\",\r\n" + 
-					"	\"endDate\": \"2018-03-26\",\r\n" + 
-					"	\"type\": \"0\",\r\n" + 
-					"	\"state\": \"1\"\r\n" + 
-					"}");
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("cusName", "深圳市石榴裙餐饮有限公司");
+			//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
+			jsonObject.put("startDate", "1900-01-01");
+			jsonObject.put("endDate", "2900-01-01");
+			//判断是企业客户，还是个人(0：企业客户，1：个人（判断）
+			jsonObject.put("type", "0");
+			//查看全部账单 (1：已缴，0：未缴，2：全部)
+			jsonObject.put("state", "2");
+			String result = accountProxy.sync_TenancyContractData(jsonObject.toString());
+			JSONObject resultJSONObject = JSON.parseObject(result);
+			System.out.println(resultJSONObject.get("reason"));
+			
+			
+			
 			System.out.println(result);
 		} catch (ServiceException e) {
 			e.printStackTrace();
