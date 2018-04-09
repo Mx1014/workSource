@@ -8001,6 +8001,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
+		//每次获取延时支付信息 都重置一次之前未支付留下的信息
+		restoreRentalBill(bill);
+
 		List<RentalBillRuleDTO> rules = new ArrayList<>();
 
 		RentalCell lastCell = null;
@@ -8334,6 +8337,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		order.setPayTotalMoney(order.getResourceTotalMoney());
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
 		order.setRentalCount(resourceOrders.size()+0.0);
+		rentalv2Provider.updateRentalBill(order);
 	}
 	@Override
 	public GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd) {
