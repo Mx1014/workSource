@@ -30,7 +30,6 @@ import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
-import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -96,7 +95,6 @@ import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
@@ -179,13 +177,13 @@ public class QualityProviderImpl implements QualityProvider {
 			});
 		}
 
-		//五分钟后启动通知
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
-		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
-				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
+//		//五分钟后启动通知
+//		Long notifyTime = System.currentTimeMillis() + 300000;
+//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+//		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+//		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+//		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+//				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 
 	}
 
