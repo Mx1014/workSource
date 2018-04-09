@@ -67,4 +67,6 @@ public interface AssetVendorHandler {
     List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+    
+    List<ListAllBillsForClientSZYDTO> listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd);
 }

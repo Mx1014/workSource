@@ -963,6 +963,20 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+    
+    /**
+     * <p>显示一个用户的全部账单（深圳湾物业缴费对接）</p>
+     * <b>URL: /asset/listAllBillsForClientSZY</b>
+     */
+    @RequestMapping("listAllBillsForClientSZY")
+    @RestReturn(value = ListAllBillsForClientSZYDTO.class,collection = true)
+    public RestResponse listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd) {
+        List<ListAllBillsForClientSZYDTO> dtos = assetService.listAllBillsForClientSZY(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
     //this is for 查看缴费详情
     /**

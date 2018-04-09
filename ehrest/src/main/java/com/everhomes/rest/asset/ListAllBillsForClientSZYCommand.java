@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>cusName:客户名称，企业客户，按名称查询，个人按电话号码查询</li>
  *</ul>
  */
-public class ShowBillForClientSZYCommand {
+public class ListAllBillsForClientSZYCommand {
 	private String ownerType;
     private Long ownerId;
     private String targetType;
@@ -77,6 +77,5 @@ public class ShowBillForClientSZYCommand {
 	public void setCusName(String cusName) {
 		this.cusName = cusName;
 	}
-    
 
 }

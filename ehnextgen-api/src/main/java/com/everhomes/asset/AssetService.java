@@ -160,6 +160,8 @@ public interface AssetService {
     List<ShowBillForClientSZYDTO> showBillForClientSZY(ShowBillForClientSZYCommand cmd);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+    
+    List<ListAllBillsForClientSZYDTO> listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd);
 
     FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 

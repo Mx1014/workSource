@@ -215,6 +215,32 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public List<ListAllBillsForClientSZYDTO> listAllBillsForClientSZY(ListAllBillsForClientSZYCommand cmd) {
+		// TODO Auto-generated method stub
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("cusName", cmd.getCusName());
+		//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
+		jsonObject.put("startDate", "1900-01-01");
+		jsonObject.put("endDate", "2900-01-01");
+		//判断是企业客户，还是个人
+		if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+			jsonObject.put("type", "0");
+		}else {
+			jsonObject.put("type", "1");
+		}
+		//查看全部账单 (1：已缴，0：未缴，2：全部)
+		jsonObject.put("state", "2");
+		//通过WebServices接口查询数据
+		SZYQuery szyQuery = new SZYQuery();
+		String result = szyQuery.query(jsonObject.toString());
+		//解析组装返回结果
+		
+		
+		
+		
+		return null;
+	}
 
     
     
