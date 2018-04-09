@@ -8,11 +8,13 @@ import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.util.DateHelper;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -115,6 +117,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             List<ServiceModuleAppAuthorization> update_authorization = all_authorization.stream().filter(r -> cmd.getProjectIds().contains(r.getProjectId())).collect(Collectors.toList());
             update_authorization.forEach(r -> {
                 r.setOrganizationId(cmd.getToOrgId());
+                r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             });
             // 如果cmd中的园区已经在这个(公司 + 应用)中分配过，则更新
             serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorizations(update_authorization);
@@ -134,6 +137,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 authorization.setAppId(cmd.getAppId());
                 authorization.setNamespaceId(cmd.getNamespaceId());
                 authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+                authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 create_authorization.add(authorization);
             });
             serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(create_authorization);
