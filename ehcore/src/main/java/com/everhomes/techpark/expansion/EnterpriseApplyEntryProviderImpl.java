@@ -102,10 +102,8 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 
-		SelectJoinStep query = context.select(Tables.EH_LEASE_PROMOTIONS.fields()).select(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID).from(Tables.EH_LEASE_PROMOTIONS);
+		SelectJoinStep query = context.select(Tables.EH_LEASE_PROMOTIONS.fields()).from(Tables.EH_LEASE_PROMOTIONS);
 
-		query.join(Tables.EH_LEASE_PROMOTION_COMMUNITIES).on(Tables.EH_LEASE_PROMOTION_COMMUNITIES.LEASE_PROMOTION_ID
-				.eq(Tables.EH_LEASE_PROMOTIONS.ID));
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CATEGORY_ID.eq(leasePromotion.getCategoryId()));
@@ -113,7 +111,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 
-			cond = cond.and(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
 		if(!StringUtils.isEmpty(leasePromotion.getRentType())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_TYPE.eq(leasePromotion.getRentType()));

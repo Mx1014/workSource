@@ -9,21 +9,12 @@ public class LeasePromotion extends EhLeasePromotions {
 
 	private static final long serialVersionUID = -5199936376319201329L;
 
-	private Long communityId;
 	private String posterUrl;
 
 	private BigDecimal startRentArea;
 	private BigDecimal endRentArea;
 	private BigDecimal startRentAmount;
 	private BigDecimal endRentAmount;
-
-	public Long getCommunityId() {
-		return communityId;
-	}
-
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
 
 	public java.lang.String getPosterUrl() {
 		return posterUrl;
