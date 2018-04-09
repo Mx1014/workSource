@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.general_form.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -20,6 +21,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
@@ -131,6 +134,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private TaskService taskService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -293,7 +299,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() == null)
@@ -536,7 +542,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
-
     private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsDatas(ImportArchivesContactsDTO data) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceCode.SCOPE);
@@ -608,23 +613,36 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
-//        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
-        ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
-        listCommand.setOrganizationId(cmd.getOrganizationId());
-        listCommand.setKeywords(cmd.getKeywords());
-        listCommand.setPageSize(Integer.MAX_VALUE - 1);
-        listCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
-        ListArchivesContactsResponse response = listArchivesContacts(listCommand);
+
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("keywords", cmd.getKeywords());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.CONTACT_LIST, "zh_CN", "userLists");
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+
+    }
+
+    @Override
+    public OutputStream getArchivesContactsOutputStream(ListArchivesContactsCommand cmd, Long taskId){
+        OutputStream outputStream = null;
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        cmd.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
+        ListArchivesContactsResponse response = listArchivesContacts(cmd);
+        taskService.updateTaskProcess(taskId, 10);
         if (response.getContacts() != null && response.getContacts().size() > 0) {
             //  1.设置导出文件名与 sheet 名
             String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.CONTACT_LIST, "zh_CN", "userLists");
-            ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
+            ExcelUtils excelUtils = new ExcelUtils(fileName, fileName);
             //  2.设置导出标题栏
-            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
+            List<String> titleNames = new ArrayList<>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
             //  3.设置格式长度
-            List<Integer> cellSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
+            List<Integer> cellSizes = new ArrayList<>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
             //  4.设置导出变量名
-            List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
+            List<String> propertyNames = new ArrayList<>(Arrays.asList("contactName", "genderString", "contactToken",
                     "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
             excelUtils.setNeedSequenceColumn(false);
             //  5.处理导出变量的值并导出
@@ -632,8 +650,12 @@ public class ArchivesServiceImpl implements ArchivesService {
                 convertArchivesContactForExcel(r);
                 return r;
             }).collect(Collectors.toList());
-            excelUtils.writeExcel(propertyNames, titleNames, cellSizes, contacts);
+            taskService.updateTaskProcess(taskId, 60);
+            outputStream = excelUtils.getOutputStream(propertyNames, titleNames, cellSizes, contacts);
+            taskService.updateTaskProcess(taskId, 90);
+//            excelUtils.writeExcel(propertyNames, titleNames, cellSizes, contacts);
         }
+        return outputStream;
     }
 
     private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {

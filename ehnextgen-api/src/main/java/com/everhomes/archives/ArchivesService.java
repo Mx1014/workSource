@@ -11,6 +11,7 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ public interface ArchivesService {
             MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
 
     void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse);
+
+    OutputStream getArchivesContactsOutputStream(ListArchivesContactsCommand cmd, Long taskId);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
