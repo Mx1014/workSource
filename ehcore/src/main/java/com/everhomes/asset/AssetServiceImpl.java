@@ -3100,7 +3100,10 @@ public class AssetServiceImpl implements AssetService {
                     }
                     cmd.setTargetName(data[j]);
                     if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())){
-                        Long orgId = organizationProvider.findOrganizationByName(data[j], namespaceId).getId();
+                        Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
+                        if(organizationByName != null){
+                            cmd.setTargetId(organizationByName.getId());
+                        }
                         // 找不到用户也可以导入
 //                        if(organizationProvider.findOrganizationByName(data[j], namespaceId).getId() == null){
 //                            log.setErrorLog("customer Id cannot be found， org name might be wrong");
@@ -3108,7 +3111,7 @@ public class AssetServiceImpl implements AssetService {
 //                            datas.add(log);
 //                            continue bill;
 //                        };
-                        cmd.setTargetId(orgId);
+
                     }
                 }else if(headers[j].contains("客户手机号")){
                     if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
