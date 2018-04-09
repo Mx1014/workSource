@@ -693,6 +693,7 @@ public class PunchServiceImpl implements PunchService {
         return newPunchDayLog;
     }
 
+    /*
 	 * 刷新一个pdl记录
 	 * @param userId : 要刷新的用户id
 	 * @param companyId : 公司id
