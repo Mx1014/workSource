@@ -1826,7 +1826,20 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
 		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
+
 		for (PortalItem portalItem: portalItems) {
+
+			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接name、label对上就是干吧。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				List<LaunchPadItem> oldpadItems = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), portalItem.getItemLocation(), portalItem.getName(), null, null);
+				if(null != oldpadItems && oldpadItems.size() > 0){
+					for (LaunchPadItem item: oldpadItems) {
+						if(portalItem.getLabel() != null && portalItem.getLabel().equals(item.getItemLabel()))
+						launchPadProvider.deleteLaunchPadItem(item.getId());
+					}
+				}
+			}
+
 			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
 			if(null != mappings && mappings.size() > 0){
@@ -1974,6 +1987,17 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL, versionId);
 		for (PortalItem item: allItems) {
+
+			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接name对上就是干吧。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				List<ItemServiceCategry> oldCategorys = launchPadProvider.listItemServiceCategries(namespaceId, item.getItemLocation(), item.getGroupName());
+				if(null != oldCategorys && oldCategorys.size() > 0){
+					for (ItemServiceCategry oldCategry: oldCategorys) {
+						launchPadProvider.deleteLaunchPadItem(oldCategry.getId());
+					}
+				}
+			}
+
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(item.getActionData(), AllOrMoreActionData.class);
 			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId());
 			for (PortalItemCategory category: categorys) {
