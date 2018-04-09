@@ -68,3 +68,7 @@ CREATE TABLE `eh_service_module_app_profile` (
 -- 增加应用类型字段 0-oa应用、1-园区应用、2-服务应用   add by yanjun 201804081501
 ALTER TABLE `eh_service_modules` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+
+-- 新增修改时间的字段 add by lei.lv 201804091401
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `create_time`  datetime NULL COMMENT 'create_time';
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  datetime NULL COMMENT 'update_time';
