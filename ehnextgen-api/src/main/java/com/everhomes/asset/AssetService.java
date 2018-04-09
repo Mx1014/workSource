@@ -42,6 +42,8 @@ public interface AssetService {
     ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
 
     ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
+    
+    ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(BillIdSZYCommand cmd);
 
     List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
 

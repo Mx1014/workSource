@@ -509,6 +509,14 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
     }
+    
+    @Override
+    public ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(BillIdSZYCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.getBillDetailForClientSZY(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
+    }
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {

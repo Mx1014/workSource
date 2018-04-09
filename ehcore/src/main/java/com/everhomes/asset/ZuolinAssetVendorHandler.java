@@ -946,4 +946,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(Long ownerId, String billId,
+			String targetType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

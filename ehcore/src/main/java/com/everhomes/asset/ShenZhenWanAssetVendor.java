@@ -241,6 +241,17 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		
 		return null;
 	}
+	@Override
+	public ShowBillDetailForClientSZYResponse getBillDetailForClientSZY(Long ownerId, String billId,
+			String targetType) {
+		// TODO Auto-generated method stub
+		
+		
+		
+		
+		
+		return null;
+	}
 
     
     

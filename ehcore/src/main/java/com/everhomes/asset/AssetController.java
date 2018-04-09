@@ -999,6 +999,20 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+    
+    /**
+     * <p>用户的账单的收费细项（深圳湾物业缴费对接）</p>
+     * <b>URL: /asset/showBillDetailForClientSZY</b>
+     */
+    @RequestMapping("showBillDetailForClientSZY")
+    @RestReturn(value = ShowBillDetailForClientSZYResponse.class, collection = true)
+    public RestResponse showBillDetailForClientSZY(BillIdSZYCommand cmd) {
+    	ShowBillDetailForClientSZYResponse res = assetService.getBillDetailForClientSZY(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
 
     //this is for app选择切换月份查看账单      4
