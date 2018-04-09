@@ -65,6 +65,14 @@ public class ExcelUtils {
 
     private XSSFWorkbook workbook = null;
 
+    // 导出的格式均为文本 added by wentian 2018/4/9
+    private boolean isCellStylePureString = false;
+
+    public ExcelUtils setIsCellStylePureString(boolean flag){
+        this.isCellStylePureString = flag;
+        return this;
+    }
+
     public ExcelUtils(String fileDir, String sheetName) {
         this.fileDir = fileDir;
         this.sheetName = sheetName;
@@ -237,6 +245,11 @@ public class ExcelUtils {
         // 设置样式
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         setTitleFont(titleStyle);
+        // 设置为纯文本 by wentian
+        XSSFDataFormat format = workbook.createDataFormat();
+        if(isCellStylePureString == true){
+            titleStyle.setDataFormat(format.getFormat("@"));
+        }
         if(headerBackGroundColorIndex != null){
             titleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
         }
@@ -245,6 +258,9 @@ public class ExcelUtils {
         setMandatoryTitleFont(mandatoryTitleStyle);
         if(headerBackGroundColorIndex != null){
             mandatoryTitleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
+        }
+        if(isCellStylePureString == true){
+            mandatoryTitleStyle.setDataFormat(format.getFormat("@"));
         }
 
 
@@ -271,6 +287,9 @@ public class ExcelUtils {
         // 内容样式
         XSSFCellStyle contentStyle = workbook.createCellStyle();
         setContentFont(contentStyle);
+        if(isCellStylePureString == true){
+            contentStyle.setDataFormat(format.getFormat("@"));
+        }
 
         if (dataList != null && dataList.size() > 0 && propertyNames.length > 0) {
             for (int rowIndex = 1; rowIndex <= dataList.size(); rowIndex++) {

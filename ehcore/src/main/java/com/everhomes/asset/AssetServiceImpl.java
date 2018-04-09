@@ -40,10 +40,6 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
-
-
-import com.everhomes.rest.community.ImportBuildingDataDTO;
-
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -77,7 +73,6 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -90,12 +85,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
-import javax.servlet.http.HttpServletResponseWrapper;
-
-
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -3074,7 +3064,7 @@ public class AssetServiceImpl implements AssetService {
             //账期被依赖
             String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
             if(org.apache.commons.lang.StringUtils.isEmpty(dateStr)){
-                log.setErrorLog("date str cannot be empty");
+                log.setErrorLog("日期格式错误,请参考说明进行填写");
                 log.setCode(AssetBillImportErrorCodes.DATE_STR_EMPTY_ERROR);
                 datas.add(log);
                 continue bill;

@@ -114,42 +114,58 @@ public class DateUtils {
 	/**
 	 * 将不明格式的日期转给指定格式的日期，如果所提供日期不是有效输入，返回null by wentian 2018/3/29
 	 * @param dateStr 不明格式的日期
-	 * @param format 想要获得的日期格式
 	 */
-	public static String guessDateTimeFormatAndFormatIt(String dateStr, String format) {
+	public static String guessDateTimeFormatAndFormatIt(String dateStr, String desired_format) {
 		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
 		DateTimeFormatter yyyyMMddDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//		DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 		DateTimeFormatter yyyyMMDash = DateTimeFormatter.ofPattern("yyyy-MM");
-//		DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyy/MM");
+		DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyy/MM");
+		DateTimeFormatter mdyy = DateTimeFormatter.ofPattern("M/d/yy");
+		DateTimeFormatter myy = DateTimeFormatter.ofPattern("M/yy");
+		DateTimeFormatter request = DateTimeFormatter.ofPattern(desired_format);
+
 
 		String yyyyMMddDash_ = "^\\d{4}-\\d{2}-\\d{2}$";				 // 2018-02-12
-//		String yyyyMMdd_ = "^\\d{4}/\\d{2}/\\d{2}$";                // 2018/12/31
+		String yyyyMMdd_ = "^\\d{4}/\\d{2}/\\d{2}$";                // 2018/12/31
 		String yyyyMMDash_ = "^\\d{4}-\\d{2}$";                      // 2018-02
-//		String yyyyMM_ = "^\\d{4}/\\d{2}$";                   // 2018/12
+		String yyyyMM_ = "^\\d{4}/\\d{2}$";                   // 2018/12
+		String mdyy_ = "^\\d{1,2}/\\d{1,2}/\\d{2}$";            // 3/1/18
+		String myy_ = "^\\d{1,2}/\\d{2}$";            // 3/18
 		Pattern pattern1 = Pattern.compile(yyyyMMddDash_);
-//		Pattern pattern2 = Pattern.compile(yyyyMMdd_);
+		Pattern pattern2 = Pattern.compile(yyyyMMdd_);
 		Pattern pattern3 = Pattern.compile(yyyyMMDash_);
-//		Pattern pattern4 = Pattern.compile(yyyyMM_);
+		Pattern pattern4 = Pattern.compile(yyyyMM_);
+		Pattern pattern5 = Pattern.compile(mdyy_);
+		Pattern pattern6 = Pattern.compile(myy_);
+
+
 		TemporalAccessor q = null;
+		String formatted = dateStr;
 		try{
 			if(pattern1.matcher(dateStr).matches()){
 				q = yyyyMMddDash.parse(dateStr);
 			}
-//			else if(pattern2.matcher(dateStr).matches()){
-//				q =yyyyMMdd.parse(dateStr);
-//			}
+			else if(pattern2.matcher(dateStr).matches()){
+				q =yyyyMMdd.parse(dateStr);
+			}
 			else if(pattern3.matcher(dateStr).matches()){
 				q = yyyyMMDash.parse(dateStr);
 			}
-//			else if(pattern4.matcher(dateStr).matches()){
-//				q = yyyyMM.parse(dateStr);
-//			}
+			else if(pattern4.matcher(dateStr).matches()){
+				q = yyyyMM.parse(dateStr);
+			}
+			else if(pattern5.matcher(dateStr).matches()){
+				q = mdyy.parse(dateStr);
+			}
+			else if(pattern6.matcher(dateStr).matches()){
+				q = myy.parse(dateStr);
+			}
 			else{
 				return null;
 			}
-
-			return dateStr;
+			formatted = request.format(q);
+			return formatted;
 		}catch (Exception e){
 			e.printStackTrace();
 		}

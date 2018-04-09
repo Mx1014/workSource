@@ -908,7 +908,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         mandatoryIndex.add(0);
         String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
-        new ExcelUtils(response,"账单模板"+System.currentTimeMillis()+".xlxs",fileName+"模板")
+        new ExcelUtils(response,"账单导入模板"+System.currentTimeMillis(),fileName+"模板")
                     .setNeedMandatoryTitle(true)
                     .setMandatoryTitle(mandatoryIndex)
                     .setNeedTitleRemark(true)
@@ -923,6 +923,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                 "6、企业客户需填写与系统内客户管理一致的准企业名称，个人客户需填写与系统内个人客户资料一致的手机号，否则会导致无法定位客户。\n" +
                 "7、客户属性为个人客户时，手机号为唯一身份识别标识，客户手机号必填。" +
                 "8、账期，计费开始和结束时间的格式只能为 2018-01 或者 2018-01-12", (short)13, (short)2500)
+                .setNeedSequenceColumn(false)
+                .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
     }
 
