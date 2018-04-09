@@ -2951,7 +2951,12 @@ public class PortalServiceImpl implements PortalService {
 
 		if(moduleId != null && moduleId.longValue() > 0) {
 			String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
-			handler = PlatformContext.getComponent(handlerPrefix + moduleId);
+			try {
+				handler = PlatformContext.getComponent(handlerPrefix + moduleId);
+			}catch (Exception ex){
+				LOGGER.info("PortalPublishHandler not exist moduleId = {}", moduleId);
+			}
+
 		}
 
 		return handler;
