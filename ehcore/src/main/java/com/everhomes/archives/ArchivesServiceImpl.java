@@ -612,7 +612,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+    public void exportArchivesContacts(ExportArchivesContactsCommand cmd) {
 
         //  export with the file download center
         Map<String, Object> params = new HashMap<>();

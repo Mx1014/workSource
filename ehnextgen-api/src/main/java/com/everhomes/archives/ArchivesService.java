@@ -33,7 +33,7 @@ public interface ArchivesService {
     ImportFileTaskDTO importArchivesContacts(
             MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
 
-    void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse);
+    void exportArchivesContacts(ExportArchivesContactsCommand cmd);
 
     OutputStream getArchivesContactsOutputStream(ListArchivesContactsCommand cmd, Long taskId);
 
