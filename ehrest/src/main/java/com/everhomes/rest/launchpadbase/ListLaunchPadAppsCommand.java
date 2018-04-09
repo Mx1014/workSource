@@ -4,20 +4,18 @@ package com.everhomes.rest.launchpadbase;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * <ul>
  *     <li>layoutId: layoutId</li>
  *     <li>itemGroup: 当前item归属哪个组，来源layout里的itemGroup</li>
- *     <li>content: 上下文信息content {@link com.everhomes.rest.launchpadbase.ContentDTO}</li>
+ *     <li>context: 上下文信息context {@link ContextDTO}</li>
  * </ul>
  */
 public class ListLaunchPadAppsCommand {
 
     private Long layoutId;
     private String itemGroup;
-    private ContentDTO content;
+    private ContextDTO context;
 
     public Long getLayoutId() {
         return layoutId;
@@ -35,12 +33,12 @@ public class ListLaunchPadAppsCommand {
         this.itemGroup = itemGroup;
     }
 
-    public ContentDTO getContent() {
-        return content;
+    public ContextDTO getContext() {
+        return context;
     }
 
-    public void setContent(ContentDTO content) {
-        this.content = content;
+    public void setContext(ContextDTO context) {
+        this.context = context;
     }
 
     @Override

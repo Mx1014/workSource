@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  *     <li>orgId: 公司id</li>
  * </ul>
  */
-public class ContentDTO {
+public class ContextDTO {
 
     @NotNull
     private Long communityId;

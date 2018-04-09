@@ -5,13 +5,11 @@ package com.everhomes.rest.launchpadbase;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * <ul>
- *     <li>content: content {@link com.everhomes.rest.launchpadbase.ContentDTO}</li>
  *     <li>layoutId: layoutId</li>
  *     <li>instanceConfig: 从layout的group中获取，参考{@link OPPush}。其中itemGroup字段包含了组件信息，例如活动为OPPushActivity</li>
+ *     <li>context: context {@link ContextDTO}</li>
  * </ul>
  */
 public class ListOPPushCardsCommand {
@@ -20,15 +18,7 @@ public class ListOPPushCardsCommand {
 
     private String instanceConfig;
 
-    private ContentDTO content;
-
-    public ContentDTO getContent() {
-        return content;
-    }
-
-    public void setContent(ContentDTO content) {
-        this.content = content;
-    }
+    private ContextDTO context;
 
     public Long getLayoutId() {
         return layoutId;
@@ -44,6 +34,14 @@ public class ListOPPushCardsCommand {
 
     public void setInstanceConfig(String instanceConfig) {
         this.instanceConfig = instanceConfig;
+    }
+
+    public ContextDTO getContext() {
+        return context;
+    }
+
+    public void setContext(ContextDTO context) {
+        this.context = context;
     }
 
     @Override
