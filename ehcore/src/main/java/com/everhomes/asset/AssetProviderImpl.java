@@ -862,6 +862,13 @@ public class AssetProviderImpl implements AssetProvider {
 
         response.setBillGroupId(billGroupId);
         response.setBillItemDTOList(list);
+        List<String> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+        if(fetch.size() > 0){
+            response.setBillGroupName(fetch.get(0));
+        }
         return response;
     }
 

@@ -908,6 +908,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         mandatoryIndex.add(0);
         String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
+        if(fileName == null) fileName = "";
         new ExcelUtils(response,"账单导入模板"+fileName+System.currentTimeMillis(),fileName+"模板")
                     .setNeedMandatoryTitle(true)
                     .setMandatoryTitle(mandatoryIndex)
