@@ -285,6 +285,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public String syncResultViewed(SyncResultViewedCommand cmd) {
+        return syncDataTaskService.syncHasViewed(cmd.getCommunityId(), cmd.getSyncType());
+    }
+
+    @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
 //        command.setIncludedGroupIds("10,11,12");

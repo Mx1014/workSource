@@ -8,10 +8,7 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.common.SyncDataResultLog;
-import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
-import com.everhomes.rest.customer.SyncDataResult;
-import com.everhomes.rest.customer.SyncDataTaskStatus;
-import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -102,6 +99,15 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     }
 
     @Override
+    public String syncHasViewed(Long communityId, String syncType) {
+        Integer notViewedCount = syncDataTaskProvider.countNotViewedSyncResult(communityId, syncType);
+        if(notViewedCount == 0) {
+            return String.valueOf(SyncResultViewedFlag.VIEWED.getCode());
+        }
+        return String.valueOf(SyncResultViewedFlag.NOT_VIEWED.getCode());
+    }
+
+    @Override
     public ListCommunitySyncResultResponse listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor) {
         Community community = communityProvider.findCommunityById(communityId);
         if(community == null) {
@@ -130,6 +136,9 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
                 }
                 results.add(result);
+
+                task.setViewFlag(SyncResultViewedFlag.VIEWED.getCode());
+                syncDataTaskProvider.updateSyncDataTask(task);
             }
 
             if(tasks.size() > pageSize) {

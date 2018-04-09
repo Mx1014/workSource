@@ -1417,4 +1417,17 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/syncResultViewed</b>
+     * <p>是否看过同步结果</p>
+     */
+    @RequestMapping("syncResultViewed")
+    @RestReturn(value = String.class)
+    public RestResponse syncResultViewed(SyncResultViewedCommand cmd) {
+        RestResponse response = new RestResponse(customerService.syncResultViewed(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

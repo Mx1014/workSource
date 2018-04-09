@@ -155,5 +155,5 @@ public interface CustomerService {
 
     ListRentalBillsCommandResponse listCustomerRentalBills(ListCustomerRentalBillsCommand cmd);
 
-
+    String syncResultViewed(SyncResultViewedCommand cmd);
 }
