@@ -56,3 +56,6 @@ VALUES ( 'pmtask.hide.represent', '1', '代发隐藏', '999966');
 
 -- 更新“企业账户”菜单图标 add by yanjun 201804101505
 UPDATE eh_web_menus set icon_url = 'business_account' WHERE id = 52000000;
+
+-- 更新错误码信息 add by yuanlei 201804101556
+UPDATE eh_locale_strings SET TEXT = '该申请已经被处理' WHERE scope = 'organization' AND CODE=500005 AND locale='zh_CN';

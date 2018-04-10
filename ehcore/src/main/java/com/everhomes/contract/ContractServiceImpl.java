@@ -33,6 +33,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
@@ -100,6 +101,8 @@ import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import org.springframework.transaction.TransactionStatus;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -207,6 +210,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private DbProvider dbProvider;
 
 	private String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
 	private String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
@@ -1309,69 +1315,73 @@ public class ContractServiceImpl implements ContractService {
 
 		}
 		//待发起的和审批不通过的能发起审批
-		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
-				(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
-				 || ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
-			if(cmd.getPaymentFlag() == 1) {
-				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
-			} else {
-				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
-			}
-			//发起审批要把门牌状态置为被占用
-			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
-			if(contractApartments != null && contractApartments.size() > 0) {
-				List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-				//续约和变更的继承原合同的不用检查也不用改状态
-				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))
-						|| ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
-					if(contract.getParentId() != null) {
-						Contract parentContract = contractProvider.findContractById(contract.getParentId());
-						if(parentContract != null && ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(parentContract.getStatus()))) {
-							List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
-							if(parentContractApartments != null && parentContractApartments.size() > 0) {
-								List<Long> parentAddressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-								//去掉已被继承的门牌
-								parentAddressIds.forEach(parentAddressId -> {
-									addressIds.remove(parentAddressId);
-								});
-							}
-						}
-					}
+		dbProvider.execute((TransactionStatus status) -> {
+			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
+					(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
+							|| ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
+				if(cmd.getPaymentFlag() == 1) {
+					checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
+				} else {
+					checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
 				}
-
-				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
-				if(mappings != null && mappings.size() > 0) {
-					//对于审批不通过合同 先检查是否全是待租的，不是的话报错
-					if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
-						for(CommunityAddressMapping mapping : mappings) {
-							if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-								LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
-								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
-										"contract apartment is not all free!");
+				//发起审批要把门牌状态置为被占用
+				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				if(contractApartments != null && contractApartments.size() > 0) {
+					List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+					//续约和变更的继承原合同的不用检查也不用改状态
+					if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))
+							|| ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+						if(contract.getParentId() != null) {
+							Contract parentContract = contractProvider.findContractById(contract.getParentId());
+							if(parentContract != null && ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(parentContract.getStatus()))) {
+								List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
+								if(parentContractApartments != null && parentContractApartments.size() > 0) {
+									List<Long> parentAddressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+									//去掉已被继承的门牌
+									parentAddressIds.forEach(parentAddressId -> {
+										addressIds.remove(parentAddressId);
+									});
+								}
 							}
 						}
 					}
 
-					mappings.forEach(mapping -> {
-						//26058  已售的状态不变
-						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-							mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
-							propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+					if(mappings != null && mappings.size() > 0) {
+						//对于审批不通过合同 先检查是否全是待租的，不是的话报错
+						if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
+							for(CommunityAddressMapping mapping : mappings) {
+								if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+									LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
+									throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
+											"contract apartment is not all free!");
+								}
+							}
 						}
-					});
+
+						mappings.forEach(mapping -> {
+							//26058  已售的状态不变
+							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+								mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+								propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+							}
+						});
+					}
 				}
-			}
 
-			contract.setStatus(cmd.getResult());
-			contractProvider.updateContract(contract);
-			contractSearcher.feedDoc(contract);
-			if(cmd.getPaymentFlag() == 1) {
-				addToFlowCase(contract, flowcasePaymentContractOwnerType);
-			}else {
-				addToFlowCase(contract, flowcaseContractOwnerType);
-			}
+				contract.setStatus(cmd.getResult());
+				contractProvider.updateContract(contract);
+				contractSearcher.feedDoc(contract);
+				if(cmd.getPaymentFlag() == 1) {
+					addToFlowCase(contract, flowcasePaymentContractOwnerType);
+				}else {
+					addToFlowCase(contract, flowcaseContractOwnerType);
+				}
 
-		}
+			}
+			return null;
+		});
+
 
 	}
 
