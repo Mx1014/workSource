@@ -37,3 +37,16 @@ END
 delimiter ;
 CALL delete_banner;
 DROP PROCEDURE if exists create_admin;
+
+-- 增加安邦的配置项 lei.lv
+set @e_id = (select max(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.namespace.id', 999949, NULL, 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.oauth.url', 'http://139.196.255.176:8000', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientid', 'zuolin', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientsecret', 'enVvbGluMjAxODAxMDI=', NULL, 999949, NULL);
+
+-- 工作流的字符模板     add by xq.tian  2018/04/09
+SET @eh_locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+    VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10010', 'zh_CN', '催办次数已达上限');
+

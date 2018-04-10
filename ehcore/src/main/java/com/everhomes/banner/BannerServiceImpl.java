@@ -14,6 +14,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
@@ -94,6 +95,9 @@ public class BannerServiceImpl implements BannerService {
     
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private LaunchPadService launchPadService;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -456,6 +460,13 @@ public class BannerServiceImpl implements BannerService {
                 // 但是客户端用来下载图片的字段是posterPath, 所以在这里要特殊处理一下
                 dto.setPosterPath(dto.getPosterUrl());
                 dto.setPosterUrl(null);
+
+                dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+
+                // 应用类型的跳转需要把名称设置为应用名称，用于客户端在跳转后的界面上显示标题
+                if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {
+                    dto.setName(r.getVendorTag());
+                }
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -756,6 +767,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setCreatorUid(userId);
             banner.setBannerGroup("Default");
@@ -804,6 +816,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setTargetType(cmd.getTargetType());
             banner.setTargetData(cmd.getTargetData());
