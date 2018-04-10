@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -882,11 +883,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
+		checkCityName(cmd.getProvinceName(),cmd.getCityName());
 		if(cmd.getId()!=null){
 			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
 			if(officeCubicleCity==null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"city id is not find");
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+						"id未找到");
 			}
 			officeCubicleCity.setCityName(cmd.getCityName());
 			officeCubicleCity.setProvinceName(cmd.getProvinceName());
@@ -894,20 +896,36 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCity.setStatus((byte)2);
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
+			OfficeCubicleCity oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			if(oldOfficeCubicleCity!=null){
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
+						"城市已存在，不能重复添加");
+			}
 			OfficeCubicleCity officeCubicleCity = ConvertHelper.convert(cmd,OfficeCubicleCity.class);
 			officeCubicleCity.setNamespaceId(UserContext.getCurrentNamespaceId());
 			officeCubicleCityProvider.createOfficeCubicleCity(officeCubicleCity);
 		}
 	}
 
+	private void checkCityName(String provinceName, String cityName) {
+		if(StringUtils.isEmpty(cityName) || StringUtils.isEmpty(cityName)){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EMPTY_CITYS,
+					"城市名称不能为空");
+		}
+	}
+
 	@Override
 	public void reOrderCity(ReOrderCityCommand cmd) {
 		OfficeCubicleCity officeCubicleCity1 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid1());
-		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
 
-		if(officeCubicleCity1==null || officeCubicleCity2==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"city id is not find");
+		if(officeCubicleCity1==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid1未找到");
+		}
+		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
+		if(officeCubicleCity2==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid2未找到");
 		}
 		Long order  = officeCubicleCity1.getDefaultOrder();
 		officeCubicleCity1.setDefaultOrder(officeCubicleCity2.getDefaultOrder());

@@ -1,0 +1,12 @@
+package com.everhomes.officecubicle;
+
+public interface OfficeCubicleErrorCode {
+
+	String SCOPE = "officecubicle";
+    int ERROR_EXIST_CITY = 10001;  //城市已存在
+	int ERROR_CITY_ID = 10002;//城市id不存在
+	int ERROR_EMPTY_CITYS = 10003;//城市名称为空
+
+
+
+}
