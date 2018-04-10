@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  * <li>pageSize：每页数量</li>
  * <li>namespaceId：命名空间 </li>
  * <li>communityId：小区id</li>
+ * <li>sceneCommunityId：当前场景小区id</li>
  * <li>buildingId：建筑id</li>
  * <li>rentType：招租类型{@link com.everhomes.rest.techpark.expansion.LeasePromotionType}</li> 
  * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li> 
@@ -36,6 +37,7 @@ public class ListBuildingForRentCommand {
     private Integer namespaceId;
     
     private Long communityId;
+	private Long sceneCommunityId;
     
     private Byte status;
 	@NotNull
@@ -204,6 +206,14 @@ public class ListBuildingForRentCommand {
 
 	public void setHouseResourceType(String houseResourceType) {
 		this.houseResourceType = houseResourceType;
+	}
+
+	public Long getSceneCommunityId() {
+		return sceneCommunityId;
+	}
+
+	public void setSceneCommunityId(Long sceneCommunityId) {
+		this.sceneCommunityId = sceneCommunityId;
 	}
 
 	@Override

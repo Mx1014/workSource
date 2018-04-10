@@ -103,12 +103,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 
 		SelectJoinStep query = context.select(Tables.EH_LEASE_PROMOTIONS.fields()).from(Tables.EH_LEASE_PROMOTIONS);
-
+		query.join(Tables.EH_LEASE_PROMOTION_COMMUNITIES).on(Tables.EH_LEASE_PROMOTION_COMMUNITIES.LEASE_PROMOTION_ID
+				.eq(Tables.EH_LEASE_PROMOTIONS.ID));
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CATEGORY_ID.eq(leasePromotion.getCategoryId()));
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
 
+		if(!StringUtils.isEmpty(leasePromotion.getSceneCommunityId())){
+
+			cond = cond.and(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID.eq(leasePromotion.getSceneCommunityId()));
+		}
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
