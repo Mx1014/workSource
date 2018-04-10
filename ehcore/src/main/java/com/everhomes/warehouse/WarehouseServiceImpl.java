@@ -595,6 +595,17 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseProvider.insertWarehouseOrder(order);
         }
 
+        //改为从request中获取stocks by wentian 2018/4/10
+        List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
+        List<WarehouseMaterialStock> stocks = new ArrayList<>();
+        for(WarehouseRequestMaterials material : warehouseRequestMaterials){
+            WarehouseMaterialStock stock = new WarehouseMaterialStock();
+            stock.setAmount(material.getAmount());
+            stock.setMaterialId(material.getMaterialId());
+            stock.setWarehouseId(material.getWarehouseId());
+            stocks.add(stock);
+        }
+        cmd.setStocks(stocks);
 
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
@@ -634,6 +645,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (materialStock != null) {
                     if (WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
                         materialStock.setAmount(materialStock.getAmount() + stock.getAmount());
+                        materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         warehouseProvider.updateWarehouseStock(materialStock);
                         //更新
                         warehouseStockSearcher.feedDoc(materialStock);
@@ -727,6 +739,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     materialStock.setMaterialId(stock.getMaterialId());
                     materialStock.setAmount(stock.getAmount());
                     materialStock.setCreatorUid(uid);
+                    materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     warehouseProvider.creatWarehouseStock(materialStock);
                     warehouseStockSearcher.feedDoc(materialStock);
 
