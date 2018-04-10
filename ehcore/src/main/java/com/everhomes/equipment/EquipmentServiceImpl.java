@@ -6170,7 +6170,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			e.printStackTrace();
 			LOGGER.error("equipmentInspection task  not exist, id = {}", cmd.getTaskId());
 			reportLog = getOfflineEquipmentTaskReportLogObject(cmd.getTaskId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.REPAIR_TASK.getCode());
 			logs.add(reportLog);
 		}
 		if (tasks != null) {
@@ -6227,7 +6227,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				LOGGER.error("Sync Repair Tasks Erro, TaskId = {}", task.getId());
 				LOGGER.error("Sync Repair Tasks Erro " + e);
 				OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+						EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.REPAIR_TASK.getCode());
 				logs.add(repairLogs);
 			}
 			// return null;
