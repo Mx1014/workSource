@@ -239,7 +239,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getCategories())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -286,7 +286,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ID error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
