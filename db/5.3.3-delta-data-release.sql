@@ -65,10 +65,10 @@ UPDATE eh_locale_strings SET TEXT = '该申请已经被处理' WHERE scope = 'or
  * Description:ISSUE#26184 门禁人脸识别
  * Created：2018-4-9
  */
---修复旧数据
+-- 修复旧数据
 UPDATE `eh_door_access` set `namespace_id` = 999981 where hardware_id like '%C0:8B:18:B3:BB:4B%';
  
- --多公司管理
+-- 多公司管理
  
 set @max_door_access_id = (select max(id) from eh_door_access);
 INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `mac_copy`) VALUES (@max_door_access_id + 1, '999981', '4284c5f93a5c434099a3f9424a5d22e3A', '0', 'C0:8B:18:B3:BB:4B1', 'A2-05', NULL, '一期5号', NULL, '五星路707弄', '245814', '245814', NULL, NULL, NULL, 'WhXDz1msS5Yqttso7TS7vg==', '0', '1', '1040198', '0', '2017-04-21 18:04:03', '1', '1', '1', '0', 'C0:8B:18:B3:BB:4B');
