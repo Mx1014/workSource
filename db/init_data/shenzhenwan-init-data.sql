@@ -1426,3 +1426,10 @@ VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home'
 INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
 VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home/PersonalService','PersonalService','EhPortalItems287','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL,NULL);
 
+
+--【深圳湾mybay】物业缴费对接
+SET @asset_vendor_id = IFNULL((SELECT MAX(id) FROM `eh_asset_vendor`),1);
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`)
+select @asset_vendor_id := @asset_vendor_id + 1, 'community', id, name, 'SZW', '2', '999966' from eh_communities where namespace_id = 999966;
+
+

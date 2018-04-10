@@ -1,4 +1,4 @@
-package com.everhomes.asset.szywyjf;
+package com.everhomes.asset.szwwyjf;
 
 import static org.junit.Assert.*;
 
@@ -9,9 +9,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
-public class SZYQueryTest {
+public class SZWQueryTest {
 	
-	private static SZYQuery szyQuery = new SZYQuery();
+	private static SZWQuery szyQuery = new SZWQuery();
 
 	@Test
 	public void testSync_TenancyContractData() {

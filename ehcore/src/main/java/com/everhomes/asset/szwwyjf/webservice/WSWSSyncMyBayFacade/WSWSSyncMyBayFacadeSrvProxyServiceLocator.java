@@ -5,9 +5,9 @@
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade;
+package com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade;
 
-public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.client.Service implements com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyService {
+public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.client.Service implements com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyService {
 
     public WSWSSyncMyBayFacadeSrvProxyServiceLocator() {
     }
@@ -39,7 +39,7 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
         WSWSSyncMyBayFacadeWSDDServiceName = name;
     }
 
-    public com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacade() throws javax.xml.rpc.ServiceException {
+    public com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacade() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(WSWSSyncMyBayFacade_address);
@@ -50,9 +50,9 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
         return getWSWSSyncMyBayFacade(endpoint);
     }
 
-    public com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacade(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+    public com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacade(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-            com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub _stub = new com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub(portAddress, this);
+            com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub _stub = new com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub(portAddress, this);
             _stub.setPortName(getWSWSSyncMyBayFacadeWSDDServiceName());
             return _stub;
         }
@@ -72,8 +72,8 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
      */
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
-            if (com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy.class.isAssignableFrom(serviceEndpointInterface)) {
-                com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub _stub = new com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub(new java.net.URL(WSWSSyncMyBayFacade_address), this);
+            if (com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy.class.isAssignableFrom(serviceEndpointInterface)) {
+                com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub _stub = new com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSoapBindingStub(new java.net.URL(WSWSSyncMyBayFacade_address), this);
                 _stub.setPortName(getWSWSSyncMyBayFacadeWSDDServiceName());
                 return _stub;
             }

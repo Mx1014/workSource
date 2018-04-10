@@ -282,7 +282,7 @@ public class BusinessOpenController extends ControllerBase {
 	
 	@RequestMapping("sendMessageToUserSZY")
 	@RestReturn(value=String.class)
-	public RestResponse sendMessageToUserSZY(BusinessMessageCommandSZY cmd) {
+	public RestResponse sendMessageToUserSZW(BusinessMessageCommandSZW cmd) {
 		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
 			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
 		}

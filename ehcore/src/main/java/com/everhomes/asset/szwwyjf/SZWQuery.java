@@ -1,4 +1,4 @@
-package com.everhomes.asset.szywyjf;
+package com.everhomes.asset.szwwyjf;
 
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
@@ -14,22 +14,22 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy;
-import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyServiceLocator;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
-import com.everhomes.asset.szywyjf.webservice.client.WSContext;
+import com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy;
+import com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxyServiceLocator;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
+import com.everhomes.asset.szwwyjf.webservice.client.WSContext;
 import com.everhomes.rest.asset.BillForClientV2;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 
-public class SZYQuery {
+public class SZWQuery {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(SZYQuery.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SZWQuery.class);
 	
-	public SZYQuery() {
+	public SZWQuery() {
 		
 	}
 	
@@ -57,7 +57,7 @@ public class SZYQuery {
 	public List<ShowBillForClientV2DTO> showBillForClientV2(String request) {
 		List<ShowBillForClientV2DTO> response = new ArrayList<ShowBillForClientV2DTO>();
 		//通过WebService登录EAS
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		if(szyQuery.login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
@@ -116,7 +116,7 @@ public class SZYQuery {
 	public List<ListAllBillsForClientDTO> listAllBillsForClient(String request, Byte chargeStatus) {
 		List<ListAllBillsForClientDTO> response = new ArrayList<ListAllBillsForClientDTO>();
 		//通过WebService登录EAS
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		if(szyQuery.login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
@@ -164,7 +164,7 @@ public class SZYQuery {
 	public ShowBillDetailForClientResponse getBillDetailForClient(String request) {
 		ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
 		//通过WebService登录EAS
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		if(szyQuery.login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();

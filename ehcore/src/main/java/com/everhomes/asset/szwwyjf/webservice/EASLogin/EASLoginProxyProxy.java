@@ -1,8 +1,8 @@
-package com.everhomes.asset.szywyjf.webservice.EASLogin;
+package com.everhomes.asset.szwwyjf.webservice.EASLogin;
 
-public class EASLoginProxyProxy implements com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy {
+public class EASLoginProxyProxy implements com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy {
   private String _endpoint = null;
-  private com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy eASLoginProxy = null;
+  private com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy eASLoginProxy = null;
   
   public EASLoginProxyProxy() {
     _initEASLoginProxyProxy();
@@ -15,7 +15,7 @@ public class EASLoginProxyProxy implements com.everhomes.asset.szywyjf.webservic
   
   private void _initEASLoginProxyProxy() {
     try {
-      eASLoginProxy = (new com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyServiceLocator()).getEASLogin();
+      eASLoginProxy = (new com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxyServiceLocator()).getEASLogin();
       if (eASLoginProxy != null) {
         if (_endpoint != null)
           ((javax.xml.rpc.Stub)eASLoginProxy)._setProperty("javax.xml.rpc.service.endpoint.address", _endpoint);
@@ -38,25 +38,25 @@ public class EASLoginProxyProxy implements com.everhomes.asset.szywyjf.webservic
     
   }
   
-  public com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy getEASLoginProxy() {
+  public com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy getEASLoginProxy() {
     if (eASLoginProxy == null)
       _initEASLoginProxyProxy();
     return eASLoginProxy;
   }
   
-  public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType) throws java.rmi.RemoteException{
+  public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType) throws java.rmi.RemoteException{
     if (eASLoginProxy == null)
       _initEASLoginProxyProxy();
     return eASLoginProxy.login(userName, password, slnName, dcName, language, dbType);
   }
   
-  public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern) throws java.rmi.RemoteException{
+  public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern) throws java.rmi.RemoteException{
     if (eASLoginProxy == null)
       _initEASLoginProxyProxy();
     return eASLoginProxy.login(userName, password, slnName, dcName, language, dbType, authPattern);
   }
   
-  public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern, int isEncodePwd) throws java.rmi.RemoteException{
+  public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern, int isEncodePwd) throws java.rmi.RemoteException{
     if (eASLoginProxy == null)
       _initEASLoginProxyProxy();
     return eASLoginProxy.login(userName, password, slnName, dcName, language, dbType, authPattern, isEncodePwd);

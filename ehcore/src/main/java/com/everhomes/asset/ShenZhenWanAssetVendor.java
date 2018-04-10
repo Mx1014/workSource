@@ -3,9 +3,9 @@ package com.everhomes.asset;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.asset.szywyjf.SZYQuery;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
+import com.everhomes.asset.szwwyjf.SZWQuery;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
 import com.everhomes.asset.zjgkVOs.*;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
@@ -45,7 +45,7 @@ import static com.everhomes.util.SignatureHelper.computeSignature;
  * Created by chongxin yang on 2018/04/08.
  */
 
-@Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"SZY")
+@Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"SZW")
 public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShenZhenWanAssetVendor.class);
@@ -126,7 +126,7 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		jsonObject.put("state", "2");
 		jsonObject.put("fid", billId);
 		//通过WebServices接口查询数据
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		ShowBillDetailForClientResponse response = szyQuery.getBillDetailForClient(jsonObject.toString());
 		return response;
 	}
@@ -236,7 +236,7 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
 		jsonObject.put("state", "0");
 		//通过WebServices接口查询数据
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		List<ShowBillForClientV2DTO> response = szyQuery.showBillForClientV2(jsonObject.toString());
 		return response;
 	}
@@ -266,7 +266,7 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
 		jsonObject.put("state", "0");
 		//通过WebServices接口查询数据
-		SZYQuery szyQuery = new SZYQuery();
+		SZWQuery szyQuery = new SZWQuery();
 		List<ListAllBillsForClientDTO> response = szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("0"));
 		//由于对接查询全部没有字段用于区分是“待支付”还是“已支付”，所以第一次查询所有未缴，第二次查询所有已缴，再作相加
 		jsonObject.put("state", "1");

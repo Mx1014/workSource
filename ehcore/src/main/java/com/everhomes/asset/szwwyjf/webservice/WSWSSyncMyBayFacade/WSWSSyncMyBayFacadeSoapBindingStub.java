@@ -5,9 +5,9 @@
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade;
+package com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade;
 
-public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.Stub implements com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy {
+public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.Stub implements com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy {
     private java.util.Vector cachedSerClasses = new java.util.Vector();
     private java.util.Vector cachedSerQNames = new java.util.Vector();
     private java.util.Vector cachedSerFactories = new java.util.Vector();
@@ -90,7 +90,7 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:client.wssyncmybayfacade", "WSInvokeException");
             cachedSerQNames.add(qName);
-            cls = com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException.class;
+            cls = com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -162,7 +162,7 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
         }
     }
 
-    public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException {
+    public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -193,15 +193,15 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
         if (axisFaultException.detail instanceof java.rmi.RemoteException) {
               throw (java.rmi.RemoteException) axisFaultException.detail;
          }
-        if (axisFaultException.detail instanceof com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException) {
-              throw (com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException) axisFaultException.detail;
+        if (axisFaultException.detail instanceof com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException) {
+              throw (com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException) axisFaultException.detail;
          }
    }
   throw axisFaultException;
 }
     }
 
-    public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException {
+    public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -232,8 +232,8 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
         if (axisFaultException.detail instanceof java.rmi.RemoteException) {
               throw (java.rmi.RemoteException) axisFaultException.detail;
          }
-        if (axisFaultException.detail instanceof com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException) {
-              throw (com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException) axisFaultException.detail;
+        if (axisFaultException.detail instanceof com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException) {
+              throw (com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException) axisFaultException.detail;
          }
    }
   throw axisFaultException;

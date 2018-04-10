@@ -1,8 +1,8 @@
-package com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade;
+package com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade;
 
-public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy {
+public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy {
   private String _endpoint = null;
-  private com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy wSWSSyncMyBayFacadeSrvProxy = null;
+  private com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy wSWSSyncMyBayFacadeSrvProxy = null;
   
   public WSWSSyncMyBayFacadeSrvProxyProxy() {
     _initWSWSSyncMyBayFacadeSrvProxyProxy();
@@ -15,7 +15,7 @@ public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szy
   
   private void _initWSWSSyncMyBayFacadeSrvProxyProxy() {
     try {
-      wSWSSyncMyBayFacadeSrvProxy = (new com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator()).getWSWSSyncMyBayFacade();
+      wSWSSyncMyBayFacadeSrvProxy = (new com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator()).getWSWSSyncMyBayFacade();
       if (wSWSSyncMyBayFacadeSrvProxy != null) {
         if (_endpoint != null)
           ((javax.xml.rpc.Stub)wSWSSyncMyBayFacadeSrvProxy)._setProperty("javax.xml.rpc.service.endpoint.address", _endpoint);
@@ -38,19 +38,19 @@ public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szy
     
   }
   
-  public com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacadeSrvProxy() {
+  public com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy getWSWSSyncMyBayFacadeSrvProxy() {
     if (wSWSSyncMyBayFacadeSrvProxy == null)
       _initWSWSSyncMyBayFacadeSrvProxyProxy();
     return wSWSSyncMyBayFacadeSrvProxy;
   }
   
-  public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
+  public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
     if (wSWSSyncMyBayFacadeSrvProxy == null)
       _initWSWSSyncMyBayFacadeSrvProxyProxy();
     return wSWSSyncMyBayFacadeSrvProxy.sync_TenancyContractDetailed(params);
   }
   
-  public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
+  public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
     if (wSWSSyncMyBayFacadeSrvProxy == null)
       _initWSWSSyncMyBayFacadeSrvProxyProxy();
     return wSWSSyncMyBayFacadeSrvProxy.sync_TenancyContractData(params);

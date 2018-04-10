@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 
-public class BusinessMessageCommandSZY {
+public class BusinessMessageCommandSZW {
     @NotNull
     private Long timestamp;
     

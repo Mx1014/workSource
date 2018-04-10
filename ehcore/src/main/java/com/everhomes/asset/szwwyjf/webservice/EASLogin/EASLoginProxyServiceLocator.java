@@ -5,9 +5,9 @@
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.everhomes.asset.szywyjf.webservice.EASLogin;
+package com.everhomes.asset.szwwyjf.webservice.EASLogin;
 
-public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service implements com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyService {
+public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service implements com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxyService {
 
     public EASLoginProxyServiceLocator() {
     }
@@ -39,7 +39,7 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
         EASLoginWSDDServiceName = name;
     }
 
-    public com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy getEASLogin() throws javax.xml.rpc.ServiceException {
+    public com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy getEASLogin() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(EASLogin_address);
@@ -50,9 +50,9 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
         return getEASLogin(endpoint);
     }
 
-    public com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy getEASLogin(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+    public com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy getEASLogin(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-            com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginSoapBindingStub _stub = new com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginSoapBindingStub(portAddress, this);
+            com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginSoapBindingStub _stub = new com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginSoapBindingStub(portAddress, this);
             _stub.setPortName(getEASLoginWSDDServiceName());
             return _stub;
         }
@@ -72,8 +72,8 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
      */
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
-            if (com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy.class.isAssignableFrom(serviceEndpointInterface)) {
-                com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginSoapBindingStub _stub = new com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginSoapBindingStub(new java.net.URL(EASLogin_address), this);
+            if (com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy.class.isAssignableFrom(serviceEndpointInterface)) {
+                com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginSoapBindingStub _stub = new com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginSoapBindingStub(new java.net.URL(EASLogin_address), this);
                 _stub.setPortName(getEASLoginWSDDServiceName());
                 return _stub;
             }

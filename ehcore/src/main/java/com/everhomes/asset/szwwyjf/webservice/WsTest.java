@@ -1,4 +1,4 @@
-package com.everhomes.asset.szywyjf.webservice;
+package com.everhomes.asset.szwwyjf.webservice;
 
 import java.rmi.RemoteException;
 
@@ -8,11 +8,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetPaymentStrings;
-import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy;
-import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyServiceLocator;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
-import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
-import com.everhomes.asset.szywyjf.webservice.client.WSContext;
+import com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy;
+import com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxyServiceLocator;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
+import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
+import com.everhomes.asset.szwwyjf.webservice.client.WSContext;
 
 public class WsTest {
 	

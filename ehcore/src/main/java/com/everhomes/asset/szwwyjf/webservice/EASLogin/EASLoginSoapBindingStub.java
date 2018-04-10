@@ -5,9 +5,9 @@
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.everhomes.asset.szywyjf.webservice.EASLogin;
+package com.everhomes.asset.szwwyjf.webservice.EASLogin;
 
-public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub implements com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxy {
+public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub implements com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxy {
     private java.util.Vector cachedSerClasses = new java.util.Vector();
     private java.util.Vector cachedSerQNames = new java.util.Vector();
     private java.util.Vector cachedSerFactories = new java.util.Vector();
@@ -38,7 +38,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "dbType"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("urn:client", "WSContext"));
-        oper.setReturnClass(com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+        oper.setReturnClass(com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
         oper.setReturnQName(new javax.xml.namespace.QName("", "loginReturn"));
         oper.setStyle(org.apache.axis.constants.Style.RPC);
         oper.setUse(org.apache.axis.constants.Use.ENCODED);
@@ -61,7 +61,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "authPattern"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("urn:client", "WSContext"));
-        oper.setReturnClass(com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+        oper.setReturnClass(com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
         oper.setReturnQName(new javax.xml.namespace.QName("", "loginReturn"));
         oper.setStyle(org.apache.axis.constants.Style.RPC);
         oper.setUse(org.apache.axis.constants.Use.ENCODED);
@@ -86,7 +86,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "isEncodePwd"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("urn:client", "WSContext"));
-        oper.setReturnClass(com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+        oper.setReturnClass(com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
         oper.setReturnQName(new javax.xml.namespace.QName("", "loginReturn"));
         oper.setStyle(org.apache.axis.constants.Style.RPC);
         oper.setUse(org.apache.axis.constants.Use.ENCODED);
@@ -142,7 +142,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:client", "WSContext");
             cachedSerQNames.add(qName);
-            cls = com.everhomes.asset.szywyjf.webservice.client.WSContext.class;
+            cls = com.everhomes.asset.szwwyjf.webservice.client.WSContext.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -214,7 +214,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         }
     }
 
-    public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType) throws java.rmi.RemoteException {
+    public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -235,9 +235,9 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         else {
             extractAttachments(_call);
             try {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) _resp;
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) _resp;
             } catch (java.lang.Exception _exception) {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {
@@ -245,7 +245,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
 }
     }
 
-    public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern) throws java.rmi.RemoteException {
+    public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -266,9 +266,9 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         else {
             extractAttachments(_call);
             try {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) _resp;
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) _resp;
             } catch (java.lang.Exception _exception) {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {
@@ -276,7 +276,7 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
 }
     }
 
-    public com.everhomes.asset.szywyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern, int isEncodePwd) throws java.rmi.RemoteException {
+    public com.everhomes.asset.szwwyjf.webservice.client.WSContext login(java.lang.String userName, java.lang.String password, java.lang.String slnName, java.lang.String dcName, java.lang.String language, int dbType, java.lang.String authPattern, int isEncodePwd) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -297,9 +297,9 @@ public class EASLoginSoapBindingStub extends org.apache.axis.client.Stub impleme
         else {
             extractAttachments(_call);
             try {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) _resp;
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) _resp;
             } catch (java.lang.Exception _exception) {
-                return (com.everhomes.asset.szywyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szywyjf.webservice.client.WSContext.class);
+                return (com.everhomes.asset.szwwyjf.webservice.client.WSContext) org.apache.axis.utils.JavaUtils.convert(_resp, com.everhomes.asset.szwwyjf.webservice.client.WSContext.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {
