@@ -264,10 +264,13 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		jsonObject.put("endDate", "2900-01-01");
 		jsonObject.put("type", type);
 		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
-		jsonObject.put("state", "2");
+		jsonObject.put("state", "0");
 		//通过WebServices接口查询数据
 		SZYQuery szyQuery = new SZYQuery();
-		List<ListAllBillsForClientDTO> response = szyQuery.listAllBillsForClient(jsonObject.toString());
+		List<ListAllBillsForClientDTO> response = szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("0"));
+		//由于对接查询全部没有字段用于区分是“待支付”还是“已支付”，所以第一次查询所有未缴，第二次查询所有已缴，再作相加
+		jsonObject.put("state", "1");
+		response.addAll(szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("1")));
 		return response;
 	}
     

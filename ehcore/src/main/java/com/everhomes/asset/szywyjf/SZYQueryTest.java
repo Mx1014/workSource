@@ -76,7 +76,7 @@ public class SZYQueryTest {
 				"    }" + 
 				"]";
 		
-		JSONArray jsonArray = JSON.parseArray(result);
+		/*JSONArray jsonArray = JSON.parseArray(result);
 		for(int i = 0;i < jsonArray.size();i++) {
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
 			System.out.println(jsonObject.get("number"));
@@ -92,7 +92,7 @@ public class SZYQueryTest {
 				System.out.println(receDataJSONObject.get("fmoneyDefine"));
 				System.out.println(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
 			}
-		}
+		}*/
 		
 		result = "{" + 
 				"    \"Reason\": \"返回数据失败\"," + 
@@ -122,6 +122,11 @@ public class SZYQueryTest {
 			JSONObject jsonObject = JSON.parseObject(result);
 			System.out.println(jsonObject.get("Reason"));
 		}*/
+		
+		String fid = "jYoAAA";
+		Long billGroupId = Long.valueOf(fid);
+		
+		
 	}
 
 }

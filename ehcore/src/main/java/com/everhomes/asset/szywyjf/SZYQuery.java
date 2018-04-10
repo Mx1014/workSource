@@ -18,6 +18,7 @@ import com.everhomes.asset.szywyjf.webservice.EASLogin.EASLoginProxyServiceLocat
 import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
 import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
 import com.everhomes.asset.szywyjf.webservice.client.WSContext;
+import com.everhomes.rest.asset.BillForClientV2;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
@@ -60,53 +61,47 @@ public class SZYQuery {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 				String result = accountProxy.sync_TenancyContractData(request);
-				/*try {
+				try {
 					JSONArray jsonArray = JSON.parseArray(result);
 					for(int i = 0;i < jsonArray.size();i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						ShowBillForClientSZYDTO showBillForClientSZYDTO = new ShowBillForClientSZYDTO();
-						showBillForClientSZYDTO.setNumber(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
-						showBillForClientSZYDTO.setTenancyName(jsonObject.get("tenancyName") != null ? jsonObject.get("tenancyName").toString() : null);
-						showBillForClientSZYDTO.setTenCustomerDes(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null);
-						showBillForClientSZYDTO.setTenancyType(jsonObject.get("tenancyType") != null ? jsonObject.get("tenancyType").toString() : null);
-						showBillForClientSZYDTO.setOldTenancyBill(jsonObject.get("oldTenancyBill") != null ? jsonObject.get("oldTenancyBill").toString() : null);
-						showBillForClientSZYDTO.setStartDate(jsonObject.get("startDate") != null ? jsonObject.get("startDate").toString() : null);
-						showBillForClientSZYDTO.setEndDate(jsonObject.get("endDate") != null ? jsonObject.get("endDate").toString() : null);
-						showBillForClientSZYDTO.setTenancyDate(jsonObject.get("tenancyDate") != null ? jsonObject.get("tenancyDate").toString() : null);
-						showBillForClientSZYDTO.setLeaseCount(jsonObject.get("leaseCount") != null ? jsonObject.get("leaseCount").toString() : null);
-						showBillForClientSZYDTO.setRoomTotalRent(jsonObject.get("roomTotalRent") != null ? jsonObject.get("roomTotalRent").toString() : null);
-						showBillForClientSZYDTO.setDepositAmount(jsonObject.get("depositAmount") != null ? jsonObject.get("depositAmount").toString() : null);
-						showBillForClientSZYDTO.setFreeDays(jsonObject.get("freeDays") != null ? jsonObject.get("freeDays").toString() : null);
-						showBillForClientSZYDTO.setFirstPayRent(jsonObject.get("firstPayRent") != null ? jsonObject.get("firstPayRent").toString() : null);
-						showBillForClientSZYDTO.setFirstLeaseEndDate(jsonObject.get("firstLeaseEndDate") != null ? jsonObject.get("firstLeaseEndDate").toString() : null);
-						showBillForClientSZYDTO.setRentCountType(jsonObject.get("rentCountType") != null ? jsonObject.get("rentCountType").toString() : null);
-						showBillForClientSZYDTO.setTenancyState(jsonObject.get("tenancyState") != null ? jsonObject.get("tenancyState").toString() : null);
-						showBillForClientSZYDTO.setTenancyAdviser(jsonObject.get("tenancyAdviser") != null ? jsonObject.get("tenancyAdviser").toString() : null);
-						showBillForClientSZYDTO.setDescription(jsonObject.get("description") != null ? jsonObject.get("description").toString() : null);
-						showBillForClientSZYDTO.setDealTotalRent(jsonObject.get("dealTotalRent") != null ? jsonObject.get("dealTotalRent").toString() : null);
-						showBillForClientSZYDTO.setQuitRoomDate(jsonObject.get("quitRoomDate") != null ? jsonObject.get("quitRoomDate").toString() : null);
-						List<BillForClientSZY> bills = new ArrayList<BillForClientSZY>();
+						ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
+						showBillForClientV2DTO.setBillGroupName(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null + "的全部账单");
+						//showBillForClientV2DTO.setBillGroupId(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
+						showBillForClientV2DTO.setContractId(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
+						showBillForClientV2DTO.setContractNum(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
+						double overAllAmountOwed = 0;//待缴金额总计
+						String addressStr = "";//包含的地址
+						List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
 						JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
 						for(int j = 0;j < receDataJsonArray.size();j++) {
 							JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
-							BillForClientSZY bill = new BillForClientSZY();
-							bill.setStartDate(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
-							bill.setEndDate(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
-							bill.setFappamount(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
-							bill.setFactMount(receDataJSONObject.get("factMount") != null ? receDataJSONObject.get("factMount").toString() : null);
-							bill.setFmoneyDefine(receDataJSONObject.get("fmoneyDefine") != null ? receDataJSONObject.get("fmoneyDefine").toString() : null);
-							bill.setFid(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
-							bill.setRoomNo(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : null);
-							bills.add(bill);
+							BillForClientV2 bill = new BillForClientV2();
+							String billDuration = receDataJSONObject.get("startDate") + "至" + receDataJSONObject.get("endDate");  		
+							bill.setBillDuration(billDuration);
+							bill.setAmountReceivable(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
+							//应付金额
+							double fappamount = receDataJSONObject.get("fappamount") != null ? Double.parseDouble(receDataJSONObject.get("fappamount").toString()): 0;
+							//实付金额
+							double factMount = receDataJSONObject.get("factMount") != null ? Double.parseDouble(receDataJSONObject.get("factMount").toString()): 0;
+							//待缴金额
+							double amountOwed = fappamount - factMount;
+							bill.setAmountOwed(String.valueOf(amountOwed));
+							bill.setBillId(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
+							
+							overAllAmountOwed += amountOwed;//待缴金额总计
+							addressStr += "," + receDataJSONObject.get("roomNo");//包含的地址
 						}
-						showBillForClientSZYDTO.setBills(bills);
-						response.add(showBillForClientSZYDTO);
+						showBillForClientV2DTO.setBills(bills);
+						showBillForClientV2DTO.setOverAllAmountOwed(String.valueOf(overAllAmountOwed));
+						showBillForClientV2DTO.setAddressStr(addressStr);
+						response.add(showBillForClientV2DTO);
 					}
 				} catch (JSONException e) {
 					// TODO: handle exception
 					JSONObject jsonObject = JSON.parseObject(result);
 					LOGGER.error("深圳湾物业缴费对接请求数据失败，失败原因：" + jsonObject.get("Reason"));
-				}*/
+				}
 			} catch (ServiceException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {
@@ -116,7 +111,7 @@ public class SZYQuery {
 		return response;
 	}
 	
-	public List<ListAllBillsForClientDTO> listAllBillsForClient(String request) {
+	public List<ListAllBillsForClientDTO> listAllBillsForClient(String request, Byte chargeStatus) {
 		List<ListAllBillsForClientDTO> response = new ArrayList<ListAllBillsForClientDTO>();
 		//通过WebService登录EAS
 		SZYQuery szyQuery = new SZYQuery();
@@ -125,53 +120,36 @@ public class SZYQuery {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 				String result = accountProxy.sync_TenancyContractData(request);
-				/*try {
+				try {
 					JSONArray jsonArray = JSON.parseArray(result);
 					for(int i = 0;i < jsonArray.size();i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						ListAllBillsForClientSZYDTO listAllBillsForClientSZYDTO = new ListAllBillsForClientSZYDTO();
-						listAllBillsForClientSZYDTO.setNumber(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyName(jsonObject.get("tenancyName") != null ? jsonObject.get("tenancyName").toString() : null);
-						listAllBillsForClientSZYDTO.setTenCustomerDes(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyType(jsonObject.get("tenancyType") != null ? jsonObject.get("tenancyType").toString() : null);
-						listAllBillsForClientSZYDTO.setOldTenancyBill(jsonObject.get("oldTenancyBill") != null ? jsonObject.get("oldTenancyBill").toString() : null);
-						listAllBillsForClientSZYDTO.setStartDate(jsonObject.get("startDate") != null ? jsonObject.get("startDate").toString() : null);
-						listAllBillsForClientSZYDTO.setEndDate(jsonObject.get("endDate") != null ? jsonObject.get("endDate").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyDate(jsonObject.get("tenancyDate") != null ? jsonObject.get("tenancyDate").toString() : null);
-						listAllBillsForClientSZYDTO.setLeaseCount(jsonObject.get("leaseCount") != null ? jsonObject.get("leaseCount").toString() : null);
-						listAllBillsForClientSZYDTO.setRoomTotalRent(jsonObject.get("roomTotalRent") != null ? jsonObject.get("roomTotalRent").toString() : null);
-						listAllBillsForClientSZYDTO.setDepositAmount(jsonObject.get("depositAmount") != null ? jsonObject.get("depositAmount").toString() : null);
-						listAllBillsForClientSZYDTO.setFreeDays(jsonObject.get("freeDays") != null ? jsonObject.get("freeDays").toString() : null);
-						listAllBillsForClientSZYDTO.setFirstPayRent(jsonObject.get("firstPayRent") != null ? jsonObject.get("firstPayRent").toString() : null);
-						listAllBillsForClientSZYDTO.setFirstLeaseEndDate(jsonObject.get("firstLeaseEndDate") != null ? jsonObject.get("firstLeaseEndDate").toString() : null);
-						listAllBillsForClientSZYDTO.setRentCountType(jsonObject.get("rentCountType") != null ? jsonObject.get("rentCountType").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyState(jsonObject.get("tenancyState") != null ? jsonObject.get("tenancyState").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyAdviser(jsonObject.get("tenancyAdviser") != null ? jsonObject.get("tenancyAdviser").toString() : null);
-						listAllBillsForClientSZYDTO.setDescription(jsonObject.get("description") != null ? jsonObject.get("description").toString() : null);
-						listAllBillsForClientSZYDTO.setDealTotalRent(jsonObject.get("dealTotalRent") != null ? jsonObject.get("dealTotalRent").toString() : null);
-						listAllBillsForClientSZYDTO.setQuitRoomDate(jsonObject.get("quitRoomDate") != null ? jsonObject.get("quitRoomDate").toString() : null);
-						List<BillForClientSZY> bills = new ArrayList<BillForClientSZY>();
 						JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
 						for(int j = 0;j < receDataJsonArray.size();j++) {
 							JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
-							BillForClientSZY bill = new BillForClientSZY();
-							bill.setStartDate(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
-							bill.setEndDate(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
-							bill.setFappamount(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
-							bill.setFactMount(receDataJSONObject.get("factMount") != null ? receDataJSONObject.get("factMount").toString() : null);
-							bill.setFmoneyDefine(receDataJSONObject.get("fmoneyDefine") != null ? receDataJSONObject.get("fmoneyDefine").toString() : null);
-							bill.setFid(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
-							bill.setRoomNo(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : null);
-							bills.add(bill);
+							ListAllBillsForClientDTO listAllBillsForClientDTO = new ListAllBillsForClientDTO();
+							listAllBillsForClientDTO.setBillGroupName(receDataJSONObject.get("fmoneyDefine") != null ? receDataJSONObject.get("fmoneyDefine").toString() : null);
+							listAllBillsForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
+							listAllBillsForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
+							String dateStr = receDataJSONObject.get("startDate") + "~" + receDataJSONObject.get("endDate");
+							listAllBillsForClientDTO.setDateStr(dateStr);
+							listAllBillsForClientDTO.setAmountReceivable(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
+							//应付金额
+							double fappamount = receDataJSONObject.get("fappamount") != null ? Double.parseDouble(receDataJSONObject.get("fappamount").toString()): 0;
+							//实付金额
+							double factMount = receDataJSONObject.get("factMount") != null ? Double.parseDouble(receDataJSONObject.get("factMount").toString()): 0;
+							//待缴金额
+							double amountOwed = fappamount - factMount;
+							listAllBillsForClientDTO.setAmountOwed(String.valueOf(amountOwed));
+							listAllBillsForClientDTO.setChargeStatus(chargeStatus);
+							response.add(listAllBillsForClientDTO);
 						}
-						listAllBillsForClientSZYDTO.setBills(bills);
-						response.add(listAllBillsForClientSZYDTO);
 					}
 				} catch (JSONException e) {
 					// TODO: handle exception
 					JSONObject jsonObject = JSON.parseObject(result);
 					LOGGER.error("深圳湾物业缴费对接请求数据失败，失败原因：" + jsonObject.get("Reason"));
-				}*/
+				}
 			} catch (ServiceException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {
@@ -189,54 +167,21 @@ public class SZYQuery {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
-				String result = accountProxy.sync_TenancyContractData(request);
-				/*try {
+				String result = accountProxy.sync_TenancyContractDetailed(request);
+				try {
 					JSONArray jsonArray = JSON.parseArray(result);
 					for(int i = 0;i < jsonArray.size();i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						ListAllBillsForClientSZYDTO listAllBillsForClientSZYDTO = new ListAllBillsForClientSZYDTO();
-						listAllBillsForClientSZYDTO.setNumber(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyName(jsonObject.get("tenancyName") != null ? jsonObject.get("tenancyName").toString() : null);
-						listAllBillsForClientSZYDTO.setTenCustomerDes(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyType(jsonObject.get("tenancyType") != null ? jsonObject.get("tenancyType").toString() : null);
-						listAllBillsForClientSZYDTO.setOldTenancyBill(jsonObject.get("oldTenancyBill") != null ? jsonObject.get("oldTenancyBill").toString() : null);
-						listAllBillsForClientSZYDTO.setStartDate(jsonObject.get("startDate") != null ? jsonObject.get("startDate").toString() : null);
-						listAllBillsForClientSZYDTO.setEndDate(jsonObject.get("endDate") != null ? jsonObject.get("endDate").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyDate(jsonObject.get("tenancyDate") != null ? jsonObject.get("tenancyDate").toString() : null);
-						listAllBillsForClientSZYDTO.setLeaseCount(jsonObject.get("leaseCount") != null ? jsonObject.get("leaseCount").toString() : null);
-						listAllBillsForClientSZYDTO.setRoomTotalRent(jsonObject.get("roomTotalRent") != null ? jsonObject.get("roomTotalRent").toString() : null);
-						listAllBillsForClientSZYDTO.setDepositAmount(jsonObject.get("depositAmount") != null ? jsonObject.get("depositAmount").toString() : null);
-						listAllBillsForClientSZYDTO.setFreeDays(jsonObject.get("freeDays") != null ? jsonObject.get("freeDays").toString() : null);
-						listAllBillsForClientSZYDTO.setFirstPayRent(jsonObject.get("firstPayRent") != null ? jsonObject.get("firstPayRent").toString() : null);
-						listAllBillsForClientSZYDTO.setFirstLeaseEndDate(jsonObject.get("firstLeaseEndDate") != null ? jsonObject.get("firstLeaseEndDate").toString() : null);
-						listAllBillsForClientSZYDTO.setRentCountType(jsonObject.get("rentCountType") != null ? jsonObject.get("rentCountType").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyState(jsonObject.get("tenancyState") != null ? jsonObject.get("tenancyState").toString() : null);
-						listAllBillsForClientSZYDTO.setTenancyAdviser(jsonObject.get("tenancyAdviser") != null ? jsonObject.get("tenancyAdviser").toString() : null);
-						listAllBillsForClientSZYDTO.setDescription(jsonObject.get("description") != null ? jsonObject.get("description").toString() : null);
-						listAllBillsForClientSZYDTO.setDealTotalRent(jsonObject.get("dealTotalRent") != null ? jsonObject.get("dealTotalRent").toString() : null);
-						listAllBillsForClientSZYDTO.setQuitRoomDate(jsonObject.get("quitRoomDate") != null ? jsonObject.get("quitRoomDate").toString() : null);
-						List<BillForClientSZY> bills = new ArrayList<BillForClientSZY>();
-						JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
-						for(int j = 0;j < receDataJsonArray.size();j++) {
-							JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
-							BillForClientSZY bill = new BillForClientSZY();
-							bill.setStartDate(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
-							bill.setEndDate(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
-							bill.setFappamount(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
-							bill.setFactMount(receDataJSONObject.get("factMount") != null ? receDataJSONObject.get("factMount").toString() : null);
-							bill.setFmoneyDefine(receDataJSONObject.get("fmoneyDefine") != null ? receDataJSONObject.get("fmoneyDefine").toString() : null);
-							bill.setFid(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
-							bill.setRoomNo(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : null);
-							bills.add(bill);
-						}
-						listAllBillsForClientSZYDTO.setBills(bills);
-						response.add(listAllBillsForClientSZYDTO);
+						//待实现
+						
+						
+						
 					}
 				} catch (JSONException e) {
 					// TODO: handle exception
 					JSONObject jsonObject = JSON.parseObject(result);
 					LOGGER.error("深圳湾物业缴费对接请求数据失败，失败原因：" + jsonObject.get("Reason"));
-				}*/
+				}
 			} catch (ServiceException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {

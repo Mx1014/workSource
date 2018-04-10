@@ -44,6 +44,12 @@ public class WSWSSyncMyBayFacadeSrvProxyProxy implements com.everhomes.asset.szy
     return wSWSSyncMyBayFacadeSrvProxy;
   }
   
+  public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
+    if (wSWSSyncMyBayFacadeSrvProxy == null)
+      _initWSWSSyncMyBayFacadeSrvProxyProxy();
+    return wSWSSyncMyBayFacadeSrvProxy.sync_TenancyContractDetailed(params);
+  }
+  
   public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szywyjf.webservice.wssyncmybayfacade.client.WSInvokeException{
     if (wSWSSyncMyBayFacadeSrvProxy == null)
       _initWSWSSyncMyBayFacadeSrvProxyProxy();
