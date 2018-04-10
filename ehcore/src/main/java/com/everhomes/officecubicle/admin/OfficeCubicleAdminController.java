@@ -129,8 +129,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
     @RequestMapping("getCityById")
     @RestReturn(value=CityDTO.class )
     public RestResponse getCityById(GetCityByIdCommand cmd) {
-        this.officeCubicleService.getCityById(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(this.officeCubicleService.getCityById(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
