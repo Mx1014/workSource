@@ -595,6 +595,17 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseProvider.insertWarehouseOrder(order);
         }
 
+        //改为从request中获取stocks by wentian 2018/4/10
+        List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
+        List<WarehouseMaterialStock> stocks = new ArrayList<>();
+        for(WarehouseRequestMaterials material : warehouseRequestMaterials){
+            WarehouseMaterialStock stock = new WarehouseMaterialStock();
+            stock.setAmount(material.getAmount());
+            stock.setMaterialId(material.getMaterialId());
+            stock.setWarehouseId(material.getWarehouseId());
+            stocks.add(stock);
+        }
+        cmd.setStocks(stocks);
 
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
