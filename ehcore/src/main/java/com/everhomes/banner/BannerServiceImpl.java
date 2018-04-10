@@ -468,6 +468,10 @@ public class BannerServiceImpl implements BannerService {
                         LOGGER.error("Refresh actionData error, bannerDTO = " + dto, e);
                     }
                 }
+                // like actionType=30
+                if (dto.getActionData() == null) {
+                    dto.setActionData("{}");
+                }
 
                 // 应用类型的跳转需要把名称设置为应用名称，用于客户端在跳转后的界面上显示标题
                 if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {

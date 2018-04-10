@@ -4,37 +4,24 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseRequestMaterials;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
-import com.everhomes.server.schema.tables.pojos.EhWarehouses;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
-import freemarker.template.SimpleDate;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -575,10 +562,10 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public String findWarehouseMenuName() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(Tables.EH_WEB_MENUS.NAME);
-        query.addFrom(Tables.EH_WEB_MENUS);
-        query.addConditions(Tables.EH_WEB_MENUS.ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
-        return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
+        query.addSelect(Tables.EH_SERVICE_MODULES.NAME);
+        query.addFrom(Tables.EH_SERVICE_MODULES);
+        query.addConditions(Tables.EH_SERVICE_MODULES.ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
+        return query.fetchOne(Tables.EH_SERVICE_MODULES.NAME);
     }
 
     @Override
