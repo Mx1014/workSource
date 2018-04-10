@@ -1989,12 +1989,12 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL, versionId);
 		for (PortalItem item: allItems) {
 
-			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接name对上就是干吧。
+			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接这个组的全干掉。
 			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
 				List<ItemServiceCategry> oldCategorys = launchPadProvider.listItemServiceCategries(namespaceId, item.getItemLocation(), item.getGroupName());
 				if(null != oldCategorys && oldCategorys.size() > 0){
 					for (ItemServiceCategry oldCategry: oldCategorys) {
-						launchPadProvider.deleteLaunchPadItem(oldCategry.getId());
+						launchPadProvider.deleteItemServiceCategryById(oldCategry.getId());
 					}
 				}
 			}
