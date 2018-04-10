@@ -47,13 +47,13 @@ public class FileManagementController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /fileManagement/updateFileCatalogName</b>
-     * <p>1-3.修改文件目录名称</p>
+     * <b>URL: /fileManagement/updateFileCatalog</b>
+     * <p>1-3.修改文件目录</p>
      */
-    @RequestMapping("updateFileCatalogName")
+    @RequestMapping("updateFileCatalog")
     @RestReturn(value = FileCatalogDTO.class)
-    public RestResponse updateFileCatalogName(UpdateFileCatalogNameCommand cmd) {
-        FileCatalogDTO res = fileManagementService.updateFileCatalogName(cmd);
+    public RestResponse updateFileCatalog(UpdateFileCatalogCommand cmd) {
+        FileCatalogDTO res = fileManagementService.updateFileCatalog(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -78,7 +78,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public FileCatalogDTO updateFileCatalogName(UpdateFileCatalogNameCommand cmd) {
+    public FileCatalogDTO updateFileCatalog(UpdateFileCatalogCommand cmd) {
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();

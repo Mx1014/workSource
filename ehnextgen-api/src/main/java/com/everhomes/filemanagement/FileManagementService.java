@@ -10,7 +10,7 @@ public interface FileManagementService {
 
     void deleteFileCatalog(FileCatalogIdCommand cmd);
 
-    FileCatalogDTO updateFileCatalogName(UpdateFileCatalogNameCommand cmd);
+    FileCatalogDTO updateFileCatalog(UpdateFileCatalogCommand cmd);
 
     ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd);
 
