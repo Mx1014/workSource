@@ -108,7 +108,7 @@ public class FileManagementController extends ControllerBase {
     /**
      * <b>URL: /fileManagement/addFileCatalogScopes</b>
      * <p>2-1.新增目录可见人员</p>
-     */
+     *//*
     @RequestMapping("addFileCatalogScopes")
     @RestReturn(value = FileCatalogScopeDTO.class, collection = true)
     public RestResponse addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
@@ -119,10 +119,10 @@ public class FileManagementController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /fileManagement/deleteFileCatalogScopes</b>
      * <p>2-2.删除目录可见人员</p>
-     */
+     *//*
     @RequestMapping("deleteFileCatalogScopes")
     @RestReturn(value = String.class)
     public RestResponse deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd) {
@@ -133,10 +133,10 @@ public class FileManagementController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /fileManagement/enableFileCatalogScopeDownload</b>
      * <p>2-3.添加人员下载权限</p>
-     */
+     *//*
     @RequestMapping("enableFileCatalogScopeDownload")
     @RestReturn(value = String.class)
     public RestResponse enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
@@ -147,10 +147,10 @@ public class FileManagementController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /fileManagement/disableFileCatalogScopeDownload</b>
      * <p>2-4.取消人员下载权限</p>
-     */
+     *//*
     @RequestMapping("disableFileCatalogScopeDownload")
     @RestReturn(value = String.class)
     public RestResponse disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
@@ -159,11 +159,11 @@ public class FileManagementController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /fileManagement/listFileCatalogScopes</b>
-     * <p>2-5.查看目录可见人员</p>
+     * <p>2.查看目录可见人员</p>
      */
     @RequestMapping("listFileCatalogScopes")
     @RestReturn(value = ListFileCatalogScopeResponse.class)
