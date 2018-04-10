@@ -5111,7 +5111,7 @@ Long nextPageAnchor = null;
 		}
 		//具体结果集
 		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
-		// send message to processor and bind recored mesaage to record
+		// send message to processor and bind record and message to record
 		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null && taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
 		} else {

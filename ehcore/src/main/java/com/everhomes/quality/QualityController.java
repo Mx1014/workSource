@@ -170,138 +170,12 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("listQualityStandards")
 	@RestReturn(value = ListQualityStandardsResponse.class)
 	public RestResponse listQualityStandards(ListQualityStandardsCommand cmd) {
-		
 		ListQualityStandardsResponse standards = qualityService.listQualityStandards(cmd);
-		
 		RestResponse response = new RestResponse(standards);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//	/**
-//	 * <b>URL: /quality/listQualityCategories</b>
-//	 * <p>查看品质核查类型(换成 specification )</p>
-//	 */
-//	@RequestMapping("listQualityCategories")
-//	@RestReturn(value = ListQualityCategoriesResponse.class)
-//	public RestResponse listQualityCategories(ListQualityCategoriesCommand cmd) {
-//
-//		ListQualityCategoriesResponse categories = qualityService.listQualityCategories(cmd);
-//
-//		RestResponse response = new RestResponse(categories);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/updateQualityCategory</b>
-//	 * <p>修改品质核查类型(换成 specification ) </p>
-//	 */
-//	@RequestMapping("updateQualityCategory")
-//	@RestReturn(value = String.class)
-//	public RestResponse updateQualityCategory(UpdateQualityCategoryCommand cmd) {
-//
-//		qualityService.updateQualityCategory(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/deleteQualityCategory</b>
-//	 * <p>删除品质核查类型(换成 specification ) </p>
-//	 */
-//	@RequestMapping("deleteQualityCategory")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteQualityCategory(DeleteQualityCategoryCommand cmd) {
-//
-//		qualityService.deleteQualityCategory(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/listFactors</b>
-//	 * <p>查看权重</p>
-//	 */
-//	@RequestMapping("listFactors")
-//	@RestReturn(value = ListFactorsResponse.class)
-//	public RestResponse listFactors(ListFactorsCommand cmd) {
-//
-//		ListFactorsResponse factors = qualityService.listFactors(cmd);
-//
-//		RestResponse response = new RestResponse(factors);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/updateFactor</b>
-//	 * <p>创建或修改业务组对特定类型的权重</p>
-//	 */
-//	@RequestMapping("updateFactor")
-//	@RestReturn(value = String.class)
-//	public RestResponse updateFactor(UpdateFactorCommand cmd) {
-//
-//		qualityService.updateFactor(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/deleteFactor</b>
-//	 * <p>删除业务组对特定类型的权重</p>
-//	 */
-//	@RequestMapping("deleteFactor")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteFactor(DeleteFactorCommand cmd) {
-//
-//		qualityService.deleteFactor(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/listEvaluations</b>
-//	 * <p>查看绩效(暂时还是按照ownerType和ownerId)</p>
-//	 */
-//	@RequestMapping("listEvaluations")
-//	@RestReturn(value = ListEvaluationsResponse.class)
-//	public RestResponse listEvaluations(ListEvaluationsCommand cmd) {
-//
-//		ListEvaluationsResponse performances = qualityService.listEvaluations(cmd);
-//
-//		RestResponse response = new RestResponse(performances);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /quality/exportEvaluations</b>
-//	 * <p>导出绩效（暂时还是按照ownerType和ownerId）</p>
-//	 */
-//	@RequestMapping("exportEvaluations")
-//	public HttpServletResponse exportEvaluations(@Valid ListEvaluationsCommand cmd,HttpServletResponse response) {
-//
-//		HttpServletResponse commandResponse = qualityService.exportEvaluations(cmd, response);
-//
-//		return commandResponse;
-//	}
 	
 	/**
 	 * <b>URL: /quality/exportInspectionTasks</b>
@@ -319,9 +193,7 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("listQualityInspectionTasks")
 	@RestReturn(value = ListQualityInspectionTasksResponse.class)
 	public RestResponse listQualityInspectionTasks(ListQualityInspectionTasksCommand cmd) {
-		
 		ListQualityInspectionTasksResponse tasks = qualityService.listQualityInspectionTasks(cmd);
-		
 		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -474,7 +346,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/createQualityInspectionTask</b>
-	 * <p>主动创建品质核查任务(包含绩效考核)</p>
+	 * <p>主动创建品质核查任务(包含绩效考核) ps:现已经在绩效考核提交的时候动态创建任务</p>
 	 */
 	@RequestMapping("createQualityInspectionTask")
 	@RestReturn(value = QualityInspectionTaskDTO.class)
@@ -642,39 +514,7 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//	/**
-//	 * <b>URL: /quality/listUserQualityInspectionTaskTemplates</b>
-//	 * <p>获得用户模板列表</p>
-//	 */
-//	@RequestMapping("listUserQualityInspectionTaskTemplates")
-//	@RestReturn(value = ListQualityInspectionTasksResponse.class)
-//	public RestResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd) {
-//
-//		ListQualityInspectionTasksResponse task = qualityService.listUserQualityInspectionTaskTemplates(cmd);
-//
-//		RestResponse response = new RestResponse(task);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-	
-//	/**
-//	 * <b>URL: /quality/deleteUserQualityInspectionTaskTemplate</b>
-//	 * <p>删除用户模板</p>
-//	 */
-//	@RequestMapping("deleteUserQualityInspectionTaskTemplate")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd) {
-//
-//		qualityService.deleteUserQualityInspectionTaskTemplate(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
+
 	/**
 	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
 	 * <p>用户关联项目</p>
