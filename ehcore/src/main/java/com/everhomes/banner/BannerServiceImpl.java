@@ -462,6 +462,11 @@ public class BannerServiceImpl implements BannerService {
                 dto.setPosterUrl(null);
 
                 dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+
+                // 应用类型的跳转需要把名称设置为应用名称，用于客户端在跳转后的界面上显示标题
+                if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {
+                    dto.setName(r.getVendorTag());
+                }
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -762,6 +767,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setCreatorUid(userId);
             banner.setBannerGroup("Default");
@@ -810,6 +816,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setTargetType(cmd.getTargetType());
             banner.setTargetData(cmd.getTargetData());

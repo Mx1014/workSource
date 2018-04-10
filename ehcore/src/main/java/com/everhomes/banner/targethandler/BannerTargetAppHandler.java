@@ -25,6 +25,7 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
         BannerTargetHandleResult res = new BannerTargetHandleResult();
         res.setActionType(tData.getActionType());
         res.setActionData(tData.getActionData());
+        res.setAppName(tData.getName());
         return res;
     }
 }
