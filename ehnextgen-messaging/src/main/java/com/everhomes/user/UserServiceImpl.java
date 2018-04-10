@@ -206,12 +206,12 @@ public class UserServiceImpl implements UserService {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 
-	private static String ANBANG_CLIENTID = "zuolin";
-	private static String ANBANG_CLIENTSECRET = "enVvbGluMjAxODAxMDI=";
-	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
-	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
-	private static String ANBANG_CURRENT_USER_URL = "http://139.196.255.176:8000/api/auth/current-user";
-	private static Integer ANBANG_NAMESPACE_ID = 999949;
+	private static String ANBANG_CLIENTID;
+	private static String ANBANG_CLIENTSECRET;
+	private static String ANBANG_OAUTH_URL;
+	private static String ANBANG_USERS_URL;
+	private static String ANBANG_CURRENT_USER_URL;
+	private static Integer ANBANG_NAMESPACE_ID;
 
 
 	@Autowired
@@ -383,6 +383,18 @@ public class UserServiceImpl implements UserService {
 	@PostConstruct
 	public void setup() {
 		localBus.subscribe("border.close", LocalBusMessageDispatcher.getDispatcher(this));
+	}
+
+	/**
+	 * 从数据库Load安邦的配置信息
+	 */
+	private void loadAnbangConfigFromDb(){
+		ANBANG_NAMESPACE_ID = configurationProvider.getIntValue("anbang.namespace.id", 999949);
+		ANBANG_OAUTH_URL =  configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/auth/oauth/token";
+		ANBANG_CLIENTID = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientid", "zuolin");
+		ANBANG_CLIENTSECRET = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientsecret", "enVvbGluMjAxODAxMDI=");
+		ANBANG_USERS_URL = ANBANG_OAUTH_URL + "/api/permission/user/synchronization";
+		ANBANG_CURRENT_USER_URL = ANBANG_OAUTH_URL + "/api/auth/current-user";
 	}
 
 	@Override
@@ -5576,6 +5588,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void syncUsersFromAnBangWuYe( SyncUsersFromAnBangWuYeCommand cmd) {
+		this.loadAnbangConfigFromDb();
 		//调用授权接口
 		String timestamp = null;
 		if(cmd.getIsAll() == 1){//全量
@@ -5689,6 +5702,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public String makeAnbangRedirectUrl(Long userId, String location, Map<String, String[]> paramMap) {
+		this.loadAnbangConfigFromDb();
 	    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 	    
 	    if(paramMap.get("sceneToken") != null) {
@@ -5767,12 +5781,13 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
+		this.loadAnbangConfigFromDb();
 		dbProvider.execute(r -> {
 			List<String> tokens = Collections.singletonList(cmd.getNamespaceUserToken());
 //			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
 			User user = new User();
 			user.setStatus(UserStatus.ACTIVE.getCode());
-			user.setNamespaceId(0);
+			user.setNamespaceId(ANBANG_NAMESPACE_ID);
 			user.setNickName(cmd.getNickName());
 			user.setGender(UserGender.UNDISCLOSURED.getCode());
 			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
@@ -5798,6 +5813,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public User getUserFromAnBangToken(String token) {
+		this.loadAnbangConfigFromDb();
         StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
         Map headerParam = new HashMap();
         headerParam.put("Authorization", "bearer " + token);
@@ -5833,6 +5849,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserLogin verifyUserByTokenFromAnBang(String token) {
+		this.loadAnbangConfigFromDb();
 		List<UserLogin> logins = new ArrayList<>();
 		User user = getUserFromAnBangToken(token);
 		if(user == null) {
@@ -5851,6 +5868,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
+		this.loadAnbangConfigFromDb();
         User user = getUserFromAnBangToken(cmd.getAbtoken());
         if(user != null) {
             ListUserRelatedScenesCommand cmd2 = new ListUserRelatedScenesCommand();
