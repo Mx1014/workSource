@@ -1312,6 +1312,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
+	/**
+	 * add by yuanlei
+	 * 根据userId和organizationId来查询数据库得到OrganizationMember对象
+	 * @param userId
+	 * @param organizationId
+     * @return
+     */
+	public OrganizationMember findOrganizationMemberByUidAndOrgId(Long userId, Long organizationId){
+		//1.拿到enterpriseId
+		Long enterpriseId = getTopOrganizationId(organizationId);
+		//2.拿到连接
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		//3.组装查询条件
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		Record record = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+				.fetchAny();
+		//判断record是否为空
+		if (record != null){
+			//说明record对象不为空，那么就将record对象转换为OrganizationMember对象
+			OrganizationMember organizationMember = ConvertHelper.convert(record, OrganizationMember.class);
+			if(enterpriseId != null) {
+				organizationMember.setEnterpriserId(enterpriseId);
+			}
+			return organizationMember;
+		}
+
+		return null;
+	}
+
     /**
      * modify cause member_detail by lei lv
      **/

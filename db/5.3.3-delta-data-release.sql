@@ -37,3 +37,25 @@ END
 delimiter ;
 CALL delete_banner;
 DROP PROCEDURE if exists create_admin;
+
+-- 增加安邦的配置项 lei.lv
+set @e_id = (select max(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.namespace.id', 999949, NULL, 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.oauth.url', 'http://139.196.255.176:8000', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientid', 'zuolin', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientsecret', 'enVvbGluMjAxODAxMDI=', NULL, 999949, NULL);
+
+-- 工作流的字符模板     add by xq.tian  2018/04/09
+SET @eh_locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+    VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10010', 'zh_CN', '催办次数已达上限');
+
+-- Mybay隐藏代发 by zheng
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`)
+VALUES ( 'pmtask.hide.represent', '1', '代发隐藏', '999966');
+
+-- 更新“企业账户”菜单图标 add by yanjun 201804101505
+UPDATE eh_web_menus set icon_url = 'business_account' WHERE id = 52000000;
+
+-- 更新错误码信息 add by yuanlei 201804101556
+UPDATE eh_locale_strings SET TEXT = '该申请已经被处理' WHERE scope = 'organization' AND CODE=500005 AND locale='zh_CN';

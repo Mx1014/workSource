@@ -1682,11 +1682,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         for (Organization o : dptOrgs) {
             orgIds.add(o.getId());
         }
-        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
-                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
+//        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
+//                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
+        ListSocialSecurityPaymentsCommand cmd = new ListSocialSecurityPaymentsCommand();
+        cmd.setOwnerId(dpt.getDirectlyEnterpriseId());
+        cmd.setDeptId(dpt.getId());
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
+
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
         List<Long> detailIds = new ArrayList<>();
-        if (null != organizationMembers) {
-            for (OrganizationMember member : organizationMembers) {
+        if (null != result) {
+            for (SocialSecurityEmployeeDTO member : result) {
                 if (null != member.getDetailId()) {
                     detailIds.add(member.getDetailId());
                 }
