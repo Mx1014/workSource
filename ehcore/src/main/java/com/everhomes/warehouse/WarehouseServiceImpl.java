@@ -645,6 +645,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (materialStock != null) {
                     if (WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
                         materialStock.setAmount(materialStock.getAmount() + stock.getAmount());
+                        materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         warehouseProvider.updateWarehouseStock(materialStock);
                         //更新
                         warehouseStockSearcher.feedDoc(materialStock);
@@ -738,6 +739,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     materialStock.setMaterialId(stock.getMaterialId());
                     materialStock.setAmount(stock.getAmount());
                     materialStock.setCreatorUid(uid);
+                    materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     warehouseProvider.creatWarehouseStock(materialStock);
                     warehouseStockSearcher.feedDoc(materialStock);
 
