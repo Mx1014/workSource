@@ -1,6 +1,8 @@
 package com.everhomes.pmtask.zhuzong;
 
 
+import java.util.List;
+
 public class ZhuzongTasksData {
 
     private String prepareddate;
@@ -18,6 +20,7 @@ public class ZhuzongTasksData {
     private String isTimely;
     private String serviceAttitude;
     private String clientSelectOpinion;
+    private List<String> srcfile;
 
     public String getPrepareddate() {
         return prepareddate;
@@ -129,5 +132,13 @@ public class ZhuzongTasksData {
 
     public void setClientSelectOpinion(String clientSelectOpinion) {
         this.clientSelectOpinion = clientSelectOpinion;
+    }
+
+    public List<String> getSrcfile() {
+        return srcfile;
+    }
+
+    public void setSrcfile(List<String> srcfile) {
+        this.srcfile = srcfile;
     }
 }
