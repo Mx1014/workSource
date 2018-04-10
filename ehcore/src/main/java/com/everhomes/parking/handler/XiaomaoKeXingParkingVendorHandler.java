@@ -313,7 +313,9 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 			cardInfoDTO.setRateName(targetRateDTO.getRateName());
 			cardInfoDTO.setCardType(targetRateDTO.getCardType()); // 月卡类型显示字段
 			cardInfoDTO.setMonthCount(BigDecimal.valueOf(requestMonthCount)); // 需要至少充值的月份
-			cardInfoDTO.setPrice(targetRateDTO.getPrice().divide(targetRateDTO.getMonthCount()));
+			//这里计算月份单价时，向上保留整数
+			cardInfoDTO.setPrice(targetRateDTO.getPrice().divide(targetRateDTO.getMonthCount(),
+					OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
 
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();
