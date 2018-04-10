@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements EquipmentTasksSearcher {
@@ -189,7 +190,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         //unMappedType
-        builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC));
+       // builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC)); NumericComparator派生类支持 float、double、int 、long
         builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
 
         SearchResponse rsp = builder.execute().actionGet();
@@ -248,6 +249,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                 }
                 tasks.add(dto);
             }
+        }
+        if (tasks != null && tasks.size() > 0) {
+            tasks = tasks.stream().sorted(Comparator.comparing(EquipmentTaskDTO::getStatus)).collect(Collectors.toList());
         }
         response.setTasks(tasks);
 
