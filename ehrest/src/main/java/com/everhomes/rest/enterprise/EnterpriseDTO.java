@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -46,7 +47,7 @@ import com.everhomes.util.StringHelper;
  * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
  * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  * <li>postUri: 标题图uri</li>
- * <li>postUrl: 标题图url</li>
+ * <li>appDtos: 授权应用，参考{@link ServiceModuleAppDTO}</li>
  * </ul>
  * @author janson
  *
@@ -100,6 +101,8 @@ public class EnterpriseDTO {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
+
+    private List<ServiceModuleAppDTO> appDtos;
     
     public String getPostUri() {
 		return postUri;
@@ -415,5 +418,13 @@ public class EnterpriseDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<ServiceModuleAppDTO> getAppDtos() {
+        return appDtos;
+    }
+
+    public void setAppDtos(List<ServiceModuleAppDTO> appDtos) {
+        this.appDtos = appDtos;
     }
 }
