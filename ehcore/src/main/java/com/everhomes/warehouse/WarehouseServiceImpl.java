@@ -149,7 +149,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode().substring(
-                CoordinationLocks.UPDATE_WAREHOUSE.getCode().lastIndexOf(".")
+                CoordinationLocks.UPDATE_WAREHOUSE.getCode().lastIndexOf(".") + 1
         )
                 + cmd.getOwnerType() + cmd.getOwnerId() + cmd.getCommunityId()).enter(() -> {
             checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId(), warehouse.getCommunityId());
@@ -274,7 +274,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         WarehouseMaterialCategories category = ConvertHelper.convert(cmd, WarehouseMaterialCategories.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
-                .substring(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode().lastIndexOf("."))
+                .substring(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode().lastIndexOf(".") + 1)
                 + cmd.getOwnerType() + cmd.getOwnerId()).enter(() -> {
             if (cmd.getId() == null) {
                 category.setNamespaceId(cmd.getNamespaceId());
@@ -431,8 +431,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
 
         this.coordinationProvider.getNamedLock(
-                CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().substring(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().lastIndexOf("."))
-                        .substring(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().lastIndexOf("."))
+                CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().substring(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().lastIndexOf(".")+1)
                 + cmd.getOwnerType() + cmd.getOwnerId() + cmd.getCommunityId()).enter(() -> {
             //检查此设备的编号，增加园区维度进行查询,允许一个企业同一个设备在不同园区增加实例
             checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId(), cmd.getCommunityId());
