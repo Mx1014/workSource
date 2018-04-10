@@ -50,3 +50,6 @@ SET @eh_locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
     VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10010', 'zh_CN', '催办次数已达上限');
 
+-- Mybay隐藏代发 by zheng
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`)
+VALUES ( 'pmtask.hide.represent', '1', '代发隐藏', '999966');
