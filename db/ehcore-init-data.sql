@@ -438,7 +438,7 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) VALUES ('6', '0', 'PaymentLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"PaymentLayout","displayName":"缴费首页","groups":[{"groupName":"pay","widget":"Navigator","instanceConfig":{"itemGroup":"PayActions"},"style":"Light","defaultOrder":1,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2015072202', '2015061701', '2', '2015-07-13 16:46:37');
 
 ----新增深圳湾对接
-INSERT INTO `ehcore`.`eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES (uuid_short(), 'community', uuid_short(), '深圳湾物业缴费对接', 'szy', '0', '999966');
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES (uuid_short(), 'community', uuid_short(), '深圳湾物业缴费对接', 'szy', '0', '999966');
 
 
 SET foreign_key_checks = 1;
