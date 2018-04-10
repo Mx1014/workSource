@@ -3117,6 +3117,19 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }else if(headers[j].contains("客户手机号")){
                     if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
+                        if(org.apache.commons.lang.StringUtils.isEmpty(data[j])){
+                            log.setErrorLog("个人客户情况下，客户手机号不能为空");
+                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+                            datas.add(log);
+                            continue bill;
+                        }
+
+                        if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
+                            log.setErrorLog("手机号码格式不正确");
+                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+                            datas.add(log);
+                            continue bill;
+                        }
                         UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
                         if(claimedIdentifierByToken!=null){
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());

@@ -14,4 +14,5 @@ public interface AssetBillImportErrorCodes {
     Integer NOTICE_TEL_EMPTY_ERROR = 1004;
     Integer CHARGING_ITEM_NAME_ERROR = 1005;
     Integer AMOUNT_INCORRECT = 1006;
+    Integer USER_CUSTOMER_TEL_ERROR = 1007;
 }
