@@ -1,5 +1,6 @@
 package com.everhomes.asset.szywyjf;
 
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.everhomes.asset.szywyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayF
 import com.everhomes.asset.szywyjf.webservice.client.WSContext;
 import com.everhomes.rest.asset.BillForClientV2;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 
@@ -170,13 +172,30 @@ public class SZYQuery {
 				String result = accountProxy.sync_TenancyContractDetailed(request);
 				try {
 					JSONArray jsonArray = JSON.parseArray(result);
-					for(int i = 0;i < jsonArray.size();i++) {
-						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						//待实现
-						
-						
-						
-					}
+					JSONObject jsonObject = jsonArray.getJSONObject(0);
+					JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
+					JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(0);
+					//应付金额
+					BigDecimal fappamount = (BigDecimal) receDataJSONObject.get("fappamount");
+					response.setAmountReceivable(fappamount);
+					//实付金额
+					BigDecimal factMount = (BigDecimal) receDataJSONObject.get("fappamount");
+					//待缴金额
+					BigDecimal amountOwed = fappamount.subtract(factMount);
+					response.setAmountOwed(amountOwed);
+					String dateStr = receDataJSONObject.get("startDate") + "~" + receDataJSONObject.get("endDate");
+					response.setDatestr(dateStr);
+					List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList = new ArrayList<ShowBillDetailForClientDTO>();
+					ShowBillDetailForClientDTO showBillDetailForClientDTO = new ShowBillDetailForClientDTO();
+					showBillDetailForClientDTO.setBillItemName("深圳湾物业缴费对接");
+					showBillDetailForClientDTO.setAmountOwed(amountOwed);
+					showBillDetailForClientDTO.setAddressName(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : null);
+					showBillDetailForClientDTO.setAmountReceivable(fappamount);
+					showBillDetailForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
+					showBillDetailForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
+					showBillDetailForClientDTO.setDateStr(dateStr);
+					showBillDetailForClientDTOList.add(showBillDetailForClientDTO);
+					response.setShowBillDetailForClientDTOList(showBillDetailForClientDTOList);
 				} catch (JSONException e) {
 					// TODO: handle exception
 					JSONObject jsonObject = JSON.parseObject(result);
