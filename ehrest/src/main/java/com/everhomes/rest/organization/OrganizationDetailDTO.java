@@ -52,7 +52,7 @@ import com.everhomes.util.StringHelper;
  *     <li>organizationMemberName: 当前用户在企业的contact_name</li>
  * </ul>
  */
-public class OrganizationDetailDTO {
+public class  OrganizationDetailDTO {
 
 	private Long id;
 	private Long organizationId;

@@ -10,9 +10,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
@@ -1593,5 +1591,44 @@ public class OrganizationController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
+
+    /**
+     * <b>URL: /org/listEnterpriseByNamespaceIds</b>
+     * <p>查询域空间下公司列表</p>
+     */
+    @RequestMapping("listEnterpriseByNamespaceIds")
+    @RestReturn(value = ListPMOrganizationsResponse.class)
+    public RestResponse listEnterpriseByNamespaceIds(@Valid ListEnterpriseByNamespaceIdCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listEnterpriseByNamespaceIds(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/enterprise/detail</b>
+     * <p>查看单个公司的具体属性</p>
+     */
+    @RequestMapping("/enterprise/detail")
+    @RestReturn(value = EnterpriseDTO.class)
+    public RestResponse findEnterpriseDetail(@Valid FindEnterpriseDetailCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/enterprise/edit</b>
+     * <p>编辑单个公司的具体属性</p>
+     */
+    @RequestMapping("/enterprise/edit")
+    @RestReturn(value = EnterpriseDTO.class)
+    public RestResponse updateEnterpriseDetail(@Valid UpdateEnterpriseDetailCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }
