@@ -278,7 +278,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("startTime", task.getExecutiveStartTime());
             b.field("endTime", task.getExecutiveExpireTime());
             b.field("status", task.getStatus());
-            b.field("taskName", task.getTaskName()).field("index","not_analyzed");
+            //b.field("taskName", task.getTaskName()).field("index","not_analyzed");
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
             EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
