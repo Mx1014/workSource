@@ -61,6 +61,21 @@ public class OfficeCubicleAdminController extends ControllerBase {
 
     }
 
+    /**
+     * <b>URL: /officecubicle/listProvinceAndCites</b>
+     * <p>城市管理-获取已经设定的省份和城市</p>
+     */
+    @RequestMapping("listProvinceAndCites")
+    @RestReturn(value=ListCitiesResponse.class )
+    public RestResponse listProvinceAndCites(ListCitiesCommand cmd) {
+        ListCitiesResponse resp = this.officeCubicleService.listProvinceAndCites(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
 
     /**
      * <b>URL: /officecubicle/listCities</b>

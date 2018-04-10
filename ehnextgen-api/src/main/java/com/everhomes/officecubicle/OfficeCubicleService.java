@@ -49,4 +49,6 @@ public interface OfficeCubicleService {
 	void updateCurrentUserSelectedCity(String provinceName, String cityName);
 
 	CityDTO getCityById(GetCityByIdCommand cmd);
+
+	ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd);
 }

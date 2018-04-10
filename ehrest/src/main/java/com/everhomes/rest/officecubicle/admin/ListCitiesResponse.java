@@ -17,7 +17,14 @@ public class ListCitiesResponse {
 
     private Long nextPageAnchor;
 
-    public List<CityDTO> getCities() {
+    public ListCitiesResponse(List<CityDTO> cities) {
+    	this.cities=cities;
+	}
+
+	public ListCitiesResponse() {
+	}
+
+	public List<CityDTO> getCities() {
         return cities;
     }
 

@@ -947,4 +947,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return ConvertHelper.convert(city,CityDTO.class);
 	}
+
+	@Override
+	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
+		List<OfficeCubicleCity> list=null;
+		if(cmd.getParentName()==null){
+			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId());
+		}else{
+			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
+		}
+		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
+	}
 }
