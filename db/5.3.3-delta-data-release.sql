@@ -53,3 +53,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 -- Mybay隐藏代发 by zheng
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`)
 VALUES ( 'pmtask.hide.represent', '1', '代发隐藏', '999966');
+
+-- 更新“企业账户”菜单图标 add by yanjun 201804101505
+UPDATE eh_web_menus set icon_url = 'business_account' WHERE id = 52000000;
