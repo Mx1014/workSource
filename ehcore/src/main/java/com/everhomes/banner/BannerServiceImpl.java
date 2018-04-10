@@ -461,7 +461,13 @@ public class BannerServiceImpl implements BannerService {
                 dto.setPosterPath(dto.getPosterUrl());
                 dto.setPosterUrl(null);
 
-                dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+                if (dto.getActionData() != null) {
+                    try {
+                        dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+                    } catch (Exception e) {
+                        LOGGER.error("Refresh actionData error, bannerDTO = " + dto, e);
+                    }
+                }
 
                 // 应用类型的跳转需要把名称设置为应用名称，用于客户端在跳转后的界面上显示标题
                 if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {
