@@ -279,6 +279,21 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	@RequestMapping("sendMessageToUserSZY")
+	@RestReturn(value=String.class)
+	public RestResponse sendMessageToUserSZY(BusinessMessageCommandSZY cmd) {
+		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
+		//根据手机号码获取用户ID
+		Long userId = userProvider.findUserByToken(cmd.getTel(), cmd.getNamespaceId()).getTargetId();
+		sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /openapi/getUserServiceAddress</b>
