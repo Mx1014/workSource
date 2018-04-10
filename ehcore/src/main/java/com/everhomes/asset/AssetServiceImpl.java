@@ -3179,7 +3179,7 @@ public class AssetServiceImpl implements AssetService {
                         if(!StringUtils.isEmpty(data[j])){
                             exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]));
-                            exemptionItemDTO.setIsPlus(ExemptionPlus.MINUS.getCode());
+                            exemptionItemDTO.setIsPlus((byte)0);
                             exemptionItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(exemptionItemDTO);
                         }
@@ -3198,7 +3198,7 @@ public class AssetServiceImpl implements AssetService {
                         if(!StringUtils.isEmpty(data[j])){
                             increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
-                            increaseItemDTO.setIsPlus(ExemptionPlus.PLUS.getCode());
+                            increaseItemDTO.setIsPlus((byte)1);
                             increaseItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(increaseItemDTO);
                         }
