@@ -84,7 +84,7 @@ public class RelocationProviderImpl implements RelocationProvider {
         SelectQuery<EhRelocationRequestsRecord> query = context.selectQuery(Tables.EH_RELOCATION_REQUESTS);
         
         query.addConditions(Tables.EH_RELOCATION_REQUESTS.NAMESPACE_ID.eq(namespaceId));
-
+		query.addConditions(Tables.EH_RELOCATION_REQUESTS.FLOW_CASE_ID.gt(0l));//抛弃创建工作流失败的
         if (null != pageAnchor && pageAnchor != 0) {
 			query.addConditions(Tables.EH_RELOCATION_REQUESTS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		}

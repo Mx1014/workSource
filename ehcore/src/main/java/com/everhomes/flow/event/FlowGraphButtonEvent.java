@@ -450,7 +450,7 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
             tracker.setFlowCaseId(ctx.getFlowCase().getId());
             tracker.setFlowUserId(ctx.getOperator().getId());
             tracker.setFlowUserName(ctx.getOperator().getNickName());
-            if (subject.getContent() != null && !subject.getContent().isEmpty()) {
+            if (isValidSubject(subject)) {
                 tracker.setSubjectId(subject.getId());
             } else if (tracker.getSubjectId() == null) {
                 tracker.setSubjectId(0L);// BUG #5431
@@ -501,6 +501,11 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
         log.setStepCount(oldStepCount);
 
         ctx.getLogs().add(log);    //added but not save to database now.
+    }
+
+    private boolean isValidSubject(FlowSubject subject) {
+        return (subject.getContent() != null && subject.getContent().length() > 0)
+                || (subject.getAttachments() != null && subject.getAttachments().size() > 0);
     }
 
     private void stepParentState(FlowCaseState ctx, FlowGraphNode nextNode) {

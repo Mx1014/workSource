@@ -3532,7 +3532,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (null == cmd.getPageAnchor()) {
 			cmd.setPageAnchor(0L);
 		}
-		Integer offset = cmd.getPageAnchor().intValue();
+		Long offset = cmd.getPageAnchor();
 
 		List<String> targetTypes = new ArrayList<>();
 		List<Long> targetIds = new ArrayList<>();
@@ -3555,7 +3555,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
-			response.setNextPageAnchor((long) (offset + 1));
+			response.setNextPageAnchor(allTasks.get(allTasks.size() - 1).getId());
 		}
 
 		List<EquipmentTaskDTO> dtos = new ArrayList<>();
@@ -3580,16 +3580,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -6);
 		Integer offset = cmd.getPageAnchor().intValue();
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listPersonalDoneTasks(cmd.getTargetId(), cmd.getInspectionCategoryId(), pageSize + 1, offset, startTime);
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (tasks != null && tasks.size() > 0) {
+			dtos = tasks.stream().map((r) -> {
+				EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+				dto.setStatus(EquipmentTaskStatus.PERSONAL_DONE.getCode());
+				return dto;
+			}).collect(Collectors.toList());
+			response.setTasks(dtos);
+		}
 		if (tasks != null && tasks.size() > pageSize) {
 			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		} else {
 			response.setNextPageAnchor(null);
-
 		}
+
 		return response;
 	}
 
-	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
+	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
 		List<EquipmentInspectionTasks> allTasks;
 		List<Long> executePlanIds = new ArrayList<>();
 		List<Long> reviewPlanIds = new ArrayList<>();
@@ -3620,7 +3629,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return allTasks;
 	}
 
-	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds) {
+	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds) {
 		List<EquipmentInspectionTasks> allTasks;
 		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 				targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
@@ -3684,7 +3693,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-															List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, Timestamp lastSyncTime, Long userId) {
+															List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, Timestamp lastSyncTime, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 		if (inspectionCategoryId == null) {

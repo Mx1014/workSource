@@ -448,12 +448,15 @@ public class BannerProviderImpl implements BannerProvider {
         SelectQuery<EhBannersRecord> query = context.selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
+        query.addConditions(t.STATUS.ne(BannerStatus.DELETE.getCode()));
+
+        query.addOrderBy(t.STATUS);
 
         if (communityId != null && communityId != 0) {
             query.addConditions(t.SCOPE_ID.eq(communityId));
+            query.addOrderBy(t.ORDER);
         }
 
-        query.addOrderBy(t.STATUS, t.ORDER);
         query.addOrderBy(t.ID.desc());
 
         if (pageSize > 0) {
