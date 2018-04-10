@@ -2949,7 +2949,7 @@ public class AssetServiceImpl implements AssetService {
         Long communityId = cmd.getOwnerId();
         Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
-        if(communityId == null){
+        if(communityId == null || communityId == -1){
             communityIds = getAllCommunity(namespaceId,true);
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
