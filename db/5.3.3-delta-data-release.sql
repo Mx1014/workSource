@@ -37,3 +37,10 @@ END
 delimiter ;
 CALL delete_banner;
 DROP PROCEDURE if exists create_admin;
+
+-- 增加安邦的配置项 lei.lv
+set @e_id = (select max(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.namespace.id', 999949, NULL, 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.oauth.url', 'http://139.196.255.176:8000', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientid', 'zuolin', NULL, 999949, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@e_id := @e_id + 1, 'anbang.clientsecret', 'enVvbGluMjAxODAxMDI=', NULL, 999949, NULL);
