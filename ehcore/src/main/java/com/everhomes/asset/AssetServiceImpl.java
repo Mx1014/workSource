@@ -1090,7 +1090,7 @@ public class AssetServiceImpl implements AssetService {
             feeRule:for(int i = 0; i < feesRules.size(); i++) {
                 // 是錯
 
-                List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+
 //                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder_inner = new HashMap<>();
 
                 // 是錯
@@ -1168,6 +1168,7 @@ public class AssetServiceImpl implements AssetService {
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
+                    List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
                     //从地址包裹中获得一个地址
                     ContractProperty property = var1.get(j);
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
@@ -1190,7 +1191,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                     //计算
                     assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
-
+                    billItemsExpectancies.addAll(billItemsExpectancies_inner);
                 }
                 Integer cycleForBill = 0;
                 switch (balanceDateType){
@@ -1210,8 +1211,8 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
-                // 試試解耦和，也許計算本身沒有錯誤
-                billItemsExpectancies.addAll(billItemsExpectancies_inner);
+
+
 //                uniqueRecorder.putAll(uniqueRecorder_inner);
             }
             //先算出所有的item
