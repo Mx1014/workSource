@@ -1431,7 +1431,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             		dto.setHardwareId(doorAccess.getMacCopy());
             	}
             	//---
-                dto.setHardwareId(doorAccess.getHardwareId());
                 dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
