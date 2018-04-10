@@ -121,6 +121,21 @@ public class OfficeCubicleAdminController extends ControllerBase {
         return response;
 
     }
+    
+    /**
+     * <b>URL: /officecubicle/getCityById</b>
+     * <p>城市管理-根据id获取城市详情</p>
+     */
+    @RequestMapping("getCityById")
+    @RestReturn(value=CityDTO.class )
+    public RestResponse getCityById(GetCityByIdCommand cmd) {
+        this.officeCubicleService.getCityById(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
 
 
     /**

@@ -938,4 +938,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		});
 
 	}
+
+	@Override
+	public CityDTO getCityById(GetCityByIdCommand cmd) {
+		OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+		if(UserContext.getCurrentNamespaceId()!=city.getNamespaceId()){
+			return null;
+		}
+		return ConvertHelper.convert(city,CityDTO.class);
+	}
 }
