@@ -1035,9 +1035,7 @@ public class AssetProviderImpl implements AssetProvider {
                     exemptionItems.add(exemptionItem);
 
                     if(amount.compareTo(zero)==-1 || exemptionItemDTO.getIsPlus().byteValue() == (byte)0){
-                        if(exemptionItemDTO.getIsPlus().byteValue() != ExemptionPlus.MINUS.getCode()){
-                            amount = amount.multiply(new BigDecimal("-1"));
-                        }
+                        amount = amount.multiply(new BigDecimal("-1"));
                         amountExemption = amountExemption.add(amount);
                     }else if(amount.compareTo(zero)==1 || exemptionItemDTO.getIsPlus().byteValue() == (byte)1){
                         amountSupplement = amountSupplement.add(amount);

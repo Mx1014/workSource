@@ -292,7 +292,7 @@ public class ExcelUtils {
         if(isCellStylePureString == true){
             contentStyle.setDataFormat(format.getFormat("@"));
             //每一列都做个默认文本
-            for(int i = 1; i <= titleNames.length; i ++){
+            for(int i = 0; i < titleNames.length; i ++){
                 sheet.setDefaultColumnStyle(i, contentStyle);
             }
 

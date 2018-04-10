@@ -3178,7 +3178,7 @@ public class AssetServiceImpl implements AssetService {
                     try{
                         if(!StringUtils.isEmpty(data[j])){
                             exemptionItemDTO = new ExemptionItemDTO();
-                            exemptionItemDTO.setAmount(new BigDecimal(data[j]));
+                            exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
                             exemptionItemDTO.setIsPlus((byte)0);
                             exemptionItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(exemptionItemDTO);
