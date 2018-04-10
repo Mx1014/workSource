@@ -545,6 +545,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			CityDTO dto = ConvertHelper.convert(r, CityDTO.class);
 			//根据上次用户选中的城市，这里设置当前选中的城市。
 			if(selecetedCity!=null 
+					&& !StringUtils.isEmpty(selecetedCity.getProvinceName())
+					&& !StringUtils.isEmpty(selecetedCity.getCityName())
 					&& selecetedCity.getProvinceName().equals(dto.getProvinceName()) 
 					&& selecetedCity.getCityName().equals(dto.getCityName())){
 				dto.setSelectFlag((byte)1);
