@@ -1631,11 +1631,15 @@ public class PortalServiceImpl implements PortalService {
 				config.setSubjectHeight(0);
 				config.setEntityCount(0);
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
+					//客户端居然是依赖名字判断的 * 1
 					itemGroup.setName("OPPushActivity");
 				}
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE){
+					//客户端居然是依赖名字判断的 * 2
+					itemGroup.setName("Gallery");
 				}
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
+					//客户端居然是依赖名字判断的 * 3
 					itemGroup.setName("OPPushBiz");
 				}
 				publishOPPushItem(itemGroup, versionId, layout.getLocation(), publishType);
