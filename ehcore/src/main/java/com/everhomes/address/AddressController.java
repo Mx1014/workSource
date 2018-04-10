@@ -180,11 +180,11 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/searchCommunities</b>
-     * <p>根据关键字搜索小区</p>
+     * <p>搜索小区</p>
      */
     @RequestMapping("searchCommunities")
     @RestReturn(value=CommunityDoc.class, collection=true)
-    public RestResponse searchCommunities(@Valid SearchCommunityCommand cmd) {
+    public RestResponse searchCommunities(SearchCommunityCommand cmd) {
         List<CommunityDoc> results = this.addressService.searchCommunities(cmd);
         RestResponse response =  new RestResponse(results);
 
