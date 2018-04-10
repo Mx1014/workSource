@@ -3023,8 +3023,7 @@ public class AssetServiceImpl implements AssetService {
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
-        List<BillItemDTO> billItemDTOList = new ArrayList<>();
-        List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
+
         //假设了第一行为标题
         RowResult headerRow = (RowResult) resultList.get(1);
         String[] headers = getOrderedCellValues(headerRow, null);
@@ -3058,10 +3057,12 @@ public class AssetServiceImpl implements AssetService {
 
             CreateBillCommand cmd = new CreateBillCommand();
             BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
+            List<BillItemDTO> billItemDTOList = new ArrayList<>();
+            List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
 //            RowResult dataRow = (RowResult) resultList.get(i);
 //            String[] data = getOrderedCellValues(dataRow, headers.length);
-            ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
-            ExemptionItemDTO increaseItemDTO = new ExemptionItemDTO();
+            ExemptionItemDTO exemptionItemDTO = null;
+            ExemptionItemDTO increaseItemDTO = null;
             //账期被依赖
             String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
             if(org.apache.commons.lang.StringUtils.isEmpty(dateStr)){
@@ -3090,6 +3091,7 @@ public class AssetServiceImpl implements AssetService {
                     continue bill;
             }
             for(int j = 0; j < data.length; j++){
+
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
                     if(org.springframework.util.StringUtils.isEmpty(data[j])){
@@ -3126,8 +3128,8 @@ public class AssetServiceImpl implements AssetService {
                 }else if(headers[j].equals("账单结束时间")){
                     cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
                 }else if(headers[j].equals("合同编号")){
-                    cmd.setContractNum(headers[j]);
-                    List<Long> list = contractProvider.SimpleFindContractByNumber(headers[j]);
+                    cmd.setContractNum(data[j]);
+                    List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
                     if(list.size() != 1){
                         LOGGER.warn("SimpleFindContractByNumber find more than 1, contract Id is={}", list);
                     }else{
@@ -3162,9 +3164,11 @@ public class AssetServiceImpl implements AssetService {
                     //减免项
                     try{
                         if(!StringUtils.isEmpty(data[j])){
+                            exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]));
-                        }else{
-                            exemptionItemDTO.setAmount(new BigDecimal("0"));
+                            exemptionItemDTO.setIsPlus(ExemptionPlus.MINUS.getCode());
+                            exemptionItemDTO.setDateStr(dateStr);
+                            exemptionItemDTOList.add(exemptionItemDTO);
                         }
                     }catch(Exception e){
                         log.setErrorLog("exemption amount error");
@@ -3172,16 +3176,18 @@ public class AssetServiceImpl implements AssetService {
                         datas.add(log);
                         continue bill;
                     }
-                    exemptionItemDTO.setIsPlus(ExemptionPlus.MINUS.getCode());
-                    exemptionItemDTO.setDateStr(dateStr);
                 }else if(headers[j].contains("减免备注")){
-                    exemptionItemDTO.setRemark(data[j]);
+                    if(exemptionItemDTO != null){
+                        exemptionItemDTO.setRemark(data[j]);
+                    }
                 }else if(headers[j].contains("增收金额")){
                     try{
                         if(!StringUtils.isEmpty(data[j])){
+                            increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
-                        }else{
-                            increaseItemDTO.setAmount(new BigDecimal("0"));
+                            increaseItemDTO.setIsPlus(ExemptionPlus.PLUS.getCode());
+                            increaseItemDTO.setDateStr(dateStr);
+                            exemptionItemDTOList.add(increaseItemDTO);
                         }
                     }catch(Exception e){
                         log.setErrorLog("amption amount error");
@@ -3189,14 +3195,12 @@ public class AssetServiceImpl implements AssetService {
                         datas.add(log);
                         continue bill;
                     }
-                    increaseItemDTO.setIsPlus(ExemptionPlus.PLUS.getCode());
-                    increaseItemDTO.setDateStr(dateStr);
                 }else if(headers[j].contains("增收备注")){
-                    increaseItemDTO.setRemark(data[j]);
+                    if(increaseItemDTO != null){
+                        increaseItemDTO.setRemark(data[j]);
+                    }
                 }
             }
-            exemptionItemDTOList.add(exemptionItemDTO);
-            exemptionItemDTOList.add(increaseItemDTO);
             billGroupDTO.setBillGroupId(billGroupId);
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
