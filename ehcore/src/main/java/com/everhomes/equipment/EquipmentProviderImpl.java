@@ -2518,8 +2518,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
             query.addConditions(con2);
-            //测试使用
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
         }
 
         Condition con = null;
@@ -2553,6 +2551,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                     .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(lastSyncTime))
                      .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.gt(lastSyncTime)));
         }
+        // 只显示离创建时间三个月的任务
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.asc());
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
         query.addLimit(pageSize);
 
@@ -3348,10 +3349,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         List<EquipmentInspectionTasks> tasksList = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTOR_ID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTOR_ID.eq(UserContext.currentUserId())
+                .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEWER_ID.eq(UserContext.currentUserId())));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+
+        if (inspectionCategoryId != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+        }
         query.addLimit(offset * (pageSize - 1), pageSize);
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.desc());
 
