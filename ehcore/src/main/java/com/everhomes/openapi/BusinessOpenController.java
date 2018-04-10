@@ -8,6 +8,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
@@ -857,6 +858,7 @@ public class BusinessOpenController extends ControllerBase {
     }
 
     @RequestMapping("verifyUserByTokenFromAnBang")
+    @SuppressDiscover
     @RequireAuthentication(false)
     @RestReturn(value = UserLogin.class)
     public RestResponse verifyUserByTokenFromAnBang(LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
