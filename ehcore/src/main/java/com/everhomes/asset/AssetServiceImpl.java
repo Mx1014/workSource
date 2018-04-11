@@ -73,6 +73,7 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -3065,7 +3066,7 @@ public class AssetServiceImpl implements AssetService {
             ExemptionItemDTO increaseItemDTO = null;
             //账期被依赖
             String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
-            if(org.apache.commons.lang.StringUtils.isEmpty(dateStr)){
+            if(StringUtils.isBlank(dateStr)){
                 log.setErrorLog("日期格式错误,请参考说明进行填写");
                 log.setCode(AssetBillImportErrorCodes.DATE_STR_EMPTY_ERROR);
                 datas.add(log);
@@ -3085,7 +3086,7 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 default:
                     //构造log然后离开这一行的处理
-                    log.setErrorLog("customer type must be organization or user");
+                    log.setErrorLog("客户类型错误，只允许填写个人客户或者企业客户");
                     log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
                     datas.add(log);
                     continue bill;
@@ -3094,7 +3095,7 @@ public class AssetServiceImpl implements AssetService {
 
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
-                    if(org.springframework.util.StringUtils.isEmpty(data[j])){
+                    if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("customer name cannot be empty");
                         log.setCode(AssetBillImportErrorCodes.CUSTOM_NAME_EMPTY_ERROR);
                         datas.add(log);
@@ -3117,7 +3118,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }else if(headers[j].contains("客户手机号")){
                     if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
-                        if(org.apache.commons.lang.StringUtils.isEmpty(data[j])){
+                        if(StringUtils.isBlank(data[j])){
                             log.setErrorLog("个人客户情况下，客户手机号不能为空");
                             log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
                             datas.add(log);
@@ -3125,7 +3126,7 @@ public class AssetServiceImpl implements AssetService {
                         }
 
                         if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                            log.setErrorLog("手机号码格式不正确");
+                            log.setErrorLog("客户手机号码格式不正确");
                             log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
                             datas.add(log);
                             continue bill;
@@ -3149,9 +3150,15 @@ public class AssetServiceImpl implements AssetService {
                         cmd.setContractId(list.get(0));
                     }
                 }else if(headers[j].contains("催缴手机号")){
-                    if(org.apache.commons.lang.StringUtils.isEmpty(data[j])){
+                    if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("notice tel cannot be emtpy");
                         log.setCode(AssetBillImportErrorCodes.NOTICE_TEL_EMPTY_ERROR);
+                        datas.add(log);
+                        continue bill;
+                    }
+                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
+                        log.setErrorLog("催缴手机号码格式不正确");
+                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
                         datas.add(log);
                         continue bill;
                     }
@@ -3166,17 +3173,32 @@ public class AssetServiceImpl implements AssetService {
                         datas.add(log);
                         continue bill;
                     }
+                    BigDecimal amountReceivable = null;
+                    if(StringUtils.isBlank(data[j])){
+                        log.setErrorLog("收费项目:"+headers[j]+"必填");
+                        log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
+                        datas.add(log);
+                        continue bill;
+                    }try{
+                        amountReceivable = new BigDecimal(data[j]);
+                    }catch (Exception e){
+                        log.setErrorLog("收费项目:" + headers[j] + "数值格式不正确，应该填写保留两位小数的数字");
+                        log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
+                        datas.add(log);
+                        continue bill;
+                    }
+
                     // id , name, groupRuleId, amount, 楼栋，门牌，addressId
                     item.setBillItemId(itemPojo.getId());
                     item.setBillItemName(headers[j]);
-                    item.setAmountReceivable(new BigDecimal(data[j]));
+                    item.setAmountReceivable(amountReceivable);
                     item.setBuildingName(building);
                     item.setApartmentName(apartment);
                     billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
                     try{
-                        if(!StringUtils.isEmpty(data[j])){
+                        if(!StringUtils.isBlank(data[j])){
                             exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
                             exemptionItemDTO.setIsPlus((byte)0);
@@ -3195,7 +3217,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }else if(headers[j].contains("增收金额")){
                     try{
-                        if(!StringUtils.isEmpty(data[j])){
+                        if(!StringUtils.isBlank(data[j])){
                             increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
                             increaseItemDTO.setIsPlus((byte)1);
@@ -3962,7 +3984,7 @@ public class AssetServiceImpl implements AssetService {
         while(iterator.hasNext()){
             String targetStr = iterator.next();
             String substitute = assetProvider.getVariableIdenfitierByName(targetStr);
-            if(!org.apache.commons.lang.StringUtils.isEmpty(substitute)){
+            if(!StringUtils.isBlank(substitute)){
                 formulaJson = formulaJson.replace(targetStr,substitute);
             }
         }
@@ -4239,7 +4261,7 @@ public class AssetServiceImpl implements AssetService {
             List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
 
             if(null == resultList || resultList.isEmpty()){
-                LOGGER.error("File content is empty。userId="+userId);
+                LOGGER.error("File content is empty，userId="+userId);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
                         "File content is empty");
             }
