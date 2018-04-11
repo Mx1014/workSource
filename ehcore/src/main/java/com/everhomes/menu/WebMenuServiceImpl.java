@@ -139,17 +139,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<Long> appOriginIds = null;
 
+		// 公司拥有所有权的园区集合
+		List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+		// 公司分配过园区的应用
+		List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
+		
+
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
 			//全部appOriginIds
 			List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
 			appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
 		}else {
-
-			// 公司拥有所有权的园区集合
-			List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
-			// 公司分配过园区的应用
-			List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
 
 
 			List<Long> appIds = new ArrayList<>();
