@@ -8019,7 +8019,8 @@ public class PunchServiceImpl implements PunchService {
 			punCalendar.setTime(punchTime);
         }
         response.setIntervals(new ArrayList<>());
-        PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
+        //这里之前用cmd.getQueryTime 查询,现在改用punchTime ,他们的区别是查当天的时候是查出来今天的还是打卡日的
+        PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(punchTime.getTime()));
         List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId, cmd.getEnterpriseId(), dateSF.get().format(punchTime),
                 ClockCode.SUCESS.getCode());
 //		if (null != ptrId) {
