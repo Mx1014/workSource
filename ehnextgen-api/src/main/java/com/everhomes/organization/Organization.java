@@ -10,6 +10,7 @@ public class Organization extends EhOrganizations {
 	public Organization() {
     }
 
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -22,5 +23,4 @@ public class Organization extends EhOrganizations {
     public void setEmailDomain(String emailDomain) {
     	OrganizationCustomField.EMAIL_DOMAIN.setStringValue(this, emailDomain);
     }
-    
 }

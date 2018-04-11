@@ -12310,11 +12310,17 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<Organization> listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd) {
+    public ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         Integer pageSize = cmd.getPageSize();
-        return this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(), null, cmd.getKeywords(), locator, pageSize);
+        List<Organization> dtos = this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(), null, cmd.getKeywords(), locator, pageSize);
+        ListPMOrganizationsResponse res = new ListPMOrganizationsResponse();
+        if(dtos != null){
+            List<OrganizationDTO> dtoList = dtos.stream().map(r->ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+            res.setDtos(dtoList);
+        }
+        return res;
     }
 
     @Override

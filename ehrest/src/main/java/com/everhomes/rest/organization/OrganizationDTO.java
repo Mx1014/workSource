@@ -46,6 +46,7 @@ import java.util.List;
  * <li>order:排序</li>
  * <li>errorCode:错误码</li>
  * <li>managerFlag: 地址列表需要的默认是否是这个公司的管理员字段</li>
+ * <li>projectsCount: 关联的项目数量</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -116,6 +117,8 @@ public class OrganizationDTO {
 
     //地址列表需要的默认是否是这个公司的管理员字段
 	private Byte managerFlag;
+
+	private Integer projectsCount;
 
 	public Long getAreaId() {
 		return areaId;
@@ -475,5 +478,13 @@ public class OrganizationDTO {
 
 	public void setManagerFlag(Byte managerFlag) {
 		this.managerFlag = managerFlag;
+	}
+
+	public Integer getProjectsCount() {
+		return projectsCount;
+	}
+
+	public void setProjectsCount(Integer projectsCount) {
+		this.projectsCount = projectsCount;
 	}
 }

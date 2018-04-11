@@ -679,5 +679,5 @@ public interface OrganizationService {
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
 
-	List<Organization> listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
+	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
 }
