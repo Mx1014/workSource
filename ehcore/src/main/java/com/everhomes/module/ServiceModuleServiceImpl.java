@@ -885,7 +885,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         //modify start
         //获取公司管理的项目
-        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOwnerIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
 
         // 获取到了授权项目
         if(serviceModuleAppAuthorizations != null && serviceModuleAppAuthorizations.size() >0){

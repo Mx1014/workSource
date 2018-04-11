@@ -95,6 +95,20 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     }
 
     @Override
+    public List<ServiceModuleAppAuthorization> listCommunityRelationOfOrgIdAndAppId(Integer namespaceId, Long organizationId, Long appId) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(organizationId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
+                return query;
+            }
+        });
+        return authorizations;
+    }
+
+    @Override
     public List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
