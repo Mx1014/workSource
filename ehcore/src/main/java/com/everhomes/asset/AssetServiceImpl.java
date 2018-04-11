@@ -3086,7 +3086,7 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 default:
                     //构造log然后离开这一行的处理
-                    log.setErrorLog("客户类型错误，只允许填写个人客户或者企业客户");
+                    log.setErrorLog("客户属性错误，只允许填写个人客户或者企业客户");
                     log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
                     datas.add(log);
                     continue bill;
