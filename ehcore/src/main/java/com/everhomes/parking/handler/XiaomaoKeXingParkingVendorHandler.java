@@ -161,44 +161,55 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
     }
 	
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
-
-		KexinXiaomaoCard card = getCardInfo(order.getPlateNumber());
-		if (null == card || !card.isSuccess()) {
-			return false;
-		}
-
-		Timestamp timestampStart = new Timestamp(Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000);
-		if (isOutOfDate(timestampStart)) {
-	        LOGGER.info("it is out of date for monthly recharge !");
-			return false;
-		}
 		
-		
-		Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(),
-				order.getMonthCount().intValue());
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String errorDescription= null;
 
-		String validStart = sdf.format(timestampStart);
-		String validEnd = sdf.format(timestampEnd);
+		do {
 
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		params.put("memberType", card.getMemberType());
-		params.put("beginTime", validStart);
-		params.put("endTime", validEnd);
-		params.put("licenseNumber", card.getLicenseNumber());
+			KexinXiaomaoCard card = getCardInfo(order.getPlateNumber());
+			if (null == card || !card.isSuccess()) {
+				errorDescription = "no card info found from third";
+				break;
+			}
 
-		String json = post(OPEN_MONTHCARD, params);
+			Timestamp timestampStart = new Timestamp(
+					Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000);
+			if (isOutOfDate(timestampStart)) {
+				errorDescription = "it is out of date for monthly recharge !";
+				break;
+			}
 
-		// 将充值信息存入订单
-		order.setErrorDescriptionJson(json);
-		order.setStartPeriod(timestampStart);
-		order.setEndPeriod(timestampEnd);
+			Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(),
+					order.getMonthCount().intValue());
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		KexinXiaomaoJsonEntity<?> entity = JSONObject.parseObject(json, KexinXiaomaoJsonEntity.class);
-		if (entity.isSuccess()) {
+			String validStart = sdf.format(timestampStart);
+			String validEnd = sdf.format(timestampEnd);
+
+			TreeMap<String, String> params = new TreeMap<String, String>();
+			params.put("memberType", card.getMemberType());
+			params.put("beginTime", validStart);
+			params.put("endTime", validEnd);
+			params.put("licenseNumber", card.getLicenseNumber());
+
+			String json = post(OPEN_MONTHCARD, params);
+
+			// 将充值信息存入订单
+			order.setErrorDescriptionJson(json);
+			order.setStartPeriod(timestampStart);
+			order.setEndPeriod(timestampEnd);
+
+			KexinXiaomaoJsonEntity<?> entity = JSONObject.parseObject(json, KexinXiaomaoJsonEntity.class);
+			if (null == entity || !entity.isSuccess()) {
+				errorDescription = "error from third msg";
+				break;
+			}
+
 			return true;
-		}
+
+		} while (false);
 		
+		order.setErrorDescription(errorDescription);
 		return false;
 	}
 
@@ -379,11 +390,11 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 		}
 
 		Calendar time = Calendar.getInstance();
-		time.add(Calendar.MILLISECOND, OUT_DATE_TIME); // 过期后3分钟之内支付都算成功
+		time.add(Calendar.MILLISECOND, -OUT_DATE_TIME); // 过期后3分钟之内支付都算成功
 
 		Timestamp outDateTime = new Timestamp(time.getTimeInMillis());
 
-		return endTime.after(outDateTime);
+		return endTime.before(outDateTime);
 	}
 	
 	
@@ -404,6 +415,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
         }else {
             request = getParkingCardRequestByOrder(order);
+            order.setCardRequestId(request.getId()); //补上id
         }
 
         Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
