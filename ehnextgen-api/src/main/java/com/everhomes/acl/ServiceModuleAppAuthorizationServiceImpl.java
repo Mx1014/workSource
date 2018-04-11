@@ -137,7 +137,9 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 authorization.setAppId(cmd.getAppId());
                 authorization.setNamespaceId(cmd.getNamespaceId());
                 authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+                authorization.setProjectId(r);
                 authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                authorization.setUpdateTime(authorization.getCreateTime());
                 create_authorization.add(authorization);
             });
             serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(create_authorization);
