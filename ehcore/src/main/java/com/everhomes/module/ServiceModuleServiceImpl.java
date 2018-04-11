@@ -885,9 +885,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         //modify start
         //获取公司管理的项目
-        List<ProjectDTO> org_communities = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
-        List<Long> org_communityIds = org_communities.stream().map(r->r.getProjectId()).collect(Collectors.toList());
-        return projectDtos.stream().filter(r->org_communityIds.contains(r.getProjectId())).collect(Collectors.toList());
+        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOwnerIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+
+        // 获取到了授权项目
+        if(serviceModuleAppAuthorizations != null && serviceModuleAppAuthorizations.size() >0){
+            List<Long> org_communityIds = serviceModuleAppAuthorizations.stream().map(r->r.getProjectId()).collect(Collectors.toList());
+            return projectDtos.stream().filter(r->org_communityIds.contains(r.getProjectId())).collect(Collectors.toList());
+        }
+
+        return new ArrayList<ProjectDTO>();
     }
 
 
