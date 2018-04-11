@@ -231,7 +231,6 @@ class PmTaskCommonServiceImpl {
         task.setIfUseFeelist((byte)0);
         task.setReferType(cmd.getReferType());
         task.setReferId(cmd.getReferId());
-        task.setStatus(FlowCaseStatus.PROCESS.getCode());
 
         //设置门牌地址,楼栋地址,服务地点
 
