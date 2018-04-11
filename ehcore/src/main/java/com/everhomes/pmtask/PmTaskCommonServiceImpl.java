@@ -16,6 +16,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -230,6 +231,7 @@ class PmTaskCommonServiceImpl {
         task.setIfUseFeelist((byte)0);
         task.setReferType(cmd.getReferType());
         task.setReferId(cmd.getReferId());
+        task.setStatus(FlowCaseStatus.PROCESS.getCode());
 
         //设置门牌地址,楼栋地址,服务地点
 

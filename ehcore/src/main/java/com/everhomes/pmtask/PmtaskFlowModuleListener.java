@@ -182,14 +182,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					ctx.getLogs().add(log);
 				}
 				task.setIfUseFeelist((byte)1);
+			}else if ("COMPLETED".equals(nodeType)){
+				task.setStatus(FlowCaseStatus.FINISHED.getCode());
+				pmTaskProvider.updateTask(task);
 			}
 		}
-		//物业报修状态和工作流一致
-		if(flowCase.getStatus() == FlowCaseStatus.ABSORTED.getCode() || flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode()
-				||flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()) {
-			task.setStatus(flowCase.getStatus());
-			pmTaskProvider.updateTask(task);
-		}
+
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
