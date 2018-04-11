@@ -14,6 +14,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
@@ -94,6 +95,9 @@ public class BannerServiceImpl implements BannerService {
     
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private LaunchPadService launchPadService;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -456,6 +460,23 @@ public class BannerServiceImpl implements BannerService {
                 // 但是客户端用来下载图片的字段是posterPath, 所以在这里要特殊处理一下
                 dto.setPosterPath(dto.getPosterUrl());
                 dto.setPosterUrl(null);
+
+                if (dto.getActionData() != null) {
+                    try {
+                        dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+                    } catch (Exception e) {
+                        LOGGER.error("Refresh actionData error, bannerDTO = " + dto, e);
+                    }
+                }
+                // like actionType=30
+                if (dto.getActionData() == null) {
+                    dto.setActionData("{}");
+                }
+
+                // 应用类型的跳转需要把名称设置为应用名称，用于客户端在跳转后的界面上显示标题
+                if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {
+                    dto.setName(r.getVendorTag());
+                }
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -546,11 +567,13 @@ public class BannerServiceImpl implements BannerService {
         cmd.setNamespaceId(banner.getNamespaceId());
 
         CountEnabledBannersByScopeResponse enabledBanners = countEnabledBannersByScope(cmd);
+
+        int maxBannerCount = this.configurationProvider.getIntValue("banner.max.active.count", AppConstants.DEFAULT_MAX_BANNER_CAN_ACTIVE);
         enabledBanners.getList().stream()
                 .filter(r -> r.getScope().equals(banner.getScopeId()))
                 .findFirst()
                 .ifPresent(r -> {
-            if (r.getCount() >= 8) {
+            if (r.getCount() >= maxBannerCount) {
                 throw RuntimeErrorException.errorWith(
                         BannerServiceErrorCode.SCOPE,
                         BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE,
@@ -754,6 +777,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setCreatorUid(userId);
             banner.setBannerGroup("Default");
@@ -761,8 +785,8 @@ public class BannerServiceImpl implements BannerService {
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
 
-            Integer maxOrder = bannerProvider.getMaxOrderByCommunityId(cmd.getNamespaceId(), communityId);
-            banner.setOrder(maxOrder == null ? 1 : maxOrder + 1);
+            Integer minOrder = bannerProvider.getMinOrderByCommunityId(cmd.getNamespaceId(), communityId);
+            banner.setOrder(minOrder == null ? 10 : minOrder - 1);
             bannerProvider.createBanner(banner);
         }
     }
@@ -802,6 +826,7 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+            banner.setVendorTag(result.getAppName());
 
             banner.setTargetType(cmd.getTargetType());
             banner.setTargetData(cmd.getTargetData());

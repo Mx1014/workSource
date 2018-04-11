@@ -39,6 +39,24 @@ public class SearchContractCommand {
 
     private String sortField;
     private Long orgId;
+    private Long addressId;
+    private Long buildingId;
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
     public Long getOrgId() {
         return orgId;

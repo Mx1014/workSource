@@ -157,3 +157,27 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
     VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'flow.stepname.approve_step', '下一步', 'approve-step', 0, NULL);
 
 UPDATE eh_flow_buttons SET button_name = '下一步' WHERE button_name = 'approve_step';
+
+
+-- 基线现网 CDN SQL
+-- CDN 配置   add by xq.tian
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.url.vendor', 'SimpleAndAliCDN', '资源URL解析器, 注意：这里的配置改了，对应的contentServer的配置也要改', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.privateKey', 'ehdjlajgls39hdsfjwl2', 'AliCDN URL鉴权 privateKey', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.domain', 'content-1-cdn.zuolin.com', 'AliCDN 域名', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.expireSeconds', '1800', 'AliCDN 资源链接过期时间', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.client.cacheConfig', '{"ignoreParameters":["token","auth_key"]}', '客户端资源的Cache配置', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.cdn.separation_version', '5.3.0', '新旧版本客户端cdn支持的分界版本', 0, NULL);
+
+-- 2. 替换现网的的contentserver, 目录在 ehnextgen/contentserver/release/server/contentserver
+
+-- 3. 修改contentserver的配置文件：
+-- auth = 3
+
+-- 4. 在阿里云上配置cdn content-1.zuolin.com -> content-1-cdn.zuolin.com

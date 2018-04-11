@@ -2257,6 +2257,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//本订单状态置为成功,
 //			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 			order.setStatus(status);
+			if (order.getStatus() == SiteBillStatus.SUCCESS.getCode() )
+				order.setPaidMoney(order.getPayTotalMoney());
 			rentalv2Provider.updateRentalBill(order);
 			return null;
 		});
@@ -2513,7 +2515,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
 					//订单开始 置为使用中的状态
-					if (currTime >= order.getStartTime().getTime() && currTime <= order.getEndTime().getTime()) {
+					if (currTime >= order.getStartTime().getTime() ) {
 						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 						orderHandler.autoUpdateOrder(order);
 					}
@@ -2668,7 +2670,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				dto.setOfflinePayName(member.getContactName());
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());
 				if (userIdentifier!=null)
-					dto.setOfflinePayName(userIdentifier.getIdentifierToken());
+					dto.setOfflinePayPhone(userIdentifier.getIdentifierToken());
 			}
 		}
 		return dto;
@@ -7999,6 +8001,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
+		//每次获取延时支付信息 都重置一次之前未支付留下的信息
+		restoreRentalBill(bill);
+
 		List<RentalBillRuleDTO> rules = new ArrayList<>();
 
 		RentalCell lastCell = null;
@@ -8063,26 +8068,57 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_RENEW_OVERTIME,"订单已超时，无法进行延时");
 		}
 
-		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+		//RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 
-		processCells(rs, bill.getRentalType());
+		//processCells(rs, bill.getRentalType());
+		if (cmd.getAmount().compareTo(new BigDecimal(0))==1) {
+			GetRenewRentalOrderInfoCommand cmd2 = new GetRenewRentalOrderInfoCommand();
+			cmd2.setCellCount(cmd.getCellCount());
+			cmd2.setRentalBillId(cmd.getRentalBillId());
+			cmd2.setRentalType(cmd.getRentalType());
+			cmd2.setTimeStep(cmd.getTimeStep());
+			GetRenewRentalOrderInfoResponse response = getRenewRentalOrderInfo(cmd2);//校验一次金额
+			if (null != response.getAmount() && cmd.getAmount().compareTo(response.getAmount()) != 0) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid param amount");
+			}
+			BigDecimal totalAmount = bill.getPayTotalMoney().add(response.getAmount());//计算价格
+			//bill.setResourceTotalMoney(totalAmount);
+			bill.setPayTotalMoney(totalAmount);
+			bill.setRentalCount(cmd.getCellCount());
+		}else{
+			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+			processCells(rs, bill.getRentalType());
+			updateRentalOrder(rs,bill,new BigDecimal(0),cmd.getCellCount(),false);
+			//发消息
+			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
-		updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount(), true);
+			handler.renewRentalOrderSendMessage(bill);
+		}
+		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
-//		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
-//		convertRentalOrderDTO(dto, bill);
 
-		//发消息
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
-		handler.renewRentalOrderSendMessage(bill);
 
 		return bill;
 	}
 
-	private void updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
+	@Override
+	public void renewOrderSuccess(RentalOrder rentalBill, Double rentalCount) {
+		RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
+		processCells(rs, rentalBill.getRentalType());
+		updateRentalOrder(rs, rentalBill, null, rentalCount, false);
+		rentalBill.setResourceTotalMoney(rentalBill.getPayTotalMoney());
+
+		//发消息
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
+
+		handler.renewRentalOrderSendMessage(rentalBill);
+	}
+
+	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(bill.getId());
 		//TODO:此处取的是连续单元格后面的id，不适用跨场景延长时间
 		Long ruleId = resourceOrders.stream().mapToLong(RentalResourceOrder::getRentalResourceRuleId).max().getAsLong();
@@ -8122,11 +8158,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid param amount");
 		}
 
-		BigDecimal totalAmount = bill.getPayTotalMoney().add(amount);
-
-		bill.setResourceTotalMoney(totalAmount);
-		bill.setPayTotalMoney(totalAmount);
-
 		List<RentalBillRuleDTO> totalRules = getBillRules(bill);
 
 		totalRules.addAll(rules);
@@ -8163,6 +8194,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
+		if (rule.getNeedPay() == NormalFlag.NEED.getCode())
+			return amount;
+		else
+			return new BigDecimal(0);
 	}
 
 	@Override
@@ -8184,7 +8219,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
 			LOGGER.error("Order not in using");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order not in using");
+					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"结束失败，订单不在使用中");
 		}
 
 		VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
@@ -8192,11 +8227,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
 			LOGGER.error("Parking lock not raise");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"Parking lock not raise");
+					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"结束失败，请先升起车锁");
 		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+		restoreRentalBill(order);
 
 		if (now > order.getEndTime().getTime()) {
 			processCells(rs, order.getRentalType());
@@ -8235,9 +8271,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalCount = (int)rentalCount + 1;
 					}
 					rs.setResourceCounts(rs.getResourceCounts()+9999999.0);//超时订单无视车锁数量
-					updateRentalOrder(rs, order, null, rentalCount, false);
+					BigDecimal amount = updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
-					order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+					amount = rentalCommonService.calculateOverTimeFee(order,amount,now);
+					if (amount.compareTo(new BigDecimal(0)) == 1)
+						order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 				}
 //				dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
 //						.collect(Collectors.toList()));
@@ -8300,6 +8338,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		}
 //	}
 
+	//停车缴费续费但没支付的订单 恢复原样
+	private void restoreRentalBill(RentalOrder order){
+		order.setPayTotalMoney(order.getResourceTotalMoney());
+		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
+		order.setRentalCount(resourceOrders.size()+0.0);
+		rentalv2Provider.updateRentalBill(order);
+	}
 	@Override
 	public GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd) {
 

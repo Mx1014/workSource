@@ -2197,6 +2197,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return query.where(condition).fetchInto(String.class);
 	}
 
+	@Override
+	public List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
+											Long rentalSiteId,List<Long> cellIds){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<String>> query = context.selectDistinct(Tables.EH_RENTALV2_ORDERS.STRING_TAG1).from(Tables.EH_RENTALV2_ORDERS).
+				join(Tables.EH_RENTALV2_RESOURCE_ORDERS).on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
+		Condition condition = Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode()).
+				or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode())));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.in(cellIds));
+
+		return query.where(condition).fetchInto(String.class);
+
+	}
+
 
 	@Override
 	public List<RentalOrder> listOverTimeRentalOrders(Integer namespaceId, Long resourceTypeId, String resourceType,

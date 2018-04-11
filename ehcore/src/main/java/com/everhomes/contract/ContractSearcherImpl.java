@@ -1,5 +1,9 @@
 package com.everhomes.contract;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -95,6 +99,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
     @Autowired
     private OrganizationProvider organizationProvider;
 
+    @Autowired
+    private CommunityProvider communityProvider;
+
     @Override
     public String getIndexType() {
         return SearchUtils.CONTRACT;
@@ -154,6 +161,25 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 builder.field("updateTime", contract.getUpdateTime());
             } else {
                 builder.field("updateTime", contract.getCreateTime());
+            }
+
+            List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+            if(contractApartments != null && contractApartments.size() > 0) {
+                List<Long> addresses = new ArrayList<>();
+                List<Long> buildings = new ArrayList<>();
+                for (ContractBuildingMapping contractApartment : contractApartments) {
+                    addresses.add(contractApartment.getAddressId());
+                    Building building = communityProvider.findBuildingByCommunityIdAndName(contract.getCommunityId(), contractApartment.getBuildingName());
+                    if (building != null) {
+                        buildings.add(building.getId());
+                    }
+                }
+
+                builder.field("buildingId", buildings);
+                builder.field("addressId", addresses);
+            } else {
+                builder.field("buildingId", 0);
+                builder.field("addressId", 0);
             }
 
             builder.endObject();
@@ -245,6 +271,15 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getCustomerType() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
         }
+
+        if(cmd.getBuildingId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+        }
+
+        if(cmd.getAddressId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {

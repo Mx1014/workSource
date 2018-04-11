@@ -13,6 +13,7 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.common.IdentifierTypeEnum;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -83,6 +84,7 @@ import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.family.FamilyServiceErrorCode;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.flow.FlowConstants;
@@ -759,7 +761,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
         for (Long id : rlt.getIds()) {
-            dtos.add(toOrganizationDetailDTO(id, false));
+            OrganizationDetailDTO detail = toOrganizationDetailDTO(id, false);
+            if(detail != null) {
+                dtos.add(detail);    
+            }
+            
         }
         dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
         LOGGER.debug("searchEnterprise result = {}", dtos.toString());
@@ -1624,10 +1630,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-            if (null != addressDTOs && 0 != addressDTOs.size()) {
-                this.addAddresses(organization.getId(), addressDTOs, user.getId());
-                organizationSearcher.feedDoc(organization);
-            }
+            // fix 26997 不管有没有传门牌 都要处理
+            this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            organizationSearcher.feedDoc(organization);
 
             //没有有关联的客户则新增一条
             if(customer == null) {
@@ -3297,9 +3302,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void addCommunityInfoToUserRelaltedOrgsByOrgId(OrganizationSimpleDTO org) {
-        OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(org.getId());
-        if (orgComm != null) {
-            Long communityId = orgComm.getCommunityId();
+//        OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(org.getId());
+        Long communityId = this.getOrganizationActiveCommunityId(org.getId());
+        if (communityId != null) {
             Community community = this.communityProvider.findCommunityById(communityId);
             if (community != null) {
                 org.setCommunityId(communityId);
@@ -5618,12 +5623,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void rejectForEnterpriseContact(RejectContactCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
-        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
+        OrganizationMember member = checkEnterpriseContactParameterContainReject(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
         if (OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL) {
             //不抛异常会导致客户端小黑条消不掉 by sfyan 20170120
             LOGGER.debug("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
-//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
-//					"organization member status error.");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+					"organization member status error.");
         } else {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
@@ -8563,8 +8568,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     @Override
-    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
-                                                                     List<String> groupTypes, Byte naviFlag) {
+    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
         if (null == naviFlag) {
             naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
@@ -8879,6 +8883,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             for (OrganizationMember member : members) {
                 OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
                 managerDTO.setMemberId(member.getId());
+                managerDTO.setDetailId(member.getDetailId());
+                managerDTO.setContactName(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()).getContactName());
                 dtos.add(managerDTO);
             }
         }
@@ -9300,6 +9306,40 @@ public class OrganizationServiceImpl implements OrganizationService {
         return member;
     }
 
+    /**
+     * add by yuanlei
+     * 查询OrganizationMember对象的方法
+     * @param enterpriseId
+     * @param targetId
+     * @param operatorUid
+     * @param tag
+     * @return
+     */
+    private OrganizationMember checkEnterpriseContactParameterContainReject(Long enterpriseId, Long targetId, Long operatorUid, String tag){
+        //1.首先需要对参数进行非空校验
+        if (targetId == null) {
+            //说明参数为空
+            LOGGER.info("Enterprise contact target user id is null, operatorUid=" + operatorUid
+                    + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
+            //返回给前端信息
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Enterprise contact target user id can not be null");
+        }
+        //说明参数不为空,那么我们根据targetId和enterpriseId来查询数据库得到OrganizationMember对象
+        OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUidAndOrgId(targetId, enterpriseId);
+        //对OrganizationMember对象进行非空校验
+        if (organizationMember == null) {
+            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid
+                    + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND,
+                    "Unable to find the enterprise contact");
+        }
+
+        return organizationMember;
+
+    }
+
+
     private QuestionMetaObject createGroupQuestionMetaObject(Organization org, OrganizationMember requestor, OrganizationMember target) {
         QuestionMetaObject metaObject = new QuestionMetaObject();
 
@@ -9312,6 +9352,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             metaObject.setRequestorUid(requestor.getTargetId());
             metaObject.setRequestTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             metaObject.setRequestorNickName(requestor.getNickName());
+            //add by yuanlei
+            metaObject.setContactName(requestor.getContactName());
+            metaObject.setContactDescription(requestor.getContactDescription());
             String avatar = requestor.getAvatar();
             metaObject.setRequestorAvatar(avatar);
             if (avatar != null && avatar.length() > 0) {
@@ -9324,6 +9367,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
+
+            //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(
+                    requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());
+            if((userIdentifier != null) && !"".equals(userIdentifier)){
+                metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
+            }
         }
 
         if (target != null) {
@@ -9334,6 +9384,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return metaObject;
     }
+
+
 
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
@@ -11329,6 +11381,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd2.setOrganizationId(cmd.getOrganizationId());
         cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
         cmd2.setTargetId(userId);
+        cmd2.setContactDescription(cmd.getContactDescription());
+        cmd2.setContactName(cmd.getContactName());
         applyForEnterpriseContact(cmd2);
         //目前写死30分钟
         dto.setEndTime(DateHelper.currentGMTTime().getTime() + 30 * 60 * 1000L);

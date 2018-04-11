@@ -39,8 +39,10 @@ public class LaunchAdProviderImpl implements LaunchAdProvider {
     @Override
     public LaunchAd findByNamespaceId(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.selectFrom(Tables.EH_LAUNCH_ADVERTISEMENTS)
-                .where(Tables.EH_LAUNCH_ADVERTISEMENTS.NAMESPACE_ID.eq(namespaceId))
+        com.everhomes.server.schema.tables.EhLaunchAdvertisements t = Tables.EH_LAUNCH_ADVERTISEMENTS;
+        return context.selectFrom(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .orderBy(t.ID.desc())
                 // .and(Tables.EH_LAUNCH_ADVERTISEMENTS.STATUS.eq(LaunchAdStatus.ACTIVE.getCode()))
                 .fetchAnyInto(LaunchAd.class);
     }

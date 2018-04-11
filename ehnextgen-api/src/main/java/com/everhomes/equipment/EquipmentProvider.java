@@ -139,7 +139,7 @@ public interface EquipmentProvider {
 
 
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
+		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
 
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
@@ -255,4 +255,5 @@ public interface EquipmentProvider {
 
     void updateEquipmentTaskByPlanId(Long planId);
 
+    List<EquipmentInspectionTasks> listPersonalDoneTasks(Long targetId, Long inspectionCategoryId, int pageSize, Integer offset, Timestamp startTime);
 }

@@ -123,4 +123,6 @@ public interface WarehouseProvider {
     Long findRequisitionId(Long requestId);
 
     void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId);
+
+    List<WarehouseRequestMaterials> findAllWarehouseRequestMaterials(Long requestId);
 }

@@ -645,13 +645,16 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup){
-		return listItemServiceCategries(namespaceId, itemLocation, itemGroup, new ListingQueryBuilderCallback() {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);
-				return null;
-			}
-		});
+//		return listItemServiceCategries(namespaceId, itemLocation, itemGroup, new ListingQueryBuilderCallback() {
+//			@Override
+//			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+//				query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);
+//				return null;
+//			}
+//		});
+
+		//真不知道上面addGroupBy有什么用，现在看唯一的作用是导致了缺数据。干掉吧，不要group by了。
+		return listItemServiceCategries(namespaceId, itemLocation, itemGroup, null);
 	}
 
 	@Override

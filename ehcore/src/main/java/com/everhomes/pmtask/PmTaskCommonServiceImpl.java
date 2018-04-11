@@ -233,14 +233,14 @@ class PmTaskCommonServiceImpl {
 
         //设置门牌地址,楼栋地址,服务地点
 
-        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
-        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
-            task.setAddress(cmd.getAddress());
-            task.setAddressType(cmd.getAddressType());
-        }
-        else {
+//        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
+//        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
+//            task.setAddress(cmd.getAddress());
+//            task.setAddressType(cmd.getAddressType());
+//        }
+//        else {
             setPmTaskAddressInfo(cmd, task);
-        }
+//        }
         pmTaskProvider.createTask(task);
         //附件
         addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
