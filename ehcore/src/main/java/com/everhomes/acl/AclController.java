@@ -194,6 +194,7 @@ public class AclController extends ControllerBase {
      * <b>URL: /acl/listOrganizationSuperAdministrators</b>
      * <p>超级管理员列表</p>
      */
+    @Deprecated
     @RequestMapping("listOrganizationSuperAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSuperAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
@@ -685,6 +686,37 @@ public class AclController extends ControllerBase {
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministratorTargetIds(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listOrganizationTopAdministrator</b>
+     * <p>超级管理员列表（标准版）</p>
+     */
+    @RequestMapping("listOrganizationTopAdministrator")
+    @RestReturn(value=OrganizationContactDTO.class)
+    public RestResponse listOrganizationTopAdministrator(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd).get(0));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listOrganizationSystemAdministrators</b>
+     * <p>系统管理员列表（标准版）</p>
+     */
+    @Deprecated
+    @RequestMapping("listOrganizationSystemAdministrators")
+    @RestReturn(value=OrganizationContactDTO.class, collection = true)
+    public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
