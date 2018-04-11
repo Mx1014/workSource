@@ -2679,13 +2679,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
 				Byte flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				switch (state){
-					case UNPROCESSED: flowCaseStatus = FlowCaseStatus.INITIAL.getCode();break;
-					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());break;
-					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break;
-                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break; //已关闭
-                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());break;
+					case UNPROCESSED: break;
+					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
+					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
+                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
+				task.setStatus(flowCaseStatus);
 				pmTaskProvider.updateTask(task);
 				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
 					cancelTask(task.getId());
