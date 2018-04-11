@@ -56,7 +56,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(XiaomaoKeXingParkingVendorHandler.class);
 	
-	private static final Integer OUT_DATE_TIME = 3 * 60 * 1000; //用户月卡过期时在
+	private static final Integer OUT_DATE_TIME = 3 * 60 * 1000; //允许用户在过期后三分钟内续费
 	
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -437,7 +437,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
         TreeMap<String, String> param = new TreeMap<String,String>();
         param.put("standardId",request.getCardTypeId());
-        param.put("beginTime",validStart);//月卡开始时间，按照你大爷的，现在时间来
+        param.put("beginTime",validStart);//月卡开始时间，按照现在时间来
         param.put("stopTime",validEnd);//结束时间
         param.put("licenseNumber", order.getPlateNumber());
         param.put("money", order.getPrice().setScale(2).toString());
