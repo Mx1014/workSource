@@ -1,13 +1,16 @@
-package com.everhomes.asset.szwwyjf;
+package com.everhomes.assetPayment;
 
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 
 public class SZWQueryTest {
+	
+	private SZWQuery szyQuery = new SZWQuery();
 
 	@Test
 	public void testSZWQuery() {
@@ -33,7 +36,6 @@ public class SZWQueryTest {
 		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
 		jsonObject.put("state", "2");
 		//通过WebServices接口查询数据
-		SZWQuery szyQuery = new SZWQuery();
 		//测试参数
 		jsonObject.put("cusName", "深圳市石榴裙餐饮有限公司");
 		jsonObject.put("type", "0");

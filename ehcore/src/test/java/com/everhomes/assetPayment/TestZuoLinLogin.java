@@ -1,4 +1,4 @@
-package com.everhomes.asset.szwwyjf;
+package com.everhomes.assetPayment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
