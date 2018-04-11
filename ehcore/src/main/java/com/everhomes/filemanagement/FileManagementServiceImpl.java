@@ -112,8 +112,13 @@ public class FileManagementServiceImpl implements  FileManagementService{
         checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName(), cmd.getCatalogId());
         //  2.update the name
         catalog.setName(cmd.getCatalogName());
-        fileManagementProvider.updateFileCatalog(catalog);
-        //  3.return back the dto
+        dbProvider.execute((TransactionStatus status) -> {
+            fileManagementProvider.updateFileCatalog(catalog);
+            //  3.create the scope
+            updateFileCatalogScopes(namespaceId, catalog.getId(), cmd.getScopes());
+            return null;
+        });
+        //  4.return back the dto
         dto.setId(catalog.getId());
         dto.setName(cmd.getCatalogName());
         dto.setCreateTime(catalog.getCreateTime());
