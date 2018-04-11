@@ -14,6 +14,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -860,40 +861,53 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         }
 
-        if(allProjectFlag){
-            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
-            for (CommunityDTO community: communitydtos) {
-                ProjectDTO dto = new ProjectDTO();
-                dto.setProjectId(community.getId());
-                dto.setProjectName(community.getName());
-                dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
-                dto.setCommunityType(community.getCommunityType());
-                dtos.add(dto);
-            }
-        }
-
-        //去重
-        List<Long> ids = new ArrayList<>();
-        List<ProjectDTO> projectDtos = new ArrayList<>();
-        dtos.stream().map(r->{
-            if (!ids.contains(r.getProjectId())){
-                ids.add(r.getProjectId());
-                projectDtos.add(r);
-            }
-            return null;
-        }).collect(Collectors.toList());
-
-        //modify start
-        //获取公司管理的项目
+        //获取公司管理的全部项目
         List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
 
         // 获取到了授权项目
         if(serviceModuleAppAuthorizations != null && serviceModuleAppAuthorizations.size() >0){
-            List<Long> org_communityIds = serviceModuleAppAuthorizations.stream().map(r->r.getProjectId()).collect(Collectors.toList());
-            return projectDtos.stream().filter(r->org_communityIds.contains(r.getProjectId())).collect(Collectors.toList());
+            List<ProjectDTO> projectDtos = new ArrayList<>();
+            for (ServiceModuleAppAuthorization authorization : serviceModuleAppAuthorizations) {
+                Community community = communityProvider.findCommunityById(authorization.getProjectId());
+                if (null == community) {
+                    continue;
+                }
+
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.info("community:" + community);
+
+                if (community.getNamespaceId().equals(UserContext.getCurrentNamespaceId())) {
+                    ProjectDTO dto = new ProjectDTO();
+                    dto.setProjectId(community.getId());
+                    dto.setProjectName(community.getName());
+                    dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                    dto.setCommunityType(community.getCommunityType());
+                    projectDtos.add(dto);
+                }
+            }
+
+            List<Long> orgAllCommunityIds = projectDtos.stream().map(r->r.getProjectId()).collect(Collectors.toList());
+
+
+            if(allProjectFlag){
+                return projectDtos;
+            }
+
+            //其他权限 去重
+            List<Long> ids = new ArrayList<>();
+            List<ProjectDTO> processDtos = new ArrayList<>();
+            dtos.stream().map(r->{
+                if (!ids.contains(r.getProjectId())){
+                    ids.add(r.getProjectId());
+                    processDtos.add(r);
+                }
+                return null;
+            }).collect(Collectors.toList());
+
+            return processDtos.stream().filter(r->orgAllCommunityIds.contains(r.getProjectId())).collect(Collectors.toList());
         }
 
-        return new ArrayList<ProjectDTO>();
+        return new ArrayList<>();
     }
 
 
