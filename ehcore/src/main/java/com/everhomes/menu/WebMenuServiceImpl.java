@@ -139,16 +139,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<Long> appOriginIds = null;
 
-		// 公司拥有所有权的园区集合
-		List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
-		List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
-
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
 			//全部appOriginIds
 			List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
 			appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
 		}else {
+
+			// 公司拥有所有权的园区集合
+			List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+			// 公司分配过园区的应用
+			List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
+
 
 			List<Long> appIds = new ArrayList<>();
 
@@ -158,7 +160,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
 			}
 
-//			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
 
 			// 园区控制的应用和非园区控制的应用分开查询
 			List<String> types = new ArrayList<>();
@@ -166,7 +167,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 			types.add(ModuleManagementType.UNLIMIT_CONTROL.getCode());
 			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypes(targets, types);
 
+
 			types.clear();
+			//todo: 这里感觉有问题，有想不出来，秋敢哥解答
 			types.add(ModuleManagementType.COMMUNITY_CONTROL.getCode());
 			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, auth_communityIds));
 
