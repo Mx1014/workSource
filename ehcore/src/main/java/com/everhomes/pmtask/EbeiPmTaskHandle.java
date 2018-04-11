@@ -789,10 +789,6 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
-                if (null!=dto.getFlowCaseId()) {
-                    FlowCase flowCase = flowService.getFlowCaseById(dto.getFlowCaseId());
-                    dto.setStatus(flowCase.getStatus());
-                }
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){
