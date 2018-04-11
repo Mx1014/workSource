@@ -7999,6 +7999,8 @@ public class PunchServiceImpl implements PunchService {
             cmd.setQueryTime(punchTime.getTime());
             if (null != pr) {
                 pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
+                //2018年4月11日 修改: 之前punCalendar就没用了,所以没有赋值为计算出来的打卡日,但是现在使用了punCalendar作为后面计算所以要赋值
+                punCalendar.setTime(punchTime);
                 PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
                 if (null != punchLog) {
                     if (null != punchLog.getExpiryTime()) {
@@ -8026,8 +8028,13 @@ public class PunchServiceImpl implements PunchService {
         }
 		if (null != ptr && pdl == null) {
 //			LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
-			pdl = new PunchDayLog();
-			refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
+			//2018年4月11日 修改:  
+			//之前直接添加一条,理论上应该是没问题的,但是现网出错了,看来这里需要先确定有没有旧数据
+			//所以现在还是采用new 一个新的pdl进行计算,然后给旧的赋值
+			PunchDayLog newPdl = new PunchDayLog();
+			refreshPunchDayLog(userId, cmd.getEnterpriseId(), pdl, punCalendar, ptr, newPdl);
+			pdl=newPdl;
+			//refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
 			LOGGER.debug("pdl is {}",StringHelper.toJsonString(pdl));
 		}
 		String[] statusList =null;
