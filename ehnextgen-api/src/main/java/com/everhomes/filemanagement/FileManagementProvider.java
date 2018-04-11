@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface FileManagementProvider {
 
-    void createFileCatalog(FileCatalog catalog);
+    Long createFileCatalog(FileCatalog catalog);
 
     void updateFileCatalog(FileCatalog catalog);
 
@@ -27,7 +27,7 @@ public interface FileManagementProvider {
 
     void deleteFileCatalogScopeByCatalogId(Integer namespaceId, Long catalogId);
 
-    void deleteFileCatalogScopeNotInSourceIds(Integer namespaceId, Long catalogId, List<Long> sourceIds);
+    void deleteOddFileCatalogScope(Integer namespaceId, Long catalogId, String sourceType, List<Long> sourceIds);
 
     void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
 
@@ -35,7 +35,7 @@ public interface FileManagementProvider {
 
     void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
 
-    FileCatalogScope findFileCatalogScopeBySourceId(Long catalogId, Long sourceId);
+    FileCatalogScope findFileCatalogScope(Long catalogId, Long sourceId, String sourceType);
 
     List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
 

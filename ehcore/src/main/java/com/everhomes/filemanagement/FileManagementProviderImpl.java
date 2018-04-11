@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.filemanagement.FileManagementStatus;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFileManagementCatalogScopesDao;
@@ -41,7 +42,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createFileCatalog(FileCatalog catalog) {
+    public Long createFileCatalog(FileCatalog catalog) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFileManagementCatalogs.class));
         catalog.setId(id);
         catalog.setCreatorUid(UserContext.currentUserId());
@@ -54,6 +55,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         dao.insert(catalog);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhFileManagementCatalogs.class, null);
+        return id;
     }
 
     @Override
@@ -209,12 +211,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public void deleteFileCatalogScopeNotInSourceIds(Integer namespaceId, Long catalogId, List<Long> sourceIds){
+    public void deleteOddFileCatalogScope(Integer namespaceId, Long catalogId, String sourceType, List<Long> sourceIds){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhFileManagementCatalogScopesRecord> query = context.deleteQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.notIn(sourceIds));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_TYPE.eq(sourceType));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFileManagementCatalogScopes.class, null);
     }
@@ -252,12 +255,14 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public FileCatalogScope findFileCatalogScopeBySourceId(Long catalogId, Long sourceId){
+    public FileCatalogScope findFileCatalogScope(Long catalogId, Long sourceId, String sourceType){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhFileManagementCatalogScopesRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_TYPE.eq(sourceType));
+
         return query.fetchAnyInto(FileCatalogScope.class);
     }
 

@@ -61,8 +61,22 @@ public class FileManagementController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /fileManagement/getFileCatalog</b>
+     * <p>1-4.查看文件目录</p>
+     */
+    @RequestMapping("getFileCatalog")
+    @RestReturn(value = FileCatalogDTO.class)
+    public RestResponse getFileCatalog(FileCatalogIdCommand cmd) {
+        FileCatalogDTO res = fileManagementService.getFileCatalog(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /fileManagement/listFileCatalogs</b>
-     * <p>1-4.文件目录列表</p>
+     * <p>2-1.文件目录列表</p>
      */
     @RequestMapping("listFileCatalogs")
     @RestReturn(value = ListFileCatalogResponse.class)
@@ -77,7 +91,7 @@ public class FileManagementController extends ControllerBase {
 
     /**
      * <b>URL: /fileManagement/listAvailableFileCatalogs</b>
-     * <p>1-5.有效文件目录列表</p>
+     * <p>2-2.有效文件目录列表</p>
      */
     @RequestMapping("listAvailableFileCatalogs")
     @RestReturn(value = ListFileCatalogResponse.class)
@@ -92,7 +106,7 @@ public class FileManagementController extends ControllerBase {
 
     /**
      * <b>URL: /fileManagement/searchFiles</b>
-     * <p>1-6.目录全局搜索</p>
+     * <p>2-3.目录全局搜索</p>
      */
     @RequestMapping("searchFiles")
     @RestReturn(value = SearchFileResponse.class)

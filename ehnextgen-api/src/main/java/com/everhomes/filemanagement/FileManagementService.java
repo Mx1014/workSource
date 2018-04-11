@@ -12,19 +12,19 @@ public interface FileManagementService {
 
     FileCatalogDTO updateFileCatalog(UpdateFileCatalogCommand cmd);
 
+    FileCatalogDTO getFileCatalog(FileCatalogIdCommand cmd);
+
     ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd);
 
     ListFileCatalogResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd);
 
     SearchFileResponse searchFiles(SearchFileCommand cmd);
 
-    List<FileCatalogScopeDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd);
+//    void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd);
 
-    void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd);
+//    void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
 
-    void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
-
-    void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
+//    void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
 
     ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd);
 
