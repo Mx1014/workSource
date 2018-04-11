@@ -7041,6 +7041,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         return res;
     }
 
+    /**
+     * 查出此公司所管理的项目
+     */
     @Override
     public List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId) {
 
@@ -7059,6 +7062,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 
         for (Organization org : orgs) {
+            //查出此公司的所有部门所管理的项目总和
             List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
             for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
                 Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());

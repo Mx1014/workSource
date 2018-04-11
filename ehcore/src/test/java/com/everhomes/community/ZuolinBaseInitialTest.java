@@ -19,16 +19,22 @@ import com.everhomes.acl.ServiceModuleAppAuthorization;
 import com.everhomes.acl.ServiceModuleAppAuthorizationProvider;
 import com.everhomes.acl.ServiceModuleAppAuthorizationService;
 import com.everhomes.enterprise.EnterpriseService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
@@ -68,6 +74,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     
     @Autowired
     OrganizationService organizationService;
+    
+    @Autowired
+    ServiceModuleService serviceModuleService;
     
     Integer namespaceId = 2;
     int pageSize = 100;
@@ -264,11 +273,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         });
         Assert.assertTrue(communities.size() == 3);
         List<Long> projectIds = new ArrayList<Long>();
+        communities.remove(0);
         for(Community c : communities) {
             projectIds.add(c.getId());
-            if(projectIds.size() == 2) {
-                break;
-            }
         }
         
         for(Long appId : communityOriginAppIds) {
@@ -297,5 +304,45 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         }
         List<Long> normalAuthCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), normalOrgId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
         Assert.assertTrue(normalAuthCommunityIds.size() == 1);
+        
+        ListUserRelatedProjectByModuleCommand relatedCommunitiesCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedCommunitiesCmd.setAppId(normalDisAppId);
+        ServiceModuleApp normalAppInfo = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(normalDisAppId);
+        relatedCommunitiesCmd.setModuleId(normalAppInfo.getModuleId());
+        relatedCommunitiesCmd.setOrganizationId(organizationId);
+        relatedCommunitiesCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedCommunitiesCmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+        relatedCommunitiesCmd.setOwnerId(organizationId);
+        List<CommunityDTO> communityDTOs = serviceModuleService.listUserRelatedCommunityByModuleId(relatedCommunitiesCmd);
+        Assert.assertTrue(communityDTOs.size() == 1);
+        
+        relatedCommunitiesCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedCommunitiesCmd.setAppId(normalDisAppId);
+        normalAppInfo = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(normalDisAppId);
+        relatedCommunitiesCmd.setModuleId(normalAppInfo.getModuleId());
+        relatedCommunitiesCmd.setOrganizationId(normalOrgId);
+        relatedCommunitiesCmd.setOwnerId(normalOrgId);
+        communityDTOs = serviceModuleService.listUserRelatedCommunityByModuleId(relatedCommunitiesCmd);
+        Assert.assertTrue(communityDTOs.size() == 1);   
+    }
+    
+    @Test
+    public void testServiceModuleQuery() {
+        Long normalOrgId = 1041162l;
+        Long normalDisAppId = 115083l;//资产管理
+        
+        ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(organizationId);
+        List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 1);
+        
+        relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(normalOrgId);
+        projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 1);      
     }
 }
