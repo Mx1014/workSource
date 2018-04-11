@@ -200,7 +200,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhFileManagementCatalogScopes.class, null);
     }
 
-    @Override
+/*    @Override
     public void deleteFileCatalogScopeByCatalogId(Integer namespaceId, Long catalogId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhFileManagementCatalogScopesRecord> query = context.deleteQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
@@ -208,7 +208,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFileManagementCatalogScopes.class, null);
-    }
+    }*/
 
     @Override
     public void deleteOddFileCatalogScope(Integer namespaceId, Long catalogId, String sourceType, List<Long> sourceIds){
@@ -220,27 +220,6 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_TYPE.eq(sourceType));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFileManagementCatalogScopes.class, null);
-    }
-
-    @Override
-    public void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        DeleteQuery<EhFileManagementCatalogScopesRecord> query = context.deleteQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.in(sourceIds));
-        query.execute();
-    }
-
-    @Override
-    public void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        UpdateQuery<EhFileManagementCatalogScopesRecord> query = context.updateQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.in(sourceIds));
-        query.addValue(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.DOWNLOAD_PERMISSION, permission);
-        query.execute();
     }
 
     @Override
@@ -267,7 +246,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords) {
+    public List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, String keywords) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<FileCatalogScope> results = new ArrayList<>();
 
@@ -276,9 +255,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         if (keywords != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_DESCRIPTION.like("%" + keywords + "%"));
-/*        if (pageAnchor != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));*/
-        query.addLimit(pageSize + 1);
+//        query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.desc());
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, FileCatalogScope.class));

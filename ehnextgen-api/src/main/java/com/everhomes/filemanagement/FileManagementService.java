@@ -26,7 +26,7 @@ public interface FileManagementService {
 
 //    void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
 
-    ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd);
+//    ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd);
 
     FileContentDTO addFileContent(AddFileContentCommand cmd);
 

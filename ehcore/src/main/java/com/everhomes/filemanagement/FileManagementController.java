@@ -173,12 +173,12 @@ public class FileManagementController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
-    /**
+    *//**
      * <b>URL: /fileManagement/listFileCatalogScopes</b>
      * <p>2.查看目录可见人员</p>
-     */
+     *//*
     @RequestMapping("listFileCatalogScopes")
     @RestReturn(value = ListFileCatalogScopeResponse.class)
     public RestResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd) {
@@ -187,7 +187,7 @@ public class FileManagementController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /fileManagement/addFileContent</b>

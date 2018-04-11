@@ -25,19 +25,19 @@ public interface FileManagementProvider {
 
     void createFileCatalogScope(FileCatalogScope scope);
 
-    void deleteFileCatalogScopeByCatalogId(Integer namespaceId, Long catalogId);
+//    void deleteFileCatalogScopeByCatalogId(Integer namespaceId, Long catalogId);
 
     void deleteOddFileCatalogScope(Integer namespaceId, Long catalogId, String sourceType, List<Long> sourceIds);
 
-    void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
+//    void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
 
     void updateFileCatalogScope(FileCatalogScope scope);
 
-    void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
+//    void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
 
     FileCatalogScope findFileCatalogScope(Long catalogId, Long sourceId, String sourceType);
 
-    List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
+    List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, String keywords);
 
     void createFileContent(FileContent content);
 

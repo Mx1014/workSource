@@ -170,6 +170,15 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileCatalogDTO getFileCatalog(FileCatalogIdCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
+        if(catalog == null)
+            return null;
+        FileCatalogDTO dto = new FileCatalogDTO();
+        dto.setId(catalog.getId());
+        dto.setName(catalog.getName());
+        dto.setCreateTime(catalog.getCreateTime());
+        dto.setScopes(listFileCatalogScopes(namespaceId, dto.getId()));
         return null;
     }
 /*
@@ -241,6 +250,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if(cmd.getCatalogId() != null)
             fileManagementProvider.updateFileCatalogScopeDownload(cmd.getCatalogId(), cmd.getSourceIds(),FileDownloadPermissionStatus.REFUSE.getCode());
     }*/
+
+    private List<FileCatalogScopeDTO> listFileCatalogScopes(Integer namespaceId, Long catalogId) {
+        List<FileCatalogScopeDTO> scopes = new ArrayList<>();
+        String keywords = null;
+
+        List<FileCatalogScope> results = fileManagementProvider.listFileCatalogScopes(namespaceId, catalogId, keywords);
+        if (results != null && results.size() > 0) {
+            results.forEach(r -> scopes.add(ConvertHelper.convert(r, FileCatalogScopeDTO.class)));
+        }
+        return scopes;
+    }
 
     @Override
     public ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd) {
@@ -375,28 +395,6 @@ public class FileManagementServiceImpl implements  FileManagementService{
         response.setCatalogs(catalogs);
         response.setFolders(folders);
         response.setFiles(files);
-        return response;
-    }
-
-    @Override
-    public ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd) {
-        ListFileCatalogScopeResponse response = new ListFileCatalogScopeResponse();
-        List<FileCatalogScopeDTO> scopes = new ArrayList<>();
-        Long nextPageAnchor = null;
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //  set the max pageSize
-        cmd.setPageSize(Integer.MAX_VALUE-1);
-
-        List<FileCatalogScope> results = fileManagementProvider.listFileCatalogScopes(namespaceId, cmd.getCatalogId(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getKeywords());
-        if (results != null && results.size() > 0) {
-            if (results.size() > cmd.getPageSize()) {
-                results.remove(results.size() - 1);
-                nextPageAnchor = results.get(results.size() - 1).getId();
-            }
-            results.forEach(r -> scopes.add(ConvertHelper.convert(r, FileCatalogScopeDTO.class)));
-        }
-        response.setScopes(scopes);
-        response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
 
