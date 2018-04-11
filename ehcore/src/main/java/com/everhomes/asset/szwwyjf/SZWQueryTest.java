@@ -1,132 +1,44 @@
 package com.everhomes.asset.szwwyjf;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 
 public class SZWQueryTest {
-	
-	private static SZWQuery szyQuery = new SZWQuery();
 
 	@Test
-	public void testSync_TenancyContractData() {
-		
-		//szyQuery.sync_TenancyContractData(request);
-	}
-
-	@Test
-	public void testSync_TenancyContractDetailed() {
+	public void testSZWQuery() {
 		fail("Not yet implemented");
 	}
-	
-	public static void main(String[] args) {
-		String result = "[" + 
-				"    {" + 
-				"        \"number\": \"6293\"," + 
-				"        \"tenancyName\": \"XXXX\"," + 
-				"        \"tenCustomerDes\": \" 6293\"," + 
-				"        \"tenancyType\": \" 0\"," + 
-				"        \"receData\": [" + 
-				"            {" + 
-				"                \"SrartDate\": \"2018-01-01\"," + 
-				"                \"endDate\": \"2018-01-31\"," + 
-				"                \"fappamount\": \"100\"," + 
-				"                \"factMount\": \"100\"," + 
-				"                \"fmoneyDefine\": \"电费\"" + 
-				"            }," + 
-				"            {" + 
-				"                \"SrartDate\": \"2018-02-01\"," + 
-				"                \"endDate\": \"2018-02-28\"," + 
-				"                \"fappamount\": \"100\"," + 
-				"                \"factMount\": \"100\"," + 
-				"                \"fmoneyDefine\": \"水费\"," + 
-				"                \"fid\": \"weqwwrwerqw\"," + 
-				"                \"roomNo\": \"123,466\"" + 
-				"            }" + 
-				"        ]" + 
-				"    }," + 
-				"    {" + 
-				"        \"number\": \"789\"," + 
-				"        \"tenancyName\": \"XXXX\"," + 
-				"        \"tenCustomerDes\": \" 6293\"," + 
-				"        \"tenancyType\": \" 0\"," + 
-				"        \"receData\": [" + 
-				"            {" + 
-				"                \"SrartDate\": \"2018-01-01\"," + 
-				"                \"endDate\": \"2018-01-31\"," + 
-				"                \"fappamount\": \"100\"," + 
-				"                \"factMount\": \"100\"," + 
-				"                \"fmoneyDefine\": \"电费\"" + 
-				"            }," + 
-				"            {" + 
-				"                \"SrartDate\": \"2018-02-01\"," + 
-				"                \"endDate\": \"2018-02-28\"," + 
-				"                \"fappamount\": \"100\"," + 
-				"                \"factMount\": \"100\"," + 
-				"                \"fmoneyDefine\": \"水费\"," + 
-				"                \"fid\": \"weqwwrwerqw\"," + 
-				"                \"roomNo\": \"123,466\"" + 
-				"            }" + 
-				"        ]" + 
-				"    }" + 
-				"]";
-		
-		/*JSONArray jsonArray = JSON.parseArray(result);
-		for(int i = 0;i < jsonArray.size();i++) {
-			JSONObject jsonObject = jsonArray.getJSONObject(i);
-			System.out.println(jsonObject.get("number"));
-			System.out.println(jsonObject.get("tenancyName"));
-			System.out.println(jsonObject.get("receData"));
-			JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
-			for(int j = 0;j < receDataJsonArray.size();j++) {
-				JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
-				System.out.println(receDataJSONObject.get("SrartDate"));
-				System.out.println(receDataJSONObject.get("endDate"));
-				System.out.println(receDataJSONObject.get("fappamount"));
-				System.out.println(receDataJSONObject.get("factMount"));
-				System.out.println(receDataJSONObject.get("fmoneyDefine"));
-				System.out.println(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
-			}
-		}*/
-		
-		result = "{" + 
-				"    \"Reason\": \"返回数据失败\"," + 
-				"    \"Number\": \"\"," + 
-				"    \"Result\": \"0\"" + 
-				"}";
-		/*try {
-			jsonArray = JSON.parseArray(result);
-			for(int i = 0;i < jsonArray.size();i++) {
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				System.out.println(jsonObject.get("number"));
-				System.out.println(jsonObject.get("tenancyName"));
-				System.out.println(jsonObject.get("receData"));
-				JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
-				for(int j = 0;j < receDataJsonArray.size();j++) {
-					JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
-					System.out.println(receDataJSONObject.get("SrartDate"));
-					System.out.println(receDataJSONObject.get("endDate"));
-					System.out.println(receDataJSONObject.get("fappamount"));
-					System.out.println(receDataJSONObject.get("factMount"));
-					System.out.println(receDataJSONObject.get("fmoneyDefine"));
-					System.out.println(receDataJSONObject.get("fid"));
-				}
-			}
-		} catch (JSONException e) {
-			// TODO: handle exception
-			JSONObject jsonObject = JSON.parseObject(result);
-			System.out.println(jsonObject.get("Reason"));
-		}*/
-		
-		String fid = "jYoAAA";
-		Long billGroupId = Long.valueOf(fid);
-		
-		
+
+	@Test
+	public void testShowBillForClientV2() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testListAllBillsForClient() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testGetBillDetailForClient() {
+		JSONObject jsonObject = new JSONObject();
+		//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
+		jsonObject.put("startDate", "1900-01-01");
+		jsonObject.put("endDate", "2900-01-01");
+		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
+		jsonObject.put("state", "2");
+		//通过WebServices接口查询数据
+		SZWQuery szyQuery = new SZWQuery();
+		//测试参数
+		jsonObject.put("cusName", "深圳市石榴裙餐饮有限公司");
+		jsonObject.put("type", "0");
+		jsonObject.put("fid", "QgwAAAAIZD4x0Rp+");
+		ShowBillDetailForClientResponse response = szyQuery.getBillDetailForClient(jsonObject.toString());
 	}
 
 }

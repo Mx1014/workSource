@@ -68,7 +68,7 @@ public class SZWQuery {
 					for(int i = 0;i < jsonArray.size();i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
 						ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
-						showBillForClientV2DTO.setBillGroupName(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null + "的全部账单");
+						showBillForClientV2DTO.setBillGroupName((jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null) + "的全部账单");
 						//showBillForClientV2DTO.setBillGroupId(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
 						showBillForClientV2DTO.setContractId(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
 						showBillForClientV2DTO.setContractNum(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
@@ -80,6 +80,8 @@ public class SZWQuery {
 							JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
 							BillForClientV2 bill = new BillForClientV2();
 							String billDuration = receDataJSONObject.get("startDate") + "至" + receDataJSONObject.get("endDate");  		
+							//格式化账期
+							billDuration = billDuration.replace(" 00:00:00", "");
 							bill.setBillDuration(billDuration);
 							bill.setAmountReceivable(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
 							//应付金额
@@ -90,12 +92,17 @@ public class SZWQuery {
 							double amountOwed = fappamount - factMount;
 							bill.setAmountOwed(String.valueOf(amountOwed));
 							bill.setBillId(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
+							bills.add(bill);
 							
 							overAllAmountOwed += amountOwed;//待缴金额总计
-							addressStr += "," + receDataJSONObject.get("roomNo");//包含的地址
+							//去除重复地址
+							if(!addressStr.contains(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : "")){
+								addressStr += receDataJSONObject.get("roomNo") + "," ;//包含的地址
+							}
 						}
 						showBillForClientV2DTO.setBills(bills);
 						showBillForClientV2DTO.setOverAllAmountOwed(String.valueOf(overAllAmountOwed));
+						addressStr = addressStr.substring(0, addressStr.length() - 1);
 						showBillForClientV2DTO.setAddressStr(addressStr);
 						response.add(showBillForClientV2DTO);
 					}
@@ -131,10 +138,10 @@ public class SZWQuery {
 							JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(j);
 							ListAllBillsForClientDTO listAllBillsForClientDTO = new ListAllBillsForClientDTO();
 							listAllBillsForClientDTO.setBillGroupName(receDataJSONObject.get("fmoneyDefine") != null ? receDataJSONObject.get("fmoneyDefine").toString() : null);
-							listAllBillsForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
-							listAllBillsForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
+							listAllBillsForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString().replace(" 00:00:00", ""): null);
+							listAllBillsForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString().replace(" 00:00:00", "") : null);
 							String dateStr = receDataJSONObject.get("startDate") + "~" + receDataJSONObject.get("endDate");
-							listAllBillsForClientDTO.setDateStr(dateStr);
+							listAllBillsForClientDTO.setDateStr(dateStr.replace(" 00:00:00", ""));
 							listAllBillsForClientDTO.setAmountReceivable(receDataJSONObject.get("fappamount") != null ? receDataJSONObject.get("fappamount").toString() : null);
 							//应付金额
 							double fappamount = receDataJSONObject.get("fappamount") != null ? Double.parseDouble(receDataJSONObject.get("fappamount").toString()): 0;
@@ -176,14 +183,16 @@ public class SZWQuery {
 					JSONArray receDataJsonArray = (JSONArray) jsonObject.get("receData");
 					JSONObject receDataJSONObject = receDataJsonArray.getJSONObject(0);
 					//应付金额
-					BigDecimal fappamount = (BigDecimal) receDataJSONObject.get("fappamount");
+					BigDecimal fappamount = new BigDecimal(receDataJSONObject.get("fappamount").toString());
 					response.setAmountReceivable(fappamount);
 					//实付金额
-					BigDecimal factMount = (BigDecimal) receDataJSONObject.get("fappamount");
+					BigDecimal factMount = new BigDecimal(receDataJSONObject.get("factMount").toString());
 					//待缴金额
 					BigDecimal amountOwed = fappamount.subtract(factMount);
 					response.setAmountOwed(amountOwed);
 					String dateStr = receDataJSONObject.get("startDate") + "~" + receDataJSONObject.get("endDate");
+					//格式化日期
+					dateStr = dateStr.replace(" 00:00:00", "");
 					response.setDatestr(dateStr);
 					List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList = new ArrayList<ShowBillDetailForClientDTO>();
 					ShowBillDetailForClientDTO showBillDetailForClientDTO = new ShowBillDetailForClientDTO();
@@ -191,8 +200,8 @@ public class SZWQuery {
 					showBillDetailForClientDTO.setAmountOwed(amountOwed);
 					showBillDetailForClientDTO.setAddressName(receDataJSONObject.get("roomNo") != null ? receDataJSONObject.get("roomNo").toString() : null);
 					showBillDetailForClientDTO.setAmountReceivable(fappamount);
-					showBillDetailForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString() : null);
-					showBillDetailForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString() : null);
+					showBillDetailForClientDTO.setDateStrBegin(receDataJSONObject.get("startDate") != null ? receDataJSONObject.get("startDate").toString().replace(" 00:00:00", "") : null);
+					showBillDetailForClientDTO.setDateStrEnd(receDataJSONObject.get("endDate") != null ? receDataJSONObject.get("endDate").toString().replace(" 00:00:00", "") : null);
 					showBillDetailForClientDTO.setDateStr(dateStr);
 					showBillDetailForClientDTOList.add(showBillDetailForClientDTO);
 					response.setShowBillDetailForClientDTOList(showBillDetailForClientDTOList);
