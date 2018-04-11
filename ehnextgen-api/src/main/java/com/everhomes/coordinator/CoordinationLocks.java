@@ -82,6 +82,9 @@ public enum CoordinationLocks {
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
 
     PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
+    
+    OFFICE_CUBICLE_CITY_LOCK("office.cubicle.city.lock"),
+	
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),

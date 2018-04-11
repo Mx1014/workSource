@@ -54,6 +54,8 @@ import org.springframework.util.StringUtils;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -78,6 +80,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 /**
  * 工位预定service实现
@@ -118,6 +121,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Autowired
 	private RegionProvider regionProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -878,9 +884,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void deleteCity(DeleteCityCommand cmd) {
-		if(cmd.getCityId()==null)
-			return ;
-		officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+		Tuple<Boolean, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_CITY_LOCK.getCode()).enter(()->{
+			List<OfficeCubicleCity> list = officeCubicleCityProvider.listOfficeCubicleCity(UserContext.getCurrentNamespaceId());
+			if(list!=null && list.size()<2){
+				return false;
+			}
+			if(cmd.getCityId()!=null){
+				officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+			}
+			return true;
+		});
+		if(!result.first()){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_DELETE_CITYS,
+					"最后一个城市不能删除");
+		}
 	}
 
 	@Override
