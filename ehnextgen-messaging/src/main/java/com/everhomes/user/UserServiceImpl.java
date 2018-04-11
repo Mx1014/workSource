@@ -393,8 +393,8 @@ public class UserServiceImpl implements UserService {
 		ANBANG_OAUTH_URL =  configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/auth/oauth/token";
 		ANBANG_CLIENTID = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientid", "zuolin");
 		ANBANG_CLIENTSECRET = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientsecret", "enVvbGluMjAxODAxMDI=");
-		ANBANG_USERS_URL = ANBANG_OAUTH_URL + "/api/permission/user/synchronization";
-		ANBANG_CURRENT_USER_URL = ANBANG_OAUTH_URL + "/api/auth/current-user";
+		ANBANG_USERS_URL = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/permission/user/synchronization";
+		ANBANG_CURRENT_USER_URL = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/auth/current-user";
 	}
 
 	@Override
