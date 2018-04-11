@@ -265,7 +265,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         Map<Long, BigDecimal> realAmountMap = new HashMap<>();
 
         for (EnergyMeterAddress address : addresses) {
-            //从合同取出门牌对应的分摊比例
+            //从合同取出门牌对应的分摊比例  eh_contract_item_address
             EnergyMeterSettingLog burdenRateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.BURDEN_RATE ,task.getExecutiveStartTime());
             engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), burdenRateSetting.getSettingValue());
             try {
