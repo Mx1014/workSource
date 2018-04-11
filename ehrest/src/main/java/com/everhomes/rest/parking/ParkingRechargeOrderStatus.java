@@ -2,10 +2,13 @@
 package com.everhomes.rest.parking;
 
 /**
- * <ul>停车充值订单状态
- * <li>INACTIVE(0): 无效</li>
- * <li>UNPAID(1): 未支付</li>
- * <li>PAID(2): 已支付</li>
+ * <ul>停车充值订单状态 
+ * <li>UNPAID(1): 待付款</li>
+ * <li>PAID(2): 已付款（客户已经成功付款，但系统未完成业务处理）</li> 
+ * <li>RECHARGED(3): 已完成</li>
+ * <li>FAILED(4): 订单异常</li>
+ * <li>REFUNDING(5): 退款中</li>
+ * <li>REFUNDED(6): 已退款</li>
  * </ul>
  */
 public enum ParkingRechargeOrderStatus {
