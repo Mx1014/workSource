@@ -7999,8 +7999,7 @@ public class PunchServiceImpl implements PunchService {
             cmd.setQueryTime(punchTime.getTime());
             if (null != pr) {
                 pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
-                //2018年4月11日 修改: 之前punCalendar就没用了,所以没有赋值为计算出来的打卡日,但是现在使用了punCalendar作为后面计算所以要赋值
-                punCalendar.setTime(punchTime);
+               
                 PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
                 if (null != punchLog) {
                     if (null != punchLog.getExpiryTime()) {
@@ -8012,6 +8011,8 @@ public class PunchServiceImpl implements PunchService {
                 }
                 response.setPunchDate(pDate.getTime());
                 punchTime = pDate;
+                //2018年4月11日 修改: 之前punCalendar就没用了,所以没有赋值为计算出来的打卡日,但是现在使用了punCalendar作为后面计算所以要赋值
+                punCalendar.setTime(punchTime);
             }
         } else {
             punchTime = new Date(cmd.getQueryTime());
