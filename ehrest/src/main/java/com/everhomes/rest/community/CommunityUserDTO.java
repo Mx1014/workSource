@@ -10,11 +10,13 @@ import com.everhomes.util.StringHelper;
  *     <li>aliasName: 别名</li>
  *     <li>avatarUri: 显示头像URI</li>
  *     <li>avatarUrl: 显示头像URL</li>
- *     <li>communityType: 园区类型</li>
+ *     <li>communityType: 园区类型参考{@link com.everhomes.rest.community.CommunityType}</li>
  *     <li>fullPinyin: 拼音全拼</li>
  *     <li>capitalPinyin: capitalPinyin</li>
- *     <li>managementFlag: 管理项目标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>siteFlag: 办公标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>siteAddress: 办公地址</li>
+ *     <li>apartmentFlag: 公寓标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>apartmentAddress: 公寓地址</li>
  * </ul>
  */
 public class CommunityUserDTO {
@@ -26,8 +28,10 @@ public class CommunityUserDTO {
     private Byte communityType;
     private String fullPinyin;
     private String capitalPinyin;
-    private Byte managementFlag;
     private Byte siteFlag;
+    private String siteAddress;
+    private Byte apartmentFlag;
+    private String apartmentAddress;
 
     public Long getId() {
         return id;
@@ -93,20 +97,36 @@ public class CommunityUserDTO {
         this.capitalPinyin = capitalPinyin;
     }
 
-    public Byte getManagementFlag() {
-        return managementFlag;
-    }
-
-    public void setManagementFlag(Byte managementFlag) {
-        this.managementFlag = managementFlag;
-    }
-
     public Byte getSiteFlag() {
         return siteFlag;
     }
 
     public void setSiteFlag(Byte siteFlag) {
         this.siteFlag = siteFlag;
+    }
+
+    public Byte getApartmentFlag() {
+        return apartmentFlag;
+    }
+
+    public void setApartmentFlag(Byte apartmentFlag) {
+        this.apartmentFlag = apartmentFlag;
+    }
+
+    public String getSiteAddress() {
+        return siteAddress;
+    }
+
+    public void setSiteAddress(String siteAddress) {
+        this.siteAddress = siteAddress;
+    }
+
+    public String getApartmentAddress() {
+        return apartmentAddress;
+    }
+
+    public void setApartmentAddress(String apartmentAddress) {
+        this.apartmentAddress = apartmentAddress;
     }
 
     @Override

@@ -142,4 +142,6 @@ public interface CommunityService {
 	
 	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
 
+	ListAllCommunitiesResponse listAllCommunities();
+
 }

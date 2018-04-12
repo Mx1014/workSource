@@ -450,7 +450,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=ListAllCommunitiesResponse.class)
     public RestResponse listAllCommunities() {
 
-        List<CommunityUserDTO> res = null;
+        ListAllCommunitiesResponse res = communityService.listAllCommunities();
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

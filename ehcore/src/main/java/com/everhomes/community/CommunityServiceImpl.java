@@ -14,6 +14,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.group.*;
@@ -44,6 +45,7 @@ import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
@@ -180,6 +182,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private PropertyMgrService propertyMgrService;
+
+	@Autowired
+	private FamilyProvider familyProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -4056,6 +4061,71 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 
+	}
+
+
+	@Override
+	public ListAllCommunitiesResponse listAllCommunities() {
+
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+
+		Set<Long> familyCommunityIdSet = new HashSet<>();
+		Set<Long> orgCommunityIdSet = new HashSet<>();
+
+		User user = UserContext.current().getUser();
+
+		//登录的话找加入的家庭和公司
+		if(user != null && user.getId() != null){
+			List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(user.getId());
+
+			if(familyDtos != null && familyDtos.size() > 0){
+				for(FamilyDTO dto: familyDtos){
+					if(GroupMemberStatus.ACTIVE == GroupMemberStatus.fromCode(dto.getMembershipStatus())){
+						familyCommunityIdSet.add(dto.getCommunityId());
+					}
+				}
+			}
+
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), user.getId());
+			if(members != null){
+				for (OrganizationMember member: members) {
+					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+						List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
+						if(organizationCommunitys != null && organizationCommunitys.size() > 0){
+							for (OrganizationCommunity orgcom: organizationCommunitys){
+								orgCommunityIdSet.add(orgcom.getCommunityId());
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+
+		List<CommunityUserDTO> dtos = new ArrayList<>();
+		for (Community com: communities){
+			CommunityUserDTO dto = ConvertHelper.convert(com, CommunityUserDTO.class);
+
+			if(familyCommunityIdSet.contains(com.getId())){
+				dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
+
+			if(orgCommunityIdSet.contains(com.getId())){
+				dto.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
+
+			String pinyin = PinYinHelper.getPinYin(dto.getName());
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+			dtos.add(dto);
+		}
+
+		ListAllCommunitiesResponse response = new ListAllCommunitiesResponse();
+		response.setDtos(dtos);
+
+		return response;
 	}
 }
 

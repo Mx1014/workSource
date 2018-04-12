@@ -1544,7 +1544,7 @@ public class UserController extends ControllerBase {
 	@RestReturn(value=ListAddressUsersResponse.class)
 	public RestResponse listAddressUsers(ListAddressUsersCommand cmd) {
 		//List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
-		ListAddressUsersResponse res = null;
+		ListAddressUsersResponse res = userService.listAddressUsers(cmd);
 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);

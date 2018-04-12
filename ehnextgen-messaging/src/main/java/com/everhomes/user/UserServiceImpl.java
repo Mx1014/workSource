@@ -80,7 +80,9 @@ import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.CommunityUserDTO;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -90,6 +92,7 @@ import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
@@ -6087,6 +6090,102 @@ public class UserServiceImpl implements UserService {
 			dtos = users.stream().map(r -> ConvertHelper.convert(r, UserDTO.class)).collect(Collectors.toList());
 		}
 		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	@Override
+	public ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd) {
+
+		User user = UserContext.current().getUser();
+
+		List<AddressUserDTO> dtos = new ArrayList<>();
+
+		//全部或者公司
+		if(cmd.getType() == null || AddressUserType.ORGANIZATION == AddressUserType.fromCode(cmd.getType())){
+
+			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+			if(orgMembers != null && orgMembers.size() > 0){
+				for (OrganizationMember member : orgMembers) {
+					AddressUserDTO dto = new AddressUserDTO();
+
+					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+					if(org == null || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
+						continue;
+					}
+					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(org.getStatus())){
+						continue;
+					}
+					if(cmd.getWorkPlatformFlag() != null && TrueOrFalseFlag.fromCode(cmd.getWorkPlatformFlag()) != TrueOrFalseFlag.fromCode(org.getWorkPlatformFlag())){
+						continue;
+					}
+
+					dto.setId(org.getId());
+					dto.setType(AddressUserType.ORGANIZATION.getCode());
+					dto.setName(org.getName());
+					dto.setAliasName(org.getName());
+					dto.setStatus(org.getStatus());
+					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+					//办公地点（公司加入的园区）
+					List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
+					List<CommunityUserDTO> communityUserDtos = new ArrayList<>();
+					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
+						for (OrganizationCommunity orgcom: organizationCommunitys){
+							Community community = communityProvider.findCommunityById(orgcom.getCommunityId());
+							communityUserDtos.add(ConvertHelper.convert(community, CommunityUserDTO.class));
+						}
+					}
+
+					dto.setCommunityUserDtos(communityUserDtos);
+					dtos.add(dto);
+				}
+			}
+
+		}
+
+
+		//全部或者家庭
+		if(cmd.getType() == null || AddressUserType.FAMILY == AddressUserType.fromCode(cmd.getType())){
+			List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(user.getId());
+
+			if(familyDtos != null && familyDtos.size() > 0){
+				for(FamilyDTO family : familyDtos){
+					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())){
+						continue;
+					}
+
+					AddressUserDTO dto = new AddressUserDTO();
+
+					dto.setId(family.getId());
+					dto.setType(AddressUserType.FAMILY.getCode());
+					dto.setName(family.getName());
+					dto.setAliasName(family.getName());
+					dto.setStatus(family.getMembershipStatus());
+					dto.setWorkPlatformFlag((byte)0);
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+					List<CommunityUserDTO> communityUserDtos = new ArrayList<>();
+					CommunityUserDTO communityUserDto = new CommunityUserDTO();
+					communityUserDto.setId(family.getCommunityId());
+					communityUserDto.setName(family.getCommunityName());
+					communityUserDto.setAliasName(family.getCommunityAliasName());
+					communityUserDto.setCommunityType(family.getCommunityType());
+					communityUserDtos.add(communityUserDto);
+
+					dto.setCommunityUserDtos(communityUserDtos);
+
+					dtos.add(dto);
+				}
+			}
+
+		}
+		ListAddressUsersResponse response = new  ListAddressUsersResponse();
 		response.setDtos(dtos);
 		return response;
 	}
