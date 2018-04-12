@@ -710,7 +710,6 @@ public class AclController extends ControllerBase {
      * <b>URL: /acl/listOrganizationSystemAdministrators</b>
      * <p>系统管理员列表（标准版）</p>
      */
-    @Deprecated
     @RequestMapping("listOrganizationSystemAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
@@ -720,5 +719,45 @@ public class AclController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /acl/getAdministratorInfosByUserId</b>
+     * <p>根据用户id获取是否是管理员（标准版）</p>
+     */
+    @RequestMapping("getAdministratorInfosByUserId")
+    @RestReturn(value=GetAdministratorInfosByUserIdResponse.class)
+    public RestResponse listAdministratorInfosByUserId(@Valid GetAdministratorInfosByUserIdCommand cmd) {
+        return null;
+    }
+
+    /**
+     * <b>URL: /acl/getPersonelInfoByToken</b>
+     * <p>根据手机号获取个人信息（标准版）</p>
+     */
+    @RequestMapping("getPersonelInfoByToken")
+    @RestReturn(value=GetPersonelInfoByTokenResponse.class)
+    public RestResponse getPersonelInfoByToken(@Valid GetPersonelInfoByTokenCommand cmd) {
+        return null;
+    }
+
+    /**
+     * <b>URL: /acl/updateTopAdminstrator</b>
+     * <p>更改超级管理员（标准版）</p>
+     */
+    @RequestMapping("updateTopAdminstrator")
+    @RestReturn(value=String.class)
+    public RestResponse updateTopAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
+        return null;
+    }
+
+    /**
+     * <b>URL: /acl/createSystemAdminstrator</b>
+     * <p>创建系统管理员（标准版）</p>
+     */
+    @RequestMapping("createSystemAdminstrator")
+    @RestReturn(value=String.class)
+    public RestResponse createSystemAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
+        return null;
     }
 }
