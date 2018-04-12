@@ -889,8 +889,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if(list!=null && list.size()<2){
 				return false;
 			}
-			if(cmd.getCityId()!=null){
+			OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+			if(city!=null){
 				officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+				officeCubicleProvider.updateSpaceByProvinceAndCity(UserContext.getCurrentNamespaceId(),city.getProvinceName(),city.getCityName());
 			}
 			return true;
 		});

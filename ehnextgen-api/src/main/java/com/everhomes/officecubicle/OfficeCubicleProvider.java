@@ -50,4 +50,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleSpace> querySpacesByCityName(String ownerType, Long ownerId, String provinceName, String cityName,
 			CrossShardListingLocator locator, int i, Integer namespaceId);
+
+	void updateSpaceByProvinceAndCity(Integer currentNamespaceId, String provinceName, String cityName);
 }
