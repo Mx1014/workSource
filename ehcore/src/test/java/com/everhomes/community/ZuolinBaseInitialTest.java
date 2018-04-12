@@ -208,7 +208,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     public void testServiceModuleDistrube() {
 //        Long projectId = 240111044332060169l;
         Long normalOrgId = 1041162l;
-        Long normalDisAppId = 115083l;//资产管理
+        Long normalDisAppId = 115084l;//资产管理
         
         ListingLocator locator = new ListingLocator();
         List<ServiceModuleAppAuthorization> authors = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(locator, 10000, new ListingQueryBuilderCallback() {
@@ -305,31 +305,25 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         List<Long> normalAuthCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), normalOrgId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
         Assert.assertTrue(normalAuthCommunityIds.size() == 1);
         
-        ListUserRelatedProjectByModuleCommand relatedCommunitiesCmd = new ListUserRelatedProjectByModuleCommand();
-        relatedCommunitiesCmd.setAppId(normalDisAppId);
-        ServiceModuleApp normalAppInfo = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(normalDisAppId);
-        relatedCommunitiesCmd.setModuleId(normalAppInfo.getModuleId());
-        relatedCommunitiesCmd.setOrganizationId(organizationId);
-        relatedCommunitiesCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-        relatedCommunitiesCmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-        relatedCommunitiesCmd.setOwnerId(organizationId);
-        List<CommunityDTO> communityDTOs = serviceModuleService.listUserRelatedCommunityByModuleId(relatedCommunitiesCmd);
-        Assert.assertTrue(communityDTOs.size() == 1);
+        ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(organizationId);
+        List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 1);
         
-        relatedCommunitiesCmd = new ListUserRelatedProjectByModuleCommand();
-        relatedCommunitiesCmd.setAppId(normalDisAppId);
-        normalAppInfo = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(normalDisAppId);
-        relatedCommunitiesCmd.setModuleId(normalAppInfo.getModuleId());
-        relatedCommunitiesCmd.setOrganizationId(normalOrgId);
-        relatedCommunitiesCmd.setOwnerId(normalOrgId);
-        communityDTOs = serviceModuleService.listUserRelatedCommunityByModuleId(relatedCommunitiesCmd);
-        Assert.assertTrue(communityDTOs.size() == 1);   
+        relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(normalOrgId);
+        projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 1);  
     }
     
     @Test
     public void testServiceModuleQuery() {
         Long normalOrgId = 1041162l;
-        Long normalDisAppId = 115083l;//资产管理
+        Long normalDisAppId = 115084l;//资产管理
         
         ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
         relatedProjectCmd.setAppId(normalDisAppId);
@@ -343,6 +337,6 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
         relatedProjectCmd.setOrganizationId(normalOrgId);
         projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-        Assert.assertTrue(projects.size() == 1);      
+        Assert.assertTrue(projects.size() == 1);
     }
 }
