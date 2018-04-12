@@ -123,19 +123,14 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 		if (null == parkingRechargeRateList) {
 			return new ArrayList<ParkingRechargeRateDTO>(0);
 		}
-
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		String result = post(GET_MONTHCARD_TYPE, params);
-		KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
-				new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
-				});
-
-		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
 		
-		if (entity != null && entity.isSuccess()) {
+		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
+		List<KexinXiaomaoCardType> allCardTypes = listCardTypes();
+		
+		if (!allCardTypes.isEmpty()) {
 			dtos = parkingRechargeRateList.stream().map(r -> {
 				ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-				populaterate(entity.getData(), dto, r);
+				populaterate(allCardTypes, dto, r);
 				return dto;
 			}).collect(Collectors.toList());
 		}
@@ -215,27 +210,43 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
 	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-    	ListCardTypeResponse ret = new ListCardTypeResponse();
-    	
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		String result = post(GET_MONTHCARD_TYPE, params);
-		LOGGER.info("Card type from kexin xiaomao={}", result);
+		ListCardTypeResponse ret = new ListCardTypeResponse();
 
-		KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
-				new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
-				});
-		List<ParkingCardType> list = new ArrayList<>();
-		if (entity.isSuccess()) {
-			for (KexinXiaomaoCardType cardType : entity.getData()) {
-				ParkingCardType parkingCardType = new ParkingCardType();
-				parkingCardType.setTypeId(cardType.getStandardId());
-				parkingCardType.setTypeName(cardType.getStandardType());
-				list.add(parkingCardType);
+		do {
+
+			// 获取当前的费率表
+			List<ParkingRechargeRate> rateList = parkingProvider.listParkingRechargeRates(cmd.getOwnerType(),
+					cmd.getOwnerId(), cmd.getParkingLotId(), null);
+			if (null == rateList || rateList.isEmpty()) {
+				break;
 			}
-			ret.setCardTypes(list);
-		}
-    	return ret;
-    }
+
+			// 获取所有卡类型
+			List<KexinXiaomaoCardType> listCardTypes = listCardTypes();
+			if (listCardTypes.isEmpty()) {
+				break;
+			}
+
+			// 获取费率支持的卡
+			List<ParkingCardType> supportCardTypes = new ArrayList<>();
+			for (ParkingRechargeRate rate : rateList) {
+				for (KexinXiaomaoCardType cardType : listCardTypes) {
+					if (rate.getCardType().equals(cardType.getStandardId())) {
+						ParkingCardType temp = new ParkingCardType();
+						temp.setTypeId(cardType.getStandardId());
+						temp.setTypeName(cardType.getStandardType());
+						supportCardTypes.add(temp);
+						break;
+					}
+				}
+			}
+
+			ret.setCardTypes(supportCardTypes);
+
+		} while (false);
+
+		return ret;
+	}
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
@@ -364,6 +375,10 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
             }
         }
         
+        if (null == temp) {
+        	return;
+        }
+        
         dto.setCardTypeId(temp.getStandardId());
         dto.setCardType(temp.getStandardType());
         dto.setRateToken(rate.getId().toString());
@@ -463,4 +478,32 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
         return false;
     }
     
+
+	private final List<KexinXiaomaoCardType> listCardTypes() {
+
+		List<KexinXiaomaoCardType> cardTypeList = new ArrayList<KexinXiaomaoCardType>(0);
+
+		do {
+			// 向第三方获取卡类型
+			String result = post(GET_MONTHCARD_TYPE, new TreeMap<String, String>());
+			if (StringUtils.isBlank(result)) {
+				break;
+			}
+
+			// 解析
+			KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
+					new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
+					});
+			if (null == entity || !entity.isSuccess()) {
+				break;
+			}
+
+			cardTypeList = entity.getData();
+
+		} while (false);
+
+		return cardTypeList;
+	}
+	
+	
 }

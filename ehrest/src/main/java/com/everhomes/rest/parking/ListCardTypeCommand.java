@@ -20,6 +20,12 @@ public class ListCardTypeCommand {
 	@NotNull
     private Long parkingLotId;
 	
+	public ListCardTypeCommand(String ownerType, Long ownerId, Long parkingLotId) {
+		this.setOwnerType(ownerType);
+		this.setOwnerId(ownerId);
+		this.setParkingLotId(parkingLotId);
+	}
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
