@@ -15,13 +15,16 @@ public class BusinessMessageCommandSZW {
     private Integer nonce;
     
     @NotNull
-    private String tel;
-    
-    @NotNull
     private String contentType;
     
     @NotNull
     private String content;
+    
+    @NotNull
+    private String type;
+    
+    @NotNull
+    private String cusName;
     
     @NotNull
     private Integer namespaceId;
@@ -79,13 +82,6 @@ public class BusinessMessageCommandSZW {
 		this.bizMessageType = bizMessageType;
 	}
 
-	public String getTel() {
-		return tel;
-	}
-
-	public void setTel(String tel) {
-		this.tel = tel;
-	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -93,6 +89,22 @@ public class BusinessMessageCommandSZW {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getCusName() {
+		return cusName;
+	}
+
+	public void setCusName(String cusName) {
+		this.cusName = cusName;
 	}
 
 }

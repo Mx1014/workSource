@@ -11,6 +11,7 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.*;
@@ -86,6 +87,9 @@ public class BusinessOpenController extends ControllerBase {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+    private OrganizationProvider organizationProvider;
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -286,8 +290,15 @@ public class BusinessOpenController extends ControllerBase {
 		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
 			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
 		}
-		//根据手机号码获取用户ID
-		Long userId = userProvider.findUserByToken(cmd.getTel(), cmd.getNamespaceId()).getTargetId();
+		Long userId = null;
+		//0：企业客户，1：个人（判断）
+		if("1".equals(cmd.getType())) {
+			//根据手机号码获取用户ID
+			userId = userProvider.findUserByToken(cmd.getCusName(), cmd.getNamespaceId()).getTargetId();
+		}else if("0".equals(cmd.getType())) {
+			//根据企业名称获取用户ID
+			userId = organizationProvider.findOrganizationByName(cmd.getCusName(), cmd.getNamespaceId()).getId();
+		}
 		sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
