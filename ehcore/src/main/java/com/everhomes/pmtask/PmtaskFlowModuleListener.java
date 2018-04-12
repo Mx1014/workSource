@@ -102,12 +102,24 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.PROCESS.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.ABSORTED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	//状态改变之后
@@ -184,12 +196,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setIfUseFeelist((byte)1);
 			}
 		}
-		//物业报修状态和工作流一致
-		if(flowCase.getStatus() == FlowCaseStatus.ABSORTED.getCode() || flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode()
-				||flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()) {
-			task.setStatus(flowCase.getStatus());
-			pmTaskProvider.updateTask(task);
-		}
+
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
@@ -198,7 +205,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.FINISHED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override

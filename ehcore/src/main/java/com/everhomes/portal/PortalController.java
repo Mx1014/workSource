@@ -14,6 +14,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/portal")
 public class PortalController extends ControllerBase {
@@ -619,7 +621,7 @@ public class PortalController extends ControllerBase {
 	 */
 	@RequestMapping("syncLaunchPadData")
 	@RestReturn(String.class)
-	public RestResponse syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+	public RestResponse syncLaunchPadData(@Valid SyncLaunchPadDataCommand cmd){
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
