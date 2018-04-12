@@ -1,6 +1,7 @@
 package com.everhomes.rest.incubator;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -34,6 +35,8 @@ import java.util.List;
  *     <li>planBookAttachmentText: excel中创业计划书字段的描述，用于导出</li>
  *     <li>applyTypeText: excel中申请类型字段的描述，用于导出</li>
  *     <li>createTimeText: excel中申请时间字段的描述，用于导出</li>
+ *     <li>rootId: rootId</li>
+ *     <li>checkFlag: 查看状态0-未查看、1-已查看 参考{@link TrueOrFalseFlag}</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
@@ -67,6 +70,11 @@ public class IncubatorApplyDTO {
 	String planBookAttachmentText;
 	String applyTypeText;
 	String createTimeText;
+
+	Long rootId;
+
+
+	Byte checkFlag;
 
 	public Long getId() {
 		return id;
@@ -274,6 +282,22 @@ public class IncubatorApplyDTO {
 
 	public void setCreateTimeText(String createTimeText) {
 		this.createTimeText = createTimeText;
+	}
+
+	public Long getRootId() {
+		return rootId;
+	}
+
+	public void setRootId(Long rootId) {
+		this.rootId = rootId;
+	}
+
+	public Byte getCheckFlag() {
+		return checkFlag;
+	}
+
+	public void setCheckFlag(Byte checkFlag) {
+		this.checkFlag = checkFlag;
 	}
 
 	@Override

@@ -3,12 +3,13 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>location: launchPadLayout 下面所对应的item 的location</li>
- * <li>name: launchPadLayout 的名称</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>location: launchPadLayout 下面所对应的item 的location</li>
+ *     <li>name: launchPadLayout 的名称</li>
  * </ul>
  */
 public class SyncLaunchPadDataCommand {

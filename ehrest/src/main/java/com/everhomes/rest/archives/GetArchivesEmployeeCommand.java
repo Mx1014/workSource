@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>formOriginId: 表单id</li>
  * <li>organizationId: 公司id</li>
  * <li>detailId: 员工id</li>
- * <li>dismiss: 离职员工(在职员工无需传递此参数)</li>
+ * <li>isExport: 0-no 1-yes</li>
  * </ul>
  */
 public class GetArchivesEmployeeCommand {
@@ -18,15 +18,16 @@ public class GetArchivesEmployeeCommand {
 
     private Long detailId;
 
-    private String dismiss;
+    private Integer isExport;
 
     public GetArchivesEmployeeCommand() {
     }
 
-    public GetArchivesEmployeeCommand(Long formOriginId, Long organizationId, Long detailId) {
+    public GetArchivesEmployeeCommand(Long formOriginId, Long organizationId, Long detailId, Integer isExport) {
         this.formOriginId = formOriginId;
         this.organizationId = organizationId;
         this.detailId = detailId;
+        this.isExport = isExport;
     }
 
     public Long getFormOriginId() {
@@ -53,12 +54,12 @@ public class GetArchivesEmployeeCommand {
         this.detailId = detailId;
     }
 
-    public String getDismiss() {
-        return dismiss;
+    public Integer getIsExport() {
+        return isExport;
     }
 
-    public void setDismiss(String dismiss) {
-        this.dismiss = dismiss;
+    public void setIsExport(Integer isExport) {
+        this.isExport = isExport;
     }
 
     @Override

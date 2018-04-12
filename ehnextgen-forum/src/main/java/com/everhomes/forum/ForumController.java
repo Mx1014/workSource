@@ -554,5 +554,34 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /forum/findDefaultForum</b>
+     * <p>查询默认园区论坛、意见反馈论坛</p>
+     */
+    @RequestMapping("findDefaultForum")
+    @RestReturn(value=FindDefaultForumResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse findDefaultForum(FindDefaultForumCommand cmd) {
+        FindDefaultForumResponse res = forumService.findDefaultForum(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/listTopicsByForumEntryId</b>
+     * <p>通过forumEntryId查询整个域空间的帖子，不区分园区、可见性等</p>
+     */
+    @RequestMapping("listTopicsByForumEntryId")
+    @RestReturn(value=ListTopicsByForumEntryIdResponse.class)
+    public RestResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd){
+        ListTopicsByForumEntryIdResponse result = forumService.listTopicsByForumEntryId(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 }

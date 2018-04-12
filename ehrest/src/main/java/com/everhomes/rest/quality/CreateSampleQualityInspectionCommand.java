@@ -15,6 +15,7 @@ import java.util.List;
  *     <li>endTime: 结束时间</li>
  *     <li>communityIds: 关联小区id列表</li>
  *     <li>executeGroupAndPositionList:执行组部门岗位id列表 参考{@link com.everhomes.rest.quality.ExecuteGroupAndPosition}</li>
+ *     <li>namespaceId:namespaceId</li>
  * </ul>
  * Created by ying.xiong on 2017/6/1.
  */
@@ -34,6 +35,8 @@ public class CreateSampleQualityInspectionCommand {
 
     @ItemType(Long.class)
     private List<Long> communityIds;
+
+    private Integer namespaceId;
 
     @ItemType(ExecuteGroupAndPosition.class)
     private List<ExecuteGroupAndPosition> executeGroupAndPositionList;
@@ -92,6 +95,14 @@ public class CreateSampleQualityInspectionCommand {
 
     public void setStartTime(Long startTime) {
         this.startTime = startTime;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.everhomes.objectstorage;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.objectstorage.OsObjectQuery;
 
 import java.util.List;
@@ -17,7 +19,7 @@ interface OsObjectProvider {
 
     void createOsObject(OsObject obj);
 
-    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback);
+    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback,List<ProjectDTO> privilegeCommunities);
 
     OsObject findById(Long id);
 

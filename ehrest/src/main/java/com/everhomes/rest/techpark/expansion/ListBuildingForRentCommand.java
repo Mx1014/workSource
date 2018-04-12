@@ -21,7 +21,11 @@ import java.math.BigDecimal;
  * <li>endRentAmount：结束金额</li>
  * <li>userId：查询业主发布的招租</li>
  * <li>organizationId：公司id</li>
+ * <li>houseResourceType：房源类型 {@link com.everhomes.rest.techpark.expansion.HouseResourceType}/li>
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
+  * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListBuildingForRentCommand {
@@ -48,8 +52,36 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private Long organizationId;
 	private String issuerType;
+	private String houseResourceType;
 
 	private Long categoryId;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;
@@ -164,6 +196,14 @@ public class ListBuildingForRentCommand {
 	}
 	public void setRentType(String rentType) {
 		this.rentType = rentType;
+	}
+
+	public String getHouseResourceType() {
+		return houseResourceType;
+	}
+
+	public void setHouseResourceType(String houseResourceType) {
+		this.houseResourceType = houseResourceType;
 	}
 
 	@Override

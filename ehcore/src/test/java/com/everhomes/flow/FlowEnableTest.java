@@ -143,7 +143,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	String flowName = "test-flow-1";
     	Flow flow = flowProvider.findFlowByName(namespaceId, moduleId
-    			, null, orgId, FlowOwnerType.ENTERPRISE.getCode(), flowName);
+    			, null, null, null, orgId, FlowOwnerType.ENTERPRISE.getCode(), flowName);
     	if(flow != null) {
     		flowService.disableFlow(flow.getId());
     		flowService.deleteFlow(flow.getId());

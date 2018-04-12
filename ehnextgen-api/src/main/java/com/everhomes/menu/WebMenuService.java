@@ -22,4 +22,6 @@ public interface WebMenuService {
 	GetTreeWebMenusByNamespaceResponse getTreeWebMenusByNamespace(GetTreeWebMenusByNamespaceCommand cmd);
 
     void updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd);
+
+    void refleshMenuByPortalVersion(Long versionId);
 }

@@ -88,7 +88,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.commit(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute commit method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute commit method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
@@ -107,9 +107,12 @@ public class TaskScheduleJob extends QuartzJobBean {
 
 
         } catch (Exception e) {
+            LOGGER.error("出错",e);
+
             //1、更新任务状态为失败
 //            taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
-            LOGGER.error("",e);
+ 
+            LOGGER.error("",e); 
         }
     }
 

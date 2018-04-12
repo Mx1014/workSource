@@ -398,6 +398,26 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
     @Override
+    public Address findActiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+                .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+
+        Record record = step.fetchAny();
+
+        LOGGER.debug("findAddressByBuildingApartmentName, sql=" + step.getSQL());
+        LOGGER.debug("findAddressByBuildingApartmentName, bindValues=" + step.getBindValues());
+        if (record != null) {
+            return ConvertHelper.convert(record, Address.class);
+        }
+        return null;
+    }
+
+    @Override
     public List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId,
                 String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

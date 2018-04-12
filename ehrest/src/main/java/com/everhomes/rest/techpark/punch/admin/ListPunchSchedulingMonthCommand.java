@@ -31,7 +31,7 @@ public class ListPunchSchedulingMonthCommand {
 	private Long targetId; 
 	private Long punchOriganizationId;
 	private Long queryTime;
-
+	private String punchRuleName;
 	@ItemType(PunchTimeRuleDTO.class)
 	private  List<PunchTimeRuleDTO> timeRules;
 	@ItemType(PunchSchedulingEmployeeDTO.class)
@@ -103,5 +103,13 @@ public class ListPunchSchedulingMonthCommand {
 
 	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
 		this.timeRules = timeRules;
+	}
+
+	public String getPunchRuleName() {
+		return punchRuleName;
+	}
+
+	public void setPunchRuleName(String punchRuleName) {
+		this.punchRuleName = punchRuleName;
 	}
 }

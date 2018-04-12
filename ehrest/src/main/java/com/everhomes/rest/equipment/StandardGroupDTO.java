@@ -23,6 +23,8 @@ public class StandardGroupDTO {
 	private String groupName;
 	
 	private Long standardId;
+
+	private Long planId;
 	
 	private Long positionId;
 
@@ -72,6 +74,14 @@ public class StandardGroupDTO {
 
 	public void setPositionId(Long positionId) {
 		this.positionId = positionId;
+	}
+
+	public Long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(Long planId) {
+		this.planId = planId;
 	}
 
 	@Override

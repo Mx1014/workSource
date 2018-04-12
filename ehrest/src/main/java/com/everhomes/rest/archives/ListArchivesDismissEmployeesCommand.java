@@ -23,13 +23,13 @@ public class ListArchivesDismissEmployeesCommand {
 
     private Long organizationId;
 
-    private Date dismissTimeStart;
+    private String dismissTimeStart;
 
-    private Date dismissTimeEnd;
+    private String dismissTimeEnd;
 
-    private Date checkInTimeStart;
+    private String checkInTimeStart;
 
-    private Date checkInTimeEnd;
+    private String checkInTimeEnd;
 
     private Long contractPartyId;
 
@@ -54,36 +54,36 @@ public class ListArchivesDismissEmployeesCommand {
         this.organizationId = organizationId;
     }
 
-    public Date getDismissTimeStart() {
+    public String getDismissTimeStart() {
         return dismissTimeStart;
     }
 
     public void setDismissTimeStart(String dismissTimeStart) {
-        this.dismissTimeStart = ArchivesUtil.parseDate(dismissTimeStart);
+        this.dismissTimeStart = dismissTimeStart;
     }
 
-    public Date getDismissTimeEnd() {
+    public String getDismissTimeEnd() {
         return dismissTimeEnd;
     }
 
     public void setDismissTimeEnd(String dismissTimeEnd) {
-        this.dismissTimeEnd = ArchivesUtil.parseDate(dismissTimeEnd);
+        this.dismissTimeEnd = dismissTimeEnd;
     }
 
-    public Date getCheckInTimeStart() {
+    public String getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = checkInTimeStart;
     }
 
-    public Date getCheckInTimeEnd() {
+    public String getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = checkInTimeEnd;
     }
 
     public Long getContractPartyId() {

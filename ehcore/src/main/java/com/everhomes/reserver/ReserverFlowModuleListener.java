@@ -6,6 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.reserver.ReserverDTO;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;

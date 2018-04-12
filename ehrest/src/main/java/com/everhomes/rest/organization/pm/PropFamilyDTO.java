@@ -20,6 +20,7 @@ public class PropFamilyDTO {
     private Long memberCount;
     private Long addressId;
     private String address;
+    private String apartmentFloor;
     private Byte livingStatus;
     private String enterpriseName;
     private Double areaSize;
@@ -28,8 +29,16 @@ public class PropFamilyDTO {
     
     public PropFamilyDTO () {
     }
-    
-    public Byte getOwed() {
+
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public Byte getOwed() {
 		return owed;
 	}
 

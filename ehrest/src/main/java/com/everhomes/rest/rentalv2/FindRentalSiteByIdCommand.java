@@ -5,15 +5,25 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id：id</li>
- * <li>rentalType: 价格类型，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
+ <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * </ul>
  */
 public class FindRentalSiteByIdCommand {
+
+    private String resourceType;
     private Long id;
 
     private String sceneToken;
 
-	public String getSceneToken() {
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getSceneToken() {
         return sceneToken;
     }
 

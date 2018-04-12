@@ -4,14 +4,14 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>moduleId: 模块id</li>
- * <li>name: 应用名称</li>
- * <li>instanceConfig: 应用参数配置，比如活动，服务联盟就要特殊的参数配置</li>
- * <li>customTag：业务Tag</li>
- * <li>customPath：业务参数</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>moduleId: 模块id</li>
+ *     <li>name: 应用名称</li>
+ *     <li>instanceConfig: 应用参数配置，比如活动，服务联盟就要特殊的参数配置</li>
+ *     <li>customTag: 业务Tag</li>
+ *     <li>customPath: 业务参数</li>
+ *     <li>versionId: versionId</li>
  * </ul>
  */
 public class CreateServiceModuleAppCommand {
@@ -28,17 +28,7 @@ public class CreateServiceModuleAppCommand {
 
 	private String customPath;
 
-	public CreateServiceModuleAppCommand() {
-
-	}
-
-	public CreateServiceModuleAppCommand(Integer namespaceId, Long moduleId, String name, String instanceConfig) {
-		super();
-		this.namespaceId = namespaceId;
-		this.moduleId = moduleId;
-		this.name = name;
-		this.instanceConfig = instanceConfig;
-	}
+	private Long versionId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -91,5 +81,13 @@ public class CreateServiceModuleAppCommand {
 
 	public void setCustomPath(String customPath) {
 		this.customPath = customPath;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
 	}
 }

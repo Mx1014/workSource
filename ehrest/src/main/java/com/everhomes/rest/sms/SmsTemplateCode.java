@@ -125,4 +125,20 @@ public interface SmsTemplateCode {
     int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
     int PM_NOTIFY_AFTER_TASK_DELAY = 57;
 
+    //资源预约： vip车位预约
+    int UNPAID_ORDER_OVER_TIME = 58; //订单超时未付款
+    int PAY_ORDER_SUCCESS = 59; //支付成功 给车主发短信
+    int RENTAL_USER_CANCEL_ORDER = 60; //vip车位预约用户取消订单 给车主发短信
+
+    int RENTAL_PARKING_LOCK_RAISE = 61; //vip车位预约用户车锁升起
+
+    int RENEW_RENTAL_ORDER_SUCCESS = 62; //使用中：延时成功 尊敬的“车主姓名”，用户（“预约人姓名”：“预约人手机号”）已为您将预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）延时到“新结束时间”，请点击以下链接使用：https://core.zuolin.com/evh/aclink/id=1283jh213a，感谢您的使用。
+
+    int RENTAL_ORDER_WILL_END = 63; //使用中：即将超时（结束时间前15分钟提醒）
+
+    int SYSTEM_AUTO_CANCEL_ORDER = 64; ///系统自动取消订单并退款成功：尊敬的用户，您预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）由于前序订单使用超时，且无其他空闲车位可更换，已自动取消并全额退款，为此我们深感抱歉，期待下次为您服务。
+
+    int SYSTEM_AUTO_UPDATE_SPACE_RESERVER = 65; //订单变更通知 给预约人发短信
+
+    int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
 }

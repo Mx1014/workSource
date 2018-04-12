@@ -27,6 +27,8 @@ public class ListAuthorizationCommunityCommand {
 
 	private Byte checkPrivilegeFlag;
 
+	private Integer namespaceId;
+
 	public Byte getCheckPrivilegeFlag() {
 		return checkPrivilegeFlag;
 	}
@@ -66,7 +68,15 @@ public class ListAuthorizationCommunityCommand {
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
 	}
-	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

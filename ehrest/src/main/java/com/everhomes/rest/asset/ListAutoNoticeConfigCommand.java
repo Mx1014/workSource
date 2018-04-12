@@ -16,6 +16,15 @@ public class ListAutoNoticeConfigCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public String getOwnerType() {
         return ownerType;

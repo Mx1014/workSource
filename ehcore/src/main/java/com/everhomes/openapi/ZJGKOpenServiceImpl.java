@@ -1567,7 +1567,7 @@ public class ZJGKOpenServiceImpl {
 
         DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
         deleteOrganizationIdCommand.setId(customer.getOrganizationId());
-        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand, false);
 //        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
 //        if(myOrganizationAddressList != null && myOrganizationAddressList.size() > 0) {
 //            myOrganizationAddressList.forEach(organizationAddress -> {

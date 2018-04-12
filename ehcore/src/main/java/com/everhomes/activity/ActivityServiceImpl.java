@@ -4348,6 +4348,13 @@ public class ActivityServiceImpl implements ActivityService {
 		//获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
 		organizationId = forumService.populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
 
+        //重复了，去重
+        Set forumIdset = new HashSet();
+        forumIdset.addAll(forumIds);
+        forumIdset.remove(null);
+        forumIds = new ArrayList<Long>();
+        forumIds.addAll(forumIdset);
+
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {
             LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
@@ -5209,6 +5216,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		//更新评论开关
 		forumService.saveInteractSetting(cmd.getNamespaceId(), ForumModuleType.ACTIVITY.getCode(), cmd.getCategoryId(), cmd.getInteractFlag());
+		timeResponse.setInteractFlag(cmd.getInteractFlag());
 
 		return timeResponse;
 	}
@@ -6021,4 +6029,24 @@ public class ActivityServiceImpl implements ActivityService {
 //		excelUtils.setNeedSequenceColumn(false);
 //		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
 //	}
+
+
+    @Override
+    public ListActivitiesByCategoryIdResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd) {
+
+	    if(cmd.getPageSize() == null){
+	        cmd.setPageSize(20L);
+        }
+        Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(cmd.getNamespaceId());
+        condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        condition = condition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Activity> activities = this.activityProvider.listActivities(locator, cmd.getPageSize().intValue(), condition, false, null);
+
+        List<ActivityDTO> dtos = activities.stream().map(r -> ConvertHelper.convert(r, ActivityDTO.class)).collect(Collectors.toList());
+        ListActivitiesByCategoryIdResponse response = new ListActivitiesByCategoryIdResponse();
+        response.setDtos(dtos);
+        return response;
+
+    }
 }

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactName：成员名称</li>
  * <li>contactType：成员类型：{@link com.everhomes.rest.user.IdentifierType}</li>
  * <li>contactToken：成员标识</li>
+ * <li>detailId：人员档案id</li>
  * </ul>
  *
  */
@@ -27,6 +28,7 @@ public class OrganizationManagerDTO {
 
 	private String contactToken;
 
+	private Long detailId;
 
 	public Long getMemberId() {
 		return memberId;
@@ -81,4 +83,11 @@ public class OrganizationManagerDTO {
         return StringHelper.toJsonString(this);
     }
 
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
 }

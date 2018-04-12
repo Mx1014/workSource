@@ -20,6 +20,7 @@ import java.sql.Timestamp;
  *     <li>unitId: 单位id</li>
  *     <li>unitName: 单位名</li>
  *     <li>updateTime: 更新时间</li>
+ *     <li>supplierName: 供应商名字</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -52,6 +53,16 @@ public class WarehouseStockDTO {
     private Long amount;
 
     private Timestamp updateTime;
+
+    private String supplierName;
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
 
     public Long getAmount() {
         return amount;

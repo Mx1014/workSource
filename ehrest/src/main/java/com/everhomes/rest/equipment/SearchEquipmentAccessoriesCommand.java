@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class SearchEquipmentAccessoriesCommand {
@@ -29,6 +30,8 @@ public class SearchEquipmentAccessoriesCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+
+	private Integer namespaceId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -85,6 +88,12 @@ public class SearchEquipmentAccessoriesCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
-	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }

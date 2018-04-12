@@ -11,6 +11,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -164,7 +165,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                             titleRow.createCell(cellNum ++).setCellValue(entry.getValue());
                         }
                     }
-
+                    LOGGER.debug("data size ={} .title:{}",data.size(),StringHelper.toJsonString(data));
                     titleRow.createCell(cellNum ++).setCellValue("错误原因");
                 }
 
@@ -176,7 +177,12 @@ public class ImportFileServiceImpl implements ImportFileService{
                     for (Map.Entry<String, String> entry : data.entrySet()) {
                         row.createCell(cellNum ++).setCellValue(entry.getValue());
                     }
-                    row.createCell(titleMap.size()).setCellValue(log.getErrorDescription());
+                    LOGGER.debug("title size ={} .title:{}",titleMap.size(),StringHelper.toJsonString(titleMap));
+                    if (StringUtils.isNotBlank(log.getErrorDescription())) {
+                        row.createCell(titleMap.size()).setCellValue(log.getErrorDescription());
+                    } else {
+                        row.createCell(titleMap.size()).setCellValue(log.getErrorLog());
+                    }
                 }
                 out = new ByteArrayOutputStream();
                 wb.write(out);

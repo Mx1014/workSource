@@ -40,6 +40,35 @@ public class EnergyMeterReadingLogDTO {
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
 
+    //离线的用
+    private Long communityId;
+    private Long organizationId;
+    private Integer namespaceId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
     public String getMeterAddress() {
         return meterAddress;
     }

@@ -6,10 +6,11 @@ package com.everhomes.rest.user;
  * <li>WX("wx"): 微信</li>
  * <li>JINDIE("jindie"): 金蝶</li>
  * <li>GUOMAO("guomao"): 国贸</li>
+ * <li>ANBANG("anbang")：安邦物业</li>
  * </ul>
  */
 public enum NamespaceUserType {
-	WANKE("wanke"), WX("wx"), JINDIE("jindie"), GUOMAO("guomao");
+	WANKE("wanke"), WX("wx"), JINDIE("jindie"), GUOMAO("guomao"), ANBANG("anbang");
     
     private String code;
     private NamespaceUserType(String code) {
