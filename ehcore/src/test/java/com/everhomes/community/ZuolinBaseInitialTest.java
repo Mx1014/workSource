@@ -215,7 +215,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             @Override
             public SelectQuery<? extends Record> buildCondition(
                     ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(organizationId).or(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(normalOrgId)));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(organizationId));
                 return query;
             }
         });
@@ -321,22 +321,128 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     }
     
     @Test
-    public void testServiceModuleQuery() {
+    public void testAnotherPMServiceModuleDistrube() {
+        Long anotherProjectId = 240111044332060180l;//之俊大厦2
+        Long anotherOrgId = 1041258l;
         Long normalOrgId = 1041162l;
         Long normalDisAppId = 115084l;//资产管理
+        
+        ListingLocator locator = new ListingLocator();
+        List<ServiceModuleAppAuthorization> authors = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(locator, 10000, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(
+                    ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(anotherOrgId));
+                return query;
+            }
+        });
+        
+        //remove all distrube information
+        for(ServiceModuleAppAuthorization obj : authors) {
+            serviceModuleAppAuthorizationProvider.deleteServiceModuleAppAuthorization(obj);    
+        }
+        
+        //remove all install apps
+        ListServiceModuleAppsByOrgIdCommand installAppsCmd = new ListServiceModuleAppsByOrgIdCommand();
+        installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
+        installAppsCmd.setInstallFlag(TrueOrFalseFlag.TRUE.getCode());
+        installAppsCmd.setNamespaceId(namespaceId);
+        installAppsCmd.setOrgId(anotherOrgId);
+        ListServiceModuleAppsByOrgIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        if(installAppsResp.getServiceModuleApps().size() > 0) {
+            for(ServiceModuleAppDTO appDTO: installAppsResp.getServiceModuleApps()) {
+                UninstallAppCommand uninstallCmd = new UninstallAppCommand();
+                uninstallCmd.setOrgAppId(appDTO.getOrgAppId());
+                serviceModuleAppService.uninstallApp(uninstallCmd);       
+            }
+        }
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == 0);
+        
+        List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
+        List<Long> appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
+        Assert.assertTrue(appOriginIds.size() > 0);
+        
+        List<Long> communityOriginAppIds = new ArrayList<>();
+        for(ServiceModuleApp r: allApps) {
+            if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+                communityOriginAppIds.add(r.getOriginId());  
+            }
+        }
+        
+        for(Long cAppId : communityOriginAppIds) {
+            InstallAppCommand installCmd = new InstallAppCommand();
+            installCmd.setAppId(cAppId);
+            installCmd.setOrgId(anotherOrgId);
+            serviceModuleAppService.installApp(installCmd);
+        }
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == communityOriginAppIds.size());
+        
+        List<Long> projectIds = new ArrayList<Long>();
+        projectIds.add(anotherProjectId);
+        
+        for(Long appId : communityOriginAppIds) {
+            DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
+            distrubeCmd.setAppId(appId);
+            distrubeCmd.setNamespaceId(namespaceId);
+            distrubeCmd.setOwnerId(anotherOrgId);
+            distrubeCmd.setProjectIds(projectIds);
+            distrubeCmd.setToOrgId(anotherOrgId);
+            serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(distrubeCmd);    
+        }
+        
+        List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), anotherOrgId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        Assert.assertTrue(authCommunityIds.size() == projectIds.size());
+        
+        {
+            DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
+            distrubeCmd.setAppId(normalDisAppId);
+            distrubeCmd.setNamespaceId(namespaceId);
+            distrubeCmd.setOwnerId(anotherOrgId);
+            distrubeCmd.setProjectIds(projectIds);
+            distrubeCmd.setToOrgId(normalOrgId);
+            serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(distrubeCmd);
+        }
+        List<Long> normalAuthCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), normalOrgId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        Assert.assertTrue(normalAuthCommunityIds.size() == 2);
         
         ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
         relatedProjectCmd.setAppId(normalDisAppId);
         relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-        relatedProjectCmd.setOrganizationId(organizationId);
+        relatedProjectCmd.setOrganizationId(anotherOrgId);
         List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-        Assert.assertTrue(projects.size() == 1);
+        Assert.assertTrue(projects.size() == 0);
         
         relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
         relatedProjectCmd.setAppId(normalDisAppId);
         relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
         relatedProjectCmd.setOrganizationId(normalOrgId);
         projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-        Assert.assertTrue(projects.size() == 1);
+        Assert.assertTrue(projects.size() == 2);  
+    }
+    
+    @Test
+    public void testServiceModuleQuery() {
+        Long normalOrgId = 1041162l;
+        Long normalDisAppId = 115084l;//资产管理
+        Long anotherOrgId = 1041258l;
+        
+        List<Long> normalAuthCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), normalOrgId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        Assert.assertTrue(normalAuthCommunityIds.size() == 2);
+        
+        ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(anotherOrgId);
+        List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 0);
+        
+        relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        relatedProjectCmd.setAppId(normalDisAppId);
+        relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+        relatedProjectCmd.setOrganizationId(normalOrgId);
+        projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+        Assert.assertTrue(projects.size() == 2);  
     }
 }
