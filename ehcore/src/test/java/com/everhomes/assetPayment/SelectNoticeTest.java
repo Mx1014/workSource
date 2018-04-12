@@ -5,7 +5,6 @@ import com.everhomes.asset.AssetService;
 import com.everhomes.community.Community;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.rest.asset.SelectedNoticeCommand;

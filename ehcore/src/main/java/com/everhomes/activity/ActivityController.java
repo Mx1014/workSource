@@ -826,5 +826,19 @@ public class ActivityController extends ControllerBase {
        return response;
    }
 
+    /**
+     * <b>URL: /activity/listActivitiesByCategoryId</b>
+     * <p>通过categoryId查询整个域空间的活动帖子，不区分园区、可见性等</p>
+     */
+    @RequestMapping("listActivitiesByCategoryId")
+    @RestReturn(value=ListActivitiesByCategoryIdResponse.class)
+    public RestResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd){
+        ListActivitiesByCategoryIdResponse result = activityService.listActivitiesByCategoryId(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
 }
