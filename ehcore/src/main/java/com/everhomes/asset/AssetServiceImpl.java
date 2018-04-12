@@ -1325,7 +1325,8 @@ public class AssetServiceImpl implements AssetService {
                 Date today = newClearedCalendar().getTime();
                 Date x_v = null;
                 try{
-                    x_v = sdf_dateStrD.parse(newBill.getDueDayDeadline());
+                    String dueDayDeadline = newBill.getDueDayDeadline();
+                    x_v = sdf_dateStrD.parse(dueDayDeadline);
                     if(today.compareTo(x_v)!=-1){
                         newBill.setChargeStatus((byte)1);
                     }else{
@@ -1333,6 +1334,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setChargeStatus((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is due day deadline from newBill = {}, e={}", newBill,e);
                 }
                 try{
                     x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
@@ -1360,6 +1362,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setNextSwitch((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is DateStrDue from newBill = {}, e={}", newBill,e);
                 }
 //                        }
 //                    for(){
@@ -1375,6 +1378,7 @@ public class AssetServiceImpl implements AssetService {
                     billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
                     billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
                 }catch (Exception e){
+                    LOGGER.error("date parsed error for bill item list , e= {}",e);
                     continue;
                 }
                 //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
@@ -1445,6 +1449,8 @@ public class AssetServiceImpl implements AssetService {
         LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
+            LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
+            LOGGER.error("failed calculation", e);
         }
     }
 
