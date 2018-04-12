@@ -167,21 +167,34 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (memberDTO != null)
                 detailId = memberDTO.getDetailId();
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            if (memberDetail != null) {
-                memberDetail.setEnName(cmd.getContactEnName());
-                memberDetail.setRegionCode(cmd.getRegionCode());
-                memberDetail.setContactShortToken(cmd.getContactShortToken());
-                memberDetail.setCheckInTime(ArchivesUtil.currentDate());
-                memberDetail.setEmploymentTime(ArchivesUtil.currentDate());
-                memberDetail.setEmployeeType(EmployeeType.FULLTIME.getCode());
-                memberDetail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
-                memberDetail.setWorkEmail(cmd.getWorkEmail());
-                memberDetail.setContractPartyId(cmd.getOrganizationId());
+            if (memberDetail == null)
+                return null;
+            memberDetail.setEnName(cmd.getContactEnName());
+            memberDetail.setRegionCode(cmd.getRegionCode());
+            memberDetail.setContactShortToken(cmd.getContactShortToken());
+
+            memberDetail.setWorkEmail(cmd.getWorkEmail());
+            memberDetail.setContractPartyId(cmd.getOrganizationId());
+
+            //  just update the info.
+            if(TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE)
+            {
                 organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                 dto.setDetailId(detailId);
                 dto.setContactName(memberDetail.getContactName());
                 dto.setContactToken(memberDetail.getContactToken());
+                return null;
             }
+
+            //  initial data for add function
+            memberDetail.setCheckInTime(ArchivesUtil.currentDate());
+            memberDetail.setEmploymentTime(ArchivesUtil.currentDate());
+            memberDetail.setEmployeeType(EmployeeType.FULLTIME.getCode());
+            memberDetail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
+            organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+            dto.setDetailId(detailId);
+            dto.setContactName(memberDetail.getContactName());
+            dto.setContactToken(memberDetail.getContactToken());
 
             //  3.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
