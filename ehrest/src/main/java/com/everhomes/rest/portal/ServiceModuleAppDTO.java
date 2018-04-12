@@ -13,6 +13,9 @@ package com.everhomes.rest.portal;
  *     <li>moduleControlType: 模块控制类型 参考{@link com.everhomes.rest.oauth2.ModuleManagementType}</li>
  *     <li>orgAppId: 公司安装app的id</li>
  *     <li>appType: appType应用类型 0-oa, 1-园区, 2-服务{@link com.everhomes.rest.module.ServiceModuleAppType}</li>
+ *     <li>description: 应用描述</li>
+ *     <li>version: 版本信息</li>
+ *     <li>appCategory: 应用分类信息</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -28,6 +31,9 @@ public class ServiceModuleAppDTO {
     private String moduleControlType;
     private Long orgAppId;
     private Byte appType;
+    private String description;
+    private String version;
+    private String appCategory;
 
 
     public Long getId() {
@@ -116,5 +122,29 @@ public class ServiceModuleAppDTO {
 
     public void setAppType(Byte appType) {
         this.appType = appType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getAppCategory() {
+        return appCategory;
+    }
+
+    public void setAppCategory(String appCategory) {
+        this.appCategory = appCategory;
     }
 }

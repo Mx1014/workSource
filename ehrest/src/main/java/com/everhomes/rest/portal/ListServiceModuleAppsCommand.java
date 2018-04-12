@@ -3,6 +3,8 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
@@ -11,6 +13,8 @@ import com.everhomes.util.StringHelper;
  *     <li>customTag: 业务Tag</li>
  *     <li>customPath: 业务参数</li>
  *     <li>versionId: versionId</li>
+ *     <li>keywords: 关键字</li>
+ *     <li>developerIds: 开发者ids</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
@@ -26,6 +30,10 @@ public class ListServiceModuleAppsCommand {
 	private String customPath;
 
 	private Long versionId;
+
+	private String keywords;
+
+	private List<Long> developerIds;
 
 	public ListServiceModuleAppsCommand() {
 
@@ -87,5 +95,21 @@ public class ListServiceModuleAppsCommand {
 
 	public void setVersionId(Long versionId) {
 		this.versionId = versionId;
+	}
+
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
+
+	public List<Long> getDeveloperIds() {
+		return developerIds;
+	}
+
+	public void setDeveloperIds(List<Long> developerIds) {
+		this.developerIds = developerIds;
 	}
 }
