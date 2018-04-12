@@ -41,7 +41,7 @@ public class ServiceModuleAppDTO {
     private Long orgAppId;
     private Byte appType;
     private String description;
-    private String version;
+    private String displayVersion;
     private String appCategory;
     private Byte mobileFlag;
     private Byte pcFlag;
@@ -150,14 +150,6 @@ public class ServiceModuleAppDTO {
         this.description = description;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     public String getAppCategory() {
         return appCategory;
     }
@@ -236,5 +228,13 @@ public class ServiceModuleAppDTO {
 
     public void setDefaultFlag(Byte defaultFlag) {
         this.defaultFlag = defaultFlag;
+    }
+
+    public String getDisplayVersion() {
+        return displayVersion;
+    }
+
+    public void setDisplayVersion(String displayVersion) {
+        this.displayVersion = displayVersion;
     }
 }

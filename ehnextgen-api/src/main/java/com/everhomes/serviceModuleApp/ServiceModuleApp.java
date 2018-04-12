@@ -10,6 +10,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private static final long serialVersionUID = -4427568958167322339L;
 
     private Long menuId;
+    private String displayVersion;
     private String appCategory;
     private String description;
     private Byte mobileFlag;
@@ -122,5 +123,13 @@ public class ServiceModuleApp extends EhServiceModuleApps {
 
     public void setDefaultFlag(Byte defaultFlag) {
         this.defaultFlag = defaultFlag;
+    }
+
+    public String getDisplayVersion() {
+        return displayVersion;
+    }
+
+    public void setDisplayVersion(String displayVersion) {
+        this.displayVersion = displayVersion;
     }
 }

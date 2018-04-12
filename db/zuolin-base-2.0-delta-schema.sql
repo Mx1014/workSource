@@ -51,7 +51,7 @@ CREATE TABLE `eh_service_module_app_profile` (
   `id` bigint(20) NOT NULL,
   `origin_id` bigint(20) NOT NULL,
   `app_category` varchar(255) DEFAULT NULL,
-  `version` varchar(128) DEFAULT NULL,
+  `display_version` varchar(128) DEFAULT NULL,
   `description` varchar(1024) DEFAULT NULL,
   `mobile_flag` tinyint(4) DEFAULT 0,
   `mobile_uri` varchar(1024) DEFAULT NULL,
@@ -75,3 +75,5 @@ ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  dat
 
 -- 新增开发者字段
 ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) NULL COMMENT 'developer owner id';
+
+-- 新增
