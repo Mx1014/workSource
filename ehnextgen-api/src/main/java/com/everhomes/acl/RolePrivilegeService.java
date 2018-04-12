@@ -9,6 +9,7 @@ import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 
@@ -388,6 +389,8 @@ public interface RolePrivilegeService {
      * @return
      */
 	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects);
+
+	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects, CommunityFetchType fetchType);
 
 	List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd);
 

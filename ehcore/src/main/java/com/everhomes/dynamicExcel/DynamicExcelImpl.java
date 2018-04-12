@@ -201,7 +201,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     LOGGER.info("import dyanmic excel dynamic sheets include = {}", dynamicSheet);
                     List<DynamicField> dynamicFields = dynamicSheet.getDynamicFields();
                     if(dynamicFields.size() != headers.size()){
-                        LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {}, ",
+                        LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {},  ",
                                 dynamicSheet,headers);
                         response.setFailedRowNumber(response.getFailedRowNumber()+(sheet.getPhysicalNumberOfRows() - headerRow));
                         continue sheet;
@@ -290,7 +290,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //            //后处理
 //            h.postProcess(response);
 //        }catch (Exception e){}
-        response.write2failCause();
+        response.write2failCause(workbook.getNumberOfSheets());
         return response;
     }
 

@@ -192,6 +192,13 @@ public interface ActivityService {
 	 * @return
 	 */
 	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
+
+	/**
+	 * 通过categoryId查询整个域空间的活动帖子，不区分园区、可见性等
+	 * @param cmd
+	 * @return
+	 */
+	ListActivitiesByCategoryIdResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd);
 	
 	void signupOrderRefund(Activity activity, Long userId);
 	

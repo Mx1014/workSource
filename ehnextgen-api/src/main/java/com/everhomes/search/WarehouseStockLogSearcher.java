@@ -15,4 +15,6 @@ public interface WarehouseStockLogSearcher {
     void feedDoc(WarehouseStockLogs log);
     void syncFromDb();
     SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd);
+
+    SearchWarehouseStockLogsResponse queryByOrder(SearchWarehouseStockLogsCommand cmd);
 }

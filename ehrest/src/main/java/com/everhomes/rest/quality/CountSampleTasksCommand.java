@@ -6,9 +6,10 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>ownerId: 例行检查所属owner id</li>
- *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>sampleId: 检查id</li>
+ * <li>ownerId: 例行检查所属owner id</li>
+ * <li>ownerType: 例行检查所属owner类型例如PM</li>
+ * <li>sampleId: 检查id</li>
+ * <li>namespaceId: 域空间id</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -21,6 +22,8 @@ public class CountSampleTasksCommand {
     private String ownerType;
 
     private Long sampleId;
+
+    private Integer namespaceId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -44,6 +47,14 @@ public class CountSampleTasksCommand {
 
     public void setSampleId(Long sampleId) {
         this.sampleId = sampleId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

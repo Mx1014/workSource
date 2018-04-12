@@ -13,5 +13,6 @@ public interface EnergyMeterSearcher {
     void feedDoc(EnergyMeter meter);
     void syncFromDb();
     SearchEnergyMeterResponse queryMeters(SearchEnergyMeterCommand cmd);
+    SearchEnergyMeterResponse querySimpleEnergyMeters(SearchEnergyMeterCommand cmd);
     List<Long> getMeterIds(SearchEnergyMeterCommand cmd);
 }

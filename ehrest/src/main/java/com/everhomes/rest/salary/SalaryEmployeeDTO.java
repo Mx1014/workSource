@@ -1,80 +1,45 @@
 package com.everhomes.rest.salary;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * <ul>
  * <li>userId: 员工id</li>
  * <li>employeeNo: 员工编号(可为空)</li>
  * <li>contactName: 员工姓名</li>
- * <li>department: 员工部门 </li>
- * <li>jobPosition: 员工岗位 </li>
- * <li>salaryGroupId: 批次id</li>
- * <li>salaryGroupName: 批次名称</li>
- * <li>idNumber: 身份证号</li>
- * <li>salaryCardNumber: 银行卡号</li>
- * <li>email: 邮箱</li>
- * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
- * <li>isNormal: 是否为异常员工:0-正常员工 1-异常员工</li>
+ * <li>dismissTime: 离职日期 </li>
+ * <li>checkInTime: 入职日期 </li>
+ * <li>regularSalary: 固定工资合计</li>
+ * <li>shouldPaySalary: 应发合计</li>
+ * <li>realPaySalary: 实发合计</li>
+ * <li>salaryStatus: 状态: 0 正常 1 实发合计为负 2 未定薪</li>
  * </ul>
  */
 public class SalaryEmployeeDTO {
 
-    private Long userId;
-
-    private Long detailId;
-
-    private String employeeNo;
-
+    private Long id;
     private String contactName;
+    private Long ownerId;
+    private Long dismissTime;
+    private Long checkInTime;
 
-    private String department;
-
-    private String jobPosition;
-
-    private Long salaryGroupId;
-
-    private String salaryGroupName;
-
-    private String idNumber;
-
-    private String salaryCardNumber;
-
-    private String email;
-
-    private Byte isConfirmed = 1;
-
-    private Byte isNormal = 0;
+    private Long userDetailId;
+    private BigDecimal regularSalary;
+    private BigDecimal shouldPaySalary;
+    private BigDecimal realPaySalary;
+    private Byte salaryStatus;
 
     public SalaryEmployeeDTO() {
     }
 
-    public Long getUserId() {
-        return userId;
+    public Long getCheckInTime() {
+        return checkInTime;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getDetailId() {
-        return detailId;
-    }
-
-    public void setDetailId(Long detailId) {
-        this.detailId = detailId;
-    }
-
-    public String getEmployeeNo() {
-        return employeeNo;
-    }
-
-    public void setEmployeeNo(String employeeNo) {
-        this.employeeNo = employeeNo;
+    public void setCheckInTime(Long checkInTime) {
+        this.checkInTime = checkInTime;
     }
 
     public String getContactName() {
@@ -85,76 +50,68 @@ public class SalaryEmployeeDTO {
         this.contactName = contactName;
     }
 
-    public String getDepartment() {
-        return department;
+    public Long getDismissTime() {
+        return dismissTime;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setDismissTime(Long dismissTime) {
+        this.dismissTime = dismissTime;
     }
 
-    public String getJobPosition() {
-        return jobPosition;
+    public Long getId() {
+        return id;
     }
 
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Long getSalaryGroupId() {
-        return salaryGroupId;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setSalaryGroupId(Long salaryGroupId) {
-        this.salaryGroupId = salaryGroupId;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
-    public String getSalaryGroupName() {
-        return salaryGroupName;
+    public BigDecimal getRealPaySalary() {
+        return realPaySalary;
     }
 
-    public void setSalaryGroupName(String salaryGroupName) {
-        this.salaryGroupName = salaryGroupName;
+    public void setRealPaySalary(BigDecimal realPaySalary) {
+        this.realPaySalary = realPaySalary;
     }
 
-    public String getIdNumber() {
-        return idNumber;
+    public BigDecimal getRegularSalary() {
+        return regularSalary;
     }
 
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
+    public void setRegularSalary(BigDecimal regularSalary) {
+        this.regularSalary = regularSalary;
     }
 
-    public String getSalaryCardNumber() {
-        return salaryCardNumber;
+    public Byte getSalaryStatus() {
+        return salaryStatus;
     }
 
-    public void setSalaryCardNumber(String salaryCardNumber) {
-        this.salaryCardNumber = salaryCardNumber;
+    public void setSalaryStatus(Byte salaryStatus) {
+        this.salaryStatus = salaryStatus;
     }
 
-    public String getEmail() {
-        return email;
+    public BigDecimal getShouldPaySalary() {
+        return shouldPaySalary;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setShouldPaySalary(BigDecimal shouldPaySalary) {
+        this.shouldPaySalary = shouldPaySalary;
     }
 
-    public Byte getIsConfirmed() {
-        return isConfirmed;
+    public Long getUserDetailId() {
+        return userDetailId;
     }
 
-    public void setIsConfirmed(Byte isConfirmed) {
-        this.isConfirmed = isConfirmed;
-    }
-
-    public Byte getIsNormal() {
-        return isNormal;
-    }
-
-    public void setIsNormal(Byte isNormal) {
-        this.isNormal = isNormal;
+    public void setUserDetailId(Long userDetailId) {
+        this.userDetailId = userDetailId;
     }
 
     @Override

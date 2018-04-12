@@ -111,6 +111,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TOKEN.eq(namespaceCustomerToken));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
         query.fetch().map((r) -> {

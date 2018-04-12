@@ -4,14 +4,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>0: none 未审核</li>
- *     <li>1: qualified 审核通过</li>
- *     <li>2: unqualified 审核不通过</li>
- * </ul>
- * Created by ying.xiong on 2017/5/11.
- */
+ *     <li>3:未发起</li>
+ *     <li>0: none 审批中</li>
+         *     <li>1: qualified 审核通过</li>
+         *     <li>2: unqualified 审核不通过</li>
+         * </ul>
+         * Created by ying.xiong on 2017/5/11.
+         */
 public enum WarehouseRequestReviewResult {
-    NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2);
+    UNINITIALIZED((byte)3),NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2);
 
     private byte code;
 

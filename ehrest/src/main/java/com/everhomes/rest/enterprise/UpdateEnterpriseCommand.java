@@ -33,6 +33,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *
  */
 public class UpdateEnterpriseCommand {
+	private Long manageOrganizationId;
 	private Long id;
 	private String   name;
     private String   displayName;
@@ -61,6 +62,14 @@ public class UpdateEnterpriseCommand {
 	private Double   latitude;
 	private String website;
 	private String unifiedSocialCreditCode;
+
+	public Long getManageOrganizationId() {
+		return manageOrganizationId;
+	}
+
+	public void setManageOrganizationId(Long manageOrganizationId) {
+		this.manageOrganizationId = manageOrganizationId;
+	}
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;

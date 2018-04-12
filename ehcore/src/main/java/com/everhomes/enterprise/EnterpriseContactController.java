@@ -45,15 +45,8 @@ import com.everhomes.rest.enterprise.UpdateContactCommand;
 import com.everhomes.rest.enterprise.importContactsCommand;
 import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 
 /**

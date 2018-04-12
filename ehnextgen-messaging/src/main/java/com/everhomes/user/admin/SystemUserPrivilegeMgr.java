@@ -1,10 +1,10 @@
 package com.everhomes.user.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.everhomes.acl.*;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.domain.Domain;
-import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
@@ -14,8 +14,8 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
-import com.everhomes.portal.ServiceModuleApp;
-import com.everhomes.portal.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -29,18 +29,21 @@ import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.user.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+
+
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
+import com.everhomes.util.RuntimeErrorException;
+import org.springframework.util.StringUtils;
 
 @Component("SystemUser")
 public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
@@ -72,6 +75,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 
 
     @Override
@@ -216,7 +222,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             }
         }
         // 查询app关联的moduleId
-        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        ServiceModuleApp app  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appId);
+//        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
         if(app != null && p_moduleId != 0L && p_moduleId.longValue() == app.getModuleId().longValue()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
           return checkModuleAppAdmin(namespaceId, ownerType, ownerId, userId, p_moduleId, appId, communityId, organizationId);
         }
@@ -290,7 +297,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId) {
-        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+//        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        ServiceModuleApp app  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appId);
         if(app == null)
             return false;
         ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(app.getModuleId());
@@ -332,12 +340,33 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = null;
         if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
+            appId = apps.getServiceModuleApps().get(0).getOriginId();
         }
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(appId ==  null){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  moduleId = "+moduleId+", customTag = "+customTag);
+        }
+        if(currentOrgId == null){
+            OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
+            if(member != null  && !StringUtils.isEmpty(member.getGroupPath())){
+                currentOrgId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            }
+        }
+        if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }else{
+            return true;
+        }
+    }
+
+    @Override
+    public boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId) {
+        LOGGER.debug("checkUserPrivilege get appId = {}", appId);
+        if(appId ==  null){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  appId " + appId);
         }
         if(currentOrgId == null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
@@ -446,6 +475,7 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
                             LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;
                         }
+
                         if(checkSuperAdmin(userId, currentOrgId)){
                             LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;

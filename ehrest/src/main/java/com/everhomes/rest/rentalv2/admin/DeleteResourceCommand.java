@@ -8,7 +8,16 @@ package com.everhomes.rest.rentalv2.admin;
  */
 public class DeleteResourceCommand {
 
+	private String resourceType;
 	private Long id;
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Long getId() {
 		return id;

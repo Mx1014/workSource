@@ -6,11 +6,28 @@ import java.util.Map;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * 
+ * <ul>
+ * <li>sourceType : ul_printer 解锁打印机/驱动扫码 {@link com.everhomes.rest.print.PrintScanTarget}</li>
+ * </ul>
+ *
+ *  @author:dengs 2018年2月11日
+ */
 public class UnlockPrinterResponse {
+	@Deprecated
 	private String url;
+	@Deprecated
 	@ItemType(String.class)
 	private Map<String,String> params;
+	private String sourceType;
 	
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
 	public UnlockPrinterResponse(String url, Map<String, String> params) {
 		super();
 		this.url = url;

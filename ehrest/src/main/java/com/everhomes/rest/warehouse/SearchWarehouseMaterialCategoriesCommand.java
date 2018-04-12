@@ -30,6 +30,16 @@ public class SearchWarehouseMaterialCategoriesCommand {
 
     private Integer pageSize;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public String getCategoryNumber() {
         return categoryNumber;
     }

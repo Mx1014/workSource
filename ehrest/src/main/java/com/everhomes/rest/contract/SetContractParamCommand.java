@@ -1,5 +1,9 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -29,6 +33,37 @@ public class SetContractParamCommand {
     private Byte expiredUnit;
     private Integer receivableDate;
     private Byte receivableUnit;
+
+    private Integer paidPeriod;
+
+    @ItemType(ContractParamGroupMapDTO.class)
+    private List<ContractParamGroupMapDTO> notifyGroups;
+    @ItemType(ContractParamGroupMapDTO.class)
+    private List<ContractParamGroupMapDTO> paidGroups;
+
+    public List<ContractParamGroupMapDTO> getNotifyGroups() {
+        return notifyGroups;
+    }
+
+    public void setNotifyGroups(List<ContractParamGroupMapDTO> notifyGroups) {
+        this.notifyGroups = notifyGroups;
+    }
+
+    public List<ContractParamGroupMapDTO> getPaidGroups() {
+        return paidGroups;
+    }
+
+    public void setPaidGroups(List<ContractParamGroupMapDTO> paidGroups) {
+        this.paidGroups = paidGroups;
+    }
+
+    public Integer getPaidPeriod() {
+        return paidPeriod;
+    }
+
+    public void setPaidPeriod(Integer paidPeriod) {
+        this.paidPeriod = paidPeriod;
+    }
 
     public Long getId() {
         return id;

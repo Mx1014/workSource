@@ -12,6 +12,7 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -19,6 +20,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
@@ -79,8 +82,11 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	private WorkerPoolFactory workerPoolFactory;
 	@Autowired
 	private JesqueClientFactory jesqueClientFactory;
-
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private PortalService portalService;
+	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if(null == event.getApplicationContext().getParent()) {
@@ -97,7 +103,9 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049200L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
+		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
@@ -354,6 +362,12 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 		createFlowCaseCommand.setContent(content);
 		createFlowCaseCommand.setCurrentOrganizationId(request.getRequestorEnterpriseId());
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+		listServiceModuleAppsCommand.setModuleId(FlowConstants.RELOCATION_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		if (apps!=null && apps.getServiceModuleApps().size()>0)
+			createFlowCaseCommand.setTitle(apps.getServiceModuleApps().get(0).getName());
 
 		String serviceName = localeStringService.getLocalizedString(RelocationTemplateCode.SCOPE,
 				String.valueOf(RelocationTemplateCode.SERVICE_TYPE_NAME), locale, "");

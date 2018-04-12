@@ -5,6 +5,7 @@ import java.util.List;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 
 public interface ServiceModuleService {
@@ -49,4 +50,5 @@ public interface ServiceModuleService {
 
 	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
 
+	ServiceModuleAppDTO findServiceModuleAppById(Long id);
 }

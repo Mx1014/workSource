@@ -137,4 +137,9 @@ public interface ForumService {
     ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd);
 
     CheckModuleAppAdminResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd);
+
+    FindDefaultForumResponse findDefaultForum(FindDefaultForumCommand cmd);
+
+    ListTopicsByForumEntryIdResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd);
+
 }

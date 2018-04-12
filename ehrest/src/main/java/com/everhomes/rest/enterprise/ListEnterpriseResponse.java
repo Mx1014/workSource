@@ -4,6 +4,13 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>enterprises {@link com.everhomes.rest.enterprise.EnterpriseDTO}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class ListEnterpriseResponse {
     private Long nextPageAnchor;
     

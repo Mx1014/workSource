@@ -13,6 +13,7 @@ public class GetUserRelatedAddressesByCommunityCommand {
 	private String ownerType;
     private Long ownerId;
     private String keyword;
+    private Integer namespaceId;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -26,7 +27,15 @@ public class GetUserRelatedAddressesByCommunityCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-    
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

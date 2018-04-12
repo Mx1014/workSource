@@ -1,22 +1,19 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>taskId: 任务id</li>
  *  <li>verificationResult: 上报结果  参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
- *  <li>attachments: 上报内容图片</li>
- *  <li>message: 上报内容文字</li>
- *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
- *  <li>ownerId: 设备所属的主体id</li>
- *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>ownerId: 任务所属的主体id</li>
+ *  <li>ownerType: 任务所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>equipmentTaskReportDetails: 任务下设备检查细项 {@link com.everhomes.rest.equipment.EquipmentTaskReportDetail}</li>
  * </ul>
  */
 public class ReportEquipmentTaskCommand {
@@ -31,13 +28,20 @@ public class ReportEquipmentTaskCommand {
 	
 	@NotNull
 	private String ownerType;
-	
+
+	@ItemType(EquipmentTaskReportDetail.class)
+	private  List<EquipmentTaskReportDetail>  equipmentTaskReportDetails;
+
+	//-----------------以下为上版使用任务上报参数----------------------------------------------
+	@Deprecated
 	@NotNull
 	@ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
-	
+
+	@Deprecated
 	private String message;
-	
+
+	@Deprecated
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
 	
@@ -95,6 +99,14 @@ public class ReportEquipmentTaskCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public List<EquipmentTaskReportDetail> getEquipmentTaskReportDetails() {
+		return equipmentTaskReportDetails;
+	}
+
+	public void setEquipmentTaskReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails) {
+		this.equipmentTaskReportDetails = equipmentTaskReportDetails;
 	}
 
 	@Override

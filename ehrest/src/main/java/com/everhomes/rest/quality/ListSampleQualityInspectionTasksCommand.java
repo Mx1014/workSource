@@ -6,15 +6,16 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>ownerId: 例行检查所属owner id</li>
- *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>communityId: 小区id</li>
- *     <li>sampleId: 例行检查id</li>
- *     <li>communityName: 项目名称</li>
- *     <li>executorName: 执行人姓名</li>
- *     <li>executeStatus: 执行状态 参考{@link com.everhomes.rest.quality.QualityInspectionTaskStatus}</li>
- *      <li>pageAnchor: 锚点</li>
- *      <li>pageSize: 页面大小</li>
+ * <li>ownerId: 例行检查所属owner id</li>
+ * <li>ownerType: 例行检查所属owner类型例如PM</li>
+ * <li>communityId: 小区id</li>
+ * <li>sampleId: 例行检查id</li>
+ * <li>communityName: 项目名称</li>
+ * <li>executorName: 执行人姓名</li>
+ * <li>executeStatus: 执行状态 参考{@link com.everhomes.rest.quality.QualityInspectionTaskStatus}</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 页面大小</li>
+ * <li>namespaceId: 域空间id</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -39,6 +40,8 @@ public class ListSampleQualityInspectionTasksCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -110,6 +113,14 @@ public class ListSampleQualityInspectionTasksCommand {
 
     public void setExecuteStatus(Byte executeStatus) {
         this.executeStatus = executeStatus;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

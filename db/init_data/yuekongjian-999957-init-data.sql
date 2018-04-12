@@ -459,3 +459,32 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `status`, `
 	VALUES (12176,'会议室',0,2,999957,0,0);
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`) 
 	VALUES (12177,'独立办公室',0,2,999957,0,0);
+
+-- update by ryan at 03/12/2018
+-- 更改公众号图标位置
+update eh_launch_pad_items set item_location = '/home', item_group = 'NavigatorGroup3', default_order = '10' where item_name = '访客预约' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home', item_group = 'NavigatorGroup3', default_order = '20' where item_name = '生活配套' and namespace_id = 999957;
+update eh_launch_pad_items set default_order = '30' where item_name = '物业服务' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home', item_group = 'NavigatorGroup3', default_order = '40' where item_name = '企业服务' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '停车缴费' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '快递收发' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '打印服务' and namespace_id = 999957;
+update eh_launch_pad_items set default_order = '20', item_name = '服务预订', item_label = '服务预订' where item_name = '服务预定' and namespace_id = 999957;
+update eh_launch_pad_items set default_order = '30', item_name = '物品租赁', item_label = '物品租赁', icon_uri = 'cs://1/image/aW1hZ2UvTVRvek5qZzNNMk5sT1RnMVptTTRNRGN3TkRBMlpXTTBOREZrT1dRMk1HUmhaUQ' where item_name = '日常物品租赁' and namespace_id = 999957;
+update eh_launch_pad_items set default_order = '40', item_name = '缴费提醒', item_label = '缴费提醒', icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5HVTFZbVprTWpnNE16RTNaV0V3TmpkbVl6ZzNZelE1WkRWbU16QTVOdw' where item_name = '账单信息' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '车位预定' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '物业缴费' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '10', icon_uri = 'cs://1/image/aW1hZ2UvTVRvNFl6WXhObVEzTURnNFl6RTNZV1JqTUdKaVlXTTFOamRoWWpabE1qSmxOZw' where item_name = '门禁' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '20' where item_name = '越秀集团' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '30' where item_name = '八大服务体系' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '40' where item_name = '物业百项服务' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '50' where item_name = '越空间1' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '60' where item_name = '入驻团队' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '70' where item_name = '入孵申请' and namespace_id = 999957;
+update eh_launch_pad_items set item_location = '/home/yuespace', item_group = 'NavigatorGroup1', default_order = '80' where item_name = '客服服务' and namespace_id = 999957;
+delete from eh_launch_pad_items where item_name = '商务服务' and namespace_id = 999957;
+set @scope_id = SELECT MAX(id) from eh_launch_pad_items;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@scope_id := @scope_id + 1, '999957', '0', '0', '0', '/home', 'NavigatorGroup3', '投诉建议', '投诉建议', 'cs://1/image/aW1hZ2UvTVRvNU1qbGxOMk16WWpnM09UQXpZak0wWmpkaVlUaGhaamc0TUdVeE56Y3pZUQ', '1', '1', '14', '', '60', '0', '1', '1', '1', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@scope_id := @scope_id + 1, '999957', '0', '0', '0', '/home', 'NavigatorGroup3', '投诉建议', '投诉建议', 'cs://1/image/aW1hZ2UvTVRvNU1qbGxOMk16WWpnM09UQXpZak0wWmpkaVlUaGhaamc0TUdVeE56Y3pZUQ', '1', '1', '14', '', '60', '0', '1', '1', '1', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', NULL, NULL, '0', NULL, NULL);
+delete from eh_me_web_menus where `name` = '会员中心' and namespace_id = 999957;
+delete from eh_me_web_menus where `name` = '意见反馈' and namespace_id = 999957;

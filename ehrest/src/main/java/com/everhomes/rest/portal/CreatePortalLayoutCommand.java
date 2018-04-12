@@ -4,35 +4,25 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>label: 门户layout名称</li>
- * <li>description: 门户layout描述</li>
- * <li>layoutTemplateId: 门户layout的模板id</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>versionId: versionId</li>
+ *     <li>label: 门户layout名称</li>
+ *     <li>description: 门户layout描述</li>
+ *     <li>layoutTemplateId: 门户layout的模板id</li>
  * </ul>
  */
 public class CreatePortalLayoutCommand {
 
 	private Integer namespaceId;
 
+	private Long versionId;
+
 	private String label;
 
 	private String description;
 
 	private Long layoutTemplateId;
-
-	public CreatePortalLayoutCommand() {
-
-	}
-
-	public CreatePortalLayoutCommand(Integer namespaceId, String label, String description, Long layoutTemplateId) {
-		super();
-		this.namespaceId = namespaceId;
-		this.label = label;
-		this.description = description;
-		this.layoutTemplateId = layoutTemplateId;
-	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -64,6 +54,14 @@ public class CreatePortalLayoutCommand {
 
 	public void setLayoutTemplateId(Long layoutTemplateId) {
 		this.layoutTemplateId = layoutTemplateId;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
 	}
 
 	@Override

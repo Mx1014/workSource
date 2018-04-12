@@ -4,14 +4,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
+import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +51,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_CATEGORIES.STATUS.equal(CommonStatus.ACTIVE.getCode()));
 		step.where(condition);
 		List<OfficeCubicleCategory> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_CATEGORIES.ID.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleCategory.class);
@@ -81,6 +78,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleCategories.class));
 		category.setId(id);
+		category.setStatus(CommonStatus.ACTIVE.getCode());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleCategoriesRecord record = ConvertHelper.convert(category, EhOfficeCubicleCategoriesRecord.class);
 		InsertQuery<EhOfficeCubicleCategoriesRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
@@ -110,27 +108,31 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 	@Override
 	public void deleteCategoriesBySpaceId(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhOfficeCubicleCategoriesRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
-		step.where(condition);
-		step.execute();
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		DeleteWhereStep<EhOfficeCubicleCategoriesRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
+//		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_OFFICE_CUBICLE_CATEGORIES)
+				.set(Tables.EH_OFFICE_CUBICLE_CATEGORIES.STATUS,CommonStatus.INACTIVE.getCode())
+				.where(Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id))
+				.execute();
 	}
 
 	@Override
-	public void deleteAttachmentsBySpaceId(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
-		step.where(condition);
-		step.execute();
-	}
-	@Override
-	public List<OfficeCubicleOrder> searchOrders(Long beginDate, Long endDate, String reserveKeyword, String spaceName,
-			CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId) {
+	public List<OfficeCubicleOrder> searchOrders(String ownerType,Long ownerId,Long beginDate, Long endDate, String reserveKeyword, String spaceName,
+												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId, Byte workFlowStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
+		if(ownerType!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_TYPE.eq(ownerType));
+		}
+		if(ownerId!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_ID.eq(ownerId));
+		}
+		if(workFlowStatus !=null){
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.WORK_FLOW_STATUS.eq(workFlowStatus));
+		}
 		if (null != beginDate)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
@@ -151,14 +153,28 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			return result;
 		return null;
 	}
+	@Override
+	public void deleteAttachmentsBySpaceId(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
+		step.where(condition);
+		step.execute();
+	}
 
 	@Override
-	public List<OfficeCubicleSpace> searchSpaces(String keyWords, CrossShardListingLocator locator, int pageSize,
+	public List<OfficeCubicleSpace> searchSpaces(String ownerType,Long ownerId,String keyWords, CrossShardListingLocator locator, int pageSize,
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_SPACES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId) ;
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
+		if(ownerId!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.eq(ownerId));
+		}
+		if(ownerType!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_TYPE.eq(ownerType));
+		}
 		if (StringUtils.isNotBlank(keyWords)) {
 			step.join(Tables.EH_USERS).on(Tables.EH_USERS.ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.MANAGER_UID));
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%")
@@ -212,11 +228,15 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
-	public List<OfficeCubicleSpace> querySpacesByCityId(Long cityId, CrossShardListingLocator locator, int pageSize,
+	public List<OfficeCubicleSpace> querySpacesByCityId(String ownerType,Long ownerId,Long cityId, CrossShardListingLocator locator, int pageSize,
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
+		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_RANGES,Tables.EH_OFFICE_CUBICLE_SPACES);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_TYPE.eq(ownerType);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_ID.eq(ownerId));
+		condition =  condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.ID));
+
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (null != cityId)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.eq(cityId));
@@ -224,9 +244,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
 		step.where(condition);
-		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map((r) -> {
-			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
-		});
+		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map(new DefaultRecordMapper(Tables.EH_OFFICE_CUBICLE_SPACES.recordType(), OfficeCubicleSpace.class));
 		if (null != result && result.size() > 0)
 			return result;
 		return null;
@@ -288,4 +306,30 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return new ArrayList<OfficeCubicleOrder>();
 	}
 
+	@Override
+	public List<OfficeCubicleSpace> listEmptyOwnerSpace() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_TYPE.isNull();
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.isNull());
+
+		step.where(condition);
+		List<OfficeCubicleSpace> result = step.fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
+		});
+		return result;
+	}
+
+	@Override
+	public List<OfficeCubicleOrder> listEmptyOwnerOrders() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_TYPE.isNull();
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_ID.isNull());
+		step.where(condition);
+		List<OfficeCubicleOrder> result = step.fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
+		});
+		return result;
+	}
 }

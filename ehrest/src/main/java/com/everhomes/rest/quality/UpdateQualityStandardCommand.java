@@ -1,6 +1,7 @@
 package com.everhomes.rest.quality;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -17,8 +18,10 @@ import java.util.List;
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
  *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
+ *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>communities: 应用到的项目id列表</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateQualityStandardCommand {
@@ -31,24 +34,27 @@ public class UpdateQualityStandardCommand {
 	
 	@NotNull
 	private String ownerType;
-	
+
+	private Long targetId;
+
+	private String targetType;
+
 	private String name;
 	
 	private String standardNumber;
 	
 	private String description;
-	
+
+	private RepeatSettingsDTO repeat;
+
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
 	@ItemType(Long.class)
 	private List<Long> specificationIds;
-	
-	private Long targetId;
-	
-	private String targetType;
-
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private Integer namespaceId;
 
 	public Long getId() {
 		return id;
@@ -136,6 +142,22 @@ public class UpdateQualityStandardCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public RepeatSettingsDTO getRepeat() {
+		return repeat;
+	}
+
+	public void setRepeat(RepeatSettingsDTO repeat) {
+		this.repeat = repeat;
 	}
 
 	@Override

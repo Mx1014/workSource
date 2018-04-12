@@ -16,6 +16,15 @@ public class OrganizationOwnerAddressCommand {
     @NotNull private Long addressId;
     private Byte livingStatus;
     private Long checkInDate;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getAddressId() {
         return addressId;

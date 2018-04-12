@@ -4,15 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.CityDTO;
-import com.everhomes.rest.officecubicle.DeleteSpaceCommand;
-import com.everhomes.rest.officecubicle.DeleteUserSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
-import com.everhomes.rest.officecubicle.OfficeOrderDTO;
-import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
-import com.everhomes.rest.officecubicle.QuerySpacesCommand;
-import com.everhomes.rest.officecubicle.QuerySpacesResponse;
+import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
@@ -32,14 +24,14 @@ public interface OfficeCubicleService {
 
 	SearchSpaceOrdersResponse searchSpaceOrders(SearchSpaceOrdersCommand cmd);
 
-	HttpServletResponse exprotSpaceOrders(SearchSpaceOrdersCommand cmd,
+	HttpServletResponse exportSpaceOrders(SearchSpaceOrdersCommand cmd,
 			HttpServletResponse response);
 
-	List<CityDTO> queryCities();
+	List<CityDTO> queryCities(QueryCitiesCommand cmd);
 
 	OfficeSpaceDTO getSpaceDetail(GetSpaceDetailCommand cmd);
 
-	void addSpaceOrder(AddSpaceOrderCommand cmd);
+	AddSpaceOrderResponse addSpaceOrder(AddSpaceOrderCommand cmd);
 
 	List<OfficeOrderDTO> getUserOrders();
 
@@ -47,4 +39,5 @@ public interface OfficeCubicleService {
 
 	QuerySpacesResponse querySpaces(QuerySpacesCommand cmd);
 
+    void dataMigration();
 }

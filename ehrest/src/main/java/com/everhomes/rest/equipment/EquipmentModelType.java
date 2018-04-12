@@ -22,10 +22,6 @@ public enum EquipmentModelType {
         return code;
     }
 
-    public void setCode(byte code) {
-        this.code = code;
-    }
-
     public static EquipmentModelType fromStatus(byte code) {
         for (EquipmentModelType v : EquipmentModelType.values()) {
             if (v.getCode() == code)

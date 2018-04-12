@@ -1,9 +1,12 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <ul>
@@ -49,6 +52,26 @@ public class UpdateOrganizationOwnerCommand {
 
     private String ownerType;
     private Long ownerId;
+    private Integer namespaceId;
+
+    @ItemType(OrganizationOwnerAddressCommand.class)
+    private List<OrganizationOwnerAddressCommand> addresses;
+
+    public List<OrganizationOwnerAddressCommand> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<OrganizationOwnerAddressCommand> addresses) {
+        this.addresses = addresses;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getOwnerType() {
         return ownerType;

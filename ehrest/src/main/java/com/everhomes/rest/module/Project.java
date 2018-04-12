@@ -8,7 +8,7 @@ package com.everhomes.rest.module;
  * <li>projectId: 项目id</li>
  * <li>projectType: 项目类型 </li>
  * <li>projectName: 项目名称 </li>
- * <li>projectName: 项目名称 </li>
+ * <li>communityType: 园区类型 </li>
  * </ul>
  */
 public class Project {

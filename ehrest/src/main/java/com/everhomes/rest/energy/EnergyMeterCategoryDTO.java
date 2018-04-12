@@ -24,6 +24,16 @@ public class EnergyMeterCategoryDTO {
     @ItemType(String.class)
     private List<String> communityName;
 
+    private String lastTime;
+
+    public String getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(String lastTime) {
+        this.lastTime = lastTime;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -63,6 +73,8 @@ public class EnergyMeterCategoryDTO {
     public void setName(String name) {
         this.name = name;
     }
+
+
 
     @Override
     public String toString() {
