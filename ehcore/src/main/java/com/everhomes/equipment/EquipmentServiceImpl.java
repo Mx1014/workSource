@@ -5518,6 +5518,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
 				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
@@ -5527,6 +5528,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 					} else {
 						dto.setGroupName(position.getName());
 					}
+				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
+					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+					position = new OrganizationJobPosition();
+					position.setName(organization.getName());
 				}
 				return dto;
 			}).collect(Collectors.toList());
