@@ -871,6 +871,7 @@ public class BusinessOpenController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+
     
     @RequestMapping("abdir")
     @RequireAuthentication(false)

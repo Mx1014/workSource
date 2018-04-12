@@ -21,6 +21,9 @@ import java.util.List;
  * <li>targetName:客户名称</li>
  * <li>billGroupDTO:账单组数据，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单</li>
+ * <li>dateStrBegin:计费开始</li>
+ * <li>dateStrEnd:计费结束</li>
+ * <li>isOwed:是否欠费，0：正常；1：欠费</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -36,6 +39,33 @@ public class CreateBillCommand {
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private Byte isSettled;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private Byte isOwed;
+
+    public Byte getIsOwed() {
+        return isOwed;
+    }
+
+    public void setIsOwed(Byte isOwed) {
+        this.isOwed = isOwed;
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
 
     public CreateBillCommand() {
     }
