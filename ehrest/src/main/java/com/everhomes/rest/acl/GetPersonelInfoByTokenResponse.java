@@ -4,7 +4,7 @@ package com.everhomes.rest.acl;
  * <ul>
  * <li>userId：用户Id</li>
  * <li>detailId：人员档案id</li>
- * <li>nickName: 用户名称/li>
+ * <li>nickName: 用户名称</li>
  * <li>cotactName: 人员档案名称</li>
  * <li>isTopAdminFlag：是否是超级管理员</li>
  * <li>isSystemAdminFlag：是否是系统管理员</li>

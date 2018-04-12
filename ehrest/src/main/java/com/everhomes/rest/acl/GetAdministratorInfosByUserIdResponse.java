@@ -4,7 +4,7 @@ package com.everhomes.rest.acl;
  * <ul>
  * <li>isTopAdminFlag：是否是超级管理员</li>
  * <li>isSystemAdminFlag：是否是系统管理员</li>
- * <li>topAdminName: 超级管理员名字/li>
+ * <li>topAdminName: 超级管理员名字</li>
  * <li>topAdminToken: 超级管理员手机号</li>
  * </ul>
  */
