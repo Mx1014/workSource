@@ -191,7 +191,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         builder.setQuery(qb);
         //unMappedType
        // builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC)); NumericComparator派生类支持 float、double、int 、long
-        builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.ASC));
+        builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
 
         SearchResponse rsp = builder.execute().actionGet();
 
