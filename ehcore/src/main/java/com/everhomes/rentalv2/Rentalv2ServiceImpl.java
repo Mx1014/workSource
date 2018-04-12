@@ -8001,6 +8001,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
+		//每次获取延时支付信息 都重置一次之前未支付留下的信息
+		restoreRentalBill(bill);
+
 		List<RentalBillRuleDTO> rules = new ArrayList<>();
 
 		RentalCell lastCell = null;
@@ -8087,16 +8090,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 			processCells(rs, bill.getRentalType());
 			updateRentalOrder(rs,bill,new BigDecimal(0),cmd.getCellCount(),false);
+			//发消息
+			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+
+			handler.renewRentalOrderSendMessage(bill);
 		}
 		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
 
-		//发消息
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
-		handler.renewRentalOrderSendMessage(bill);
 
 		return bill;
 	}
@@ -8107,6 +8111,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		processCells(rs, rentalBill.getRentalType());
 		updateRentalOrder(rs, rentalBill, null, rentalCount, false);
 		rentalBill.setResourceTotalMoney(rentalBill.getPayTotalMoney());
+
+		//发消息
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
+
+		handler.renewRentalOrderSendMessage(rentalBill);
 	}
 
 	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
@@ -8334,6 +8343,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		order.setPayTotalMoney(order.getResourceTotalMoney());
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
 		order.setRentalCount(resourceOrders.size()+0.0);
+		rentalv2Provider.updateRentalBill(order);
 	}
 	@Override
 	public GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd) {

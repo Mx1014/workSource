@@ -11,14 +11,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetBannersBySceneCommand {
-    private String bannerLocation;
-    
-    private String bannerGroup;
-    
-    private String sceneToken;
 
-    public GetBannersBySceneCommand() {
-    }
+    private String bannerLocation;
+    private String bannerGroup;
+    private String sceneToken;
 
     public String getBannerLocation() {
         return bannerLocation;

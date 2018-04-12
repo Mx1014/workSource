@@ -229,6 +229,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -3532,7 +3533,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (null == cmd.getPageAnchor()) {
 			cmd.setPageAnchor(0L);
 		}
-		Integer offset = cmd.getPageAnchor().intValue();
+		Long offset = cmd.getPageAnchor();
 
 		List<String> targetTypes = new ArrayList<>();
 		List<Long> targetIds = new ArrayList<>();
@@ -3555,7 +3556,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
-			response.setNextPageAnchor((long) (offset + 1));
+			response.setNextPageAnchor(allTasks.get(allTasks.size() - 1).getId());
 		}
 
 		List<EquipmentTaskDTO> dtos = new ArrayList<>();
@@ -3580,16 +3581,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -6);
 		Integer offset = cmd.getPageAnchor().intValue();
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listPersonalDoneTasks(cmd.getTargetId(), cmd.getInspectionCategoryId(), pageSize + 1, offset, startTime);
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (tasks != null && tasks.size() > 0) {
+			dtos = tasks.stream().map((r) -> {
+				EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+				dto.setStatus(EquipmentTaskStatus.PERSONAL_DONE.getCode());
+				return dto;
+			}).collect(Collectors.toList());
+			response.setTasks(dtos);
+		}
 		if (tasks != null && tasks.size() > pageSize) {
 			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		} else {
 			response.setNextPageAnchor(null);
-
 		}
+
 		return response;
 	}
 
-	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
+	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
 		List<EquipmentInspectionTasks> allTasks;
 		List<Long> executePlanIds = new ArrayList<>();
 		List<Long> reviewPlanIds = new ArrayList<>();
@@ -3620,7 +3630,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return allTasks;
 	}
 
-	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds) {
+	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds) {
 		List<EquipmentInspectionTasks> allTasks;
 		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 				targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
@@ -3684,7 +3694,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-															List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, Timestamp lastSyncTime, Long userId) {
+															List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, Timestamp lastSyncTime, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 		if (inspectionCategoryId == null) {
@@ -5508,6 +5518,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
 				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
@@ -5517,6 +5528,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 					} else {
 						dto.setGroupName(position.getName());
 					}
+				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
+					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+					position = new OrganizationJobPosition();
+					position.setName(organization.getName());
 				}
 				return dto;
 			}).collect(Collectors.toList());
@@ -5566,7 +5581,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		inActiveTaskByPlanId(cmd.getId());
+		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 
@@ -5926,7 +5941,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
 			if (itemDTOS != null && itemDTOS.size() > 0) {
-				items.addAll(itemDTOS);
+				items.addAll(itemDTOS.stream().sorted(Comparator.comparing(InspectionItemDTO::getDefaultOrder)).collect(Collectors.toList()));
 			}
 		});
 
@@ -6161,7 +6176,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			e.printStackTrace();
 			LOGGER.error("equipmentInspection task  not exist, id = {}", cmd.getTaskId());
 			reportLog = getOfflineEquipmentTaskReportLogObject(cmd.getTaskId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.REPAIR_TASK.getCode());
 			logs.add(reportLog);
 		}
 		if (tasks != null) {
@@ -6218,7 +6233,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				LOGGER.error("Sync Repair Tasks Erro, TaskId = {}", task.getId());
 				LOGGER.error("Sync Repair Tasks Erro " + e);
 				OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+						EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.REPAIR_TASK.getCode());
 				logs.add(repairLogs);
 			}
 			// return null;

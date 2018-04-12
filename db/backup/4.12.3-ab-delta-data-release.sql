@@ -1,0 +1,2 @@
+set @max_id = (select max(id) from eh_apps);
+INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES (@max_id + 1, '1', '578580df-7015-4a42-b61f-b5c0ec0bc38a', 'S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==', 'anbang', 'anbang.app', '1', '2018-01-06 16:14:16', NULL, NULL);

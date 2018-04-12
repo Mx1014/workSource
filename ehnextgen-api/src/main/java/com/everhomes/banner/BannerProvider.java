@@ -1,5 +1,6 @@
 package com.everhomes.banner;
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
@@ -33,7 +34,7 @@ public interface BannerProvider {
     BannerClick findBannerClickByBannerIdAndUserId(long bannerId, long userId);
     BannerClick findBannerClickByToken(String token);
     List<Banner> listBanners(String keyword, long offset, long pageSize);
-	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
+	List<Banner> findBannerByNamespaceId(Integer currentNamespaceId);
 	
 	/**
 	 * 根据scopeId列表banner
@@ -62,4 +63,14 @@ public interface BannerProvider {
     Banner findAnyCustomizedBanner(Integer namespaceId, Byte scopeCode, Long scopeId, String sceneType);
 
     List<Banner> listBannersByNamespace(Integer namespaceId);
+
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId);
+
+    Integer getMaxOrderByCommunityId(Integer namespaceId, Long communityId);
+
+    Integer getMinOrderByCommunityId(Integer namespaceId, Long scopeId);
+
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator);
+
+    Map<Long,Integer> countEnabledBannersByScope(Integer namespaceId);
 }
