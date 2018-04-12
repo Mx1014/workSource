@@ -140,9 +140,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<Long> appOriginIds = null;
 
 		// 公司拥有所有权的园区集合
-		List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+		List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
 		// 公司分配过园区的应用
-		List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
+		List<Long> authAppIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
 		
 
 		// 超级管理员拿所有菜单
@@ -172,7 +172,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			types.clear();
 			//todo: 这里感觉有问题，有想不出来，秋敢哥解答
 			types.add(ModuleManagementType.COMMUNITY_CONTROL.getCode());
-			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, auth_communityIds));
+			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, authCommunityIds));
 
 			//getVersion
 			PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
@@ -206,7 +206,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 
 		// 取下交集
-		appOriginIds.retainAll(auth_organizationIds);
+		appOriginIds.retainAll(authAppIds);
 
 		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 

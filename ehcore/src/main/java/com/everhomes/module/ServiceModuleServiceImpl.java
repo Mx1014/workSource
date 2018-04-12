@@ -14,13 +14,10 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
@@ -37,6 +34,8 @@ import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -808,21 +807,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             for (Long orgId: orgIds) {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
-
-           // by lei.lv 取消掉模块管理员的逻辑
-//            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
-//            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
-//            for (Project project: projects) {
-//                //在模块下拥有全部项目权限
-//                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
-//                    allProjectFlag = true;
-//                    break;
-//                }else {
-//                    processProject(project);
-//                    dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
-//                }
-//            }
-
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
             // todo 加上应用
