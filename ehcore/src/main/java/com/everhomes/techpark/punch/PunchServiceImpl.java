@@ -3221,10 +3221,10 @@ public class PunchServiceImpl implements PunchService {
         int i = -1;
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
-        row.createCell(++i).setCellValue(statistic.getWorkDayCount());
-        row.createCell(++i).setCellValue(statistic.getWorkCount());
-        row.createCell(++i).setCellValue(statistic.getAnnualLeaveBalance());
-        row.createCell(++i).setCellValue(statistic.getOvertimeCompensationBalance());
+        row.createCell(++i).setCellValue(""+statistic.getWorkDayCount());
+        row.createCell(++i).setCellValue(""+statistic.getWorkCount());
+        row.createCell(++i).setCellValue(""+statistic.getAnnualLeaveBalance());
+        row.createCell(++i).setCellValue(""+statistic.getOvertimeCompensationBalance());
         if (null != statistic.getExts()) {
             for (ExtDTO ext : statistic.getExts()) {
                 row.createCell(++i).setCellValue(ext.getTimeCount());
@@ -3233,21 +3233,22 @@ public class PunchServiceImpl implements PunchService {
 
             }
         }
-        row.createCell(++i).setCellValue(statistic.getDeviceChangeCounts());
-        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
+        row.createCell(++i).setCellValue(""+statistic.getDeviceChangeCounts());
+        row.createCell(++i).setCellValue(""+statistic.getExceptionRequestCount());
 //        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
-        row.createCell(++i).setCellValue(statistic.getBelateCount());
-        row.createCell(++i).setCellValue(statistic.getBelateTime());
-        row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
+        row.createCell(++i).setCellValue(""+statistic.getBelateCount());
+        row.createCell(++i).setCellValue(""+statistic.getBelateTime());
+        row.createCell(++i).setCellValue(""+statistic.getLeaveEarlyCount());
         row.createCell(++i).setCellValue(statistic.getLeaveEarlyTime());
-        row.createCell(++i).setCellValue(statistic.getBlandleCount());
-        row.createCell(++i).setCellValue(statistic.getForgotCount());
+        row.createCell(++i).setCellValue(""+statistic.getBlandleCount());
+        row.createCell(++i).setCellValue(""+statistic.getForgotCount());
         Map<String, String> statusMap = new HashMap<>();
         if (statistic.getStatusList() != null) {
             for (DayStatusDTO dto : statistic.getStatusList()) {
                 statusMap.put(dto.getDate(), dto.getStatus());
             }
         }
+        LOGGER.debug("status Map : {} \n date list {}",StringHelper.toJsonString(statusMap),StringHelper.toJsonString(dateList));
         if (null != dateList) {
             for (String date : dateList) {
                 String value = statusMap.get("date");
