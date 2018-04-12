@@ -3,6 +3,12 @@ package com.everhomes.oauth2;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
@@ -15,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 
 import java.net.URI;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Component
 public class OAuth2ServiceImpl implements OAuth2Service {
@@ -39,7 +47,16 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private UserProvider userProvider;
 
     @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+
+    @Autowired
+    private DomainService domainService;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public ConfirmAuthorizationVO confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
@@ -118,6 +135,46 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         authorizationCode.setExpirationTime(accessToken.getCreateTime());
         this.oAuth2Provider.updateAuthorizationCode(authorizationCode);
         return accessToken;
+    }
+
+    @Override
+    public void addAttribute(Model model, AuthorizationCommand cmd, App app) {
+        AppNamespaceMapping nsMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
+        if (nsMapping == null) {
+            return;
+        }
+
+        Domain domain = domainService.findDomainByNamespaceId(nsMapping.getNamespaceId());
+        if (domain == null) {
+            return;
+        }
+
+        String loginLogoURI = null;
+        String loginBgURI = null;
+        if (domain.getLoginLogoUri() != null) {
+            loginLogoURI = domain.getLoginLogoUri();
+        }
+        if (domain.getLoginBgUri() != null) {
+            loginBgURI = domain.getLoginBgUri();
+        }
+
+        if (loginBgURI == null || loginLogoURI == null) {
+            Domain dftNs = domainService.findDomainByNamespaceId(Namespace.DEFAULT_NAMESPACE);
+            if (loginBgURI == null) {
+                loginBgURI = dftNs.getLoginBgUri();
+            }
+            if (loginLogoURI == null) {
+                loginLogoURI = dftNs.getLoginLogoUri();
+            }
+        }
+
+        String backgroundImg = contentServerService.parserUri(loginBgURI);
+        String logoImg = contentServerService.parserUri(loginLogoURI);
+
+        model.addAttribute("backgroundImg", backgroundImg);
+        model.addAttribute("logoImg", logoImg);
+        model.addAttribute("appName", domain.getName());
+        model.addAttribute("currentYear", LocalDate.now().getYear());
     }
 
     @Override

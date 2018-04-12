@@ -110,15 +110,16 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		cmd.setState(state);
 		//has logon
 		User user = UserContext.current().getUser();
-		if(user!=null&&user.getId()!=User.ANNONYMOUS_UID){
+		if (user != null && user.getId() != User.ANNONYMOUS_UID) {
 			URI uri = oAuth2Service.confirmAuthorization(user, cmd);
 			if (uri != null) {
                 return redirectTo(uri, redirectType, model);
 			}
 		}
 		//no logon
-		model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
-		return "oauth2-authorize";
+        model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
+        oAuth2Service.addAttribute(model, cmd, app);
+		return "oauth2-authorize2";
 	}
 
     private Object redirectTo(URI uri, String redirectType, Model model) {
@@ -195,8 +196,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
                     LOGGER.debug("confirmAuthorization return uri is null");
                 }
                 // make sure we always carry the view state back to front end for next round of submission
-				model.addAttribute("viewState", viewState);
-				return "oauth2-authorize";
+                model.addAttribute("viewState", viewState);
+                oAuth2Service.addAttribute(model, cmd, app);
+				return "oauth2-authorize2";
 			}
 		} catch (RuntimeErrorException e) {
 			LOGGER.error("Unexpected exception code = {}", e.getErrorCode());
