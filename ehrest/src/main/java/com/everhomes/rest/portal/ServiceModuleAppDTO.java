@@ -16,6 +16,15 @@ package com.everhomes.rest.portal;
  *     <li>description: 应用描述</li>
  *     <li>version: 版本信息</li>
  *     <li>appCategory: 应用分类信息</li>
+ *     <li>mobileFlag: 支持移动端</li>
+ *     <li>pcFlag: 支持PC端</li>
+ *     <li>mobileUri: 移动端uri</li>
+ *     <li>pcUri: PC端uri</li>
+ *     <li>appEntryInfo: 应用entry信息</li>
+ *     <li>independentConfigFlag: 允许独立配置</li>
+ *     <li>configAppIds: 配置应用id</li>
+ *     <li>supportThirdFlag: 支持第三方对接</li>
+ *     <li>defaultFlag: 默认flag</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
