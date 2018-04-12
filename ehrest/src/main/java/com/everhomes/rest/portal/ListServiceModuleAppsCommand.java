@@ -15,6 +15,11 @@ import java.util.List;
  *     <li>versionId: versionId</li>
  *     <li>keywords: 关键字</li>
  *     <li>developerIds: 开发者ids</li>
+ *     <li>appType: 应用分类</li>
+ *     <li>mobileFlag: 支持移动端(0:不支持，1:支持)</li>
+ *     <li>pcFlag: 支持PC端(0:不支持，1:支持)</li>
+ *     <li>independentConfigFlag: 允许独立配置(0:不支持，1:支持)</li>
+ *     <li>supportThirdFlag: 支持第三方对接(0:不支持，1:支持)</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
@@ -34,6 +39,16 @@ public class ListServiceModuleAppsCommand {
 	private String keywords;
 
 	private List<Long> developerIds;
+
+	private String appType;
+
+	private Byte mobileFlag;
+
+	private Byte pcFlag;
+
+	private Byte independentConfigFlag;
+
+	private Byte supportThirdFlag;
 
 	public ListServiceModuleAppsCommand() {
 
@@ -111,5 +126,45 @@ public class ListServiceModuleAppsCommand {
 
 	public void setDeveloperIds(List<Long> developerIds) {
 		this.developerIds = developerIds;
+	}
+
+	public Byte getMobileFlag() {
+		return mobileFlag;
+	}
+
+	public void setMobileFlag(Byte mobileFlag) {
+		this.mobileFlag = mobileFlag;
+	}
+
+	public Byte getPcFlag() {
+		return pcFlag;
+	}
+
+	public void setPcFlag(Byte pcFlag) {
+		this.pcFlag = pcFlag;
+	}
+
+	public Byte getIndependentConfigFlag() {
+		return independentConfigFlag;
+	}
+
+	public void setIndependentConfigFlag(Byte independentConfigFlag) {
+		this.independentConfigFlag = independentConfigFlag;
+	}
+
+	public Byte getSupportThirdFlag() {
+		return supportThirdFlag;
+	}
+
+	public void setSupportThirdFlag(Byte supportThirdFlag) {
+		this.supportThirdFlag = supportThirdFlag;
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
 	}
 }

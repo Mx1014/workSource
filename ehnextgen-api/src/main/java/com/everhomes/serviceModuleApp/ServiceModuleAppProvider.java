@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-
 import java.util.List;
 
 public interface ServiceModuleAppProvider {
@@ -36,4 +34,6 @@ public interface ServiceModuleAppProvider {
 	List<ServiceModuleApp> listServiceModuleAppByOriginId(Long originId);
 
     List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword);
+
+    List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, String appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag);
 }

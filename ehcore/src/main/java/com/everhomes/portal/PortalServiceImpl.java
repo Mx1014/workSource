@@ -176,7 +176,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getModuleId());
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getModuleId(), cmd.getKeywords(), cmd.getDeveloperIds(), cmd.getAppType(), cmd.getMobileFlag(), cmd.getPcFlag(), cmd.getIndependentConfigFlag(), cmd.getSupportThirdFlag());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
 		}).collect(Collectors.toList()));

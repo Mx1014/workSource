@@ -5,9 +5,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.module.ReflectionServiceModuleApp;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -16,7 +15,10 @@ import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +168,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
 
+
 	@Override
 	public List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, Long versionId, List<Long> moduleIds) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
@@ -274,4 +277,33 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return apps;
 	}
 
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, String appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+		if(null != versionId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		if(null != moduleId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		if(null != keywords)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.NAME.like("%"+ keywords + "%"));
+		if(null != developerIds)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.DEVELOP_ID.in(developerIds));
+		if(null != appType)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.valueOf(appType).getCode()));
+		if(null != mobileFlag)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.MOBILE_FLAG.eq(mobileFlag));
+		if(null != pcFlag)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.PC_FLAG.eq(pcFlag));
+		if(null != independentConfigFlag)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.INDEPENDENT_CONFIG_FLAG.eq(independentConfigFlag));
+		if(null != supportThirdFlag)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.SUPPORT_THIRD_FLAG.eq(supportThirdFlag));
+
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS).leftOuterJoin(Tables.EH_SERVICE_MODULE_APP_PROFILE).on(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_PROFILE.ORIGIN_ID))
+				.where(cond)
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+	}
 }
