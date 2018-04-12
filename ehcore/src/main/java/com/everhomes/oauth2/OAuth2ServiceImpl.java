@@ -146,7 +146,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
         Domain domain = domainService.findDomainByNamespaceId(nsMapping.getNamespaceId());
         if (domain == null) {
-            return;
+            domain = domainService.findDomainByNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
 
         String loginLogoURI = null;

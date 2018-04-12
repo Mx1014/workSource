@@ -362,5 +362,5 @@ public interface PrivilegeConstants {
     long ORGANIZATION_SET_ADMIN = 33007L;
 
     // ------- 启动广告权限 --------
-    long LAUNCHAD_ALL = 33001L;
+    long LAUNCHAD_ALL = 10900L;
 }

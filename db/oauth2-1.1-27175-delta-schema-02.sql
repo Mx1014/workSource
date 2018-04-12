@@ -1,3 +1,6 @@
+-- 下载资源名称字段长度过短,加长
+ALTER TABLE  eh_content_server_resources CHANGE resource_name resource_name VARCHAR(1024) NOT NULL ;
+
 -- 广告管理 v1.4 加字段    add by xq.tian  2018/03/07
 ALTER TABLE eh_banners ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE';
 ALTER TABLE eh_banners ADD COLUMN target_data VARCHAR(1024) DEFAULT NULL COMMENT 'It is different by different target_type';

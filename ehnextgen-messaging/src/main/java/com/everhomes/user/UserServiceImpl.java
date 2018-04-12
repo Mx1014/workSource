@@ -925,16 +925,17 @@ public class UserServiceImpl implements UserService {
             }
 			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(identifier != null) {
+				user = this.userProvider.findUserById(identifier.getOwnerUid());
+			} else {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
                 }
-				user = this.userProvider.findUserById(identifier.getOwnerUid());
-			}
+            }
 		}
 
         if (user != null // 存在用户
                 && UserStatus.fromCode(user.getStatus()) == UserStatus.ACTIVE // 正常状态
-                && EncryptionUtils.validateHashPassword(EncryptionUtils.hashPassword(password), user.getSalt(), user.getPasswordHash()) /*密码正确*/) {
+                && EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash()) /*密码正确*/) {
             return createLogin(user.getNamespaceId(), user, null, null);
         }
 		return null;

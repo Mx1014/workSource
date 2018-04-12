@@ -9,10 +9,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
-import com.everhomes.rest.oauth2.AuthorizationCommand;
-import com.everhomes.rest.oauth2.CommonRestResponse;
-import com.everhomes.rest.oauth2.OAuth2AccessTokenResponse;
-import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.oauth2.*;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserInfo;
@@ -42,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -192,13 +190,18 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
                 httpHeaders.setLocation(confirmAuthorization.getUri());
                 return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 			} else {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("confirmAuthorization return uri is null");
-                }
+                // 登录失败
                 // make sure we always carry the view state back to front end for next round of submission
+                String localizedString = localeStringService.getLocalizedString(
+                        OAuth2LocalStringCode.SCOPE,
+                        OAuth2LocalStringCode.ERROR_LOGIN,
+                        Locale.CHINA.toString(),
+                        "Invalid identifier or password");
+
+                model.addAttribute("errorDesc", localizedString);
                 model.addAttribute("viewState", viewState);
                 oAuth2Service.addAttribute(model, cmd, app);
-				return "oauth2-authorize2";
+                return "oauth2-authorize2";
 			}
 		} catch (RuntimeErrorException e) {
 			LOGGER.error("Unexpected exception code = {}", e.getErrorCode());
