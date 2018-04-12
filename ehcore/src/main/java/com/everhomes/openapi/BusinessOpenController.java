@@ -4,6 +4,12 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetVendor;
 import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
+<<<<<<< HEAD
+=======
+=======
+import com.everhomes.aclink.DoorAuth;
+>>>>>>> refs/remotes/origin/5.3.3
+>>>>>>> refs/remotes/origin/szywyjf
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -120,6 +126,13 @@ public class BusinessOpenController extends ControllerBase {
         return handler;
     }
 	
+<<<<<<< HEAD
+=======
+=======
+    @Autowired
+    private FlowService flowService;
+>>>>>>> refs/remotes/origin/5.3.3
+>>>>>>> refs/remotes/origin/szywyjf
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -338,6 +351,16 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+<<<<<<< HEAD
+=======
+=======
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+>>>>>>> refs/remotes/origin/5.3.3
+>>>>>>> refs/remotes/origin/szywyjf
 
 	/**
 	 * <b>URL: /openapi/getUserServiceAddress</b>
