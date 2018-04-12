@@ -167,15 +167,14 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 				break;
 			}
 
-			Timestamp timestampStart = new Timestamp(
-					Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000);
+			long endTime = Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000;
+			Timestamp timestampStart = new Timestamp(endTime);
 			if (isOutOfDate(timestampStart)) {
 				errorDescription = "it is out of date for monthly recharge !";
 				break;
 			}
-
-			Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(),
-					order.getMonthCount().intValue());
+			
+			Timestamp timestampEnd = getCardEndTime(endTime, order.getMonthCount().intValue());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			String validStart = sdf.format(timestampStart);
@@ -342,21 +341,22 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();
 			cardInfoDTO.setOpenDate(now);
-			cardInfoDTO.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			cardInfoDTO.setExpireDate(getCardEndTime(now, requestMonthCount).getTime());
 
 			// 根据配置设定收费标准，默认按实际天数，即ParkingCardExpiredRechargeType.ACTUAL(2)
 			if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				cardInfoDTO.setPayMoney(cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			} else {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTimeInMillis(now);
-				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-				int today = calendar.get(Calendar.DAY_OF_MONTH);
-
-				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
-						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-				cardInfoDTO.setPayMoney(price);
+				//正中会暂不支持此模式
+//				Calendar calendar = Calendar.getInstance();
+//				calendar.setTimeInMillis(now);
+//				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+//				int today = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
+//						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
+//								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+//				cardInfoDTO.setPayMoney(price);
 			}
 			
 			cardInfoDTO.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
@@ -432,9 +432,10 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
             request = getParkingCardRequestByOrder(order);
             order.setCardRequestId(request.getId()); //补上id
         }
-
-        Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
-        Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+        
+        long nowTime = System.currentTimeMillis();
+        Timestamp timestampStart = new Timestamp(nowTime);
+		Timestamp timestampEnd = getCardEndTime(nowTime, order.getMonthCount().intValue());
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 
@@ -505,5 +506,30 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 		return cardTypeList;
 	}
 	
+	
+	/**   
+	* @Function: XiaomaoKeXingParkingVendorHandler.java
+	* @Description: 根据source时间戳增加mounth个月后的时间
+	* 规则：今天是4月12日，用户开卡交1个月，有效期到5月11日23点59分59秒
+	* 如果是当月最后一天则如下：
+	* 	今天是2月28日，用户开卡交1个月，有效期到3月30日23点59分59秒
+	*	今天是3月31日，用户开卡交1个月，有效期到4月29日23点59分59秒
+	*   今天是4月30日，用户开卡交1个月，有效期到5月30日23点59分59秒
+	*   
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年4月12日 下午8:23:12 
+	*
+	*/
+	private final static Timestamp getCardEndTime(long nowTime, int addMounthNum) {
+		
+		Timestamp endTime = Utils.getTimestampByAddMonth(nowTime, addMounthNum);
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(endTime.getTime());
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		
+		return new Timestamp(cal.getTimeInMillis());
+	}
 	
 }
