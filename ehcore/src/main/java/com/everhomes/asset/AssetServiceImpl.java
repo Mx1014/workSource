@@ -107,6 +107,7 @@ import java.util.stream.Collectors;
 public class AssetServiceImpl implements AssetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetServiceImpl.class);
 
+    static final List<Character> operators = Arrays.asList('*','/','+','-');
     final String downloadDir ="\\download\\";
 
     @Autowired
@@ -2437,8 +2438,44 @@ public class AssetServiceImpl implements AssetService {
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         formula += "*"+duration;
         BigDecimal response = CalculatorUtil.arithmetic(formula);
@@ -2454,8 +2491,44 @@ public class AssetServiceImpl implements AssetService {
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2,BigDecimal.ROUND_CEILING);
@@ -2473,8 +2546,44 @@ public class AssetServiceImpl implements AssetService {
 //                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
                 map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             }
-            for(Map.Entry<String,String> entry : map.entrySet()){
-                formula = formula.replace(entry.getKey(),entry.getValue());
+            formula = formula.trim();
+            char[] preChars = formula.toCharArray();
+            List<Character> chars = new ArrayList<>();
+            for(Character c : preChars){
+                if(!StringUtils.isBlank(c.toString())){
+                    chars.add(c);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            StringBuilder variable = new StringBuilder();
+            for(int i = 0; i < chars.size(); i++){
+                Character c = chars.get(i);
+                if(operators.contains(c)){
+                    if(variable.length() > 0){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                    sb.append(c);
+                    variable = new StringBuilder();
+                }else{
+                    variable.append(c);
+                    if(i == chars.size() - 1){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                }
+            }
+            formula = sb.toString();
+            for(char i : formula.toCharArray()){
+                if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                    throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+                }
             }
             formula += "*"+duration;
             result = CalculatorUtil.arithmetic(formula);
