@@ -3215,16 +3215,21 @@ public class PunchServiceImpl implements PunchService {
 //		row.createCell(++i).setCellValue("加班小时数");
 
     }
-
+    private String objToString(Object o) {
+        if (null == o) {
+            return "";
+        }
+        return o.toString();
+    }
     public void setNewPunchStatisticsBookRow(Sheet sheet, PunchCountDTO statistic, List<String> dateList, XSSFWorkbook wb) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
-        row.createCell(++i).setCellValue(""+statistic.getWorkDayCount());
-        row.createCell(++i).setCellValue(""+statistic.getWorkCount());
-        row.createCell(++i).setCellValue(""+statistic.getAnnualLeaveBalance());
-        row.createCell(++i).setCellValue(""+statistic.getOvertimeCompensationBalance());
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getAnnualLeaveBalance()));
+        row.createCell(++i).setCellValue(objToString(statistic.getOvertimeCompensationBalance()));
         if (null != statistic.getExts()) {
             for (ExtDTO ext : statistic.getExts()) {
                 row.createCell(++i).setCellValue(ext.getTimeCount());
@@ -3233,15 +3238,15 @@ public class PunchServiceImpl implements PunchService {
 
             }
         }
-        row.createCell(++i).setCellValue(""+statistic.getDeviceChangeCounts());
-        row.createCell(++i).setCellValue(""+statistic.getExceptionRequestCount());
+        row.createCell(++i).setCellValue(objToString(statistic.getDeviceChangeCounts()));
+        row.createCell(++i).setCellValue(objToString(statistic.getExceptionRequestCount()));
 //        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
-        row.createCell(++i).setCellValue(""+statistic.getBelateCount());
-        row.createCell(++i).setCellValue(""+statistic.getBelateTime());
-        row.createCell(++i).setCellValue(""+statistic.getLeaveEarlyCount());
-        row.createCell(++i).setCellValue(statistic.getLeaveEarlyTime());
-        row.createCell(++i).setCellValue(""+statistic.getBlandleCount());
-        row.createCell(++i).setCellValue(""+statistic.getForgotCount());
+        row.createCell(++i).setCellValue(objToString(statistic.getBelateCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getBelateTime()));
+        row.createCell(++i).setCellValue(objToString(statistic.getLeaveEarlyCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getLeaveEarlyTime()));
+        row.createCell(++i).setCellValue(objToString(statistic.getBlandleCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getForgotCount()));
         Map<String, String> statusMap = new HashMap<>();
         if (statistic.getStatusList() != null) {
             for (DayStatusDTO dto : statistic.getStatusList()) {
