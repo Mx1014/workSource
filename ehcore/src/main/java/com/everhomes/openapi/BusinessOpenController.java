@@ -1,5 +1,9 @@
 package com.everhomes.openapi;
 
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetVendor;
+import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -89,7 +93,33 @@ public class BusinessOpenController extends ControllerBase {
 	private OrganizationService organizationService;
 	
 	@Autowired
-    private OrganizationProvider organizationProvider;
+    private AssetProvider assetProvider;
+	
+	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
+        if(null == namespaceId) {
+            LOGGER.error("checkAssetVendor namespaceId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor namespaceId cannot be null.");
+        }
+        AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
+        return assetVendor;
+    }
+	
+	private BusinessOpenVendorHandler getBusinessOpenVendorHandler(String vendorName) {
+		BusinessOpenVendorHandler handler = null;
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = BusinessOpenVendorHandler.BUSINESSOPEN_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+        return handler;
+    }
+	
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -284,21 +314,24 @@ public class BusinessOpenController extends ControllerBase {
 		return response;
 	}
 	
-	@RequestMapping("sendMessageToUserSZW")
+	
+	
+	/**
+	 * <b>URL: /openapi/sendMessageToCustomUser</b>
+	 * <p>提供给深圳湾的定制接口</p>
+	 */
+	@RequestMapping("sendMessageToCustomUser")
 	@RestReturn(value=String.class)
-	public RestResponse sendMessageToUserSZW(BusinessMessageCommandSZW cmd) {
+	public RestResponse sendMessageToCustomUser(BusinessMessageCustomCommand cmd) {
 		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
 			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
 		}
-		Long userId = null;
-		//0：企业客户，1：个人（判断）
-		if("1".equals(cmd.getType())) {
-			//根据手机号码获取用户ID
-			userId = userProvider.findUserByToken(cmd.getCusName(), cmd.getNamespaceId()).getTargetId();
-		}else if("0".equals(cmd.getType())) {
-			//根据企业名称获取用户ID
-			userId = organizationProvider.findOrganizationByName(cmd.getCusName(), cmd.getNamespaceId()).getId();
-		}
+		
+		AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
+		String vendorName = assetVendor.getVendorName();
+        BusinessOpenVendorHandler handler = getBusinessOpenVendorHandler(vendorName);
+        Long userId = handler.getUserId(cmd.getCustomJson(), cmd.getNamespaceId());
+        		
 		sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

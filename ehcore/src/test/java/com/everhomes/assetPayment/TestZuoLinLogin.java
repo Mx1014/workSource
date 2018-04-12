@@ -20,6 +20,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class TestZuoLinLogin {
 	
 	/**  
@@ -229,14 +231,21 @@ public class TestZuoLinLogin {
         parameters.put("contentType", "text");
         parameters.put("content", "欢迎您使用XXX服务");
         parameters.put("timestamp", "1498641124142");
-        parameters.put("tel", "15272074489");
-        parameters.put("namespaceId", "999949");
+        
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "0");
+        jsonObject.put("cusName", "深圳湾");
+        parameters.put("customJson", jsonObject.toString());
+        
+        parameters.put("namespaceId", "999966");
         
         String signature = computeSignature(parameters, "S/IxJYKRq1y2Sk6Mh0jE3NVfNm7T91CL+V3cR8f9QC+p04XaJqZ5gsjtuWxTKe0B8/soqELcJfyul1FoES/P6w==");
         System.out.println("signature=" + signature);
         parameters.put("signature", signature);
         
-        String result =sendPost("http://127.0.0.1:8080/evh/openapi/sendMessageToUserSZW", parameters);  
+        System.out.println(parameters.toString());
+        
+        String result =sendPost("http://127.0.0.1:8080/evh/openapi/sendMessageToCustomUser", parameters);  
         System.out.println(result);   
     }    
 

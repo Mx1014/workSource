@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 
-public class BusinessMessageCommandSZW {
+public class BusinessMessageCustomCommand {
     @NotNull
     private Long timestamp;
     
@@ -24,7 +24,7 @@ public class BusinessMessageCommandSZW {
     private String type;
     
     @NotNull
-    private String cusName;
+    private String customJson;
     
     @NotNull
     private Integer namespaceId;
@@ -99,12 +99,12 @@ public class BusinessMessageCommandSZW {
 		this.type = type;
 	}
 
-	public String getCusName() {
-		return cusName;
+	public String getCustomJson() {
+		return customJson;
 	}
 
-	public void setCusName(String cusName) {
-		this.cusName = cusName;
+	public void setCustomJson(String customJson) {
+		this.customJson = customJson;
 	}
 
 }
