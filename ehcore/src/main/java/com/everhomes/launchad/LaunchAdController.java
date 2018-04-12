@@ -8,7 +8,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.launchad.LaunchAdDTO;
-import com.everhomes.rest.launchad.SetLaunchAdCommand;
+import com.everhomes.rest.launchad.CreateOrUpdateLaunchAdCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,13 +40,13 @@ public class LaunchAdController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchad/setLaunchAd</b>
-     * <p>设置启动广告信息</p>
+     * <b>URL: /launchad/createOrUpdateLaunchAd</b>
+     * <p>创建或修改启动广告信息</p>
      */
-    @RequestMapping("setLaunchAd")
+    @RequestMapping("createOrUpdateLaunchAd")
     @RestReturn(value = LaunchAdDTO.class)
-    public RestResponse setLaunchAd(SetLaunchAdCommand cmd) {
-        return response(launchAdService.setLaunchAd(cmd));
+    public RestResponse createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
+        return response(launchAdService.createOrUpdateLaunchAd(cmd));
     }
 
     /**
