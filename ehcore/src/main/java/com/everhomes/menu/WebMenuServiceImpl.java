@@ -137,13 +137,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<Target> targets = new ArrayList<>();
 		targets.add(new Target(EntityType.USER.getCode(), userId));
 
+		//getVersion
+		PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
+		Long versionId = version != null ? version.getId() : null;
+
+
 		List<Long> appOriginIds = null;
 
 		// 公司拥有所有权的园区集合
 		List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
 		// 公司分配过园区的应用
 		List<Long> authAppIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
-		
+		List<ServiceModuleApp> communityApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
+		List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
+
+		//填充OA和无限制的应用id
+		orgApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
+		unlimitApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
 
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
@@ -174,23 +185,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 			types.add(ModuleManagementType.COMMUNITY_CONTROL.getCode());
 			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, authCommunityIds));
 
-			//getVersion
-			PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
-
-			Long versionId = version != null ? version.getId() : null;
-
 			appTuples.stream().map(r -> {
 				if (Long.valueOf(r.first()) == 0L) {
 					List<ServiceModuleApp> appDtos = null;
 					switch (ModuleManagementType.fromCode(r.second())) {
 						case COMMUNITY_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
+							appDtos = communityApps;
 							break;
 						case ORG_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+							appDtos = orgApps;
 							break;
 						case UNLIMIT_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
+							appDtos = unlimitApps;
 							break;
 					}
 					if (appDtos != null && appDtos.size() > 0) {
