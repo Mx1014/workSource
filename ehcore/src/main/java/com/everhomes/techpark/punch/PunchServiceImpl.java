@@ -3248,10 +3248,9 @@ public class PunchServiceImpl implements PunchService {
                 statusMap.put(dto.getDate(), dto.getStatus());
             }
         }
-        LOGGER.debug("status Map : {} \n date list {}",StringHelper.toJsonString(statusMap),StringHelper.toJsonString(dateList));
         if (null != dateList) {
             for (String date : dateList) {
-                String value = statusMap.get("date");
+                String value = statusMap.get(date);
                 if (null == value) {
                     value = "";
                 }
