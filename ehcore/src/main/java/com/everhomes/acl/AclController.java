@@ -700,7 +700,7 @@ public class AclController extends ControllerBase {
     public RestResponse listOrganizationTopAdministrator(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
-        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd).get(0));
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationTopAdministrator(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -715,7 +715,7 @@ public class AclController extends ControllerBase {
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
-        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd));
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSystemAdministrators(cmd.getOrganizationId(), cmd.getActivationFlag()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -728,7 +728,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("getAdministratorInfosByUserId")
     @RestReturn(value=GetAdministratorInfosByUserIdResponse.class)
     public RestResponse listAdministratorInfosByUserId(@Valid GetAdministratorInfosByUserIdCommand cmd) {
-        return null;
+        RestResponse response = new RestResponse(rolePrivilegeService.getAdministratorInfosByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**
@@ -738,7 +741,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("getPersonelInfoByToken")
     @RestReturn(value=GetPersonelInfoByTokenResponse.class)
     public RestResponse getPersonelInfoByToken(@Valid GetPersonelInfoByTokenCommand cmd) {
-        return null;
+        RestResponse response = new RestResponse(rolePrivilegeService.getPersonelInfoByToken(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**
@@ -748,7 +754,11 @@ public class AclController extends ControllerBase {
     @RequestMapping("updateTopAdminstrator")
     @RestReturn(value=String.class)
     public RestResponse updateTopAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
-        return null;
+        rolePrivilegeService.updateTopAdminstrator(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**
@@ -758,6 +768,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("createSystemAdminstrator")
     @RestReturn(value=String.class)
     public RestResponse createSystemAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
-        return null;
+        rolePrivilegeService.createOrganizationSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

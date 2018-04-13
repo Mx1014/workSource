@@ -15,8 +15,8 @@ public class GetPersonelInfoByTokenResponse {
     private Long detailId;
     private String nickName;
     private String cotactName;
-    private Integer isTopAdminFlag;
-    private Integer isSystemAdminFlag;
+    private Byte isTopAdminFlag;
+    private Byte isSystemAdminFlag;
 
     public Long getUserId() {
         return userId;
@@ -50,19 +50,19 @@ public class GetPersonelInfoByTokenResponse {
         this.cotactName = cotactName;
     }
 
-    public Integer getIsTopAdminFlag() {
+    public Byte getIsTopAdminFlag() {
         return isTopAdminFlag;
     }
 
-    public void setIsTopAdminFlag(Integer isTopAdminFlag) {
+    public void setIsTopAdminFlag(Byte isTopAdminFlag) {
         this.isTopAdminFlag = isTopAdminFlag;
     }
 
-    public Integer getIsSystemAdminFlag() {
+    public Byte getIsSystemAdminFlag() {
         return isSystemAdminFlag;
     }
 
-    public void setIsSystemAdminFlag(Integer isSystemAdminFlag) {
+    public void setIsSystemAdminFlag(Byte isSystemAdminFlag) {
         this.isSystemAdminFlag = isSystemAdminFlag;
     }
 }
