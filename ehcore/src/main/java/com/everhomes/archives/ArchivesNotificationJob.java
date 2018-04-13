@@ -37,7 +37,8 @@ public class ArchivesNotificationJob extends QuartzJobBean {
             archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
             LOGGER.info("ArchivesNotificationJob Success!");
 
-            LocalDateTime nextDateTime = LocalDateTime.of(nowDateTime.getYear(), nowDateTime.getMonthValue(), nowDateTime.getDayOfMonth(), nowDateTime.getHour() + 1, 0);
+            LocalDateTime nextDateTime = nowDateTime.plusHours(1);
+            nextDateTime = LocalDateTime.of(nextDateTime.getYear(), nextDateTime.getMonthValue(), nextDateTime.getDayOfMonth(), nextDateTime.getHour(), 0);
             ZonedDateTime zdt = nextDateTime.atZone(zoneId);
             java.util.Date date = java.util.Date.from(zdt.toInstant());
             scheduleProvider.scheduleSimpleJob(

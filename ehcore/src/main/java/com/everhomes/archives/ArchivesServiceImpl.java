@@ -2635,9 +2635,12 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void initArchivesNotification() {
         ZoneId zoneId = ZoneId.systemDefault();
-        LocalDateTime nowDateTime = LocalDateTime.now();
+        LocalDateTime initTime = LocalDateTime.now().plusHours(1);
+        /*LocalDateTime nowDateTime = LocalDateTime.now();
         LocalDateTime nextDateTime = LocalDateTime.of(nowDateTime.getYear(), nowDateTime.getMonthValue(), nowDateTime.getDayOfMonth(), nowDateTime.getHour() + 1, 0);
-        ZonedDateTime zdt = nextDateTime.atZone(zoneId);
+        */
+        initTime = LocalDateTime.of(initTime.getYear(), initTime.getMonthValue(), initTime.getDayOfMonth(), initTime.getHour(), 0);
+        ZonedDateTime zdt = initTime.atZone(zoneId);
         java.util.Date date = java.util.Date.from(zdt.toInstant());
         scheduleProvider.scheduleSimpleJob(
                 ARCHIVES_NOTIFICATION,
