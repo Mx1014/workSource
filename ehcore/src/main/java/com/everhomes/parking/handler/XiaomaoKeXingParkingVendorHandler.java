@@ -167,14 +167,14 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 				break;
 			}
 
-			long endTime = Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000;
-			Timestamp timestampStart = new Timestamp(endTime);
+			long expireTime = Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME);
+			Timestamp timestampStart = Utils.addSecond(expireTime, 1);
 			if (isOutOfDate(timestampStart)) {
 				errorDescription = "it is out of date for monthly recharge !";
 				break;
 			}
 			
-			Timestamp timestampEnd = getCardEndTime(endTime, order.getMonthCount().intValue());
+			Timestamp timestampEnd = getCardEndTime(expireTime, order.getMonthCount().intValue());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			String validStart = sdf.format(timestampStart);
@@ -510,26 +510,17 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 	/**   
 	* @Function: XiaomaoKeXingParkingVendorHandler.java
 	* @Description: 根据source时间戳增加mounth个月后的时间
-	* 规则：今天是4月12日，用户开卡交1个月，有效期到5月11日23点59分59秒
-	* 如果是当月最后一天则如下：
-	* 	今天是2月28日，用户开卡交1个月，有效期到3月30日23点59分59秒
-	*	今天是3月31日，用户开卡交1个月，有效期到4月29日23点59分59秒
-	*   今天是4月30日，用户开卡交1个月，有效期到5月30日23点59分59秒
+	* 规则：每次都是添加下个月的最大天数
+	* 	今天是1月1日，2月有28天，有效期到1月29日23点59分59秒
+	*	今天是2月10日（2月有28天），3月有31天，有效期到3月13日23点59分59秒
 	*   
 	* @version: v1.0.0
 	* @author:	 黄明波
 	* @date: 2018年4月12日 下午8:23:12 
 	*
 	*/
-	private final static Timestamp getCardEndTime(long nowTime, int addMounthNum) {
-		
-		Timestamp endTime = Utils.getTimestampByAddMonth(nowTime, addMounthNum);
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(endTime.getTime());
-		cal.add(Calendar.DAY_OF_MONTH, -1);
-		
-		return new Timestamp(cal.getTimeInMillis());
+	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
+		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
 	}
 	
 }
