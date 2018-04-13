@@ -66,6 +66,7 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -158,7 +159,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setJobPositionIds(cmd.getJobPositionIds());
         addCommand.setJobLevelIds(cmd.getJobLevelIds());
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
-        dbProvider.execute((TransactionStatus status) -> {
+        OrganizationMemberDetails member = dbProvider.execute((TransactionStatus status) -> {
             //  1.添加人员到组织架构
             OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
@@ -166,43 +167,42 @@ public class ArchivesServiceImpl implements ArchivesService {
             Long detailId = null;
             if (memberDTO != null)
                 detailId = memberDTO.getDetailId();
-            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            if (memberDetail == null)
+            OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (employee == null)
                 return null;
-            memberDetail.setEnName(cmd.getContactEnName());
-            memberDetail.setRegionCode(cmd.getRegionCode());
-            memberDetail.setContactShortToken(cmd.getContactShortToken());
+            employee.setEnName(cmd.getContactEnName());
+            employee.setRegionCode(cmd.getRegionCode());
+            employee.setContactShortToken(cmd.getContactShortToken());
 
-            memberDetail.setWorkEmail(cmd.getWorkEmail());
-            memberDetail.setContractPartyId(cmd.getOrganizationId());
+            employee.setWorkEmail(cmd.getWorkEmail());
+            employee.setContractPartyId(cmd.getOrganizationId());
 
             //  just update the info.
             if(TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE)
             {
-                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
-                dto.setDetailId(detailId);
-                dto.setContactName(memberDetail.getContactName());
-                dto.setContactToken(memberDetail.getContactToken());
-                return null;
+                organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
+                return employee;
             }
 
             //  initial data for add function
-            memberDetail.setCheckInTime(ArchivesUtil.currentDate());
-            memberDetail.setEmploymentTime(ArchivesUtil.currentDate());
-            memberDetail.setEmployeeType(EmployeeType.FULLTIME.getCode());
-            memberDetail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
-            organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
-            dto.setDetailId(detailId);
-            dto.setContactName(memberDetail.getContactName());
-            dto.setContactToken(memberDetail.getContactToken());
+            employee.setCheckInTime(ArchivesUtil.currentDate());
+            employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
+            employee.setEmploymentTime(ArchivesUtil.currentDate());
+            employee.setEmployeeType(EmployeeType.FULLTIME.getCode());
+            employee.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
+            organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
+
 
             //  3.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.currentDate());
-            return null;
+            return employee;
         });
+        dto.setDetailId(member.getId());
+        dto.setContactName(member.getContactName());
+        dto.setContactToken(member.getContactToken());
         return dto;
     }
 
@@ -915,31 +915,32 @@ public class ArchivesServiceImpl implements ArchivesService {
             Long detailId = null;
             if (memberDTO != null)
                 detailId = memberDTO.getDetailId();
-            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            if (memberDetail != null) {
-                memberDetail.setEmployeeType(cmd.getEmployeeType());
-                memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
-                memberDetail.setEmployeeNo(cmd.getEmployeeNo());
-                memberDetail.setEnName(cmd.getEnName());
-                memberDetail.setContactShortToken(cmd.getContactShortToken());
-                memberDetail.setWorkEmail(cmd.getWorkEmail());
-                memberDetail.setRegionCode(cmd.getRegionCode());
+            OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (employee != null) {
+                employee.setEmployeeType(cmd.getEmployeeType());
+                employee.setEmployeeStatus(cmd.getEmployeeStatus());
+                employee.setEmployeeNo(cmd.getEmployeeNo());
+                employee.setEnName(cmd.getEnName());
+                employee.setContactShortToken(cmd.getContactShortToken());
+                employee.setWorkEmail(cmd.getWorkEmail());
+                employee.setRegionCode(cmd.getRegionCode());
                 if (cmd.getCheckInTime() != null)
-                    memberDetail.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
+                    employee.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
-                    memberDetail.setCheckInTime(ArchivesUtil.currentDate());
+                    employee.setCheckInTime(ArchivesUtil.currentDate());
+                employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
                 if (cmd.getEmploymentTime() == null)
-                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
+                    employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
-                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
+                    employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 if (cmd.getContractPartyId() != null)
-                    memberDetail.setContractPartyId(cmd.getContractPartyId());
+                    employee.setContractPartyId(cmd.getContractPartyId());
                 else
-                    memberDetail.setContractPartyId(cmd.getOrganizationId());
-                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+                    employee.setContractPartyId(cmd.getOrganizationId());
+                organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
                 dto.setDetailId(detailId);
-                dto.setContactName(memberDetail.getContactName());
-                dto.setContactToken(memberDetail.getContactToken());
+                dto.setContactName(employee.getContactName());
+                dto.setContactToken(employee.getContactToken());
             }
 
             //  3.查询若存在于离职列表则删除
@@ -1143,6 +1144,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 switch (itemValue.getFieldName()) {
                     case ArchivesParameter.BIRTHDAY:
                         employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        employee.setBirthdayIndex(getMonthAndDay(employee.getBirthday().toLocalDate()));
                         break;
                     case ArchivesParameter.CONTACT_NAME:
                         employee.setContactName(itemValue.getFieldValue());
@@ -2712,7 +2714,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date) {
         String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
 //        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter df2 = DateTimeFormatter.ofPattern("MMdd");
         String dateString = date.toLocalDate() + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
         Map<String, Object> map;
@@ -2724,14 +2725,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                 contract += (employee.getContactName() + "，");
             if (date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
-            if (df2.format(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
+            if (getMonthAndDay(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
                 map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
                 anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
             }
-            if (df2.format(date.toLocalDate()).equals(employee.getBirthdayIndex())) {
+            if (getMonthAndDay(date.toLocalDate()).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("year", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
@@ -2765,6 +2766,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         body += "\n";
 
         return body;
+    }
+
+    private String getMonthAndDay(LocalDate date){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        return formatter.format(date);
     }
 
     private void sendArchivesEmails(String email, String body) {
