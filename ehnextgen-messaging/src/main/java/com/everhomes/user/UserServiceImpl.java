@@ -95,6 +95,7 @@ import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
@@ -6189,4 +6190,13 @@ public class UserServiceImpl implements UserService {
 		response.setDtos(dtos);
 		return response;
 	}
+
+	private List<IndexDTO> listIndex(Integer namespaceId, Long userId){
+
+		return null;
+
+	}
+
+
+
 }

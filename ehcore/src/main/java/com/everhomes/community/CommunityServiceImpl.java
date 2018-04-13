@@ -4127,5 +4127,23 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 	}
+
+
+	@Override
+	public CommunityUserDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
+
+		List<CommunityGeoPoint> pointList = new ArrayList<>();
+		for(int i = 12; i > 5; i--){
+			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 5);
+		}
+		
+
+		return null;
+	}
+
+	@Override
+	public CommunityUserDTO findDefaultCommunity() {
+		return null;
+	}
 }
 
