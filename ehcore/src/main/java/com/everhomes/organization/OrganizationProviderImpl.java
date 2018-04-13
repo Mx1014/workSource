@@ -5018,8 +5018,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		//离职日期
 		if(dissmissTimeStart != null && dissmissTimeEnd != null){
-			cond = cond.and(t2.field("dismiss_time").gt(checkinTimeStart));
-			cond = cond.and(t2.field("dismiss_time").lt(checkinTimeEnd));
+			cond = cond.and(t2.field("dismiss_time").gt(dissmissTimeStart));
+			cond = cond.and(t2.field("dismiss_time").lt(dissmissTimeEnd));
 		}
 		if (null != locator && null != locator.getAnchor())
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
