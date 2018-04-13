@@ -24,6 +24,7 @@ import java.util.List;
  * <li>dateStrBegin:计费开始</li>
  * <li>dateStrEnd:计费结束</li>
  * <li>isOwed:是否欠费，0：正常；1：欠费</li>
+ * <li>customerTel:客户手机号，用来滞后定位用户</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -42,6 +43,15 @@ public class CreateBillCommand {
     private String dateStrBegin;
     private String dateStrEnd;
     private Byte isOwed;
+    private String customerTel;
+
+    public String getCustomerTel() {
+        return customerTel;
+    }
+
+    public void setCustomerTel(String customerTel) {
+        this.customerTel = customerTel;
+    }
 
     public Byte getIsOwed() {
         return isOwed;

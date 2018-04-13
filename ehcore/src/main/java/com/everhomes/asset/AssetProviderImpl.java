@@ -916,15 +916,27 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel
-            , Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum
-            ,Long contractId, String dateStrBegin, String dateStrEnd, Byte isOwed) {
+    public ListBillsDTO creatPropertyBill( CreateBillCommand cmd) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-
+            //获取所需要的cmd的数据
+            BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
+            String dateStr = cmd.getDateStr();
+            Byte isSettled = cmd.getIsSettled();
+            String noticeTel = cmd.getNoticeTel();
+            Long ownerId = cmd.getOwnerId();
+            String ownerType = cmd.getOwnerType();
+            String targetName = cmd.getTargetName();
+            Long targetId = cmd.getTargetId();
+            String targetType = cmd.getTargetType();
+            String contractNum = cmd.getContractNum();
+            Long contractId = cmd.getContractId();
+            String dateStrBegin = cmd.getDateStrBegin();
+            String dateStrEnd = cmd.getDateStrEnd();
+            Byte isOwed = cmd.getIsOwed();
+            String customerTel = cmd.getCustomerTel();
             //普通信息卸载
-
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
@@ -1140,7 +1152,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setDueDayDeadline(dates.get(3));
 
 
-
+            //添加客户的手机号，用来之后定位用户 by wentian.V.Brytania 2018/4/13
+            newBill.setCustomerTel(customerTel);
 
 
 
@@ -3973,11 +3986,11 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void linkOrganizationToBill(Long ownerUid, String token) {
+    public void linkOrganizationToBill(Long ownerUid, String orgName) {
         DSLContext context = getReadWriteContext();
         context.update(Tables.EH_PAYMENT_BILLS)
                 .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
-                .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(token))
+                .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(orgName))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))
                 .execute();
     }

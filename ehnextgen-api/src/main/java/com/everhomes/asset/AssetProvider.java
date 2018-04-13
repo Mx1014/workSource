@@ -61,7 +61,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
-    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId, String dateStrBegin, String dateStrEnd, Byte isOwed);
+    ListBillsDTO creatPropertyBill(CreateBillCommand cmd);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -296,5 +296,5 @@ public interface AssetProvider {
 
     void linkIndividualUserToBill(Long ownerUid, String token);
 
-    void linkOrganizationToBill(Long ownerUid, String token);
+    void linkOrganizationToBill(Long ownerUid, String orgName);
 }

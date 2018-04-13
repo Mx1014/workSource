@@ -3251,6 +3251,7 @@ public class AssetServiceImpl implements AssetService {
                         if(claimedIdentifierByToken!=null){
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
+                        cmd.setCustomerTel(data[j]);
                     }
                 }
                 else if(headers[j].equals("账单开始时间")){
