@@ -245,7 +245,8 @@ public class TestZuoLinLogin {
         
         System.out.println(parameters.toString());
         
-        String result =sendPost("http://127.0.0.1:8080/evh/openapi/sendMessageToCustomUser", parameters);  
+        String result =sendPost("https://parktest.szbay.com/evh/openapi/sendMessageToCustomUser", parameters);  
+        //String result =sendPost("http://127.0.0.1:8080/evh/openapi/sendMessageToCustomUser", parameters);  
         System.out.println(result);   
     }    
 

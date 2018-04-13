@@ -350,9 +350,12 @@ public class BusinessOpenController extends ControllerBase {
 		AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
 		String vendorName = assetVendor.getVendorName();
         BusinessOpenVendorHandler handler = getBusinessOpenVendorHandler(vendorName);
-        Long userId = handler.getUserId(cmd.getCustomJson(), cmd.getNamespaceId());
+        List<Long> userIdList = handler.getUserId(cmd.getCustomJson(), cmd.getNamespaceId());
+        for(int i = 0;i <userIdList.size();i++) {
+        	Long userId = userIdList.get(i);
+        	sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
+        }
         		
-		sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

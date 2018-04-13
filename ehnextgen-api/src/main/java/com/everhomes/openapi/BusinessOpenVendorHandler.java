@@ -12,6 +12,6 @@ import java.util.List;
 public interface BusinessOpenVendorHandler {
     String BUSINESSOPEN_VENDOR_PREFIX = "BusinessOpenVendor-";
 
-    Long getUserId(String customJson, Integer namespaceId);
+    List<Long> getUserId(String customJson, Integer namespaceId);
     
 }
