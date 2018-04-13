@@ -15,6 +15,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
  * Created by chongxin.yang on 2018/4/12.
@@ -51,7 +52,7 @@ public class SZWBusinessOpenVendorHandler implements BusinessOpenVendorHandler{
 				cmd.setOwnerType("EhOrganizations");
 				cmd.setOwnerId(null);
 				List<OrganizationContactDTO> lists = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
-                LOGGER.info("organization manager check for bill display, cmd = "+ cmd.toString());
+                LOGGER.info("organization manager check for bill display, cmd = {}", cmd.toString());
                 List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);
                 LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
                 for(OrganizationContactDTO dto : organizationContactDTOS){
@@ -59,7 +60,7 @@ public class SZWBusinessOpenVendorHandler implements BusinessOpenVendorHandler{
                 }
 			}
 		}catch (Exception e) {
-			// TODO: handle exception
+			throw new RuntimeException("this cusname not find userid");
 		}
 		return userIdList;
 	}
