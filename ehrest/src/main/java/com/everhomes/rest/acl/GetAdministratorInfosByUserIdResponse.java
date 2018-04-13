@@ -9,26 +9,11 @@ package com.everhomes.rest.acl;
  * </ul>
  */
 public class GetAdministratorInfosByUserIdResponse {
-    private Integer isTopAdminFlag;
-    private Integer isSystemAdminFlag;
+    private Byte isTopAdminFlag;
+    private Byte isSystemAdminFlag;
     private String topAdminName;
     private String topAdminToken;
 
-    public Integer getIsTopAdminFlag() {
-        return isTopAdminFlag;
-    }
-
-    public void setIsTopAdminFlag(Integer isTopAdminFlag) {
-        this.isTopAdminFlag = isTopAdminFlag;
-    }
-
-    public Integer getIsSystemAdminFlag() {
-        return isSystemAdminFlag;
-    }
-
-    public void setIsSystemAdminFlag(Integer isSystemAdminFlag) {
-        this.isSystemAdminFlag = isSystemAdminFlag;
-    }
 
     public String getTopAdminName() {
         return topAdminName;
@@ -44,5 +29,21 @@ public class GetAdministratorInfosByUserIdResponse {
 
     public void setTopAdminToken(String topAdminToken) {
         this.topAdminToken = topAdminToken;
+    }
+
+    public Byte getIsTopAdminFlag() {
+        return isTopAdminFlag;
+    }
+
+    public void setIsTopAdminFlag(Byte isTopAdminFlag) {
+        this.isTopAdminFlag = isTopAdminFlag;
+    }
+
+    public Byte getIsSystemAdminFlag() {
+        return isSystemAdminFlag;
+    }
+
+    public void setIsSystemAdminFlag(Byte isSystemAdminFlag) {
+        this.isSystemAdminFlag = isSystemAdminFlag;
     }
 }

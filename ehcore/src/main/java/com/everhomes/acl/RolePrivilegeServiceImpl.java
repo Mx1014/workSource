@@ -1,5 +1,6 @@
 package com.everhomes.acl;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -17,6 +18,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.portal.AuthorizationsAppControl;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
@@ -1694,6 +1696,74 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return listOrganizationAdmin(cmd.getOrganizationId(), ActivationFlag.fromCode(cmd.getActivationFlag()));
 	}
 
+	@Override
+	public List<OrganizationContactDTO> listOrganizationSystemAdministrators(Long organizationId, Byte activationFlag) {
+		List<OrganizationContactDTO> dtos = listOrganizationAdmin(organizationId, ActivationFlag.fromCode(activationFlag));
+		Long topAdminUserId = getTopAdministratorByOrganizationId(organizationId);
+		return dtos.stream().filter(r->r.getTargetId() != topAdminUserId).collect(Collectors.toList());
+	}
+
+	@Override
+	public GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd) {
+		GetPersonelInfoByTokenResponse response = new GetPersonelInfoByTokenResponse();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getContactToken());
+		if(userIdentifier == null)
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USERTOKEN,
+					"invalid params");
+		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+		// 昵称
+		response.setNickName(user.getNickName());
+
+		GetAdministratorInfosByUserIdCommand getMethodCmd = new GetAdministratorInfosByUserIdCommand();
+		getMethodCmd.setOrganizationId(cmd.getOrganizationId());
+		getMethodCmd.setUserId(userIdentifier.getOwnerUid());
+		GetAdministratorInfosByUserIdResponse getMethodResponse = this.getAdministratorInfosByUserId(getMethodCmd);
+		// 用户id
+		response.setUserId(userIdentifier.getOwnerUid());
+		// 管理员flag
+		response.setIsTopAdminFlag(getMethodResponse.getIsTopAdminFlag());
+		response.setIsSystemAdminFlag(getMethodResponse.getIsSystemAdminFlag());
+
+		OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(userIdentifier.getOwnerUid(), cmd.getOrganizationId());
+		if(details != null){
+			// 档案信息和id
+			response.setCotactName(details.getContactName());
+			response.setDetailId(details.getId());
+		}
+		return null;
+	}
+
+	@Override
+	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
+		dbProvider.execute((TransactionStatus status) -> {
+			// 删除原来的超管权限
+			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+
+			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
+			if(detail != null){
+				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+				for (RoleAssignment roleAssignment: roleAssignments) {
+					if(roleIds.contains(roleAssignment.getRoleId())){
+						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
+				}
+			}
+
+			//  调用原来创建超管的方法创建管理员，注意，这个创建方法会把这个人加入到公司
+			this.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
+
+
+			Organization o = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+			if(null != o){
+				o.setAdminTargetId(cmd.getUserId());
+				organizationProvider.updateOrganization(o);
+			}
+			return null;
+		});
+
+	}
+
 	private List<OrganizationContactDTO> listOrganizationAdmin(Long organizationId, ActivationFlag activationFlag){
 		String targetType = null;
 		if(ActivationFlag.YES == activationFlag){
@@ -2459,7 +2529,63 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return projectTrees;
 	}
 
-	private void fliterProjectTrees(ProjectDTO dto, String type){
+	/**
+	 * 获取某个公司的top管理员
+	 * @param orgId
+	 * @return
+	 */
+	private Long getTopAdministratorByOrganizationId(Long orgId){
+		Organization org = checkOrganization(orgId);
+		if(org != null) {
+			if (org.getAdminTargetId() != null) {
+				return org.getAdminTargetId();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
+		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		if(adminUserId != null){
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), adminUserId);
+			for (OrganizationMember member: members) {
+				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+					return processOrganizationContactDTO(member);
+				}else{
+					continue;
+				}
+			}
+		}
+		return new OrganizationContactDTO();
+	}
+
+	@Override
+    public GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd) {
+		GetAdministratorInfosByUserIdResponse response = new GetAdministratorInfosByUserIdResponse();
+		List<OrganizationContactDTO> systemAdminDtos = this.listOrganizationSystemAdministrators(cmd.getOrganizationId(), null);
+		List<OrganizationContactDTO> targetDtos = systemAdminDtos.stream().filter(r->r.getTargetId().equals(cmd.getUserId())).collect(Collectors.toList());
+		response.setIsTopAdminFlag((targetDtos != null && targetDtos.size() > 0) ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+
+		if(getTopAdministratorByOrganizationId(cmd.getOrganizationId()).equals(cmd.getUserId())){
+			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
+
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
+			if(identifier != null){
+				response.setTopAdminToken(identifier.getIdentifierToken());
+			}
+			User user = userProvider.findUserById(cmd.getUserId());
+			if(user != null){
+				response.setTopAdminName(user.getNickName());
+			}
+		}else{
+			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
+		}
+
+		return response;
+    }
+
+    private void fliterProjectTrees(ProjectDTO dto, String type){
 		if(dto.getProjects() != null){
 			for (ProjectDTO r : dto.getProjects()) {
 				if (r.getProjectType().equals(type)) {

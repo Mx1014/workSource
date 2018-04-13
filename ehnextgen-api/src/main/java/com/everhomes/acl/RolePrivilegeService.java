@@ -430,4 +430,14 @@ public interface RolePrivilegeService {
 	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
 
 	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
+
+	OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
+
+	GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd);
+
+	List<OrganizationContactDTO> listOrganizationSystemAdministrators(Long organizationId, Byte activationFlag);
+
+	GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd);
+
+	void updateTopAdminstrator(CreateOrganizationAdminCommand cmd);
 }

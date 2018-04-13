@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 机构id</li>
  * <li>contactToken: 手机号</li>
  * <li>contactName:  用户姓名</li>
+ * <li>userId:  用户id</li>
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
@@ -21,6 +22,8 @@ public class CreateOrganizationAdminCommand {
 	private String contactToken;
 	
 	private String contactName;
+
+	private Long userId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -67,4 +70,11 @@ public class CreateOrganizationAdminCommand {
         return StringHelper.toJsonString(this);
     }
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }
