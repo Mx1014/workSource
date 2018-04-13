@@ -144,4 +144,8 @@ public interface CommunityProvider {
 
     List<Community> listNamespaceCommunities(Integer namespaceId);
     List<Community> listAllCommunitiesWithNamespaceToken();
+
+    Community findDefaultCommunity(Integer namespaceId);
+
+    Community findAnyCommunity(Integer namespaceId);
 }

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -1808,5 +1809,25 @@ public class CommunityProviderImpl implements CommunityProvider {
         return l;
     }
 
+    @Override
+    public Community findDefaultCommunity(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.DEFAULT_COMMUNITY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+        return query.fetchAnyInto(Community.class);
+    }
+
+    @Override
+    public Community findAnyCommunity(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        return query.fetchAnyInto(Community.class);
+    }
 
 }

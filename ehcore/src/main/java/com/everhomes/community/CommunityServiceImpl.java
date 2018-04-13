@@ -4076,30 +4076,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//登录的话找加入的家庭和公司
 		if(user != null && user.getId() != null){
-			List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(user.getId());
-
-			if(familyDtos != null && familyDtos.size() > 0){
-				for(FamilyDTO dto: familyDtos){
-					if(GroupMemberStatus.ACTIVE == GroupMemberStatus.fromCode(dto.getMembershipStatus())){
-						familyCommunityIdSet.add(dto.getCommunityId());
-					}
-				}
-			}
-
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), user.getId());
-			if(members != null){
-				for (OrganizationMember member: members) {
-					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
-						List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
-						if(organizationCommunitys != null && organizationCommunitys.size() > 0){
-							for (OrganizationCommunity orgcom: organizationCommunitys){
-								orgCommunityIdSet.add(orgcom.getCommunityId());
-							}
-						}
-					}
-				}
-			}
-
+			orgCommunityIdSet = getOrgCommunityIdsByUserId(user.getId());
+			familyCommunityIdSet = getFamilyCommunityIdsByUserId(user.getId());
 		}
 
 
@@ -4128,21 +4106,110 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
+	private Set<Long> getFamilyCommunityIdsByUserId(Long userId){
+
+
+		Set<Long> familyCommunityIdSet = new HashSet<>();
+
+		List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(userId);
+
+		if(familyDtos != null && familyDtos.size() > 0){
+			for(FamilyDTO dto: familyDtos){
+				if(GroupMemberStatus.ACTIVE == GroupMemberStatus.fromCode(dto.getMembershipStatus())){
+					familyCommunityIdSet.add(dto.getCommunityId());
+				}
+			}
+		}
+
+		return familyCommunityIdSet;
+	}
+
+
+	private Set<Long> getOrgCommunityIdsByUserId(Long userId){
+
+
+		Set<Long> orgCommunityIdSet = new HashSet<>();
+
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), userId);
+		if(members != null){
+			for (OrganizationMember member: members) {
+				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+					List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
+					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
+						for (OrganizationCommunity orgcom: organizationCommunitys){
+							orgCommunityIdSet.add(orgcom.getCommunityId());
+						}
+					}
+				}
+			}
+		}
+
+		return orgCommunityIdSet;
+
+	}
+
 
 	@Override
 	public CommunityUserDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
 
-		List<CommunityGeoPoint> pointList = new ArrayList<>();
+		List<CommunityGeoPoint> pointList;
+
+
+
 		for(int i = 12; i > 5; i--){
-			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), 5);
+			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
+			if(pointList != null && pointList.size() > 0){
+				Community community = communityProvider.findCommunityById(pointList.get(0).getCommunityId());
+				if(community != null){
+					CommunityUserDTO dto = ConvertHelper.convert(community, CommunityUserDTO.class);
+
+					Set<Long> familyCommunityIdSet;
+					Set<Long> orgCommunityIdSet;
+
+					User user = UserContext.current().getUser();
+
+					//登录的话找加入的家庭和公司
+					if(user != null && user.getId() != null){
+						orgCommunityIdSet = getOrgCommunityIdsByUserId(user.getId());
+						if(orgCommunityIdSet.contains(community.getId())){
+							dto.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+						}
+						familyCommunityIdSet = getFamilyCommunityIdsByUserId(user.getId());
+						if(familyCommunityIdSet.contains(community.getId())){
+							dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
+						}
+					}
+
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+					return dto;
+				}
+			}
 		}
-		
+
 
 		return null;
 	}
 
 	@Override
 	public CommunityUserDTO findDefaultCommunity() {
+		Community defaultCommunity = communityProvider.findDefaultCommunity(UserContext.getCurrentNamespaceId());
+		if(defaultCommunity == null){
+			defaultCommunity = communityProvider.findAnyCommunity(UserContext.getCurrentNamespaceId());
+		}
+
+
+		if(defaultCommunity != null){
+			CommunityUserDTO dto = ConvertHelper.convert(defaultCommunity, CommunityUserDTO.class);
+			String pinyin = PinYinHelper.getPinYin(dto.getName());
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+			return dto;
+		}
+
 		return null;
 	}
 }
