@@ -120,6 +120,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             for (SyncDataTask task : tasks) {
                 SyncDataResult result = new SyncDataResult();
                 result.setStartTime(task.getCreateTime());
+                result.setEndTime(task.getUpdateTime());
                 result.setStatus(task.getStatus());
                 if(SyncDataTaskStatus.FINISH.equals(SyncDataTaskStatus.fromCode(task.getStatus()))
                         || SyncDataTaskStatus.EXCEPTION.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
