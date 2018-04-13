@@ -61,7 +61,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
-    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
+    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId, String dateStrBegin, String dateStrEnd, Byte isOwed);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -289,4 +289,12 @@ public interface AssetProvider {
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
 
     void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+
+    PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
+
+    String findBillGroupNameById(Long billGroupId);
+
+    void linkIndividualUserToBill(Long ownerUid, String token);
+
+    void linkOrganizationToBill(Long ownerUid, String token);
 }

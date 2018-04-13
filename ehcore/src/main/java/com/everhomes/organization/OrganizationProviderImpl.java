@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -20,7 +19,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
@@ -37,7 +35,6 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -45,12 +42,9 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.hp.hpl.sparta.xpath.Step;
-
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
-import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
