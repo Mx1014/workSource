@@ -80,3 +80,7 @@ ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) 
 ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
 ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
 
+-- 默认园区标志
+ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NULL COMMENT 'is the default community in his namespace, 0-no, 1-yes';
+
+
