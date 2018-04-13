@@ -6222,48 +6222,48 @@ public class PunchServiceImpl implements PunchService {
         return dto;
     }
 
-    @Override
-    public void addPunchWiFiRule(PunchWiFiRuleDTO cmd) {
-
-        Long userId = UserContext.current().getUser().getId();
-        if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
-            LOGGER.error("Invalid owner type or  Id parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid owner type or  Id parameter in the command");
-        }
-        if (null == cmd.getName()) {
-            LOGGER.error("Invalid name parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid name parameter in the command");
-        }
-        List<PunchWifiRule> punchWiFiRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
-        if (null != punchWiFiRules) {
-            LOGGER.error("Invalid name parameter in the command");
-            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_NAME_REPEAT,
-                    "name repeat");
-
-        } else {
-            this.dbProvider.execute((TransactionStatus status) -> {
-                PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
-                obj.setCreatorUid(userId);
-                obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                        .getTime()));
-                this.punchProvider.createPunchWifiRule(obj);
-                if (null == cmd.getWifis())
-                    return null;
-                for (PunchWiFiDTO dto : cmd.getWifis()) {
-                    PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
-                    punchWifi.setOwnerType(cmd.getOwnerType());
-                    punchWifi.setOwnerId(cmd.getOwnerId());
-                    punchWifi.setCreatorUid(userId);
-                    punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    punchWifi.setWifiRuleId(obj.getId());
-                    punchProvider.createPunchWifi(punchWifi);
-                }
-                return null;
-            });
-        }
-    }
+//    @Override
+//    public void addPunchWiFiRule(PunchWiFiRuleDTO cmd) {
+//
+//        Long userId = UserContext.current().getUser().getId();
+//        if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
+//            LOGGER.error("Invalid owner type or  Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid owner type or  Id parameter in the command");
+//        }
+//        if (null == cmd.getName()) {
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid name parameter in the command");
+//        }
+//        List<PunchWifiRule> punchWiFiRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+//        if (null != punchWiFiRules) {
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_NAME_REPEAT,
+//                    "name repeat");
+//
+//        } else {
+//            this.dbProvider.execute((TransactionStatus status) -> {
+//                PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
+//                obj.setCreatorUid(userId);
+//                obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//                        .getTime()));
+//                this.punchProvider.createPunchWifiRule(obj);
+//                if (null == cmd.getWifis())
+//                    return null;
+//                for (PunchWiFiDTO dto : cmd.getWifis()) {
+//                    PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
+//                    punchWifi.setOwnerType(cmd.getOwnerType());
+//                    punchWifi.setOwnerId(cmd.getOwnerId());
+//                    punchWifi.setCreatorUid(userId);
+//                    punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    punchWifi.setWifiRuleId(obj.getId());
+//                    punchProvider.createPunchWifi(punchWifi);
+//                }
+//                return null;
+//            });
+//        }
+//    }
 
     @Override
     public void updatePunchWiFiRule(PunchWiFiRuleDTO cmd) {
@@ -6462,77 +6462,147 @@ public class PunchServiceImpl implements PunchService {
         return obj;
     }
 
-    @Override
-    public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
-        Long userId = UserContext.current().getUser().getId();
-        if (null == cmd.getId()) {
-            LOGGER.error("Invalid   Id parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid  Id parameter in the command");
-        }
-        if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
-            LOGGER.error("Invalid owner type or  Id parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid owner type or  Id parameter in the command");
-        }
-        if (null == cmd.getName()) {
-            LOGGER.error("Invalid name parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid name parameter in the command");
-        }
-
-        List<PunchWorkdayRule> punchWorkdayRules = punchProvider.queryPunchWorkdayRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
-        if (null != punchWorkdayRules && (punchWorkdayRules.size() > 1 || !punchWorkdayRules.get(0).getId().equals(cmd.getId()))) {
-            //有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
-            LOGGER.error("Invalid name parameter in the command");
-            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_NAME_REPEAT,
-                    "name repeat");
-
-        }
-
-        PunchWorkdayRule old = this.punchProvider.getPunchWorkdayRuleById(cmd.getId());
-        if (null == old) {
-            LOGGER.error("Invalid   Id parameter in the command");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid  Id parameter in the command:can not found rule");
-        } else {
-            this.dbProvider.execute((TransactionStatus status) -> {
-                PunchWorkdayRule obj = converDTO2WorkdayRule(cmd);
-                obj.setCreateTime(old.getCreateTime());
-                obj.setCreatorUid(old.getCreatorUid());
-                this.punchProvider.updatePunchWorkdayRule(obj);
-                this.punchProvider.deletePunchHolidayByRuleId(cmd.getId());
-                if (null != cmd.getWorkdays()) {
-                    for (Long date : cmd.getWorkdays()) {
-                        PunchHoliday holiday = new PunchHoliday();
-                        holiday.setOwnerType(cmd.getOwnerType());
-                        holiday.setOwnerId(cmd.getOwnerId());
-                        holiday.setCreatorUid(userId);
-                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        holiday.setWorkdayRuleId(obj.getId());
-                        holiday.setRuleDate(new java.sql.Date(date));
-                        holiday.setStatus(DateStatus.WORKDAY.getCode());
-                        this.punchProvider.createPunchHoliday(holiday);
-
-                    }
-                }
-                if (null != cmd.getHolidays()) {
-                    for (Long date : cmd.getHolidays()) {
-                        PunchHoliday holiday = new PunchHoliday();
-                        holiday.setOwnerType(cmd.getOwnerType());
-                        holiday.setOwnerId(cmd.getOwnerId());
-                        holiday.setCreatorUid(userId);
-                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        holiday.setWorkdayRuleId(obj.getId());
-                        holiday.setRuleDate(new java.sql.Date(date));
-                        holiday.setStatus(DateStatus.HOLIDAY.getCode());
-                        this.punchProvider.createPunchHoliday(holiday);
-                    }
-                }
-                return null;
-            });
-        }
-    }
+//    @Override
+//    public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
+//        Long userId = UserContext.current().getUser().getId();
+//        if (null == cmd.getId()) {
+//            LOGGER.error("Invalid   Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid  Id parameter in the command");
+//        }
+//        if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
+//            LOGGER.error("Invalid owner type or  Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid owner type or  Id parameter in the command");
+//        }
+//        if (null == cmd.getName()) {
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid name parameter in the command");
+//        }
+//
+//        List<PunchWorkdayRule> punchWorkdayRules = punchProvider.queryPunchWorkdayRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+//        if (null != punchWorkdayRules && (punchWorkdayRules.size() > 1 || !punchWorkdayRules.get(0).getId().equals(cmd.getId()))) {
+//            //有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_NAME_REPEAT,
+//                    "name repeat");
+//
+//        }
+//
+//        PunchWorkdayRule old = this.punchProvider.getPunchWorkdayRuleById(cmd.getId());
+//        if (null == old) {
+//            LOGGER.error("Invalid   Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid  Id parameter in the command:can not found rule");
+//        } else {
+//            this.dbProvider.execute((TransactionStatus status) -> {
+//                PunchWorkdayRule obj = converDTO2WorkdayRule(cmd);
+//                obj.setCreateTime(old.getCreateTime());
+//                obj.setCreatorUid(old.getCreatorUid());
+//                this.punchProvider.updatePunchWorkdayRule(obj);
+//                this.punchProvider.deletePunchHolidayByRuleId(cmd.getId());
+//                if (null != cmd.getWorkdays()) {
+//                    for (Long date : cmd.getWorkdays()) {
+//                        PunchHoliday holiday = new PunchHoliday();
+//                        holiday.setOwnerType(cmd.getOwnerType());
+//                        holiday.setOwnerId(cmd.getOwnerId());
+//                        holiday.setCreatorUid(userId);
+//                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        holiday.setWorkdayRuleId(obj.getId());
+//                        holiday.setRuleDate(new java.sql.Date(date));
+//                        holiday.setStatus(DateStatus.WORKDAY.getCode());
+//                        this.punchProvider.createPunchHoliday(holiday);
+//
+//                    }
+//                }
+//                if (null != cmd.getHolidays()) {
+//                    for (Long date : cmd.getHolidays()) {
+//                        PunchHoliday holiday = new PunchHoliday();
+//                        holiday.setOwnerType(cmd.getOwnerType());
+//                        holiday.setOwnerId(cmd.getOwnerId());
+//                        holiday.setCreatorUid(userId);
+//                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        holiday.setWorkdayRuleId(obj.getId());
+//                        holiday.setRuleDate(new java.sql.Date(date));
+//                        holiday.setStatus(DateStatus.HOLIDAY.getCode());
+//                        this.punchProvider.createPunchHoliday(holiday);
+//                    }
+//                }
+//                return null;
+//            });
+//        }
+//    }
+//    public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
+//        Long userId = UserContext.current().getUser().getId();
+//        if (null == cmd.getId()) {
+//            LOGGER.error("Invalid   Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid  Id parameter in the command");
+//        }
+//        if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
+//            LOGGER.error("Invalid owner type or  Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid owner type or  Id parameter in the command");
+//        }
+//        if (null == cmd.getName()) {
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid name parameter in the command");
+//        }
+//
+//        List<PunchWorkdayRule> punchWorkdayRules = punchProvider.queryPunchWorkdayRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+//        if (null != punchWorkdayRules && (punchWorkdayRules.size() > 1 || !punchWorkdayRules.get(0).getId().equals(cmd.getId()))) {
+//            //有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+//            LOGGER.error("Invalid name parameter in the command");
+//            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_NAME_REPEAT,
+//                    "name repeat");
+//
+//        }
+//
+//        PunchWorkdayRule old = this.punchProvider.getPunchWorkdayRuleById(cmd.getId());
+//        if (null == old) {
+//            LOGGER.error("Invalid   Id parameter in the command");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid  Id parameter in the command:can not found rule");
+//        } else {
+//            this.dbProvider.execute((TransactionStatus status) -> {
+//                PunchWorkdayRule obj = converDTO2WorkdayRule(cmd);
+//                obj.setCreateTime(old.getCreateTime());
+//                obj.setCreatorUid(old.getCreatorUid());
+//                this.punchProvider.updatePunchWorkdayRule(obj);
+//                this.punchProvider.deletePunchHolidayByRuleId(cmd.getId());
+//                if (null != cmd.getWorkdays()) {
+//                    for (Long date : cmd.getWorkdays()) {
+//                        PunchHoliday holiday = new PunchHoliday();
+//                        holiday.setOwnerType(cmd.getOwnerType());
+//                        holiday.setOwnerId(cmd.getOwnerId());
+//                        holiday.setCreatorUid(userId);
+//                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        holiday.setWorkdayRuleId(obj.getId());
+//                        holiday.setRuleDate(new java.sql.Date(date));
+//                        holiday.setStatus(DateStatus.WORKDAY.getCode());
+//                        this.punchProvider.createPunchHoliday(holiday);
+//
+//                    }
+//                }
+//                if (null != cmd.getHolidays()) {
+//                    for (Long date : cmd.getHolidays()) {
+//                        PunchHoliday holiday = new PunchHoliday();
+//                        holiday.setOwnerType(cmd.getOwnerType());
+//                        holiday.setOwnerId(cmd.getOwnerId());
+//                        holiday.setCreatorUid(userId);
+//                        holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        holiday.setWorkdayRuleId(obj.getId());
+//                        holiday.setRuleDate(new java.sql.Date(date));
+//                        holiday.setStatus(DateStatus.HOLIDAY.getCode());
+//                        this.punchProvider.createPunchHoliday(holiday);
+//                    }
+//                }
+//                return null;
+//            });
+//        }
+//    }
 
     @Override
     public void deletePunchWorkdayRule(DeleteCommonCommand cmd) {
