@@ -4,6 +4,8 @@ package com.everhomes.purchase;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
@@ -12,18 +14,27 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
-import com.everhomes.rest.warehouse.WarehouseMaterialStock;
+import com.everhomes.rest.warehouse.*;
+import com.everhomes.search.WarehouseStockLogSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseOrders;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.supplier.SupplierProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.warehouse.WarehouseMaterials;
-import com.everhomes.warehouse.WarehouseOrderStatus;
-import com.everhomes.warehouse.WarehouseProvider;
+import com.everhomes.warehouse.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,17 +70,20 @@ public class PurchaseServiceImpl implements PurchaseService {
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private OrganizationService organizationService;
-
+    @Autowired
+    private UserProvider userProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
+    @Autowired
+    private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
 
     @Override
     public void CreateOrUpdatePurchaseOrderCommand(CreateOrUpdatePurchaseOrderCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_OPERATION);
-        if(cmd.getPurchaseRequestId() != null){
-            //删除
-            purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
-            purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
-        }
+
         PurchaseOrder order = new PurchaseOrder();
         order.setApplicantId(UserContext.currentUserId());
         order.setApplicantTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -101,8 +115,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         BigDecimal totalAmount = new BigDecimal("0");
         for(PurchaseMaterialDTO dto : cmd.getDtos()) {
-            long l = Long.parseLong(dto.getUnitPrice()) * dto.getPurchaseQuantity();
-            totalAmount = totalAmount.add(new BigDecimal(l));
+             totalAmount = new BigDecimal(dto.getUnitPrice()).multiply(new BigDecimal(dto.getPurchaseQuantity()));
         }
         order.setTotalAmount(totalAmount);
 
@@ -124,18 +137,23 @@ public class PurchaseServiceImpl implements PurchaseService {
                     EhWarehousePurchaseItems.class
             )));
             item.setMaterialId(dto.getMaterialId());
+            //预录入入库的仓库
+            item.setWarehouseId(dto.getWarehouseId());
             item.setNamespaceId(cmd.getNamespaceId());
             item.setOwnerId(cmd.getOwnerId());
             item.setOwnerType(cmd.getOwnerType());
             item.setPurchaseQuantity(dto.getPurchaseQuantity());
             item.setPurchaseRequestId(nextPurchaseOrderId);
-            item.setUnitPrice(new BigDecimal(dto.getUnitPrice()));
+            try{
+                item.setUnitPrice(new BigDecimal(dto.getUnitPrice().trim()));
+            }catch (Exception e){
+                LOGGER.error("unit price input incorrect");
+
+            }
             list.add(item);
         }
 
         this.dbProvider.execute((TransactionStatus status) -> {
-            purchaseProvider.insertPurchaseOrder(order);
-            purchaseProvider.insertPurchaseItems(list);
             if(cmd.getStartFlow().byteValue() == (byte)1){
                 //工作流case
                 //创建工作流
@@ -160,6 +178,14 @@ public class PurchaseServiceImpl implements PurchaseService {
                 createFlowCaseCommand.setProjectType(order.getOwnerType());
                 flowService.createFlowCase(createFlowCaseCommand);
             }
+            if(cmd.getPurchaseRequestId() != null){
+                //删除
+                purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
+                purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
+            }
+            purchaseProvider.insertPurchaseOrder(order);
+            purchaseProvider.insertPurchaseItems(list);
+
             return null;
         });
     }
@@ -172,7 +198,8 @@ public class PurchaseServiceImpl implements PurchaseService {
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null || pageSize < 1) pageSize = 20;
-        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,++pageSize,cmd.getSubmissionStatus()
+        int overloadPageSize = pageSize + 1;
+        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,overloadPageSize,cmd.getSubmissionStatus()
                 ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
         if(dtos.size() > pageSize) {
             response.setNextPageAnchor(pageAnchor + pageSize);
@@ -185,24 +212,96 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public void entryWarehouse(Long purchaseRequestId,Long communityId) {
         checkAssetPriviledgeForPropertyOrg(communityId, PrivilegeConstants.PURCHASE_ENTRY_STOCK);
-        PurchaseOrder order = purchaseProvider.getPurchaseOrderById(purchaseRequestId);
-        if(!order.getSubmissionStatus().equals(PurchaseSubmissionStatus.FINISH.getCode())){
+        PurchaseOrder purchaseOrder = purchaseProvider.getPurchaseOrderById(purchaseRequestId);
+        if(!purchaseOrder.getSubmissionStatus().equals(PurchaseSubmissionStatus.FINISH.getCode())){
             throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE,PurchaseErrorCodes.UNABLE_ENTRY_WAREHOUSE
             ,"unabale to continue instock operation since this order had been canceld or not finished yet");
         }
-        //增加库存
+        //增加一个入库单
+        WarehouseOrder order = new WarehouseOrder();
+        long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
+        order.setId(warehouseOrderId);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setCreateUid(UserContext.currentUserId());
+        order.setOwnerType(purchaseOrder.getOwnerType());
+        order.setOwnerId(purchaseOrder.getOwnerId());
+        order.setNamespaceId(purchaseOrder.getNamespaceId());
+        order.setIdentity(SupplierHelper.getIdentity());
+        order.setExecutorId(UserContext.currentUserId());
+        order.setServiceType(OrderServiceType.PURCHASE_ENTRY.getCode());
+        order.setCommunityId(purchaseOrder.getCommunityId());
+        User userById = userProvider.findUserById(UserContext.currentUserId());
+        order.setExecutorName(userById.getNickName());
+        order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        warehouseProvider.insertWarehouseOrder(order);
+        //增加库存,增加库存日志
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(purchaseRequestId);
         for(PurchaseItem item : items){
             Long materialId = item.getMaterialId();
             Long purchaseQuantity = item.getPurchaseQuantity();
-            warehouseProvider.updateWarehouseStockByPurchase(materialId,purchaseQuantity);
+            Long warehouseId = item.getWarehouseId();
+            //寻找库存
+            boolean stockExists = warehouseProvider.checkStockExists(warehouseId,materialId);
+            WarehouseStocks stock = null;
+            if(stockExists){
+                //如果库存已经有了，则增加库存
+                stock = warehouseProvider.updateWarehouseStockByPurchase(warehouseId,materialId,purchaseQuantity);
+            }else{
+                //如果没有，则新增库存
+                stock = new WarehouseStocks();
+                stock.setAmount(item.getPurchaseQuantity());
+                stock.setCommunityId(order.getCommunityId());
+                stock.setCreateTime(DateUtils.currentTimestamp());
+                stock.setCreatorUid(order.getCreateUid());
+                stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                        EhWarehouseStocks.class
+                )));
+                stock.setMaterialId(item.getMaterialId());
+                stock.setNamespaceId(order.getNamespaceId());
+                stock.setOwnerId(order.getOwnerId());
+                stock.setOwnerType(order.getOwnerType());
+                stock.setStatus(Status.ACTIVE.getCode());
+                stock.setWarehouseId(item.getWarehouseId());
+                // 忘记在es上feed一下了 by vincent wang 2018/3/28
+                warehouseProvider.insertWarehouseStock(stock);
+                warehouseStockSearcher.feedDoc(stock);
+            }
+            //出入库记录
+            WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
+            logs.setWarehouseOrderId(warehouseOrderId);
+            logs.setRequestUid(order.getCreateUid());
+            logs.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                    EhWarehouseStockLogs.class
+            )));
+            logs.setDeliveryUid(logs.getRequestUid());
+            logs.setDeliveryAmount(purchaseQuantity);
+            logs.setStockAmount(stock.getAmount());
+            logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
+            logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
+            logs.setRequestId(purchaseOrder.getId());
+
+            warehouseProvider.insertWarehouseStockLog(logs);
+            warehouseStockLogSearcher.feedDoc(logs);
         }
+
+        //将purchaseOrder的warehouseStatus状态改变
+        resetWarehouseStatusForPurchaseOrder(WarehouseStatus.ENABLE.getCode(), purchaseRequestId);
+    }
+
+    private void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        warehouseProvider.resetWarehouseStatusForPurchaseOrder(status, purchaseRequestId);
     }
 
     @Override
     public GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd) {
         //校验权限
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_VIEW);
+        Long requestId = cmd.getPurchaseRequestId();
+        if(requestId == null){
+            Long flowCaseId = cmd.getFlowCaseId();
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+            cmd.setPurchaseRequestId(flowCase.getReferId());
+        }
         PurchaseOrder order = purchaseProvider.getPurchaseOrderById(cmd.getPurchaseRequestId());
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(cmd.getPurchaseRequestId());
         //组装数据 TODO api字段和jooq字段保持一致可以节省代码
@@ -211,7 +310,9 @@ public class PurchaseServiceImpl implements PurchaseService {
         dto.setContact(order.getContactName());
         dto.setContactTel(order.getContactTel());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
+        try{
+            dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
+        }catch (Exception e){}
         dto.setPurchaseRequestId(order.getId());
         dto.setRemark(order.getRemark());
         dto.setSupplierId(order.getSupplierId());
@@ -221,13 +322,20 @@ public class PurchaseServiceImpl implements PurchaseService {
             PurchaseMaterialDetailDTO pto = new PurchaseMaterialDetailDTO();
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterialById(item.getMaterialId());
             WarehouseMaterialStock stock = warehouseProvider.findWarehouseStocksByMaterialId(item.getMaterialId());
-            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //还没有入库的话
+            if(stock != null){
+                pto.setStock(stock.getAmount());
+            }else{
+                pto.setStock(0l);
+            }
+//            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //拿填单的时候的仓库id
+            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameById(item.getWarehouseId()));
             pto.setMaterialCategory(warehouseProvider.findWarehouseMaterialCategoryByMaterialId(item.getMaterialId()));
             pto.setMaterialId(item.getMaterialId());
             pto.setMaterialName(material.getName());
             pto.setMaterialNumber(material.getMaterialNumber());
             pto.setPurchaseQuantity(item.getPurchaseQuantity());
-            pto.setStock(stock.getAmount());
             pto.setSupplierName(material.getSupplierName());
             pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
             pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));

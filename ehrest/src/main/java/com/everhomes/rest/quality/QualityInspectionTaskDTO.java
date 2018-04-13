@@ -55,87 +55,87 @@ import java.util.List;
  * </ul>
  */
 public class QualityInspectionTaskDTO {
-	
+
 	private Long id;
-	
+
 	private Long standardId;
-	
+
 	private Long parentId;
-	
+
 	private Long childCount;
 
 	private String ownerType;
-	
+
 	private Long ownerId;
-	
+
 	private String targetType;
-	
+
 	private Long targetId;
 
 	private String targetName;
-	
+
 	private String taskName;
-	
+
 	private String taskNumber;
-	
+
 	private String executiveGroupName;
 
 	private String groupName;
 
 	private String categoryName;
-	
+
 	private Long executiveGroupId;
-	
+
 	private Long executivePositionId;
-	
+
 	private Long executorId;
-	
+
 	private String executorName;
 
 	private Long operatorId;
-	
+
 	private String operatorName;
 
 	private String operatorType;
-	
+
 	private Timestamp executiveStartTime;
-	
+
 	private Timestamp executiveExpireTime;
-	
+
 	private Timestamp processExpireTime;
-	
+
 	private Byte status;
-	
+
 	private Byte result;
-	
+
 	private Byte processResult;
-	
+
 	private Byte reviewResult;
-	
+
 	private Long reviewerId;
-	
+
 	private String reviewerName;
-	
+
 	private Long categoryId;
-	
+
 	@ItemType(QualityInspectionTaskRecordsDTO.class)
-    private QualityInspectionTaskRecordsDTO record;
-	
+	private QualityInspectionTaskRecordsDTO record;
+
 	@ItemType(GroupUserDTO.class)
 	private List<GroupUserDTO> groupUsers;
-	
+
 	private Byte taskFlag;
-	
+
 	private Long manualFlag;
-	
+
 	private Long creatorUid;
-	
+
 	private String creatorName;
-	
+
 	private String standardDescription;
-	
+
 	private String categoryDescription;
-	
+
 	private Timestamp createTime;
 
 	private Timestamp executiveTime;
@@ -509,8 +509,8 @@ public class QualityInspectionTaskDTO {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

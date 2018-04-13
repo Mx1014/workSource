@@ -19,6 +19,9 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 状态 {@link com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus}</li>
  *     <li>pageSize: 一页条数</li>
  *     <li>pageAnchor: 下一页锚点</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class SearchClearanceLogCommand {
@@ -37,6 +40,33 @@ public class SearchClearanceLogCommand {
 
     private Integer pageSize;
     private Long pageAnchor;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
     public Integer getNamespaceId() {
         return namespaceId;

@@ -18,4 +18,6 @@ public interface RequisitionService {
     List<ListRequisitionTypesDTO> listRequisitionTypes(ListRequisitionTypesCommand cmd);
 
     String getRequisitionNameById(Long requisitionId);
+
+    ListRequisitionsResponse listRequisitionsForSecondParty(ListRequisitionsCommand cmd);
 }

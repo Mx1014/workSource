@@ -187,7 +187,11 @@ public class WorkReportServiceImpl implements WorkReportService {
             }
         }
         //  remove the extra scope.
+        if (detailIds.size() == 0)
+            detailIds.add(0L);
         workReportProvider.deleteOddWorkReportDetailScope(namespaceId, reportId, detailIds);
+        if (organizationIds.size() == 0)
+            organizationIds.add(0L);
         workReportProvider.deleteOddWorkReportOrganizationScope(namespaceId, reportId, organizationIds);
     }
 

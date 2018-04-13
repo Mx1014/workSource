@@ -320,6 +320,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.eq(type));
 
         query.addConditions(cond);
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.DEFAULT_ORDER.asc());
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
             return null;

@@ -272,6 +272,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaName(area.getName());
 		community.setCityName(city.getName());
 		community.setAreaSize(cmd.getAreaSize());
+		community.setName(cmd.getName());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
 			communitySearcher.feedDoc(community);
@@ -3583,11 +3584,12 @@ public class CommunityServiceImpl implements CommunityService {
 				communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
 			}
 		}else{
-			if(null == cmd.getResourceCategoryId()) {
-	        	LOGGER.error("CategoryId cannot be null.");
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-	    				"CategoryId cannot be null.");
-	        }
+			//分类无可以改成无
+//			if(null == cmd.getResourceCategoryId()) {
+//	        	LOGGER.error("CategoryId cannot be null.");
+//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//	    				"CategoryId cannot be null.");
+//	        }
 			ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
 			checkResourceCategoryIsNull(category);
 			rca = new ResourceCategoryAssignment();

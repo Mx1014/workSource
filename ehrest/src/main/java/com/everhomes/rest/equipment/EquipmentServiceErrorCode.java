@@ -112,7 +112,7 @@ public interface EquipmentServiceErrorCode {
       */
      int ERROR_EQUIPMENT_REPAIR_CATEGORY_NOT_EXIST = 10027;
      /**
-      * 报修类型未建立
+      * 报修同步错误
       */
      int ERROR_EQUIPMENT_TASK_SYNC_ERROR = 10028;
 }

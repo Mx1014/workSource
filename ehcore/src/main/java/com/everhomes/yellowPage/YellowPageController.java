@@ -494,6 +494,7 @@ public class YellowPageController  extends ControllerBase {
   	 */
       @RequestMapping("syncOldForm")
       @RestReturn(value = String.class)
+      @Deprecated
       public RestResponse syncOldForm() {
       	
       	this.yellowPageService.syncOldForm();
@@ -503,5 +504,22 @@ public class YellowPageController  extends ControllerBase {
       	response.setErrorDescription("OK");
       	return response;
       }
+      
+      /**
+    	 * <b>URL: /yellowPage/syncServiceAllianceApplicationRecords</b>
+    	 * <p> 申请记录迁移到表中存储</p>
+    	 */
+    @RequestMapping("syncServiceAllianceApplicationRecords")
+    @RestReturn(value = String.class)
+    @Deprecated
+    public RestResponse syncServiceAllianceApplicationRecords() {
+    	
+    	this.yellowPageService.syncServiceAllianceApplicationRecords();
+    	 
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
 
 }

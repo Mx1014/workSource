@@ -7,6 +7,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.forum.FindDefaultForumCommand;
 import com.everhomes.rest.forum.FindDefaultForumResponse;
 import com.everhomes.rest.forum.ForumActionData;
+import com.everhomes.rest.forum.ForumEntryConfigulation;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhForumCategories;
 import com.everhomes.util.StringHelper;
@@ -34,21 +35,28 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	@Override
 	public String publish(Integer namespaceId, String instanceConfig, String appName) {
 
-		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
-		if(actionDataObj == null){
-			actionDataObj = new ForumActionData();
+		ForumEntryConfigulation config = (ForumEntryConfigulation) StringHelper.fromJsonString(instanceConfig, ForumEntryConfigulation.class);
+		if(config == null){
+			config = new ForumEntryConfigulation();
 		}
-		if(actionDataObj.getForumEntryId() == null){
+
+		//关联到主页签论坛
+		if(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode().equals(config.getIndexFlag())){
+			config.setForumEntryId(0L);
+		}
+
+
+		if(config.getForumEntryId() == null){
 			FindDefaultForumCommand cmd = new FindDefaultForumCommand();
 			cmd.setNamespaceId(namespaceId);
 			FindDefaultForumResponse defaultForum = forumService.findDefaultForum(cmd);
 			if(defaultForum != null || defaultForum.getDefaultForum() != null){
 				ForumCategory forumCategory = createForumCategory(namespaceId, defaultForum.getDefaultForum().getId(), appName);
-				actionDataObj.setForumEntryId(forumCategory.getEntryId());
+				config.setForumEntryId(forumCategory.getEntryId());
 			}
 		}
 
-		return actionDataObj.toString();
+		return config.toString();
 	}
 
 	@Override
@@ -59,15 +67,15 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	@Override
 	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
 
-		ForumActionData forumActionData = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
-		if(forumActionData == null){
-			forumActionData = new ForumActionData();
+		ForumEntryConfigulation config = (ForumEntryConfigulation) StringHelper.fromJsonString(actionData, ForumEntryConfigulation.class);
+		if(config == null){
+			config = new ForumEntryConfigulation();
 		}
 
-		if(forumActionData.getForumEntryId() == null){
-			forumActionData.setForumEntryId(0L);
+		if(config.getForumEntryId() == null){
+			config.setForumEntryId(0L);
 		}
-		return forumActionData.toString();
+		return config.toString();
 	}
 
 	@Override
@@ -76,13 +84,13 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
 
-		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
+		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
 
-		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
-			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
-		}
+//		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
+//			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
+//		}
 
 		if(actionDataObj != null && actionDataObj.getForumEntryId() != null){
 			return String.valueOf(actionDataObj.getForumEntryId());
@@ -92,7 +100,7 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
 		return 42050000L;
 	}
 

@@ -95,6 +95,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -111,6 +112,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private ConfigurationProvider configProvider;
 	
@@ -137,6 +140,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -149,14 +155,26 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void syncFromDb() {
 		int pageSize = 200;      
+		long pageAnchor = 0;
         this.deleteAll();
-
-        syncFromServiceAllianceRequestsDb(pageSize);
-        syncFromReservationRequestsDb(pageSize);
-        syncFromSettleRequestInfoSearcherDb(pageSize);
-        syncFromServiceAllianceApartmentRequestsDb(pageSize);
-        syncFromServiceAllianceInvestRequestsDb(pageSize);
-        syncFromServiceAllianceFlowCasesDb(pageSize);//同步通过工作流审批的申请记录。
+        
+        while(true){
+        	List<ServiceAllianceApplicationRecord> list = saapplicationRecordProvider.listServiceAllianceApplicationRecord(pageAnchor,pageSize);
+        	for (ServiceAllianceApplicationRecord record : list) {
+        		feedDoc(ConvertHelper.convert(record, ServiceAllianceRequestInfo.class));
+			}
+        	if(list.size()<pageSize){
+        		break;
+        	}
+        	pageAnchor = list.get(list.size()-1).getId();
+        }
+        	
+//        syncFromServiceAllianceRequestsDb(pageSize);
+//        syncFromReservationRequestsDb(pageSize);
+//        syncFromSettleRequestInfoSearcherDb(pageSize);
+//        syncFromServiceAllianceApartmentRequestsDb(pageSize);
+//        syncFromServiceAllianceInvestRequestsDb(pageSize);
+//        syncFromServiceAllianceFlowCasesDb(pageSize);//同步通过工作流审批的申请记录。
 
 	}
 
@@ -189,8 +207,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         }
         return null;
     }
-
-    private void bulkUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    
+    public List<ServiceAllianceRequestInfo> generateUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    	List<ServiceAllianceRequestInfo> list = new ArrayList<>();
         for (FlowCaseDetail flowCase : details) {
             // 服务联盟的审批拼接工作流 content字符串
             ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
@@ -231,7 +250,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             if(lists!=null && lists.size()>0) {
                 request.setCreateTime(lists.get(0).getCreateTime());
             }
-            request.setCreatorName(user.getNickName());
+            request.setCreatorName(user!=null?user.getNickName():"");
             if(organizationVal!= null && organizationVal.getFieldValue() != null){
                 PostApprovalFormTextValue organizationvalue = JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class);
                 if(organizationvalue != null) {
@@ -268,7 +287,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
     			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
     		}
     		request.setWorkflowStatus(status);
-            feedDoc(request);
+            list.add(request);
+        }
+        return list;
+    }
+
+    private void bulkUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    	 List<ServiceAllianceRequestInfo> list = generateUpdateServiceAllianceFlowCaseRequests(details);
+    	 for (ServiceAllianceRequestInfo request : list) {
+    		feedDoc(request);
             LOGGER.debug("request = "+request);
         }
     }
@@ -499,6 +526,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public SearchRequestInfoResponse searchRequestInfo(
 			SearchRequestInfoCommand cmd) {
+		
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040540L, cmd.getAppId(), null,0L);//申请记录权限
+		}
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
@@ -1053,14 +1084,14 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			if(org != null) {
 			    b.field("creatorOrganization", org.getName());
             } else {
-                b.field("creatorOrganization", "");
+                b.field("creatorOrganization", request.getCreatorOrganization()==null?"":request.getCreatorOrganization());
             }
             
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
             if(sa != null) {
             	b.field("serviceOrganization", sa.getName());
             } else {
-                b.field("serviceOrganization", "");
+                b.field("serviceOrganization", request.getServiceOrganization()==null?"":request.getServiceOrganization());
             }
 			
             b.endObject();

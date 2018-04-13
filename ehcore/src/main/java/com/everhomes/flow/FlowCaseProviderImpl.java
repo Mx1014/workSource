@@ -198,53 +198,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		locator.setAnchor(cmd.getPageAnchor());
     	}
 
-//<<<<<<< HEAD
-//    	    if(locator.getAnchor() != null) {
-//    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.le(locator.getAnchor()));
-//            }
-//    	    
-//        	if(cmd.getModuleId() != null) {
-//        		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
-//        	}
-//        	if(cmd.getOrganizationId() != null) {
-//        		cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
-//        	}
-//        	if(cmd.getOwnerId() != null) {
-//        		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
-//        	}
-//        	if(cmd.getOwnerType() != null) {
-//        		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_TYPE.eq(cmd.getOwnerType()));
-//        	}
-//        	if(cmd.getFlowCaseStatus() != null) {
-//        		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
-//        	}
-//        	if(cmd.getServiceType() != null) {
-//                cond = cond.and(
-//                        Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType())
-//                                .or(Tables.EH_FLOW_CASES.MODULE_NAME.eq(cmd.getServiceType())
-//                                        .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.eq(cmd.getServiceType())))
-//                );
-//        	}
-//
-//            if(cmd.getStartTime() != null && cmd.getEndTime() == null) {
-//                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
-//            } else if(cmd.getEndTime() != null && cmd.getStartTime() == null) {
-//                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
-//            } else if(cmd.getEndTime() != null && cmd.getStartTime() != null) {
-//                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
-//            }
-//            if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
-//        		cond = cond.and(
-//        				Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
-//        				.or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
-//        				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
-//        				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
-//                );
-//        	}
-//=======
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(searchType.equals(FlowCaseSearchType.APPLIER)) {
-//>>>>>>> opv2-2.0
 
             Condition cond = buildSearchFlowCaseCmdCondition(locator, cmd);
 
@@ -313,6 +268,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         }
         if(cmd.getFlowCaseStatus() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        } else {
+           cond = cond.and(Tables.EH_FLOW_CASES.STATUS.notIn(
+                   FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.INVALID.getCode())
+           );
         }
         if(cmd.getServiceType() != null) {
             cond = cond.and(
@@ -384,6 +343,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
 
+<<<<<<< HEAD
 //<<<<<<< HEAD
 //            if(locator.getAnchor() != null) {
 //                cond = cond.and(Tables.EH_FLOW_CASES.ID.le(locator.getAnchor()));
@@ -421,6 +381,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 //=======
            Condition cond = buildSearchFlowCaseCmdCondition(locator,cmd);
 //>>>>>>> opv2-2.0
+=======
+           Condition cond = buildSearchFlowCaseCmdCondition(locator,cmd);
+>>>>>>> master
 
             SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
                     .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)

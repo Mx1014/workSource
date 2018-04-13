@@ -65,6 +65,7 @@ import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.admin.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +120,9 @@ public interface Rentalv2Service {
 //			BatchCompleteBillCommand cmd);
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
+	void exportRentalBills(SearchRentalOrdersCommand cmd,HttpServletResponse response);
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill, RentalResource rs);
+	void convertRentalOrderDTO(RentalOrderDTO dto, RentalOrder bill);
 	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
@@ -281,6 +284,8 @@ public interface Rentalv2Service {
 	GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd);
 
 	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
+
+	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();
 }

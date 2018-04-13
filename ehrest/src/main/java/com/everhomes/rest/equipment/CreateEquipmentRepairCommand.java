@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>equipmentId:设备id</li>
+ * <li>standardId:标准id</li>
  * <li>taskId:任务id</li>
  * <li>ownerType:ownerType</li>
  * <li>ownerId:ownerId</li>
@@ -27,6 +28,7 @@ import java.util.List;
 public class CreateEquipmentRepairCommand {
 
     private Long equipmentId;
+    private Long standardId;
     private Long taskId;
     private String targetType;
     private Long targetId;
@@ -49,6 +51,14 @@ public class CreateEquipmentRepairCommand {
 
     public void setEquipmentId(Long equipmentId) {
         this.equipmentId = equipmentId;
+    }
+
+    public Long getStandardId() {
+        return standardId;
+    }
+
+    public void setStandardId(Long standardId) {
+        this.standardId = standardId;
     }
 
     public Long getTaskId() {

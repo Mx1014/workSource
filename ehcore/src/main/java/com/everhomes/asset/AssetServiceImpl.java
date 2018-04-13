@@ -12,7 +12,6 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-//import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerService;
@@ -41,7 +40,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
-
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -50,7 +48,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -71,10 +72,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-
 import com.google.gson.Gson;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -90,7 +88,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -101,6 +98,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//import com.everhomes.contract.ContractService;
+
 /**
  * Created by Wentian on 2017/2/20.
  */
@@ -108,6 +107,7 @@ import java.util.stream.Collectors;
 public class AssetServiceImpl implements AssetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetServiceImpl.class);
 
+    static final List<Character> operators = Arrays.asList('*','/','+','-');
     final String downloadDir ="\\download\\";
 
     @Autowired
@@ -243,7 +243,7 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
-    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long currentOrg) {
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
 //        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
 //        cmd1.setActionType((byte)13);
 //        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
@@ -263,7 +263,7 @@ public class AssetServiceImpl implements AssetService {
 //                    "Insufficient privilege");
 //        }
 
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrg, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
     @Override
@@ -514,7 +514,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType());
@@ -559,7 +559,7 @@ public class AssetServiceImpl implements AssetService {
             convertedCmd.setPageAnchor(1l);
         }
         if(convertedCmd.getDateStrEnd()==null){
-            Calendar now = Calendar.getInstance();
+            Calendar now = newClearedCalendar();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             String dateStrEnd = sdf.format(now.getTime());
             convertedCmd.setDateStrEnd(dateStrEnd);
@@ -711,7 +711,7 @@ public class AssetServiceImpl implements AssetService {
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
         }
-        Calendar c = Calendar.getInstance();
+        Calendar c = newClearedCalendar();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
         int date = c.get(Calendar.DATE);
@@ -759,7 +759,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
@@ -828,7 +828,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
-        Calendar now = Calendar.getInstance();
+        Calendar now = newClearedCalendar();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         //calculate the details of payment expectancies
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
@@ -1089,6 +1089,12 @@ public class AssetServiceImpl implements AssetService {
             Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder = new HashMap<>();
             //遍历计价条款包裹
             feeRule:for(int i = 0; i < feesRules.size(); i++) {
+                // 是錯
+
+
+//                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder_inner = new HashMap<>();
+
+                // 是錯
                 //获取单一包裹
                 FeeRules rule = feesRules.get(i);
                 //获得包裹中的地址包裹
@@ -1163,6 +1169,7 @@ public class AssetServiceImpl implements AssetService {
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
+                    List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
                     //从地址包裹中获得一个地址
                     ContractProperty property = var1.get(j);
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
@@ -1184,8 +1191,8 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
                     //计算
-                    assetFeeHandler(billItemsExpectancies,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
-
+                    assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
+                    billItemsExpectancies.addAll(billItemsExpectancies_inner);
                 }
                 Integer cycleForBill = 0;
                 switch (balanceDateType){
@@ -1205,6 +1212,9 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
+
+
+//                uniqueRecorder.putAll(uniqueRecorder_inner);
             }
             //先算出所有的item
             for(int g = 0; g < billItemsExpectancies.size(); g++){
@@ -1313,10 +1323,11 @@ public class AssetServiceImpl implements AssetService {
                 //初始化账单状态（未缴，缴清）
                 newBill.setStatus((byte)0);
                 //设定缴费状态（正常，欠费）
-                Date today = Calendar.getInstance().getTime();
+                Date today = newClearedCalendar().getTime();
                 Date x_v = null;
                 try{
-                    x_v = sdf_dateStrD.parse(newBill.getDueDayDeadline());
+                    String dueDayDeadline = newBill.getDueDayDeadline();
+                    x_v = sdf_dateStrD.parse(dueDayDeadline);
                     if(today.compareTo(x_v)!=-1){
                         newBill.setChargeStatus((byte)1);
                     }else{
@@ -1324,6 +1335,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setChargeStatus((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is due day deadline from newBill = {}, e={}", newBill,e);
                 }
                 try{
                     x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
@@ -1351,6 +1363,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setNextSwitch((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is DateStrDue from newBill = {}, e={}", newBill,e);
                 }
 //                        }
 //                    for(){
@@ -1366,6 +1379,7 @@ public class AssetServiceImpl implements AssetService {
                     billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
                     billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
                 }catch (Exception e){
+                    LOGGER.error("date parsed error for bill item list , e= {}",e);
                     continue;
                 }
                 //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
@@ -1436,6 +1450,8 @@ public class AssetServiceImpl implements AssetService {
         LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
+            LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
+            LOGGER.error("failed calculation", e);
         }
     }
 
@@ -1460,11 +1476,11 @@ public class AssetServiceImpl implements AssetService {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
         //计算的时间区间
-        Calendar dateStrBegin = Calendar.getInstance();
+        Calendar dateStrBegin = newClearedCalendar();
         if(rule.getDateStrBegin() != null){
             dateStrBegin.setTime(rule.getDateStrBegin());
         }
-        Calendar dateStrEnd = Calendar.getInstance();
+        Calendar dateStrEnd = newClearedCalendar();
         if(rule.getDateStrEnd() == null){
             dateStrEnd.set(Calendar.DAY_OF_MONTH,dateStrEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
         }else{
@@ -1474,13 +1490,13 @@ public class AssetServiceImpl implements AssetService {
 
 
         //先算开始a
-        Calendar a = Calendar.getInstance();
+        Calendar a = newClearedCalendar(Calendar.DATE);
         a.setTime(dateStrBegin.getTime());
 
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //计算费用产生月d d = a+cycle
-            Calendar d = Calendar.getInstance();
+            Calendar d = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 d.setTime(dateStrEnd.getTime());
             } else {
@@ -1491,7 +1507,7 @@ public class AssetServiceImpl implements AssetService {
             }
 
             //计算费用产生的日期
-            Calendar d1 = Calendar.getInstance();
+            Calendar d1 = newClearedCalendar();
             d1.setTime(d.getTime());
 
 
@@ -1516,7 +1532,7 @@ public class AssetServiceImpl implements AssetService {
             }
             //比较d和d1---wrong
             //比较d和dateStrEnd
-            Calendar d2 = Calendar.getInstance();
+            Calendar d2 = newClearedCalendar();
 //            if(d.compareTo(d1)<0){
 //                d2.setTime(d.getTime());
 //            }else if(d.compareTo(d1)>=0){
@@ -1534,7 +1550,7 @@ public class AssetServiceImpl implements AssetService {
                 boolean b = checkCycle(d2, a, cycle+1);
                 if(!b){
                     float divider = daysBetween(d2, a);
-                    Calendar d_assist = Calendar.getInstance();
+                    Calendar d_assist = newClearedCalendar();
                     d_assist.setTime(d2.getTime());
 //                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
                     d_assist.add(Calendar.MONTH,cycle+1);
@@ -1571,7 +1587,7 @@ public class AssetServiceImpl implements AssetService {
 //            obj.setStatus(billStatus);
             obj.setBillGroupId(group.getId());
             obj.setBillDateStr(yyyyMM.format(a.getTime()));
-            Calendar due = Calendar.getInstance();
+            Calendar due = newClearedCalendar();
 
             due.setTime(d2.getTime());
 
@@ -1579,7 +1595,7 @@ public class AssetServiceImpl implements AssetService {
             due.add(Calendar.MONTH,1);
             due.set(Calendar.DAY_OF_MONTH,group.getBillsDay());
             obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
-            Calendar deadline = Calendar.getInstance();
+            Calendar deadline = newClearedCalendar();
             deadline.setTime(due.getTime());
             if(group.getDueDayType()==1){
                 //日
@@ -1640,9 +1656,9 @@ public class AssetServiceImpl implements AssetService {
                 //进行调组
 
                 //调组的时间区间,收费项的计费时间区间为 a —— d2
-                Calendar start = Calendar.getInstance();
+                Calendar start = newClearedCalendar();
                 start.setTime(rent.getStart());
-                Calendar end = Calendar.getInstance();
+                Calendar end = newClearedCalendar();
                 end.setTime(rent.getEnd());
                 if(end.compareTo(dateStrEnd)!=-1){
                     end.setTime(dateStrEnd.getTime());
@@ -1655,9 +1671,17 @@ public class AssetServiceImpl implements AssetService {
                     case 1:
                         Calendar start_copy = getCopyCalendar(start);
                         if(separationTime<1) separationTime = 1f;
+                        //version 1
+//                        while(start_copy.compareTo(end)==-1){
+//                            Calendar start_copy_copy =newClearedCalendar();
+//                            start_copy_copy.setTime(start_copy.getTime());
+//                            insertTimes.add(start_copy_copy);
+//                            start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
+//                        }
+                        //version 2
                         start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
                         while(start_copy.compareTo(end)==-1){
-                            Calendar start_copy_copy =Calendar.getInstance();
+                            Calendar start_copy_copy =newClearedCalendar();
                             start_copy_copy.setTime(start_copy.getTime());
                             insertTimes.add(start_copy_copy);
                             start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
@@ -1667,31 +1691,52 @@ public class AssetServiceImpl implements AssetService {
                         Calendar start_copy_1 = getCopyCalendar(start);
                         Object[] interAndFloat = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
 
-                        start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
-                        start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
 
 //                        String test1 = yyyyMMdd.format(start_copy_1.getTime());
 //                        String test2 = yyyyMMdd.format(end.getTime());
-
-                        while(start_copy_1.compareTo(end)==-1){
-                            Calendar start_copy_1_copy =Calendar.getInstance();
+                        //version 1
+//                        while(start_copy_1.compareTo(end)==-1){
+//                            Calendar start_copy_1_copy =newClearedCalendar();
+//                            start_copy_1_copy.setTime(start_copy_1.getTime());
+//                            insertTimes.add(start_copy_1_copy);
+//                            start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+//                            start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+//                        }
+                        //version 2
+                        start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+                        start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+                        while(start_copy_1.compareTo(end) == -1){
+                            Calendar start_copy_1_copy =newClearedCalendar();
                             start_copy_1_copy.setTime(start_copy_1.getTime());
                             insertTimes.add(start_copy_1_copy);
                             start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                             start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
                         }
+                        // break
                         break;
                     case 3:
                         Calendar start_copy_2 = getCopyCalendar(start);
 
                         Object[] interAndFloat_1 = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
-                        start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
                         Object[] interAndFloat_2 = IntegerUtil.getIntegerAndFloatPartFromFloat(((float) interAndFloat_1[1]) * 12f);
+
+                        // version 1
+//                        while(start_copy_2.compareTo(end)==-1){
+//                            Calendar start_copy_2_copy =newClearedCalendar();
+//                            start_copy_2_copy.setTime(start_copy_2.getTime());
+//                            insertTimes.add(start_copy_2_copy);
+//
+//                            start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
+//                            start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
+//                            start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+//                        }
+
+                        // version 2
+                        start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
                         start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
                         start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
-
                         while(start_copy_2.compareTo(end)==-1){
-                            Calendar start_copy_2_copy =Calendar.getInstance();
+                            Calendar start_copy_2_copy =newClearedCalendar();
                             start_copy_2_copy.setTime(start_copy_2.getTime());
                             insertTimes.add(start_copy_2_copy);
 
@@ -1707,8 +1752,10 @@ public class AssetServiceImpl implements AssetService {
                     Calendar longinus = insertTimes.get(m);
                     for(int k = 0; k < list.size(); k++){
                         BillItemsExpectancy item = list.get(k);
+                        //target上才调?
+
                         a.setTime(item.getDateStrBegin());
-                        Calendar d2 = Calendar.getInstance();
+                        Calendar d2 = newClearedCalendar();
                         d2.setTime(item.getDateStrEnd());
 
 
@@ -1752,9 +1799,9 @@ public class AssetServiceImpl implements AssetService {
                 //开始免租
 //            //此计价条款在此资产上的终止时间
 //            Date feeEnd = list.get(list.size() - 1).getDateStrEnd();
-//            Calendar start = Calendar.getInstance();
+//            Calendar start = newClearedCalendar();
 //            start.setTime(rent.getStartDate());
-//            Calendar end = Calendar.getInstance();
+//            Calendar end = newClearedCalendar();
 //            end.setTime(rent.getEndDate());
                 Date start = rent.getStartDate();
                 Date end = rent.getEndDate();
@@ -1767,9 +1814,9 @@ public class AssetServiceImpl implements AssetService {
                     if(end.compareTo(item_start) != 1 || start.compareTo(item_end) != -1){
                         continue;
                     }
-                    Calendar minEnd = Calendar.getInstance();
+                    Calendar minEnd = newClearedCalendar();
                     minEnd.setTime(end.compareTo(item_end) == -1 ? end : item_end);
-                    Calendar maxStart = Calendar.getInstance();
+                    Calendar maxStart = newClearedCalendar();
                     maxStart.setTime(start.compareTo(item_start)==1 ? start : item_start);
                     float f = (float)daysBetween(maxStart, minEnd) / (float) daysBetween_date(start, end);
                     item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free.multiply(new BigDecimal(f))));
@@ -1784,7 +1831,7 @@ public class AssetServiceImpl implements AssetService {
 //                    //左包不全，右包全
 //                    else if(start.compareTo(item_start)==1 && start.compareTo(item_end) == -1 && end.compareTo(item_end)!=-1){
 //                        //代码不能重用，提取没有意义,overfitting
-//                        Calendar item_start_c = Calendar.getInstance();
+//                        Calendar item_start_c = newClearedCalendar();
 //                        item_start_c.setTime(item_start);
 //                        Float f = (float)daysBetween_date(start,item_end)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
 //                        BigDecimal f_c = new BigDecimal(f);
@@ -1794,7 +1841,7 @@ public class AssetServiceImpl implements AssetService {
 //                    }
 //                    //左包全，右包不全
 //                    else if(start.compareTo(item_start)!=1 && end.compareTo(start) == 1 &&end.compareTo(item_end)==-1){
-//                        Calendar item_start_c = Calendar.getInstance();
+//                        Calendar item_start_c = newClearedCalendar();
 //                        item_start_c.setTime(item_start);
 //                        Float f = (float)daysBetween_date(end,item_start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
 //                        BigDecimal f_c = new BigDecimal(f);
@@ -1804,7 +1851,7 @@ public class AssetServiceImpl implements AssetService {
 //                    }
 //                    //左保不全，右也包步全
 //                    else if(start.compareTo(item_start)==1 && end.compareTo(item_end)==-1){
-//                        Calendar item_start_c = Calendar.getInstance();
+//                        Calendar item_start_c = newClearedCalendar();
 //                        item_start_c.setTime(item_start);
 //                        Float f = (float)daysBetween_date(end,start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
 //                        BigDecimal f_c = new BigDecimal(f);
@@ -1821,16 +1868,32 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
+    private Calendar newClearedCalendar(Integer level) {
+        Calendar instance = Calendar.getInstance();
+//        if(level == null){
+//            instance.clear();
+//        }else{
+//            instance.clear(level);
+//        }
+        instance.clear(Calendar.DATE);
+        return instance;
+    }
+    private Calendar newClearedCalendar() {
+        Calendar instance = Calendar.getInstance();
+        instance.clear(Calendar.DATE);
+        return instance;
+    }
+
     private void assetFeeHandlerForBillCycles(Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder, List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope ) {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 
         //计算的时间区间
-        Calendar dateStrBegin = Calendar.getInstance();
+        Calendar dateStrBegin = newClearedCalendar();
         if(rule.getDateStrBegin() != null){
             dateStrBegin.setTime(rule.getDateStrBegin());
         }
-        Calendar dateStrEnd = Calendar.getInstance();
+        Calendar dateStrEnd = newClearedCalendar();
         if(rule.getDateStrEnd() == null){
             dateStrEnd.set(Calendar.DAY_OF_MONTH,dateStrEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
         }else{
@@ -1839,12 +1902,12 @@ public class AssetServiceImpl implements AssetService {
 
 
         //先算开始a
-        Calendar a = Calendar.getInstance();
+        Calendar a = newClearedCalendar(Calendar.DATE);
         a.setTime(dateStrBegin.getTime());
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //计算费用产生月d d = a+cycle
-            Calendar d = Calendar.getInstance();
+            Calendar d = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 d.setTime(dateStrEnd.getTime());
             } else {
@@ -1856,7 +1919,7 @@ public class AssetServiceImpl implements AssetService {
 
 
             //比较d和dateStrEnd
-            Calendar d2 = Calendar.getInstance();
+            Calendar d2 = newClearedCalendar();
             d2.setTime(d.getTime());
             if(d2.compareTo(dateStrEnd)>0){
                 d2.setTime(dateStrEnd.getTime());
@@ -1880,12 +1943,12 @@ public class AssetServiceImpl implements AssetService {
             BillDateAndGroupId dag = new BillDateAndGroupId();
             dag.setBillGroupId(group.getId());
             dag.setDateStr(obj.getBillDateStr());
-            Calendar due = Calendar.getInstance();
+            Calendar due = newClearedCalendar();
             due.setTime(d2.getTime());
             due.add(Calendar.MONTH,1);
             due.set(Calendar.DAY_OF_MONTH,group.getBillsDay());
             obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
-            Calendar deadline = Calendar.getInstance();
+            Calendar deadline = newClearedCalendar();
             deadline.setTime(due.getTime());
             if(group.getDueDayType()==1){
                 //日
@@ -1947,8 +2010,8 @@ public class AssetServiceImpl implements AssetService {
 
             //拿到本周期的结束和开始
             float preD = 1f;
-            Calendar fakeEnd = Calendar.getInstance();
-            Calendar realStart = Calendar.getInstance();
+            Calendar fakeEnd = newClearedCalendar();
+            Calendar realStart = newClearedCalendar();
             realStart.setTime(item.getDateStrBegin());
             fakeEnd.setTime(item.getDateStrBegin());
             fakeEnd.add(Calendar.MONTH,cycle+1);
@@ -1993,8 +2056,8 @@ public class AssetServiceImpl implements AssetService {
     private void reCalFee(Calendar longinus, Calendar d2, BillItemsExpectancy item, RentAdjust rent, Integer cycle) {
         float i = 0f;
         //拿到本周期的结束和开始
-        Calendar fakeEnd = Calendar.getInstance();
-        Calendar realStart = Calendar.getInstance();
+        Calendar fakeEnd = newClearedCalendar();
+        Calendar realStart = newClearedCalendar();
         realStart.setTime(item.getDateStrBegin());
         fakeEnd.setTime(item.getDateStrBegin());
         fakeEnd.add(Calendar.MONTH,cycle+1);
@@ -2049,13 +2112,14 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private Calendar getCopyCalendar(Calendar raw) {
-        Calendar copy = Calendar.getInstance();
+        Calendar copy = newClearedCalendar(null);
+        copy.clear();
         copy.setTime(raw.getTime());
         return copy;
     }
 
     private boolean checkCycle(Calendar d2, Calendar a, Integer cycle) {
-        Calendar a_assist = Calendar.getInstance();
+        Calendar a_assist = newClearedCalendar(Calendar.DATE);
         a_assist.setTime(a.getTime());
         a_assist.set(Calendar.MONTH,a_assist.get(Calendar.MONTH)+cycle);
         a_assist.set(Calendar.DAY_OF_MONTH,a_assist.get(Calendar.DAY_OF_MONTH)-1);
@@ -2092,23 +2156,23 @@ public class AssetServiceImpl implements AssetService {
         String propertyName = property.getPropertyName();
         Date dateStrBegin = rule.getDateStrBegin();
         Date dateStrEnd = rule.getDateStrEnd();
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
+        Calendar c1 = newClearedCalendar(null);
+        Calendar c2 = newClearedCalendar(null);
         // c1 is the start of the contract
         c1.setTime(dateStrBegin);
         // c2 is the end date of the contract
         c2.setTime(dateStrEnd);
-        Calendar c3 = Calendar.getInstance();
+        Calendar c3 = newClearedCalendar(null);
         // c3 starts as the begin of the contract
         c3.setTime(dateStrBegin);
         //define duration for cal
         float duration = 0;
         //define the end of the date the calculation should take as multiply
-        Calendar c5 = Calendar.getInstance();
+        Calendar c5 = newClearedCalendar(null);
         //first to check if the whole period is less than one month
 
-        Calendar c7 = Calendar.getInstance();
-        Calendar c8 = Calendar.getInstance();
+        Calendar c7 = newClearedCalendar(null);
+        Calendar c8 = newClearedCalendar(null);
 //        c7.setTime(c1.getTime());
 //        c8.setTime(c8.getTime());
         if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
@@ -2134,7 +2198,7 @@ public class AssetServiceImpl implements AssetService {
         //C3 即账期前进一个月
         c3.add(Calendar.MONTH,1);
         c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
-        Calendar c4 = Calendar.getInstance();
+        Calendar c4 = newClearedCalendar();
         c4.setTime(c3.getTime());
         //c4 must be ahead of c3 for one month
         c4.add(Calendar.MONTH,1);
@@ -2166,18 +2230,18 @@ public class AssetServiceImpl implements AssetService {
         String propertyName = property.getPropertyName();
         Date dateStrBegin = rule.getDateStrBegin();
         Date dateStrEnd = rule.getDateStrEnd();
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
+        Calendar c1 = newClearedCalendar();
+        Calendar c2 = newClearedCalendar();
         // c1 is the start of the contract
         c1.setTime(dateStrBegin);
         // c2 is the end date of the contract
         c2.setTime(dateStrEnd);
-        Calendar c3 = Calendar.getInstance();
+        Calendar c3 = newClearedCalendar();
         // c3 starts as the begin of the contract
         c3.setTime(dateStrBegin);
         int day = c3.get(Calendar.DAY_OF_MONTH);
 
-        Calendar c4 = Calendar.getInstance();
+        Calendar c4 = newClearedCalendar();
         c4.setTime(c3.getTime());
         c4.add(Calendar.MONTH,1);
         if(c4.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
@@ -2195,7 +2259,7 @@ public class AssetServiceImpl implements AssetService {
             while(c4.compareTo(c2) != 1) {
                 //each month
                 float duration = 1;
-                Calendar c5 = Calendar.getInstance();
+                Calendar c5 = newClearedCalendar();
                 c5.setTime(c3.getTime());
                 if(c5.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
                     c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
@@ -2356,7 +2420,7 @@ public class AssetServiceImpl implements AssetService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         dto.setDateStrBegin(sdf.format(c3.getTime()));
 //        dto.setDateStrEnd(sdf.format(c2.getTime()));
-        Calendar c6 = Calendar.getInstance();
+        Calendar c6 = newClearedCalendar();
         c6.setTime(c3.getTime());
         c6.add(Calendar.MONTH,1);
         c6.set(Calendar.DAY_OF_MONTH,billDay);
@@ -2374,8 +2438,44 @@ public class AssetServiceImpl implements AssetService {
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         formula += "*"+duration;
         BigDecimal response = CalculatorUtil.arithmetic(formula);
@@ -2391,8 +2491,44 @@ public class AssetServiceImpl implements AssetService {
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2,BigDecimal.ROUND_CEILING);
@@ -2410,8 +2546,44 @@ public class AssetServiceImpl implements AssetService {
 //                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
                 map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             }
-            for(Map.Entry<String,String> entry : map.entrySet()){
-                formula = formula.replace(entry.getKey(),entry.getValue());
+            formula = formula.trim();
+            char[] preChars = formula.toCharArray();
+            List<Character> chars = new ArrayList<>();
+            for(Character c : preChars){
+                if(!StringUtils.isBlank(c.toString())){
+                    chars.add(c);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            StringBuilder variable = new StringBuilder();
+            for(int i = 0; i < chars.size(); i++){
+                Character c = chars.get(i);
+                if(operators.contains(c)){
+                    if(variable.length() > 0){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                    sb.append(c);
+                    variable = new StringBuilder();
+                }else{
+                    variable.append(c);
+                    if(i == chars.size() - 1){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                }
+            }
+            formula = sb.toString();
+            for(char i : formula.toCharArray()){
+                if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                    throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+                }
             }
             formula += "*"+duration;
             result = CalculatorUtil.arithmetic(formula);
@@ -2563,7 +2735,7 @@ public class AssetServiceImpl implements AssetService {
                 //获取当前时间，如果是5号，则将之前的账单的switch装为1
                 for (int i = 0; i < list.size(); i++) {
                     PaymentBillGroup paymentBillGroup = list.get(i);
-                    Calendar c = Calendar.getInstance();
+                    Calendar c = newClearedCalendar();
                     if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
                         String billDateStr = sdf.format(c.getTime());
@@ -2665,7 +2837,7 @@ public class AssetServiceImpl implements AssetService {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
                 SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-                Calendar today = Calendar.getInstance();
+                Calendar today = newClearedCalendar();
                 List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
 //            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
@@ -2693,7 +2865,7 @@ public class AssetServiceImpl implements AssetService {
                                 Integer day = days.get(j);
                                 String dueDayDeadline = bill.getDueDayDeadline();
                                 try {
-                                    Calendar deadline = Calendar.getInstance();
+                                    Calendar deadline = newClearedCalendar();
                                     deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
                                     deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
                                     if (today.compareTo(deadline) != -1) {
@@ -2856,7 +3028,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCommunityId(c.getId());
             cmd.setNamespaceId(999971);
             customerService.syncIndividualCustomers(cmd);
-            customerService.syncEnterpriseCustomers(cmd);
+            customerService.syncEnterpriseCustomers(cmd, false);
         }
     }
 
@@ -2892,7 +3064,7 @@ public class AssetServiceImpl implements AssetService {
         Long communityId = cmd.getOwnerId();
         Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
-        if(communityId == null){
+        if(communityId == null || communityId == -1){
             communityIds = getAllCommunity(namespaceId,true);
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
@@ -2919,7 +3091,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
             Long brotherStandardId = null;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
@@ -2983,7 +3155,10 @@ public class AssetServiceImpl implements AssetService {
         s.setNamespaceId(cmd.getNamespaceId());
         s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         s.setBrotherStandardId(brotherStandardId);
-        assetProvider.createChargingStandard(c,s,f);
+        this.dbProvider.execute((TransactionStatus status) ->{
+            assetProvider.createChargingStandard(c,s,f);
+            return null;
+        });
         return nextStandardId;
 
     }
@@ -3000,7 +3175,7 @@ public class AssetServiceImpl implements AssetService {
         // 由于chargingStandard要变化，所以对于全部的情况直接修改，不需要coupling；
         // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null) {
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1) {
             deCouplingFlag = 0;
             //修改未耦合的
             assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
@@ -3034,17 +3209,18 @@ public class AssetServiceImpl implements AssetService {
         DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
         byte deCouplingFlag = 1;
         // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
             return dto;
         }
         // 各个：在工作的standard不能删除，不在工作的可以，并且查看是否有bro，有则干掉
-        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(!safe){
-            dto.setFailCause(AssetPaymentConstants.DELETE_CHARGING_STANDARD_UNSAFE);
-            return dto;
-        }
+        // 没有定时需要chargingStandard的，生成账单时的timing基本不会遇到，这是很少进行删除操作的后台
+//        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+//        if(!safe){
+//            dto.setFailCause(AssetPaymentConstants.DELETE_CHARGING_STANDARD_UNSAFE);
+//            return dto;
+//        }f
         // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
         assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
 //            dto.setFailCause(AssetPaymentConstants.DELETE_SUCCCESS);
@@ -3170,7 +3346,7 @@ public class AssetServiceImpl implements AssetService {
         byte deCouplingFlag = 1;
         Long brotherGroupId = null;
         //创造账单组不涉及到安全问题，所以只需要看同步与否
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherGroupId = assetProvider.createBillGroup(cmd,deCouplingFlag,null);
@@ -3190,7 +3366,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void modifyBillGroup(ModifyBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             //全部的情况,修改billGroup的以及bro为billGroup的
             deCouplingFlag = 0;
             assetProvider.modifyBillGroup(cmd,deCouplingFlag);
@@ -3209,7 +3385,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
@@ -3253,7 +3429,7 @@ public class AssetServiceImpl implements AssetService {
     public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
         Long brotherRuleId = null;
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
@@ -3265,7 +3441,7 @@ public class AssetServiceImpl implements AssetService {
                     assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
                 }
             }
-        }else if(cmd.getOwnerId() != null){
+        }else if(cmd.getOwnerId() != null && cmd.getOwnerId() != -1){
             //添加+解耦，判断safe+修改+解耦group和rule
             assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
         }
@@ -3307,7 +3483,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null) {
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
             deCouplingFlag = 0;
             return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         }
@@ -4052,14 +4228,14 @@ public class AssetServiceImpl implements AssetService {
 
     //获得本月第一天0点时间
     private long getTimesMonthmorning(){
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = newClearedCalendar();
         cal.set(cal.get(Calendar.YEAR),cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0,0);
         cal.set(Calendar.DAY_OF_MONTH,cal.getActualMinimum(Calendar.DAY_OF_MONTH));
         return cal.getTimeInMillis();
     }
     //获得本月最后一天24点时间
     private long getTimesMonthnight() {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = newClearedCalendar();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
         cal.set(Calendar.HOUR_OF_DAY, 24);

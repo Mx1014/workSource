@@ -21,6 +21,9 @@ import com.everhomes.util.StringHelper;
  * <li>carBrand: 车品牌</li>
  * <li>carSerieName: 车系</li>
  * <li>cardTypeId: 卡类型id</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class SearchParkingCardRequestsCommand {
@@ -42,6 +45,33 @@ public class SearchParkingCardRequestsCommand {
     private String carSerieName;
 
     private String cardTypeId;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
     public String getCardTypeId() {
         return cardTypeId;

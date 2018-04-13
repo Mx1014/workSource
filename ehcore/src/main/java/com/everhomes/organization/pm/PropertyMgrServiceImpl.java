@@ -1153,7 +1153,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		        SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
                 String.valueOf(UserContext.current().getUser().getId()),
-                UserContext.current().getScheme()
+                UserContext.current().getScheme(),
+				cmd.getNamespaceId()
         );
 
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
@@ -4721,6 +4722,64 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             return owner;
         });
 
+		List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(cmd.getNamespaceId(), cmd.getId());
+		for(OrganizationOwnerAddressCommand addressCmd : cmd.getAddresses()) {
+			OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(cmd.getNamespaceId(), cmd.getId(), addressCmd.getAddressId());
+			if(ownerAddress == null) {
+				Address address = addressProvider.findAddressById(addressCmd.getAddressId());
+				if(address != null) {
+					ownerAddress = new OrganizationOwnerAddress();
+					ownerAddress.setAddressId(address.getId());
+					ownerAddress.setNamespaceId(addressCmd.getNamespaceId());
+					ownerAddress.setOrganizationOwnerId(cmd.getId());
+					ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
+					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+					if (addressCmd.getCheckInDate() != null) {
+						createOrganizationOwnerBehavior(cmd.getId(), address.getId(), addressCmd.getCheckInDate(), OrganizationOwnerBehaviorType.IMMIGRATION);
+					}
+					// 如果小区里有该手机号的用户, 则自动审核当前客户
+					//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
+//                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
+					propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
+					getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
+				} else {
+					LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
+				}
+			} else {
+				if(ownerAddressList != null && ownerAddressList.size() > 0) {
+					for(OrganizationOwnerAddress address : ownerAddressList) {
+						if(address.getId().equals(ownerAddress.getId())) {
+							ownerAddressList.remove(address);
+							break;
+						}
+					}
+
+				}
+
+				ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
+				ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+				propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+			}
+		}
+
+		if(ownerAddressList != null && ownerAddressList.size() > 0) {
+			for(OrganizationOwnerAddress ownerAddress : ownerAddressList) {
+				propertyMgrProvider.deleteOrganizationOwnerAddress(ownerAddress);
+
+				// 创建删除行为记录
+				createOrganizationOwnerBehavior(ownerAddress.getOrganizationOwnerId(), ownerAddress.getAddressId(),
+						System.currentTimeMillis(), OrganizationOwnerBehaviorType.DELETE);
+
+				// 如果当前用户在该地址下认证过,则移除认证状态
+				Family family = this.familyProvider.findFamilyByAddressId(ownerAddress.getAddressId());
+				if (family != null) {
+					leaveFamilyByOwnerId(ownerAddress.getOrganizationOwnerId(), family.getId());
+				}
+
+				createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
+			}
+		}
+
         return convertOwnerToDTO(tuple.first());
     }
 
@@ -6493,8 +6552,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Long requestId = cmd.getRequestId();  //表示那条记录的id
 		if (resourceType == EntityType.ORGANIZATIONS) {
 		    // requestId 已经无法使用了，组织架构那边改了好多
-			OrganizationMember organizationMember = organizationProvider.
-                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());
+			/*OrganizationMember organizationMember = organizationProvider.
+                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());*/
+			OrganizationMember organizationMember = null;
+					List<OrganizationMember> organizationMemberList = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(cmd.getResourceId(),cmd.getRequestorUid());
+			if(organizationMemberList != null){
+				organizationMember = organizationMemberList.get(0);
+			}
+
 			if (LOGGER.isDebugEnabled())
 			    LOGGER.debug("getRequestInfo organizationMember {}", organizationMember);
 			if (organizationMember != null) {

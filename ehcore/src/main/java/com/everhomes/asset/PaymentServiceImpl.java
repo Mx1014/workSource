@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
 
         //权限校验
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
 
         if(cmd.getNamespaceId() == null){
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());

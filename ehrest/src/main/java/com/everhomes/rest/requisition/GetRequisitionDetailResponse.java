@@ -24,6 +24,15 @@ public class GetRequisitionDetailResponse {
     private String description;
     private String attachmentUrl;
     private Long flowCaseId;
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public Long getFlowCaseId() {
         return flowCaseId;

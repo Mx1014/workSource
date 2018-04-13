@@ -1,9 +1,11 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -51,9 +53,10 @@ public class ListQualityInspectionTasksCommand {
 	private Long endDate;
 	
 	private Long groupId;
-	
-	private Byte executeStatus;
-	
+
+	@ItemType(Byte.class)
+	private List<Byte> executeStatus;
+
 	private Byte reviewStatus;
 
 	private String taskName;
@@ -126,12 +129,20 @@ public class ListQualityInspectionTasksCommand {
 		this.isReview = isReview;
 	}
 
-	public Byte getExecuteStatus() {
+	public List<Byte> getExecuteStatus() {
 		return executeStatus;
 	}
 
-	public void setExecuteStatus(Byte executeStatus) {
+	public void setExecuteStatus(List<Byte> executeStatus) {
 		this.executeStatus = executeStatus;
+	}
+
+	public Byte getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(Byte reviewStatus) {
+		this.reviewStatus = reviewStatus;
 	}
 
 	public Long getStartDate() {
@@ -156,14 +167,6 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
-	}
-
-	public Byte getReviewStatus() {
-		return reviewStatus;
-	}
-
-	public void setReviewStatus(Byte reviewStatus) {
-		this.reviewStatus = reviewStatus;
 	}
 
 	public Byte getManualFlag() {

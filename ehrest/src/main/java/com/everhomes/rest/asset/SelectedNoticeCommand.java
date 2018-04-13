@@ -12,6 +12,7 @@ import java.util.List;
  * <li>billIdAndTypes:账单id客户类型的集合</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
+ * <li>organizationId:公司id,权限用</li>
  *</ul>
  */
 public class SelectedNoticeCommand {

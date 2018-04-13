@@ -23,7 +23,6 @@ import java.util.List;
  * <li>dtos:采购物品列表，参考{@link com.everhomes.rest.purchase.PurchaseMaterialDTO}</li>
  * <li>xxxx</li>
  * <li>xxxx</li>
- * <li>xxxx</li>
  *</ul>
  */
 public class CreateOrUpdatePurchaseOrderCommand {

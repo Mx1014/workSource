@@ -122,8 +122,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	}
 
 	@Override
-	public SearchEquipmentStandardRelationsResponse query(
-			SearchEquipmentStandardRelationsCommand cmd) {
+	public SearchEquipmentStandardRelationsResponse query(SearchEquipmentStandardRelationsCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
 		if(cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
@@ -295,7 +294,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
-            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
+//            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
             	//add equipment   inspectionCategoryId and categoryId  V3.0.2
 				b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 				b.field("categoryId", equipment.getCategoryId());

@@ -55,6 +55,15 @@ public class CreateOrUpdateOneSupplierCommand {
     private Long ownerId;
     private String attachmentUrl;
     private Long communityId;
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public Long getCommunityId() {
         return communityId;

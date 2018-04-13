@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 public class WarehouseRequestMaterials extends EhWarehouseRequestMaterials {
     private static final long serialVersionUID = 3757792319392563177L;
 
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

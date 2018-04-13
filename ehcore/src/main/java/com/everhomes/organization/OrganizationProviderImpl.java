@@ -45,6 +45,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.hp.hpl.sparta.xpath.Step;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -1292,8 +1293,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //            return ConvertHelper.convert(member, OrganizationMember.class);
 //        }
 //        return null;
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId).and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        if(organizationId != null && organizationId != 0L ){
+            condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+        }
         //added by wh 2016-10-13 把被拒绝的过滤掉
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
@@ -1308,6 +1311,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return null;
     }
+
+	/**
+	 * add by yuanlei
+	 * 根据userId和organizationId来查询数据库得到OrganizationMember对象
+	 * @param userId
+	 * @param organizationId
+     * @return
+     */
+	public OrganizationMember findOrganizationMemberByUidAndOrgId(Long userId, Long organizationId){
+		//1.拿到enterpriseId
+		Long enterpriseId = getTopOrganizationId(organizationId);
+		//2.拿到连接
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		//3.组装查询条件
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		Record record = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+				.fetchAny();
+		//判断record是否为空
+		if (record != null){
+			//说明record对象不为空，那么就将record对象转换为OrganizationMember对象
+			OrganizationMember organizationMember = ConvertHelper.convert(record, OrganizationMember.class);
+			if(enterpriseId != null) {
+				organizationMember.setEnterpriserId(enterpriseId);
+			}
+			return organizationMember;
+		}
+
+		return null;
+	}
 
     /**
      * modify cause member_detail by lei lv
@@ -5672,10 +5707,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
-    @Override
-    public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
-        return this.listOrganizationPersonnelsWithDownStream(keywords, contactSignedupStatus, visibleFlag, locator, pageSize, listCommand, filterScopeType, null);
-    }
 
     @Override
     public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens) {
@@ -5946,13 +5977,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     @Override
-    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId) {
+    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+        SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(directlyEnterpriseId))
                 .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
-                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchAny();
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        if(null !=groupId){
+        	step = step.and(Tables.EH_ORGANIZATIONS.ID.ne(groupId));
+        }
+        
+        Record r = step.fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;

@@ -221,6 +221,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 
     private List<Long> listUsersByDepartmentJobPosition(Integer namespaceId, Long organizationId, Long departmentId, Long departmentJobPosId) {
         ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
+        cmd.setEnterpriseId(organizationId);
         cmd.setOrganizationId(departmentJobPosId);
         cmd.setNamespaceId(namespaceId);
         cmd.setPageSize(10000);

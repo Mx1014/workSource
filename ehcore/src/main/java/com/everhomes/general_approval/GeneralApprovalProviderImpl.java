@@ -146,7 +146,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_TEMPLATE_ID.eq(templateId));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
-        return query.fetchOneInto(GeneralApproval.class);
+        return query.fetchAnyInto(GeneralApproval.class);
     }
 
     @Override

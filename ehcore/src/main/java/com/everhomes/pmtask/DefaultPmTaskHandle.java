@@ -324,11 +324,6 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 						dto.setTaskCategoryName(taskCategory.getName());
 					}
 
-					if (null!=task.getFlowCaseId()) {
-						FlowCase flowCase = flowService.getFlowCaseById(task.getFlowCaseId());
-						if (flowCase!=null)
-							dto.setStatus(flowCase.getStatus());
-					}
 				}
 				
 				if (dto.getOrganizationUid()==0)

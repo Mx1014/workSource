@@ -65,7 +65,9 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         SelectQuery<Record> query = context.selectQuery();
         List<SearchPurchasesDTO> list = new ArrayList<>();
         query.addFrom(purchase);
-        query.addConditions(purchase.SUBMISSION_STATUS.eq(submissionStatus));
+        if(submissionStatus != null){
+            query.addConditions(purchase.SUBMISSION_STATUS.eq(submissionStatus));
+        }
         if(warehouseStatus != null){
             query.addConditions(purchase.WAREHOUSE_STATUS.eq(warehouseStatus));
         }
@@ -76,6 +78,7 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         query.addConditions(purchase.OWNER_TYPE.eq(ownerType));
         query.addConditions(purchase.NAMESPACE_ID.eq(namespaceId));
         query.addLimit(pageAnchor.intValue(), pageSize);
+        query.addOrderBy(purchase.CREATE_TIME.desc());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         query.fetch()
                 .forEach(r -> {

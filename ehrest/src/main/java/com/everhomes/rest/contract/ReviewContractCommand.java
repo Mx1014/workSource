@@ -4,6 +4,7 @@ package com.everhomes.rest.contract;
  * <ul>
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
+ *     <li>invalidReason: 作废时传作废原因</li>
  *     <li>result: 结果 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
@@ -23,6 +24,16 @@ public class ReviewContractCommand {
     private Integer namespaceId;
 
     private Byte paymentFlag = 0;
+
+    private String invalidReason;
+
+    public String getInvalidReason() {
+        return invalidReason;
+    }
+
+    public void setInvalidReason(String invalidReason) {
+        this.invalidReason = invalidReason;
+    }
 
     public Byte getPaymentFlag() {
         return paymentFlag;

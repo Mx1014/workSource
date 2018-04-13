@@ -23,9 +23,27 @@ public class ServiceAllianceRequestInfo {
 	private Long secondCategoryId;
 	private String secondCategoryName;
 	private Byte workflowStatus;
+	private String creatorOrganization;
+	private String serviceOrganization;
 	
 
-    public Long getSecondCategoryId() {
+    public String getCreatorOrganization() {
+		return creatorOrganization;
+	}
+
+	public void setCreatorOrganization(String creatorOrganization) {
+		this.creatorOrganization = creatorOrganization;
+	}
+
+	public String getServiceOrganization() {
+		return serviceOrganization;
+	}
+
+	public void setServiceOrganization(String serviceOrganization) {
+		this.serviceOrganization = serviceOrganization;
+	}
+
+	public Long getSecondCategoryId() {
 		return secondCategoryId;
 	}
 

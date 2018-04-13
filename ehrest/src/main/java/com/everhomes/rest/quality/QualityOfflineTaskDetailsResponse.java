@@ -14,6 +14,7 @@ import java.util.List;
  * <li>taskCount:任务数目统计</li>
  * <li>organizations:组织架构</li>
  * <li>organizationMembers:人员</li>
+ * <li>jobPositions:岗位</li>
  * <li>groupMaps:计划和group关系</li>
  * <li>taskGroupMap:任务执行group关系</li>
  * <li>nextPageAnchor:下一页锚点</li>
@@ -39,6 +40,9 @@ public class QualityOfflineTaskDetailsResponse {
 
     @ItemType(OrganizationMemberDTO.class)
     private List<OrganizationMemberDTO> organizationMembers;
+
+    @ItemType(OfflineJobPositionDTO.class)
+    private List<OfflineJobPositionDTO> jobPositions;
 
     @ItemType(QualityInspectionStandardGroupMapDTO.class)
     private List<QualityInspectionStandardGroupMapDTO> groupMaps;
@@ -91,6 +95,14 @@ public class QualityOfflineTaskDetailsResponse {
 
     public void setOrganizationMembers(List<OrganizationMemberDTO> organizationMembers) {
         this.organizationMembers = organizationMembers;
+    }
+
+    public List<OfflineJobPositionDTO> getJobPositions() {
+        return jobPositions;
+    }
+
+    public void setJobPositions(List<OfflineJobPositionDTO> jobPositions) {
+        this.jobPositions = jobPositions;
     }
 
     public List<QualityInspectionStandardGroupMapDTO> getGroupMaps() {

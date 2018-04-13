@@ -96,27 +96,27 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
     
     final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*)");
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
     	
-    	if(actionData!=null && actionData.length()!=0){
-	    	Matcher m = pattern.matcher(actionData);
-	    	if(m.find()){
-	    		return m.group(1);
-	    	}
-    	}
+//    	if(actionData!=null && actionData.length()!=0){
+//	    	Matcher m = pattern.matcher(actionData);
+//	    	if(m.find()){
+//	    		return m.group(1);
+//	    	}
+//    	}
     	if(instanceConfig!=null && instanceConfig.length()!=0){
     		Matcher m = pattern.matcher(instanceConfig);
 	    	if(m.find()){
 	    		return m.group(1);
 	    	}
     	}
-    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = {}, instanceConfig = {}",actionData,instanceConfig);
+    	LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
     	return null;
     }
 
     @Override
-    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-        String categoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
+        String categoryId = getCustomTag(namespaceId, moudleId, instanceConfig);
         if(categoryId == null || "0".equals(categoryId.trim())){
             return 10800L;
         }

@@ -2,6 +2,8 @@ package com.everhomes.customer;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.dynamicExcel.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.*;
@@ -16,6 +18,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +35,11 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +48,12 @@ import java.util.stream.Collectors;
 @Component(DynamicExcelStrings.DYNAMIC_EXCEL_HANDLER + DynamicExcelStrings.CUSTOEMR)
 public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CustomerDynamicExcelHandler.class);
+
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter3 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter formatter4 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
 
     @Autowired
     private FieldProvider fieldProvider;
@@ -62,6 +75,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -99,24 +115,25 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                    df.setDisplayName(fieldDTO.getFieldDisplayName());
-                    if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
-                        df.setDateFormat("yyyy-MM-dd HH:mm");
+                    if(!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                        DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                        df.setDisplayName(fieldDTO.getFieldDisplayName());
+                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                        }
+                        //boolean isMandatory 数据库是0和1 默认false
+                        if(fieldDTO.getMandatoryFlag() == 1) {
+                            df.setMandatory(true);
+                        }
+                        if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                                return item.getItemDisplayName();
+                            }).collect(Collectors.toList());
+                            df.setAllowedValued(allowedValued);
+                        }
+                        dynamicFields.add(df);
                     }
-                    //boolean isMandatory 数据库是0和1 默认false
-                    if(fieldDTO.getMandatoryFlag() == 1) {
-                        df.setMandatory(true);
-                    }
-                    if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                        List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                            return item.getItemDisplayName();
-                        }).collect(Collectors.toList());
-                        df.setAllowedValued(allowedValued);
-                    }
-                    dynamicFields.add(df);
                 }
-
             });
         }
 
@@ -143,8 +160,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
+                Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
+                        if(customerId != 0) {
+                            //不为0时为管理里面导入的 直接break
+                            break;
+                        }
+                        //列表里导入时：
                         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
                         enterpriseCustomer.setNamespaceId(namespaceId);
                         enterpriseCustomer.setCommunityId(communityId);
@@ -178,32 +201,53 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue());
+                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
 
-                        if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
-                            String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
-                            enterpriseCustomer.setGeohash(geohash);
+                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
+                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
+                            if(customers != null && customers.size() > 0) {
+                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
+                                failedNumber ++;
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
+                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, enterpriseCustomer.getName());
+                            if(customers != null && customers.size() > 0) {
+                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
+                                failedNumber ++;
+                                flag = false;
+                                break;
+                            }
                         }
 
-                        customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+                        if(flag) {
+                            if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
+                                String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                                enterpriseCustomer.setGeohash(geohash);
+                            }
+                            customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
-                        //企业客户新增成功,保存客户事件
-                        customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+                            //企业客户新增成功,保存客户事件
+                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
 
-                        OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                        enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+                            OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                            enterpriseCustomer.setOrganizationId(organizationDTO.getId());
 
-                        customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-                        customerSearcher.feedDoc(enterpriseCustomer);
-
+                            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+                            customerSearcher.feedDoc(enterpriseCustomer);
+                        }
                         break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
@@ -221,16 +265,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), tax, column.getValue());
+                                    setToObj(column.getFieldName(), tax, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTax failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        customerProvider.createCustomerTax(tax);
+                        if(flag) {
+                            customerProvider.createCustomerTax(tax);
+                        }
                         break;
                     case CUSTOMER_ACCOUNT:
                         CustomerAccount account = new CustomerAccount();
@@ -246,17 +294,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), account, column.getValue());
+                                    setToObj(column.getFieldName(), account, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerAccount failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerAccount(account);
+                        if(flag) {
+                            customerProvider.createCustomerAccount(account);
+                        }
                         break;
                     case CUSTOMER_TALENT:
                         CustomerTalent talent = new CustomerTalent();
@@ -276,17 +327,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), talent, column.getValue());
+                                    setToObj(column.getFieldName(), talent, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTalent failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerTalent(talent);
+                        }
 
-                        customerProvider.createCustomerTalent(talent);
                         break;
                     case CUSTOMER_TRADEMARK:
                         CustomerTrademark trademark = new CustomerTrademark();
@@ -303,17 +358,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), trademark, column.getValue());
+                                    setToObj(column.getFieldName(), trademark, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrademark failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerTrademark(trademark);
+                        if(flag) {
+                            customerProvider.createCustomerTrademark(trademark);
+                        }
                         break;
                     case CUSTOMER_APPLY_PROJECT:
                         CustomerApplyProject project = new CustomerApplyProject();
@@ -355,17 +413,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), project, column.getValue());
+                                    setToObj(column.getFieldName(), project, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerApplyProject failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerApplyProject(project);
+                        if(flag) {
+                            customerProvider.createCustomerApplyProject(project);
+                        }
                         break;
                     case CUSTOMER_COMMERCIAL:
                         CustomerCommercial commercial = new CustomerCommercial();
@@ -383,17 +444,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), commercial, column.getValue());
+                                    setToObj(column.getFieldName(), commercial, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCommercial failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
 
-                        customerProvider.createCustomerCommercial(commercial);
+                        if(flag) {
+                            customerProvider.createCustomerCommercial(commercial);
+                        }
                         break;
                     case CUSTOMER_INVESTMENT:
                         CustomerInvestment investment = new CustomerInvestment();
@@ -404,17 +469,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 try {
-                                    setToObj(column.getFieldName(), investment, column.getValue());
+                                    setToObj(column.getFieldName(), investment, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerInvestment failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerInvestment(investment);
+                        }
 
-                        customerProvider.createCustomerInvestment(investment);
                         break;
                     case CUSTOMER_ECONOMIC_INDICATOR:
                         CustomerEconomicIndicator indicator = new CustomerEconomicIndicator();
@@ -425,17 +494,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             if(columns != null && columns.size() > 0) {
                                 for(DynamicColumnDTO column : columns) {
                                     try {
-                                        setToObj(column.getFieldName(), indicator, column.getValue());
+                                        setToObj(column.getFieldName(), indicator, column.getValue(), new SimpleDateFormat("yyyy-MM"));
                                     } catch(Exception e){
                                         LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
                                         failedNumber ++;
+                                        flag = false;
+                                        break;
                                     }
 
                                     continue;
                                 }
                         }
-
-                        customerProvider.createCustomerEconomicIndicator(indicator);
+                        if(flag) {
+                            customerProvider.createCustomerEconomicIndicator(indicator);
+                        }
                         break;
                     case CUSTOMER_PATENT:
                         CustomerPatent patent = new CustomerPatent();
@@ -452,17 +524,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), patent, column.getValue());
+                                    setToObj(column.getFieldName(), patent, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerPatent failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerPatent(patent);
+                        if(flag) {
+                            customerProvider.createCustomerPatent(patent);
+                        }
                         break;
                     case CUSTOMER_CERTIFICATE:
                         CustomerCertificate certificate = new CustomerCertificate();
@@ -473,17 +548,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 try {
-                                    setToObj(column.getFieldName(), certificate, column.getValue());
+                                    setToObj(column.getFieldName(), certificate, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCertificate failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerCertificate(certificate);
+                        }
 
-                        customerProvider.createCustomerCertificate(certificate);
                         break;
                     case CUSTOMER_TRACKING:
                         CustomerTracking tracking = new CustomerTracking();
@@ -507,22 +586,26 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), tracking, column.getValue());
+                                    setToObj(column.getFieldName(), tracking, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTracking failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        customerProvider.createCustomerTracking(tracking);
-                        EnterpriseCustomer customer = customerProvider.findById(customerId);
-                        if(customer != null) {
-                            customer.setLastTrackingTime(tracking.getTrackingTime());
-                            //更细客户表的最后跟进时间
-                            customerProvider.updateCustomerLastTrackingTime(customer);
-                            customerSearcher.feedDoc(customer);
+                        if(flag) {
+                            customerProvider.createCustomerTracking(tracking);
+                            EnterpriseCustomer customer = customerProvider.findById(customerId);
+                            if(customer != null) {
+                                customer.setLastTrackingTime(tracking.getTrackingTime());
+                                //更细客户表的最后跟进时间
+                                customerProvider.updateCustomerLastTrackingTime(customer);
+                                customerSearcher.feedDoc(customer);
+                            }
                         }
 
                         break;
@@ -542,19 +625,23 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), plan, column.getValue());
+                                    setToObj(column.getFieldName(), plan, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrackingPlan failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        if(plan.getNotifyTime() != null ){
-                            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                        if(flag) {
+                            if(plan.getNotifyTime() != null ){
+                                plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                            }
+                            customerProvider.createCustomerTrackingPlan(plan);
                         }
-                        customerProvider.createCustomerTrackingPlan(plan);
 
                         break;
                     case CUSTOMER_ENTRY_INFO:
@@ -564,29 +651,36 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         entryInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
+                            String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
                                 if("addressId".equals(column.getFieldName()) ) {
-                                    String[] value = column.getValue().split("-");
-                                    if(value.length == 2) {
-                                        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, value[0], value[1]);
-                                        if(address != null) {
-                                            column.setValue(address.getId().toString());
-                                        }
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+                                    if(address != null) {
+                                        column.setValue(address.getId().toString());
                                     }
-
+                                }
+                                if("buildingId".equals(column.getFieldName()) ) {
+                                    buildingName = column.getValue();
+                                    Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
+                                    if(building != null) {
+                                        column.setValue(building.getId().toString());
+                                    }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), entryInfo, column.getValue());
+                                    setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerEntryInfo(entryInfo);
+                        if(flag) {
+                            customerProvider.createCustomerEntryInfo(entryInfo);
+                        }
                         break;
                     case CUSTOMER_DEPARTURE_INFO:
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
@@ -603,17 +697,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), departureInfo, column.getValue());
+                                    setToObj(column.getFieldName(), departureInfo, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerDepartureInfo(departureInfo);
+                        if(flag) {
+                            customerProvider.createCustomerDepartureInfo(departureInfo);
+                        }
                         break;
                 }
 
@@ -623,7 +720,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
-    private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String setToObj(String fieldName, Object dto,Object value, SimpleDateFormat sdf) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass().getSuperclass();
         Object val = value;
         String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
@@ -644,16 +741,40 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         val = null;
                         break;
                     }
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    try {
-                        date = sdf.parse((String) value);
-                    } catch (ParseException e) {
-                        val = null;
-                        break;
+                    String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
+                    String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
+                    String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
+                    String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
+                    Pattern pattern1 = Pattern.compile(regex1);
+                    Pattern pattern2 = Pattern.compile(regex2);
+                    Pattern pattern3 = Pattern.compile(regex3);
+                    Pattern pattern4 = Pattern.compile(regex4);
+                    TemporalAccessor q = null;
+                    if(pattern1.matcher(value.toString()).matches()){
+                        q = formatter1.parse(value.toString());
+                    }else if(pattern2.matcher(value.toString()).matches()){
+                        q =formatter2.parse(value.toString());
+                    }else if(pattern3.matcher(value.toString()).matches()){
+                        q = formatter3.parse(value.toString());
+                    }else if(pattern4.matcher(value.toString()).matches()){
+                        q = formatter4.parse(value.toString());
                     }
 
-                    val = new Timestamp(date.getTime());
+                    val = Timestamp.valueOf(LocalDateTime.from(q));
+
+//                    Date date = new Date();
+//
+//                    if(sdf == null) {
+//                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//                    }
+//                    try {
+//                        date = sdf.parse((String) value);
+//                    } catch (ParseException e) {
+//                        val = null;
+//                        break;
+//                    }
+//
+//                    val = new Timestamp(date.getTime());
                     break;
                 case "Integer":
                     val = Integer.parseInt((String)value);

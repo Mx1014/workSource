@@ -18,6 +18,7 @@ import java.util.List;
  *  <li>operatorId: 整改执行人id</li>
  *  <li>itemResults: 规范事项  参考{@link com.everhomes.rest.quality.ReportSpecificationItemResultsDTO}</li>
  *  <li>namespaceId: namespaceId</li>
+ *  <li>createTask : 创建绩效考核的参数 参考{@link com.everhomes.rest.quality.CreateQualityInspectionTaskCommand}</li>
  * </ul>
  */
 public class ReportVerificationResultCommand {
@@ -41,6 +42,8 @@ public class ReportVerificationResultCommand {
 	private String message;
 
 	private Integer namespaceId;
+
+	private CreateQualityInspectionTaskCommand createTask;
 	
 	@ItemType(ReportSpecificationItemResultsDTO.class)
 	private List<ReportSpecificationItemResultsDTO> itemResults;
@@ -115,6 +118,14 @@ public class ReportVerificationResultCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public CreateQualityInspectionTaskCommand getCreateTask() {
+		return createTask;
+	}
+
+	public void setCreateTask(CreateQualityInspectionTaskCommand createTask) {
+		this.createTask = createTask;
 	}
 
 	@Override

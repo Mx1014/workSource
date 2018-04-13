@@ -11,11 +11,13 @@ public interface SalaryDepartStatisticProvider {
 
 	SalaryDepartStatistic findSalaryDepartStatisticById(Long id);
 
-	List<SalaryDepartStatistic> listSalaryDepartStatistic();
+	List<SalaryDepartStatistic> listFiledSalaryDepartStatistic();
 
 	void deleteSalaryDepartStatistic(Long ownerId, byte isFile, String month);
 
 	SalaryDepartStatistic findSalaryDepartStatisticByDptAndMonth(Long id, String format);
 
-	List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, String month);
+	List<SalaryDepartStatistic> listFiledSalaryDepartStatistic(Long ownerId, String month);
+
+	List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, Byte isFile, String month);
 }

@@ -255,12 +255,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.join(Tables.EH_RENTALV2_ORDERS)
 			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
 			.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
+					or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
 			.fetchOne();
 
 		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)) == null ? 0D: result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
@@ -632,7 +628,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId,
+	public List<RentalOrder> listRentalBills(Long id, Long userId,Long rentalSiteId, String resourceType, Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
 		final List<RentalOrder> result = new ArrayList<>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
@@ -647,6 +643,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (StringUtils.isNotBlank(resourceType)) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(resourceType));
 		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalSiteId));
 		if (null != id)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.eq(id));
 		if (null != payMode) {
@@ -901,7 +899,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-												Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,
+												Long startTime, Long endTime, String tag1, String tag2,String keyword, Long pageAnchor ,
 												Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
@@ -926,6 +924,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
+		if (null != keyword)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
+					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
 
 		if(null != pageAnchor && pageAnchor != 0)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(pageAnchor)));
@@ -936,6 +937,40 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		step.where(condition);
 
 		return step.fetch().map((r) -> ConvertHelper.convert(r, RentalOrder.class));
+	}
+
+	@Override
+	public BigDecimal getRentalOrdersTotalAmount(Long resourceTypeId, String resourceType, Long rentalSiteId,
+												 Byte billStatus, Long startTime, Long endTime, String tag1, String tag2, String keyword) {
+		BigDecimal count = new BigDecimal(0);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()).from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (StringUtils.isNotBlank(tag1))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STRING_TAG1.equal(tag1));
+		if (StringUtils.isNotBlank(tag2))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STRING_TAG2.equal(tag2));
+		if(null != resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.equal(resourceTypeId));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != billStatus)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
+		if (null != keyword)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
+					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
+
+		count = step.where(condition).fetchOneInto(BigDecimal.class);
+
+		return count;
 	}
 
 	@Override
@@ -2160,6 +2195,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.lt(new Timestamp(System.currentTimeMillis())));
 
 		return query.where(condition).fetchInto(String.class);
+	}
+
+	@Override
+	public List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
+											Long rentalSiteId,List<Long> cellIds){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<String>> query = context.selectDistinct(Tables.EH_RENTALV2_ORDERS.STRING_TAG1).from(Tables.EH_RENTALV2_ORDERS).
+				join(Tables.EH_RENTALV2_RESOURCE_ORDERS).on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
+		Condition condition = Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode()).
+				or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode())));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.in(cellIds));
+
+		return query.where(condition).fetchInto(String.class);
+
 	}
 
 

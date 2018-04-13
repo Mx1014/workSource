@@ -36,6 +36,9 @@ import com.everhomes.util.StringHelper;
  * <li>refundFlag: 是否退款 0-否 1-是</li>
  * <li>refundRatio: 退款比例 百分比</li>
  * <li>refundAmount: 退款金额</li>
+ * <li>payMode: 资源支付方式</li>
+ * <li>offlinePayName: 退款人姓名/li>
+ * <li>offlinePayPhone: 退款人联系方式/li>
  * <li>cancelFlag: 是否允许取消,永远为1</li>
  * <li>useDetail: 使用详情</li>
  * <li>vendorType: 支付方式,10001-支付宝，10002-微信</li>
@@ -92,6 +95,9 @@ public class RentalBillDTO {
 	private Long unpayCancelTime;
 	private String doorAuthTime;
 	private String packageName;
+	private Byte payMode;
+	private String offlinePayName;
+	private String offlinePayPhone;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -467,4 +473,27 @@ public class RentalBillDTO {
 		this.confirmationPrompt = confirmationPrompt;
 	}
 
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
+	public String getOfflinePayName() {
+		return offlinePayName;
+	}
+
+	public void setOfflinePayName(String offlinePayName) {
+		this.offlinePayName = offlinePayName;
+	}
+
+	public String getOfflinePayPhone() {
+		return offlinePayPhone;
+	}
+
+	public void setOfflinePayPhone(String offlinePayPhone) {
+		this.offlinePayPhone = offlinePayPhone;
+	}
 }

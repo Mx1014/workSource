@@ -38,7 +38,9 @@ public class ContractDTO {
 	private Long id;
 
 	private Long partyAId;
-	
+
+	private String partyAName;
+
 	private String contractNumber;
 
 	private String name;
@@ -52,7 +54,35 @@ public class ContractDTO {
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
-	
+
+	private Long categoryItemId;
+
+	private String categoryItemName;
+
+	public Long getCategoryItemId() {
+		return categoryItemId;
+	}
+
+	public void setCategoryItemId(Long categoryItemId) {
+		this.categoryItemId = categoryItemId;
+	}
+
+	public String getCategoryItemName() {
+		return categoryItemName;
+	}
+
+	public void setCategoryItemName(String categoryItemName) {
+		this.categoryItemName = categoryItemName;
+	}
+
+	public String getPartyAName() {
+		return partyAName;
+	}
+
+	public void setPartyAName(String partyAName) {
+		this.partyAName = partyAName;
+	}
+
 	private String contactor;
 	
 	private String contract;
