@@ -244,6 +244,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
 
         JSONObject jsonObject = JSONObject.parseObject(result);
         Object obj = jsonObject.get("flag");
+        order.setErrorDescription(jsonObject.getString("message"));
         if(null != obj ) {
             int resCode = (int) obj;
             if(resCode == 1) {
@@ -334,6 +335,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             order.setEndPeriod(timestampEnd);
 
             YinxingzhijieXiaomaoJsonEntity<?> entity = JSONObject.parseObject(json, YinxingzhijieXiaomaoJsonEntity.class);
+            order.setErrorDescription(entity!=null?entity.getMessage():null);
             if (entity.isSuccess()){
                 return true;
             }

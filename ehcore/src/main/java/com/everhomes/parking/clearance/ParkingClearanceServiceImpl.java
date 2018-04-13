@@ -283,11 +283,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             ParkingLot parkingLot = parkingProvider.findParkingLotById(r.getParkingLotId());
 
             String vendorName = parkingLot.getVendorName();
-            JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-            List<JinyiClearance> actualLogs = handler.getTempCardLogs(r);
+            ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+            List<ParkingActualClearanceLogDTO> result = handler.getTempCardLogs(r);
 
-            if (null != actualLogs) {
-                List<ParkingActualClearanceLogDTO> result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+            if (null != result) {
+//                List<ParkingActualClearanceLogDTO> result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
                 Map<String, String> temp = new LinkedHashMap<>();
                 result.forEach(a -> {
                     if (null != a.getEntryTime()) {
@@ -394,7 +394,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         ParkingLot parkingLot = parkingProvider.findParkingLotById(log.getParkingLotId());
 
         String vendorName = parkingLot.getVendorName();
-        JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         String logToken = handler.applyTempCard(log);
         if (null == logToken) {
             LOGGER.error("some error.");
@@ -637,37 +637,22 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     @Override
     public List<ParkingActualClearanceLogDTO> getActualClearanceLog(GetActualClearanceLogCommand cmd) {
 
-        List<ParkingActualClearanceLogDTO> result = new ArrayList<>();
+//        List<ParkingActualClearanceLogDTO> result = new ArrayList<>();
         ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 
         ParkingClearanceLog log = clearanceLogProvider.findById(cmd.getId());
         String vendorName = parkingLot.getVendorName();
-        JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-        List<JinyiClearance> actualLogs = handler.getTempCardLogs(log);
-        if (null != actualLogs) {
-            result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
-        }
-        return result;
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+        List<ParkingActualClearanceLogDTO> actualLogs = handler.getTempCardLogs(log);
+//        if (null != actualLogs) {
+//            result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+//        }
+        return actualLogs;
     }
 
-    private ParkingActualClearanceLogDTO convertActualClearanceLogDTO(JinyiClearance jinyiClearance) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
-        if (null != jinyiClearance.getEntrytime()) {
-            LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
-            dto.setEntryTime(Timestamp.valueOf(entryTime));
-        }
-        if (null != jinyiClearance.getExittime()) {
-            LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
-            dto.setExitTime(Timestamp.valueOf(exitTime));
-        }
-
-        return dto;
-    }
-
-    private JinyiParkingVendorHandler getParkingVendorHandler(String vendorName) {
-        JinyiParkingVendorHandler handler = null;
+    private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
+        ParkingVendorHandler handler = null;
 
         if(vendorName != null && vendorName.length() > 0) {
             String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;

@@ -9,3 +9,6 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.elivejieshun.signKey', '', '住总停车场signKey', 0, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.elivejieshun.parkCode', '20171113', '住总停车场parkCode', 0, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.elivejieshun.areaCode', '20171113', '住总停车场areaCode', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.elivejieshun.businesserCode', 'jsdstest', '住总停车场businesserCode', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.elivejieshun.personCode', 'SZ000014', '住总停车场personCode', 0, NULL);
+

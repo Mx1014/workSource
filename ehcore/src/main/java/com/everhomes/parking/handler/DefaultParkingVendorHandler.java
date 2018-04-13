@@ -8,9 +8,11 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -353,4 +355,13 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
         }
     }
+    @Override
+    public List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r){
+        return null;
+    }
+    @Override
+    public String applyTempCard(ParkingClearanceLog log){
+        return null;
+    }
+
 }
