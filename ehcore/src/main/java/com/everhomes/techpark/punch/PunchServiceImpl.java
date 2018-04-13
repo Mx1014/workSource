@@ -2803,7 +2803,7 @@ public class PunchServiceImpl implements PunchService {
 
         if (null != pr.getChinaHolidayFlag() && pr.getChinaHolidayFlag().equals(NormalFlag.YES.getCode())) {
             PunchHoliday holiday = punchProvider.findHolidayByDate(punchDate);
-            LOGGER.debug("2018年03月05日 临时debug ,holiday = {} ; punchDate = {}", holiday, punchDate);
+//            LOGGER.debug("2018年03月05日 临时debug ,holiday = {} ; punchDate = {}", holiday, punchDate);
             if (null != holiday) {
                 if (holiday.getStatus().equals(NormalFlag.YES.getCode())) {
                     return null;
@@ -6067,11 +6067,12 @@ public class PunchServiceImpl implements PunchService {
 
     /**
      * 刷新punCalendar 当天日数据 和 start到pun 之间的月数据
+     * @throws ParseException 
      */
     private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
-                                           Calendar punCalendar, Calendar startCalendar) {
+                                           Calendar punCalendar, Calendar startCalendar) throws ParseException {
         orgId = getTopEnterpriseId(orgId);
-        try {
+//        try {
             LOGGER.debug("refresh day log stat " + member.toString());
             //刷新 daylog
             PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(member.getTargetId(), orgId,
@@ -6083,10 +6084,10 @@ public class PunchServiceImpl implements PunchService {
 
             addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
-        } catch (Exception e) {
-            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
-                    + "] organization id :[" + orgId + "] ", e);
-        }
+//        } catch (Exception e) {
+//            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
+//                    + "] organization id :[" + orgId + "] ", e);
+//        }
     }
 
     @Override
