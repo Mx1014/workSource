@@ -129,7 +129,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     result.setRateOfProgress(calculateProgress(community, syncType));
                 }
 
-                if(task.getCreatorUid() == 0L) {
+                if(task.getCreatorUid() == null || task.getCreatorUid() == 0L) {
                     result.setManualFlag((byte)0);
                 } else {
                     result.setManualFlag((byte)1);
