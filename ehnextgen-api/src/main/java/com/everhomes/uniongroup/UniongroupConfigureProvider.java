@@ -61,6 +61,9 @@ public interface UniongroupConfigureProvider {
     //获取当前版本
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId, Integer versionCode);
 
+    //获取当前版本
+    List<UniongroupMemberDetail> listUniongroupMemberDetail(List<Long> groupIds, Integer versionCode);
+
     void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType);
 
     void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType, Integer versionCode);

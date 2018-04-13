@@ -52,7 +52,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		
 		if(event != null) {
 			FlowSubject subject = event.getSubject();
-			if(subject != null && subject.getContent() != null && !subject.getContent().isEmpty()) {
+			if(isValidSubject(subject)) {
 				log.setSubjectId(subject.getId());	
 			} else {
 				log.setSubjectId(0L);
@@ -60,4 +60,10 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		}
 		ctx.getLogs().add(log);
 	}
+
+    private boolean isValidSubject(FlowSubject subject) {
+        return subject != null
+                && ((subject.getContent() != null && subject.getContent().length() > 0)
+                || (subject.getAttachments() != null && subject.getAttachments().size() > 0));
+    }
 }

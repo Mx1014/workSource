@@ -13,3 +13,21 @@ ALTER TABLE eh_launch_advertisements ADD COLUMN content_uri_origin VARCHAR(1024)
 -- 用户认证 V2.3 #13692
 ALTER TABLE `eh_users` ADD COLUMN `third_data` varchar(2048) DEFAULT NULL COMMENT 'third_data for AnBang';
 
+
+
+-- 标准item 顺序 by jiarui
+ALTER TABLE `eh_equipment_inspection_items` ADD COLUMN `default_order`  int(11) NOT NULL DEFAULT 0 AFTER `value_jason`;
+
+/**
+ * Designer:yilin Liu
+ * Description:ISSUE#26184 门禁人脸识别
+ * Created：2018-4-9
+ */
+
+-- 门禁多公司管理
+ALTER TABLE `eh_door_access`
+ADD `mac_copy` VARCHAR(128) COMMENT '原mac地址';
+
+/**
+* End by: yilin Liu
+*/
