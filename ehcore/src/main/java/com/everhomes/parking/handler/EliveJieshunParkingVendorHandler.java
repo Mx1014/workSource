@@ -674,7 +674,11 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		for (EliveJieShunDataItems<String, String, String> dataItem : outRecordResponse.getDataItems()) {
 			JSONObject attr = JSONObject.parseObject(dataItem.getAttributes());
 			String outTime = attr.getString("outTime");
-			dtos.get(i++).setEntryTime(Utils.strToTimeStamp(outTime,Utils.DateStyle.DATE_TIME));
+			ParkingActualClearanceLogDTO dto = dtos.get(i++);
+			if(dto==null){
+				dto=new ParkingActualClearanceLogDTO();
+			}
+			dto.setEntryTime(Utils.strToTimeStamp(outTime,Utils.DateStyle.DATE_TIME));
 		}
 		return dtos;
 	}
@@ -712,7 +716,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("carNo",transformPlateNumberToThirdpartFormat(r.getPlateNumber()));
 		paramattrs.put("beginTime",generateClearanceStartTime(r.getClearanceTime()));
 		paramattrs.put("endTime",generateClearanceEndTime(r.getClearanceTime()));
-		paramattrs.put("pageIndex",0);
+		paramattrs.put("pageIndex",1);
 		paramattrs.put("pageSize",100);
 		params.put("attributes",paramattrs);
 
@@ -741,7 +745,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("areaCode",areaCode);
 		paramattrs.put("beginTime",generateClearanceStartTime(r.getClearanceTime()));
 		paramattrs.put("endTime",generateClearanceEndTime(r.getClearanceTime()));
-		paramattrs.put("pageIndex",0);
+		paramattrs.put("pageIndex",1);
 		paramattrs.put("pageSize",10);
 		params.put("attributes",paramattrs);
 
@@ -781,8 +785,8 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("personCode",personCode);
 		paramattrs.put("businesserCode",businesserCode);
 		paramattrs.put("visitorType",3);
-		JSONObject timeDesc = new JSONObject();
 
+		JSONObject timeDesc = new JSONObject();
 		timeDesc.put("sd", generateClearanceStartTime(log.getClearanceTime()));
 		timeDesc.put("ed", generateClearanceEndTime(log.getClearanceTime()));
 //		timeDesc.put("st", null);
