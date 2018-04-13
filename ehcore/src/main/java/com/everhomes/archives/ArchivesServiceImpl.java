@@ -1217,6 +1217,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         break;
                     case ArchivesParameter.CHECK_IN_TIME:
                         employee.setCheckInTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
                         break;
                     case ArchivesParameter.PROCREATIVE:
                         employee.setProcreative(itemValue.getFieldValue());
@@ -1643,7 +1644,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     //  执行定时配置项
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 4 * * ? *")
     @Override
     public void executeArchivesConfiguration() {
         if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
