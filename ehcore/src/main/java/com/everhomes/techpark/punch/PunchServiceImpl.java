@@ -2918,8 +2918,10 @@ public class PunchServiceImpl implements PunchService {
             statistic.setDeviceChangeCounts(deviceChangeCounts);
             //年假余额
             PunchVacationBalance vacationBalance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(member.getDetailId());
-            statistic.setOvertimeCompensationBalance(vacationBalance.getOvertimeCompensationBalance());
-            statistic.setAnnualLeaveBalance(vacationBalance.getAnnualLeaveBalance());
+            if(null !=vacationBalance){
+            	statistic.setOvertimeCompensationBalance(vacationBalance.getOvertimeCompensationBalance());
+            	statistic.setAnnualLeaveBalance(vacationBalance.getAnnualLeaveBalance());
+            }
 
             //算每一项需要计算的
             processPunchListCount(dayLogList, statistic);
