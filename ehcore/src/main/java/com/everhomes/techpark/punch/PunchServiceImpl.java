@@ -5625,8 +5625,10 @@ public class PunchServiceImpl implements PunchService {
                 dto.setApprovalRecords(new ArrayList<>());
                 for (PunchExceptionRequest request : exceptionRequests) {
                     FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
-                    GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
-                    dto.getApprovalRecords().add(recordDTO);
+                    if(null != flowCase){
+                    	GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+                    	dto.getApprovalRecords().add(recordDTO);
+                    }
                 }
             }
         }
