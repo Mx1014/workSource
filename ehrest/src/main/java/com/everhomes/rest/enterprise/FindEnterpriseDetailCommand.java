@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 查看单个公司的具体属性（标准版）
- * <li>organizationId: 域空间</li>
+ * <li>organizationId: 公司id</li>
  * </ul>
  *
  */
