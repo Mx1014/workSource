@@ -12,7 +12,7 @@ public class FindNearbyMixCommunityCommand {
 
 	private Double longitude;
 
-	private Double latigtue;
+	private Double latitude;
 
 	public Double getLongitude() {
 		return longitude;
@@ -22,12 +22,12 @@ public class FindNearbyMixCommunityCommand {
 		this.longitude = longitude;
 	}
 
-	public Double getLatigtue() {
-		return latigtue;
+	public Double getLatitude() {
+		return latitude;
 	}
 
-	public void setLatigtue(Double latigtue) {
-		this.latigtue = latigtue;
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
 
 	@Override
