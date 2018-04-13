@@ -193,6 +193,8 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("企业情况");
                 sheetNames.remove("员工情况");
                 sheetNames.remove("客户合同");
+                sheetNames.remove("资源预定");
+                sheetNames.remove("企业服务");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
