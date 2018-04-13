@@ -1,3 +1,17 @@
+-- Designer: zhiwei zhang
+-- Description: ISSUE#25301 【打卡考勤】按日导出打卡记录导出文件时间过长
+-- Created: 2018-4-4
+
+
+ALTER TABLE eh_punch_exception_requests ADD INDEX i_eh_enterprise_user_punch_date(`enterprise_id`,`user_id`,`punch_date`);
+ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_user_punch_date(`enterprise_id`,`user_id`,`punch_date`);
+
+-- End by: zhiwei zhang
+
+-- Designer: wuhan
+-- Description: 考勤4.0 
+-- Created: 2018-4-12
+
 
 CREATE TABLE `eh_punch_vacation_balances` (
   `id` BIGINT NOT NULL,
@@ -47,3 +61,5 @@ ALTER TABLE eh_punch_statistics ADD COLUMN `forgot_count` INT COMMENT '下班缺
 ALTER TABLE eh_punch_statistics ADD COLUMN `status_list` VARCHAR(1024) COMMENT '校正后状态列表(月初到月末)';
 ALTER TABLE eh_punch_logs ADD COLUMN `wifi_info` VARCHAR(1024) COMMENT '打卡用到的WiFi信息';
 ALTER TABLE eh_punch_logs ADD COLUMN `location_info` VARCHAR(1024) COMMENT '打卡用到的地址定位';
+
+-- end 考勤4.0
