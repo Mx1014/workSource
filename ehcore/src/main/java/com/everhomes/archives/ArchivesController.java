@@ -446,7 +446,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("testNotification")
     @RestReturn(value = String.class)
     public RestResponse testNotification(){
-        archivesService.executeArchivesNotification(7, 18, LocalDateTime.now());
+        archivesService.executeArchivesNotification(6, 9, LocalDateTime.now());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

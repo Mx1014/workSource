@@ -2636,18 +2636,18 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void initArchivesNotification() {
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDateTime initTime = LocalDateTime.now().plusHours(1);
-        /*LocalDateTime nowDateTime = LocalDateTime.now();
-        LocalDateTime nextDateTime = LocalDateTime.of(nowDateTime.getYear(), nowDateTime.getMonthValue(), nowDateTime.getDayOfMonth(), nowDateTime.getHour() + 1, 0);
-        */
         initTime = LocalDateTime.of(initTime.getYear(), initTime.getMonthValue(), initTime.getDayOfMonth(), initTime.getHour(), 0);
         ZonedDateTime zdt = initTime.atZone(zoneId);
         java.util.Date date = java.util.Date.from(zdt.toInstant());
-        scheduleProvider.scheduleSimpleJob(
-                ARCHIVES_NOTIFICATION,
-                ARCHIVES_NOTIFICATION,
+        scheduleProvider.scheduleRepeatJob(
+                ARCHIVES_NOTIFICATION + date,
+                ARCHIVES_NOTIFICATION + date,
                 date,
+                60 * 60 * 1000,
+                0,
                 ArchivesNotificationJob.class,
                 new HashMap<>());
+        LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + date);
     }
 
     @Override
