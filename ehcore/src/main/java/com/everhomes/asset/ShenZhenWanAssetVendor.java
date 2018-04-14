@@ -273,5 +273,10 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		response.addAll(szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("1")));
 		return response;
 	}
+	@Override
+	public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
