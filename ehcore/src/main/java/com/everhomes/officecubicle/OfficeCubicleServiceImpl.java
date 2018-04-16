@@ -578,8 +578,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Flow flow = flowService.getEnabledFlow(space.getNamespaceId(), OfficeCubicleFlowModuleListener.MODULE_ID,
 				FlowModuleType.NO_MODULE.getCode(),space.getOwnerId(), FlowOwnerType.COMMUNITY.getCode());
 		if(flow==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"unable to get enabled flow ");
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_UNENABLE_FLOW,
+					"提交失败，未启用工作流，请联系管理员");
 		}
 
 		Long flowCaseId = flowService.getNextFlowCaseId();

@@ -7,6 +7,7 @@ public interface OfficeCubicleErrorCode {
 	int ERROR_CITY_ID = 10002;//城市id不存在
 	int ERROR_EMPTY_CITYS = 10003;//城市名称为空
 	int ERROR_DELETE_CITYS = 10004;//城市名称为空
+	int ERROR_UNENABLE_FLOW = 10005;//工作流未启用
 
 
 
