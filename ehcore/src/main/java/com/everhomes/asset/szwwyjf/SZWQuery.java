@@ -142,8 +142,8 @@ public class SZWQuery {
 							//实付金额
 							BigDecimal factMount = new BigDecimal(receDataJSONObject.get("factMount") != null ? Double.parseDouble(receDataJSONObject.get("factMount").toString()): 0);
 							//待缴金额
-							BigDecimal amountOwed = fappamount.subtract(factMount);
-							listAllBillsForClientDTO.setAmountOwed(String.valueOf(amountOwed));
+							BigDecimal amountOwed = fappamount.subtract(factMount).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+							listAllBillsForClientDTO.setAmountOwed(amountOwed.toString());
 							listAllBillsForClientDTO.setChargeStatus(chargeStatus);
 							response.add(listAllBillsForClientDTO);
 						}
@@ -178,7 +178,7 @@ public class SZWQuery {
 					//实付金额
 					BigDecimal factMount = new BigDecimal(receDataJSONObject.get("factMount").toString());
 					//待缴金额
-					BigDecimal amountOwed = fappamount.subtract(factMount);
+					BigDecimal amountOwed = fappamount.subtract(factMount).setScale(2,BigDecimal.ROUND_HALF_DOWN);
 					response.setAmountOwed(amountOwed);
 					String dateStr = receDataJSONObject.get("startDate") + "~" + receDataJSONObject.get("endDate");
 					//格式化日期
