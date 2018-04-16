@@ -2772,7 +2772,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         return body;
     }
 
-    private String getMonthAndDay(LocalDate date){
+    private String getMonthAndDay(LocalDate date) {
+        if (date == null)
+            return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         return formatter.format(date);
     }
