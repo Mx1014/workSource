@@ -3832,8 +3832,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			//TODO: 临时给越空间解决公众号支付
+			String vspCusid = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"tempVspCusid","");
+			paymentParamsDTO.setVspCusid(vspCusid);
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
+
 
 		}
 

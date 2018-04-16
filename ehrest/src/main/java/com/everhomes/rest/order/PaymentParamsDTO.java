@@ -11,6 +11,7 @@ public class PaymentParamsDTO {
     @NotNull
     private String payType;
     private String acct;
+    private String vspCusid;
 
     public String getPayType() {
         return payType;
@@ -26,5 +27,13 @@ public class PaymentParamsDTO {
 
     public void setAcct(String acct) {
         this.acct = acct;
+    }
+
+    public String getVspCusid() {
+        return vspCusid;
+    }
+
+    public void setVspCusid(String vspCusid) {
+        this.vspCusid = vspCusid;
     }
 }
