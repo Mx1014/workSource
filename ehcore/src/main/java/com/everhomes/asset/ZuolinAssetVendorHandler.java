@@ -14,6 +14,7 @@ import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PayService;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
@@ -72,7 +73,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     private AddressProvider addressProvider;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private AssetService assetService;
@@ -447,6 +448,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             res.setAddressNames(areaAndAddressByContract.getAddressNames());
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
             res.setCustomerName(contractDTO.getCustomerName());
+        }else{
+            String targeType = cmd.getTargetType();
+            if(targeType.equals(AssetPaymentConstants.EH_USER)){
+                res.setCustomerName(UserContext.current().getUser().getNickName());
+            }else if(targeType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
+                String organizationNameById = organizationProvider.getOrganizationNameById(cmd.getTargetId());
+                res.setCustomerName(organizationNameById);
+            }
         }
         return res;
     }
