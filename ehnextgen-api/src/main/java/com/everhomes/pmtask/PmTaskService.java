@@ -110,4 +110,7 @@ public interface PmTaskService {
 	List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd);
 
 	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
+
+	void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp);
+
 }

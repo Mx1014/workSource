@@ -7,6 +7,7 @@ package com.everhomes.rest.pmtask;
  * <li>ownerId: 所属项目id</li>
  * <li>dateStart: 起始日期</li>
  * <li>dateEnd: 截止日期</li>
+ * <li>exportType: 导出统计类型：1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据</li>
  * </ul>
  */
 public class GetTaskStatCommand {
@@ -16,6 +17,7 @@ public class GetTaskStatCommand {
     private Long ownerId;
     private long dateStart;
     private long dateEnd;
+    private Integer exportType;
 
     public String getOwnerType() {
         return ownerType;
@@ -56,5 +58,13 @@ public class GetTaskStatCommand {
 
     public void setDateEnd(long dateEnd) {
         this.dateEnd = dateEnd;
+    }
+
+    public Integer getExportType() {
+        return exportType;
+    }
+
+    public void setExportType(Integer exportType) {
+        this.exportType = exportType;
     }
 }

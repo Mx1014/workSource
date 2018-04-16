@@ -717,7 +717,7 @@ public class PmTaskController extends ControllerBase {
      * <p>根据服务类型统计报修数据</p>
      */
     @RequestMapping("getStatByCategory")
-    @RestReturn(value=List.class)
+    @RestReturn(value=PmTaskStatSubDTO.class,collection = true)
     public RestResponse getStatByCategory(GetTaskStatCommand cmd){
         List<PmTaskStatSubDTO> res = pmTaskService.getStatByCategory(cmd);
         RestResponse response = new RestResponse(res);
@@ -731,7 +731,7 @@ public class PmTaskController extends ControllerBase {
      * <p>根据来源统计报修数据</p>
      */
     @RequestMapping("getStatByCreator")
-    @RestReturn(value=List.class)
+    @RestReturn(value=PmTaskStatDTO.class,collection = true)
     public RestResponse getStatByCreator(GetTaskStatCommand cmd){
         List<PmTaskStatDTO> res = pmTaskService.getStatByCreator(cmd);
         RestResponse response = new RestResponse(res);
@@ -745,7 +745,7 @@ public class PmTaskController extends ControllerBase {
      * <p>根据状态统计报修数据</p>
      */
     @RequestMapping("getStatByStatus")
-    @RestReturn(value=List.class)
+    @RestReturn(value=PmTaskStatDTO.class,collection = true)
     public RestResponse getStatByStatus(GetTaskStatCommand cmd){
         List<PmTaskStatDTO> res = pmTaskService.getStatByStatus(cmd);
         RestResponse response = new RestResponse(res);
@@ -759,13 +759,22 @@ public class PmTaskController extends ControllerBase {
      * <p>根据区域统计报修数据</p>
      */
     @RequestMapping("getStatByArea")
-    @RestReturn(value=List.class)
+    @RestReturn(value=PmTaskStatSubDTO.class,collection = true)
     public RestResponse getStatByArea(GetTaskStatCommand cmd){
         List<PmTaskStatSubDTO> res = pmTaskService.getStatByArea(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/exportTaskStat</b>
+     * <p>导出统计列表</p>
+     */
+    @RequestMapping("exportTaskStat")
+    public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
+        pmTaskService.exportTaskStat(cmd, resp);
     }
 
 }

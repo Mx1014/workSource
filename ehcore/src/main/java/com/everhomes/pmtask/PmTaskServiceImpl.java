@@ -2798,4 +2798,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
 		return null;
 	}
+
+	@Override
+	public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
+
+	}
 }
