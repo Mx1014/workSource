@@ -2490,7 +2490,7 @@ public class PortalServiceImpl implements PortalService {
 				itemCategory.setUpdateTime(createTimestamp);
 			}
 			//复制item，未分组
-			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, null, null, newVersionId);
+			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, 0L, null, newVersionId);
 
 			portalItemCategoryProvider.createPortalItemCategories(portalItemCategories);
 		}
