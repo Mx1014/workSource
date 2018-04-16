@@ -71,7 +71,7 @@ public class SZWQueryTest {
 		//测试参数
 		jsonObject.put("cusName", "深圳市石榴裙餐饮有限公司");
 		jsonObject.put("type", "0");
-		//jsonObject.put("fid", "QgwAAAAIZD4x0Rp+");
+		//jsonObject.put("fid", "QgwAAAAIZAox0Rp+");
 		List<ShowBillForClientV2DTO> response = szyQuery.showBillForClientV2(jsonObject.toString());
 		System.out.println(response);
 	}

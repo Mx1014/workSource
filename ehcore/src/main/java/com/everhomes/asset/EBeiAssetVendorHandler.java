@@ -256,7 +256,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         BigDecimal amountReceivable = new BigDecimal("0");
         BigDecimal amountOwed = new BigDecimal("0");

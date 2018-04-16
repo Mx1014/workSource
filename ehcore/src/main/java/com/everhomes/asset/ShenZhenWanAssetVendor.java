@@ -100,34 +100,39 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		return null;
 	}
 	@Override
-	public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+	public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
+		LOGGER.info("ShenZhenWanAssetVendor call getBillDetailForClient() ownerId=" + ownerId + ", targetType=" + targetType);
 		JSONObject jsonObject = new JSONObject();
 		//企业客户，按名称查询，个人按电话号码查询
 		String cusName = null;
 		String type = null;
-		if (targetType.equals(AssetTargetType.USER.getCode())) {
-	    	Long targetId = UserContext.currentUserId();
-	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
-	    	cusName = userProvider.findUserIdentifiersOfUser(targetId, namespaceId).getIdentifierToken();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "1";
-	    }else if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())) {
-	    	Long orgId = UserContext.currentUserId();
-	    	cusName = organizationProvider.findOrganizationById(orgId).getName();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "0";
-	    }
-		jsonObject.put("cusName", cusName);
-		//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
-		jsonObject.put("startDate", "1900-01-01");
-		jsonObject.put("endDate", "2900-01-01");
-		jsonObject.put("type", type);
-		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
-		jsonObject.put("state", "2");
-		jsonObject.put("fid", billId);
-		//通过WebServices接口查询数据
-		SZWQuery szyQuery = new SZWQuery();
-		ShowBillDetailForClientResponse response = szyQuery.getBillDetailForClient(jsonObject.toString());
+		ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+		try {
+			if (targetType.equals(AssetTargetType.USER.getCode())) {
+		    	Long targetId = UserContext.currentUserId();
+		    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+		    	cusName = userProvider.findUserIdentifiersOfUser(targetId, namespaceId).getIdentifierToken();
+		    	//0：企业客户，1：个人（判断）
+		    	type = "1";
+		    }else if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())) {
+		    	cusName = organizationProvider.findOrganizationById(organizationId).getName();
+		    	//0：企业客户，1：个人（判断）
+		    	type = "0";
+		    }
+			jsonObject.put("cusName", cusName);
+			//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
+			jsonObject.put("startDate", "1900-01-01");
+			jsonObject.put("endDate", "2900-01-01");
+			jsonObject.put("type", type);
+			//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
+			jsonObject.put("state", "2");
+			jsonObject.put("fid", billId);
+			//通过WebServices接口查询数据
+			SZWQuery szyQuery = new SZWQuery();
+			response = szyQuery.getBillDetailForClient(jsonObject.toString());
+		}catch (Exception e) {
+			LOGGER.error("ShenZhenWanAssetVendor call getBillDetailForClient() : " + e);
+		}
 		return response;
 	}
 	@Override
