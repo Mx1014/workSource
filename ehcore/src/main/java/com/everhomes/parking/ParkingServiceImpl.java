@@ -2098,7 +2098,10 @@ public class ParkingServiceImpl implements ParkingService {
 			String vendorName = parkingLot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-			ListCardTypeResponse listCardTypeResponse = handler.listCardType(null);
+			ListCardTypeCommand cardTypeCmd = new ListCardTypeCommand(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getParkingLotId());
+			ListCardTypeResponse listCardTypeResponse = handler.listCardType(cardTypeCmd);
+			
 			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
 			if(list==null || list.size()==0){
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,

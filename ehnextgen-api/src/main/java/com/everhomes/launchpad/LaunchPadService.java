@@ -4,6 +4,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.ui.launchpad.*;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 
@@ -16,6 +17,9 @@ public interface LaunchPadService {
 
     //void createLaunchPadItem(CreateLaunchPatItemCommand cmd);
     void userDefinedLaunchPad(UserDefinedLaunchPadCommand cmd);
+
+    String refreshActionData(SceneTokenDTO sceneToken, String actionData);
+
     void createLaunchPadItem(CreateLaunchPadItemAdminCommand cmd);
     void deleteLaunchPadItem(DeleteLaunchPadItemAdminCommand cmd);
     List<LaunchPadLayoutDTO> getLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd, ScopeType scopeType, Long scopeId);

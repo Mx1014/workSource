@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.community.CommunityProvider;
@@ -544,6 +545,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return list;
     }
 
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
@@ -556,3 +564,4 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 }
+

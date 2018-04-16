@@ -323,8 +323,8 @@ public class EnterpriseContactController extends ControllerBase {
     /**
      * <b>URL: /contact/addContactGroup</b>
      * <p>添加部门</p>
-     *
-     * @return {@link AddContactGroupCommandResponse}
+     * @param cmd
+     * @return
      */
     @RequestMapping("addContactGroup")
     @RestReturn(value = String.class)

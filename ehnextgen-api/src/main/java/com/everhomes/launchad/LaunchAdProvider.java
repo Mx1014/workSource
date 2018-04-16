@@ -6,10 +6,9 @@ package com.everhomes.launchad;
  */
 public interface LaunchAdProvider {
 
-    /**
-     * 获取启动广告
-     */
-    LaunchAd getLaunchAd(Integer namespaceId);
+    LaunchAd findById(Long id);
+
+    LaunchAd findByNamespaceId(Integer namespaceId);
 
     /**
      * 更新launchAd

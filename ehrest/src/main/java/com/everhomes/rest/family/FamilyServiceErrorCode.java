@@ -1,5 +1,9 @@
 package com.everhomes.rest.family;
 
+import com.everhomes.rest.group.GroupMemberStatus;
+
+import javax.management.RuntimeErrorException;
+
 public class FamilyServiceErrorCode {
     public static final String SCOPE = "family";
     
@@ -9,4 +13,6 @@ public class FamilyServiceErrorCode {
     public static final int ERROR_USER_REVOKE_SELF = 10004; //不能剔除自己
     public static final int ERROR_USER_REJECT_SELF = 10005; //不能拒绝自己
     public static final int ERROR_USER_FAMILY_EXIST = 10006; //用户已经加入该家庭。
+    public static final int ERROR_USER_FAMILY_WAITING_FOR_APPROVAL=10007;//用户已经申请加入等待批准
+
 }

@@ -294,7 +294,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
-            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
+//            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
             	//add equipment   inspectionCategoryId and categoryId  V3.0.2
 				b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 				b.field("categoryId", equipment.getCategoryId());

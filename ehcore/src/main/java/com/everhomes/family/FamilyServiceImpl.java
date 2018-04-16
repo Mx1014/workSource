@@ -150,14 +150,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
-    	
-    	
     	if(null == u){
     		u = UserContext.current().getUser();
     	}
-
-
-    	
     	final User user = u;
         long uid = user.getId();
         Community community = this.communityProvider.findCommunityById(address.getCommunityId());
@@ -230,11 +225,15 @@ public class FamilyServiceImpl implements FamilyService {
                 final Family f = family;
                 GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(f.getId(), EntityType.USER.getCode(), uid);
                 if(member != null){
-//                    throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
-//                            "User has in family,please don't join it again.");
-                    LOGGER.error("User has in family,please don't join it again.userId=" + user.getId() + ",familyId=" + family.getId());
-                    
-                    return null;
+                    //说明该用户已经存在，但是目前该用户是否已经被批准加入家庭，还不确定，需要判断
+                    if(member.getMemberStatus() == GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()){
+                        //说明该成员现在已经申请加入该家庭了，等待管理员的批准，所以我们需要给前端提示信息
+                        throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_WAITING_FOR_APPROVAL,
+                                "user waiting for approval");
+                    }else if(member.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
+                        //说明该用户已经被批准加入该家庭了，所以我们需要给出前端提示信息
+                        throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE,FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST,"user has join in family");
+                    }
                 }
                 // add transaction
                 this.dbProvider.execute((TransactionStatus status) -> {
@@ -269,7 +268,7 @@ public class FamilyServiceImpl implements FamilyService {
             }
             long lcEndTime = System.currentTimeMillis();
             LOGGER.info("create family in the lock,elapse=" + (lcEndTime - lcStartTime));
-            return family;  
+            return family;
         });
         
         if(result.second()){
@@ -282,6 +281,7 @@ public class FamilyServiceImpl implements FamilyService {
         
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Unable to save into database, SQL exception or storage full?");
+
     }
     
     private void sendFamilyNotificationForReqJoinFamily(Address address, Group group, GroupMember member) {
@@ -973,6 +973,9 @@ public class FamilyServiceImpl implements FamilyService {
 //            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
 //                    "User has not apply join in family, or other approve the user.");
         }
+
+
+
         Tuple<Boolean,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
             this.dbProvider.execute((TransactionStatus status) -> {
                 
@@ -2289,14 +2292,14 @@ public class FamilyServiceImpl implements FamilyService {
 		}
         
 	}
-	
-	/**
-	 * 用于测试锁的获取
-	 * @param expression  格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
-	 *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
-	 *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
-	 *                                    这几项信息使用逗号分隔
-	 */
+
+    /**
+     * 格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
+     *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
+     *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
+     *                                    这几项信息使用逗号分隔
+     * @param cmd
+     */
 	public void testLockAquiring(TestLockAquiringCommand cmd) {
 	    String lockCode = cmd.getLockCode(); // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
 	    long millis = (cmd.getLockTimeout() == null) ? 5000L : cmd.getLockTimeout();  // 持有锁的时间

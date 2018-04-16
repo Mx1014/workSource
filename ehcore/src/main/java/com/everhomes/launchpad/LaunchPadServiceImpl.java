@@ -37,18 +37,12 @@ import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.ui.launchpad.*;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.LaunchPadItemSort;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
@@ -1204,29 +1198,34 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	private void refreshActionData(List<LaunchPadItemDTO> dtos, SceneTokenDTO sceneToken){
 		if(dtos != null && dtos.size() > 0){
-			dtos.forEach(r ->{
+			dtos.forEach(r -> {
 				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
 					//调用各个业务的handler处理action
-					JSONObject jsonObject = (JSONObject) JSONValue.parse(r.getActionData());
-					if(jsonObject.get("handler") != null){
-						LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
-						if(handler != null){
-							String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
-							r.setActionData(newActionData);
-						}
-					}
-
-					//调用默认的default_host handler处理url，将{key}等转换成实际的host
-					LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
-					String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
-					r.setActionData(newActionData);
-				}
+                    String newActionData = refreshActionData(sceneToken, r.getActionData());
+                    r.setActionData(newActionData);
+                }
 			});
 		}
-
 	}
 
-	private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
+	@Override
+    public String refreshActionData(SceneTokenDTO sceneToken, String actionData) {
+        JSONObject jsonObject = (JSONObject) JSONValue.parse(actionData);
+        if(jsonObject.get("handler") != null) {
+            LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
+                    LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
+            if (handler != null) {
+                actionData = handler.refreshActionData(actionData, sceneToken);
+            }
+        }
+
+        //调用默认的default_host handler处理url，将{key}等转换成实际的host
+        LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
+                LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
+        return handler.refreshActionData(actionData, sceneToken);
+    }
+
+    private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
 		List<BusinessDTO> businesses = new ArrayList<>();
 		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
 		if(org.springframework.util.StringUtils.isEmpty(serverURL)){

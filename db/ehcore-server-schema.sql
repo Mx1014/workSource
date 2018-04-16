@@ -1529,10 +1529,11 @@ CREATE TABLE `eh_banners` (
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `create_time` DATETIME,
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
-  `scene_type` VARCHAR(64) DEFAULT 'default',
-  `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert 3:customized',
+  `scene_type` VARCHAR(32),
+  `apply_policy` TINYINT,
   `update_time` DATETIME,
-  
+  `target_type` VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE',
+  `target_data` VARCHAR(1024) COMMENT 'It is different by different target_type',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -3379,7 +3380,7 @@ CREATE TABLE `eh_door_access` (
   `acking_secret_version` INTEGER NOT NULL DEFAULT 1,
   `expect_secret_key` INTEGER NOT NULL DEFAULT 1,
   `groupId` BIGINT NOT NULL DEFAULT 0,
-
+  `mac_copy` VARCHAR(128) COMMENT '原mac地址',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_door_access_uuid` (`uuid`),
   KEY `i_eh_door_access_name` (`name`),
@@ -4729,6 +4730,7 @@ CREATE TABLE `eh_equipment_inspection_items` (
   `value_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0-none、1-two-tuple、2-range',
   `unit` VARCHAR(32),
   `value_jason` VARCHAR(512),
+  `default_order` INTEGER NOT NULL DEFAULT 0,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -7124,7 +7126,9 @@ CREATE TABLE `eh_launch_advertisements` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
-  
+  `target_type` VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE',
+  `target_data` VARCHAR(1024) COMMENT 'It is different by different target_type',
+  `content_uri_origin` VARCHAR(1024) COMMENT 'Content uri for origin file.',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -16720,7 +16724,7 @@ CREATE TABLE `eh_users` (
   `position_tag` VARCHAR(128) COMMENT '职位',
   `identity_number_tag` VARCHAR(20) COMMENT '身份证号',
   `update_time` DATETIME,
-  
+  `third_data` VARCHAR(2048) COMMENT 'third_data for AnBang',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   UNIQUE KEY `u_eh_user_account_name` (`account_name`),

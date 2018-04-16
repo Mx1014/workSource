@@ -19,7 +19,6 @@ public class SearchCommunityCommand {
     
     private Long regionId;
     
-    @NotNull
     private String keyword;
     
     private Integer pageOffset;

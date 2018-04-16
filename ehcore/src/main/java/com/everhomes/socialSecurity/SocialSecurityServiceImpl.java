@@ -1669,26 +1669,36 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == dpt) {
                 continue;
             }
-            calculateSocialSecurityDptReports(dpt, month);
+            calculateSocialSecurityDptReports(ownerId, dpt, month);
         }
 
     }
 
-    private void calculateSocialSecurityDptReports(Organization dpt, String month) {
-        List<Organization> dptOrgs = findOrganizationDpts(dpt);
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Long> orgIds = new ArrayList<Long>();
-        orgIds.add(dpt.getId());
-        for (Organization o : dptOrgs) {
-            orgIds.add(o.getId());
+    private void calculateSocialSecurityDptReports(Long ownerId, Organization dpt, String month) {
+//        List<Organization> dptOrgs = findOrganizationDpts(dpt);
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        List<Long> orgIds = new ArrayList<Long>();
+//        orgIds.add(dpt.getId());
+//        for (Organization o : dptOrgs) {
+//            orgIds.add(o.getId());
+//        }
+//        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
+//                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
+        ListSocialSecurityPaymentsCommand cmd = new ListSocialSecurityPaymentsCommand();
+        Long dptId = null;
+        if(!dpt.getId().equals(ownerId)){
+        	dptId = dpt.getId();	
         }
-        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
-                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, dptId, (locator, query) -> {
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc()); 
+            return query;
+        });
         List<Long> detailIds = new ArrayList<>();
-        if (null != organizationMembers) {
-            for (OrganizationMember member : organizationMembers) {
-                if (null != member.getDetailId()) {
-                    detailIds.add(member.getDetailId());
+        if (null != records) {
+            for (OrganizationMemberDetails member : records) {
+                if (null != member.getId()) {
+                    detailIds.add(member.getId());
                 }
             }
         }
