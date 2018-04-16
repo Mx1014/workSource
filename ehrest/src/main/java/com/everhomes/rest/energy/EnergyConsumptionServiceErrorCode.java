@@ -42,4 +42,5 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERROR_METER_NUMBER_IS_NULL = 10029;//表计号码为空
     int ERROR_READING_IS_NULL = 10030;//读数为空
     int ERROR_READING_IS_NOT_NUMBER = 10031;//读数不为小数
+    int ERROR_BURDENRATE_GT_ONE = 10032;//分摊比例大于1
 }

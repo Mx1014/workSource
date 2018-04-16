@@ -464,15 +464,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
-//        validate(cmd);
-//        checkCurrentUserNotInOrg(cmd.getOwnerId());
         checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_CREATE, cmd.getOwnerId(), cmd.getCommunityId());
-//        if(cmd.getCommunityId() == null) {
-//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
-//        } else {
-//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
-//        }
-
         checkEnergyMeterUnique(null, cmd.getCommunityId(), cmd.getMeterNumber(), cmd.getName());
 
         EnergyMeterType meterType = EnergyMeterType.fromCode(cmd.getMeterType());
@@ -550,6 +542,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(addresses == null) {
             return ;
         }
+        validateBurdenRate(addresses);
         //取出表记关联的所有门牌；传入的参数有id的从exist中去掉，没有id的增加，最后将exist中剩下的门牌关联关系置为inactive
         Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         if(addresses != null && addresses.size() > 0) {
@@ -571,6 +564,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meterAddress.setStatus(CommonStatus.INACTIVE.getCode());
                 energyMeterAddressProvider.updateEnergyMeterAddress(meterAddress);
             });
+        }
+    }
+
+    private void validateBurdenRate(List<EnergyMeterAddressDTO> addresses) {
+        if (addresses != null && addresses.size() > 0) {
+            BigDecimal burdenRate = new BigDecimal(0);
+            addresses.forEach((address) -> burdenRate.add(address.getBurdenRate()));
+            if (burdenRate.subtract(new BigDecimal(1)).longValue() > 0) {
+                throw RuntimeErrorException.errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_GT_ONE, "burden rate of this meter is greater than 1.00");
+            }
         }
     }
 
