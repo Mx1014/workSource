@@ -3845,6 +3845,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
 				if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+					departmentGroup.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
+					departmentGroup.setPositionId(organization.getId());
+					groupDtos.add(departmentGroup);
+					//上面几行临时解决部门岗位问题
 
 					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if (LOGGER.isInfoEnabled()) {
