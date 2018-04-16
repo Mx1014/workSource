@@ -623,7 +623,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     EnergyMeterAddress address = ConvertHelper.convert(meterAddress, EnergyMeterAddress.class);
                     energyMeterAddressProvider.createEnergyMeterAddress(address);
                 } else {
-                    existAddress.remove(meterAddress.getId());
+                    //existAddress.remove(meterAddress.getId());
+                    EnergyMeterAddress address = ConvertHelper.convert(meterAddress, EnergyMeterAddress.class);
+                    energyMeterAddressProvider.updateEnergyMeterAddress(address);
                 }
             });
         }
