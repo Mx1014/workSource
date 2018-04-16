@@ -41,7 +41,6 @@ import com.everhomes.organization.pm.DefaultChargingItemProvider;
 import com.everhomes.organization.pm.OrganizationOwnerAddress;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.repeat.RepeatService;
-import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
@@ -71,8 +70,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -165,7 +162,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("EnergyTaskScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
         }
-
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             calculateCloseTaskFee();
@@ -176,12 +172,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     private void calculateCloseTaskFee() {
         LOGGER.info("EnergyTaskScheduleJob: calculateCloseTaskFee.");
         //suanqian
-        ExecutorUtil.submit(new Runnable() {
-            @Override
-            public void run() {
-                generatePaymentExpectancies();
-            }
-        });
+        ExecutorUtil.submit(this::generatePaymentExpectancies);
 
     }
 
@@ -194,7 +185,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();
         if(tasks != null && tasks.size() > 0) {
             tasks.forEach(task -> {
-                if(EnergyTaskStatus.NON_READ.equals(task.getStatus())) {
+                if(EnergyTaskStatus.NON_READ.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
                     task.setStatus(EnergyTaskStatus.NON_READ_DELAY.getCode());
                     taskProvider.updateEnergyMeterTask(task);
                     energyMeterTaskSearcher.feedDoc(task);
@@ -213,9 +204,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         BigDecimal amount = BigDecimal.ZERO;
         BigDecimal taskReading = task.getReading() == null ? BigDecimal.ZERO : task.getReading();
         BigDecimal readingAnchor = task.getLastTaskReading() == null ? BigDecimal.ZERO : task.getLastTaskReading();
-        // 重置flag
+//        // 重置flag
         Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
-        // 换表flag
+//        // 换表flag
         Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
 
         //查看是否有换表,是否有归零
@@ -247,19 +238,20 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(amountSetting == null || rateSetting == null) {
             return null;
         }
-
-        String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("js");
-
-        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-        BigDecimal realAmount = new BigDecimal(0);
+//
+//        String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+//
+//        ScriptEngineManager manager = new ScriptEngineManager();
+//        ScriptEngine engine = manager.getEngineByName("js");
+//
+//        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+//        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+//        BigDecimal realAmount = new BigDecimal(0);
 
         Map<Long, BigDecimal> realAmountMap = new HashMap<>();
 
         for (EnergyMeterAddress address : addresses) {
+            //这里对接缴费之后去除  直接变成  读数 * 倍率 * 分摊比列
            /* //address  meter关系表中带上burdenDate
             engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), address.getBurdenRate());
             try {
@@ -270,8 +262,12 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter formula error");
             }
             realAmountMap.put(address.getAddressId(), realAmount);*/
-            realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()).multiply(address.getBurdenRate()););
-
+            if(address.getBurdenRate()!=null && address.getBurdenRate().longValue()!=0L){
+                BigDecimal  burdenRate = address.getBurdenRate();
+                realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()).multiply(burdenRate));
+            }else {
+                realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()));
+            }
         }
 
         return realAmountMap;

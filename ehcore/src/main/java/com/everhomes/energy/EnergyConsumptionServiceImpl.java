@@ -442,75 +442,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
-
-//        Accessor acc = this.bigCollectionProvider.getMapAccessor(TASK_EXECUTE, "");
-//        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-//        String token = getEnergyTaskToken(redisTemplate);
-//        if(StringUtils.isEmpty(token)) {
-//            //manual cache it to redis
-//            redisTemplate.opsForValue().set(TASK_EXECUTE, "executing", 3, TimeUnit.HOURS);
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
                     cronExpression, EnergyTaskScheduleJob.class, null);
         }
-//        }
     }
 
-//    private String getEnergyTaskToken(RedisTemplate redisTemplate) {
-//        Map<String, String> map = makeEnergyTaskToken(redisTemplate);
-//        if(map == null) {
-//            return null;
-//        }
-//        String accessToken = map.get(TASK_EXECUTE);
-//        return accessToken;
-//    }
-//
-//    private Map<String, String> makeEnergyTaskToken(RedisTemplate redisTemplate) {
-//        Object o = redisTemplate.opsForValue().get(TASK_EXECUTE);
-//        if(o != null) {
-//            Map<String, String> keys = new HashMap<String, String>();
-//            keys.put(TASK_EXECUTE, (String)o);
-//            return keys;
-//        } else {
-//            return null;
-//        }
-//    }
-
-    //    @Override
-//    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-//
-//        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
-//            if(null == cmd.getOrganizationId()) {
-//                LOGGER.error("Not privilege", cmd);
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
-//                        "Not privilege");
-//            }
-//        }
-//
-//        ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
-//
-//        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
-//        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
-//        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
-//
-//        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
-//
-//        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
-//            SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-//            User user = UserContext.current().getUser();
-//            List<CommunityDTO> result = new ArrayList<>();
-//            dtos.forEach(r -> {
-//                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
-//                    result.add(r);
-//                }
-//            });
-//            response.setCommunities(result);
-//
-//        }else{
-//            response.setCommunities(dtos);
-//        }
-//        return response;
-//    }
     private void checkEnergyMeterUnique(Long id, Long communityId, String meterNumber, String meterName) {
         EnergyMeter meter = meterProvider.findByName(communityId, meterName);
         if(meter != null && !meter.getId().equals(id)) {
@@ -788,26 +725,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 amount = amount.add(dayCurrReading.subtract(readingAnchor));
 
                 //获取公式,计算当天的费用
-                EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE, meter.getLastReadTime());
+                //EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE, meter.getLastReadTime());
                 EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE , meter.getLastReadTime());
-                EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA , meter.getLastReadTime());
-                if (Stream.of(priceSetting, rateSetting, amountSetting).anyMatch(Objects::isNull)) {
+//                EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA , meter.getLastReadTime());
+//                if (Stream.of(rateSetting, amountSetting).anyMatch(Objects::isNull)) {
+//                    return null;
+//                }
+                if (rateSetting == null) {
                     return null;
                 }
-                EnergyMeterFormula amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId());
-                if (amountFormula == null) {
-                    return null;
-                }
-                ScriptEngineManager manager = new ScriptEngineManager();
-                ScriptEngine engine = manager.getEngineByName("js");
-
-                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+//                EnergyMeterFormula amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId());
+//                if (amountFormula == null) {
+//                    return null;
+//                }
+//                ScriptEngineManager manager = new ScriptEngineManager();
+//                ScriptEngine engine = manager.getEngineByName("js");
+//
+//                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+//                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+//                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
                 BigDecimal realAmount;
                 try {
-                    realAmount = BigDecimal.valueOf(Double.valueOf(engine.eval(amountFormula.getExpression()).toString()));
+                    realAmount = amount.multiply(rateSetting.getSettingValue());
+//                    realAmount = BigDecimal.valueOf(Double.valueOf(engine.eval(amountFormula.getExpression()).toString()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOGGER.error("The energy meter error");
