@@ -84,7 +84,7 @@ public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvi
 	public AppNamespaceMapping findAppNamespaceMappingByAppKey(String appKey) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_APP_NAMESPACE_MAPPINGS)
 			.where(Tables.EH_APP_NAMESPACE_MAPPINGS.APP_KEY.eq(appKey))
-			.fetchOne();
+			.fetchAny();
 		if (record != null) {
 			return ConvertHelper.convert(record, AppNamespaceMapping.class);
 		}
@@ -100,7 +100,12 @@ public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvi
                 .fetchInto(App.class);
     }
 
-	private EhAppNamespaceMappingsDao getReadWriteDao() {
+    @Override
+    public void deleteNamespaceMapping(AppNamespaceMapping mapping) {
+        getReadWriteDao().delete(mapping);
+    }
+
+    private EhAppNamespaceMappingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
 

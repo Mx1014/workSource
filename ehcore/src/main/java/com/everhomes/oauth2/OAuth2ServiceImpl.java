@@ -104,7 +104,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         App app = this.appProvider.findAppByKey(clientId);
         if(app == null)
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid clientapp Id");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_CLIENT, "Invalid clientId");
 
         if(redirectUri == null || redirectUri.isEmpty())
             redirectUri = getDefaultRedirectUri(app.getId());
@@ -112,15 +112,15 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         AuthorizationCode authorizationCode = this.oAuth2Provider.findAuthorizationCodeByCode(code);
         if(authorizationCode == null)
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid authorization code");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid authorization code");
 
         if(authorizationCode.isExpired(DateHelper.currentGMTTime()))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid authorization code, code offer has expired");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid authorization code, code offer has expired");
 
         if(!authorizationCode.getRedirectUri().equals(redirectUri))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid redirect URI, it is different with the one that was originally granted");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid redirect URI, it is different with the one that was originally granted");
 
         AccessToken accessToken = new AccessToken();
         accessToken.setGrantorUid(authorizationCode.getGrantorUid());

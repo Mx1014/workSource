@@ -36,8 +36,6 @@ public class TokenEndpointController extends OAuth2ControllerBase {
         long expireInSeconds = (accessToken.getExpirationTime().getTime() - DateHelper.currentGMTTime().getTime()) / 1000;
         tokenResponse.setExpires_in(expireInSeconds);
 
-        ResponseEntity<Object> responseEntity = new ResponseEntity<Object>(tokenResponse,
-            responseHeaders, HttpStatus.OK);
-        return responseEntity;
+        return new ResponseEntity<>(tokenResponse, responseHeaders, HttpStatus.OK);
     }
 }

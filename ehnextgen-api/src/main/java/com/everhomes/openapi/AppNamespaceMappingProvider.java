@@ -19,4 +19,6 @@ public interface AppNamespaceMappingProvider {
 	AppNamespaceMapping findAppNamespaceMappingByAppKey(String appKey);
 
     List<App> listAppsByAppKey(List<String> appKeys);
+
+    void deleteNamespaceMapping(AppNamespaceMapping mapping);
 }

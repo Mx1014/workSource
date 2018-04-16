@@ -1,5 +1,6 @@
 package com.everhomes.openapi;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -44,12 +45,18 @@ import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -830,4 +837,29 @@ public class BusinessOpenController extends ControllerBase {
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
+
+    /**
+     * <b>URL: /openapi/redirect</b>
+     * <p>统一跳转到传入的redirectUrl，并在后面加上指定的参数</p>
+     */
+    @RequestMapping(value = "redirect", method = RequestMethod.GET)
+    public Object redirect(RedirectCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        String errorDesc = "";
+
+        OpenApiRedirectHandler handler = PlatformContext.getComponent(OpenApiRedirectHandler.PREFIX + cmd.getHandler());
+        if (handler != null) {
+            try {
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setLocation(new URI(handler.build(cmd.getUrl(), request.getParameterMap())));
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            } catch (URISyntaxException e) {
+                errorDesc = "Invalid handler build " + e.getMessage();
+            }
+        } else {
+            errorDesc = "Can not find handler by " + cmd.getHandler();
+        }
+        RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
+        restResponse.setErrorDescription(errorDesc);
+        return restResponse;
+    }
 }

@@ -11,4 +11,5 @@ ALTER TABLE eh_banners MODIFY COLUMN apply_policy TINYINT DEFAULT NULL;
 -- 启动广告 v1.1
 ALTER TABLE eh_launch_advertisements ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE';
 ALTER TABLE eh_launch_advertisements ADD COLUMN target_data VARCHAR(1024) DEFAULT NULL COMMENT 'It is different by different target_type';
+ALTER TABLE eh_launch_advertisements ADD COLUMN resource_name VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'Resource name';
 ALTER TABLE eh_launch_advertisements ADD COLUMN content_uri_origin VARCHAR(1024) DEFAULT NULL COMMENT 'Content uri for origin file.';

@@ -1,6 +1,7 @@
 package com.everhomes.app;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
@@ -32,6 +33,9 @@ public class AppServiceImpl implements AppService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public AppDTO createApp(CreateAppCommand cmd) {
@@ -83,7 +87,14 @@ public class AppServiceImpl implements AppService {
         ValidatorUtil.validate(cmd);
         App app = appProvider.findAppById(cmd.getId());
         if (app != null) {
-            appProvider.deleteApp(app);
+            dbProvider.execute(status -> {
+                appProvider.deleteApp(app);
+                AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
+                if (mapping != null) {
+                    appNamespaceMappingProvider.deleteNamespaceMapping(mapping);
+                }
+                return true;
+            });
         }
     }
 }

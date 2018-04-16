@@ -213,10 +213,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 						OAuth2ServiceErrorCode.SCOPE,
 						String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 						httpRequest.getLocale().toLanguageTag(),
-						"Invalid request client_id or unregistered redirectTo URI"));
+						"Internal server error"));
 
 				return "oauth2-error-response";
-
 			default : {
 				URI uri = new URI(String.format("%s#error=%s&state=%s", redirectUri,
 						this.oAuth2Service.getOAuth2AuthorizeError(e.getErrorCode()), cmd.getState()));

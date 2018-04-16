@@ -7,7 +7,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
     VALUES (10900, '启动广告', '10000', '/10000/10900', '1', '2', '2', '0', NOW(), null, '13', NOW(), '0', '0', '0', '0','unlimit_control');
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-	VALUES (1090010900, NULL, '启动广告 全部权限', '启动广告 全部权限', NULL);
+	VALUES (1090010000, NULL, '启动广告 全部权限', '启动广告 全部权限', NULL);
 
 SET @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
