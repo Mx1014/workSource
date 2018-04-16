@@ -1832,18 +1832,21 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
 		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId(), itemGroup.getId());
 
-		for (PortalItem portalItem: portalItems) {
+		//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接干吧。
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
 
-			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接name、label对上就是干吧。
-			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
-				List<LaunchPadItem> oldpadItems = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), portalItem.getItemLocation(), portalItem.getName(), null, null);
+			if(portalItems != null && portalItems.size() > 0){
+				List<LaunchPadItem> oldpadItems = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), portalItems.get(0).getItemLocation(), null, null, null);
 				if(null != oldpadItems && oldpadItems.size() > 0){
 					for (LaunchPadItem item: oldpadItems) {
-						if(portalItem.getLabel() != null && portalItem.getLabel().equals(item.getItemLabel()))
 						launchPadProvider.deleteLaunchPadItem(item.getId());
 					}
 				}
 			}
+
+		}
+
+		for (PortalItem portalItem: portalItems) {
 
 			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
