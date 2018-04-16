@@ -420,6 +420,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 //        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
         List<ContractDTO> dtos = listCustomerContracts(cmd.getTargetType(),cmd.getTargetId(),UserContext.getCurrentNamespaceId(),cmd.getCommunityId());
+        if(dtos == null) dtos = new ArrayList<>();
         for(int i = 0; i < dtos.size(); i++){
             FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
             dto.setContractNum(dtos.get(i).getContractNumber());
