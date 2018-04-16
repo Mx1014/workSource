@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class EnergyReadByMeterNo {
     private static  final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNo.class);
-    private static final String url = "http://122.225.71.66:8787/ts";
+    private static final String url = "http://122.225.71.66:211/test";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
@@ -41,7 +41,7 @@ public class EnergyReadByMeterNo {
     public static void main(String[] args) {
        // System.out.println("readByMeterNo");
         String access_token = getToken();
-        String meterNo = "201707100412";
+        String meterNo = "201703001320";
         Map<String, String> params = new HashMap<>();
         params.put("meterNo", meterNo);
         params.put("access_token", access_token);
@@ -55,7 +55,6 @@ public class EnergyReadByMeterNo {
      */
     private static String sendPost(String url, Map<String, String> params) {
         long st = new Date().getTime();
-        LOGGER.debug("reqeust: " + st);
         if (url == null || url.isEmpty() || params == null || params.isEmpty()) {
             return "";
         }

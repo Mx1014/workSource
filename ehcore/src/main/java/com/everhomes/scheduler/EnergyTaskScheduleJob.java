@@ -50,7 +50,6 @@ import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
 import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
 import com.everhomes.rest.energy.EnergyMeterSettingType;
 import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.rest.energy.EnergyTaskStatus;
@@ -74,7 +73,6 @@ import org.springframework.stereotype.Component;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -83,9 +81,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * Created by ying.xiong on 2017/10/26.
@@ -265,7 +260,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         Map<Long, BigDecimal> realAmountMap = new HashMap<>();
 
         for (EnergyMeterAddress address : addresses) {
-            //address  meter关系表中带上burdenDate
+           /* //address  meter关系表中带上burdenDate
             engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), address.getBurdenRate());
             try {
                 realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
@@ -274,7 +269,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 LOGGER.error("The energy meter amount formula: {} error", aoumtFormula);
                 throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter formula error");
             }
-            realAmountMap.put(address.getAddressId(), realAmount);
+            realAmountMap.put(address.getAddressId(), realAmount);*/
+            realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()).multiply(address.getBurdenRate()););
+
         }
 
         return realAmountMap;
