@@ -5535,12 +5535,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 					}
 				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
 					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					position = new OrganizationJobPosition();
-					position.setName(organization.getName());
+					String positionName = null;
+					if(organization!=null){
+						positionName = organization.getName();
+					}
 					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+						dto.setGroupName(dto.getGroupName() + "-" + positionName);
 					} else {
-						dto.setGroupName(position.getName());
+						dto.setGroupName(positionName);
 					}
 				}
 				return dto;
@@ -5562,6 +5564,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
 					} else {
 						dto.setGroupName(position.getName());
+					}
+				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
+					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+					String positionName = null;
+					if (organization != null) {
+						positionName = organization.getName();
+					}
+					if (dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + positionName);
+					} else {
+						dto.setGroupName(positionName);
 					}
 				}
 				return dto;
