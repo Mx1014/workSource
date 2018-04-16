@@ -107,6 +107,7 @@ import java.util.stream.Collectors;
 public class AssetServiceImpl implements AssetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetServiceImpl.class);
 
+    static final List<Character> operators = Arrays.asList('*','/','+','-');
     final String downloadDir ="\\download\\";
 
     @Autowired
@@ -513,7 +514,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType());
@@ -758,7 +759,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
@@ -1090,7 +1091,7 @@ public class AssetServiceImpl implements AssetService {
             feeRule:for(int i = 0; i < feesRules.size(); i++) {
                 // 是錯
 
-                List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+
 //                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder_inner = new HashMap<>();
 
                 // 是錯
@@ -1168,6 +1169,7 @@ public class AssetServiceImpl implements AssetService {
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
+                    List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
                     //从地址包裹中获得一个地址
                     ContractProperty property = var1.get(j);
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
@@ -1190,7 +1192,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                     //计算
                     assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
-
+                    billItemsExpectancies.addAll(billItemsExpectancies_inner);
                 }
                 Integer cycleForBill = 0;
                 switch (balanceDateType){
@@ -1210,8 +1212,8 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
-                // 試試解耦和，也許計算本身沒有錯誤
-                billItemsExpectancies.addAll(billItemsExpectancies_inner);
+
+
 //                uniqueRecorder.putAll(uniqueRecorder_inner);
             }
             //先算出所有的item
@@ -1324,7 +1326,8 @@ public class AssetServiceImpl implements AssetService {
                 Date today = newClearedCalendar().getTime();
                 Date x_v = null;
                 try{
-                    x_v = sdf_dateStrD.parse(newBill.getDueDayDeadline());
+                    String dueDayDeadline = newBill.getDueDayDeadline();
+                    x_v = sdf_dateStrD.parse(dueDayDeadline);
                     if(today.compareTo(x_v)!=-1){
                         newBill.setChargeStatus((byte)1);
                     }else{
@@ -1332,6 +1335,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setChargeStatus((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is due day deadline from newBill = {}, e={}", newBill,e);
                 }
                 try{
                     x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
@@ -1359,6 +1363,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     newBill.setNextSwitch((byte)0);
+                    LOGGER.error("date str parse failed, parsed object is DateStrDue from newBill = {}, e={}", newBill,e);
                 }
 //                        }
 //                    for(){
@@ -1374,6 +1379,7 @@ public class AssetServiceImpl implements AssetService {
                     billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
                     billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
                 }catch (Exception e){
+                    LOGGER.error("date parsed error for bill item list , e= {}",e);
                     continue;
                 }
                 //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
@@ -1444,6 +1450,8 @@ public class AssetServiceImpl implements AssetService {
         LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
+            LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
+            LOGGER.error("failed calculation", e);
         }
     }
 
@@ -2430,8 +2438,44 @@ public class AssetServiceImpl implements AssetService {
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         formula += "*"+duration;
         BigDecimal response = CalculatorUtil.arithmetic(formula);
@@ -2447,8 +2491,44 @@ public class AssetServiceImpl implements AssetService {
             map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
 //            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
-        for(Map.Entry<String,String> entry : map.entrySet()){
-            formula = formula.replace(entry.getKey(),entry.getValue());
+        formula = formula.trim();
+        char[] preChars = formula.toCharArray();
+        List<Character> chars = new ArrayList<>();
+        for(Character c : preChars){
+            if(!StringUtils.isBlank(c.toString())){
+                chars.add(c);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
+        for(int i = 0; i < chars.size(); i++){
+            Character c = chars.get(i);
+            if(operators.contains(c)){
+                if(variable.length() > 0){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+                sb.append(c);
+                variable = new StringBuilder();
+            }else{
+                variable.append(c);
+                if(i == chars.size() - 1){
+                    if(map.containsKey(variable.toString())){
+                        sb.append(map.get(variable.toString()));
+                    }else{
+                        sb.append(variable.toString());
+                    }
+                }
+            }
+        }
+        formula = sb.toString();
+        for(char i : formula.toCharArray()){
+            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+            }
         }
         BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2,BigDecimal.ROUND_CEILING);
@@ -2466,8 +2546,44 @@ public class AssetServiceImpl implements AssetService {
 //                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
                 map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             }
-            for(Map.Entry<String,String> entry : map.entrySet()){
-                formula = formula.replace(entry.getKey(),entry.getValue());
+            formula = formula.trim();
+            char[] preChars = formula.toCharArray();
+            List<Character> chars = new ArrayList<>();
+            for(Character c : preChars){
+                if(!StringUtils.isBlank(c.toString())){
+                    chars.add(c);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            StringBuilder variable = new StringBuilder();
+            for(int i = 0; i < chars.size(); i++){
+                Character c = chars.get(i);
+                if(operators.contains(c)){
+                    if(variable.length() > 0){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                    sb.append(c);
+                    variable = new StringBuilder();
+                }else{
+                    variable.append(c);
+                    if(i == chars.size() - 1){
+                        if(map.containsKey(variable.toString())){
+                            sb.append(map.get(variable.toString()));
+                        }else{
+                            sb.append(variable.toString());
+                        }
+                    }
+                }
+            }
+            formula = sb.toString();
+            for(char i : formula.toCharArray()){
+                if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
+                    throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
+                }
             }
             formula += "*"+duration;
             result = CalculatorUtil.arithmetic(formula);
@@ -2948,7 +3064,7 @@ public class AssetServiceImpl implements AssetService {
         Long communityId = cmd.getOwnerId();
         Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
-        if(communityId == null){
+        if(communityId == null || communityId == -1){
             communityIds = getAllCommunity(namespaceId,true);
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
@@ -2975,7 +3091,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
             Long brotherStandardId = null;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
@@ -3059,7 +3175,7 @@ public class AssetServiceImpl implements AssetService {
         // 由于chargingStandard要变化，所以对于全部的情况直接修改，不需要coupling；
         // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null) {
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1) {
             deCouplingFlag = 0;
             //修改未耦合的
             assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
@@ -3093,7 +3209,7 @@ public class AssetServiceImpl implements AssetService {
         DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
         byte deCouplingFlag = 1;
         // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
             return dto;
@@ -3230,7 +3346,7 @@ public class AssetServiceImpl implements AssetService {
         byte deCouplingFlag = 1;
         Long brotherGroupId = null;
         //创造账单组不涉及到安全问题，所以只需要看同步与否
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherGroupId = assetProvider.createBillGroup(cmd,deCouplingFlag,null);
@@ -3250,7 +3366,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void modifyBillGroup(ModifyBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             //全部的情况,修改billGroup的以及bro为billGroup的
             deCouplingFlag = 0;
             assetProvider.modifyBillGroup(cmd,deCouplingFlag);
@@ -3269,7 +3385,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
         List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
@@ -3313,7 +3429,7 @@ public class AssetServiceImpl implements AssetService {
     public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
         Long brotherRuleId = null;
-        if(cmd.getOwnerId() == null){
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
@@ -3325,7 +3441,7 @@ public class AssetServiceImpl implements AssetService {
                     assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
                 }
             }
-        }else if(cmd.getOwnerId() != null){
+        }else if(cmd.getOwnerId() != null && cmd.getOwnerId() != -1){
             //添加+解耦，判断safe+修改+解耦group和rule
             assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
         }
@@ -3367,7 +3483,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
         byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null) {
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
             deCouplingFlag = 0;
             return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         }

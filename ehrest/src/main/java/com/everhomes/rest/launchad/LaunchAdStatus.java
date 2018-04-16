@@ -5,8 +5,9 @@ import com.everhomes.rest.energy.EnergyMeterStatus;
 
 /**
  * <ul>
- * <li>INACTIVE(0): 删除</li>
- * <li>ACTIVE(2): 正常</li>
+ *     <li>INACTIVE((byte) 0): 关闭</li>
+ *     <li>WAITING_FOR_APPROVAL((byte) 1): WAITING_FOR_APPROVAL</li>
+ *     <li>ACTIVE((byte) 2): 开启</li>
  * </ul>
  */
 public enum LaunchAdStatus {

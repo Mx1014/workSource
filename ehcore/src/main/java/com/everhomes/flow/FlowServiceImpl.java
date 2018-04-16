@@ -1369,9 +1369,9 @@ public class FlowServiceImpl implements FlowService {
         checkFlowValidationStatus(flow);
 
         // 避免同时启用工作流的问题
-        String lockKey = String.format("%s:%s:%s:%s:%s:%s:%s:%s",
+        String lockKey = MD5Utils.getMD5(String.format("%s:%s:%s:%s:%s:%s:%s:%s",
                 CoordinationLocks.FLOW.getCode(), flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
-                flow.getModuleType(), flow.getModuleId(), flow.getOwnerType(), flow.getOwnerId());
+                flow.getModuleType(), flow.getModuleId(), flow.getOwnerType(), flow.getOwnerId()));
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流

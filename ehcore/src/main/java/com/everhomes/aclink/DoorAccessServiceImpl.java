@@ -1426,7 +1426,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null) {
-                dto.setHardwareId(doorAccess.getHardwareId());
+				dto.setHardwareId(doorAccess.getHardwareId());
+				//---clone DoorAccess 20180408 by liuyilin
+            	if(doorAccess.getMacCopy() != null && !doorAccess.getMacCopy().isEmpty()){
+            		dto.setHardwareId(doorAccess.getMacCopy());
+            	}
+            	//---
                 dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
