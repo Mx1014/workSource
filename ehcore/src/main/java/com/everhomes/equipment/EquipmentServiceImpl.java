@@ -5532,6 +5532,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
 					position = new OrganizationJobPosition();
 					position.setName(organization.getName());
+					if (dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+					} else {
+						dto.setGroupName(position.getName());
+					}
 				}
 				return dto;
 			}).collect(Collectors.toList());
