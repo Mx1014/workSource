@@ -266,7 +266,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
         for (EnergyMeterAddress address : addresses) {
             //address  meter关系表中带上burdenDate
-            engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), address.getBurdenRate());
+           // engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), address.getBurdenRate());
             try {
                 realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
             } catch (ScriptException e) {
