@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.crypto.KeyGenerator;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.junit.After;
@@ -14,6 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import com.everhomes.acl.ServiceModuleAppAuthorization;
 import com.everhomes.acl.ServiceModuleAppAuthorizationProvider;
@@ -28,6 +35,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.otp.TimeBasedOneTimePasswordGenerator;
 import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -423,6 +431,41 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     }
     
     @Test
+    public void testServiceModuleForum() {
+        Long normalDisAppId = 114457l;//论坛
+        Long normalOrgId = 1041162l;
+        Long anotherOrgId = 1041258l;
+
+        {
+            Long anotherProjectId = 240111044332060169l;//之俊大厦
+            List<Long> projectIds = new ArrayList<Long>();
+            projectIds.add(anotherProjectId);
+            
+            DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
+            distrubeCmd.setAppId(normalDisAppId);
+            distrubeCmd.setNamespaceId(namespaceId);
+            distrubeCmd.setOwnerId(organizationId);
+            distrubeCmd.setProjectIds(projectIds);
+            distrubeCmd.setToOrgId(normalOrgId);
+            serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(distrubeCmd);
+        }
+        
+        {
+            Long anotherProjectId = 240111044332060180l;//之俊大厦2
+            List<Long> projectIds = new ArrayList<Long>();
+            projectIds.add(anotherProjectId);
+            
+            DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
+            distrubeCmd.setAppId(normalDisAppId);
+            distrubeCmd.setNamespaceId(namespaceId);
+            distrubeCmd.setOwnerId(anotherOrgId);
+            distrubeCmd.setProjectIds(projectIds);
+            distrubeCmd.setToOrgId(normalOrgId);
+            serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(distrubeCmd);
+        }
+    }
+    
+    @Test
     public void testServiceModuleQuery() {
         Long normalOrgId = 1041162l;
         Long normalDisAppId = 115084l;//资产管理
@@ -444,5 +487,35 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         relatedProjectCmd.setOrganizationId(normalOrgId);
         projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
         Assert.assertTrue(projects.size() == 2);  
+    }
+    
+    @Test
+    public void testOPApp() {
+        Long normalOrgId = 1041162l;
+        Long cAppId = 114493l; // 管理员管理
+        InstallAppCommand installCmd = new InstallAppCommand();
+        installCmd.setAppId(cAppId);
+        installCmd.setOrgId(normalOrgId);
+        serviceModuleAppService.installApp(installCmd);
+    }
+    
+    @Test
+    public void testTOTP() throws NoSuchAlgorithmException, InvalidKeyException {
+        final TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
+
+        final Key secretKey;
+        final KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+
+        // SHA-1 and SHA-256 prefer 64-byte (512-bit) keys; SHA512 prefers 128-byte keys
+        keyGenerator.init(512);
+
+        secretKey = keyGenerator.generateKey();
+
+        final Date now = new Date();
+        final Date later = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(28));
+
+        System.out.format("Current password: %06d\n", totp.generateOneTimePassword(secretKey, now));
+        System.out.format("Future password:  %06d\n", totp.generateOneTimePassword(secretKey, later));
+
     }
 }
