@@ -15,6 +15,8 @@ import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
@@ -335,6 +337,8 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+				.fetch().map(r -> 
+				RecordHelper.convert(r, ServiceModuleApp.class)
+				);
 	}
 }
