@@ -1830,7 +1830,7 @@ public class PortalServiceImpl implements PortalService {
 	private void publishItem(PortalItemGroup itemGroup, Long versionId, Byte publishType){
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
-		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
+		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId(), itemGroup.getId());
 
 		for (PortalItem portalItem: portalItems) {
 
@@ -1912,6 +1912,7 @@ public class PortalServiceImpl implements PortalService {
 						actionData.setItemLocation(portalItem.getItemLocation());
 						actionData.setItemGroup(portalItem.getGroupName());
 						item.setActionData(StringHelper.toJsonString(actionData));
+						item.setDefaultOrder(10000);
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
 					}
 
@@ -2077,9 +2078,9 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private Map<Long, String> getItemCategoryMap(Integer namespaceId){
+	private Map<Long, String> getItemCategoryMap(Integer namespaceId, Long itemGroupId){
 		Map<Long, String> categoryMap = new HashMap<>();
-		List<PortalItemCategory> categories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, null);
+		List<PortalItemCategory> categories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, itemGroupId);
 		for (PortalItemCategory  category: categories) {
 			categoryMap.put(category.getId(), category.getName());
 		}
@@ -2090,10 +2091,11 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
 
+		ValidatorUtil.validate(cmd);
+
 		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
 		sequenceService.syncSequence();
-
 
 		//同步和发布的时候不用预览账号
 		UserContext.current().setPreviewPortalVersionId(null);
@@ -2488,7 +2490,7 @@ public class PortalServiceImpl implements PortalService {
 				itemCategory.setUpdateTime(createTimestamp);
 			}
 			//复制item，未分组
-			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, 0L, id, newVersionId);
+			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, null, null, newVersionId);
 
 			portalItemCategoryProvider.createPortalItemCategories(portalItemCategories);
 		}
