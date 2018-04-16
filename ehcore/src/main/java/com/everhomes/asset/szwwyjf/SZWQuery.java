@@ -88,8 +88,8 @@ public class SZWQuery {
 							//实付金额
 							BigDecimal factMount = new BigDecimal(receDataJSONObject.get("factMount") != null ? Double.parseDouble(receDataJSONObject.get("factMount").toString()): 0);
 							//待缴金额
-							BigDecimal amountOwed = fappamount.subtract(factMount);
-							bill.setAmountOwed(String.valueOf(amountOwed));
+							BigDecimal amountOwed = fappamount.subtract(factMount).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+							bill.setAmountOwed(amountOwed.toString());
 							bill.setBillId(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
 							bills.add(bill);
 							overAllAmountOwed = overAllAmountOwed.add(amountOwed);//待缴金额总计
