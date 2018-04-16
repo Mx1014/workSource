@@ -3827,7 +3827,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				Integer namespaceId = UserContext.getCurrentNamespaceId();
 //				preOrderCommand.setClientAppName("wechat_" + namespaceId);
 //			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
