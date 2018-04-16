@@ -481,7 +481,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 			List<String> titleNames = new ArrayList<String>(Arrays.asList("发起人", "手机号", "发起时间", "来访车辆", "预计来访日期", "任务状态", "备注", "实际来访记录"));
 			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 20, 20, 20, 20, 30, 30));
 			excelUtils.setNeedSequenceColumn(true);
-			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, logs);
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, logs.stream().map(r->{
+				if("{}".equals(r.getLogJson())){
+					r.setLogJson("");
+				}
+				return r;
+			}).collect(Collectors.toList()));
 		}else {
 			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
 					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
