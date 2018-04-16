@@ -7562,8 +7562,13 @@ public class PunchServiceImpl implements PunchService {
 //        } else {
 //            fileName = String.format("个人按日统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
 //=======
+            Calendar endDay = Calendar.getInstance();
+            endDay.add(Calendar.DAY_OF_MONTH, -1);
+            if (endDay.after(new Date(cmd.getEndDay()))) {
+                endDay.setTimeInMillis(cmd.getEndDay());
+            }
             fileName = String.format("个人按月统计报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
-                    , DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
+                    , DateUtil.dateToStr(endDay.getTime(), DateUtil.NO_SLASH));
         } else {
             fileName = String.format("按日统计报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 //>>>>>>> master
