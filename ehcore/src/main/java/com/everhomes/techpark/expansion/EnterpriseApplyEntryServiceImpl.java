@@ -1189,14 +1189,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	private List<ProjectDTO> getProjectDTOs(Long id) {
 		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeasePromotionCommunities(id);
-		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
-		return temp.values().stream().map(r -> {
-			ProjectDTO projectDTO = new ProjectDTO();
-			projectDTO.setProjectId(r.getId());
-			projectDTO.setProjectName(r.getName());
+		if (communityIds!=null && communityIds.size()>0) {
+			Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+			return temp.values().stream().map(r -> {
+				ProjectDTO projectDTO = new ProjectDTO();
+				projectDTO.setProjectId(r.getId());
+				projectDTO.setProjectName(r.getName());
 
-			return projectDTO;
-		}).collect(Collectors.toList());
+				return projectDTO;
+			}).collect(Collectors.toList());
+		}else
+			return null;
 	}
 
 	@Override
