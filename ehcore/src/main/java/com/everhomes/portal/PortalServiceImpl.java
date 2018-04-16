@@ -946,6 +946,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemCategory.setNamespaceId(namespaceId);
 		portalItemCategory.setItemGroupId(cmd.getItemGroupId());
 		portalItemCategory.setVersionId(itemGroup.getVersionId());
+		portalItemCategory.setDefaultOrder(100);
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -1832,7 +1833,8 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
 		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId(), itemGroup.getId());
 
-		//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接干吧。
+		//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接全干了吧。
+		// 例如：在3版本添加了itemA并发布，然后回到2版本再发布时，因为2版本mapping中没有itemA信息，2版本发布时并不会删除广场上的itemA。
 		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
 
 			if(portalItems != null && portalItems.size() > 0){
