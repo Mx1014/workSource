@@ -99,4 +99,15 @@ public interface PmTaskService {
 	void syncTaskStatistics(HttpServletResponse resp);
 
 	void syncCategories();
+
+
+	PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
 }

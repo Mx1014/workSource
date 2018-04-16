@@ -696,4 +696,76 @@ public class PmTaskController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+/*------------------------------- 3.5报修统计 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/getStatSurvey</b>
+     * <p>根据项目Id与起止时间查询统计概况</p>
+     */
+    @RequestMapping("getStatSurvey")
+    @RestReturn(value=PmTaskStatDTO.class)
+    public RestResponse getStatSurvey(GetTaskStatCommand cmd){
+        PmTaskStatDTO res = pmTaskService.getStatSurvey(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByCategory</b>
+     * <p>根据服务类型统计报修数据</p>
+     */
+    @RequestMapping("getStatByCategory")
+    @RestReturn(value=List.class)
+    public RestResponse getStatByCategory(GetTaskStatCommand cmd){
+        List<PmTaskStatSubDTO> res = pmTaskService.getStatByCategory(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByCreator</b>
+     * <p>根据来源统计报修数据</p>
+     */
+    @RequestMapping("getStatByCreator")
+    @RestReturn(value=List.class)
+    public RestResponse getStatByCreator(GetTaskStatCommand cmd){
+        List<PmTaskStatDTO> res = pmTaskService.getStatByCreator(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByStatus</b>
+     * <p>根据状态统计报修数据</p>
+     */
+    @RequestMapping("getStatByStatus")
+    @RestReturn(value=List.class)
+    public RestResponse getStatByStatus(GetTaskStatCommand cmd){
+        List<PmTaskStatDTO> res = pmTaskService.getStatByStatus(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByArea</b>
+     * <p>根据区域统计报修数据</p>
+     */
+    @RequestMapping("getStatByArea")
+    @RestReturn(value=List.class)
+    public RestResponse getStatByArea(GetTaskStatCommand cmd){
+        List<PmTaskStatSubDTO> res = pmTaskService.getStatByArea(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

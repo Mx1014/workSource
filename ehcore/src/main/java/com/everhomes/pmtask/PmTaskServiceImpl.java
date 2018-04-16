@@ -2773,4 +2773,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		});
 	}
+
+	@Override
+	public PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
+		return null;
+	}
 }
