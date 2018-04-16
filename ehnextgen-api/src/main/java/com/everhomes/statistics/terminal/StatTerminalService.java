@@ -13,15 +13,21 @@ public interface StatTerminalService {
 
     TerminalDayStatisticsDTO qryTerminalDayStatisticsByDay(String date);
 
-    List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate);
+    List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId);
 
     List<TerminalStatisticsTaskDTO> executeStatTask(Integer namespaceId, String startDate, String endDate);
 
-    List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date);
+    List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date, Integer namespaceId);
 
     PieChart getTerminalAppVersionPieChart(String Date, TerminalStatisticsType type);
 
     List<Long> executeUserSyncTask(Integer namespaceId);
 
     void deleteStatTaskLog(DeleteStatTaskLogCommand cmd);
+
+    void exportTerminalHourLineChart(TerminalStatisticsChartCommand cmd);
+
+    void exportTerminalDayLineChart(ListTerminalStatisticsByDateCommand cmd);
+
+    void exportTerminalAppVersionPieChart(ListTerminalStatisticsByDayCommand cmd);
 }

@@ -69,7 +69,7 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
     @Override
     public List<Long> listCities() {
         return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID).from(Tables.EH_SOCIAL_SECURITY_BASES)
-                .fetch().map(Record1::value1);
+                .fetch().map(Record1<Long>::value1);
     }
 
     @Override

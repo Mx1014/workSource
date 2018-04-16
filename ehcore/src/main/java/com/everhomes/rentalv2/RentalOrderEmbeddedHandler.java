@@ -92,10 +92,10 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 						if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())) {
 							order.setStatus(SiteBillStatus.COMPLETE.getCode());
-							rentalProvider.updateRentalBill(order);
 						}
 						else
 							rentalService.renewOrderSuccess(order,order.getRentalCount());
+						rentalProvider.updateRentalBill(order);
 					}else{
 						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
 					}

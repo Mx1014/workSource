@@ -40,6 +40,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
 import com.everhomes.server.schema.tables.pojos.EhUserLikes;
 import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -49,6 +50,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.MapReduceCallback;
 import com.everhomes.util.RecordHelper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -1750,4 +1752,121 @@ public class UserProviderImpl implements UserProvider {
                 .fetchOne(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
         return s;
     }
+    
+    @Override
+    public void deleteUserAndUserIdentifiers(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+        List<Long> userIds = this.listUsersByNamespaceUserInfo(namespaceId, namespaceUserTokens, namespaceUserType);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        // delete users
+        DeleteQuery<EhUsersRecord> query_user = context.deleteQuery(Tables.EH_USERS);
+        query_user.addConditions(Tables.EH_USERS.ID.in(userIds));
+        query_user.execute();
+
+        // delete userIdentifiers
+        DeleteQuery<EhUserIdentifiersRecord> query_userIdentifiers = context.deleteQuery(Tables.EH_USER_IDENTIFIERS);
+        query_userIdentifiers.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.in(userIds));
+        query_userIdentifiers.execute();
+    }
+
+    @Override
+    public List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+        if(namespaceUserTokens  != null && namespaceUserTokens.size() > 0)
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TOKEN.in(namespaceUserTokens));
+        if(!StringUtils.isEmpty(namespaceUserType))
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
+
+        List<Long> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(r.getId());
+            return null;
+        });
+        return result;
+    }
+    
+    @Override
+    public void updateIdentifierByUid(UserIdentifier userIdentifier) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+        UpdateQuery<EhUserIdentifiersRecord> query = context.updateQuery(Tables.EH_USER_IDENTIFIERS);
+        query.addValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN, userIdentifier.getIdentifierToken());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID, userIdentifier.getNamespaceId());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.VERIFICATION_CODE, userIdentifier.getVerificationCode());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.REGION_CODE, userIdentifier.getRegionCode());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE, userIdentifier.getIdentifierType());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.NOTIFY_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(userIdentifier.getOwnerUid()));
+        query.execute();
+    }
+    
+    @Override
+    public void deleteIdentifier(Integer namespaceId, List<Long> uIds) {
+
+    }
+    
+    @Override
+    public TargetDTO findUserByTokenAndName(String tel, String targetName) {
+        TargetDTO dto = new TargetDTO();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        com.everhomes.server.schema.tables.EhUsers t1 = Tables.EH_USERS.as("t1");
+        Long userId;
+        if (tel != null) {
+            userId = context.select(t.OWNER_UID)
+                    .from(t)
+                    .where(t.IDENTIFIER_TOKEN.eq(tel))
+                    .fetchOne(0, Long.class);
+            if (userId == null) {
+                return null;
+            }
+            String nameFound = context.select(t1.NICK_NAME)
+                    .from(t1)
+                    .where(t1.ID.eq(userId))
+                    .fetchOne(0, String.class);
+            if (targetName != null) {
+                if (!nameFound.equals(targetName)) {
+                    return null;
+                }
+            } else {
+                dto.setUserIdentifier(tel);
+                dto.setTargetId(userId);
+                dto.setTargetType("eh_user");
+                dto.setTargetName(nameFound);
+            }
+        } else if (targetName != null) {
+            List<TargetDTO> dtos = new ArrayList<>();
+            context.select(t.IDENTIFIER_TOKEN, t1.ID, t1.NICK_NAME)
+                    .from(t1, t)
+                    .where(t1.ID.eq(t.OWNER_UID))
+                    .and(t1.NICK_NAME.eq(targetName))
+                    .fetch()
+                    .map(r -> {
+                        TargetDTO d = new TargetDTO();
+                        d.setTargetName(r.getValue(t1.NICK_NAME));
+                        d.setTargetType("eh_user");
+                        d.setTargetId(r.getValue(t1.ID));
+                        d.setUserIdentifier(r.getValue(t.IDENTIFIER_TOKEN));
+                        dtos.add(d);
+                        return null;
+                    });
+            if (dtos.size() != 1) {
+                return null;
+            } else {
+                return dtos.get(0);
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public User findUserByNamespaceUserTokenAndType(String token, String type) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+        User user = context.select().from(EH_USERS).where(EH_USERS.NAMESPACE_USER_TOKEN.eq(token))
+                .and(EH_USERS.NAMESPACE_USER_TYPE.eq(type))
+                .fetchAnyInto(User.class);
+        return user;
+    }
+
+    
 }

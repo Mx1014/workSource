@@ -6552,8 +6552,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Long requestId = cmd.getRequestId();  //表示那条记录的id
 		if (resourceType == EntityType.ORGANIZATIONS) {
 		    // requestId 已经无法使用了，组织架构那边改了好多
-			OrganizationMember organizationMember = organizationProvider.
-                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());
+			/*OrganizationMember organizationMember = organizationProvider.
+                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());*/
+			OrganizationMember organizationMember = null;
+					List<OrganizationMember> organizationMemberList = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(cmd.getResourceId(),cmd.getRequestorUid());
+			if(organizationMemberList != null){
+				organizationMember = organizationMemberList.get(0);
+			}
+
 			if (LOGGER.isDebugEnabled())
 			    LOGGER.debug("getRequestInfo organizationMember {}", organizationMember);
 			if (organizationMember != null) {

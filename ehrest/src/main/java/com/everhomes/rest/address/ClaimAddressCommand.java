@@ -27,7 +27,7 @@ public class ClaimAddressCommand {
     @NotNull
     private String apartmentName;
     
-    @NotNull
+    //@NotNull
     private Long historyId;
 
     public ClaimAddressCommand() {
