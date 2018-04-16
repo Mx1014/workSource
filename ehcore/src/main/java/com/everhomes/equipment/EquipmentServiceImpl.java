@@ -3846,42 +3846,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 				if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
 					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
-					departmentGroup.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
+					departmentGroup.setGroupId(organization.getParentId());
 					departmentGroup.setPositionId(organization.getId());
 					groupDtos.add(departmentGroup);
-					//上面几行临时解决部门岗位问题
-
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-					if (LOGGER.isInfoEnabled()) {
-						LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
-					}
-
-					if (maps != null && maps.size() > 0) {
-						for (OrganizationJobPositionMap map : maps) {
-							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-							group.setPositionId(map.getJobPositionId());
-							groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
-							String[] path = organization.getPath().split("/");
-							Long organizationId = Long.valueOf(path[1]);
-							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
-							topGroup.setGroupId(organizationId);
-							topGroup.setPositionId(map.getJobPositionId());
-							groupDtos.add(topGroup);
-//							}
-
-						}
-
-					}
 				} else {
 					ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
 					group.setGroupId(organization.getId());
 					group.setPositionId(0L);
 					groupDtos.add(group);
+				}
+				//通用岗位
+				List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
+				}
+
+				if (maps != null && maps.size() > 0) {
+					for (OrganizationJobPositionMap map : maps) {
+						String[] path = organization.getPath().split("/");
+						Long organizationId = Long.valueOf(path[1]);
+						ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+						topGroup.setGroupId(organizationId);
+						topGroup.setPositionId(map.getJobPositionId());
+						groupDtos.add(topGroup);
+					}
+
 				}
 			}
 		}
