@@ -1644,7 +1644,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     //  执行定时配置项
-    @Scheduled(cron = "0 0 4 * * ? *")
+    @Scheduled(cron = "0 0 4 * * ?")
     @Override
     public void executeArchivesConfiguration() {
         if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
