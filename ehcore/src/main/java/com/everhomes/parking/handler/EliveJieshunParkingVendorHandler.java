@@ -678,7 +678,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			if(dto==null){
 				dto=new ParkingActualClearanceLogDTO();
 			}
-			dto.setEntryTime(Utils.strToTimeStamp(outTime,Utils.DateStyle.DATE_TIME));
+			dto.setExitTime(Utils.strToTimeStamp(outTime,Utils.DateStyle.DATE_TIME));
 		}
 		return dtos;
 	}
@@ -714,8 +714,14 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		JSONObject paramattrs=new JSONObject();
 		paramattrs.put("parkCode",parkCode);
 		paramattrs.put("carNo",transformPlateNumberToThirdpartFormat(r.getPlateNumber()));
-		paramattrs.put("beginTime",generateClearanceStartTime(r.getClearanceTime()));
-		paramattrs.put("endTime",generateClearanceEndTime(r.getClearanceTime()));
+//		paramattrs.put("carNo","粤-R654321");
+		if("3c.park.queryparkinrecord".equals(serviceId)) {
+			paramattrs.put("beginTime", generateClearanceStartTime(r.getClearanceTime()));
+			paramattrs.put("endTime", generateClearanceEndTime(r.getClearanceTime()));
+		}else if("3c.park.queryparkout".equals(serviceId)) {
+			paramattrs.put("beginDate", generateClearanceStartTime(r.getClearanceTime()));
+			paramattrs.put("endDate", generateClearanceEndTime(r.getClearanceTime()));
+		}
 		paramattrs.put("pageIndex",1);
 		paramattrs.put("pageSize",100);
 		params.put("attributes",paramattrs);
@@ -811,6 +817,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	private String generateClearanceStartTime(Timestamp clearanceTime) {
 		LocalDateTime start = clearanceTime.toLocalDateTime();
 		return start.format(dtf2);
+//		return "2018-03-16 00:00:00";
 	}
 
 	private String generateClearanceEndTime(Timestamp clearanceTime) {
@@ -818,6 +825,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		end = end.plusDays(1L);
 		end = end.minusSeconds(1L);
 		return end.format(dtf2);
+//		return "2018-04-12 00:00:00";
 	}
 
 }

@@ -348,11 +348,29 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
             tempRow.createCell(3).setCellValue(order.getPayerPhone());
             tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
-            tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
-            tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
+            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
+                    order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+                tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                tempRow.createCell(6).setCellValue(datetimeSF.format(order.getEndPeriod()));
+            }else{
+                tempRow.createCell(5).setCellValue("");
+                tempRow.createCell(6).setCellValue("");
+            }
+            tempRow.createCell(7).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
+            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
+                    order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
+                tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                tempRow.createCell(9).setCellValue(datetimeSF.format(order.getEndPeriod()));
+                tempRow.createCell(10).setCellValue(order.getParkingTime());
+            }else{
+                tempRow.createCell(8).setCellValue("");
+                tempRow.createCell(9).setCellValue("");
+                tempRow.createCell(10).setCellValue("");
+            }
+            tempRow.createCell(11).setCellValue(String.valueOf(order.getPrice().doubleValue()));
             VendorType type = VendorType.fromCode(order.getPaidType());
-            tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
-            tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+            tempRow.createCell(12).setCellValue(null==type?"":type.getDescribe());
+            tempRow.createCell(13).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
         }
     }
     @Override

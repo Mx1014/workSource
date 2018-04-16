@@ -3,7 +3,6 @@ package com.everhomes.parking;
 
 import java.util.List;
 
-import com.everhomes.parking.clearance.Clearance;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.*;
