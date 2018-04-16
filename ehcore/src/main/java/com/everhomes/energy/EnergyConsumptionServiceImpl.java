@@ -252,7 +252,6 @@ import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_FO
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_HAS_BEEN_REFERENCE;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST_TASK;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
@@ -490,11 +489,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter category is not exist, id = {}", cmd.getBillCategoryId());
             throw errorWith(SCOPE, ERR_METER_CATEGORY_NOT_EXIST, "The energy meter category is not exist, id = %s", cmd.getBillCategoryId());
         }
-        EnergyMeterFormula formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getAmountFormulaId());
-        if (formula == null) {
-            LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getAmountFormulaId());
-            throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getAmountFormulaId());
-        }
+//        EnergyMeterFormula formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getAmountFormulaId());
+//        if (formula == null) {
+//            LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getAmountFormulaId());
+//            throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getAmountFormulaId());
+//        }
 //        if(cmd.getCostFormulaSource() == null || cmd.getCostFormulaSource() == 0) {
 //            formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCostFormulaId());
 //            if (formula == null) {
@@ -620,20 +619,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         // 当前倍率
         EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.RATE);
         dto.setRate(rateLog != null ? rateLog.getSettingValue() : null);
-
-        // 当前费用公式名称
-        EnergyMeterSettingLog costLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.COST_FORMULA);
-        if (costLog != null) {
-            EnergyMeterFormula costFormula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), costLog.getFormulaId());
-            dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
-        }
-
-        // 当前用量公式名称
-        EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
-        if (amountLog != null) {
-            EnergyMeterFormula amountFormula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), amountLog.getFormulaId());
-            dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
-        }
+//
+//        // 当前费用公式名称
+//        EnergyMeterSettingLog costLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.COST_FORMULA);
+//        if (costLog != null) {
+//            EnergyMeterFormula costFormula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), costLog.getFormulaId());
+//            dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
+//        }
+//
+//        // 当前用量公式名称
+//        EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
+//        if (amountLog != null) {
+//            EnergyMeterFormula amountFormula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), amountLog.getFormulaId());
+//            dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+//        }
 
         // 抄表提示, 判断今天是否读表
         Timestamp lastReadTime = meter.getLastReadTime();
