@@ -2484,7 +2484,7 @@ public class PunchServiceImpl implements PunchService {
      * 3.如果今天没排班,看明天的最早上班
      */
     @Override
-    public java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
+    public java.sql.Date  calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
 
 //		try {
 //			punCalendar.setTime(datetimeSF.get().parse(punchTime));
@@ -4671,7 +4671,11 @@ public class PunchServiceImpl implements PunchService {
             row.createCell(++i).setCellValue("");
         }
         row.createCell(++i).setCellValue(NormalFlag.NO == NormalFlag.fromCode(log.getPunchType()) ? "上班打卡" : "下班打卡");
-        row.createCell(++i).setCellValue(timeSF.get().format(log.getPunchTime()));
+        if (null != log.getPunchTime()) {
+            row.createCell(++i).setCellValue(timeSF.get().format(log.getPunchTime()));
+        }else{
+            row.createCell(++i).setCellValue("");
+        }
         if (null != log.getLocationInfo()) {
             row.createCell(++i).setCellValue("位置 :" + log.getLocationInfo());
         }else{
