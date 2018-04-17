@@ -16,7 +16,7 @@ public class Test {
 //        String testStr = "ewr";
 //        System.out.println(testStr.indexOf("/", 0));
         String testStr = "//dddd/sdf/cvd//df///44//3/a";
-        String[] result = split1(testStr);
+        String[] result = split2(testStr);
         System.out.println(testStr+"转换成了"+StringHelper.toJsonString(result));
 //        while (true) {
 //            if(array)
@@ -24,23 +24,25 @@ public class Test {
 //        cycle(100, 7);
     }
 //
-//    public static String[] split1(String str) {
-//        List<String> arrayList = new ArrayList<String>();
-//        char[] sa = str.toCharArray();
-//        StringBuilder sb = new StringBuilder();
-//        for(int i = 0;i<str.length();i++) {
-//            if('/'==sa[i]){
-//                if (sb.length() > 0) {
-//                    arrayList.add(sb.toString());
-//                    sb = new StringBuilder();
-//                }
-//            }else{
-//                sb.append(sa[i]);
-//            }
-//        }
-//        String[] a = new String[arrayList.size()];
-//        return   arrayList.toArray(a);
-//    }
+    public static String[] split2(String str) {
+        List<String> arrayList = new ArrayList<String>();
+//        return str.split("/+");
+        char[] sa = str.toCharArray();
+        int fromIndex=0;
+        int endIndex=0;
+        for(int i = 0;i<str.length();i++) {
+            if('/'==sa[i]){
+                endIndex=i;
+                if(endIndex-fromIndex>1){
+                    arrayList.add(str.substring(fromIndex+1, endIndex));
+                }
+                fromIndex=i;
+            }else{
+            }
+        }
+        String[] a = new String[arrayList.size()];
+        return   arrayList.toArray(a);
+    }
 
     public static String[] split1(String str) {
         List<String> arrayList = new ArrayList<String>();
@@ -70,7 +72,7 @@ public class Test {
      * @param k 数到第几个剔除
      * @return
      */
-    public static int cycle(int total, int k) {
+    public static synchronized int cycle(int total, int k) {
         List<Integer> dataList = new ArrayList<>(); // 创建链表对象
         for (int i = 0; i < total; i++)                  // 添加数据元素
             dataList.add(new Integer(i + 1));

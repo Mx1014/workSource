@@ -13069,10 +13069,11 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd) {
-        UpdateVacationBalancesCommand cmd1 = ConvertHelper.convert(cmd, UpdateVacationBalancesCommand.class);
-        cmd1.setIsBatch(NormalFlag.YES.getCode());
         this.dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
+                //因为每一次在update方法里面会更改cmd的值,所以这里在循环里面
+                UpdateVacationBalancesCommand cmd1 = ConvertHelper.convert(cmd, UpdateVacationBalancesCommand.class);
+                cmd1.setIsBatch(NormalFlag.YES.getCode());
                 cmd1.setDetailId(detailId);
                 updateVacationBalances(cmd1);
 
