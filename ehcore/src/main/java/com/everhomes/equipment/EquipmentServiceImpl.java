@@ -5019,15 +5019,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 						}
 					} else if (PmNotifyReceiverType.ORGANIZATION_MEMBER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
 						if (receiver.getReceiverIds() != null) {
-							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
-							if (members != null && members.size() > 0) {
-								List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
-								members.forEach(member -> {
-									ReceiverName receiverName = new ReceiverName();
-									receiverName.setId(member.getId());
-									receiverName.setName(member.getContactName());
-									receiverName.setContactToken(member.getContactToken());
-									dtoReceivers.add(receiverName);
+//							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+							if (receiver.getReceiverIds() != null && receiver.getReceiverIds().size() > 0) {
+								List<ReceiverName> dtoReceivers = new ArrayList<>();
+								receiver.getReceiverIds().forEach(uId -> {
+									List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(uId);
+									if (members != null) {
+										ReceiverName receiverName = new ReceiverName();
+										receiverName.setId(members.get(0).getId());
+										receiverName.setName(members.get(0).getContactName());
+										receiverName.setContactToken(members.get(0).getContactToken());
+										dtoReceivers.add(receiverName);
+									}
 								});
 								dto.setReceivers(dtoReceivers);
 							}
