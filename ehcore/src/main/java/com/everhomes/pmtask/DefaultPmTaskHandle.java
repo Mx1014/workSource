@@ -45,6 +45,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import javax.servlet.http.HttpServletRequest;
+
 abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPmTaskHandle.class);
@@ -342,7 +344,27 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		return response;
 	}
 
-//	@Override
+	@Override
+	public Object getThirdAddress(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object createThirdTask(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object listThirdTasks(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object getThirdTaskDetail(HttpServletRequest req) {
+		return null;
+	}
+
+	//	@Override
 //	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 //		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 //		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
