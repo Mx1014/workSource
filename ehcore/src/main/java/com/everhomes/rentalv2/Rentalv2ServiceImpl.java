@@ -2162,8 +2162,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
-		bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(bill.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		}
 		orderCmd.setOrderNo(bill.getOrderNo());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		orderCmd.setSubject(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
@@ -2185,8 +2188,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
-		order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(order.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		}
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
 		preOrderCommand.setAmount(amount);
