@@ -183,6 +183,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
@@ -2758,30 +2760,60 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 每天早上5点10分刷自动读表
-     * */
+     */
     @Scheduled(cron = "0 10 5 * * ?")
     public void readMeterRemote() {
-        //双机判断
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-//            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("read energy meter reading ...");
-                EnergyReadByMeterNo remoteMeterReader = new EnergyReadByMeterNo();
-                List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
-                String meterNo = "201703001320";
-                String meterReading = remoteMeterReader.readMeterautomatically(meterNo);
-                LOGGER.info("read energy meter reading  end...");
-            } catch (Exception e) {
-                LOGGER.error("read energy meter reading  error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
+            LOGGER.info("read energy meter reading ...");
+            EnergyReadByMeterNo remoteMeterReader = new EnergyReadByMeterNo();
+            List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
+            if (meters != null && meters.size() > 0) {
+                String serverUrl = configurationProvider.getValue(meters.get(0).getNamespaceId(), "energy.meter.thirdparty.server", "");
+                meters.forEach((meter) -> {
+                    try {
+                        String meterReading = remoteMeterReader.readMeterautomatically(meter.getId().toString(), serverUrl);
+                        //parser
+                        JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
+                        String data = jsonObj.getAsJsonArray("data").get(0).toString();
+                        Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
+                        //log
+                        EnergyMeterReadingLog log = new EnergyMeterReadingLog();
+                        log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+//                        log.setTaskId(cmd.getTaskId());
+                        log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
+                        log.setCommunityId(meter.getCommunityId());
+                        log.setMeterId(meter.getId());
+                        log.setNamespaceId(meter.getNamespaceId());
+                        log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        log.setOperatorId(UserContext.currentUserId());
+                        if (Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
+                            log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                        } else {
+                            log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                        }
+                        dbProvider.execute(r -> {
+                            meterReadingLogProvider.createEnergyMeterReadingLog(log);
+                            meter.setLastReading(log.getReading());
+                            meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
+                            meterProvider.updateEnergyMeter(meter);
+                            return true;
+                        });
+                        readingLogSearcher.feedDoc(log);
+                        meterSearcher.feedDoc(meter);
+                    } catch (Exception e) {
+                        LOGGER.error("read energy meter reading  error...", e);
+                        sendErrorMessage(e);
+                        e.printStackTrace();
+                    }
+                });
+
             }
-//            });
+            LOGGER.info("read energy meter reading  end...");
         }
     }
 
     private void sendErrorMessage(Exception e) {
-        String xiongying = "ying.xiong@zuolin.com";
+        String xiongying = "rui.jia@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
         String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");

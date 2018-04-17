@@ -32,18 +32,32 @@ import java.util.Map;
 
 public class EnergyReadByMeterNo {
     private static  final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNo.class);
-    private static final String url = "http://122.225.71.66:211/test";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
     private static final String PUBLIC_KEY = "RSAPublicKey";
     private static final String PRIVATE_KEY = "RSAPrivateKey";
-    public  String readMeterautomatically(String meterName) {
+    public  String readMeterautomatically(String meterName,String serverUrl) {
         String access_token = getToken();
         Map<String, String> params = new HashMap<>();
         params.put("meterNo", meterName);
         params.put("access_token", access_token);
-        return sendPost(url + "/joy/readByMeterNo.do", params);
+        return sendPost(serverUrl + "/joy/readByMeterNo.do", params);
+    }
+
+    public static void main(String[] args) {
+//        String access_token = getToken();
+//        Map<String, String> params = new HashMap<>();
+//        params.put("meterNo", "201703001320");
+//        params.put("access_token", access_token);
+//        String meterReading= sendPost(url + "/joy/readByMeterNo.do", params);
+//        JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
+//        String data  = jsonObj.getAsJsonArray("data").get(0).toString();
+//        Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
+//        result.get("isAutoClear");
+//        result.get("this_read");
+//        System.out.println(result.get("isAutoClear"));
+//        System.out.println(result.get("this_read"));
     }
 
     /**
