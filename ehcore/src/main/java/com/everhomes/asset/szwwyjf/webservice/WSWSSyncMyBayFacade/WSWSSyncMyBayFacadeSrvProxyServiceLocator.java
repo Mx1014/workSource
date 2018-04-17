@@ -22,7 +22,7 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
     }
 
     // Use to get a proxy class for WSWSSyncMyBayFacade
-    private java.lang.String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade";
+    private java.lang.String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade/已修改为可配置";
 
     public java.lang.String getWSWSSyncMyBayFacadeAddress() {
         return WSWSSyncMyBayFacade_address;
@@ -105,7 +105,7 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
     }
 
     public javax.xml.namespace.QName getServiceName() {
-        return new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade", "WSWSSyncMyBayFacadeSrvProxyService");
+        return new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade/经测试无关", "WSWSSyncMyBayFacadeSrvProxyService");
     }
 
     private java.util.HashSet ports = null;
@@ -113,7 +113,7 @@ public class WSWSSyncMyBayFacadeSrvProxyServiceLocator extends org.apache.axis.c
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();
-            ports.add(new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade", "WSWSSyncMyBayFacade"));
+            ports.add(new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade/经测试无关", "WSWSSyncMyBayFacade"));
         }
         return ports.iterator();
     }

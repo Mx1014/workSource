@@ -33,7 +33,7 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
         oper.setStyle(org.apache.axis.constants.Style.RPC);
         oper.setUse(org.apache.axis.constants.Use.ENCODED);
         oper.addFault(new org.apache.axis.description.FaultDesc(
-                      new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade", "fault"),
+                      new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade/经测试无关", "fault"),
                       "wssyncmybayfacade.client.WSInvokeException",
                       new javax.xml.namespace.QName("urn:client.wssyncmybayfacade", "WSInvokeException"), 
                       true
@@ -50,7 +50,7 @@ public class WSWSSyncMyBayFacadeSoapBindingStub extends org.apache.axis.client.S
         oper.setStyle(org.apache.axis.constants.Style.RPC);
         oper.setUse(org.apache.axis.constants.Use.ENCODED);
         oper.addFault(new org.apache.axis.description.FaultDesc(
-                      new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade", "fault"),
+                      new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade/经测试无关", "fault"),
                       "wssyncmybayfacade.client.WSInvokeException",
                       new javax.xml.namespace.QName("urn:client.wssyncmybayfacade", "WSInvokeException"), 
                       true

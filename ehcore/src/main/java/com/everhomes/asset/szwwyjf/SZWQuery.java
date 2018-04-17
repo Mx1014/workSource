@@ -1,14 +1,14 @@
 package com.everhomes.asset.szwwyjf;
 
 import java.math.BigDecimal;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.rpc.ServiceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -19,28 +19,39 @@ import com.everhomes.asset.szwwyjf.webservice.EASLogin.EASLoginProxyServiceLocat
 import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxy;
 import com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade.WSWSSyncMyBayFacadeSrvProxyServiceLocator;
 import com.everhomes.asset.szwwyjf.webservice.client.WSContext;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.asset.BillForClientV2;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
-import com.everhomes.util.StringHelper;
 
+@Component
 public class SZWQuery {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SZWQuery.class);
 	
-	public SZWQuery() {
-		
-	}
+	@Autowired
+    private ConfigurationProvider configurationProvider;
 	
-	private	Boolean login() {
+	public Boolean login() {
 		Boolean isLogin = false;
 		try {
 			//通过WebService登录EAS
 			EASLoginProxyServiceLocator loginLocator = new EASLoginProxyServiceLocator();
+			//String EASLogin_address = "http://192.168.1.200:6888/ormrpc/services/EASLogin";
+			String EASLogin_address = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_EASLOGIN_ADDRESS,"");
+			loginLocator.setEASLoginEndpointAddress(EASLogin_address);
 			EASLoginProxy loginProxy = loginLocator.getEASLogin();
-			WSContext context = loginProxy.login("mybay", "mybay", "eas", "cs200", "l2", 2);
+			String username = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_USERNAME,"");
+			String password = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_PASSWORD,"");
+			String slnName = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_SLNNAME,"");
+			String dcName = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_DCNAME,"");
+			String language = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_LANGUAGE,"");
+			String dbType = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_DBTYPE,"");
+			//WSContext context = loginProxy.login("mybay", "mybay", "eas", "cs200", "l2", 2);
+			WSContext context = loginProxy.login(username, password, slnName, dcName, language, Integer.parseInt(dbType));
 			if(context.getSessionId() != null) {
 				LOGGER.info("szw WebService login success，SessionID: " + context.getSessionId());
 				isLogin = true;
@@ -48,7 +59,7 @@ public class SZWQuery {
 				LOGGER.error("szw webservice login fail");
 			}
 		} catch (Exception e) {
-			LOGGER.error("szw webservice login fail");
+			LOGGER.error("szw webservice login fail : " + e);
 		} 
 		return isLogin;
 	}
@@ -56,10 +67,12 @@ public class SZWQuery {
 	public List<ShowBillForClientV2DTO> showBillForClientV2(String request) {
 		List<ShowBillForClientV2DTO> response = new ArrayList<ShowBillForClientV2DTO>();
 		//通过WebService登录EAS
-		SZWQuery szyQuery = new SZWQuery();
-		if(szyQuery.login()) {
+		if(login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
+				//String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade";
+				String WSWSSyncMyBayFacade_address = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS,"");
+				accountLocator.setWSWSSyncMyBayFacadeEndpointAddress(WSWSSyncMyBayFacade_address);
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 				String result = accountProxy.sync_TenancyContractData(request);
 				try {
@@ -117,10 +130,12 @@ public class SZWQuery {
 	public List<ListAllBillsForClientDTO> listAllBillsForClient(String request, Byte chargeStatus) {
 		List<ListAllBillsForClientDTO> response = new ArrayList<ListAllBillsForClientDTO>();
 		//通过WebService登录EAS
-		SZWQuery szyQuery = new SZWQuery();
-		if(szyQuery.login()) {
+		if(login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
+				//String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade";
+				String WSWSSyncMyBayFacade_address = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS,"");
+				accountLocator.setWSWSSyncMyBayFacadeEndpointAddress(WSWSSyncMyBayFacade_address);
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 				String result = accountProxy.sync_TenancyContractData(request);
 				try {
@@ -161,10 +176,12 @@ public class SZWQuery {
 	public ShowBillDetailForClientResponse getBillDetailForClient(String request) {
 		ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
 		//通过WebService登录EAS
-		SZWQuery szyQuery = new SZWQuery();
-		if(szyQuery.login()) {
+		if(login()) {
 			try {
 				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
+				//String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade";
+				String WSWSSyncMyBayFacade_address = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS,"");
+				accountLocator.setWSWSSyncMyBayFacadeEndpointAddress(WSWSSyncMyBayFacade_address);
 				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
 				String result = accountProxy.sync_TenancyContractDetailed(request);
 				try {
