@@ -22,6 +22,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowAutoStepDTO;
@@ -218,6 +220,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
+	@Autowired
+	private EnterpriseService enterpriseService;
 	
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -8438,7 +8442,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
         }
         QueryOrgRentalStatisticsResponse response = new QueryOrgRentalStatisticsResponse();
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		response.setOrgStatistics(new ArrayList<>());
+		List<Enterprise> enterprises = enterpriseService.listEnterpriseByCommunityId(locator,null,cmd.getCommunityId(),null,pageSize);
+		if (enterprises == null || enterprises.size()==0)
+			return response;
+		for (Enterprise enterprise:enterprises){
+			RentalStatisticsDTO dto = new RentalStatisticsDTO();
+			dto.setName(enterprise.getName());
+			dto.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,enterprise.getId()));
+			dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,enterprise.getId()));
 
-        return null;
+			response.getOrgStatistics().add(dto);
+		}
+		response.setNextPageAnchor(locator.getAnchor());
+        return response;
     }
 }

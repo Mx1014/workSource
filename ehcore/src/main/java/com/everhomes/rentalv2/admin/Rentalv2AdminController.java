@@ -909,8 +909,8 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("queryRentalStatistics")
 	@RestReturn(value = QueryRentalStatisticsResponse.class)
 	public RestResponse queryRentalStatistics( QueryRentalStatisticsCommand cmd) {
-		rentalService.queryRentalStatistics(cmd);
-		RestResponse response = new RestResponse();
+		QueryRentalStatisticsResponse statisticsResponse = rentalService.queryRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -925,8 +925,8 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("queryOrgRentalStatistics")
 	@RestReturn(value = QueryOrgRentalStatisticsResponse.class)
 	public RestResponse queryOrgRentalStatistics( QueryRentalStatisticsCommand cmd) {
-		rentalService.queryRentalStatistics(cmd);
-		RestResponse response = new RestResponse();
+		QueryOrgRentalStatisticsResponse statisticsResponse = rentalService.queryOrgRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
