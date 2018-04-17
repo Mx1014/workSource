@@ -1248,8 +1248,8 @@ Long nextPageAnchor = null;
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
 
 			//塞执行组名
-			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId());
-			dto.setExecutiveGroupName(executiveGroupName);
+//			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId(),r.get);
+//			dto.setExecutiveGroupName(executiveGroupName);
 			Community community = communityProvider.findCommunityById(r.getTargetId());
 			if(community != null) {
 				dto.setTargetName(community.getName());
@@ -2145,28 +2145,39 @@ Long nextPageAnchor = null;
 
 	}
 
-	private String getGroupName(Long groupId, Long positionId) {
+	private String getGroupName(Long groupId, Long positionId,Long inspectorUid) {
 		StringBuilder sb = new StringBuilder();
 		Organization group = organizationProvider.findOrganizationById(groupId);
-		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(positionId);
-		if(group != null) {
+		OrganizationJobPosition position = null;
+		if (group != null) {
 			sb.append(group.getName());
-
+		}
+		Organization departPosition = organizationProvider.findOrganizationById(positionId);
+		if (departPosition != null) {
+			position = new OrganizationJobPosition();
+			position.setName(departPosition.getName());
+		}else {
+			position = organizationProvider.findOrganizationJobPositionById(positionId);
 		}
 
 		if(position != null) {
 			if(sb.length() > 0) {
 				sb.append("-");
 				sb.append(position.getName());
-
 			} else {
 				sb.append(position.getName());
 
 			}
 		}
-
-		return sb.toString();
+		if (inspectorUid != null && inspectorUid != 0) {
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(inspectorUid);
+			if (members != null && members.size() > 0) {
+				sb.append(members.get(0).getContactName());
+			}
+		}
+			return sb.toString();
 	}
+
 
 	private QualityStandardsDTO converStandardToDto(QualityInspectionStandards standard) {
 		processRepeatSetting(standard);
@@ -2184,7 +2195,7 @@ Long nextPageAnchor = null;
 
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 
-			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId(),r.getInspectorUid());
 			dto.setGroupName(groupName);
         	return dto;
         }).collect(Collectors.toList());
@@ -2192,7 +2203,7 @@ Long nextPageAnchor = null;
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
 
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
-			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId(),r.getInspectorUid());
 			dto.setGroupName(groupName);
 
         	return dto;
