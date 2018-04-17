@@ -14,12 +14,14 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.workReport.WorkReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +152,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 if (scope != null) {
                     scope.setSourceDescription(dto.getSourceDescription());
                     scope.setDownloadPermission(dto.getDownloadPermission());
+                    scope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     fileManagementProvider.updateFileCatalogScope(scope);
                 } else {
                     scope = new FileCatalogScope();
@@ -163,6 +166,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 }
             }
 
+        //  remove the extra scope.
         if (detailIds.size() == 0)
             detailIds.add(0L);
         fileManagementProvider.deleteOddFileCatalogScope(namespaceId, catalogId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);

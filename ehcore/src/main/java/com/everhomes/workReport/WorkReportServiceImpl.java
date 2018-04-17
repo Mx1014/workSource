@@ -161,38 +161,37 @@ public class WorkReportServiceImpl implements WorkReportService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (scopes == null)
-            return;
+        if (scopes != null && scopes.size() > 0)
+            for (WorkReportScopeMapDTO dto : scopes) {
+                //  in order to record those ids.
+                if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                    organizationIds.add(dto.getSourceId());
+                else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                    detailIds.add(dto.getSourceId());
 
-        for (WorkReportScopeMapDTO dto : scopes) {
-            //  in order to record those ids.
-            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
-                organizationIds.add(dto.getSourceId());
-            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
-                detailIds.add(dto.getSourceId());
-
-            WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
-            if (scopeMap != null) {
-                scopeMap.setSourceDescription(dto.getSourceDescription());
-                scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                workReportProvider.updateWorkReportScopeMap(scopeMap);
-            } else {
-                scopeMap = new WorkReportScopeMap();
-                scopeMap.setNamespaceId(UserContext.getCurrentNamespaceId());
-                scopeMap.setReportId(reportId);
-                scopeMap.setSourceType(dto.getSourceType());
-                scopeMap.setSourceId(dto.getSourceId());
-                scopeMap.setSourceDescription(dto.getSourceDescription());
-                workReportProvider.createWorkReportScopeMap(scopeMap);
+                WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
+                if (scopeMap != null) {
+                    scopeMap.setSourceDescription(dto.getSourceDescription());
+                    scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    workReportProvider.updateWorkReportScopeMap(scopeMap);
+                } else {
+                    scopeMap = new WorkReportScopeMap();
+                    scopeMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    scopeMap.setReportId(reportId);
+                    scopeMap.setSourceType(dto.getSourceType());
+                    scopeMap.setSourceId(dto.getSourceId());
+                    scopeMap.setSourceDescription(dto.getSourceDescription());
+                    workReportProvider.createWorkReportScopeMap(scopeMap);
+                }
             }
-        }
+
         //  remove the extra scope.
         if (detailIds.size() == 0)
             detailIds.add(0L);
-        workReportProvider.deleteOddWorkReportDetailScope(namespaceId, reportId, detailIds);
+        workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
-        workReportProvider.deleteOddWorkReportOrganizationScope(namespaceId, reportId, organizationIds);
+        workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     @Override
