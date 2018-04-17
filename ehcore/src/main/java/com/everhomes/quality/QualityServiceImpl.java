@@ -1116,7 +1116,7 @@ Long nextPageAnchor = null;
 					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					/*List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
 						LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
 					}
@@ -1135,6 +1135,29 @@ Long nextPageAnchor = null;
 //								groupDtos.add(group);
 //							}
 							//取path后的第一个路径 为顶层公司 by xiongying 20170323
+							String[] path = organization.getPath().split("/");
+							Long organizationId = Long.valueOf(path[1]);
+							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+							topGroup.setGroupId(organizationId);
+							topGroup.setPositionId(map.getJobPositionId());
+							groupDtos.add(topGroup);
+						}
+
+					}*/
+					//部门岗位
+					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+					departmentGroup.setGroupId(organization.getParentId());
+					departmentGroup.setPositionId(organization.getId());
+					groupDtos.add(departmentGroup);
+
+					//通用岗位
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					if (LOGGER.isInfoEnabled()) {
+						LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
+					}
+
+					if (maps != null && maps.size() > 0) {
+						for (OrganizationJobPositionMap map : maps) {
 							String[] path = organization.getPath().split("/");
 							Long organizationId = Long.valueOf(path[1]);
 							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
