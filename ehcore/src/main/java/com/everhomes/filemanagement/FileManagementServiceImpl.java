@@ -134,43 +134,41 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
     }
 
-    private void updateFileCatalogScopes(Integer namespaceId, Long catalogId, List<FileCatalogScopeDTO> scopes){
+    private void updateFileCatalogScopes(Integer namespaceId, Long catalogId, List<FileCatalogScopeDTO> scopes) {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (scopes == null || scopes.size() == 0)
-            return;
+        if (scopes != null && scopes.size() > 0)
+            for (FileCatalogScopeDTO dto : scopes) {
+                //  in order to record those ids.
+                if (UniongroupTargetType.fromCode(dto.getSourceType()).equals(UniongroupTargetType.ORGANIZATION))
+                    organizationIds.add(dto.getSourceId());
+                else if (UniongroupTargetType.fromCode(dto.getSourceType()).equals(UniongroupTargetType.MEMBERDETAIL))
+                    detailIds.add(dto.getSourceId());
 
-        for(FileCatalogScopeDTO dto : scopes){
-            //  in order to record those ids.
-            if (UniongroupTargetType.fromCode(dto.getSourceType()).equals(UniongroupTargetType.ORGANIZATION))
-                organizationIds.add(dto.getSourceId());
-            else if (UniongroupTargetType.fromCode(dto.getSourceType()).equals(UniongroupTargetType.MEMBERDETAIL))
-                detailIds.add(dto.getSourceId());
-
-            FileCatalogScope scope = fileManagementProvider.findFileCatalogScope(catalogId, dto.getSourceId(), dto.getSourceType());
-            if(scope != null){
-                scope.setSourceDescription(dto.getSourceDescription());
-                scope.setDownloadPermission(dto.getDownloadPermission());
-                fileManagementProvider.updateFileCatalogScope(scope);
-            }else{
-                scope = new FileCatalogScope();
-                scope.setNamespaceId(namespaceId);
-                scope.setCatalogId(catalogId);
-                scope.setSourceId(dto.getSourceId());
-                scope.setSourceType(dto.getSourceType());
-                scope.setSourceDescription(dto.getSourceDescription());
-                scope.setDownloadPermission(dto.getDownloadPermission());
-                fileManagementProvider.createFileCatalogScope(scope);
+                FileCatalogScope scope = fileManagementProvider.findFileCatalogScope(catalogId, dto.getSourceId(), dto.getSourceType());
+                if (scope != null) {
+                    scope.setSourceDescription(dto.getSourceDescription());
+                    scope.setDownloadPermission(dto.getDownloadPermission());
+                    fileManagementProvider.updateFileCatalogScope(scope);
+                } else {
+                    scope = new FileCatalogScope();
+                    scope.setNamespaceId(namespaceId);
+                    scope.setCatalogId(catalogId);
+                    scope.setSourceId(dto.getSourceId());
+                    scope.setSourceType(dto.getSourceType());
+                    scope.setSourceDescription(dto.getSourceDescription());
+                    scope.setDownloadPermission(dto.getDownloadPermission());
+                    fileManagementProvider.createFileCatalogScope(scope);
+                }
             }
 
-            if (detailIds.size() == 0)
-                detailIds.add(0L);
-            fileManagementProvider.deleteOddFileCatalogScope(namespaceId, catalogId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
-            if (organizationIds.size() == 0)
-                organizationIds.add(0L);
-            fileManagementProvider.deleteOddFileCatalogScope(namespaceId, catalogId, UniongroupTargetType.ORGANIZATION.getCode(), detailIds);
-        }
+        if (detailIds.size() == 0)
+            detailIds.add(0L);
+        fileManagementProvider.deleteOddFileCatalogScope(namespaceId, catalogId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
+        if (organizationIds.size() == 0)
+            organizationIds.add(0L);
+        fileManagementProvider.deleteOddFileCatalogScope(namespaceId, catalogId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     @Override
