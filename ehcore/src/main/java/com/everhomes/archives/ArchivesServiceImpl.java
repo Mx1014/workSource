@@ -142,7 +142,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
-        //校验权限
+        //  校验权限 by lei.lv
         if (cmd.getDetailId() != null) {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
             organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
@@ -173,18 +173,15 @@ public class ArchivesServiceImpl implements ArchivesService {
             employee.setEnName(cmd.getContactEnName());
             employee.setRegionCode(cmd.getRegionCode());
             employee.setContactShortToken(cmd.getContactShortToken());
-
             employee.setWorkEmail(cmd.getWorkEmail());
             employee.setContractPartyId(cmd.getOrganizationId());
 
-            //  just update the info.
-            if(TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE)
-            {
+            //  3-1.编辑则直接更新信息
+            if (TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE) {
                 organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
                 return employee;
             }
-
-            //  initial data for add function
+            //  3-2.新增则初始化部分信息
             employee.setCheckInTime(ArchivesUtil.currentDate());
             employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime()));
             employee.setEmploymentTime(ArchivesUtil.currentDate());
@@ -192,14 +189,15 @@ public class ArchivesServiceImpl implements ArchivesService {
             employee.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
             organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
 
-
-            //  3.查询若存在于离职列表则删除
+            //  4.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
-            //  4.增加入职记录
+            //  5.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.currentDate());
             return employee;
         });
+        if (member == null)
+            return null;
         dto.setDetailId(member.getId());
         dto.setContactName(member.getContactName());
         dto.setContactToken(member.getContactToken());
@@ -897,7 +895,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
 
-        //  1.组织架构添加人员
+        //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
         addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
@@ -907,8 +905,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setJobLevelIds(cmd.getJobLevelIds());
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
-        dbProvider.execute((TransactionStatus status) -> {
-
+        OrganizationMemberDetails member = dbProvider.execute((TransactionStatus status) -> {
+            //  1.添加人员到组织架构
             OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
             //  2.获得 detailId 然后处理其它信息
@@ -931,16 +929,23 @@ public class ArchivesServiceImpl implements ArchivesService {
                 employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime()));
                 if (cmd.getEmploymentTime() == null)
                     employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-                else
+                else{
+                    //  若转正日期不为当前时间则需做配置
                     employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
+                    if(ArchivesUtil.parseDate(cmd.getEmploymentTime()).after(ArchivesUtil.parseDate(cmd.getCheckInTime()))){
+                        EmployArchivesEmployeesCommand employConfigCommand = new EmployArchivesEmployeesCommand();
+                        employConfigCommand.setDetailIds(Arrays.asList(employee.getId()));
+                        employConfigCommand.setOrganizationId(employee.getOrganizationId());
+                        employConfigCommand.setEmploymentTime(cmd.getEmploymentTime());
+                        employConfigCommand.setEmploymentEvaluation("");
+                        employArchivesEmployeesConfig(employConfigCommand);
+                    }
+                }
                 if (cmd.getContractPartyId() != null)
                     employee.setContractPartyId(cmd.getContractPartyId());
                 else
                     employee.setContractPartyId(cmd.getOrganizationId());
                 organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-                dto.setDetailId(detailId);
-                dto.setContactName(employee.getContactName());
-                dto.setContactToken(employee.getContactToken());
             }
 
             //  3.查询若存在于离职列表则删除
@@ -948,9 +953,13 @@ public class ArchivesServiceImpl implements ArchivesService {
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.parseDate(cmd.getCheckInTime()));
-
-            return null;
+            return employee;
         });
+        if (member == null)
+            return null;
+        dto.setDetailId(member.getId());
+        dto.setContactName(member.getContactName());
+        dto.setContactToken(member.getContactToken());
         return dto;
     }
 
