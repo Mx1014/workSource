@@ -36,7 +36,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
 
     @Override
     public String processInstanceConfig(String instanceConfig) {
-        return null;
+        return instanceConfig;
     }
 
     @Override
