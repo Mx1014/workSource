@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.util.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -899,4 +900,20 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <b>URL: /rental/admin/queryRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息
+	 * </p>
+	 */
+	@RequestMapping("queryRentalStatistics")
+	@RestReturn(value = String.class)
+	public RestResponse queryRentalStatistics( ConfirmRefundCommand cmd) {
+		rentalService.confirmRefund(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
