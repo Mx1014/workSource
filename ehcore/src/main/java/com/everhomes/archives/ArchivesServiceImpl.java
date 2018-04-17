@@ -186,7 +186,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
             //  initial data for add function
             employee.setCheckInTime(ArchivesUtil.currentDate());
-            employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
+            employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime()));
             employee.setEmploymentTime(ArchivesUtil.currentDate());
             employee.setEmployeeType(EmployeeType.FULLTIME.getCode());
             employee.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
@@ -928,7 +928,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     employee.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
                     employee.setCheckInTime(ArchivesUtil.currentDate());
-                employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
+                employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime()));
                 if (cmd.getEmploymentTime() == null)
                     employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
@@ -1144,7 +1144,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 switch (itemValue.getFieldName()) {
                     case ArchivesParameter.BIRTHDAY:
                         employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                        employee.setBirthdayIndex(getMonthAndDay(employee.getBirthday().toLocalDate()));
+                        employee.setBirthdayIndex(getMonthAndDay(employee.getBirthday()));
                         break;
                     case ArchivesParameter.CONTACT_NAME:
                         employee.setContactName(itemValue.getFieldValue());
@@ -1217,7 +1217,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         break;
                     case ArchivesParameter.CHECK_IN_TIME:
                         employee.setCheckInTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                        employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime().toLocalDate()));
+                        employee.setCheckInTimeIndex(getMonthAndDay(employee.getCheckInTime()));
                         break;
                     case ArchivesParameter.PROCREATIVE:
                         employee.setProcreative(itemValue.getFieldValue());
@@ -2729,14 +2729,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                 contract += (employee.getContactName() + "，");
             if (date.equals(employee.getIdExpiryDate()))
                 idExpiry += (employee.getContactName() + "，");
-            if (getMonthAndDay(date.toLocalDate()).equals(employee.getCheckInTimeIndex())) {
+            if (getMonthAndDay(date).equals(employee.getCheckInTimeIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
                 map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
                 anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
             }
-            if (getMonthAndDay(date.toLocalDate()).equals(employee.getBirthdayIndex())) {
+            if (getMonthAndDay(date).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("year", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
@@ -2772,11 +2772,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         return body;
     }
 
-    private String getMonthAndDay(LocalDate date) {
+    private String getMonthAndDay(java.sql.Date date) {
         if (date == null)
             return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
-        return formatter.format(date);
+        return formatter.format(date.toLocalDate());
     }
 
     private void sendArchivesEmails(String email, String body) {
