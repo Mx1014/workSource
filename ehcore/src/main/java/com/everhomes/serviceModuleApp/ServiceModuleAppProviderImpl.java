@@ -281,7 +281,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, String appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, Byte appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != versionId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -292,7 +292,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		if(null != developerIds)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.DEVELOP_ID.in(developerIds));
 		if(null != appType)
-			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.valueOf(appType).getCode()));
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 		if(null != mobileFlag)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.MOBILE_FLAG.eq(mobileFlag));
 		if(null != pcFlag)
