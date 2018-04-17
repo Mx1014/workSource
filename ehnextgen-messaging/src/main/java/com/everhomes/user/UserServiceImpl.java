@@ -6235,9 +6235,9 @@ public class UserServiceImpl implements UserService {
             SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(cmd.getSmartCardKey().getBytes()), totp.getAlgorithm());
             resp.setNow(DateHelper.currentGMTTime().getTime());
             if(cmd.getNow() == null) {
-                cmd.setNow(resp.getNow());
+                cmd.setNow(resp.getNow() / 1000);
             }
-            resp.setSmartCardCode(String.valueOf(totp.generateOneTimePassword(key, new Date(cmd.getNow()))));
+            resp.setSmartCardCode(String.valueOf(totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000))));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
         }
