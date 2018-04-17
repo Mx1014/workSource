@@ -6237,7 +6237,15 @@ public class UserServiceImpl implements UserService {
             if(cmd.getNow() == null) {
                 cmd.setNow(resp.getNow());
             }
-            resp.setSmartCardCode(String.valueOf(totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000))));
+            
+            int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
+            long randomUid = UserContext.currentUserId();
+            if(randomUid > 10) {
+                randomUid = (randomUid) ^ (long)topt;
+                resp.setQrCode(String.valueOf(randomUid) + String.valueOf(topt));
+            }
+            
+            resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
         }

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GenerateSmartCardCodeResponse {
     private String smartCardCode;
+    private String qrCode;
     private Long now;
 
     public String getSmartCardCode() {
@@ -28,6 +29,14 @@ public class GenerateSmartCardCodeResponse {
 
     public void setNow(Long now) {
         this.now = now;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
     }
 
     @Override
