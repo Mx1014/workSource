@@ -4682,11 +4682,11 @@ public class PunchServiceImpl implements PunchService {
             row.createCell(++i).setCellValue("WiFi :" + log.getWifiInfo());
         }
         if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(log.getStatus())) {
-            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()) + getLeaveEarlyString(log));
-        }else if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(log.getStatus())) {
-            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()) + getBelateString(log));
+            row.createCell(++i).setCellValue(statusToString(log.getStatus()) + getLeaveEarlyString(log));
+        }else if (PunchStatus.BELATE == PunchStatus.fromCode(log.getStatus())) {
+            row.createCell(++i).setCellValue(statusToString(log.getStatus()) + getBelateString(log));
         }else{
-            row.createCell(++i).setCellValue(statusToString(log.getPunchStatus()));
+            row.createCell(++i).setCellValue(statusToString(log.getStatus()));
         }
 
     }
