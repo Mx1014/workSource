@@ -1,46 +1,92 @@
 package com.everhomes.rest.rentalv2.admin;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.rentalv2.RentalStatisticsDTO;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 /**
- * <ul>
- * <li>totalAmount: 总金额</li>
- * <li>orderAmount: 总订单数量</li>
- * <li>classifyAmount: 分类统计结果</li>
- * </ul>
+ * Created by Administrator on 2018/4/17.
  */
 public class QueryRentalStatisticsCommand {
 
-    private BigDecimal totalAmount;
-    private Integer orderAmount;
-    @ItemType(RentalStatisticsDTO.class)
-    private List<RentalStatisticsDTO> classifyAmount;
+    private String resourceType;
+    private Long communityId;
+    private Long startDate;
+    private Long endDate;
 
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    private Long pageAnchor;
+
+    private Integer pageSize;
+
+    private Long currentPMId;
+    private Long currentProjectId;
+    private Long appId;
+
+    public String getResourceType() {
+        return resourceType;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
     }
 
-    public Integer getOrderAmount() {
-        return orderAmount;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setOrderAmount(Integer orderAmount) {
-        this.orderAmount = orderAmount;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
-    public List<RentalStatisticsDTO> getClassifyAmount() {
-        return classifyAmount;
+    public Long getStartDate() {
+        return startDate;
     }
 
-    public void setClassifyAmount(List<RentalStatisticsDTO> classifyAmount) {
-        this.classifyAmount = classifyAmount;
+    public void setStartDate(Long startDate) {
+        this.startDate = startDate;
+    }
+
+    public Long getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Long endDate) {
+        this.endDate = endDate;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }

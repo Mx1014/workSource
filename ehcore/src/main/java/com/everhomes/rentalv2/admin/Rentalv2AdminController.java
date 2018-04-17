@@ -5,7 +5,6 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
-import com.everhomes.util.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -908,9 +907,25 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("queryRentalStatistics")
-	@RestReturn(value = String.class)
-	public RestResponse queryRentalStatistics( ConfirmRefundCommand cmd) {
-		rentalService.confirmRefund(cmd);
+	@RestReturn(value = QueryRentalStatisticsResponse.class)
+	public RestResponse queryRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		rentalService.queryRentalStatistics(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/queryOrgRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息(公司)
+	 * </p>
+	 */
+	@RequestMapping("queryOrgRentalStatistics")
+	@RestReturn(value = QueryOrgRentalStatisticsResponse.class)
+	public RestResponse queryOrgRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		rentalService.queryRentalStatistics(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

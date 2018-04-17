@@ -8400,4 +8400,45 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setTip(order.getTip());
 		return response;
 	}
+
+    @Override
+    public QueryRentalStatisticsResponse queryRentalStatistics(QueryRentalStatisticsCommand cmd) {
+        if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+        }
+        QueryRentalStatisticsResponse response = new QueryRentalStatisticsResponse();
+       BigDecimal totalAmount =  rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getCommunityId(),
+               cmd.getStartDate(),cmd.getEndDate(),null,null);
+        response.setTotalAmount(totalAmount);
+        Integer orderCount = rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getCommunityId(),
+                cmd.getStartDate(),cmd.getEndDate(),null,null);
+        response.setOrderCount(orderCount);
+
+        response.setClassifyStatistics(new ArrayList<>());
+        List<RentalResource> rentalSites = rentalv2Provider.findRentalSitesByCommunityId(cmd.getResourceType(),cmd.getCommunityId());
+        if (rentalSites == null || rentalSites.size()==0)
+            return response;
+        for (RentalResource rentalSite:rentalSites){
+            RentalStatisticsDTO dto = new RentalStatisticsDTO();
+            dto.setName(rentalSite.getResourceName());
+            dto.setAmount(rentalv2Provider.countRentalBillAmount(null,null,cmd.getStartDate(),
+                    cmd.getEndDate(),rentalSite.getId(),null));
+            dto.setOrderCount(rentalv2Provider.countRentalBillNum(null,null,cmd.getStartDate(),
+                    cmd.getEndDate(),rentalSite.getId(),null));
+
+            response.getClassifyStatistics().add(dto);
+        }
+
+        return response;
+    }
+
+    @Override
+    public QueryOrgRentalStatisticsResponse queryOrgRentalStatistics(QueryRentalStatisticsCommand cmd) {
+        if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+        }
+        QueryOrgRentalStatisticsResponse response = new QueryOrgRentalStatisticsResponse();
+
+        return null;
+    }
 }

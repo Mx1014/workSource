@@ -67,6 +67,8 @@ public interface Rentalv2Provider {
 	List<RentalResource> findRentalSites(Long resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);
 
+	List<RentalResource> findRentalSitesByCommunityId(String resouceType,Long communityId);
+
 	List<RentalOrder> listRentalBills(Long ownerId, String ownerType,
 			String siteType, Long rentalSiteId, Long beginDate, Long endDate);
 
@@ -201,4 +203,8 @@ public interface Rentalv2Provider {
 											   Long rentalSiteId, String spaceNo);
 	List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
 									 Long rentalSiteId,List<Long> cellIds);
+
+	BigDecimal countRentalBillAmount(String resourceType,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	Integer countRentalBillNum(String resourceType,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
 }

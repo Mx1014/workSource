@@ -974,6 +974,55 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public BigDecimal countRentalBillAmount(String resourceType,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		BigDecimal count = new BigDecimal(0);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()).from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.equal(orgId));
+		count = step.where(condition).fetchOneInto(BigDecimal.class);
+
+		return count;
+	}
+
+	@Override
+	public Integer countRentalBillNum(String resourceType, Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		Integer count = 0;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.equal(orgId));
+		count = step.where(condition).fetchOneInto(Integer.class);
+		return count;
+	}
+
+	@Override
 	public List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long> siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1010,6 +1059,20 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return step.where(condition).orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc())
 				.limit(pageSize).fetch().map((r) -> ConvertHelper.convert(r, RentalResource.class));
+	}
+
+	@Override
+	public List<RentalResource> findRentalSitesByCommunityId(String resouceType, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DELETED.getCode());
+		if(communityId  != null)
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
+		if (!StringUtils.isEmpty(resouceType))
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE.eq(resouceType));
+
+		return step.where(condition).fetch().map((r) -> ConvertHelper.convert(r, RentalResource.class));
 	}
 
 	@Override
