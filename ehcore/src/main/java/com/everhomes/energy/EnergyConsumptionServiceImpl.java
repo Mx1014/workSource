@@ -2771,15 +2771,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 String serverUrl = configurationProvider.getValue(meters.get(0).getNamespaceId(), "energy.meter.thirdparty.server", "");
                 meters.forEach((meter) -> {
                     try {
-                        String meterReading = remoteMeterReader.readMeterautomatically(meter.getId().toString(), serverUrl);
+                        String meterReading = remoteMeterReader.readMeterautomatically(meter.getMeterNumber(), serverUrl);
                         //parser
                         JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
                         String data = jsonObj.getAsJsonArray("data").get(0).toString();
                         Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
                         //log
+                        EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
                         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-//                        log.setTaskId(cmd.getTaskId());
+                        if (task != null) {
+                            log.setTaskId(task.getId());
+                        }
                         log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
                         log.setCommunityId(meter.getCommunityId());
                         log.setMeterId(meter.getId());
@@ -2802,7 +2805,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         meterSearcher.feedDoc(meter);
                     } catch (Exception e) {
                         LOGGER.error("read energy meter reading  error...", e);
-                        sendErrorMessage(e);
+                        //sendErrorMessage(e);
                         e.printStackTrace();
                     }
                 });
