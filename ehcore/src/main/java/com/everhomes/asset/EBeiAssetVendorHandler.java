@@ -27,7 +27,7 @@ import java.util.*;
  * Created by ying.xiong on 2017/4/12.
  */
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX + "EBEI")
-public class EBeiAssetVendorHandler implements AssetVendorHandler {
+public class EBeiAssetVendorHandler extends AssetVendorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EBeiAssetVendorHandler.class);
 
     @Autowired
@@ -132,7 +132,25 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, ListBillsResponse response, ListBillsCommand cmd) {
+        //修改传递参数为一个对象，卸货
+        String contractNum = cmd.getContractNum();
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String buildingName = cmd.getBuildingName();
+        String apartmentName = cmd.getApartmentName();
+        Long addressId = cmd.getAddressId();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        String targetName = cmd.getTargetName();
+        Byte status = cmd.getStatus();
+        String targetType = cmd.getTargetType();
+        //卸货完毕
         List<ListBillsDTO> list = new ArrayList<>();
         if(targetType!=null && targetType.equals(AssetPaymentConstants.EH_USER)) {
             return list;
@@ -249,7 +267,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId, Integer namespaceId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");

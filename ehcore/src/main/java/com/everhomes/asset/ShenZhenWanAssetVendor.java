@@ -46,7 +46,7 @@ import static com.everhomes.util.SignatureHelper.computeSignature;
  */
 
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"SZW")
-public class ShenZhenWanAssetVendor implements AssetVendorHandler{
+public class ShenZhenWanAssetVendor extends AssetVendorHandler{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShenZhenWanAssetVendor.class);
     
@@ -75,10 +75,7 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		return null;
 	}
 	@Override
-	public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType,
-			String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId,
-			Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize,
-			String targetName, Byte status, String targetType, ListBillsResponse response) {
+	public List<ListBillsDTO> listBills(Integer currentNamespaceId, ListBillsResponse response, ListBillsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

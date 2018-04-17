@@ -1,14 +1,10 @@
 //@formatter:off
 package com.everhomes.assetPayment;
 
-import com.everhomes.asset.AssetService;
-import com.everhomes.asset.ZhangjianggaokeAssetVendor;
-import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.asset.ZhangJiangGaoKeThirdPartyAssetVendor;
 import com.everhomes.rest.asset.ClientIdentityCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowBillForClientDTO;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by Wentian Wang on 2017/9/10.
@@ -19,7 +15,7 @@ public class appTest {
 
     @Test
     public void fun(){
-         ZhangjianggaokeAssetVendor handler = new ZhangjianggaokeAssetVendor();
+         ZhangJiangGaoKeThirdPartyAssetVendor handler = new ZhangJiangGaoKeThirdPartyAssetVendor();
         ClientIdentityCommand command = new ClientIdentityCommand();
         command.setBillGroupId(null);
         command.setTargetId(311077l);

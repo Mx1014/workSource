@@ -8,25 +8,22 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
-
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import org.springframework.context.ApplicationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
@@ -41,10 +38,10 @@ import static com.everhomes.util.SignatureHelper.computeSignature;
  * Created by Wentian Wang on 2017/8/10.
  */
 
-@Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"ZJGK")
-public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
+@Component
+public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZhangjianggaokeAssetVendor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZhangJiangGaoKeThirdPartyAssetVendor.class);
 
     @Autowired
     private AssetProvider assetProvider;
@@ -52,11 +49,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private OrganizationProvider organizationProvider;
 
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private UserProvider userProvider;
     @Autowired
     private PayService payService;
 
@@ -833,7 +825,25 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId,ListBillsResponse carrier, ListBillsCommand cmd) {
+        //修改传递参数为一个对象，卸货
+        String contractNum = cmd.getContractNum();
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String buildingName = cmd.getBuildingName();
+        String apartmentName = cmd.getApartmentName();
+        Long addressId = cmd.getAddressId();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        String targetName = cmd.getTargetName();
+        Byte status = cmd.getStatus();
+        String targetType = cmd.getTargetType();
+        //卸货完毕
         if(pageAnchor ==null || pageAnchor == 0l){
             pageAnchor = 1l;
         }
@@ -1170,18 +1180,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         return list;
     }
-//    public HttpResponseEntity<?> postGo(String body, String url, Class T) {
-//    HttpResponseEntity<?> entity = RestCallTemplate.url(url)
-//            .body(body)
-//            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-//            .respType(T)
-//            .post();
-//    return (HttpResponseEntity<?>)entity;
-//    }
 
-    private ZuolinAssetVendorHandler getZuolinHandler(){
-        return applicationContext.getBean(ZuolinAssetVendorHandler.class);
-    }
     private void check(String fieldValue, String fieldName){
         if(fieldValue==null||fieldValue.trim().length()<1){
             LOGGER.error(fieldName+":"+fieldValue+"为必填，不能为空");

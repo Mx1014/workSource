@@ -178,4 +178,6 @@ public interface AssetService {
 	BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file);
 
 	void linkCustomerToBill(String code, Long ownerUid, String identifierToken);
+
+    void modifySettledBill(ModifySettledBillCommand cmd);
 }
