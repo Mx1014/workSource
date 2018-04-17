@@ -501,15 +501,16 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     
     @Test
     public void testTOTP() throws NoSuchAlgorithmException, InvalidKeyException {
-        final TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
+        final TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
 
         final Key secretKey;
         final KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
 
         // SHA-1 and SHA-256 prefer 64-byte (512-bit) keys; SHA512 prefers 128-byte keys
-        keyGenerator.init(512);
+        keyGenerator.init(1024);
 
         secretKey = keyGenerator.generateKey();
+//        secretKey.getEncoded();
 
         final Date now = new Date();
         final Date later = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(28));

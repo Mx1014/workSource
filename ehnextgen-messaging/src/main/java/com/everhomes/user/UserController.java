@@ -1450,6 +1450,52 @@ public class UserController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /user/getUserConfigAfterStartup</b>
+     * <p>SystemInfo</p>
+     * @return {@link GetUserConfigAfterStartupResponse}
+     */
+    @RequestMapping("getUserConfigAfterStartup")
+    @RestReturn(GetUserConfigAfterStartupResponse.class)
+    public RestResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
+        GetUserConfigAfterStartupResponse obj = userService.getUserConfigAfterStartup(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/smartCardVerify</b>
+     * <p>SystemInfo</p>
+     * @return {@link SmartCardVerifyResponse}
+     */
+    @RequestMapping("smartCardVerify")
+    @RestReturn(SmartCardVerifyResponse.class)
+    public RestResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse obj = userService.smartCardVerify(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/generateSmartCardCode</b>
+     * <p>SystemInfo</p>
+     * @return {@link GenerateSmartCardCodeResponse}
+     */
+    @RequestMapping("generateSmartCardCode")
+    @RequireAuthentication(false)
+    @RestReturn(GenerateSmartCardCodeResponse.class)
+    public RestResponse generateOneCardCode(GenerateSmartCardCodeCommand cmd) {
+        GenerateSmartCardCodeResponse obj = userService.generateSmartCardCode(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
      * <b>URL: /user/genAppKey</b>
      * <p>test</p>
      * @return
