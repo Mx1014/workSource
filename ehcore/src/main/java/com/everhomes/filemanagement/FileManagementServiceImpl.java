@@ -184,7 +184,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         dto.setName(catalog.getName());
         dto.setCreateTime(catalog.getCreateTime());
         dto.setScopes(listFileCatalogScopes(namespaceId, dto.getId()));
-        return null;
+        return dto;
     }
 /*
     private List<FileCatalogScopeDTO> addFileCatalogScopes(Integer namespaceId, Long catalogId, List<FileCatalogScopeDTO> scopes) {
