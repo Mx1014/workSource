@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.portal;
 
+import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  *     <li>versionId: versionId</li>
  *     <li>keywords: 关键字</li>
  *     <li>developerIds: 开发者ids</li>
- *     <li>appType: 应用分类</li>
+ *     <li>appType: 应用类型，0-oa, 1-园区, 2-服务 参考{@link ServiceModuleAppType}</li>
  *     <li>mobileFlag: 支持移动端(0:不支持，1:支持)</li>
  *     <li>pcFlag: 支持PC端(0:不支持，1:支持)</li>
  *     <li>independentConfigFlag: 允许独立配置(0:不支持，1:支持)</li>
@@ -40,7 +41,7 @@ public class ListServiceModuleAppsCommand {
 
 	private List<Long> developerIds;
 
-	private String appType;
+	private Byte appType;
 
 	private Byte mobileFlag;
 
@@ -160,11 +161,11 @@ public class ListServiceModuleAppsCommand {
 		this.supportThirdFlag = supportThirdFlag;
 	}
 
-	public String getAppType() {
+	public Byte getAppType() {
 		return appType;
 	}
 
-	public void setAppType(String appType) {
+	public void setAppType(Byte appType) {
 		this.appType = appType;
 	}
 }

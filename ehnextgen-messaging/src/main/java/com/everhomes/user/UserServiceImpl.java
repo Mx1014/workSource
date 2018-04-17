@@ -67,6 +67,7 @@ import com.everhomes.news.NewsService;
 import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.otp.TimeBasedOneTimePasswordGenerator;
 import com.everhomes.point.UserLevel;
 import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
@@ -148,6 +149,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -164,6 +167,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -6197,6 +6203,54 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+    @Override
+    public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
+        GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
+        TimeBasedOneTimePasswordGenerator totp;
+        try {
+            totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+            keyGenerator.init(512);
+            Key secretKey = keyGenerator.generateKey();
+            String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
+            resp.setSmartCardId(0l);
+            resp.setSmartCardKey(resultStr);
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("generate totp failed", e);
+        }
+        return resp;
+    }
 
+    @Override
+    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
+    @Override
+    public GenerateSmartCardCodeResponse generateSmartCardCode(GenerateSmartCardCodeCommand cmd) {
+        GenerateSmartCardCodeResponse resp = new GenerateSmartCardCodeResponse();
+        try {
+            TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
+            SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(cmd.getSmartCardKey().getBytes()), totp.getAlgorithm());
+            resp.setNow(DateHelper.currentGMTTime().getTime() / 1000);
+            if(cmd.getNow() == null) {
+                cmd.setNow(resp.getNow());
+            }
+            
+            int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
+            long randomUid = UserContext.currentUserId();
+            if(randomUid > 10) {
+                randomUid = (randomUid) ^ (long)topt;
+                resp.setQrCode(String.valueOf(randomUid) + String.valueOf(topt));
+            }
+            
+            resp.setSmartCardCode(String.valueOf(topt));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            LOGGER.error("generateOneCardCode failed", e);
+        }
+        return resp;
+        
+    }
+    
 }

@@ -83,4 +83,32 @@ ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL 
 -- 默认园区标志
 ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NULL COMMENT 'is the default community in his namespace, 0-no, 1-yes';
 
+-- 主页签信息
+CREATE TABLE `eh_launch_pad_indexs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `type` varchar(64) NOT NULL,
+  `name` varchar(64) DEFAULT NULL,
+  `config_json` text,
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 一卡通实现
+CREATE TABLE `eh_smart_card_keys` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(256) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

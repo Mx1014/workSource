@@ -1450,6 +1450,52 @@ public class UserController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /user/getUserConfigAfterStartup</b>
+     * <p>启动之后，去统一的接口拿用户相关的配置信息</p>
+     * @return {@link GetUserConfigAfterStartupResponse}
+     */
+    @RequestMapping("getUserConfigAfterStartup")
+    @RestReturn(GetUserConfigAfterStartupResponse.class)
+    public RestResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
+        GetUserConfigAfterStartupResponse obj = userService.getUserConfigAfterStartup(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/smartCardVerify</b>
+     * <p>校验用户的 TOTP 是否合法 </p>
+     * @return {@link SmartCardVerifyResponse}
+     */
+    @RequestMapping("smartCardVerify")
+    @RestReturn(SmartCardVerifyResponse.class)
+    public RestResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse obj = userService.smartCardVerify(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/generateSmartCardCode</b>
+     * <p>测试 TOTP 的生成结果</p>
+     * @return {@link GenerateSmartCardCodeResponse}
+     */
+    @RequestMapping("generateSmartCardCode")
+    @RequireAuthentication(false)
+    @RestReturn(GenerateSmartCardCodeResponse.class)
+    public RestResponse generateOneCardCode(GenerateSmartCardCodeCommand cmd) {
+        GenerateSmartCardCodeResponse obj = userService.generateSmartCardCode(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
      * <b>URL: /user/genAppKey</b>
      * <p>test</p>
      * @return
