@@ -1277,38 +1277,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         Long enterpriseId = getTopOrganizationId(organizationId);
 
-
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-//        Condition condition = t1.field("id").gt(0L);
-//        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
-//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-//        Record record = step.where(condition).fetchAny();
-//        if (record != null) {
-//            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
-//            return ConvertHelper.convert(member, OrganizationMember.class);
-//        }
-//        return null;
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId).and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
         if(organizationId != null && organizationId != 0L ){
             condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
         }
         //added by wh 2016-10-13 把被拒绝的过滤掉
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
 
-        if (r != null) {
-            OrganizationMember organizationMember = ConvertHelper.convert(r, OrganizationMember.class);
+        return backOrganizationMember(r, enterpriseId);
+    }
+
+    private OrganizationMember backOrganizationMember(Record record, Long enterpriseId){
+        if (record != null) {
+            OrganizationMember organizationMember = ConvertHelper.convert(record, OrganizationMember.class);
             if (enterpriseId != null) {
                 organizationMember.setEnterpriserId(enterpriseId);
             }
             return organizationMember;
         }
-
         return null;
     }
 
@@ -1332,16 +1321,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
 				.fetchAny();
 		//判断record是否为空
-		if (record != null){
-			//说明record对象不为空，那么就将record对象转换为OrganizationMember对象
-			OrganizationMember organizationMember = ConvertHelper.convert(record, OrganizationMember.class);
-			if(enterpriseId != null) {
-				organizationMember.setEnterpriserId(enterpriseId);
-			}
-			return organizationMember;
-		}
-
-		return null;
+        return backOrganizationMember(record, enterpriseId);
 	}
 
     /**
@@ -5720,8 +5700,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
-		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
-		return list;
+        return query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
 	}
 
     @Override
