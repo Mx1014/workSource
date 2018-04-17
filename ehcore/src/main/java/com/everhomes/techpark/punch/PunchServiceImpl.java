@@ -8395,7 +8395,8 @@ public class PunchServiceImpl implements PunchService {
         params.put("exceptionStatus", cmd.getExceptionStatus());
         params.put("userName", cmd.getUserName());
         params.put("reportType", "exportPunchStatistics");
-        String fileName = String.format("按月统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+        String fileName = String.format("按月统计导出报表__%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+                , DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
         return response;
