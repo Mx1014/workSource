@@ -339,7 +339,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 					OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
 
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
-			long now = System.currentTimeMillis();
+			long now = getStartTimeMillis();
 			cardInfoDTO.setOpenDate(now);
 			cardInfoDTO.setExpireDate(getCardEndTime(now, requestMonthCount).getTime());
 
@@ -432,7 +432,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
             request = getParkingCardRequestByOrder(order);
             order.setCardRequestId(request.getId()); //补上id
         }
-        long nowTime = System.currentTimeMillis();
+        long nowTime = getStartTimeMillis();
         Timestamp timestampStart = new Timestamp(nowTime);
 		Timestamp timestampEnd = getCardEndTime(nowTime, order.getMonthCount().intValue());
         order.setStartPeriod(timestampStart);
@@ -520,6 +520,26 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 	*/
 	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
 		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
+	}
+	
+	
+	/**   
+	* @Function: XiaomaoKeXingParkingVendorHandler.java
+	* @Description: 获取月卡开始时间。(默认为系统当前时间戳)
+	* 为了测试不同的开卡时间，可通过parking.kexinxiaomao.openCardDate参数进行配置开始时间
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年4月17日 下午3:38:32 
+	*
+	*/
+	private final long getStartTimeMillis() {
+		String cardStartStr = configProvider.getValue("parking.kexinxiaomao.openCardDate", "");
+		if (StringUtils.isBlank(cardStartStr)) {
+			return System.currentTimeMillis();
+		}
+		
+		return Utils.strToLong(cardStartStr, Utils.DateStyle.DATE_TIME);
 	}
 	
 }
