@@ -326,4 +326,9 @@ public interface UserService {
             Map<String, String[]> paramMap);
 
     ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd);
+    GetUserConfigAfterStartupResponse getUserConfigAfterStartup(
+            GetUserConfigAfterStartupCommand cmd);
+    SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd);
+    GenerateSmartCardCodeResponse generateSmartCardCode(
+            GenerateSmartCardCodeCommand cmd);
 }
