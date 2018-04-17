@@ -2,9 +2,7 @@ package com.everhomes;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 100个字组成一个序列，让你写一个程序，从第一个字开始，依次往后数，
@@ -18,12 +16,26 @@ public class Test {
         String testStr = "//dddd/sdf/cvd//df///44//3/a";
         String[] result = split2(testStr);
         System.out.println(testStr+"转换成了"+StringHelper.toJsonString(result));
+//        Map<String, String> map = new HashMap<String, String>(16);
 //        while (true) {
 //            if(array)
 //        }
 //        cycle(100, 7);
     }
-//
+
+    //
+    public void test(Object a, Object b) {
+        synchronized (a){
+            try {
+                a.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            synchronized (b) {
+                a.notify();
+            }
+        }
+    }
     public static String[] split2(String str) {
         List<String> arrayList = new ArrayList<String>();
 //        return str.split("/+");

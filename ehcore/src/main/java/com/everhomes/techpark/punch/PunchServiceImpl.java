@@ -4329,7 +4329,7 @@ public class PunchServiceImpl implements PunchService {
     private void processStatisticsTime(PunchLog log, PunchStatistic statistic, Byte status) {
         if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(status)) {
             statistic.setLeaveEarlyTime(statistic.getLeaveEarlyTime() + processLeaveEarlyTime(log));
-        } else if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(status)) {
+        } else if (PunchStatus.BELATE == PunchStatus.fromCode(status)) {
             statistic.setBelateTime(statistic.getBelateTime() + processBelateTime(log));
         }
     }
@@ -7840,6 +7840,8 @@ public class PunchServiceImpl implements PunchService {
         } else {
             row.createCell(++i).setCellValue("");
         }
+        row.createCell(++i).setCellValue(dto.getStatuString());
+        row.createCell(++i).setCellValue(dto.getApprovalStatuString());
     }
     /**
      * 刷新某公司某一段时间的所有打卡day logs
