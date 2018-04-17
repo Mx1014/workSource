@@ -2756,6 +2756,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
+    /**
+     * 每天早上5点10分刷自动读表
+     * */
+    @Scheduled(cron = "0 10 5 * * ?")
+    public void readMeterRemote() {
+        //双机判断
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+//            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+            try {
+                LOGGER.info("read energy meter reading ...");
+                EnergyReadByMeterNo remoteMeterReader = new EnergyReadByMeterNo();
+                List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
+                String meterNo = "201703001320";
+                String meterReading = remoteMeterReader.readMeterautomatically(meterNo);
+                LOGGER.info("read energy meter reading  end...");
+            } catch (Exception e) {
+                LOGGER.error("read energy meter reading  error...", e);
+                sendErrorMessage(e);
+                e.printStackTrace();
+            }
+//            });
+        }
+    }
+
     private void sendErrorMessage(Exception e) {
         String xiongying = "ying.xiong@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;

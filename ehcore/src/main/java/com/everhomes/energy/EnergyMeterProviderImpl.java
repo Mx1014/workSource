@@ -115,6 +115,13 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
                 .fetchAnyInto(EnergyMeter.class);
     }
 
+    @Override
+    public List<EnergyMeter> listAutoReadingMeters() {
+        context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.AUTO_FLAG.)
+        return null;
+    }
+
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }

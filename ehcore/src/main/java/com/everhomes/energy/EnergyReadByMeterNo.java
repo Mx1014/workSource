@@ -38,16 +38,12 @@ public class EnergyReadByMeterNo {
 
     private static final String PUBLIC_KEY = "RSAPublicKey";
     private static final String PRIVATE_KEY = "RSAPrivateKey";
-    public static void main(String[] args) {
-       // System.out.println("readByMeterNo");
+    public  String readMeterautomatically(String meterName) {
         String access_token = getToken();
-        String meterNo = "201703001320";
         Map<String, String> params = new HashMap<>();
-        params.put("meterNo", meterNo);
+        params.put("meterNo", meterName);
         params.put("access_token", access_token);
-        String res = sendPost(url + "/joy/readByMeterNo.do", params);
-        System.out.println(res);
-
+        return sendPost(url + "/joy/readByMeterNo.do", params);
     }
 
     /**
