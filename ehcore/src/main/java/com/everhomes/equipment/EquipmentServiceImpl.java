@@ -5024,7 +5024,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 								List<ReceiverName> dtoReceivers = new ArrayList<>();
 								receiver.getReceiverIds().forEach(uId -> {
 									List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(uId);
-									if (members != null) {
+									if (members != null && members.size() > 0) {
 										ReceiverName receiverName = new ReceiverName();
 										receiverName.setId(members.get(0).getId());
 										receiverName.setName(members.get(0).getContactName());
