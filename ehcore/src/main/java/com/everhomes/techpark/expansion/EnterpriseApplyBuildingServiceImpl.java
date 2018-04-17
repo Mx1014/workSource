@@ -12,6 +12,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -19,6 +20,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
@@ -70,6 +72,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -378,10 +382,25 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-		
+
+		List<Long> authCommunities = null;
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null,0L);//项目介绍权限
+			if (cmd.getCurrentProjectId()!=null) {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
+				authCommunities.add(cmd.getCurrentProjectId());
+			}else{//项目导航为全部 找出授权的项目
+				ListUserRelatedProjectByModuleCommand cmd2 = new ListUserRelatedProjectByModuleCommand();
+				cmd2.setAppId(cmd.getAppId());
+				cmd2.setOrganizationId(cmd.getCurrentPMId());
+				cmd2.setModuleId(40100L);
+				List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd2);
+				if (dtos!=null && dtos.size()>0)
+					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
+				else
+					authCommunities = new ArrayList<>();
+			}
 		}
+
 
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -390,7 +409,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
-				cmd.getAreaId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+				cmd.getAreaId(), cmd.getKeyword(),authCommunities, cmd.getPageAnchor(), pageSize);
 
 		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
 
