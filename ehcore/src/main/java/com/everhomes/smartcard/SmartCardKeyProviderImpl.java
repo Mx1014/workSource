@@ -22,10 +22,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhSmartCardKeysDao;
 import com.everhomes.server.schema.tables.pojos.EhSmartCardKeys;
 import com.everhomes.server.schema.tables.records.EhSmartCardKeysRecord;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class SmartCardKeyProviderImpl implements SmartCardKeyProvider {
