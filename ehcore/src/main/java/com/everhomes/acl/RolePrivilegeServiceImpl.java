@@ -2546,8 +2546,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
+	public ListOrganizationContactDTOResponse listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		ListOrganizationContactDTOResponse listOrganizationContactDTOResponse = new ListOrganizationContactDTOResponse();
 		if(adminUserId != null){
 			int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 			ListingLocator locator = new ListingLocator();
@@ -2556,16 +2557,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			List<OrganizationMember> members =
 					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
 							null, OrganizationMemberTargetType.USER.getCode(), adminUserId, pageSize, locator);
+			listOrganizationContactDTOResponse.setOrganizationContactDTOList(members.stream().filter(
+					r -> OrganizationGroupType.ENTERPRISE
+							== OrganizationGroupType.fromCode(r.getGroupType()))
+					.map(this::processOrganizationContactDTO)
+					.collect(Collectors.toList()));
+			return listOrganizationContactDTOResponse;
 
-			for (OrganizationMember member: members) {
+			/*for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 					return processOrganizationContactDTO(member);
 				}else{
 					continue;
 				}
-			}
+			}*/
 		}
-		return new OrganizationContactDTO();
+		listOrganizationContactDTOResponse.setOrganizationContactDTOList(new ArrayList<>());
+		return listOrganizationContactDTOResponse;
 	}
 
 	@Override

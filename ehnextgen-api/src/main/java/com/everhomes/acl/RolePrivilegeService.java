@@ -431,7 +431,7 @@ public interface RolePrivilegeService {
 
 	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
 
-	OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
+	ListOrganizationContactDTOResponse listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
 
 	GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd);
 
