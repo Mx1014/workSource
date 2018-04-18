@@ -1,0 +1,15 @@
+-- 资源预约订单统计 By st.zheng
+CREATE TABLE `eh_rentalv2_order_statistics` (
+  `id` BIGINT(20) NOT NULL,
+  `order_id` BIGINT(20) NOT NULL,
+  `rental_uid` BIGINT(20) NULL DEFAULT NULL,
+  `rental_date` DATE NULL DEFAULT NULL,
+  `start_time` DATETIME NULL DEFAULT NULL,
+  `end_time` DATETIME NULL DEFAULT NULL,
+  `reserve_time` DATETIME NULL DEFAULT NULL,
+  `community_id` BIGINT(20) NULL DEFAULT NULL,
+  `namespace_id` INT(11) NULL DEFAULT NULL,
+  `user_enterprise_id` BIGINT(20) NULL DEFAULT NULL,
+  `rental_type` TINYINT(4) NULL DEFAULT NULL,
+  `resource_type` VARCHAR(64) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`));

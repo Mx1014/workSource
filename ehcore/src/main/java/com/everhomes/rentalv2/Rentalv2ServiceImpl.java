@@ -2267,34 +2267,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
-
-		//状态为付款成功时 创建门禁授权
 		if (SiteBillStatus.SUCCESS.getCode() == status){
-
-//			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (!StringUtils.isEmpty(rs.getAclinkId())) {
-				String[] ids = rs.getAclinkId().split(",");
-				if (ids.length > 0) {
-					String doorAuthId = "";
-					for (String id : ids)
-						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-								Long.parseLong(id), rs.getCreatorUid()) + ",";
-					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
-				}
-			}
 			onOrderSuccess(order);
-			//用户积分
-			LocalEventBus.publish(event -> {
-				LocalEventContext context = new LocalEventContext();
-				context.setUid(order.getRentalUid());
-				context.setNamespaceId(order.getNamespaceId());
-				event.setContext(context);
-				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
-				event.setEntityId(order.getId());
-				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
-			});
 		}
-
 
 		//根据产品定义，是在待审批的节点就不允许其他用户预订 同时段统一资源（状态不是已预约成功，比如待付款）
 		if (cancelOtherOrderFlag) {
@@ -4130,10 +4105,36 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		//发消息给管理员
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
-
 		handler.addOrderSendMessage(order);
 
 		//发短信在对接支付的handler  RentalOrderEmbeddedHandler //TODO:看是否需要移到这里
+
+		//预约成功 授权门禁
+		RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
+
+//			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+		if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
+			String[] ids = rentalResource.getAclinkId().split(",");
+			if (ids.length > 0) {
+				String doorAuthId = "";
+				for (String id : ids)
+					doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+							Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
+				order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+			}
+		}
+
+		//用户积分
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(order.getRentalUid());
+			context.setNamespaceId(order.getNamespaceId());
+			event.setContext(context);
+			event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+			event.setEntityId(order.getId());
+			event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
+		});
+
 	}
 	private FlowCase createFlowCase(RentalOrder order){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
@@ -4172,33 +4173,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
 		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()) {
-			//预约成功 授权门禁
-			RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
-
-//			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
-				String[] ids = rentalResource.getAclinkId().split(",");
-				if (ids.length > 0) {
-					String doorAuthId = "";
-					for (String id : ids)
-						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-								Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
-					order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
-				}
-			}
-
-
-
-            //用户积分
-            LocalEventBus.publish(event -> {
-                LocalEventContext context = new LocalEventContext();
-                context.setUid(order.getRentalUid());
-                context.setNamespaceId(order.getNamespaceId());
-                event.setContext(context);
-                event.setEntityType(EhRentalv2Orders.class.getSimpleName());
-                event.setEntityId(order.getId());
-                event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
-            });
 
 			//创建哑工作流
 			GeneralModuleInfo gm = new GeneralModuleInfo();
