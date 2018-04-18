@@ -68,6 +68,10 @@ public interface ContractProvider {
 
     String findContractIdByThirdPartyId(String contractId, String code);
 
+
+	List<Long> SimpleFindContractByNumber(String header);
+
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
+
 
 }

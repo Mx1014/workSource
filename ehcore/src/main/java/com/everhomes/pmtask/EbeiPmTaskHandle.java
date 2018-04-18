@@ -509,7 +509,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                     FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         else
              flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                 FlowModuleType.REPAIR_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
@@ -597,7 +597,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             if(cancelTask(task)) {
                 User user = UserContext.current().getUser();
                 Timestamp now = new Timestamp(System.currentTimeMillis());
-                task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
+                task.setStatus(FlowCaseStatus.ABSORTED.getCode());
                 task.setDeleteUid(user.getId());
                 task.setDeleteTime(now);
                 pmTaskProvider.updateTask(task);
@@ -789,10 +789,6 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
-                if (null!=dto.getFlowCaseId()) {
-                    FlowCase flowCase = flowService.getFlowCaseById(dto.getFlowCaseId());
-                    dto.setStatus(flowCase.getStatus());
-                }
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){

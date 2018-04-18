@@ -2162,8 +2162,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
-		bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(bill.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		}
 		orderCmd.setOrderNo(bill.getOrderNo());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		orderCmd.setSubject(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
@@ -2185,8 +2188,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
-		order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(order.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		}
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
 		preOrderCommand.setAmount(amount);
@@ -3827,13 +3833,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				Integer namespaceId = UserContext.getCurrentNamespaceId();
 //				preOrderCommand.setClientAppName("wechat_" + namespaceId);
 //			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			//TODO: 临时给越空间解决公众号支付
+			String vspCusid = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"tempVspCusid","");
+			paymentParamsDTO.setVspCusid(vspCusid);
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
+
 
 		}
 
@@ -8030,6 +8040,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
+		//每次获取延时支付信息 都重置一次之前未支付留下的信息
+		restoreRentalBill(bill);
+
 		List<RentalBillRuleDTO> rules = new ArrayList<>();
 
 		RentalCell lastCell = null;
@@ -8116,16 +8129,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 			processCells(rs, bill.getRentalType());
 			updateRentalOrder(rs,bill,new BigDecimal(0),cmd.getCellCount(),false);
+			//发消息
+			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+
+			handler.renewRentalOrderSendMessage(bill);
 		}
 		rentalv2Provider.updateRentalBill(bill);
 
 		cellList.get().clear();
 
 
-		//发消息
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
-		handler.renewRentalOrderSendMessage(bill);
 
 		return bill;
 	}
@@ -8136,6 +8150,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		processCells(rs, rentalBill.getRentalType());
 		updateRentalOrder(rs, rentalBill, null, rentalCount, false);
 		rentalBill.setResourceTotalMoney(rentalBill.getPayTotalMoney());
+
+		//发消息
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
+
+		handler.renewRentalOrderSendMessage(rentalBill);
 	}
 
 	private BigDecimal updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
@@ -8363,6 +8382,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		order.setPayTotalMoney(order.getResourceTotalMoney());
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
 		order.setRentalCount(resourceOrders.size()+0.0);
+		rentalv2Provider.updateRentalBill(order);
 	}
 	@Override
 	public GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd) {

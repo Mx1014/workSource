@@ -2,6 +2,14 @@ package com.everhomes.rest.enterprise;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>namespaceId: 域空间 ID</li>
+ * <li>公司关键字</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class SearchEnterpriseCommand {
     private Integer namespaceId;
     private String keyword;

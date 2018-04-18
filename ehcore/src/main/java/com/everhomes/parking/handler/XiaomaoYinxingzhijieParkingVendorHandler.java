@@ -142,7 +142,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             dto.setCardType(rate.getCardType());
 //            dto.setMonthCount(rate.getMonthCount());
             dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
-            dto.setPrice(rate.getPrice().divide(rate.getMonthCount()));
+            dto.setPrice(rate.getPrice().divide(rate.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
 
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
@@ -210,8 +210,10 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
         for(YinxingzhijieXiaomaoCardType t: types) {
             if(t.getStandardId().equals(r.getCardType())) {
                 temp = t;
+                break;
             }
         }
+        
         dto.setCardTypeId(temp.getStandardId());
         dto.setCardType(temp.getStandardType());
         dto.setRateToken(r.getId().toString());
@@ -244,6 +246,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
 
         JSONObject jsonObject = JSONObject.parseObject(result);
         Object obj = jsonObject.get("flag");
+        order.setErrorDescription(jsonObject.getString("message"));
         if(null != obj ) {
             int resCode = (int) obj;
             if(resCode == 1) {
@@ -334,6 +337,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             order.setEndPeriod(timestampEnd);
 
             YinxingzhijieXiaomaoJsonEntity<?> entity = JSONObject.parseObject(json, YinxingzhijieXiaomaoJsonEntity.class);
+            order.setErrorDescription(entity!=null?entity.getMessage():null);
             if (entity.isSuccess()){
                 return true;
             }

@@ -177,7 +177,17 @@ public enum VersionRealmType {
     ANDROID_XINWEICHUANGYUAN("Android_XinWeiChuangYuan"),
     IOS_XINWEICHUANGYUAN("iOS_XinWeiChuangYuan"),
     ANDROID_WANZHIHUI("Android_WanZhiHui"),
-    IOS_WANZHIHUI("iOS_WanZhiHui")
+    IOS_WANZHIHUI("iOS_WanZhiHui"),
+    ANDROID_HUIMENGWUYE("Android_HuiMengWuYe"),
+    IOS_HUIMENGWUYE("iOS_HuiMengWuYe"),
+    ANDROID_GUOMAOFUWU("Android_GuoMaoFuWu"),
+    IOS_GUOMAOFUWU("iOS_GuoMaoFuWu"),
+    ANDROID_BEIJINGAIRPORT("Android_BeiJingAirport"),
+    IOS_BEIJINGAIRPORT("iOS_BeiJingAirport"),
+    ANDROID_SHUMIYUANPARK("Android_ShuMiYuanPark"),
+    IOS_SHUMIYUANPARK("iOS_ShuMiYuanPark"),
+    ANDROID_ZHIGUHUI("Android_ZhiGuHui"),
+    IOS_ZHIGUHUI("iOS_ZhiGuHui")
     ;
 
     private String code;

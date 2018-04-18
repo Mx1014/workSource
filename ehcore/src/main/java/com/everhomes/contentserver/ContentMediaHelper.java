@@ -43,7 +43,7 @@ public class ContentMediaHelper {
         
         String mediaType = extMap.get(fileSuffix);
         if(mediaType == null) {
-            mediaType = UPLOAD_UNKNOW;
+            mediaType = UPLOAD_FILE;
         }
         
         return mediaType;

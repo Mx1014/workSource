@@ -102,12 +102,24 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.PROCESS.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.ABSORTED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	//状态改变之后
@@ -152,40 +164,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 			LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 
-			if ("ACCEPTING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-			}else if ("ASSIGNING".equals(nodeType)) {
-
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
-				pmTaskProvider.updateTask(task);
-
-				//TODO: 同步数据到科技园 （当受理之后才同步） 此处由于不好获取工作流中分配的人，所以当节点值（ASSIGNING）待分配时
-				//应项目经理需求，关掉同步数据到科技园 modify by sw 20171214
-				// 在fireButton存在eh_pm_task_logs表中，onFlowCaseStateChanged方法是状态已经更新之后，此处节点值是当前节点的下一个节点
-//				Integer namespaceId = UserContext.getCurrentNamespaceId();
-//				if(namespaceId == 1000000) {
-//					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-//					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
-//					if (null != logs && logs.size() != 0) {
-//						for (PmTaskLog r: logs) {
-//							if (null != r.getTargetId()) {
-//								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
-//								break;
-//							}
-//						}
-//					}
-//				}
-			}else if ("COMPLETED".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-			}else if ("HANDOVER".equals(nodeType)) {
+			if ("HANDOVER".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
@@ -216,11 +195,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 				task.setIfUseFeelist((byte)1);
 			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-
-			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
-			pmTaskProvider.updateTask(task);
 		}
+
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
@@ -229,7 +205,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.FINISHED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override
@@ -523,7 +505,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setStatus(FlowCaseStatus.FINISHED.getCode());
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}

@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -20,7 +19,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
@@ -37,7 +35,6 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -45,12 +42,9 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.hp.hpl.sparta.xpath.Step;
-
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
-import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1311,6 +1305,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return null;
     }
+
+	/**
+	 * add by yuanlei
+	 * 根据userId和organizationId来查询数据库得到OrganizationMember对象
+	 * @param userId
+	 * @param organizationId
+     * @return
+     */
+	public OrganizationMember findOrganizationMemberByUidAndOrgId(Long userId, Long organizationId){
+		//1.拿到enterpriseId
+		Long enterpriseId = getTopOrganizationId(organizationId);
+		//2.拿到连接
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		//3.组装查询条件
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		Record record = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+				.fetchAny();
+		//判断record是否为空
+		if (record != null){
+			//说明record对象不为空，那么就将record对象转换为OrganizationMember对象
+			OrganizationMember organizationMember = ConvertHelper.convert(record, OrganizationMember.class);
+			if(enterpriseId != null) {
+				organizationMember.setEnterpriserId(enterpriseId);
+			}
+			return organizationMember;
+		}
+
+		return null;
+	}
 
     /**
      * modify cause member_detail by lei lv
@@ -4992,8 +5018,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		//离职日期
 		if(dissmissTimeStart != null && dissmissTimeEnd != null){
-			cond = cond.and(t2.field("dismiss_time").gt(checkinTimeStart));
-			cond = cond.and(t2.field("dismiss_time").lt(checkinTimeEnd));
+			cond = cond.and(t2.field("dismiss_time").gt(dissmissTimeStart));
+			cond = cond.and(t2.field("dismiss_time").lt(dissmissTimeEnd));
 		}
 		if (null != locator && null != locator.getAnchor())
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
@@ -5675,10 +5701,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
-    @Override
-    public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
-        return this.listOrganizationPersonnelsWithDownStream(keywords, contactSignedupStatus, visibleFlag, locator, pageSize, listCommand, filterScopeType, null);
-    }
 
     @Override
     public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens) {
