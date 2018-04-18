@@ -541,12 +541,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
-        if(addresses == null) {
-            return ;
+        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
+        if (addresses == null) {
+            if (existAddress != null) {
+                existAddress.values().forEach((v) -> {
+                    v.setStatus(CommonStatus.ACTIVE.getCode());
+                    energyMeterAddressProvider.updateEnergyMeterAddress(v);
+                });
+            }
+            return;
         }
         validateBurdenRate(addresses);
         //取出表记关联的所有门牌；传入的参数有id的从exist中去掉，没有id的增加，最后将exist中剩下的门牌关联关系置为inactive
-        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         if(addresses != null && addresses.size() > 0) {
             addresses.forEach(meterAddress -> {
                 if (meterAddress.getId() == null) {
@@ -556,6 +562,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 } else {
                     //existAddress.remove(meterAddress.getId());
                     EnergyMeterAddress address = ConvertHelper.convert(meterAddress, EnergyMeterAddress.class);
+                    address.setStatus(CommonStatus.ACTIVE.getCode());
                     energyMeterAddressProvider.updateEnergyMeterAddress(address);
                 }
             });
