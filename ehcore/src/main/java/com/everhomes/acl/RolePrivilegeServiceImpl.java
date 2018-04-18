@@ -1,5 +1,6 @@
 package com.everhomes.acl;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -10,7 +11,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.*;
@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -2546,35 +2547,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public ListOrganizationContactDTOResponse listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
+	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		ListOrganizationContactDTOResponse listOrganizationContactDTOResponse = new ListOrganizationContactDTOResponse();
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(cmd.getPageAnchor());
 		if(adminUserId != null){
-
-			List<OrganizationMember> members =
-					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
-							null, OrganizationMemberTargetType.USER.getCode(), adminUserId, pageSize, locator);
-			listOrganizationContactDTOResponse.setOrganizationContactDTOList(members.stream().filter(
-					r -> OrganizationGroupType.ENTERPRISE
-							== OrganizationGroupType.fromCode(r.getGroupType()))
-					.map(this::processOrganizationContactDTO)
-					.collect(Collectors.toList()));
-			listOrganizationContactDTOResponse.setNextPageAnchor(locator.getAnchor());
-			return listOrganizationContactDTOResponse;
-
-			/*for (OrganizationMember member: members) {
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), adminUserId);
+			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 					return processOrganizationContactDTO(member);
 				}else{
 					continue;
 				}
-			}*/
+			}
 		}
-		listOrganizationContactDTOResponse.setOrganizationContactDTOList(new ArrayList<>());
-		return listOrganizationContactDTOResponse;
+		return new OrganizationContactDTO();
 	}
 
 	@Override

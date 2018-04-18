@@ -3160,7 +3160,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Set<Long> organizationIds = new HashSet<>();
 
 
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId, null, new ListingLocator());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId);
         for (OrganizationMember member: members) {
             if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
                 organizationIds.add(member.getOrganizationId());

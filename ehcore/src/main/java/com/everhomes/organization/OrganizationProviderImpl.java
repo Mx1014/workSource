@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -19,7 +20,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
-import com.everhomes.point.PointLogProvider;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
@@ -36,6 +37,7 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -43,10 +45,12 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.hp.hpl.sparta.xpath.Step;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
+import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,9 +74,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-
-    @Autowired
-    private PointLogProvider pointLogProvider;
 
     @Override
     public void createOrganization(Organization organization) {
@@ -475,21 +476,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null, null, new ListingLocator());
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null);
     }
 
     @Override
-    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(
-            String memberGroup, String targetType, Long targetId, Integer pageSize, ListingLocator locator) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(
-                null, memberGroup, targetType, targetId, pageSize, locator);
+    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId) {
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId);
     }
 
 
     @Override
-    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, Integer pageSize, ListingLocator locator) {
+    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
+        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 
         if (null != organizationId) {
@@ -510,26 +510,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-
-        //添加上分页的pageAnchor和pageSize两个参数进行分页
-        //add by lei yuan
-        if (locator != null && locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.le(locator.getAnchor()));
-        }
-
-        if (pageSize != null && pageSize > 0) {
-            query.addLimit(pageSize + 1);
-        }
+        //:todo 解决重复
+        // updated by Janson 20171018 错误的公司成员会覆盖正确的公司成员 #17284
+//		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-
-        List<OrganizationMember> list = query.fetchInto(OrganizationMember.class);
-        if (pageSize != null && pageSize > 0 && list.size() > pageSize) {
-            locator.setAnchor(list.get(list.size() - 1).getId());
-            list.remove(list.size() - 1);
-        } else {
-            locator.setAnchor(null);
-        }
-        return list;
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, OrganizationMember.class));
+            return null;
+        });
+        return result;
     }
 
     @Override
