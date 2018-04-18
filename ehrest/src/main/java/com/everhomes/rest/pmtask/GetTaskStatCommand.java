@@ -8,6 +8,8 @@ package com.everhomes.rest.pmtask;
  * <li>dateStart: 起始日期</li>
  * <li>dateEnd: 截止日期</li>
  * <li>exportType: 导出统计类型：1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据</li>
+ * <li>appId: 应用id</li>
+ * <li>currentPMId: 当前管理公司ID</li>
  * </ul>
  */
 public class GetTaskStatCommand {
@@ -18,6 +20,9 @@ public class GetTaskStatCommand {
     private long dateStart;
     private long dateEnd;
     private Integer exportType;
+
+    private Long appId;
+    private Long currentPMId;
 
     public String getOwnerType() {
         return ownerType;
@@ -66,5 +71,21 @@ public class GetTaskStatCommand {
 
     public void setExportType(Integer exportType) {
         this.exportType = exportType;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
     }
 }

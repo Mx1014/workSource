@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 
@@ -33,6 +34,7 @@ import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.community.BuildingDTO;
@@ -41,6 +43,7 @@ import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus;
 import com.everhomes.rest.organization.*;
 
 import com.everhomes.rest.pmtask.*;
@@ -2776,31 +2779,166 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd) {
-		return null;
+		this.checkNamespaceId(cmd.getNamespaceId());
+		List<Long> ownerIds = getOwnerIds(cmd);
+//		查询数据
+		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
+//		聚合统计
+		Map<Byte,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getStatus,Collectors.counting()));
+//		构建响应数据对象
+		PmTaskStatDTO pmTaskStatDTO = new PmTaskStatDTO();
+		result.entrySet().forEach(elem ->{
+			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey())
+				pmTaskStatDTO.setProcessingCount(elem.getValue().intValue());
+			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey())
+				pmTaskStatDTO.setCloseCount(elem.getValue().intValue());
+			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey())
+				pmTaskStatDTO.setCompleteCount(elem.getValue().intValue());
+		});
+		pmTaskStatDTO.setTotalCount(pmTaskStatDTO.getProcessingCount() + pmTaskStatDTO.getCloseCount() + pmTaskStatDTO.getCompleteCount());
+		return pmTaskStatDTO;
 	}
 
 	@Override
 	public List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd) {
-		return null;
+		this.checkNamespaceId(cmd.getNamespaceId());
+		List<Long> ownerIds = getOwnerIds(cmd);
+//		查询数据
+		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
+//		聚合统计
+		Map<PmTask.OwnerCategory,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerCategory,Collectors.counting()));
+//		构建响应数据对象
+		List<PmTaskStatSubDTO> dtoList = result.entrySet().stream().map(elem ->{
+			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
+			Category category = categoryProvider.findCategoryById(elem.getKey().getTaskCategoryId());
+			bean.setNamespaceId(cmd.getNamespaceId());
+			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerId(elem.getKey().getOwnerId());
+			bean.setOwnerName(community.getName());
+			bean.setType(category.getName());
+			bean.setTotal(elem.getValue().intValue());
+			return bean;
+		}).collect(Collectors.toList());
+		return dtoList;
 	}
 
 	@Override
 	public List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd) {
-		return null;
+		this.checkNamespaceId(cmd.getNamespaceId());
+		List<Long> ownerIds = getOwnerIds(cmd);
+//		查询数据
+		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
+//		聚合统计
+		Map<Long,Integer> initCount = new HashMap<>();
+		Map<Long,Integer> agentCount = new HashMap<>();
+		list.forEach(elem -> {
+			if(!initCount.keySet().contains(elem.getOwnerId())){
+				initCount.put(elem.getOwnerId(),0);
+				agentCount.put(elem.getOwnerId(),0);
+			}
+			if(null == elem.getOrganizationUid() || 0 == elem.getOrganizationUid()){
+				initCount.put(elem.getOwnerId(),initCount.get(elem.getOwnerId())+1);
+			}else{
+				agentCount.put(elem.getOwnerId(),agentCount.get(elem.getOwnerId())+1);
+			}
+		});
+//		构建响应数据对象
+		List<PmTaskStatDTO> dtolist = initCount.entrySet().stream().map(elem ->{
+			PmTaskStatDTO bean = new PmTaskStatDTO();
+			bean.setNamespaceId(cmd.getNamespaceId());
+			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerId(elem.getKey());
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			bean.setOwnerName(community.getName());
+			bean.setInitCount(elem.getValue());
+			bean.setAgentCount(agentCount.get(elem.getKey()));
+			bean.setTotalCount(bean.getInitCount() + bean.getAgentCount());
+			return bean;
+		}).collect(Collectors.toList());
+		return dtolist;
 	}
 
 	@Override
 	public List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd) {
-		return null;
+		this.checkNamespaceId(cmd.getNamespaceId());
+		List<Long> ownerIds = getOwnerIds(cmd);
+//		查询数据
+		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
+		Map<PmTask.OwnerStatus,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerStatus,Collectors.counting()));
+		List<PmTaskStatDTO> dtolist = result.entrySet().stream().map(elem -> {
+			PmTaskStatDTO bean = new PmTaskStatDTO();
+			bean.setNamespaceId(cmd.getNamespaceId());
+			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerId(elem.getKey().getOwnerId());
+			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
+			bean.setOwnerName(community.getName());
+			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().getStatus())
+				bean.setProcessingCount(elem.getValue().intValue());
+			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().getStatus())
+				bean.setCloseCount(elem.getValue().intValue());
+			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey().getStatus())
+				bean.setCompleteCount(elem.getValue().intValue());
+			return bean;
+		}).collect(Collectors.toList());
+		Map<Long,PmTaskStatDTO> dtoMap = new HashMap<>();
+		dtolist.forEach(elem -> {
+			if (dtoMap.keySet().contains(elem.getOwnerId())){
+				PmTaskStatDTO target = dtoMap.get(elem.getOwnerId());
+				if(null != elem.getProcessingCount())
+					target.setProcessingCount(elem.getProcessingCount());
+				if(null != elem.getCloseCount())
+					target.setCloseCount(elem.getCloseCount());
+				if(null != elem.getCompleteCount())
+					target.setCompleteCount(elem.getCompleteCount());
+				dtoMap.put(elem.getOwnerId(),target);
+			} else {
+				dtoMap.put(elem.getOwnerId(),elem);
+			}
+		});
+
+		return dtoMap.values().stream().collect(Collectors.toList());
 	}
 
 	@Override
 	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
-		return null;
+		this.checkNamespaceId(cmd.getNamespaceId());
+		List<Long> ownerIds = getOwnerIds(cmd);
+//		查询数据
+		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
+		Map<String,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getBuildingName,Collectors.counting()));
+		List<PmTaskStatSubDTO> dtolist = result.entrySet().stream().map(elem -> {
+			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+			bean.setNamespaceId(cmd.getNamespaceId());
+			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerId(cmd.getOwnerId());
+			Community community = communityProvider.findCommunityById(bean.getOwnerId());
+			bean.setOwnerName(community.getName());
+			bean.setType(elem.getKey());
+			bean.setTotal(elem.getValue().intValue());
+			return bean;
+		}).collect(Collectors.toList());
+		return dtolist;
 	}
 
 	@Override
 	public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
 
+	}
+
+
+	private List<Long> getOwnerIds(GetTaskStatCommand cmd){
+		List<Long> ownerIds = new ArrayList<>();
+		if(null == cmd.getOwnerId()){
+			ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+			cmd1.setModuleId(20100L);
+			cmd1.setAppId(cmd.getAppId());
+			cmd1.setOrganizationId(cmd.getCurrentPMId());
+			List<ProjectDTO> dtos =  serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+			ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
+		} else {
+			ownerIds.add(cmd.getOwnerId());
+		}
+		return ownerIds;
 	}
 }

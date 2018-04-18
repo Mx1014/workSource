@@ -23,6 +23,11 @@ public class PmTaskStatSubDTO {
     private String type;
     private Integer total;
 
+    public PmTaskStatSubDTO() {
+        super();
+        this.total = 0;
+    }
+
     public Integer getNamespaceId() {
         return namespaceId;
     }

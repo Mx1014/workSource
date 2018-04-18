@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmtask;
 
+import java.util.Objects;
+
 /**
  * <ul>
  * <li>namespaceId: 域空间</li>
@@ -26,6 +28,30 @@ public class PmTaskStatDTO {
     private Integer closeCount;
     private Integer initCount;
     private Integer agentCount;
+
+    public PmTaskStatDTO() {
+        super();
+        this.totalCount = 0;
+        this.completeCount = 0;
+        this.processingCount = 0;
+        this.closeCount = 0;
+        this.initCount = 0;
+        this.agentCount = 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PmTaskStatDTO that = (PmTaskStatDTO) o;
+        return Objects.equals(ownerId, that.ownerId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(ownerId);
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
