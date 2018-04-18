@@ -1451,7 +1451,7 @@ public class UserController extends ControllerBase {
     
     /**
      * <b>URL: /user/getUserConfigAfterStartup</b>
-     * <p>SystemInfo</p>
+     * <p>启动之后，去统一的接口拿用户相关的配置信息</p>
      * @return {@link GetUserConfigAfterStartupResponse}
      */
     @RequestMapping("getUserConfigAfterStartup")
@@ -1466,7 +1466,7 @@ public class UserController extends ControllerBase {
     
     /**
      * <b>URL: /user/smartCardVerify</b>
-     * <p>SystemInfo</p>
+     * <p>校验用户的 TOTP 是否合法 </p>
      * @return {@link SmartCardVerifyResponse}
      */
     @RequestMapping("smartCardVerify")
@@ -1481,7 +1481,7 @@ public class UserController extends ControllerBase {
     
     /**
      * <b>URL: /user/generateSmartCardCode</b>
-     * <p>SystemInfo</p>
+     * <p>测试 TOTP 的生成结果</p>
      * @return {@link GenerateSmartCardCodeResponse}
      */
     @RequestMapping("generateSmartCardCode")

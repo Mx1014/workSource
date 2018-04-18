@@ -1,6 +1,5 @@
 package com.everhomes.acl;
 
-import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -11,6 +10,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.*;
@@ -1742,12 +1742,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
-				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
-				for (RoleAssignment roleAssignment: roleAssignments) {
-					if(roleIds.contains(roleAssignment.getRoleId())){
-						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+				long ownerId = cmd.getOwnerId() != null ? cmd.getOrganizationId() : 0;
+				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), ownerId, detail.getTargetType(), detail.getTargetId());
+					for (RoleAssignment roleAssignment: roleAssignments) {
+						if(roleIds.contains(roleAssignment.getRoleId())){
+							aclProvider.deleteRoleAssignment(roleAssignment.getId());
+						}
 					}
-				}
 			}
 
 			//  调用原来创建超管的方法创建管理员，注意，这个创建方法会把这个人加入到公司
@@ -2545,19 +2546,35 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
+	public ListOrganizationContactDTOResponse listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		ListOrganizationContactDTOResponse listOrganizationContactDTOResponse = new ListOrganizationContactDTOResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
 		if(adminUserId != null){
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), adminUserId);
-			for (OrganizationMember member: members) {
+
+			List<OrganizationMember> members =
+					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							null, OrganizationMemberTargetType.USER.getCode(), adminUserId, pageSize, locator);
+			listOrganizationContactDTOResponse.setOrganizationContactDTOList(members.stream().filter(
+					r -> OrganizationGroupType.ENTERPRISE
+							== OrganizationGroupType.fromCode(r.getGroupType()))
+					.map(this::processOrganizationContactDTO)
+					.collect(Collectors.toList()));
+			listOrganizationContactDTOResponse.setNextPageAnchor(locator.getAnchor());
+			return listOrganizationContactDTOResponse;
+
+			/*for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 					return processOrganizationContactDTO(member);
 				}else{
 					continue;
 				}
-			}
+			}*/
 		}
-		return new OrganizationContactDTO();
+		listOrganizationContactDTOResponse.setOrganizationContactDTOList(new ArrayList<>());
+		return listOrganizationContactDTOResponse;
 	}
 
 	@Override

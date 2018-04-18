@@ -1,10 +1,12 @@
 package com.everhomes.community;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -502,12 +505,13 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
     @Test
     public void testTOTP() throws NoSuchAlgorithmException, InvalidKeyException {
         final TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
+        final TimeBasedOneTimePasswordGenerator totp2 = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
 
         final Key secretKey;
         final KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
 
         // SHA-1 and SHA-256 prefer 64-byte (512-bit) keys; SHA512 prefers 128-byte keys
-        keyGenerator.init(1024);
+        keyGenerator.init(512);
 
         secretKey = keyGenerator.generateKey();
 //        secretKey.getEncoded();
@@ -516,7 +520,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         final Date later = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(28));
 
         System.out.format("Current password: %06d\n", totp.generateOneTimePassword(secretKey, now));
-        System.out.format("Future password:  %06d\n", totp.generateOneTimePassword(secretKey, later));
+        
+        SecretKeySpec key2 = new SecretKeySpec(secretKey.getEncoded(), totp2.getAlgorithm());
+        System.out.format("Future password:  %06d\n", totp2.generateOneTimePassword(key2, now));
 
     }
 }

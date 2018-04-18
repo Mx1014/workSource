@@ -6239,11 +6239,19 @@ public class UserServiceImpl implements UserService {
         try {
             TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
             SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(cmd.getSmartCardKey().getBytes()), totp.getAlgorithm());
-            resp.setNow(DateHelper.currentGMTTime().getTime());
+            resp.setNow(DateHelper.currentGMTTime().getTime() / 1000);
             if(cmd.getNow() == null) {
                 cmd.setNow(resp.getNow());
             }
-            resp.setSmartCardCode(String.valueOf(totp.generateOneTimePassword(key, new Date(cmd.getNow()))));
+            
+            int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
+            long randomUid = UserContext.currentUserId();
+            if(randomUid > 10) {
+                randomUid = (randomUid) ^ (long)topt;
+                resp.setQrCode(String.valueOf(randomUid) + String.valueOf(topt));
+            }
+            
+            resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
         }

@@ -101,8 +101,20 @@ CREATE TABLE `eh_launch_pad_indexs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 一卡通实现
+CREATE TABLE `eh_smart_card_keys` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(256) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 DELETE FROM eh_portal_navigation_bars;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `label` `name`  varchar(64) DEFAULT NULL;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
+

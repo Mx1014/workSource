@@ -13,12 +13,16 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.menu.*;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
@@ -29,6 +33,7 @@ import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +156,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<ServiceModuleApp> communityApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
 		List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
-
+		
 		//填充OA和无限制的应用id
 		orgApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
 		unlimitApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
@@ -210,9 +215,35 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 			appOriginIds = appIds;
 		}
+		
+		//这里需要优化，需要缓存
+		List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
+		List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
+		Map<Long, ServiceModuleApp> communityAppMap = new HashMap<Long, ServiceModuleApp>();
+        for(ServiceModuleApp r: allApps) {
+            if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+                communityAppMap.put(r.getOriginId(), r); 
+            }
+        }
+		for(Long authAppId : authAppIds) {
+		    ServiceModuleApp app = communityAppMap.get(authAppId);
+		    if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+		        //如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
+	            ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+	            relatedProjectCmd.setAppId(authAppId);
+	            relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+	            relatedProjectCmd.setOrganizationId(organizationId);
+	            List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+	            if(projects != null && projects.size() > 0) {
+	                authAppIdsWithoutZeroProjects.add(authAppId);       
+	            }
+		    } else {
+		        authAppIdsWithoutZeroProjects.add(authAppId);    
+		    }
+		}
 
 		// 取下交集
-		appOriginIds.retainAll(authAppIds);
+		appOriginIds.retainAll(authAppIdsWithoutZeroProjects);
 
 		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
