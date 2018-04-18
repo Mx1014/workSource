@@ -151,6 +151,36 @@ public class FieldServiceImpl implements FieldService {
             //处理group的树状结构
             SystemFieldGroupDTO fieldGroupDTO = processSystemFieldGroupnTree(groups, null);
             List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
+            //把企业服务和资源预定放到第一位和第二位 客户管理2.9 by wentian
+            Integer firstIndex = null;
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i++){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("企业服务".equals(groupDTO.getTitle())) {
+                    firstIndex = i;
+                    break;
+                }
+            }
+            if(firstIndex != 0 && firstIndex != null){
+                SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(0);
+                SystemFieldGroupDTO firstGroupDTO = groupDTOs.get(firstIndex);
+                groupDTOs.set(0, firstGroupDTO);
+                groupDTOs.set(firstIndex, replacedGroupDTO);
+            }
+            Integer secondIndex = null;
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i++){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("资源预订".equals(groupDTO.getTitle())) {
+                    secondIndex = i;
+                    break;
+                }
+            }
+            if(secondIndex != 1 && secondIndex != null){
+                SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(1);
+                SystemFieldGroupDTO secondGroupDTO = groupDTOs.get(secondIndex);
+                groupDTOs.set(1, secondGroupDTO);
+                groupDTOs.set(secondIndex, replacedGroupDTO);
+            }
+
             return groupDTOs;
         }
         return null;
