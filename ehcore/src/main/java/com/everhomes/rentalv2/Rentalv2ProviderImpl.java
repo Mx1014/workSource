@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -39,23 +40,6 @@ import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhRentalv2ResourceRanges;
-import com.everhomes.server.schema.tables.records.EhRentalv2CellsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2CloseDatesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ConfigAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2DefaultRulesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ItemsOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ItemsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrderAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrderPayorderMapRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2RefundOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceNumbersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourcePicsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceRangesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceTypesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourcesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
@@ -162,6 +146,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		query.setRecord(record);
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Orders.class, null);
+		return id;
+	}
+
+	@Override
+	public Long createRentalOrderStatistics(RentalOrderStatistics statistics) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2OrderStatistics.class));
+		statistics.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2OrderStatisticsRecord record = ConvertHelper.convert(statistics,
+			EhRentalv2OrderStatisticsRecord.class);
+		InsertQuery<EhRentalv2OrderStatisticsRecord> query = context.insertQuery(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhRentalv2OrderStatistics.class,null);
 		return id;
 	}
 

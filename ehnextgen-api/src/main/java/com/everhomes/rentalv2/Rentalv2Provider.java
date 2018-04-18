@@ -19,6 +19,8 @@ public interface Rentalv2Provider {
 
 	Long createRentalOrder(RentalOrder rentalBill);
 
+	Long createRentalOrderStatistics(RentalOrderStatistics statistics);
+
 	Long createRentalItemBill(RentalItemsOrder rib);
 
 	Long createRentalSiteBill(RentalResourceOrder rsb);

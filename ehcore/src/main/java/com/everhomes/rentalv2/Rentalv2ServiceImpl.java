@@ -4135,19 +4135,36 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
 		});
 		//创建订单统计数据
-		craeteOrderStatistics(order);
+		createOrderStatistics(order);
 
 	}
 
-	private void craeteOrderStatistics(RentalOrder order){
+	private void createOrderStatistics(RentalOrder order){
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+				order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
 
 		if (order.getRentalType().equals(RentalType.HOUR.getCode())||order.getRentalType().equals(RentalType.HALFDAY.getCode())
-				||order.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+				||order.getRentalType().equals(RentalType.THREETIMEADAY.getCode())||order.getRentalType().equals(RentalType.DAY.getCode())){
 			RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
-			
+			statistics.setValidTimeLong(order.getEndTime().getTime()-order.getStartTime().getTime());
+			rentalv2Provider.createRentalOrderStatistics(statistics);
 		}else{
+			//计算有效时长 去掉关闭的天
 			List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(order.getResourceType(),
 					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
+			Set<Long> closeTime = closeDates.stream().map(r-> r.getCloseDate().getTime()).collect(Collectors.toSet());
+			LocalDateTime startDate = new Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime endDate = new Date(order.getEndTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			while (!startDate.isAfter(endDate)){
+				Long time = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+				if (!closeTime.contains(time)){
+					RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
+
+					rentalv2Provider.createRentalOrderStatistics(statistics);
+				}
+				startDate = startDate.plusDays(1);
+			}
+
 		}
 	}
 
