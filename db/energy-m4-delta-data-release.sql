@@ -1,3 +1,17 @@
 -- 对接 北科建远程抄表  by jiarui 20180416
 SET  @id = (SELECT MAX(id) FROM  eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id:=@id+1), 'energy.meter.thirdparty.server', 'http://122.225.71.66:211/test', 'energy.meter.thirdparty.server', '0', NULL);
+
+-- 增加公摊水电费，水电费改为自用水电费 by wentian
+set @id = IFNULL((select MAX(`id`) from eh_payment_charging_items),0);
+INSERT INTO `ehcore`.`eh_payment_charging_items`
+(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
+VALUES
+  (@id:=@id+1, '公摊水费', '0', NOW(), NULL, NULL, '1');
+INSERT INTO `ehcore`.`eh_payment_charging_items`
+(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
+VALUES
+  (@id:=@id+1, '公摊电费', '0', NOW(), NULL, NULL, '1');
+
+UPDATE `eh_payment_charging_items` SET `name` = '自用水费' where `name` = '水费';
+UPDATE `eh_payment_charging_items` SET `name` = '自用电费' where `name` = '电费';
