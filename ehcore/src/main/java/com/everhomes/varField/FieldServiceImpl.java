@@ -160,7 +160,9 @@ public class FieldServiceImpl implements FieldService {
                     break;
                 }
             }
-            if(firstIndex != 0 && firstIndex != null){
+            // 编译ok， 运行时自动拆箱调用了intValue()，会导致空指针
+//            if(firstIndex != 0 && firstIndex != null){
+            if(firstIndex != null && firstIndex != 0){
                 SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(0);
                 SystemFieldGroupDTO firstGroupDTO = groupDTOs.get(firstIndex);
                 groupDTOs.set(0, firstGroupDTO);
@@ -174,7 +176,7 @@ public class FieldServiceImpl implements FieldService {
                     break;
                 }
             }
-            if(secondIndex != 1 && secondIndex != null){
+            if(secondIndex != null && secondIndex != 1){
                 SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(1);
                 SystemFieldGroupDTO secondGroupDTO = groupDTOs.get(secondIndex);
                 groupDTOs.set(1, secondGroupDTO);
