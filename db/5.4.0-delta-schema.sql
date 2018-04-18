@@ -284,3 +284,10 @@ CREATE TABLE `eh_remind_shares` (
 
 
 -- End by: zhiwei zhang
+
+--
+-- 启动广告   add by xq.tian  2018/04/18
+--
+ALTER TABLE eh_launch_advertisements ADD COLUMN resource_name VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'Resource name';
+
+-- end xq.tian
