@@ -2810,13 +2810,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		构建响应数据对象
 		List<PmTaskStatSubDTO> dtoList = result.entrySet().stream().map(elem ->{
 			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
-			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
-			Category category = categoryProvider.findCategoryById(elem.getKey().getTaskCategoryId());
 			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
 			bean.setOwnerId(elem.getKey().getOwnerId());
-			bean.setOwnerName(community.getName());
-			bean.setType(category.getName());
+			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
+			if (null != community)
+				bean.setOwnerName(community.getName());
+			Category category = categoryProvider.findCategoryById(elem.getKey().getTaskCategoryId());
+			if (null != category)
+				bean.setType(category.getName());
 			bean.setTotal(elem.getValue().intValue());
 			return bean;
 		}).collect(Collectors.toList());
@@ -2847,10 +2849,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskStatDTO> dtolist = initCount.entrySet().stream().map(elem ->{
 			PmTaskStatDTO bean = new PmTaskStatDTO();
 			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
 			bean.setOwnerId(elem.getKey());
 			Community community = communityProvider.findCommunityById(elem.getKey());
-			bean.setOwnerName(community.getName());
+			if(null != community)
+				bean.setOwnerName(community.getName());
+			else
+				bean.setOwnerName("");
 			bean.setInitCount(elem.getValue());
 			bean.setAgentCount(agentCount.get(elem.getKey()));
 			bean.setTotalCount(bean.getInitCount() + bean.getAgentCount());
@@ -2869,10 +2874,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskStatDTO> dtolist = result.entrySet().stream().map(elem -> {
 			PmTaskStatDTO bean = new PmTaskStatDTO();
 			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
 			bean.setOwnerId(elem.getKey().getOwnerId());
 			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
-			bean.setOwnerName(community.getName());
+			if (null != community)
+				bean.setOwnerName(community.getName());
+			else
+				bean.setOwnerName("");
 			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().getStatus())
 				bean.setProcessingCount(elem.getValue().intValue());
 			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().getStatus())
@@ -2903,6 +2911,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
+		this.checkOwnerIdAndOwnerType(cmd.getOwnerType(),cmd.getOwnerId());
 		List<Long> ownerIds = getOwnerIds(cmd);
 //		查询数据
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
@@ -2910,10 +2919,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskStatSubDTO> dtolist = result.entrySet().stream().map(elem -> {
 			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
 			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(cmd.getOwnerType());
+			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
 			bean.setOwnerId(cmd.getOwnerId());
 			Community community = communityProvider.findCommunityById(bean.getOwnerId());
-			bean.setOwnerName(community.getName());
+			if (null != community)
+				bean.setOwnerName(community.getName());
+			else
+				bean.setOwnerName("");
 			bean.setType(elem.getKey());
 			bean.setTotal(elem.getValue().intValue());
 			return bean;
@@ -2923,6 +2935,73 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
+
+		Integer exportType = cmd.getExportType();
+		if(null == exportType){
+
+		}
+		List<PmTaskStatSubDTO> datalist1 = new ArrayList();
+		List<PmTaskStatDTO> datalist2 = new ArrayList();
+//		1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据
+		switch (exportType){
+			case 1 : datalist1 = this.getStatByCategory(cmd);break;
+			case 2 : datalist2 = this.getStatByCreator(cmd);break;
+			case 3 : datalist2 = this.getStatByStatus(cmd);break;
+			case 4 : datalist1 = this.getStatByArea(cmd);break;
+		}
+
+		XSSFWorkbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+
+		Set<String> titles = new HashSet<String>();
+		datalist1.forEach(elem ->{
+			if (!titles.contains(elem.getType())){
+				titles.add(elem.getType());
+			}
+		});
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("序號");
+		row.createCell(1).setCellValue("項目名稱");
+		row.createCell(2).setCellValue("新增");
+		row.createCell(3).setCellValue("总量");
+		row.createCell(4).setCellValue("剩余未处理");
+		row.createCell(5).setCellValue("任务完成率");
+		row.createCell(6).setCellValue("任务关闭率");
+		row.createCell(7).setCellValue("客户评价均分");
+//		for(int i=0;i<list.size();i++){
+//			Row tempRow = sheet.createRow(i + 1);
+//			PmTaskStatistics pts = list.get(i);
+//			Category category = checkCategory(pts.getTaskCategoryId());
+//			Community community = communityProvider.findCommunityById(pts.getOwnerId());
+//			tempRow.createCell(0).setCellValue(community.getName());
+//			tempRow.createCell(1).setCellValue(category.getName());
+//			tempRow.createCell(2).setCellValue(pts.getTotalCount());
+//			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getTaskCategoryId(), null);
+//			tempRow.createCell(3).setCellValue(totalCount);
+//			tempRow.createCell(4).setCellValue(pts.getUnprocessCount());
+//			CellStyle cellStyle = wb.createCellStyle();
+//			XSSFDataFormat fmt = wb.createDataFormat();
+//			cellStyle.setDataFormat(fmt.getFormat("0.00%"));
+//			Cell cell4 = tempRow.createCell(5);
+//			cell4.setCellStyle(cellStyle);
+//			cell4.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getProcessedCount()/pts.getTotalCount():0);
+//			Cell cell5 = tempRow.createCell(6);
+//			cell5.setCellStyle(cellStyle);
+//			cell5.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getCloseCount()/pts.getTotalCount():0);
+//			float avgStar = calculatePerson(pts)!=0?(float) (calculateStar(pts)) / (calculatePerson(pts)):0;
+//			tempRow.createCell(7).setCellValue(avgStar);
+//		}
+
+		exportExcel(wb, resp);
+
 
 	}
 
