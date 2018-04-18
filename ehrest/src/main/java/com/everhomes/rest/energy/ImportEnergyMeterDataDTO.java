@@ -1,5 +1,9 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * Created by ying.xiong on 2017/11/10.
  */
@@ -9,8 +13,10 @@ public class ImportEnergyMeterDataDTO {
     private String meterType = "";
     private String billCategory = "";
     private String serviceCategory = "";
-    private String buildingName = "";
-    private String apartmentName = "";
+    @ItemType(String.class)
+    private List<String> buildingName = null;
+    @ItemType(String.class)
+    private List<String> apartmentName = null;
     private String maxReading = "";
     private String startReading = "";
     private String Rate = "";
@@ -24,14 +30,6 @@ public class ImportEnergyMeterDataDTO {
         this.amountFormula = amountFormula;
     }
 
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
-    }
-
     public String getBillCategory() {
         return billCategory;
     }
@@ -40,12 +38,20 @@ public class ImportEnergyMeterDataDTO {
         this.billCategory = billCategory;
     }
 
-    public String getBuildingName() {
+    public List<String> getBuildingName() {
         return buildingName;
     }
 
-    public void setBuildingName(String buildingName) {
+    public void setBuildingName(List<String> buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public List<String> getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(List<String> apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public String getMaxReading() {

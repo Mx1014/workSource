@@ -869,9 +869,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             case RATE:
                 log.setSettingValue(cmd.getRate());
                 break;
-            case AMOUNT_FORMULA:
-                log.setFormulaId(cmd.getAmountFormulaId());
-                break;
+//            case AMOUNT_FORMULA:
+//                log.setFormulaId(cmd.getAmountFormulaId());
+//                break;
 //            case COST_FORMULA:
 //                log.setFormulaId(cmd.getCostFormulaId());
 //                log.setFormulaSource(cmd.getCostFormulaSource());
@@ -1503,14 +1503,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setBuildingName(r.getF().trim());
+                data.setBuildingName(Arrays.asList(r.getF().trim().split(",")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getG())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setApartmentName(r.getG().trim());
+                data.setApartmentName(Arrays.asList(r.getG().trim().split(",")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getH())) {
@@ -1665,19 +1665,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meterProvider.createEnergyMeter(meter);
 
                 if (!StringUtils.isEmpty(str.getBuildingName()) && !StringUtils.isEmpty(str.getApartmentName())) {
-                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), str.getBuildingName(), str.getApartmentName());
-                    if (address != null) {
-                        EnergyMeterAddress ma = new EnergyMeterAddress();
-                        ma.setBuildingName(address.getBuildingName());
-                        ma.setApartmentName(address.getApartmentName());
-                        ma.setAddressId(address.getId());
-                        ma.setApartmentFloor(address.getApartmentFloor());
-                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
-                        if (building != null) {
-                            ma.setBuildingId(building.getId());
+                    for (int i = 0; i < str.getBuildingName().size(); i++) {
+                        Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), str.getBuildingName().get(i), str.getApartmentName().get(i));
+                        if (address != null) {
+                            EnergyMeterAddress ma = new EnergyMeterAddress();
+                            ma.setBuildingName(address.getBuildingName());
+                            ma.setApartmentName(address.getApartmentName());
+                            ma.setAddressId(address.getId());
+                            ma.setApartmentFloor(address.getApartmentFloor());
+                            Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
+                            if (building != null) {
+                                ma.setBuildingId(building.getId());
+                            }
+                            ma.setMeterId(meter.getId());
+                            energyMeterAddressProvider.createEnergyMeterAddress(ma);
                         }
-                        ma.setMeterId(meter.getId());
-                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
                     }
                 }
 
@@ -1692,10 +1694,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setCalculationType(meter.getCalculationType());
                 updateCmd.setConfigId(meter.getConfigId());
                 updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+//                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
-                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
-                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
+//                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+//                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
                 // 创建一条初始读表记录
                 ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
