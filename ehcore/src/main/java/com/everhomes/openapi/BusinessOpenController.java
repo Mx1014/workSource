@@ -921,6 +921,7 @@ public class BusinessOpenController extends ControllerBase {
     }
 
     @RequestMapping("verifyUserByTokenFromAnBang")
+    @SuppressDiscover
     @RequireAuthentication(false)
     @RestReturn(value = UserLogin.class)
     @SuppressDiscover
