@@ -156,7 +156,7 @@ public class FieldServiceImpl implements FieldService {
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
                 if("企业服务".equals(groupDTO.getTitle())) {
                     groupDTOs.remove(i);
-                    groupDTOs.set(1, groupDTO);
+                    groupDTOs.add(1, groupDTO);
                     break;
                 }
             }
@@ -166,7 +166,7 @@ public class FieldServiceImpl implements FieldService {
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
                 if("资源预定".equals(groupDTO.getTitle())) {
                     groupDTOs.remove(i);
-                    groupDTOs.set(1, groupDTO);
+                    groupDTOs.add(1, groupDTO);
                     break;
                 }
             }
