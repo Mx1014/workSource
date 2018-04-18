@@ -205,6 +205,11 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 				urlbuffer.append(entry.getKey()).append('=').append(entry.getValue()).append('&');
 			}
 			result = Utils.get((Map<String, Object>) null,urlbuffer.substring(0,urlbuffer.length()-1).toString());
+			jsonObject = JSONObject.parseObject(result);
+		}
+		if(jsonObject!=null && jsonObject.getInteger("resultCode")!=0){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_TOKEN,
+					jsonObject.getInteger("resultCode")+','+jsonObject.getString("message"));
 		}
 		return result;
 	}
@@ -584,7 +589,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 		String attributes = response.getDataItems().get(0).getAttributes();
 		JSONObject jsonAttributes = JSONObject.parseObject(attributes);
-		if(jsonAttributes==null || jsonAttributes.size()==0 || !"0".equals(jsonAttributes.getString("retcode"))){
+		if(jsonAttributes==null || jsonAttributes.size()==0 || 0!=jsonAttributes.getInteger("retcode")){
 			return null;
 		}
 
