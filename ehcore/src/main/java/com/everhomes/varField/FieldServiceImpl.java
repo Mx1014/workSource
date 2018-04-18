@@ -152,35 +152,23 @@ public class FieldServiceImpl implements FieldService {
             SystemFieldGroupDTO fieldGroupDTO = processSystemFieldGroupnTree(groups, null);
             List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
             //把企业服务和资源预定放到第一位和第二位 客户管理2.9 by wentian
-            Integer firstIndex = null;
             for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
                 if("企业服务".equals(groupDTO.getTitle())) {
-                    firstIndex = i;
+                    groupDTOs.remove(i);
+                    groupDTOs.set(1, groupDTO);
                     break;
                 }
             }
             // 编译ok， 运行时自动拆箱调用了intValue()，会导致空指针
 //            if(firstIndex != 0 && firstIndex != null){
-            if(firstIndex != null && firstIndex != 0){
-                SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(0);
-                SystemFieldGroupDTO firstGroupDTO = groupDTOs.get(firstIndex);
-                groupDTOs.set(0, firstGroupDTO);
-                groupDTOs.set(firstIndex, replacedGroupDTO);
-            }
-            Integer secondIndex = null;
             for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
-                if("资源预订".equals(groupDTO.getTitle())) {
-                    secondIndex = i;
+                if("资源预定".equals(groupDTO.getTitle())) {
+                    groupDTOs.remove(i);
+                    groupDTOs.set(1, groupDTO);
                     break;
                 }
-            }
-            if(secondIndex != null && secondIndex != 1){
-                SystemFieldGroupDTO replacedGroupDTO = groupDTOs.get(1);
-                SystemFieldGroupDTO secondGroupDTO = groupDTOs.get(secondIndex);
-                groupDTOs.set(1, secondGroupDTO);
-                groupDTOs.set(secondIndex, replacedGroupDTO);
             }
 
             return groupDTOs;
