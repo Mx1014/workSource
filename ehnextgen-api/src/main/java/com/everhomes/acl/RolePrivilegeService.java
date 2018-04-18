@@ -435,7 +435,7 @@ public interface RolePrivilegeService {
 
 	GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd);
 
-	List<OrganizationContactDTO> listOrganizationSystemAdministrators(Long organizationId, Byte activationFlag);
+	ListOrganizationContectDTOResponse listOrganizationSystemAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd);
 

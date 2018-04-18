@@ -1,6 +1,5 @@
 package com.everhomes.acl;
 
-import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -11,6 +10,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.*;
@@ -63,7 +63,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1698,10 +1697,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<OrganizationContactDTO> listOrganizationSystemAdministrators(Long organizationId, Byte activationFlag) {
-		List<OrganizationContactDTO> dtos = listOrganizationAdmin(organizationId, ActivationFlag.fromCode(activationFlag));
-		Long topAdminUserId = getTopAdministratorByOrganizationId(organizationId);
-		return dtos.stream().filter(r->r.getTargetId() != topAdminUserId).collect(Collectors.toList());
+	public ListOrganizationContectDTOResponse listOrganizationSystemAdministrators(ListServiceModuleAdministratorsCommand cmd) {
+		ListOrganizationContectDTOResponse listOrganizationContectDTOResponse = new ListOrganizationContectDTOResponse();
+		String targetType = null;
+		ActivationFlag activationFlag = ActivationFlag.fromCode(cmd.getActivationFlag());
+		if(ActivationFlag.YES == activationFlag){
+			targetType = OrganizationMemberTargetType.USER.getCode();
+		}else if(ActivationFlag.NO == activationFlag){
+			targetType = OrganizationMemberTargetType.UNTRACK.getCode();
+		}
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		Integer pageSize = cmd.getPageSize();
+		if(pageSize == null || "".equals(pageSize)){
+			pageSize = 10;
+		}
+
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), targetType, pageSize, locator);
+		for (OrganizationMember member: members ) {
+			dtos.add(processOrganizationContactDTO(member));
+		}
+
+		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		listOrganizationContectDTOResponse.setDtos(dtos.stream().filter(r-> !Objects.equals(r.getTargetId(), topAdminUserId)).collect(Collectors.toList()));
+		listOrganizationContectDTOResponse.setNextPageAnchor(locator.getAnchor());
+		return listOrganizationContectDTOResponse;
 	}
 
 	@Override
@@ -1774,7 +1799,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			targetType = OrganizationMemberTargetType.UNTRACK.getCode();
 		}
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
 		for (OrganizationMember member: members ) {
 			dtos.add(processOrganizationContactDTO(member));
 		}
@@ -2565,8 +2592,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
     public GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd) {
 		GetAdministratorInfosByUserIdResponse response = new GetAdministratorInfosByUserIdResponse();
-		List<OrganizationContactDTO> systemAdminDtos = this.listOrganizationSystemAdministrators(cmd.getOrganizationId(), null);
-		List<OrganizationContactDTO> targetDtos = systemAdminDtos.stream().filter(r->r.getTargetId().equals(cmd.getUserId())).collect(Collectors.toList());
+
+		ListServiceModuleAdministratorsCommand adminCmd = new ListServiceModuleAdministratorsCommand();
+		adminCmd.setOrganizationId(cmd.getOrganizationId());
+
+		ListOrganizationContectDTOResponse systemAdminDtos = this.listOrganizationSystemAdministrators(adminCmd);
+		List<OrganizationContactDTO> targetDtos = systemAdminDtos.getDtos().stream().filter(r->r.getTargetId().equals(cmd.getUserId())).collect(Collectors.toList());
 		response.setIsTopAdminFlag((targetDtos != null && targetDtos.size() > 0) ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
 		//modify by lei yuan
 		Long organizationId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
