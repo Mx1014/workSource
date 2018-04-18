@@ -15,6 +15,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
@@ -124,6 +125,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	
 	@Autowired
 	private NamespaceResourceProvider namespaceResourceProvider;
+
+	@Autowired
+	private LaunchPadIndexProvider launchPadIndexProvider;
 	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -2723,6 +2727,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public List<IndexDTO> listIndexDtos(Integer namespaceId, Long userId) {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+
+		List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+			query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
+			query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.ORDER_BY);
+			return query;
+		});
+
+		for (LaunchPadIndex index: launchPadIndices){
+
+		}
 
 
 

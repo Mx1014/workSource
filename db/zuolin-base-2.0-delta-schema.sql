@@ -90,6 +90,7 @@ CREATE TABLE `eh_launch_pad_indexs` (
   `type` varchar(64) NOT NULL,
   `name` varchar(64) DEFAULT NULL,
   `config_json` text,
+  `default_order` int(11) NOT NULL DEFAULT '0',
   `icon_uri` varchar(1024) DEFAULT NULL,
   `selected_icon_uri` varchar(1024) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0',
@@ -120,5 +121,7 @@ ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json` 
 -- layout 类型
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
 
+-- layout 类型
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL;
 
 
