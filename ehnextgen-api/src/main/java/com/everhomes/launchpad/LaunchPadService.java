@@ -3,6 +3,7 @@ package com.everhomes.launchpad;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
@@ -84,4 +85,6 @@ public interface LaunchPadService {
      * @return
      */
     SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd);
+
+    List<IndexDTO> listIndexDtos(Integer namespaceId, Long userId);
 }

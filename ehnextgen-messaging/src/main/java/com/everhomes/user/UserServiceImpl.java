@@ -387,6 +387,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
     private PictureValidateService pictureValidateService;
 
+	@Autowired
+	private LaunchPadService launchPadService;
+
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -5591,6 +5594,9 @@ public class UserServiceImpl implements UserService {
                 "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
 		resp.setContentCacheConfig(
 		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+
+		List<IndexDTO> indexDtos = new ArrayList<>();
+		resp.setIndexDtos(indexDtos);
 
         return resp;
     }

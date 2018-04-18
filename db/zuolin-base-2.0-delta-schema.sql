@@ -100,3 +100,9 @@ CREATE TABLE `eh_launch_pad_indexs` (
   `description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DELETE FROM eh_portal_navigation_bars;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `label` `name`  varchar(64) DEFAULT NULL;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;

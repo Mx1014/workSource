@@ -34,6 +34,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -2718,5 +2719,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		response.setLaunchPadItemDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
+	}
+
+	@Override
+	public List<IndexDTO> listIndexDtos(Integer namespaceId, Long userId) {
+
+
+
+		return null;
 	}
 }
