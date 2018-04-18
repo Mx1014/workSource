@@ -153,7 +153,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
             //把企业服务和资源预定放到第一位和第二位 客户管理2.9 by wentian
             Integer firstIndex = null;
-            for(int i = groupDTOs.size() - 1; i >= 0 ; i++){
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
                 if("企业服务".equals(groupDTO.getTitle())) {
                     firstIndex = i;
@@ -167,7 +167,7 @@ public class FieldServiceImpl implements FieldService {
                 groupDTOs.set(firstIndex, replacedGroupDTO);
             }
             Integer secondIndex = null;
-            for(int i = groupDTOs.size() - 1; i >= 0 ; i++){
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
                 SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
                 if("资源预订".equals(groupDTO.getTitle())) {
                     secondIndex = i;
