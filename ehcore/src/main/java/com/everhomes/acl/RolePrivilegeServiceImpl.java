@@ -2549,10 +2549,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public ListOrganizationContactDTOResponse listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
 		ListOrganizationContactDTOResponse listOrganizationContactDTOResponse = new ListOrganizationContactDTOResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
 		if(adminUserId != null){
-			int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-			ListingLocator locator = new ListingLocator();
-			locator.setAnchor(cmd.getPageAnchor());
 
 			List<OrganizationMember> members =
 					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
@@ -2562,6 +2562,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							== OrganizationGroupType.fromCode(r.getGroupType()))
 					.map(this::processOrganizationContactDTO)
 					.collect(Collectors.toList()));
+			listOrganizationContactDTOResponse.setNextPageAnchor(locator.getAnchor());
 			return listOrganizationContactDTOResponse;
 
 			/*for (OrganizationMember member: members) {
