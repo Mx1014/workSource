@@ -4,19 +4,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>layoutId: layoutId</li>
  * </ul>
  */
-public class Square {
+public class Application {
 
-    private Long layoutId;
+    private String router;
 
-    public Long getLayoutId() {
-        return layoutId;
+    public String getRouter() {
+        return router;
     }
 
-    public void setLayoutId(Long layoutId) {
-        this.layoutId = layoutId;
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     @Override

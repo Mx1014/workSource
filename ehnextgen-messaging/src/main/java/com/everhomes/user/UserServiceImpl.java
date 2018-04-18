@@ -334,7 +334,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
+
     @Autowired
     private LaunchPadService launchPadService;
     
@@ -386,9 +386,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
     private PictureValidateService pictureValidateService;
-
-	@Autowired
-	private LaunchPadService launchPadService;
 
 
 	private static final String DEVICE_KEY = "device_login";

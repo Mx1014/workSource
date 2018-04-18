@@ -1174,10 +1174,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd) {
 		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
-		portalNavigationBar.setLabel(cmd.getLabel());
+		portalNavigationBar.setLabel(cmd.getName());
 		portalNavigationBar.setDescription(cmd.getDescription());
-		portalNavigationBar.setTargetType(cmd.getTargetType());
-		portalNavigationBar.setTargetId(cmd.getTargetId());
+		portalNavigationBar.setType(cmd.getType());
+		portalNavigationBar.setConfigJson(cmd.getConfigJson());
 		portalNavigationBar.setIconUri(cmd.getIconUri());
 		portalNavigationBar.setSelectedIconUri(cmd.getSelectedIconUri());
 		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
@@ -1211,19 +1211,21 @@ public class PortalServiceImpl implements PortalService {
 		User operator = userProvider.findUserById(portalNavigationBar.getOperatorUid());
 		if(null != operator) dto.setOperatorUName(operator.getNickName());
 
-		if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.PORTAL_LAYOUT){
-			PortalLayout portalLayout = portalLayoutProvider.findPortalLayoutById(portalNavigationBar.getTargetId());
-			if(null != portalLayout){
-				String layoutTitle = configurationProvider.getValue(ConfigConstants.PORTAL_LAYOUT_TITLE, "门户");
-				dto.setContentName(layoutTitle + "-" + portalLayout.getLabel());
-			}
-		}else if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.SERVICE_MODULE_APP){
-			ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(portalNavigationBar.getTargetId());
-			if(null != serviceModuleApp){
-				String moduleAppTitle = configurationProvider.getValue(ConfigConstants.PORTAL_MODULE_APP_TITLE, "应用");
-				dto.setContentName(moduleAppTitle + "-" + serviceModuleApp.getName());
-			}
-		}
+		//TODO
+//
+//		if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.PORTAL_LAYOUT){
+//			PortalLayout portalLayout = portalLayoutProvider.findPortalLayoutById(portalNavigationBar.getTargetId());
+//			if(null != portalLayout){
+//				String layoutTitle = configurationProvider.getValue(ConfigConstants.PORTAL_LAYOUT_TITLE, "门户");
+//				dto.setContentName(layoutTitle + "-" + portalLayout.getLabel());
+//			}
+//		}else if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.SERVICE_MODULE_APP){
+//			ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(portalNavigationBar.getTargetId());
+//			if(null != serviceModuleApp){
+//				String moduleAppTitle = configurationProvider.getValue(ConfigConstants.PORTAL_MODULE_APP_TITLE, "应用");
+//				dto.setContentName(moduleAppTitle + "-" + serviceModuleApp.getName());
+//			}
+//		}
 		if(!StringUtils.isEmpty(portalNavigationBar.getIconUri())){
 			String url = contentServerService.parserUri(portalNavigationBar.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 			dto.setIconUrl(url);

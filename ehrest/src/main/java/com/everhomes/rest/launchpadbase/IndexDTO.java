@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: Id</li>
  *     <li>type: 主页签类型，参考{@link IndexType}</li>
- *     <li>name: 名字</li>
+ *     <li>label: 名字</li>
  *     <li>iconUrl: Icon</li>
  *     <li>selectIconUrl: 被选中后的Icon</li>
  *     <li>configJson: 主页签内部配置信息，根据type名字到com.everhomes.rest.launchpadbase.Indexconfigjson获取对象，比如“工作台”的layoutId，“我”里面是否有“我的发布”</li>
@@ -20,7 +20,7 @@ public class IndexDTO {
 
     private Byte type;
 
-    private String name;
+    private String label;
 
     private String iconUrl;
 
@@ -45,11 +45,11 @@ public class IndexDTO {
     }
 
     public String getName() {
-        return name;
+        return label;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.label = name;
     }
 
     public String getIconUrl() {
