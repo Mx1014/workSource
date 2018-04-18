@@ -201,10 +201,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
 			dto.setRanking(count + 1);
 
-			ParkingCardType cardType = parkingService.getParkingCardType(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
-					parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId());
-			if (null != cardType) {
-				dto.setCardTypeName(cardType.getTypeName());
+			if(dto.getCardTypeName()==null) {
+				ParkingCardType cardType = parkingService.getParkingCardType(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+						parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId());
+				if (null != cardType) {
+					dto.setCardTypeName(cardType.getTypeName());
+				}
 			}
 
 			if (null != parkingCardRequest.getInvoiceType()) {

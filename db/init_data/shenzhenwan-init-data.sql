@@ -1426,3 +1426,5 @@ VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home'
 INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
 VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home/PersonalService','PersonalService','EhPortalItems287','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL,NULL);
 
+
+

@@ -597,7 +597,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             if(cancelTask(task)) {
                 User user = UserContext.current().getUser();
                 Timestamp now = new Timestamp(System.currentTimeMillis());
-                task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
+                task.setStatus(FlowCaseStatus.ABSORTED.getCode());
                 task.setDeleteUid(user.getId());
                 task.setDeleteTime(now);
                 pmTaskProvider.updateTask(task);

@@ -8,6 +8,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
@@ -75,6 +76,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.*;
@@ -307,7 +309,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
+    private AssetService assetService;
+
+    @Autowired
     private EnterpriseCustomerProvider customerProvider;
+
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -1304,6 +1310,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setEmailDomain(cmd.getEmailDomain());
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
+            assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
 
             OrganizationDetail enterprise = new OrganizationDetail();
             enterprise.setOrganizationId(organization.getId());

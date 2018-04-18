@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -16,6 +17,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
+import org.elasticsearch.http.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -1210,4 +1213,30 @@ public class AssetController extends ControllerBase {
 //        restResponse.setErrorDescription("OK");
 //        return restResponse;
 //    }
+
+    /**
+     * <b>URL: /asset/batchImportBills</b>
+     * <p>批量导入账单</p>
+     */
+    @RequestMapping("batchImportBills")
+    @RestReturn(value = BatchImportBillsResponse.class)
+    public RestResponse batchImportBills(MultipartFile attachment,BatchImportBillsCommand cmd){
+        BatchImportBillsResponse  res = assetService.batchImportBills(cmd, attachment);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/exportBillTemplates</b>
+     * <p>导出账单的模板</p>
+     */
+    @RequestMapping("exportBillTemplates")
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response){
+        assetService.exportBillTemplates(cmd, response);
+    }
+
+
 }
+

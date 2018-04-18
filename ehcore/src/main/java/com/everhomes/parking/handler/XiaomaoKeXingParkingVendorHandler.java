@@ -123,19 +123,14 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 		if (null == parkingRechargeRateList) {
 			return new ArrayList<ParkingRechargeRateDTO>(0);
 		}
-
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		String result = post(GET_MONTHCARD_TYPE, params);
-		KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
-				new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
-				});
-
-		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
 		
-		if (entity != null && entity.isSuccess()) {
+		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
+		List<KexinXiaomaoCardType> allCardTypes = listCardTypes();
+		
+		if (!allCardTypes.isEmpty()) {
 			dtos = parkingRechargeRateList.stream().map(r -> {
 				ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-				populaterate(entity.getData(), dto, r);
+				populaterate(allCardTypes, dto, r);
 				return dto;
 			}).collect(Collectors.toList());
 		}
@@ -172,15 +167,14 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 				break;
 			}
 
-			Timestamp timestampStart = new Timestamp(
-					Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME) + 1000);
+			long expireTime = Utils.strToLong(card.getEndTime(), Utils.DateStyle.DATE_TIME);
+			Timestamp timestampStart = Utils.addSecond(expireTime, 1);
 			if (isOutOfDate(timestampStart)) {
 				errorDescription = "it is out of date for monthly recharge !";
 				break;
 			}
-
-			Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(),
-					order.getMonthCount().intValue());
+			
+			Timestamp timestampEnd = getCardEndTime(expireTime, order.getMonthCount().intValue());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			String validStart = sdf.format(timestampStart);
@@ -215,27 +209,43 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
 	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-    	ListCardTypeResponse ret = new ListCardTypeResponse();
-    	
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		String result = post(GET_MONTHCARD_TYPE, params);
-		LOGGER.info("Card type from kexin xiaomao={}", result);
+		ListCardTypeResponse ret = new ListCardTypeResponse();
 
-		KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
-				new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
-				});
-		List<ParkingCardType> list = new ArrayList<>();
-		if (entity.isSuccess()) {
-			for (KexinXiaomaoCardType cardType : entity.getData()) {
-				ParkingCardType parkingCardType = new ParkingCardType();
-				parkingCardType.setTypeId(cardType.getStandardId());
-				parkingCardType.setTypeName(cardType.getStandardType());
-				list.add(parkingCardType);
+		do {
+
+			// 获取当前的费率表
+			List<ParkingRechargeRate> rateList = parkingProvider.listParkingRechargeRates(cmd.getOwnerType(),
+					cmd.getOwnerId(), cmd.getParkingLotId(), null);
+			if (null == rateList || rateList.isEmpty()) {
+				break;
 			}
-			ret.setCardTypes(list);
-		}
-    	return ret;
-    }
+
+			// 获取所有卡类型
+			List<KexinXiaomaoCardType> listCardTypes = listCardTypes();
+			if (listCardTypes.isEmpty()) {
+				break;
+			}
+
+			// 获取费率支持的卡
+			List<ParkingCardType> supportCardTypes = new ArrayList<>();
+			for (ParkingRechargeRate rate : rateList) {
+				for (KexinXiaomaoCardType cardType : listCardTypes) {
+					if (rate.getCardType().equals(cardType.getStandardId())) {
+						ParkingCardType temp = new ParkingCardType();
+						temp.setTypeId(cardType.getStandardId());
+						temp.setTypeName(cardType.getStandardType());
+						supportCardTypes.add(temp);
+						break;
+					}
+				}
+			}
+
+			ret.setCardTypes(supportCardTypes);
+
+		} while (false);
+
+		return ret;
+	}
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
@@ -329,23 +339,24 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 					OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
 
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
-			long now = System.currentTimeMillis();
+			long now = getStartTimeMillis();
 			cardInfoDTO.setOpenDate(now);
-			cardInfoDTO.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			cardInfoDTO.setExpireDate(getCardEndTime(now, requestMonthCount).getTime());
 
 			// 根据配置设定收费标准，默认按实际天数，即ParkingCardExpiredRechargeType.ACTUAL(2)
 			if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				cardInfoDTO.setPayMoney(cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			} else {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTimeInMillis(now);
-				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-				int today = calendar.get(Calendar.DAY_OF_MONTH);
-
-				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
-						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-				cardInfoDTO.setPayMoney(price);
+				//正中会暂不支持此模式
+//				Calendar calendar = Calendar.getInstance();
+//				calendar.setTimeInMillis(now);
+//				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+//				int today = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
+//						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
+//								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+//				cardInfoDTO.setPayMoney(price);
 			}
 			
 			cardInfoDTO.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
@@ -362,6 +373,10 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
                 temp = type;
                 break;
             }
+        }
+        
+        if (null == temp) {
+        	return;
         }
         
         dto.setCardTypeId(temp.getStandardId());
@@ -417,9 +432,9 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
             request = getParkingCardRequestByOrder(order);
             order.setCardRequestId(request.getId()); //补上id
         }
-
-        Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
-        Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+        long nowTime = getStartTimeMillis();
+        Timestamp timestampStart = new Timestamp(nowTime);
+		Timestamp timestampEnd = getCardEndTime(nowTime, order.getMonthCount().intValue());
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 
@@ -463,4 +478,68 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
         return false;
     }
     
+
+	private final List<KexinXiaomaoCardType> listCardTypes() {
+
+		List<KexinXiaomaoCardType> cardTypeList = new ArrayList<KexinXiaomaoCardType>(0);
+
+		do {
+			// 向第三方获取卡类型
+			String result = post(GET_MONTHCARD_TYPE, new TreeMap<String, String>());
+			if (StringUtils.isBlank(result)) {
+				break;
+			}
+
+			// 解析
+			KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>> entity = JSONObject.parseObject(result,
+					new TypeReference<KexinXiaomaoJsonEntity<List<KexinXiaomaoCardType>>>() {
+					});
+			if (null == entity || !entity.isSuccess()) {
+				break;
+			}
+
+			cardTypeList = entity.getData();
+
+		} while (false);
+
+		return cardTypeList;
+	}
+	
+	
+	/**   
+	* @Function: XiaomaoKeXingParkingVendorHandler.java
+	* @Description: 根据source时间戳增加mounth个月后的时间
+	* 规则：每次都是添加下个月的最大天数
+	* 	今天是1月1日，2月有28天，有效期到1月29日23点59分59秒
+	*	今天是2月10日（2月有28天），3月有31天，有效期到3月13日23点59分59秒
+	*   
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年4月12日 下午8:23:12 
+	*
+	*/
+	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
+		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
+	}
+	
+	
+	/**   
+	* @Function: XiaomaoKeXingParkingVendorHandler.java
+	* @Description: 获取月卡开始时间。(默认为系统当前时间戳)
+	* 为了测试不同的开卡时间，可通过parking.kexinxiaomao.openCardDate参数进行配置开始时间
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年4月17日 下午3:38:32 
+	*
+	*/
+	private final long getStartTimeMillis() {
+		String cardStartStr = configProvider.getValue("parking.kexinxiaomao.openCardDate", "");
+		if (StringUtils.isBlank(cardStartStr)) {
+			return System.currentTimeMillis();
+		}
+		
+		return Utils.strToLong(cardStartStr, Utils.DateStyle.DATE_TIME);
+	}
+	
 }
