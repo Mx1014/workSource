@@ -579,8 +579,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private void validateBurdenRate(List<EnergyMeterAddressDTO> addresses) {
         if (addresses != null && addresses.size() > 0) {
             BigDecimal burdenRate = new BigDecimal(0);
-            addresses.forEach((address) -> burdenRate.add(address.getBurdenRate()));
-            if (burdenRate.subtract(new BigDecimal(1)).longValue() > 0) {
+            burdenRate = addresses.stream().map(EnergyMeterAddressDTO::getBurdenRate).reduce( burdenRate, BigDecimal::add);
+            if (burdenRate.compareTo(new BigDecimal(1)) > 0) {
                 throw RuntimeErrorException.errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_GT_ONE, "burden rate of this meter is greater than 1.00");
             }
         }
