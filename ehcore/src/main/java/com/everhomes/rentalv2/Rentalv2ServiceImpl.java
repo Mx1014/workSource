@@ -4134,8 +4134,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			event.setEntityId(order.getId());
 			event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
 		});
+		//创建订单统计数据
+		craeteOrderStatistics(order);
 
 	}
+
+	private void craeteOrderStatistics(RentalOrder order){
+
+		if (order.getRentalType().equals(RentalType.HOUR.getCode())||order.getRentalType().equals(RentalType.HALFDAY.getCode())
+				||order.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+			RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
+			
+		}else{
+			List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(order.getResourceType(),
+					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
+		}
+	}
+
 	private FlowCase createFlowCase(RentalOrder order){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();

@@ -7,6 +7,7 @@ CREATE TABLE `eh_rentalv2_order_statistics` (
   `start_time` DATETIME NULL DEFAULT NULL,
   `end_time` DATETIME NULL DEFAULT NULL,
   `reserve_time` DATETIME NULL DEFAULT NULL,
+  `valid_time_long` BIGINT(20) NULL DEFAULT NULL,
   `community_id` BIGINT(20) NULL DEFAULT NULL,
   `namespace_id` INT(11) NULL DEFAULT NULL,
   `user_enterprise_id` BIGINT(20) NULL DEFAULT NULL,
