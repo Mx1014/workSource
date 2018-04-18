@@ -67,8 +67,8 @@ public class EventStatPortalStatStep extends AbstractStatEventStep {
             stat.setStatDate(date);
             stat.setOwnerType(EhPortalNavigationBars.class.getSimpleName());
             stat.setOwnerId(navigationBar.getId());
-            stat.setDisplayName(navigationBar.getName());
-            stat.setName(navigationBar.getName());
+            stat.setDisplayName(navigationBar.getLabel());
+            stat.setName(navigationBar.getLabel());
             stat.setStatType(StatEventPortalStatType.BOTTOM_NAVIGATION.getCode());
             stat.setDescription(navigationBar.getDescription());
             stat.setTimeInterval(StatEventStatTimeInterval.DAILY.getCode());

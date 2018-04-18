@@ -45,7 +45,7 @@ public class PortalNavigationBarProviderImpl1 implements PortalNavigationBarProv
             PortalNavigationBar bar = new PortalNavigationBar();
             bar.setId(config.getId());
             bar.setNamespaceId(config.getNamespaceId());
-            bar.setName(config.getDisplayName());
+            bar.setLabel(config.getDisplayName());
             bar.setDescription(config.getDescription());
 
             navigationBars.add(bar);

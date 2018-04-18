@@ -1174,7 +1174,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd) {
 		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
-		portalNavigationBar.setName(cmd.getName());
+		portalNavigationBar.setLabel(cmd.getName());
 		portalNavigationBar.setDescription(cmd.getDescription());
 		portalNavigationBar.setType(cmd.getType());
 		portalNavigationBar.setConfigJson(cmd.getConfigJson());
