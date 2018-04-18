@@ -60,6 +60,7 @@ import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.DeleteEnergyMeterFormulaCommand;
 import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
 import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
+import com.everhomes.rest.energy.EnergyAutoReadingFlag;
 import com.everhomes.rest.energy.EnergyCategoryDefault;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
@@ -504,6 +505,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeter meter = ConvertHelper.convert(cmd, EnergyMeter.class);
         meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
         meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+        if(cmd.getMeterNumber()!=null && cmd.getMeterNumber().startsWith("ZFH")){
+            meter.setAutoFlag(EnergyAutoReadingFlag.TURE.getCode());
+        }
         dbProvider.execute(r -> {
             meterProvider.createEnergyMeter(meter);
 
