@@ -154,4 +154,7 @@ public interface ConfigConstants {
 
 	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";
 
+    String REMIND_COLOUR_LIST = "remind.colour.list";
+    String REMIND_COLOUR_SHARE = "remind.colour.share";
+
 }
