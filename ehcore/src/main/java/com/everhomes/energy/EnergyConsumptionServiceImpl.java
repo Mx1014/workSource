@@ -545,7 +545,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (addresses == null) {
             if (existAddress != null) {
                 existAddress.values().forEach((v) -> {
-                    v.setStatus(CommonStatus.ACTIVE.getCode());
+                    v.setStatus(CommonStatus.INACTIVE.getCode());
                     energyMeterAddressProvider.updateEnergyMeterAddress(v);
                 });
             }
