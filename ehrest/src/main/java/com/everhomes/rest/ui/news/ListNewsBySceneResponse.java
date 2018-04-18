@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * 返回值
  * <li>nextPageAnchor: 分页的锚点，下一页开始取数据的位置</li>
  * <li>newsList: 新闻列表，参考{@link com.everhomes.rest.news.BriefNewsDTO}</li>
- * <li>needUseUrl: “查看更多”是否启用renderUrl参数进行跳转  0-不启用 1-启用</li>
+ * <li>needUseUrl: “查看更多”是否进行跳转 {@link com.everhomes.rest.news.NewsNormalFlag}  0-不启用 1-启用</li>
  * <li>renderUrl: “查看更多”跳转url</li>
  * <li>title: 跳转后的页面标题</li>
  * </ul>

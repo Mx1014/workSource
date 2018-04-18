@@ -1293,8 +1293,37 @@ public class NewsServiceImpl implements NewsService {
 
 		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
 
-		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), NewsStatus.ACTIVE.getCode()),
+		ListNewsBySceneResponse response =  ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), NewsStatus.ACTIVE.getCode()),
 				ListNewsBySceneResponse.class);
+		
+		Byte isNeedUserUrl = Byte.parseByte(configurationProvider.getValue("ui.news.needuseurl", "0"))   ;
+		String renderUrl = configurationProvider.getValue("ui.news.renderurl", "");
+		String title = configurationProvider.getValue("ui.news.title", "园区快讯");
+		
+		response.setNeedUseUrl(isNeedUserUrl);
+		response.setRenderUrl(renderUrl);
+		response.setTitle(title);
+		
+		 return response;
+		
+	}
+	
+	@Override
+	public void setRenderUrl(SetNewsLikeFlagBySceneCommand cmd) {
+		String renderUrl  = cmd.getNewsToken();
+		String title = cmd.getSceneToken();
+		
+		if (null != cmd.getLikeFlag() ) {
+			configurationProvider.setIntValue(  "ui.news.needuseurl", cmd.getLikeFlag());
+		}
+		
+		if (null != renderUrl && !"".equals(renderUrl)) {
+			configurationProvider.setValue("ui.news.renderurl", renderUrl);
+		}
+		
+		if (null != title && !"".equals(title)) {
+			configurationProvider.setValue("ui.news.title", title);
+		}
 	}
 
 	private SceneTokenDTO getNamespaceFromSceneToken(Long userId, String sceneToken) {
