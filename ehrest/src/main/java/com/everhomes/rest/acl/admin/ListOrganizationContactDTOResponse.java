@@ -12,8 +12,6 @@ import java.util.List;
 public class ListOrganizationContactDTOResponse {
 
     private List<OrganizationContactDTO> organizationContactDTOList;
-    private Long nextPageAnchor;
-
 
     public List<OrganizationContactDTO> getOrganizationContactDTOList() {
         return organizationContactDTOList;
@@ -21,13 +19,5 @@ public class ListOrganizationContactDTOResponse {
 
     public void setOrganizationContactDTOList(List<OrganizationContactDTO> organizationContactDTOList) {
         this.organizationContactDTOList = organizationContactDTOList;
-    }
-
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
-    }
-
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
     }
 }

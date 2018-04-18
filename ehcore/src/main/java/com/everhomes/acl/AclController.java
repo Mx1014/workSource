@@ -715,7 +715,6 @@ public class AclController extends ControllerBase {
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
-
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSystemAdministrators(cmd.getOrganizationId(), cmd.getActivationFlag()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
