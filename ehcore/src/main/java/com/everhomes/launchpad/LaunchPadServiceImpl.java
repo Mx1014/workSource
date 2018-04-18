@@ -2732,7 +2732,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
 			query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
-			query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.ORDER_BY);
+			query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER);
 			return query;
 		});
 
