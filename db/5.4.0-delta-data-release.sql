@@ -85,3 +85,6 @@ SELECT 72180000 AS id,'固定资产管理' AS name,72000000 AS parent_id,'perman
 WHERE m.id IS NULL;
 
 -- End by: zhiwei zhang
+
+-- 住总报修地址 by st.zheng
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ( 'pmtask.zhuzong.url', 'http://139.129.204.232:8007/LsInterfaceServer', '物业报修', '0');
