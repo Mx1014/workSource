@@ -472,7 +472,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null, null, new ListingLocator());
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null, -1, new ListingLocator());
     }
 
     @Override
@@ -482,14 +482,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId, null, new ListingLocator());
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId, -1, new ListingLocator());
     }
 
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(
             Long organizationId, String memberGroup, String targetType, Long targetId,
-            Integer pageSize, ListingLocator locator) {
+            int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
@@ -517,7 +517,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.le(locator.getAnchor()));
         }
 
-        if ( pageSize != null && pageSize > 0 ) {
+        if (pageSize > 0 ) {
             query.addLimit(pageSize + 1);
         }
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
