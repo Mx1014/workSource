@@ -1500,21 +1500,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setBuildingName(Arrays.asList(r.getF().trim().split(",")));
+                data.setBuildingName(Arrays.asList(r.getF().trim().split("，")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getG())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setApartmentName(Arrays.asList(r.getG().trim().split(",")));
+                data.setApartmentName(Arrays.asList(r.getG().trim().split("，")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getH())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setBurdenRate(Arrays.asList(r.getH().trim().split(",")));
+                data.setBurdenRate(Arrays.asList(r.getH().trim().split("，")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getI())) {
