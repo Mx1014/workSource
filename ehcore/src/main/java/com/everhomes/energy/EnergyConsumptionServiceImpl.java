@@ -2795,7 +2795,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     /**
      * 每天早上5点10分刷自动读表
      */
-    @Scheduled(cron = "0 10 5 * * ?")
+    @Scheduled(cron = "0 10 5 L * ?")
     public void readMeterRemote() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
@@ -2855,6 +2855,28 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             }
             LOGGER.info("read energy meter reading  end...");
+
+            LOGGER.info("starting create  auto  meter plans ...");
+            createMonthAutoPlans(meters);
+            LOGGER.info("ending create  auto  meter plans ...");
+        }
+    }
+
+    private void createMonthAutoPlans(List<EnergyMeter> meters) {
+        //暂时只有FZH 不做域空间区分
+        if (meters != null && meters.size() > 0) {
+            EnergyPlan plan = new EnergyPlan();
+            plan.setRepeatSettingId(0L);
+            plan.setName("autoPlans");
+            plan.setNamespaceId(meters.get(0).getNamespaceId());
+            plan.setStatus(CommonStatus.AUTO.getCode());
+            energyPlanProvider.createEnergyPlan(plan);
+            meters.forEach((meter)->{
+                EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
+                meterMap.setPlanId(plan.getId());
+                meterMap.setMeterId(meter.getId());
+                energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+            });
         }
     }
 
@@ -4910,5 +4932,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         }
         return response;
+    }
+
+    @Override
+    public void testAutoReading() {
+        LOGGER.debug("starting auto reading manual...");
+        readMeterRemote();
+        LOGGER.debug("ending auto reading manual...");
     }
 }

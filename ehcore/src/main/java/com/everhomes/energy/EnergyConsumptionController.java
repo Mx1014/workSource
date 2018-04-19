@@ -807,6 +807,14 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.syncOfflineData(cmd));
     }
 
-
-
+    /**
+     * <p>同步离线数据</p>
+     * <b>URL: /energy/testAutoReadMeters</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("testAutoReadMeters")
+    public RestResponse testAutoReadMeters() {
+        energyConsumptionService.testAutoReading();
+        return success();
+    }
 }
