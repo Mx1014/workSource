@@ -4183,7 +4183,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if (dayopenTimes != null && dayopenTimes.size()>0){
 						RentalDayopenTime t = dayopenTimes.get(0);
 						statistics.setValidTimeLong((long)(t.getCloseTime()-t.getOpenTime()*3600*1000));
-					}
+					}else
+						statistics.setValidTimeLong((long)(rule.getDayOpenTime()-rule.getDayCloseTime()*3600*1000));
+					statistics.setRentalDate(new Date(time));
 					rentalv2Provider.createRentalOrderStatistics(statistics);
 				}
 				startDate = startDate.plusDays(1);
