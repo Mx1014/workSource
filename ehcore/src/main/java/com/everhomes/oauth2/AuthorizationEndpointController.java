@@ -71,7 +71,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			@RequestParam(value="client_id", required = true) String clientId,
 			@RequestParam(value="redirect_uri", required = false) String redirectUri,
 			@RequestParam(value="scope", required = false) String scope,
-			@RequestParam(value="state", required = true) String state,
+			@RequestParam(value="state", required = false) String state,
 			@RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
 			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) {
 

@@ -87,7 +87,11 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         code.setGrantorUid(user.getId());
         oAuth2Provider.createAuthorizationCode(code);
 
-        String redirectUrl = String.format("%s?code=%s&state=%s", cmd.getredirect_uri(), code.getCode(), cmd.getState());
+        String redirectUrl = String.format("%s?code=%s", cmd.getredirect_uri(), code.getCode());
+
+        if (cmd.getState() != null && cmd.getState().trim().length() > 0) {
+            redirectUrl = redirectUrl + "&state=" + cmd.getState();
+        }
 
         try {
             return new URI(redirectUrl);
