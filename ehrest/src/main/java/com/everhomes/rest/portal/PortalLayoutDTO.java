@@ -2,10 +2,11 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>
- * <li>id: 门户layout id</li>
- * <li>label: 门户layout名称</li>
- * <li>description: 门户layout描述</li>
- * <li>layoutTemplateId: 门户layout的模板id</li>
+ *     <li>id: 门户layout id</li>
+ *     <li>label: 门户layout名称</li>
+ *     <li>description: 门户layout描述</li>
+ *     <li>type: 类型 参考{@link com.everhomes.rest.launchpadbase.LayoutType}</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class PortalLayoutDTO {
@@ -14,6 +15,10 @@ public class PortalLayoutDTO {
     private String label;
 
     private String description;
+
+    private Byte type;
+
+    private Long bgColor;
 
     public Long getId() {
         return id;
@@ -37,5 +42,21 @@ public class PortalLayoutDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Byte getType() {
+        return type;
+    }
+
+    public void setType(Byte type) {
+        this.type = type;
+    }
+
+    public Long getBgColor() {
+        return bgColor;
+    }
+
+    public void setBgColor(Long bgColor) {
+        this.bgColor = bgColor;
     }
 }

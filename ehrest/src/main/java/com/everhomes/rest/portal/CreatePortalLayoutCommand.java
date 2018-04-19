@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>label: 门户layout名称</li>
  *     <li>description: 门户layout描述</li>
  *     <li>layoutTemplateId: 门户layout的模板id</li>
+ *     <li>type: 类型 参考{@link com.everhomes.rest.launchpadbase.LayoutType}</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class CreatePortalLayoutCommand {
@@ -23,6 +25,10 @@ public class CreatePortalLayoutCommand {
 	private String description;
 
 	private Long layoutTemplateId;
+
+	private Byte type;
+
+	private Long bgColor;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -62,6 +68,22 @@ public class CreatePortalLayoutCommand {
 
 	public void setVersionId(Long versionId) {
 		this.versionId = versionId;
+	}
+
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
+
+	public Long getBgColor() {
+		return bgColor;
+	}
+
+	public void setBgColor(Long bgColor) {
+		this.bgColor = bgColor;
 	}
 
 	@Override

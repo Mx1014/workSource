@@ -4,11 +4,11 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>id: 门户layout的id</li>
- * <li>label: 门户layout名称</li>
- * <li>description: 门户layout描述</li>
+ * <ul>
+ *     <li>id: 门户layout的id</li>
+ *     <li>label: 门户layout名称</li>
+ *     <li>description: 门户layout描述</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class UpdatePortalLayoutCommand {
@@ -19,16 +19,7 @@ public class UpdatePortalLayoutCommand {
 
 	private String description;
 
-	public UpdatePortalLayoutCommand() {
-
-	}
-
-	public UpdatePortalLayoutCommand(Long id, String label, String description) {
-		super();
-		this.id = id;
-		this.label = label;
-		this.description = description;
-	}
+	private Long bgColor;
 
 	public Long getId() {
 		return id;
@@ -52,6 +43,14 @@ public class UpdatePortalLayoutCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Long getBgColor() {
+		return bgColor;
+	}
+
+	public void setBgColor(Long bgColor) {
+		this.bgColor = bgColor;
 	}
 
 	@Override

@@ -8,35 +8,39 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>id: 广场布局Id</li>
- * <li>namespaceId: 命名空间</li>
- * <li>name: 名字</li>
- * <li>layoutJson: 服务市场版本风格，参考{@link LayoutJsonDTO}</li>
- * <li>versionCode: 当前版本</li>
- * <li>minVersionCode: 最小支持版本</li>
- * <li>status: 状态</li>
- * <li>createTime: 创建时间</li>
- * <li>sceneType: 场景类型（以前的字段，标准版不用）</li>
- * <li>bgImageUri: 背景图片（以前的字段，标准版不用）</li>
- * <li>bgImageUrl: 背景图片（以前的字段，标准版不用）</li>
+ *     <li>id: 广场布局Id</li>
+ *     <li>namespaceId: 命名空间</li>
+ *     <li>name: 名字</li>
+ *     <li>layoutJson: 服务市场版本风格，参考{@link LayoutJsonDTO}</li>
+ *     <li>versionCode: 当前版本</li>
+ *     <li>status: 状态</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>sceneType: 场景类型（以前的字段，标准版不用）</li>
+ *     <li>bgImageUri: 背景图片（以前的字段，标准版不用）</li>
+ *     <li>bgImageUrl: 背景图片（以前的字段，标准版不用）</li>
+ *     <li>type: 类型 参考{@link com.everhomes.rest.launchpadbase.LayoutType}</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class LaunchPadLayoutDTO {
 
-    private Long     id;
-    private Integer  namespaceId;
-    private String   name;
-    private String   layoutJson;
-    private Long     versionCode;
+    private Long id;
+    private Integer namespaceId;
+    private String name;
+    private String layoutJson;
+    private Long versionCode;
     //private Long     minVersionCode;
-    private Byte     status;
+    private Byte status;
     private Timestamp createTime;
     private String sceneType;
 
     private String bgImageUri;
 
     private String bgImageUrl;
-    
+
+    private Byte type;
+    private Long bgColor;
+
     public Long getId() {
         return id;
     }
@@ -123,6 +127,22 @@ public class LaunchPadLayoutDTO {
 
     public void setBgImageUrl(String bgImageUrl) {
         this.bgImageUrl = bgImageUrl;
+    }
+
+    public Long getBgColor() {
+        return bgColor;
+    }
+
+    public void setBgColor(Long bgColor) {
+        this.bgColor = bgColor;
+    }
+
+    public Byte getType() {
+        return type;
+    }
+
+    public void setType(Byte type) {
+        this.type = type;
     }
 
     @Override

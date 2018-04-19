@@ -118,10 +118,13 @@ DELETE FROM eh_portal_navigation_bars;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
 
--- layout 类型
+-- layout 类型、背景颜色
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
-
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  int(11) NULL ;
 -- layout 类型
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL;
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  int(11) NULL;
+
+
 
 
