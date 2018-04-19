@@ -1,7 +1,11 @@
 package com.everhomes.asset.szwwyjf;
 
 import java.math.BigDecimal;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -26,6 +30,9 @@ import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class SZWQuery {
@@ -221,4 +228,64 @@ public class SZWQuery {
 		}
 		return response;
 	}
+	
+	public ContractDetailDTO findContractForApp(String request) {
+		ContractDetailDTO contractDetailDTO = new ContractDetailDTO();
+		//通过WebService登录EAS
+		if(login()) {
+			try {
+				WSWSSyncMyBayFacadeSrvProxyServiceLocator accountLocator = new WSWSSyncMyBayFacadeSrvProxyServiceLocator();
+				//String WSWSSyncMyBayFacade_address = "http://192.168.1.200:6888/ormrpc/services/WSWSSyncMyBayFacade";
+				String WSWSSyncMyBayFacade_address = configurationProvider.getValue(999966, ConfigConstants.ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS,"");
+				accountLocator.setWSWSSyncMyBayFacadeEndpointAddress(WSWSSyncMyBayFacade_address);
+				WSWSSyncMyBayFacadeSrvProxy accountProxy = accountLocator.getWSWSSyncMyBayFacade();
+				String result = accountProxy.sync_TenancyContractInfo(request);
+				try {
+					JSONArray jsonArray = JSON.parseArray(result);
+					JSONObject jsonObject = jsonArray.getJSONObject(0);
+					contractDetailDTO.setContractNumber(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
+					contractDetailDTO.setName(jsonObject.get("tenancyName") != null ? jsonObject.get("tenancyName").toString() : null);
+					contractDetailDTO.setCustomerName(jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null);
+					contractDetailDTO.setCategoryItemName(jsonObject.get("tenancyType") != null ? jsonObject.get("tenancyType").toString() : null);
+					contractDetailDTO.setParentContractNumber(jsonObject.get("oldTenancyBill") != null ? jsonObject.get("oldTenancyBill").toString() : null);
+					//格式化日期
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+					Timestamp contractStartDate = new Timestamp(format.parse(jsonObject.get("startDate") != null ? jsonObject.get("startDate").toString() : null).getTime());
+					Timestamp contractEndDate = new Timestamp(format.parse(jsonObject.get("endDate") != null ? jsonObject.get("endDate").toString() : null).getTime());
+					contractDetailDTO.setContractStartDate(contractStartDate);
+					contractDetailDTO.setContractEndDate(contractEndDate);
+					Timestamp signedTime = new Timestamp(format.parse(jsonObject.get("tenancyDate") != null ? jsonObject.get("tenancyDate").toString() : null).getTime());
+					contractDetailDTO.setSignedTime(signedTime);
+					Integer rentCycle = Integer.parseInt(jsonObject.get("leaseCount") != null ? jsonObject.get("leaseCount").toString() : null);
+					contractDetailDTO.setRentCycle(rentCycle);
+					Double rentSize = Double.parseDouble(jsonObject.get("roomTotalRent") != null ? jsonObject.get("roomTotalRent").toString() : null);
+					contractDetailDTO.setRentSize(rentSize);
+					BigDecimal deposit = new BigDecimal(jsonObject.get("depositAmount") != null ? jsonObject.get("depositAmount").toString() : null);
+					contractDetailDTO.setDeposit(deposit);
+					Integer freeDays = Integer.parseInt(jsonObject.get("freeDays") != null ? jsonObject.get("freeDays").toString() : null);
+					contractDetailDTO.setFreeDays(freeDays);
+					BigDecimal downpayment = new BigDecimal(jsonObject.get("firstPayRent") != null ? jsonObject.get("firstPayRent").toString() : null);
+					contractDetailDTO.setDownpayment(downpayment);
+					Timestamp downpaymentTime = new Timestamp(format.parse(jsonObject.get("firstLeaseEndDate") != null ? jsonObject.get("firstLeaseEndDate").toString() : null).getTime());
+					contractDetailDTO.setDownpaymentTime(downpaymentTime);
+					contractDetailDTO.setPaidType(jsonObject.get("rentCountType") != null ? jsonObject.get("rentCountType").toString() : null);
+					//合同状态：待第三方修改
+					//contractDetailDTO.setStatus(jsonObject.get("tenancyState") != null ? jsonObject.get("tenancyState").toString() : null);
+					//经办人：没有这个字段
+					//备注
+					contractDetailDTO.setRemark(jsonObject.get("description") != null ? jsonObject.get("description").toString() : null);
+					//合同总额
+					Timestamp denunciationTime = new Timestamp(format.parse(jsonObject.get("quitRoomDate") != null ? jsonObject.get("quitRoomDate").toString() : null).getTime());
+					contractDetailDTO.setDenunciationTime(denunciationTime);
+				} catch (JSONException e) {
+					LOGGER.error("findContractForApp Failed to parse json response, request={}, result={}", request, result, e);
+				}
+			} catch (Exception e) {
+				LOGGER.error("findContractForApp Failed to call szw api, request={}", request, e);
+			}
+		}
+		return contractDetailDTO;
+	}
+	
+	
 }
