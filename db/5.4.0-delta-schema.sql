@@ -359,3 +359,9 @@ ALTER TABLE eh_punch_exception_requests ADD INDEX i_eh_enterprise_user_punch_dat
 ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_user_punch_date(`enterprise_id`,`user_id`,`punch_date`);
 
 -- End by: zhiwei zhang
+
+-- 优化客户和合同的流程 by wentian
+ALTER TABLE eh_sync_data_tasks ADD COLUMN `view_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否被查看';
+ALTER TABLE eh_customer_talents ADD COLUMN `member_id` BIGINT NOT NULL DEFAULT 0 COMMENT '通讯录表中的id';
+
+-- end by: wentian
