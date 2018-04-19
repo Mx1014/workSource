@@ -7182,6 +7182,8 @@ public class PunchServiceImpl implements PunchService {
             if (null != statistic.getLeaveEarlyTime()) {
                 dto.setLeaveEarlyTime(new BigDecimal(statistic.getLeaveEarlyTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
             }
+            // 实际考勤天数
+            dto.setWorkCount(Double.valueOf(actWorkDayCount(dto.getStatusList())));
 //=======
 //>>>>>>> master
             punchCountDTOList.add(dto);
