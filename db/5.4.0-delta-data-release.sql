@@ -85,3 +85,116 @@ SELECT 72180000 AS id,'固定资产管理' AS name,72000000 AS parent_id,'perman
 WHERE m.id IS NULL;
 
 -- End by: zhiwei zhang
+
+-- 住总报修地址 by st.zheng
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ( 'pmtask.zhuzong.url', 'http://139.129.204.232:8007/LsInterfaceServer', '物业报修', '0');
+-- by zheng 初始化communityId
+update `eh_lease_promotions`  right join `eh_lease_buildings` on `eh_lease_promotions`.building_id = `eh_lease_buildings`.id
+set `eh_lease_promotions`.community_id = `eh_lease_buildings`.community_id
+where `eh_lease_promotions`.building_id>0;
+
+update `eh_service_modules` set module_control_type = 'community_control' where id = 40100;
+
+update `eh_general_forms` set template_text = '[{"dataSourceType":"USER_NAME","dynamicFlag":1,"fieldDisplayName":"用户姓名","fieldExtra":"{\"limitWord\":10}","fieldName":"USER_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"USER_PHONE","dynamicFlag":1,"fieldDisplayName":"手机号码","fieldExtra":"{\"limitWord\":11}","fieldName":"USER_PHONE","fieldType":"INTEGER_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROJECT_NAME","dynamicFlag":1,"fieldDisplayName":"项目名称","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROJECT_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_BUILDING","dynamicFlag":1,"fieldDisplayName":"楼栋名称","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROMOTION_BUILDING","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_APARTMENT","dynamicFlag":1,"fieldDisplayName":"门牌号码","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROMOTION_APARTMENT","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_DESCRIPTION","dynamicFlag":0,"fieldDisplayName":"备注说明","fieldName":"LEASE_PROMOTION_DESCRIPTION","fieldType":"MULTI_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"CUSTOM_DATA","dynamicFlag":0,"fieldName":"CUSTOM_DATA","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"visibleType":"HIDDEN"}]'
+where owner_type = 'EhLeasePromotions';
+
+update `eh_general_forms` set template_text = '[{"dataSourceType":"USER_NAME","dynamicFlag":1,"fieldDisplayName":"用户姓名","fieldExtra":"{\"limitWord\":10}","fieldName":"USER_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"USER_PHONE","dynamicFlag":1,"fieldDisplayName":"手机号码","fieldExtra":"{\"limitWord\":11}","fieldName":"USER_PHONE","fieldType":"INTEGER_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROJECT_NAME","dynamicFlag":1,"fieldDisplayName":"项目名称","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROJECT_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_BUILDING","dynamicFlag":1,"fieldDisplayName":"楼栋名称","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROMOTION_BUILDING","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_DESCRIPTION","dynamicFlag":0,"fieldDisplayName":"备注说明","fieldName":"LEASE_PROMOTION_DESCRIPTION","fieldType":"MULTI_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"CUSTOM_DATA","dynamicFlag":0,"fieldName":"CUSTOM_DATA","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"visibleType":"HIDDEN"}]'
+where owner_type = 'EhBuildings';
+
+update `eh_general_forms` set template_text = '[{"dataSourceType":"USER_NAME","dynamicFlag":1,"fieldDisplayName":"用户姓名","fieldExtra":"{\"limitWord\":10}","fieldName":"USER_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"USER_PHONE","dynamicFlag":1,"fieldDisplayName":"手机号码","fieldExtra":"{\"limitWord\":11}","fieldName":"USER_PHONE","fieldType":"INTEGER_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROJECT_NAME","dynamicFlag":1,"fieldDisplayName":"项目名称","fieldExtra":"{\"limitWord\":20}","fieldName":"LEASE_PROJECT_NAME","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"LEASE_PROMOTION_DESCRIPTION","dynamicFlag":0,"fieldDisplayName":"备注说明","fieldName":"LEASE_PROMOTION_DESCRIPTION","fieldType":"MULTI_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"EDITABLE"},{"dataSourceType":"CUSTOM_DATA","dynamicFlag":0,"fieldName":"CUSTOM_DATA","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":1,"visibleType":"HIDDEN"}]'
+where owner_type = 'EhLeaseProjects';
+
+update `eh_locale_templates` set text = '[{"key":"预约楼栋","value":"${applyBuilding}","entityType":"list"},{"key":"姓名","value":"${applyUserName}","entityType":"list"},{"key":"手机号","value":"${contactPhone}","entityType":"list"},{"key":"申请来源","value":"${sourceType}","entityType":"list"},{"key":"备注","value":"${description}","entityType":"multi_line"}]'
+where scope = 'expansion' and code = '2';
+
+-- 人事2.6新需求 by ryan 03/21/2018
+SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '1001', 'zh_CN', '通讯录删除');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '1002', 'zh_CN', '通讯录成员列表');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '1003', 'zh_CN', '人员档案导入模板');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '1004', 'zh_CN', '人员档案列表');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '1005', 'zh_CN', '填写须知：\r\n    1、请不要对员工信息类别进行增加、删除或修改，以免无法识别员工信息；\r\n    2、Excel中红色字段为必填字段,黑色字段为选填字段\r\n    3、请不要包含公式，以免错误识别员工信息；\r\n    4、多次导入时，若系统中已存在相同手机号码的员工，将以导入的信息为准；\r\n    5、部门：上下级部门间用‘/’隔开，且从最上级部门开始，例如\\\"左邻/深圳研发中心/研发部\\\"；部门若为空，则自动将成员添加到选择的目录下；\r\n    6、手机：支持国内、国际手机号（国内手机号直接输入手机号即可；国际手机号必须包含加号以及国家地区码，格式示例：“+85259****24”）；\r\n    7、合同公司：合同公司若为空，将默认使用公司全称\r\n    8、若要删除某行信息，请右键行号，选择删除\r\n    9、注意日期格式为 xxxx-xx-xx');
+
+SET @template_id = (SELECT MAX(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 5, 'zh_CN', '人事提醒开头', '你好，${contactName}\r\n\r\n\r\n${companyName}近一周需要注意的人事日程如下：\r\n\r\n\r\n', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 6, 'zh_CN', '人事转正提醒', '${contactNames} 转正\r\n', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 7, 'zh_CN', '人事合同到期提醒', '${contactNames} 合同到期\r\n', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 8, 'zh_CN', '人事身份证到期提醒', '${contactNames} 身份证到期\r\n', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 9, 'zh_CN', '人事周年提醒', '${contactName} 在${companyName}工作满 ${year} 年\r\n', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', 10, 'zh_CN', '人事生日提醒', '${contactName} ${year} 岁生日\r\n', 0);
+-- end by ryan
+
+-- Designer: zhiwei zhang
+-- Description: ISSUE#26208 日程1.0
+
+
+INSERT INTO eh_remind_settings(id,name,offset_day,fix_time,default_order,creator_uid,create_time)
+SELECT r.id,r.name,r.offset_day,'09:00',r.default_order,0,NOW() FROM(
+SELECT 1 AS id,'当天（09:00）' AS name,0 AS offset_day,1 AS default_order UNION ALL
+SELECT 2 AS id,'提前1天（09:00）' AS name,1 AS offset_day,2 AS default_order UNION ALL
+SELECT 3 AS id,'提前2天（09:00）' AS name,2 AS offset_day,3 AS default_order UNION ALL
+SELECT 4 AS id,'提前3天（09:00）' AS name,3 AS offset_day,4 AS default_order UNION ALL
+SELECT 5 AS id,'提前5天（09:00）' AS name,5 AS offset_day,5 AS default_order UNION ALL
+SELECT 6 AS id,'提前1周（09:00）' AS name,7 AS offset_day,6 AS default_order
+)r LEFT JOIN eh_remind_settings s ON r.id=s.id
+WHERE s.id IS NULL;
+
+INSERT INTO eh_configurations(name,value,namespace_id)
+SELECT r.name,r.value,r.namespace_id FROM
+(
+SELECT 'remind.colour.list' AS name,'#B3FF3B30,#FFF58F3E,#FFF2C500,#FF4AD878,#FF00B9EF,#FF4285F4,#B3673AB7' AS value,0 AS namespace_id union all
+SELECT 'remind.colour.share' AS name,'#FF6E6E74' AS value,0 AS namespace_id
+)r LEFT JOIN eh_configurations c ON r.name=c.name
+WHERE c.id IS NULL;
+
+
+INSERT INTO eh_locale_strings(scope,code,locale,text)
+SELECT r.scope,r.code,r.locale,r.text FROM(
+SELECT 'calendarRemind' AS scope,10000 AS code,'zh_CN' AS locale,'分类名称已存在' AS text UNION ALL
+SELECT 'calendarRemind' AS scope,10001 AS code,'zh_CN' AS locale,'此日程已被删除' AS text UNION ALL
+SELECT 'calendarRemind' AS scope,10002 AS code,'zh_CN' AS locale,'此日程已取消共享' AS text UNION ALL
+SELECT 'calendarRemind' AS scope,10003 AS code,'zh_CN' AS locale,'最后一个分类不能删除' AS text
+)r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
+WHERE s.id IS NULL;
+
+
+
+-- volgo 添加日程图标.
+SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '日程', '日程', 'cs://1/image/aW1hZ2UvTVRvNE5XWXdPVFl6Wm1SaVpqWmxaVFJpT0RkaE56WXpNR1EyTnpsa1ptSmpZZw', '1', '1', '73', '{"title":"日程"}', '11', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
+
+
+-- End by: zhiwei zhang
+
+--
+-- 启动广告模块数据 add by xq.tian  2018/04/18
+--
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`,`module_control_type`)
+    VALUES (10900, '启动广告', '10000', '/10000/10900', '1', '2', '2', '0', NOW(), null, '13', NOW(), '0', '0', '0', '0','unlimit_control');
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+	VALUES (1090010000, NULL, '启动广告 全部权限', '启动广告 全部权限', NULL);
+
+SET @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+	VALUES (@mp_id:=@mp_id+1, 10900, '0', 1090010900, '启动广告 全部权限', '0', NOW());
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`)
+    VALUES (16021500, '启动广告', 16020000, NULL, 'startup-advert', 1, 2, '/16000000/16020000/16021500', 'zuolin', 15, 10900, 3, 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`)
+    VALUES (41070000, '启动广告', 41000000, NULL, 'startup-advert', 1, 2, '/41000000/41070000', 'park', 15, 10900, 2, 'system', 'module', NULL);
+
+--
+-- 第三方应用管理菜单 add by xq.tian  2018/04/18
+--
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`)
+    VALUES (11040000, '第三方应用管理', 11000000, NULL, 'other-apps', 1, 2, '/11000000/11040000', 'zuolin', 15, NULL, 2, 'system', 'module', NULL);
+
+--
+-- OAuth2登陆提示 add by xq.tian  2018/04/18
+--
+SET @eh_locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+    VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'oauth2', '10000', 'zh_CN', '用户名或密码错误');
+
+-- end   xq.tian

@@ -13,6 +13,7 @@ import java.util.List;
  * <li>targetTypes: 组织架构类型</li>
  * <li>pageAnchor: 分页锚点</li>
  * <li>pageSize: 每页大小</li>
+ * <li>namespaceId: 域空间id(异步导出使用)</li>
  * </ul>
  */
 public class ListArchivesContactsCommand {
@@ -30,6 +31,8 @@ public class ListArchivesContactsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
 
     public ListArchivesContactsCommand() {
     }
@@ -72,6 +75,14 @@ public class ListArchivesContactsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

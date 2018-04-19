@@ -10721,13 +10721,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         Byte visibleFlag = cmd.getVisibleFlag() != null ? cmd.getVisibleFlag() : Byte.valueOf("0");
         organizationMember.setVisibleFlag(visibleFlag);
         organizationMember.setGroupId(0l);
-        /**Modify by lei.lv**/
+        /**Modify by lei.lv**//*
         organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType() : EmployeeType.FULLTIME.getCode());
         if (cmd.getCheckInTime() != null) {
             organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
             organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
         }
-
+*/
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
             organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());

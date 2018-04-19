@@ -2415,7 +2415,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
@@ -2423,7 +2423,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");

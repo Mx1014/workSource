@@ -10,10 +10,12 @@ import java.util.List;
  * <li>organizationId: 公司 id</li>
  * <li>remindDay: 提醒日, 参考{@link com.everhomes.rest.archives.WeekDaysList}</li>
  * <li>remindTime: 提醒时间点</li>
- * <li>remindEmails: 邮箱(List)</li>
+ * <li>detailIds: 成员 detailId(List)</li>
+ * <li>mailFlag: 邮件提醒 0-否,1-是</li>
+ * <li>messageFlag: 消息提醒 0-否,1-是</li>
  * </ul>
  */
-public class RemindArchivesEmployeeCommand {
+public class ArchivesNotificationCommand {
 
     private Long organizationId;
 
@@ -21,10 +23,14 @@ public class RemindArchivesEmployeeCommand {
 
     private Integer remindTime;
 
-    @ItemType(String.class)
-    private List<String> remindEmails;
+    @ItemType(Long.class)
+    private List<Long> detailIds;
 
-    public RemindArchivesEmployeeCommand() {
+    private Byte mailFlag;
+
+    private Byte messageFlag;
+
+    public ArchivesNotificationCommand() {
     }
 
     public Long getOrganizationId() {
@@ -51,12 +57,28 @@ public class RemindArchivesEmployeeCommand {
         this.remindTime = remindTime;
     }
 
-    public List<String> getRemindEmails() {
-        return remindEmails;
+    public List<Long> getDetailIds() {
+        return detailIds;
     }
 
-    public void setRemindEmails(List<String> remindEmails) {
-        this.remindEmails = remindEmails;
+    public void setDetailIds(List<Long> detailIds) {
+        this.detailIds = detailIds;
+    }
+
+    public Byte getMailFlag() {
+        return mailFlag;
+    }
+
+    public void setMailFlag(Byte mailFlag) {
+        this.mailFlag = mailFlag;
+    }
+
+    public Byte getMessageFlag() {
+        return messageFlag;
+    }
+
+    public void setMessageFlag(Byte messageFlag) {
+        this.messageFlag = messageFlag;
     }
 
     @Override
