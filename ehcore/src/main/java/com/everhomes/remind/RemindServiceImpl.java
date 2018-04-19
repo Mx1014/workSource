@@ -567,6 +567,9 @@ public class RemindServiceImpl implements RemindService {
         return remind.getId();
     }
 
+    /**
+     * updateRemind方法没有更新状态，状态的更新走updateRemindStatus接口
+     */
     private Long updateRemind(CreateOrUpdateRemindCommand cmd, Remind existRemind) {
         String originPlanDescription = existRemind.getPlanDescription();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -614,7 +617,7 @@ public class RemindServiceImpl implements RemindService {
             remindProvider.updateRemind(existRemind);
             remindProvider.deleteRemindSharesByRemindId(existRemind.getId());
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind));
-            updateTrackReminds(trackReminds, existRemind);
+            updateTrackReminds(trackReminds, existRemind, false);
             return null;
         });
 
@@ -898,7 +901,7 @@ public class RemindServiceImpl implements RemindService {
         Remind repeat = dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(remind);
             Remind repeatRemind = createRepeatRemind(remind, originRepeatType);
-            updateTrackReminds(trackReminds, remind);
+            updateTrackReminds(trackReminds, remind, true);
             return repeatRemind;
         });
 
@@ -1334,14 +1337,16 @@ public class RemindServiceImpl implements RemindService {
         );
     }
 
-    private void updateTrackReminds(List<Remind> trackReminds, Remind originRemind) {
+    private void updateTrackReminds(List<Remind> trackReminds, Remind originRemind, boolean isStatusChanged) {
         if (!CollectionUtils.isEmpty(trackReminds)) {
             trackReminds.forEach(trackRemind -> {
-                Integer nextOrder = remindProvider.getNextRemindDefaultOrder(trackRemind.getNamespaceId(), trackRemind.getOwnerType(), trackRemind.getOwnerId(), trackRemind.getUserId(), originRemind.getStatus());
                 trackRemind.setPlanDate(originRemind.getPlanDate());
                 trackRemind.setPlanDescription(originRemind.getPlanDescription());
                 trackRemind.setStatus(originRemind.getStatus());
-                trackRemind.setDefaultOrder(nextOrder != null ? nextOrder : Integer.valueOf(1));
+                if (isStatusChanged) {
+                    Integer nextOrder = remindProvider.getNextRemindDefaultOrder(trackRemind.getNamespaceId(), trackRemind.getOwnerType(), trackRemind.getOwnerId(), trackRemind.getUserId(), originRemind.getStatus());
+                    trackRemind.setDefaultOrder(nextOrder != null ? nextOrder : Integer.valueOf(1));
+                }
                 remindProvider.updateRemind(trackRemind);
             });
         }
