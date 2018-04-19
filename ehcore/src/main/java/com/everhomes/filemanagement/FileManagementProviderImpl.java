@@ -8,7 +8,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.filemanagement.FileManagementStatus;
-import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFileManagementCatalogScopesDao;
@@ -20,7 +19,6 @@ import com.everhomes.server.schema.tables.pojos.EhFileManagementContents;
 import com.everhomes.server.schema.tables.records.EhFileManagementCatalogScopesRecord;
 import com.everhomes.server.schema.tables.records.EhFileManagementCatalogsRecord;
 import com.everhomes.server.schema.tables.records.EhFileManagementContentsRecord;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -241,7 +239,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         return query.fetchAnyInto(FileCatalogScope.class);
     }
 
-    @Cacheable(value = "FileCatalogScope", key = "#catalogId", unless = "#result.size() == 0")
+    @Cacheable(value = "FileCatalogScope", key = "#catalogId", unless = "#result == null")
     @Override
     public List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, String keywords) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
