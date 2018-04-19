@@ -42,6 +42,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryName: 分类名称</li>
  * <li>communityUserCount : 统计人数</li>
  * <li>communityNumber: 园区编号</li>
+ * <li>firstLatterOfName: 名字首字母</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -86,6 +87,8 @@ public class CommunityDTO {
     private Integer communityUserCount;
 
     private String communityNumber;
+    
+    private String firstLatterOfName;
 
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -401,4 +404,13 @@ public class CommunityDTO {
     public void setCommunityNumber(String communityNumber) {
         this.communityNumber = communityNumber;
     }
+
+    public String getFirstLatterOfName() {
+        return firstLatterOfName;
+    }
+
+    public void setFirstLatterOfName(String firstLatterOfName) {
+        this.firstLatterOfName = firstLatterOfName;
+    }
+
 }

@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul> 注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员
  * <li>communityId: 取一个园区的企业</li>
  * <li>email: 邮箱地址-通过这个验证用户是否在本小区的某公司</li>
+ * <li>contactName:  姓名</li>
+ * <li>contactDescription: 部门</li>
  * </ul>
  * @author wh
  *
@@ -16,11 +18,10 @@ public class ListOrganizationsByEmailCommand {
     //Use current user as userId
     //@NotNull
 
-	private Long communityId; 
+    private Long communityId; 
     private String email;
-      
 
-	public String getEmail() {
+    public String getEmail() {
 		return email;
 	}
 

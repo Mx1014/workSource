@@ -148,7 +148,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
-        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode()
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode().substring(
+                CoordinationLocks.UPDATE_WAREHOUSE.getCode().lastIndexOf(".") + 1
+        )
                 + cmd.getOwnerType() + cmd.getOwnerId() + cmd.getCommunityId()).enter(() -> {
             checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId(), warehouse.getCommunityId());
             if (cmd.getId() == null) {
@@ -272,6 +274,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         WarehouseMaterialCategories category = ConvertHelper.convert(cmd, WarehouseMaterialCategories.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
+                .substring(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode().lastIndexOf(".") + 1)
                 + cmd.getOwnerType() + cmd.getOwnerId()).enter(() -> {
             if (cmd.getId() == null) {
                 category.setNamespaceId(cmd.getNamespaceId());
@@ -427,7 +430,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL, cmd.getOwnerId());
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
 
-        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode()
+        this.coordinationProvider.getNamedLock(
+                CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().substring(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode().lastIndexOf(".")+1)
                 + cmd.getOwnerType() + cmd.getOwnerId() + cmd.getCommunityId()).enter(() -> {
             //检查此设备的编号，增加园区维度进行查询,允许一个企业同一个设备在不同园区增加实例
             checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId(), cmd.getCommunityId());
@@ -590,6 +594,17 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseProvider.insertWarehouseOrder(order);
         }
 
+        //改为从request中获取stocks by wentian 2018/4/10
+        List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
+        List<WarehouseMaterialStock> stocks = new ArrayList<>();
+        for(WarehouseRequestMaterials material : warehouseRequestMaterials){
+            WarehouseMaterialStock stock = new WarehouseMaterialStock();
+            stock.setAmount(material.getAmount());
+            stock.setMaterialId(material.getMaterialId());
+            stock.setWarehouseId(material.getWarehouseId());
+            stocks.add(stock);
+        }
+        cmd.setStocks(stocks);
 
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
@@ -629,6 +644,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (materialStock != null) {
                     if (WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
                         materialStock.setAmount(materialStock.getAmount() + stock.getAmount());
+                        materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         warehouseProvider.updateWarehouseStock(materialStock);
                         //更新
                         warehouseStockSearcher.feedDoc(materialStock);
@@ -722,6 +738,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     materialStock.setMaterialId(stock.getMaterialId());
                     materialStock.setAmount(stock.getAmount());
                     materialStock.setCreatorUid(uid);
+                    materialStock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     warehouseProvider.creatWarehouseStock(materialStock);
                     warehouseStockSearcher.feedDoc(materialStock);
 

@@ -7,6 +7,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
@@ -28,6 +29,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -191,6 +193,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private AssetService assetService;
 
     public void syncData() {
 //        Map<String, String> params = generateParams();
@@ -1485,6 +1490,7 @@ public class ZJGKOpenServiceImpl {
         organization.setNamespaceOrganizationType(NamespaceOrganizationType.SHENZHOU.getCode());
         organization.setNamespaceOrganizationToken(customer.getNamespaceCustomerToken());
         organizationProvider.createOrganization(organization);
+        assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
         return organization;
     }
 

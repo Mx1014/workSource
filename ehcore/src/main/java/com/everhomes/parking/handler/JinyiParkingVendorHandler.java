@@ -10,6 +10,7 @@ import com.everhomes.parking.jinyi.JinyiClearance;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.MD5Utils;
@@ -24,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 清华信息港 停车
@@ -326,6 +328,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return Locale.SIMPLIFIED_CHINESE.toString();
 	}
 
+	@Override
 	public String applyTempCard(ParkingClearanceLog log) {
 
 		Map<String, String> params = createGeneralParam(APPLY_TEMP_CARD, createApplyTempCardParam(log));
@@ -368,7 +371,8 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return json;
 	}
 
-	public List<JinyiClearance> getTempCardLogs(ParkingClearanceLog log) {
+	@Override
+	public List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog log) {
 
 //		Map<String, String> params = createGeneralParam(GET_TEMP_CARD_LOGS, createGetTempCardLogsParam(log.getLogToken()));
 		Map<String, String> params = createGeneralParam(PARKING_RECORD_SEARCH, createParkingRecordSearch(log));
@@ -381,10 +385,28 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		if(jsonEntity.isSuccess()) {
 			//存入申请记录中
 			log.setLogJson(responseJson);
-			return jsonEntity.getData();
+			List<JinyiClearance> actualLogs = jsonEntity.getData();
+			if (null != actualLogs) {
+				return actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+			}
+		}
+		return null;
+	}
+
+	private ParkingActualClearanceLogDTO convertActualClearanceLogDTO(JinyiClearance jinyiClearance) {
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+		ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
+		if (null != jinyiClearance.getEntrytime()) {
+			LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
+			dto.setEntryTime(Timestamp.valueOf(entryTime));
+		}
+		if (null != jinyiClearance.getExittime()) {
+			LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
+			dto.setExitTime(Timestamp.valueOf(exitTime));
 		}
 
-		return null;
+		return dto;
 	}
 
 	private JSONObject createApplyTempCardParam(ParkingClearanceLog log) {

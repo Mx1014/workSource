@@ -18,7 +18,8 @@ public interface StatTransactionConstant {
 	String BIZ_BUSINESSES_INFO_API = "get.businesses.info.api";
 	
 	String PAID_TRANSACTION_API = "get.transaction.api";
-	
+	String PAID_TRANSACTION_NEW_API = "get.transaction.newApi";
+
 	String PAID_REFUND_API = "get.refund.api";
 	
 	String BIZ_APPKEY = "stat.biz.appkey";

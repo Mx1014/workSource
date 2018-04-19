@@ -22,7 +22,7 @@ public class ParkingLotConfig {
 
     private Byte businessLicenseFlag = 0;
     private Byte vipParkingFlag = 0;
-    private Byte identityCardFlag;
+    private Byte identityCardFlag = 0;
 
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
