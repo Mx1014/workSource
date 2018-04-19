@@ -463,10 +463,10 @@ public class CommunityController extends ControllerBase {
      * <p>获取最近的园区</p>
      */
     @RequestMapping("findNearbyMixCommunity")
-    @RestReturn(value=CommunityUserDTO.class)
+    @RestReturn(value=CommunityInfoDTO.class)
     public RestResponse findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
 
-        CommunityUserDTO res = communityService.findNearbyMixCommunity(cmd);
+        CommunityInfoDTO res = communityService.findNearbyMixCommunity(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -479,10 +479,10 @@ public class CommunityController extends ControllerBase {
      * <p>获取默认园区，比如游客模式拿不到最近园区时可用</p>
      */
     @RequestMapping("findDefaultCommunity")
-    @RestReturn(value=CommunityUserDTO.class)
+    @RestReturn(value=CommunityInfoDTO.class)
     public RestResponse findDefaultCommunity() {
 
-        CommunityUserDTO res = communityService.findDefaultCommunity();
+        CommunityInfoDTO res = communityService.findDefaultCommunity();
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1,7 +1,7 @@
 package com.everhomes.rest.user;
 
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.community.CommunityUserDTO;
+import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationSiteDTO;
@@ -37,7 +37,7 @@ public class AddressUserDTO {
     private String capitalPinyin;
     private Byte status;
     private Byte workPlatformFlag;
-    private List<CommunityUserDTO> communityUserDtos;
+    private List<CommunityInfoDTO> communityUserDtos;
 
     public Long getId() {
         return id;
@@ -119,11 +119,11 @@ public class AddressUserDTO {
         this.workPlatformFlag = workPlatformFlag;
     }
 
-    public List<CommunityUserDTO> getCommunityUserDtos() {
+    public List<CommunityInfoDTO> getCommunityUserDtos() {
         return communityUserDtos;
     }
 
-    public void setCommunityUserDtos(List<CommunityUserDTO> communityUserDtos) {
+    public void setCommunityUserDtos(List<CommunityInfoDTO> communityUserDtos) {
         this.communityUserDtos = communityUserDtos;
     }
 

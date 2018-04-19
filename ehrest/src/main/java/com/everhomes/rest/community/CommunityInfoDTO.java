@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
  *     <li>apartmentAddress: 公寓地址</li>
  * </ul>
  */
-public class CommunityUserDTO {
+public class CommunityInfoDTO {
     private Long id;
     private String name;
     private String aliasName;

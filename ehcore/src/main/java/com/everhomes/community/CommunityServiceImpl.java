@@ -4081,9 +4081,9 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 
 
-		List<CommunityUserDTO> dtos = new ArrayList<>();
+		List<CommunityInfoDTO> dtos = new ArrayList<>();
 		for (Community com: communities){
-			CommunityUserDTO dto = ConvertHelper.convert(com, CommunityUserDTO.class);
+			CommunityInfoDTO dto = ConvertHelper.convert(com, CommunityInfoDTO.class);
 
 			if(familyCommunityIdSet.contains(com.getId())){
 				dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -4150,7 +4150,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public CommunityUserDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
+	public CommunityInfoDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
 
 		List<CommunityGeoPoint> pointList;
 
@@ -4161,7 +4161,7 @@ public class CommunityServiceImpl implements CommunityService {
 			if(pointList != null && pointList.size() > 0){
 				Community community = communityProvider.findCommunityById(pointList.get(0).getCommunityId());
 				if(community != null){
-					CommunityUserDTO dto = ConvertHelper.convert(community, CommunityUserDTO.class);
+					CommunityInfoDTO dto = ConvertHelper.convert(community, CommunityInfoDTO.class);
 
 					Set<Long> familyCommunityIdSet;
 					Set<Long> orgCommunityIdSet;
@@ -4194,7 +4194,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public CommunityUserDTO findDefaultCommunity() {
+	public CommunityInfoDTO findDefaultCommunity() {
 		Community defaultCommunity = communityProvider.findDefaultCommunity(UserContext.getCurrentNamespaceId());
 		if(defaultCommunity == null){
 			defaultCommunity = communityProvider.findAnyCommunity(UserContext.getCurrentNamespaceId());
@@ -4202,7 +4202,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 		if(defaultCommunity != null){
-			CommunityUserDTO dto = ConvertHelper.convert(defaultCommunity, CommunityUserDTO.class);
+			CommunityInfoDTO dto = ConvertHelper.convert(defaultCommunity, CommunityInfoDTO.class);
 			String pinyin = PinYinHelper.getPinYin(dto.getName());
 			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
 			dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));

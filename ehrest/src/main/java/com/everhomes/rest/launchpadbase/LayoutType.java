@@ -3,14 +3,15 @@ package com.everhomes.rest.launchpadbase;
 
 /**
  * <ul>
- *     <li>LAYOUT((byte) 1): 门户</li>
- *     <li>APPLICATION((byte) 2): 应用</li>
- *     <li>MESSAGE((byte) 3): 消息</li>
- *     <li>ME((byte) 4): 我的</li>
+ *     <li>NAV_LUCENCY((byte) 1): 不透明导航栏</li>
+ *     <li>NAV_OPAQUE((byte) 2): 透明导航栏</li>
+ *     <li>TAB((byte) 3): TAB页签</li>
+ *     <li>WORKPLATFORM((byte) 4): 工作台</li>
+ *     <li>COMMUNITY((byte) 5): 园区广场</li>
  * </ul>
  */
 public enum LayoutType {
-    LAYOUT((byte) 1), APPLICATION((byte) 2), MESSAGE((byte) 3), ME((byte) 4);
+    NAV_LUCENCY((byte) 1), NAV_OPAQUE((byte) 2), TAB((byte) 3), WORKPLATFORM((byte) 4), COMMUNITY((byte) 5);
 
     private byte code;
 

@@ -7,17 +7,17 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 园区和用户的相关信息 参考{@link CommunityUserDTO}</li>
+ *     <li>dtos: 园区和用户的相关信息 参考{@link CommunityInfoDTO}</li>
  * </ul>
  */
 public class ListAllCommunitiesResponse {
-    private List<CommunityUserDTO> dtos;
+    private List<CommunityInfoDTO> dtos;
 
-    public List<CommunityUserDTO> getDtos() {
+    public List<CommunityInfoDTO> getDtos() {
         return dtos;
     }
 
-    public void setDtos(List<CommunityUserDTO> dtos) {
+    public void setDtos(List<CommunityInfoDTO> dtos) {
         this.dtos = dtos;
     }
 

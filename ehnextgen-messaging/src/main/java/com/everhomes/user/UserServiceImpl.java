@@ -83,7 +83,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.community.CommunityUserDTO;
+import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -6142,11 +6142,11 @@ public class UserServiceImpl implements UserService {
 
 					//办公地点（公司加入的园区）
 					List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
-					List<CommunityUserDTO> communityUserDtos = new ArrayList<>();
+					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
 					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
 						for (OrganizationCommunity orgcom: organizationCommunitys){
 							Community community = communityProvider.findCommunityById(orgcom.getCommunityId());
-							communityUserDtos.add(ConvertHelper.convert(community, CommunityUserDTO.class));
+							communityUserDtos.add(ConvertHelper.convert(community, CommunityInfoDTO.class));
 						}
 					}
 
@@ -6180,8 +6180,8 @@ public class UserServiceImpl implements UserService {
 					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
-					List<CommunityUserDTO> communityUserDtos = new ArrayList<>();
-					CommunityUserDTO communityUserDto = new CommunityUserDTO();
+					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
+					CommunityInfoDTO communityUserDto = new CommunityInfoDTO();
 					communityUserDto.setId(family.getCommunityId());
 					communityUserDto.setName(family.getCommunityName());
 					communityUserDto.setAliasName(family.getCommunityAliasName());
