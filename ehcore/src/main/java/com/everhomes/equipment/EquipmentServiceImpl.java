@@ -6479,7 +6479,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private void setNewEquipmentRepairLogsBookRow(Sheet sheet, EquipmentInspectionTasksLogs dto) {
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getMaintanceType());
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(dto.getEquipmentId());
