@@ -117,6 +117,7 @@ CREATE TABLE `eh_smart_card_keys` (
 DELETE FROM eh_portal_navigation_bars;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
 ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `version_id`  bigint(20) NULL ;
 
 -- layout 类型、背景颜色
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
