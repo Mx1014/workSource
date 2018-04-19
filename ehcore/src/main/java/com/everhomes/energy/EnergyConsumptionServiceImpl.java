@@ -158,6 +158,7 @@ import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.scheduler.EnergyAutoReadingJob;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -447,6 +448,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
                     cronExpression, EnergyTaskScheduleJob.class, null);
+
+            String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
+            scheduleProvider.scheduleCronJob(autoReading, autoReading,
+                    "0 10 5 L * ?", EnergyAutoReadingJob.class, null);
         }
     }
 
@@ -2792,10 +2797,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
-    /**
-     * 每天早上5点10分刷自动读表
-     */
-    @Scheduled(cron = "0 10 5 L * ?")
+//    /**
+//     * 每天早上5点10分刷自动读表
+//     */
+//    @Scheduled(cron = "0 10 5 L * ?")
     public void readMeterRemote() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
