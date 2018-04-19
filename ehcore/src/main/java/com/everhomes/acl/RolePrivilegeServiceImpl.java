@@ -1758,7 +1758,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			response.setCotactName(details.getContactName());
 			response.setDetailId(details.getId());
 		}
-		return null;
+		return response;
 	}
 
 	@Override
