@@ -517,7 +517,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.le(locator.getAnchor()));
         }
 
-        if (pageSize > 0) {
+        if ( pageSize != null && pageSize > 0 ) {
             query.addLimit(pageSize + 1);
         }
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
