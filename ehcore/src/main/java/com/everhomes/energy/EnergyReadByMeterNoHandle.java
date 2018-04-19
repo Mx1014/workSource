@@ -29,37 +29,23 @@ import java.util.Map;
 
 /**
  * Created by Rui.Jia  2018/4/16 11 :01
- *
  */
-@Component(EnergyAutoReadHandler.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN)
-public class EnergyReadByMeterNoHandle {
-    private static  final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNoHandle.class);
-    public static final String KEY_ALGORITHM = "RSA";
+@Component(EnergyAutoReadHandler.AUTO_PREFIX + PmTaskHandle.YUE_KONG_JIAN)
+public class EnergyReadByMeterNoHandle implements EnergyAutoReadHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNoHandle.class);
+    private static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
     private static final String PUBLIC_KEY = "RSAPublicKey";
     private static final String PRIVATE_KEY = "RSAPrivateKey";
-    public  String readMeterautomatically(String meterName,String serverUrl) {
-        String access_token = getToken();
+
+    @Override
+    public String readMeterautomatically(String meterName, String serverUrl, String publicKey, String clientId) {
+        String access_token = getToken(publicKey, clientId);
         Map<String, String> params = new HashMap<>();
         params.put("meterNo", meterName);
         params.put("access_token", access_token);
         return sendPost(serverUrl + "/joy/readByMeterNo.do", params);
-    }
-
-    public static void main(String[] args) {
-//        String access_token = getToken();
-//        Map<String, String> params = new HashMap<>();
-//        params.put("meterNo", "201703001320");
-//        params.put("access_token", access_token);
-//        String meterReading= sendPost(url + "/joy/readByMeterNo.do", params);
-//        JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
-//        String data  = jsonObj.getAsJsonArray("data").get(0).toString();
-//        Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
-//        result.get("isAutoClear");
-//        result.get("this_read");
-//        System.out.println(result.get("isAutoClear"));
-//        System.out.println(result.get("this_read"));
     }
 
     /**
@@ -78,13 +64,13 @@ public class EnergyReadByMeterNoHandle {
         HttpEntity entity = null;
         try {
             List<NameValuePair> list = new ArrayList<>();
-            params.forEach((k,v) -> list.add(new BasicNameValuePair(k, v)));
+            params.forEach((k, v) -> list.add(new BasicNameValuePair(k, v)));
             httpPost.setEntity(new UrlEncodedFormEntity(list, "UTF-8"));
             response = httpClient.execute(httpPost);
             entity = response.getEntity();
             result = EntityUtils.toString(entity, "UTF-8");
         } catch (IOException e) {
-           LOGGER.error("post exception",e);
+            LOGGER.error("post exception", e);
         } finally {
             try {
                 httpPost.releaseConnection();
@@ -94,27 +80,26 @@ public class EnergyReadByMeterNoHandle {
                 EntityUtils.consume(entity);
                 //httpClient.close();
             } catch (IOException e) {
-                LOGGER.error("post exception",e);
+                LOGGER.error("post exception", e);
             }
         }
-        LOGGER.debug("response elapse: " + (new Date().getTime() - st) / 1000+" s");
+        LOGGER.debug("response elapse: " + (new Date().getTime() - st) / 1000 + " s");
         return result;
     }
+
     /**
-     *
      * @return @throws Exception
      */
-    private static  String getToken() {
+    private static String getToken(String publicKey, String inputString) {
         try {
-            String publicKey = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJQeFrVhmHoWYNwPkXFVScpdwsZ/BnVhsUuGGvozfgcyde6Q7nFaTmvNBGuxbSqsSmatQLKEZWkPDDzP/Yv7zPcCAwEAAQ==";
-            String inputStr = String.format("{'client_id':'joy000001','datetime':'%s'}", new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
+            String inputStr = String.format("{'client_id':'%s','datetime':'%s'}", inputString, new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
             LOGGER.debug("before encrypted: " + inputStr);
             byte[] data = inputStr.getBytes();
             byte[] encodedData = encryptByPublicKey(data, publicKey);
-            return  Base64.encodeBase64URLSafeString(encodedData);
+            return Base64.encodeBase64URLSafeString(encodedData);
 
         } catch (Exception ex) {
-            LOGGER.error("get token error ",ex);
+            LOGGER.error("get token error ", ex);
         }
         return "";
     }

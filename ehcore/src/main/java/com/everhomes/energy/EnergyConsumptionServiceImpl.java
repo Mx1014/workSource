@@ -2778,48 +2778,56 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void readMeterRemote() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
-            EnergyReadByMeterNo remoteMeterReader = new EnergyReadByMeterNo();
             List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
             if (meters != null && meters.size() > 0) {
-                String serverUrl = configurationProvider.getValue(meters.get(0).getNamespaceId(), "energy.meter.thirdparty.server", "");
                 meters.forEach((meter) -> {
-                    try {
-                        String meterReading = remoteMeterReader.readMeterautomatically(meter.getMeterNumber(), serverUrl);
-                        //parser
-                        JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
-                        String data = jsonObj.getAsJsonArray("data").get(0).toString();
-                        Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
-                        //log
-                        EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        EnergyMeterReadingLog log = new EnergyMeterReadingLog();
-                        log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                        if (task != null) {
-                            log.setTaskId(task.getId());
+                    String serverUrl = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.server", "");
+                    String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
+                    String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
+                    EnergyAutoReadHandler handler = null;
+                    if (meter.getNamespaceId() == 999961) {
+                         handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
+                    }
+                    if(handler!=null) {
+                        try {
+                            String meterReading = handler.readMeterautomatically(meter.getMeterNumber(), serverUrl, publicKey, clientId);
+                            //parser
+                            JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
+                            String data = jsonObj.getAsJsonArray("data").get(0).toString();
+                            Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {
+                            }.getType());
+                            //log
+                            EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            EnergyMeterReadingLog log = new EnergyMeterReadingLog();
+                            log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                            if (task != null) {
+                                log.setTaskId(task.getId());
+                            }
+                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
+                            log.setCommunityId(meter.getCommunityId());
+                            log.setMeterId(meter.getId());
+                            log.setNamespaceId(meter.getNamespaceId());
+                            log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            log.setOperatorId(UserContext.currentUserId());
+                            if (Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
+                                log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                            } else {
+                                log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                            }
+                            dbProvider.execute(r -> {
+                                meterReadingLogProvider.createEnergyMeterReadingLog(log);
+                                meter.setLastReading(log.getReading());
+                                meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
+                                meterProvider.updateEnergyMeter(meter);
+                                return true;
+                            });
+                            readingLogSearcher.feedDoc(log);
+                            meterSearcher.feedDoc(meter);
+                        } catch (Exception e) {
+                            LOGGER.error("read energy meter reading  error...", e);
+                            //sendErrorMessage(e);
+                            e.printStackTrace();
                         }
-                        log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
-                        log.setCommunityId(meter.getCommunityId());
-                        log.setMeterId(meter.getId());
-                        log.setNamespaceId(meter.getNamespaceId());
-                        log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        log.setOperatorId(UserContext.currentUserId());
-                        if (Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
-                            log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
-                        } else {
-                            log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
-                        }
-                        dbProvider.execute(r -> {
-                            meterReadingLogProvider.createEnergyMeterReadingLog(log);
-                            meter.setLastReading(log.getReading());
-                            meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
-                            meterProvider.updateEnergyMeter(meter);
-                            return true;
-                        });
-                        readingLogSearcher.feedDoc(log);
-                        meterSearcher.feedDoc(meter);
-                    } catch (Exception e) {
-                        LOGGER.error("read energy meter reading  error...", e);
-                        //sendErrorMessage(e);
-                        e.printStackTrace();
                     }
                 });
 
