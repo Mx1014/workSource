@@ -2601,8 +2601,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		ListOrganizationContectDTOResponse systemAdminDtos = this.listOrganizationSystemAdministrators(adminCmd);
 		List<OrganizationContactDTO> targetDtos = systemAdminDtos.getDtos().stream().filter(r->r.getTargetId().equals(cmd.getUserId())).collect(Collectors.toList());
 		response.setIsTopAdminFlag((targetDtos != null && targetDtos.size() > 0) ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+
 		//add by lei yuan
-		response.setIsSystemAdminFlag((targetDtos != null && targetDtos.size() > 0) ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+		boolean flag = checkAdministrators(cmd.getOrganizationId());
+		response.setIsSystemAdminFlag(flag == true ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+
+
 		//modify by lei yuan
 		Long organizationId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
 		if(organizationId != null && organizationId.equals(cmd.getUserId())){
