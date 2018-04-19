@@ -38,6 +38,16 @@ public class ContractChargingChangeDTO {
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
     private String remark;
+    // 增加免租天数
+    private Integer changeDurationDays;
+
+    public Integer getChangeDurationDays() {
+        return changeDurationDays;
+    }
+
+    public void setChangeDurationDays(Integer changeDurationDays) {
+        this.changeDurationDays = changeDurationDays;
+    }
 
     public List<BuildingApartmentDTO> getApartments() {
         return apartments;

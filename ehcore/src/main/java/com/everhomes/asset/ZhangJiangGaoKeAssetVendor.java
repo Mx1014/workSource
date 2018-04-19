@@ -143,6 +143,10 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
         if(isZuolinByBillGroupId(cmd.getBillGroupId())){
             return zuolinAssetVendorHandler.listBills(currentNamespaceId, response, cmd);
         }
+        if(cmd.getStatus() != null && cmd.getStatus().byteValue() == (byte)0){
+            //未缴纳账单查询
+            return new ArrayList<>();
+        }
         return zhangJiangGaoKeThirdPartyAssetVendor.listBills(currentNamespaceId, response, cmd);
     }
 
