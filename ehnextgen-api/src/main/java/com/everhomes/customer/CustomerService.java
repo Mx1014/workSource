@@ -1,10 +1,13 @@
 package com.everhomes.customer;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -146,6 +149,11 @@ public interface CustomerService {
     void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist);
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
+    void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member);
 
+    SearchRequestInfoResponse listCustomerSeviceAllianceAppRecords(ListCustomerSeviceAllianceAppRecordsCommand cmd);
 
+    ListRentalBillsCommandResponse listCustomerRentalBills(ListCustomerRentalBillsCommand cmd);
+
+    String syncResultViewed(SyncResultViewedCommand cmd);
 }

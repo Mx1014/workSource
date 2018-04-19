@@ -25,6 +25,14 @@ import com.everhomes.util.StringHelper;
  * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
  * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
  * <li>exceptionRequestCount：异常天数 </li>
+ * <li>annualLeaveBalance：年假余额</li>
+ * <li>overtimeCompensationBalance：调休余额</li>
+ * <li>deviceChangeCounts：设备异常数量</li>
+ * <li>exceptionRequestCounts：异常申请数</li>
+ * <li>belateTime：迟到时长</li>
+ * <li>leaveEarlyTime：早退时长</li>
+ * <li>forgotCount：缺卡次数</li>
+ * <li>statusList：每天状态列表 参考{@link com.everhomes.rest.techpark.punch.DayStatusDTO}</li> 
  * </ul>
  */
 public class PunchCountDTO {
@@ -54,7 +62,14 @@ public class PunchCountDTO {
 	private Byte userStatus;
 	private Integer exceptionDayCount;
 	private Integer exceptionRequestCount;
-
+    private Double annualLeaveBalance;
+    private Double overtimeCompensationBalance;
+    private Integer deviceChangeCounts;
+    private Double exceptionRequestCounts;
+    private String belateTime;
+    private String leaveEarlyTime;
+    private Integer forgotCount;
+    private List<DayStatusDTO> statusList;
 
 	public Integer getExceptionDayCount() {
 		return exceptionDayCount;
@@ -209,4 +224,69 @@ public class PunchCountDTO {
 	public void setExceptionRequestCount(Integer exceptionRequestCount) {
 		this.exceptionRequestCount = exceptionRequestCount;
 	}
+
+	public Double getAnnualLeaveBalance() {
+		return annualLeaveBalance;
+	}
+
+	public void setAnnualLeaveBalance(Double annualLeaveBalance) {
+		this.annualLeaveBalance = annualLeaveBalance;
+	}
+
+	public Double getOvertimeCompensationBalance() {
+		return overtimeCompensationBalance;
+	}
+
+	public void setOvertimeCompensationBalance(Double overtimeCompensationBalance) {
+		this.overtimeCompensationBalance = overtimeCompensationBalance;
+	}
+
+	public Integer getDeviceChangeCounts() {
+		return deviceChangeCounts;
+	}
+
+	public void setDeviceChangeCounts(Integer deviceChangeCounts) {
+		this.deviceChangeCounts = deviceChangeCounts;
+	}
+
+	public Double getExceptionRequestCounts() {
+		return exceptionRequestCounts;
+	}
+
+	public void setExceptionRequestCounts(Double exceptionRequestCounts) {
+		this.exceptionRequestCounts = exceptionRequestCounts;
+	}
+
+	public String getBelateTime() {
+		return belateTime;
+	}
+
+	public void setBelateTime(String belateTime) {
+		this.belateTime = belateTime;
+	}
+
+	public String getLeaveEarlyTime() {
+		return leaveEarlyTime;
+	}
+
+	public void setLeaveEarlyTime(String leaveEarlyTime) {
+		this.leaveEarlyTime = leaveEarlyTime;
+	}
+
+	public Integer getForgotCount() {
+		return forgotCount;
+	}
+
+	public void setForgotCount(Integer forgotCount) {
+		this.forgotCount = forgotCount;
+	}
+
+	public List<DayStatusDTO> getStatusList() {
+		return statusList;
+	}
+
+	public void setStatusList(List<DayStatusDTO> statusList) {
+		this.statusList = statusList;
+	}
+	
 }

@@ -151,6 +151,26 @@ public class FieldServiceImpl implements FieldService {
             //处理group的树状结构
             SystemFieldGroupDTO fieldGroupDTO = processSystemFieldGroupnTree(groups, null);
             List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
+            //把企业服务和资源预定放到第一位和第二位 客户管理2.9 by wentian
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("企业服务".equals(groupDTO.getTitle())) {
+                    groupDTOs.remove(i);
+                    groupDTOs.add(1, groupDTO);
+                    break;
+                }
+            }
+            // 编译ok， 运行时自动拆箱调用了intValue()，会导致空指针
+//            if(firstIndex != 0 && firstIndex != null){
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("资源预定".equals(groupDTO.getTitle())) {
+                    groupDTOs.remove(i);
+                    groupDTOs.add(1, groupDTO);
+                    break;
+                }
+            }
+
             return groupDTOs;
         }
         return null;
@@ -193,6 +213,8 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("企业情况");
                 sheetNames.remove("员工情况");
                 sheetNames.remove("客户合同");
+                sheetNames.remove("资源预定");
+                sheetNames.remove("企业服务");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);

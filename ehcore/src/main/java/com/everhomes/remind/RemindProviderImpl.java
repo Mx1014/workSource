@@ -544,7 +544,7 @@ public class RemindProviderImpl implements RemindProvider {
         query.and(Tables.EH_REMIND_SHARES.OWNER_USER_ID.eq(request.getShareUserId()));
         query.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()));
         query.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()));
-        query.orderBy(Tables.EH_REMIND_SHARES.CREATE_TIME.desc());
+        query.orderBy(Tables.EH_REMINDS.CREATE_TIME.desc());
 
         if (StringUtils.hasText(request.getKeyWord())) {
             query.and(Tables.EH_REMINDS.PLAN_DESCRIPTION.like("%" + request.getKeyWord() + "%"));
