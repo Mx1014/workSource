@@ -24,18 +24,24 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.BizDetailActionData;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.IndexDTO;
+import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.LayoutType;
+import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -45,7 +51,10 @@ import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.AddressUserType;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.ListAddressUsersCommand;
+import com.everhomes.rest.user.ListAddressUsersResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
@@ -2736,12 +2745,33 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			return query;
 		});
 
+		List<IndexDTO> dtos = new ArrayList<>();
 		for (LaunchPadIndex index: launchPadIndices){
+			if(IndexType.fromCode(index.getType()) == IndexType.CONTAINER){
+				Container container = ConvertHelper.convert(index.getConfigJson(), Container.class);
 
+				//工作台特殊逻辑
+				if(LayoutType.fromCode(container.getLayoutType()) == LayoutType.WORKPLATFORM){
+					ListAddressUsersCommand cmd = new ListAddressUsersCommand();
+					cmd.setStatus(GroupMemberStatus.ACTIVE.getCode());
+					cmd.setType(AddressUserType.ORGANIZATION.getCode());
+					cmd.setWorkPlatformFlag(TrueOrFalseFlag.TRUE.getCode());
+					ListAddressUsersResponse response = userService.listAddressUsers(cmd);
+					//不显示工作台
+					if(response == null || response.getDtos() == null || response.getDtos().size() == 0){
+						continue;
+					}
+				}
+			}
+
+			//TODO
+			if(IndexType.fromCode(index.getType()) == IndexType.APPLICATION){
+
+			}
+
+
+			dtos.add(ConvertHelper.convert(index, IndexDTO.class));
 		}
-
-
-
-		return null;
+		return dtos;
 	}
 }

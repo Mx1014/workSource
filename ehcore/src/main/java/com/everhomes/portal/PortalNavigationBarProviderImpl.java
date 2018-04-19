@@ -51,16 +51,23 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	}
 
 	@Override
+	public void deletePortalNavigationBar(Long id) {
+		assert (id != null);
+		getReadWriteDao().deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalNavigationBars.class, id);
+	}
+
+	@Override
 	public PortalNavigationBar findPortalNavigationBarById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalNavigationBar.class);
 	}
 	
 	@Override
-	public List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId) {
+	public List<PortalNavigationBar> listPortalNavigationBar(Long versionId) {
 		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
-		if(null != namespaceId){
-			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.NAMESPACE_ID.eq(namespaceId));
+		if(null != versionId){
+			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.VERSION_ID.eq(versionId));
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)

@@ -10,10 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.launchpad.ItemServiceCategry;
-import com.everhomes.launchpad.LaunchPadItem;
-import com.everhomes.launchpad.LaunchPadLayout;
-import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.launchpad.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -33,6 +30,9 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
+import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -165,6 +165,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private SequenceService sequenceService;
+
+	@Autowired
+	private LaunchPadIndexProvider launchPadIndexProvider;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1151,8 +1154,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(namespaceId);
+		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(cmd.getVersionId());
 		return new ListPortalNavigationBarsResponse(portalNavigationBars.stream().map(r ->{
 			return processPortalNavigationBarDTO(r);
 		}).collect(Collectors.toList()));
@@ -1187,10 +1189,8 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd) {
-		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
-		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
-		portalNavigationBar.setStatus(PortalNavigationBarStatus.INACTIVE.getCode());
-		portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+
+		portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
 	}
 
 	private PortalNavigationBar checkPortalNavigationBar(Long id){
@@ -1394,6 +1394,8 @@ public class PortalServiceImpl implements PortalService {
 							//发布layout
 							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 						}
+
+
 
 						//正式发布之后，在此基础上生成小本版
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
@@ -1720,6 +1722,64 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 		}
+	}
+
+
+	private void publishNavigationBar(Long versionId, Byte publishType){
+
+		PortalVersionDTO portalVersion = findPortalVersionById(versionId);
+
+
+		//正式发布删除旧的index
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+				query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(portalVersion.getNamespaceId()));
+				return query;
+			});
+
+			if(launchPadIndices != null){
+				for (LaunchPadIndex index: launchPadIndices){
+					launchPadIndexProvider.deleteLaunchPadIndex(index);
+				}
+			}
+		}
+
+
+		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(versionId);
+
+		if(portalNavigationBars != null){
+			for (PortalNavigationBar na: portalNavigationBars){
+				LaunchPadIndex index = ConvertHelper.convert(na, LaunchPadIndex.class);
+
+				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
+					Container container = ConvertHelper.convert(index.getConfigJson(), Container.class);
+					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
+
+					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
+						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
+					}
+
+					index.setConfigJson(container.toString());
+
+				}else if(IndexType.fromCode(na.getType()) == IndexType.APPLICATION){
+					//TODO  转换成router
+					Application application = new Application();
+					index.setConfigJson(application.toString());
+				}
+
+				index.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				index.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+				index.setCreatorUid(UserContext.currentUserId());
+
+				launchPadIndexProvider.createLaunchPadIndex(index);
+			}
+
+		}
+
+
+
+
 	}
 
 
