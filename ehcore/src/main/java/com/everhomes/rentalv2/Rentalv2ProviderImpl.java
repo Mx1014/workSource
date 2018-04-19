@@ -164,6 +164,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return id;
 	}
 
+
+
 	@Override
 	public Long createRentalItemBill(RentalItemsOrder rib) {
 
@@ -824,6 +826,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public void deleteRentalOrderStatisticsByOrderId(Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2OrderStatisticsRecord> step = context.delete(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.ORDER_ID.eq(orderId);
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
 	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
 											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
 											 Long startTime, Long endTime, Byte invoiceFlag,Long userId){
@@ -1456,6 +1467,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public void createRentalDayopenTime(RentalDayopenTime rdt) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2DayopenTime.class));
+		rdt.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2DayopenTimeRecord record = ConvertHelper.convert(rdt,
+				EhRentalv2DayopenTimeRecord.class);
+		InsertQuery<EhRentalv2DayopenTimeRecord> query = context.insertQuery(Tables.EH_RENTALV2_DAYOPEN_TIME);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhRentalv2DayopenTime.class,null);
+
+	}
+
+	@Override
 	public void createRentalConfigAttachment(RentalConfigAttachment rca) {
 
 		long id = sequenceProvider.getNextSequence(NameMapper
@@ -1595,6 +1621,23 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
 
+		return result;
+	}
+
+	@Override
+	public List<RentalDayopenTime> queryRentalDayopenTimeByOwner(String resourceType, String ownerType, Long ownerId,Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_DAYOPEN_TIME);
+		Condition condition = Tables.EH_RENTALV2_DAYOPEN_TIME.RESOURCE_TYPE.eq(resourceType);
+		condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType));
+		condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(ownerId));
+		if (null != rentalType)
+			condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.RENTAL_TYPE.eq(rentalType));
+		step.where(condition);
+		List<RentalDayopenTime> result = step.fetch().map(r->{
+			return ConvertHelper.convert(r,RentalDayopenTime.class);
+		});
 		return result;
 	}
 
@@ -1761,6 +1804,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Integer deleteCount = step.execute();
 		return deleteCount;
 		
+	}
+
+	@Override
+	public Integer deleteRentalDayopenTimeByOwnerId(String resourceType, String ownerType, Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2DayopenTimeRecord > step = context.delete(Tables.EH_RENTALV2_DAYOPEN_TIME);
+		Condition condition = Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType)
+				.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(id)).and(Tables.EH_RENTALV2_DAYOPEN_TIME.RESOURCE_TYPE.eq(resourceType));
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
 	}
 
 	@Override

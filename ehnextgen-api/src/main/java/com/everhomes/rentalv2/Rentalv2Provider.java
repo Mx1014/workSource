@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.rentalv2.MaxMinPrice;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DayopenTime;
 
 public interface Rentalv2Provider {
 
@@ -20,6 +21,8 @@ public interface Rentalv2Provider {
 	Long createRentalOrder(RentalOrder rentalBill);
 
 	Long createRentalOrderStatistics(RentalOrderStatistics statistics);
+
+	void deleteRentalOrderStatisticsByOrderId(Long orderId);
 
 	Long createRentalItemBill(RentalItemsOrder rib);
 
@@ -88,6 +91,8 @@ public interface Rentalv2Provider {
 
 	void createRentalCloseDate(RentalCloseDate rcd);
 
+	void createRentalDayopenTime(RentalDayopenTime rdt);
+
 	void createRentalConfigAttachment(RentalConfigAttachment rca);
 
 	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId, String resourceType, Long resourceTypeId,
@@ -101,6 +106,8 @@ public interface Rentalv2Provider {
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId,Byte attachmentType);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
+
+	List<RentalDayopenTime> queryRentalDayopenTimeByOwner(String resourceType, String ownerType, Long ownerId,Byte rentalType);
 
 	void createRentalSiteOwner(RentalSiteRange siteOwner);
 
@@ -123,6 +130,8 @@ public interface Rentalv2Provider {
 	Integer deleteRentalCloseDatesByOwnerId(String resourceType, String ownerType, Long id);
 
 	Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType, Long id,Byte attachmentType);
+
+	Integer deleteRentalDayopenTimeByOwnerId(String resourceType, String ownerType, Long id);
 
 	List<RentalSiteRange> findRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 

@@ -16,7 +16,7 @@ CREATE TABLE `eh_rentalv2_order_statistics` (
   PRIMARY KEY (`id`));
 
   CREATE TABLE `eh_rentalv2_dayopen_time` (
-  `id` INT NOT NULL,
+  `id` BIGINT(20) NOT NULL,
   `owner_id` BIGINT(20) NULL DEFAULT NULL,
   `owner_type` VARCHAR(255) NULL DEFAULT NULL,
   `open_time` DOUBLE NULL DEFAULT NULL,

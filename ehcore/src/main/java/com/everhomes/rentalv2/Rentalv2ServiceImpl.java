@@ -478,17 +478,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				priceRuleType, id);
 		response.setPriceRules(priceRules.stream().map(this::convert).collect(Collectors.toList()));
 		response.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
-//		if (priceRules.size() > 0) {
-//			Rentalv2PriceRule priceRule = priceRules.get(0);
-//			response.setRentalType(priceRule.getRentalType());
-//			response.setWorkdayPrice(priceRule.getWorkdayPrice());
-//			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
-//			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
-//			response.setDiscountType(priceRule.getDiscountType());
-//			response.setDiscountRatio(priceRule.getDiscountRatio());
-//			response.setFullPrice(priceRule.getFullPrice());
-//			response.setCutPrice(priceRule.getCutPrice());
-//		}
+
 
 		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rule.getResourceType(),
 				priceRuleType, id,null,null);
@@ -521,6 +511,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate() && d.getCloseDate().getTime()>firstDay).map(c -> c.getCloseDate().getTime())
 					.collect(Collectors.toList()));
 		}
+		List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(rule.getResourceType(),
+				ruleType, id,null);
+		if (dayopenTimes!=null){
+			response.setOpenTimes(dayopenTimes.stream().map(r->{
+				RentalOpenTimeDTO dto = new RentalOpenTimeDTO();
+				dto.setRentalType(r.getRentalType());
+				dto.setDayOpenTime(r.getOpenTime());
+				dto.setDayCloseTime(r.getCloseTime());
+				return dto;
+			}).collect(Collectors.toList()));
+		}
+
 		//set 物资
 		List<RentalConfigAttachment> attachments = rentalv2Provider.queryRentalConfigAttachmentByOwner(rule.getResourceType(),
 				ruleType, id,null);
@@ -986,6 +988,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rcd.setOwnerId(ownerId);
 				rcd.setResourceType(resourceType);
 				this.rentalv2Provider.createRentalCloseDate(rcd);
+			});
+		}
+	}
+
+	private void setRentalDayopenTime(List<RentalOpenTimeDTO> openTime,String ownerType,Long ownerId,String resourceType){
+		if (null != openTime){
+			openTime.forEach(c->{
+				RentalDayopenTime dayopenTime = new RentalDayopenTime();
+				dayopenTime.setOwnerId(ownerId);
+				dayopenTime.setOwnerType(ownerType);
+				dayopenTime.setOpenTime(c.getDayOpenTime());
+				dayopenTime.setCloseTime(c.getDayCloseTime());
+				dayopenTime.setRentalType(c.getRentalType());
+				dayopenTime.setResourceType(resourceType);
+				this.rentalv2Provider.createRentalDayopenTime(dayopenTime);
 			});
 		}
 	}
@@ -3669,6 +3686,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				event.setEntityId(order.getId());
 				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
 			});
+			//删除统计信息
+			rentalv2Provider.deleteRentalOrderStatisticsByOrderId(order.getId());
 			return null;
 		});
 	}
@@ -4159,7 +4178,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long time = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 				if (!closeTime.contains(time)){
 					RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
-
+					List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(order.getResourceType(),
+							RuleSourceType.RESOURCE.getCode(),order.getRentalResourceId(),order.getRentalType());
+					if (dayopenTimes != null && dayopenTimes.size()>0){
+						RentalDayopenTime t = dayopenTimes.get(0);
+						statistics.setValidTimeLong((long)(t.getCloseTime()-t.getOpenTime()*3600*1000));
+					}
 					rentalv2Provider.createRentalOrderStatistics(statistics);
 				}
 				startDate = startDate.plusDays(1);
@@ -7290,6 +7314,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//设置关闭日期close dates
 			rentalv2Provider.deleteRentalCloseDatesByOwnerId(rule.getResourceType(), ownerType, id);
 			setRentalRuleCloseDates(cmd.getCloseDates(), id, ownerType, rule.getResourceType());
+
+			//设置每天开启关闭时间
+			rentalv2Provider.deleteRentalDayopenTimeByOwnerId(rule.getResourceType(),ownerType,id);
+			setRentalDayopenTime(cmd.getOpenTimes(),ownerType,id,rule.getResourceType());
 
 			//先删除后添加
 			List<Rentalv2PriceRule> prices = rentalv2PriceRuleProvider.listPriceRuleByOwner(rule.getResourceType(), priceRuleType, id);
