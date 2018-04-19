@@ -505,7 +505,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setStatus(FlowCaseStatus.FINISHED.getCode());
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}

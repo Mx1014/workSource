@@ -37,6 +37,7 @@ import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
@@ -173,28 +174,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @PostConstruct
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
-//        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
-
-        String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-        LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
-        if (taskServer.equals(equipmentIp)) {
-            LOGGER.info("================================================taskServer equals equipmentIp");
-//			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+        //  String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
+        //  String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            LOGGER.info("starting  equipment scheduler.....");
             String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
             scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
                     cronExpression, EquipmentInspectionScheduleJob.class, null);
-
-//			});
         }
-
-//		Long notifyTime = System.currentTimeMillis() + 300000;
-//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-//		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-//		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-//		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-//				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
-
-
     }
 
     @Cacheable(value = "findEquipmentByIdAndOwner", key = "{#id, #ownerType, #ownerId}", unless = "#result == null")
