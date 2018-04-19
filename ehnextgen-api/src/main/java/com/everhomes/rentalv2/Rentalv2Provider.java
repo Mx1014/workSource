@@ -218,4 +218,8 @@ public interface Rentalv2Provider {
 	BigDecimal countRentalBillAmount(String resourceType,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
 
 	Integer countRentalBillNum(String resourceType,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	Long countRentalBillValidTime(String resourceType,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+
 }

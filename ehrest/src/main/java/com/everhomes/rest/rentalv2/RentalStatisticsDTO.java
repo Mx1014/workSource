@@ -14,7 +14,7 @@ public class RentalStatisticsDTO {
     private String name;
     private BigDecimal amount;
     private Integer OrderCount;
-    private BigDecimal usedTime;
+    private Long usedTime;
 
     public String getName() {
         return name;
@@ -40,11 +40,11 @@ public class RentalStatisticsDTO {
         OrderCount = orderCount;
     }
 
-    public BigDecimal getUsedTime() {
+    public Long getUsedTime() {
         return usedTime;
     }
 
-    public void setUsedTime(BigDecimal usedTime) {
+    public void setUsedTime(Long usedTime) {
         this.usedTime = usedTime;
     }
 }

@@ -2,6 +2,7 @@
 CREATE TABLE `eh_rentalv2_order_statistics` (
   `id` BIGINT(20) NOT NULL,
   `order_id` BIGINT(20) NOT NULL,
+  `rental_resource_id` BIGINT(20) NOT NULL,
   `rental_uid` BIGINT(20) NULL DEFAULT NULL,
   `rental_date` DATE NULL DEFAULT NULL,
   `start_time` DATETIME NULL DEFAULT NULL,

@@ -1033,6 +1033,26 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public Long countRentalBillValidTime(String resourceType, Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		Long count = 0l;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum()).from(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE.eq(resourceType);
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.COMMUNITY_ID.eq(communityId));
+		if (null!=startTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.ge(new Date(startTime)));
+		if (null!=endTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.le(new Date(endTime)));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_RESOURCE_ID.eq(rentalSiteId));
+		if (null!=orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID.eq(orgId));
+		count = step.where(condition).fetchOneInto(Long.class);
+		return count;
+	}
+
+	@Override
 	public List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long> siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

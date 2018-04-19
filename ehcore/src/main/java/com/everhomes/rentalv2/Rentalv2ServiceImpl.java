@@ -8459,11 +8459,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         for (RentalResource rentalSite:rentalSites){
             RentalStatisticsDTO dto = new RentalStatisticsDTO();
             dto.setName(rentalSite.getResourceName());
-            dto.setAmount(rentalv2Provider.countRentalBillAmount(null,null,cmd.getStartDate(),
+            dto.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),null,cmd.getStartDate(),
                     cmd.getEndDate(),rentalSite.getId(),null));
-            dto.setOrderCount(rentalv2Provider.countRentalBillNum(null,null,cmd.getStartDate(),
+            dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),null,cmd.getStartDate(),
                     cmd.getEndDate(),rentalSite.getId(),null));
-
+			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),null,cmd.getStartDate(),
+					cmd.getEndDate(),rentalSite.getId(),null));
             response.getClassifyStatistics().add(dto);
         }
 
@@ -8490,7 +8491,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					cmd.getEndDate(),null,enterprise.getId()));
 			dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
 					cmd.getEndDate(),null,enterprise.getId()));
-
+			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,enterprise.getId()));
 			response.getOrgStatistics().add(dto);
 		}
 		response.setNextPageAnchor(locator.getAnchor());
