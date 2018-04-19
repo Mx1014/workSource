@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间</li>
  *     <li>versionId: versionId</li>
  *     <li>type: 主页签类型，参考{@link IndexType}</li>
- *     <li>configJson: configJson</li>
+ *     <li>configJson: configJson 参考</li>
  *     <li>label: 主页签名称</li>
  *     <li>description: 描述</li>
  *     <li>iconUri: icon 图片</li>

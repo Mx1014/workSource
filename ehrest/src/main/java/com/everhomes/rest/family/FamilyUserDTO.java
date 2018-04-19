@@ -1,6 +1,6 @@
 package com.everhomes.rest.family;
 
-import com.everhomes.rest.community.CommunityUserDTO;
+import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
 
 /**
@@ -13,7 +13,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
  *     <li>fullPinyin: 拼音全拼</li>
  *     <li>capitalPinyin: 拼音首写字母</li>
  *     <li>status: status {@link GroupMemberStatus}</li>
- *     <li>community: 家庭所在园区 {@link com.everhomes.rest.community.CommunityUserDTO}</li>
+ *     <li>community: 家庭所在园区 {@link com.everhomes.rest.community.CommunityInfoDTO}</li>
  * </ul>
  */
 public class FamilyUserDTO {
@@ -25,7 +25,7 @@ public class FamilyUserDTO {
     private String fullPinyin;
     private String capitalPinyin;
     private Byte status;
-    private CommunityUserDTO community;
+    private CommunityInfoDTO community;
 
     public Long getId() {
         return id;
@@ -91,11 +91,11 @@ public class FamilyUserDTO {
         this.status = status;
     }
 
-    public CommunityUserDTO getCommunity() {
+    public CommunityInfoDTO getCommunity() {
         return community;
     }
 
-    public void setCommunity(CommunityUserDTO community) {
+    public void setCommunity(CommunityInfoDTO community) {
         this.community = community;
     }
 }

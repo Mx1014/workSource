@@ -144,7 +144,7 @@ public interface CommunityService {
 
 	ListAllCommunitiesResponse listAllCommunities();
 
-    CommunityUserDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd);
+	CommunityInfoDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd);
 
-	CommunityUserDTO findDefaultCommunity();
+	CommunityInfoDTO findDefaultCommunity();
 }

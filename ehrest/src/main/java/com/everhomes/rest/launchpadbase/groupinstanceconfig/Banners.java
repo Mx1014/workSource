@@ -8,6 +8,9 @@ import java.util.List;
 /**
  * <ul>
  *     <li>itemGroup: itemGroup</li>
+ *     <li>wideRatio: 宽高比（宽）</li>
+ *     <li>hightRatio: 宽高比（高）</li>
+ *     <li>shadowFlag: shadowFlag</li>
  * </ul>
  */
 public class Banners {
