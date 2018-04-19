@@ -14,3 +14,14 @@ CREATE TABLE `eh_rentalv2_order_statistics` (
   `rental_type` TINYINT(4) NULL DEFAULT NULL,
   `resource_type` VARCHAR(64) NULL DEFAULT NULL,
   PRIMARY KEY (`id`));
+
+  CREATE TABLE `eh_rentalv2_dayopen_time` (
+  `id` INT NOT NULL,
+  `owner_id` BIGINT(20) NULL DEFAULT NULL,
+  `owner_type` VARCHAR(255) NULL DEFAULT NULL,
+  `open_time` DOUBLE NULL DEFAULT NULL,
+  `close_time` DOUBLE NULL DEFAULT NULL,
+  `rental_type` TINYINT(4) NULL DEFAULT NULL,
+  `resource_type` VARCHAR(64) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`));
+
