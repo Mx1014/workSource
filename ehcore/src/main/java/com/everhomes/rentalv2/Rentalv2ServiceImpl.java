@@ -45,6 +45,7 @@ import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rentalv2.job.RentalCancelOrderJob;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rentalv2.order_action.CancelUnsuccessRentalOrderAction;
@@ -4019,10 +4020,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private void createOrderOverTimeTask(RentalOrder bill) {
 		// n分钟后，取消未成功的订单
-		final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(), String.valueOf(bill.getId()));
-
-		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-				bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME);
+//		final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(), String.valueOf(bill.getId()));
+//
+//		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//				bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME);
+		Map<String, Object> messageMap = new HashMap<>();
+		messageMap.put("orderId",bill.getId());
+		scheduleProvider.scheduleSimpleJob(
+				queueName,
+				queueName,
+				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				RentalCancelOrderJob.class,
+				messageMap
+		);
 	}
 
 	private void createOrderItems(List<SiteItemDTO> rentalItems, RentalOrder bill) {
