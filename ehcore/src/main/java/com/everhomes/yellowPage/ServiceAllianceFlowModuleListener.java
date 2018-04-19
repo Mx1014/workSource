@@ -48,6 +48,8 @@ import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -77,6 +79,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private OrganizationProvider organizationProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -192,8 +197,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
 		//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
 		if(ocr == null){
-			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			Group group = this.groupProvider.findGroupById(flowCase.getApplierOrganizationId());
+			if(group!=null){
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(group.getIntegralTag2());
+			}else{
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			}
 		}else{
 			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
         	request.setOwnerId(ocr.getCommunityId());
