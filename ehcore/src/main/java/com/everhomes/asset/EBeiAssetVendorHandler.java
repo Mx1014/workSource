@@ -222,7 +222,7 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupid) {
         List<BillDTO> list = new ArrayList<>();
         if (pageOffSet == null) {
             pageOffSet = 1;
@@ -250,7 +250,6 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
             dto.setApartmentName(source.getBuildingRename());
             dto.setBuildingName(source.getBuildingRename());
             dto.setTargetType("eh_organization");
-
             list.add(dto);
         }
         if(res.getHasNextPag().equals("1")){
@@ -260,7 +259,7 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -331,7 +330,7 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -359,7 +358,7 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public void deleteBill(String l) {
+    public void deleteBill(String billId, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");

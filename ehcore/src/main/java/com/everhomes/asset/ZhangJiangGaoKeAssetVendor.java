@@ -8,8 +8,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/4/16.
@@ -61,18 +63,18 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
         return zhangJiangGaoKeThirdPartyAssetVendor.getBillDetailForClient(ownerId, billId, targetType);
     }
 
-    /**
-     *
-     * 此功能只有张江高科对接的, 无法切换, todo ask frontend is it good to add billGroupId as parameter?
-     */
+
     @Override
-    ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
-        return zhangJiangGaoKeThirdPartyAssetVendor.listBillDetailOnDateChange(billStatus, ownerId, ownerType, targetType, targetId, dateStr, contractId);
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId, Long billGroupId) {
+        if(isZuolinByBillGroupId(billGroupId)){
+            return zuolinAssetVendorHandler.listBillDetailOnDateChange(billStatus, ownerId, ownerType, targetType, targetId, dateStr, contractId, billGroupId);
+        }
+        return zhangJiangGaoKeThirdPartyAssetVendor.listBillDetailOnDateChange(billStatus, ownerId, ownerType, targetType, targetId, dateStr, contractId, billGroupId);
     }
 
     /**
      *
-     * todo 无法判断账单组，需要新的参数     ask frontend is it good to add billGroupId as parameter?
+     *   只找租金的，找不到只显示用户名，不显示合同
      */
     @Override
     FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
@@ -81,18 +83,18 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
 
     /**
      *
-     * todo 无法判断账单组，需要新的参数     ask frontend is it good to add billGroupId as parameter?
+     * 无法判断账单组，直接按照租金处理
      */
     @Override
     GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
         return zhangJiangGaoKeThirdPartyAssetVendor.getAreaAndAddressByContract(cmd);
     }
-    /**
-     *
-     * todo 无法判断账单组，需要新的参数     ask frontend is it good to add billGroupId as parameter?
-     */
+
     @Override
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
+            return zuolinAssetVendorHandler.placeAnAssetOrder(cmd);
+        }
         return zhangJiangGaoKeThirdPartyAssetVendor.placeAnAssetOrder(cmd);
     }
     /**
@@ -105,11 +107,11 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     }
     /**
      *
-     * todo 无法判断账单组，需要新的参数     ask frontend is it good to add billGroupId as parameter?
+     *   新ui界面，这里用左邻的吧，不用对接的
      */
     @Override
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        return zhangJiangGaoKeThirdPartyAssetVendor.listAllBillsForClient(cmd);
+        return zuolinAssetVendorHandler.listAllBillsForClient(cmd);
     }
     /**
      *
@@ -145,22 +147,19 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response) {
-        if(isZuolinByBillId(billId)){
-            return zuolinAssetVendorHandler.listBillItems(targetType, billId, targetName, pageOffSet, pageSize, ownerId, response);
+    List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response, Long billGroupid) {
+        if(isZuolinByBillGroupId(billGroupid)){
+            return zuolinAssetVendorHandler.listBillItems(targetType, billId, targetName, pageOffSet, pageSize, ownerId, response, billGroupid);
         }
-        return zhangJiangGaoKeThirdPartyAssetVendor.listBillItems(targetType, billId, targetName, pageOffSet, pageSize, ownerId, response);
+        return zhangJiangGaoKeThirdPartyAssetVendor.listBillItems(targetType, billId, targetName, pageOffSet, pageSize, ownerId, response, billGroupid);
     }
 
     @Override
-    List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
-        if(billIdAndTypes == null || billIdAndTypes.size() < 1){
-            return new ArrayList<>();
+    List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId) {
+        if(isZuolinByBillGroupId(billGroupId)){
+            return zuolinAssetVendorHandler.listNoticeInfoByBillId(billIdAndTypes, billGroupId);
         }
-        if(isZuolinByBillId(billIdAndTypes.get(0).getBillId())){
-            return zuolinAssetVendorHandler.listNoticeInfoByBillId(billIdAndTypes);
-        }
-        return zhangJiangGaoKeThirdPartyAssetVendor.listNoticeInfoByBillId(billIdAndTypes);
+        return zhangJiangGaoKeThirdPartyAssetVendor.listNoticeInfoByBillId(billIdAndTypes, billGroupId);
     }
 
 
@@ -170,15 +169,34 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     @Override
     ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId, Integer namespaceId) {
         if(isZuolinByBillGroupId(billGroupId)){
-            ShowBillForClientV2Command cmd = new ShowBillForClientV2Command();
-            cmd.setTargetType(targetType);
-            cmd.setTargetId(targetId);
-            cmd.setNamespaceId(namespaceId);
-            //todo
-            zuolinAssetVendorHandler.showBillForClientV2()
-            return zuolinAssetVendorHandler.showBillForClient(ownerId, ownerType, targetType, targetId, billGroupId, isOnlyOwedBill, contractId);
+            ListAllBillsForClientCommand cmdAllBill = new ListAllBillsForClientCommand();
+            cmdAllBill.setNamespaceId(namespaceId);
+            cmdAllBill.setOwnerId(ownerId);
+            cmdAllBill.setOwnerType(ownerType);
+            cmdAllBill.setTargetId(targetId);
+            cmdAllBill.setTargetType(targetType);
+            cmdAllBill.setIsOnlyOwedBill(isOnlyOwedBill);
+            List<ListAllBillsForClientDTO> listAllBillsForClientDTOS = zuolinAssetVendorHandler.listAllBillsForClient(cmdAllBill);
+            return v2BillDTO2v1BillDTO(listAllBillsForClientDTOS);
         }
-        return zhangJiangGaoKeThirdPartyAssetVendor.showBillForClient(ownerId, ownerType, targetType, targetId, billGroupId, isOnlyOwedBill, contractId);
+        return zhangJiangGaoKeThirdPartyAssetVendor.showBillForClient(ownerId, ownerType, targetType, targetId, billGroupId, isOnlyOwedBill, contractId, namespaceId);
+    }
+
+    private ShowBillForClientDTO v2BillDTO2v1BillDTO(List<ListAllBillsForClientDTO> showBillForClientV2DTOS) {
+        ShowBillForClientDTO ret = new ShowBillForClientDTO();
+        List<BillDetailDTO> billDetailDTOList = new ArrayList<>();
+        for(ListAllBillsForClientDTO target : showBillForClientV2DTOS){
+            BillDetailDTO dto = new BillDetailDTO();
+            dto.setBillId(target.getBillId());
+            dto.setAmountReceviable(new BigDecimal(target.getAmountReceivable()));
+            dto.setAmountOwed(new BigDecimal(target.getAmountOwed()));
+            dto.setDateStrBegin(target.getDateStrBegin());
+            dto.setDateStrEnd(target.getDateStrEnd());
+            dto.setDateStr(target.getDateStr());
+            billDetailDTOList.add(dto);
+        }
+        ret.setBillDetailDTOList(billDetailDTOList);
+        return ret;
     }
 
     @Override
@@ -188,24 +206,29 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    void deleteBill(String l) {
-        if(isZuolinByBillId(l)){
-            zuolinAssetVendorHandler.deleteBill(l);
+    void deleteBill(String billId, Long billGroupId) {
+        if(isZuolinByBillGroupId(billGroupId)){
+            zuolinAssetVendorHandler.deleteBill(billId, billGroupId);
+            return;
         }
-        zhangJiangGaoKeThirdPartyAssetVendor.deleteBill(l);
+        zhangJiangGaoKeThirdPartyAssetVendor.deleteBill(billId, billGroupId);
     }
 
     @Override
     void deleteBillItem(BillItemIdCommand cmd) {
-        if(isZuolinByBillItemId(cmd.getBillItemId())){
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
             zuolinAssetVendorHandler.deleteBillItem(cmd);
+            return;
         }
         zhangJiangGaoKeThirdPartyAssetVendor.deleteBillItem(cmd);
     }
 
     @Override
     void deletExemptionItem(ExemptionItemIdCommand cmd) {
-        // todo can I get the billGroupId info instead of guessing
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
+            zuolinAssetVendorHandler.deletExemptionItem(cmd);
+            return;
+        }
         super.deletExemptionItem(cmd);
     }
 
@@ -217,19 +240,21 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
         return zhangJiangGaoKeThirdPartyAssetVendor.showCreateBill(billGroupId);
     }
 
-    // todo 这里可以改为billGroupId应该
     @Override
     void modifyBillStatus(BillIdCommand cmd) {
-        if(isZuolinByBillId(cmd.getBillId())){
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
             zuolinAssetVendorHandler.modifyBillStatus(cmd);
+            return;
         }
         zhangJiangGaoKeThirdPartyAssetVendor.modifyBillStatus(cmd);
     }
 
     @Override
     ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
-        //todo 改为billGroupid
-        return super.listBillExemptionItems(cmd);
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
+            return zuolinAssetVendorHandler.listBillExemptionItems(cmd);
+        }
+        return zhangJiangGaoKeThirdPartyAssetVendor.listBillExemptionItems(cmd);
     }
 
     @Override
@@ -266,9 +291,9 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
 
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
-        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
-            zuolinAssetVendorHandler.batchImportBills(cmd, file);
-        }
+            if(isZuolinByBillGroupId(cmd.getBillGroupId())){
+                zuolinAssetVendorHandler.batchImportBills(cmd, file);
+            }
         return super.batchImportBills(cmd, file);
     }
 }

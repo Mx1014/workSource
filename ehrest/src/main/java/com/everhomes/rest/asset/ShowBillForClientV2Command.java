@@ -23,15 +23,7 @@ public class ShowBillForClientV2Command {
     private Long targetId;
     private Integer namespaceId;
 
-    private Byte isPendingPayment;
-
-    public Byte getIsPendingPayment() {
-        return isPendingPayment;
-    }
-
-    public void setIsPendingPayment(Byte isPendingPayment) {
-        this.isPendingPayment = isPendingPayment;
-    }
+//    private Byte isPendingPayment;
 
     @Override
     public String toString() {

@@ -339,7 +339,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupId) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -358,7 +358,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId) {
         List<Long> billIds = new ArrayList<>();
         for(int i = 0; i < billIdAndTypes.size(); i++){
             BillIdAndType billIdAndType = billIdAndTypes.get(i);
@@ -368,7 +368,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
     //这个UI页面希望有合同筛选
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId, Integer namespaceId) {
         ShowBillForClientDTO response = new ShowBillForClientDTO();
         checkCustomerParameter(targetType, targetId);
         //获得必要条件 客户
@@ -524,8 +524,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public void deleteBill(String l) {
-        assetProvider.deleteBill(Long.parseLong(l));
+    public void deleteBill(String billId, Long billGroupId ) {
+        assetProvider.deleteBill(Long.parseLong(billId));
     }
 
     @Override
@@ -835,7 +835,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
-                        dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
+                        Long billGroupId = enclosedBills.get(0).getBillGroupId();
+                        dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
+                        dto.setBillGroupId(billGroupId);
                         if(enclosedBills.get(0).getContractId() != null){
                             dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
                         }
@@ -874,7 +876,15 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
+        Byte status = null;
+        if(cmd.getIsOnlyOwedBill() == null){
+            status = null;
+        }else if(cmd.getIsOnlyOwedBill().byteValue() == (byte)1){
+            status= 0;
+        }else if(cmd.getIsOnlyOwedBill().byteValue() == (byte)0){
+            status = 1;
+        }
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId(), status);
     }
 
     @Override
@@ -1496,7 +1506,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId, Long billGroupId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         Long conId = Long.parseLong(contractId);
         response =  assetProvider.getBillDetailByDateStr( billStatus,ownerId,ownerType,targetId,targetType,dateStr,conId);

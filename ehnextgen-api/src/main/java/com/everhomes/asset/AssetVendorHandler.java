@@ -46,13 +46,13 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
     };
 
-    List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response){
+    List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response, Long billGroupId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     };
 
-    List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes){
+    List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -70,7 +70,7 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
     };
 
-    ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId){
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId, Long billGroupId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -94,7 +94,7 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
     };
 
-    void deleteBill(String l){
+    void deleteBill(String billId, Long billGroupId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");

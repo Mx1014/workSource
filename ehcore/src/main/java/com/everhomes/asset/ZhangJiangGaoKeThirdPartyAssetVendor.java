@@ -53,7 +53,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     private PayService payService;
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
         PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
         if(!group.getName().equals("租金")) return finalDto;
@@ -384,7 +384,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId, Long billGroupId) {
         ShowBillDetailForClientResponse result = new ShowBillDetailForClientResponse();
         List<ShowBillDetailForClientDTO> list = new ArrayList<>();
         //找合计
@@ -648,7 +648,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    public void deleteBill(String l) {
+    public void deleteBill(String l, Long billGroupId) {
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBill");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -1016,7 +1016,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse res) {
+    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse res, Long billGroupId) {
         if (pageOffSet == null) {
             pageOffSet = 1;
         }
@@ -1086,7 +1086,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId) {
         List<NoticeInfo> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params = new HashMap<String, String>();
