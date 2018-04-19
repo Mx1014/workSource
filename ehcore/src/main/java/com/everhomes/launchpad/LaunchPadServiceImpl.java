@@ -2747,7 +2747,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		List<IndexDTO> dtos = new ArrayList<>();
 		for (LaunchPadIndex index: launchPadIndices){
-			if(IndexType.fromCode(index.getType()) == IndexType.LAYOUT){
+			if(IndexType.fromCode(index.getType()) == IndexType.CONTAINER){
 				Container container = ConvertHelper.convert(index.getConfigJson(), Container.class);
 
 				//工作台特殊逻辑
