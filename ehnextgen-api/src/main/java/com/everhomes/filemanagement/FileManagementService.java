@@ -20,14 +20,6 @@ public interface FileManagementService {
 
     SearchFileResponse searchFiles(SearchFileCommand cmd);
 
-//    void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd);
-
-//    void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
-
-//    void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
-
-//    ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd);
-
     FileContentDTO addFileContent(AddFileContentCommand cmd);
 
     void deleteFileContents(DeleteFileContentCommand cmd);

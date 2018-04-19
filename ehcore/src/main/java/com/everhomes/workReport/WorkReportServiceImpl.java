@@ -349,6 +349,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         ListWorkReportsResponse response = new ListWorkReportsResponse();
         Long userId = UserContext.currentUserId();
         OrganizationMember member = getMemberDepartmentByUserId(userId, cmd.getOwnerId());
+        if(member == null)
+            member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         List<WorkReportDTO> reports = new ArrayList<>();
         cmd.setPageSize(10000000);
 
@@ -359,15 +361,15 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         //  filter the result and return back to the user.
         if (results != null && results.size() > 0) {
-            results.forEach(r -> {
+            for(WorkReport result : results){
                 WorkReportDTO dto = new WorkReportDTO();
-                dto.setReportName(r.getReportName());
-                dto.setReportId(r.getId());
-                dto.setReportType(r.getReportType());
+                dto.setReportName(result.getReportName());
+                dto.setReportId(result.getId());
+                dto.setReportType(result.getReportType());
                 //  check the scope.
-                if (checkTheScope(r.getId(), member))
+                if (checkTheScope(result.getId(), member))
                     reports.add(dto);
-            });
+            }
         }
 
         response.setReports(reports);
