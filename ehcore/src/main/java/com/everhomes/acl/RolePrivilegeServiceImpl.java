@@ -1711,10 +1711,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		Integer pageSize = cmd.getPageSize();
+		/*Integer pageSize = cmd.getPageSize();
 		if(pageSize == null || "".equals(pageSize)){
 			pageSize = 10;
-		}
+		}*/
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
@@ -1756,7 +1758,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			response.setCotactName(details.getContactName());
 			response.setDetailId(details.getId());
 		}
-		return null;
+		return response;
 	}
 
 	@Override
