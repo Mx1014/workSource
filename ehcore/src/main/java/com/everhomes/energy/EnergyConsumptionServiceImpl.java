@@ -1560,7 +1560,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
-
+            //校验excel的比例系数不大于1
+            if (!validateBurdenRateString(str.getBurdenRate())) {
+                return;
+            }
             if (org.apache.commons.lang.StringUtils.isBlank(str.getName())) {
                 LOGGER.error("energy meter name is null, data = {}", str);
                 log.setData(str);
@@ -1719,6 +1722,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             });
         });
         return errorDataLogs;
+    }
+
+    private Boolean validateBurdenRateString(List<String> burdenRate) {
+        Boolean result = false;
+        if (burdenRate != null && burdenRate.size() > 0) {
+            BigDecimal sum = new BigDecimal(0);
+            sum = burdenRate.stream().map(BigDecimal::new).reduce(sum, BigDecimal::add);
+            result = true;
+            if (sum.compareTo(new BigDecimal(1)) > 0) {
+                result = false;
+            }
+        }
+        return result;
     }
 
 
