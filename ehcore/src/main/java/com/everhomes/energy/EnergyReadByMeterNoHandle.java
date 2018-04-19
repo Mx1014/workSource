@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import com.everhomes.pmtask.PmTaskHandle;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -12,6 +13,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -29,9 +31,9 @@ import java.util.Map;
  * Created by Rui.Jia  2018/4/16 11 :01
  *
  */
-
-public class EnergyReadByMeterNo {
-    private static  final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNo.class);
+@Component(EnergyAutoReadHandler.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN)
+public class EnergyReadByMeterNoHandle {
+    private static  final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNoHandle.class);
     public static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
