@@ -87,7 +87,7 @@ ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NUL
 CREATE TABLE `eh_launch_pad_indexs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `type` varchar(64) NOT NULL,
+  `type` tinyint(4) NOT NULL,
   `name` varchar(64) DEFAULT NULL,
   `config_json` text,
   `default_order` int(11) NOT NULL DEFAULT '0',
