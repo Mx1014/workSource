@@ -5592,7 +5592,9 @@ public class UserServiceImpl implements UserService {
 		resp.setContentCacheConfig(
 		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
 
-		List<IndexDTO> indexDtos = new ArrayList<>();
+		Long userId = user == null ? null : user.getId();
+		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
+
 		resp.setIndexDtos(indexDtos);
 
         return resp;
@@ -6198,12 +6200,6 @@ public class UserServiceImpl implements UserService {
 		ListAddressUsersResponse response = new  ListAddressUsersResponse();
 		response.setDtos(dtos);
 		return response;
-	}
-
-	private List<IndexDTO> listIndex(Integer namespaceId, Long userId){
-
-		return null;
-
 	}
 
     @Override

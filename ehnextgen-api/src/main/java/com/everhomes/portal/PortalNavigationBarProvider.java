@@ -9,8 +9,10 @@ public interface PortalNavigationBarProvider {
 
 	void updatePortalNavigationBar(PortalNavigationBar portalNavigationBar);
 
+	void deletePortalNavigationBar(Long id);
+
 	PortalNavigationBar findPortalNavigationBarById(Long id);
 
-	List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId);
+	List<PortalNavigationBar> listPortalNavigationBar(Long versionId);
 
 }

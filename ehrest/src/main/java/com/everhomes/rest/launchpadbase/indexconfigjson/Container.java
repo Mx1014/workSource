@@ -23,6 +23,14 @@ public class Container {
         this.layoutId = layoutId;
     }
 
+    public Byte getLayoutType() {
+        return layoutType;
+    }
+
+    public void setLayoutType(Byte layoutType) {
+        this.layoutType = layoutType;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
