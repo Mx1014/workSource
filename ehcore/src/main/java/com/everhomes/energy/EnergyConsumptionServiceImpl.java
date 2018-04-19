@@ -1567,6 +1567,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeter meter = new EnergyMeter();
             //校验excel的比例系数不大于1
             if (!validateBurdenRateString(str.getBurdenRate())) {
+                LOGGER.error("energy meter number is exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter number is exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NUMBER_EXIST);
+                errorDataLogs.add(log);
                 return;
             }
             if (org.apache.commons.lang.StringUtils.isBlank(str.getName())) {
@@ -1734,10 +1739,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (burdenRate != null && burdenRate.size() > 0) {
             BigDecimal sum = new BigDecimal(0);
             sum = burdenRate.stream().map(BigDecimal::new).reduce(sum, BigDecimal::add);
-            result = true;
-            if (sum.compareTo(new BigDecimal(1)) > 0) {
-                result = false;
-            }
+            result = sum.compareTo(new BigDecimal(1)) <= 0;
         }
         return result;
     }
