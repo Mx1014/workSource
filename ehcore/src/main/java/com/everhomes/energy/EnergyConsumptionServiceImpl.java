@@ -1424,22 +1424,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             task.setOwnerId(cmd.getOwnerId());
             task.setType(ImportFileTaskType.ENERGY_METER.getCode());
             task.setCreatorUid(userId);
-            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
-                @Override
-                public ImportFileResponse importFile() {
-                    ImportFileResponse response = new ImportFileResponse();
-                    List<ImportEnergyMeterDataDTO> datas = handleImportEnergyMeterData(resultList);
-                    if(datas.size() > 0){
-                        //设置导出报错的结果excel的标题
-                        response.setTitle(datas.get(0));
-                        datas.remove(0);
-                    }
-                    List<ImportFileResultLog<ImportEnergyMeterDataDTO>> results = importEnergyMeterData(cmd, datas, userId);
-                    response.setTotalCount((long)datas.size());
-                    response.setFailCount((long)results.size());
-                    response.setLogs(results);
-                    return response;
+            task = importFileService.executeTask(() -> {
+                ImportFileResponse response = new ImportFileResponse();
+                List<ImportEnergyMeterDataDTO> datas = handleImportEnergyMeterData(resultList);
+                if(datas.size() > 0){
+                    //设置导出报错的结果excel的标题
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
                 }
+                List<ImportFileResultLog<ImportEnergyMeterDataDTO>> results = importEnergyMeterData(cmd, datas, userId);
+                response.setTotalCount((long)datas.size());
+                response.setFailCount((long)results.size());
+                response.setLogs(results);
+                return response;
             }, task);
 
         } catch (IOException e) {
@@ -1517,28 +1514,35 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setMaxReading(r.getH().trim());
+                data.setBurdenRate(Arrays.asList(r.getH().trim().split(",")));
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getI())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setStartReading(r.getI().trim());
+                data.setMaxReading(r.getI().trim());
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getJ())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setRate(r.getJ().trim());
+                data.setStartReading(r.getJ().trim());
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setAmountFormula(r.getK().trim());
+                data.setRate(r.getK().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setAmountFormula(r.getL().trim());
             }
 
             if(data != null) {
@@ -1673,6 +1677,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             ma.setApartmentName(address.getApartmentName());
                             ma.setAddressId(address.getId());
                             ma.setApartmentFloor(address.getApartmentFloor());
+                            ma.setBurdenRate(new BigDecimal(Double.valueOf(str.getBurdenRate().get(i))));
                             Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
                             if (building != null) {
                                 ma.setBuildingId(building.getId());
@@ -2809,7 +2814,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             log.setNamespaceId(meter.getNamespaceId());
                             log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             log.setOperatorId(UserContext.currentUserId());
-                            if (Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
+                            if (meter.getLastReading() != null &&
+                                    Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
                                 log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
                             } else {
                                 log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());

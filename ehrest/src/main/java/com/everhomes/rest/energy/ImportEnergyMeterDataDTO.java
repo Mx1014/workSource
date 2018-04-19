@@ -17,6 +17,7 @@ public class ImportEnergyMeterDataDTO {
     private List<String> buildingName = null;
     @ItemType(String.class)
     private List<String> apartmentName = null;
+    private List<String>  burdenRate = null;
     private String maxReading = "";
     private String startReading = "";
     private String Rate = "";
@@ -108,5 +109,13 @@ public class ImportEnergyMeterDataDTO {
 
     public void setStartReading(String startReading) {
         this.startReading = startReading;
+    }
+
+    public List<String> getBurdenRate() {
+        return burdenRate;
+    }
+
+    public void setBurdenRate(List<String> burdenRate) {
+        this.burdenRate = burdenRate;
     }
 }
