@@ -37,4 +37,5 @@ public interface ApprovalRequestProvider {
 	Double countOvertimeDurationByUserAndMonth(Long userId, String ownerType, Long ownerId,
 											   String punchMonth);
 
+	int countAbnormalUserRequest(Long creatorId, Long ownerId, java.util.Date start, java.util.Date end);
 }
