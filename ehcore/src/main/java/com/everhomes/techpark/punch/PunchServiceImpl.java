@@ -2,61 +2,6 @@ package com.everhomes.techpark.punch;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.*;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.approval.*;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.techpark.punch.*;
-import com.everhomes.rest.techpark.punch.ApprovalStatus;
-import com.everhomes.rest.techpark.punch.admin.*;
-import com.everhomes.rest.uniongroup.*;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
-import com.everhomes.uniongroup.*;
-import com.everhomes.util.*;
-import com.google.gson.Gson;
-
-import org.apache.commons.collections.ArrayStack;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.common.util.DoubleArray;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
@@ -113,7 +58,6 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -366,6 +310,7 @@ public class PunchServiceImpl implements PunchService {
     final String downloadDir = "download/";
 
     private static final List<String> timeIntervalApprovalAttribute;
+    private static final List<String> WORK_STATUS_LIST = java.util.Arrays.asList("半天公出", "半天调休", "半天病假", "半天事假", "加班", "公出", "迟到且早退", "早退", "迟到", "正常", "缺卡");
 
     static {
         timeIntervalApprovalAttribute = new ArrayList<>();
@@ -4539,7 +4484,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
         row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
-        row.createCell(++i).setCellValue(objToString(statistic.getWorkCount()));
+        row.createCell(++i).setCellValue(actWorkDayCount(statistic.getStatusList()));
         row.createCell(++i).setCellValue(objToString(statistic.getAnnualLeaveBalance()));
         row.createCell(++i).setCellValue(objToString(statistic.getOvertimeCompensationBalance()));
         if (null != statistic.getExts()) {
@@ -4585,6 +4530,19 @@ public class PunchServiceImpl implements PunchService {
             }
         }
 
+    }
+
+    private int actWorkDayCount(List<DayStatusDTO> statusList) {
+        if (org.springframework.util.CollectionUtils.isEmpty(statusList)) {
+            return 0;
+        }
+        int count = 0;
+        for (DayStatusDTO status : statusList) {
+            if (WORK_STATUS_LIST.contains(status.getStatus())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public Workbook createPunchStatisticsBook(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId) {
