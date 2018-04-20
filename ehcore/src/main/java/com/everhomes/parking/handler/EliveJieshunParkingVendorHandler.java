@@ -557,18 +557,19 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 				JSONObject.parseObject(result, new TypeReference
 						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
 				});
+		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(!isRequestSuccess(response)){
-			return null;
+			return dto;
 		}
 
 
 		String attributes = response.getDataItems().get(0).getAttributes();
 		JSONObject jsonAttributes = JSONObject.parseObject(attributes);
 		if(jsonAttributes==null || jsonAttributes.size()==0 || 0!=jsonAttributes.getInteger("retcode")){
-			return null;
+			return dto;
 		}
 
-		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+		
 		dto.setPrice(new BigDecimal(jsonAttributes.getString("serviceFee")));
 		dto.setRemainingTime(jsonAttributes.getInteger("surplusMinute"));
 		dto.setPlateNumber(plateNumber);
