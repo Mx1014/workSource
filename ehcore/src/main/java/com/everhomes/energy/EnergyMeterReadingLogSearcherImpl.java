@@ -216,16 +216,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             TermFilterBuilder meterIdTerm = FilterBuilders.termFilter("meterId", cmd.getMeterId());
             filterBuilders.add(meterIdTerm);
         }
-
-        if (cmd.getBuildingId() != null) {
-            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
-            filterBuilders.add(buildingIdFilter);
-        }
-
-        if (cmd.getAddressId() != null) {
-            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
-            filterBuilders.add(addressIdFilter);
-        }
         RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
             rangeTimeTerm.gte(cmd.getStartTime());
