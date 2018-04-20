@@ -4,6 +4,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>ownerId: organizationId</li>
+ *     <li>oenerType: 类型</li>
  *     <li>keyword: 关键字：手机号或地址或客户名称</li>
  *     <li>customerCategoryId: 客户类型id</li>
  *     <li>corpIndustryItemId: 行业类别id</li>
@@ -14,7 +16,7 @@ import com.everhomes.util.StringHelper;
  *     <li>sortType: 排序类型：0 升序， 1 降序</li>
  *     <li>sortField: 排序字段名</li>
  		<li>trackingUid: 跟进人uid</li>
- *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户</li>
+ *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户 现在换成 1：无  2：有跟进人  3：无跟进人</li>
  *     
  *     <li>lastTrackingTime: 最近跟进时间（天）</li>
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
@@ -24,6 +26,10 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/8/1.
  */
 public class SearchEnterpriseCustomerCommand {
+
+    private Long ownerId;
+
+    private String ownerType;
 
     private String keyword;
 
@@ -58,6 +64,22 @@ public class SearchEnterpriseCustomerCommand {
     private Integer namespaceId;
 
     private Long orgId;
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

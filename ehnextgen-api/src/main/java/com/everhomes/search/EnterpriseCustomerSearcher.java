@@ -11,8 +11,12 @@ import java.util.List;
  */
 public interface EnterpriseCustomerSearcher {
     void deleteById(Long id);
+
     void bulkUpdate(List<EnterpriseCustomer> customers);
+
     void feedDoc(EnterpriseCustomer customer);
+
     void syncFromDb();
-    SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
+
+    SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd, Boolean isAdmin);
 }
