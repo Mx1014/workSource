@@ -137,6 +137,7 @@ import com.everhomes.rest.energy.UpdateEnergyMeterPriceConfigCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
 import com.everhomes.rest.energy.UpdateEnergyPlanCommand;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.StandardRepeatType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -293,6 +294,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     };
 
     DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    DateTimeFormatter autoDateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -2816,14 +2818,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     if (meter.getNamespaceId() == 999961) {
                          handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
                     }
-                    if(handler!=null) {
+                    if (handler != null) {
                         try {
                             String meterReading = handler.readMeterautomatically(meter.getMeterNumber(), serverUrl, publicKey, clientId);
                             //parser
                             JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
                             String data = jsonObj.getAsJsonArray("data").get(0).toString();
-                            Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {
-                            }.getType());
+                            Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
                             //log
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
@@ -2877,6 +2878,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             plan.setName("autoPlans");
             plan.setNamespaceId(meters.get(0).getNamespaceId());
             plan.setStatus(CommonStatus.AUTO.getCode());
+            plan.setOwnerId(meters.get(0).getOwnerId());
+            plan.setOwnerType(meters.get(0).getOwnerType());
+            RepeatSettings repeatSetting = new RepeatSettings();
+            //调用此的时候已经是每月月底
+            LocalDate localDate = LocalDate.now();
+            repeatSetting.setOwnerId(meters.get(0).getOwnerId());
+            repeatSetting.setOwnerType(meters.get(0).getOwnerType());
+            repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
+            repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).format(autoDateSF)));
+            repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
+            repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
+            repeatSetting.setRepeatInterval(1);
+            String expression = "{\"expression\":[{\"day\":{%s}}]}";
+            expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
+            repeatSetting.setExpression(expression);
+            repeatService.createRepeatSettings(repeatSetting);
+            plan.setRepeatSettingId(repeatSetting.getId());
             energyPlanProvider.createEnergyPlan(plan);
             meters.forEach((meter)->{
                 EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
