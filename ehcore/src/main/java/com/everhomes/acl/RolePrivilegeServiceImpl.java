@@ -54,6 +54,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -1757,6 +1758,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			//现在可以说明的是已经注册了，那么就将isSigned状态置为1
 			response.setIsSigned(TrueOrFalseFlag.TRUE.getCode());
+
+			//还需要判断该客户是否已经加入到当前企业，根据传过来的organizationId在organizations表中查，如果有记录说明已经加入公司
+			//否则就没有加入
+			Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+			//判断
+			if(organization != null){
+				//说明之前已经加入了公司
+				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
+			}else{
+				//说明没有加入公司
+				response.setIsJoined(TrueOrFalseFlag.FALSE.getCode());
+			}
+
 
 			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
 			// 昵称
