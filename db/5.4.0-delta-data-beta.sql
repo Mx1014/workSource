@@ -1,3 +1,4 @@
+-- 上线后请调用接口，/officecubicle/dataMigration 工位预定数据迁移
 -- Designer: zhiwei zhang
 -- Description: ISSUE#24392 固定资产管理V1.0（支持对内部各类固定资产进行日常维护）
 
