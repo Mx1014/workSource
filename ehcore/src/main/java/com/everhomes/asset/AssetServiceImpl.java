@@ -3190,8 +3190,8 @@ public class AssetServiceImpl implements AssetService {
             }
             cmd.setDateStr(dateStr);
             //楼栋门牌也是
-            String building = headers[buildingIndex];
-            String apartment = headers[apartmentIndex];
+            String building = data[buildingIndex];
+            String apartment = data[apartmentIndex];
             //客户属性也是
             switch (data[targetTypeIndex]){
                 case "企业客户":
