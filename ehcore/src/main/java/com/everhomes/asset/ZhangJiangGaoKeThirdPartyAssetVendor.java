@@ -512,9 +512,9 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
             identifier = organization.getNamespaceOrganizationToken();
             if(identifier==null){
-                LOGGER.error("Insufficient privilege, zjgkhandler organization_identifier is null");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                        "Insufficient privilege");
+                LOGGER.error("zjgkhandler organization_identifier is null");
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                        "Insufficient privilege");
             }
             params.put("enterpriseIdentifier",identifier);
         }else if(targetType!=null && targetType.equals(AssetTargetType.USER.getCode())){
@@ -522,9 +522,9 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             identifier = assetProvider.findIdentifierByUid(UserContext.currentUserId());
             //测试
             if(identifier==null){
-                LOGGER.error("Insufficient privilege, zjgkhandler userMobile is null");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                        "Insufficient privilege");
+                LOGGER.error("zjgkhandler userMobile is null");
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                        "Insufficient privilege");
             }
             params.put("userMobile",identifier);
         }else{
@@ -532,9 +532,11 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         }
         String json = generateJson(params);
         try {
+            LOGGER.error("zjgk request json is "+json);
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
             LOGGER.error("Request ShenZhouShuMa Failed"+e);
+            LOGGER.error("zjgk response is "+postJson);
 //            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
