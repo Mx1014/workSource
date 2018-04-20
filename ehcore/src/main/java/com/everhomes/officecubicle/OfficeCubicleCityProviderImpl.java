@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Result;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -123,5 +125,29 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId) {
+		List<OfficeCubicleCity> res = getReadOnlyContext().selectDistinct(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME).from(Tables.EH_OFFICE_CUBICLE_CITIES)
+		.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+		.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+		.fetch().map(r->{
+			OfficeCubicleCity province = new OfficeCubicleCity();
+			province.setProvinceName(r.getValue(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME));
+			return province;
+		});
+		return res;
+	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
 }

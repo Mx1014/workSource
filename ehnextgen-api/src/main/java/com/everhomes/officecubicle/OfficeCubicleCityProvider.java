@@ -20,4 +20,8 @@ public interface OfficeCubicleCityProvider {
 	void deleteOfficeCubicleCity(Long cityId);
 
 	OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName, String cityName, Integer namespaceId);
+
+	List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId);
+
+	List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId);
 }

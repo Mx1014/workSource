@@ -49,10 +49,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -77,6 +80,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 /**
  * 工位预定service实现
@@ -117,6 +121,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Autowired
 	private RegionProvider regionProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -238,7 +245,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getCategories())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -285,7 +292,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ID error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
@@ -544,6 +551,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			CityDTO dto = ConvertHelper.convert(r, CityDTO.class);
 			//根据上次用户选中的城市，这里设置当前选中的城市。
 			if(selecetedCity!=null 
+					&& !StringUtils.isEmpty(selecetedCity.getProvinceName())
+					&& !StringUtils.isEmpty(selecetedCity.getCityName())
 					&& selecetedCity.getProvinceName().equals(dto.getProvinceName()) 
 					&& selecetedCity.getCityName().equals(dto.getCityName())){
 				dto.setSelectFlag((byte)1);
@@ -569,8 +578,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Flow flow = flowService.getEnabledFlow(space.getNamespaceId(), OfficeCubicleFlowModuleListener.MODULE_ID,
 				FlowModuleType.NO_MODULE.getCode(),space.getOwnerId(), FlowOwnerType.COMMUNITY.getCode());
 		if(flow==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"unable to get enabled flow ");
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_UNENABLE_FLOW,
+					"提交失败，未启用工作流，请联系管理员");
 		}
 
 		Long flowCaseId = flowService.getNextFlowCaseId();
@@ -875,18 +884,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void deleteCity(DeleteCityCommand cmd) {
-		if(cmd.getCityId()==null)
-			return ;
-		officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+		Tuple<Boolean, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_CITY_LOCK.getCode()).enter(()->{
+			List<OfficeCubicleCity> list = officeCubicleCityProvider.listOfficeCubicleCity(UserContext.getCurrentNamespaceId());
+			if(list!=null && list.size()<2){
+				return false;
+			}
+			OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+			if(city!=null){
+				officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+				officeCubicleProvider.updateSpaceByProvinceAndCity(UserContext.getCurrentNamespaceId(),city.getProvinceName(),city.getCityName());
+			}
+			return true;
+		});
+		if(!result.first()){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_DELETE_CITYS,
+					"最后一个城市不能删除");
+		}
 	}
 
 	@Override
 	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
+		checkCityName(cmd.getProvinceName(),cmd.getCityName());
 		if(cmd.getId()!=null){
 			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
 			if(officeCubicleCity==null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"city id is not find");
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+						"id未找到");
 			}
 			officeCubicleCity.setCityName(cmd.getCityName());
 			officeCubicleCity.setProvinceName(cmd.getProvinceName());
@@ -894,20 +917,36 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCity.setStatus((byte)2);
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
+			OfficeCubicleCity oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			if(oldOfficeCubicleCity!=null){
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
+						"城市已存在，不能重复添加");
+			}
 			OfficeCubicleCity officeCubicleCity = ConvertHelper.convert(cmd,OfficeCubicleCity.class);
 			officeCubicleCity.setNamespaceId(UserContext.getCurrentNamespaceId());
 			officeCubicleCityProvider.createOfficeCubicleCity(officeCubicleCity);
 		}
 	}
 
+	private void checkCityName(String provinceName, String cityName) {
+		if(StringUtils.isEmpty(cityName) || StringUtils.isEmpty(cityName)){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EMPTY_CITYS,
+					"城市名称不能为空");
+		}
+	}
+
 	@Override
 	public void reOrderCity(ReOrderCityCommand cmd) {
 		OfficeCubicleCity officeCubicleCity1 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid1());
-		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
 
-		if(officeCubicleCity1==null || officeCubicleCity2==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"city id is not find");
+		if(officeCubicleCity1==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid1未找到");
+		}
+		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
+		if(officeCubicleCity2==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid2未找到");
 		}
 		Long order  = officeCubicleCity1.getDefaultOrder();
 		officeCubicleCity1.setDefaultOrder(officeCubicleCity2.getDefaultOrder());
@@ -919,5 +958,25 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return null;
 		});
 
+	}
+
+	@Override
+	public CityDTO getCityById(GetCityByIdCommand cmd) {
+		OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+		if(UserContext.getCurrentNamespaceId().intValue()!=city.getNamespaceId()){
+			return null;
+		}
+		return ConvertHelper.convert(city,CityDTO.class);
+	}
+
+	@Override
+	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
+		List<OfficeCubicleCity> list=null;
+		if(cmd.getParentName()==null){
+			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId());
+		}else{
+			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
+		}
+		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}
 }
