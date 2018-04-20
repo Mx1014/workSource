@@ -15,6 +15,7 @@ package com.everhomes.rest.parking;
  * <li>GUANG_DA_WE_GU("GUANG_DA_WE_GU"): 光大we谷停车场</li>
  * <li>KEXIN_XIAOMAO("KEXIN_XIAOMAO"): 科兴正中时代广场停车场(小猫)</li>
  * <li>YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"): 银星工业区停车场</li>
+ * <li>ELIVE_JIESHUN("ELIVE_JIESHUN"): 住总停车场</li>
  * </ul>
  */
 public enum ParkingLotVendor {
@@ -31,8 +32,9 @@ public enum ParkingLotVendor {
     ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"),
     GUANG_DA_WE_GU("GUANG_DA_WE_GU"),
     KEXIN_XIAOMAO("KEXIN_XIAOMAO"),
-    YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO");
-    
+    YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"),
+    ELIVE_JIESHUN("ELIVE_JIESHUN");
+
     private String code;
     private ParkingLotVendor(String code) {
         this.code = code;

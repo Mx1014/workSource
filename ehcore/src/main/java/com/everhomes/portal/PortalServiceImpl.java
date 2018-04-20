@@ -948,6 +948,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemCategory.setNamespaceId(namespaceId);
 		portalItemCategory.setItemGroupId(cmd.getItemGroupId());
 		portalItemCategory.setVersionId(itemGroup.getVersionId());
+		portalItemCategory.setDefaultOrder(100);
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -1832,20 +1833,24 @@ public class PortalServiceImpl implements PortalService {
 	private void publishItem(PortalItemGroup itemGroup, Long versionId, Byte publishType){
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
-		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
+		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId(), itemGroup.getId());
 
-		for (PortalItem portalItem: portalItems) {
+		//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接全干了吧。
+		// 例如：在3版本添加了itemA并发布，然后回到2版本再发布时，因为2版本mapping中没有itemA信息，2版本发布时并不会删除广场上的itemA。
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
 
-			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接name、label对上就是干吧。
-			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
-				List<LaunchPadItem> oldpadItems = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), portalItem.getItemLocation(), portalItem.getName(), null, null);
+			if(portalItems != null && portalItems.size() > 0){
+				List<LaunchPadItem> oldpadItems = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), portalItems.get(0).getItemLocation(), null, null, null);
 				if(null != oldpadItems && oldpadItems.size() > 0){
 					for (LaunchPadItem item: oldpadItems) {
-						if(portalItem.getLabel() != null && portalItem.getLabel().equals(item.getItemLabel()))
 						launchPadProvider.deleteLaunchPadItem(item.getId());
 					}
 				}
 			}
+
+		}
+
+		for (PortalItem portalItem: portalItems) {
 
 			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
@@ -1914,6 +1919,7 @@ public class PortalServiceImpl implements PortalService {
 						actionData.setItemLocation(portalItem.getItemLocation());
 						actionData.setItemGroup(portalItem.getGroupName());
 						item.setActionData(StringHelper.toJsonString(actionData));
+						item.setDefaultOrder(10000);
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
 					}
 
@@ -2079,9 +2085,9 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private Map<Long, String> getItemCategoryMap(Integer namespaceId){
+	private Map<Long, String> getItemCategoryMap(Integer namespaceId, Long itemGroupId){
 		Map<Long, String> categoryMap = new HashMap<>();
-		List<PortalItemCategory> categories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, null);
+		List<PortalItemCategory> categories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, itemGroupId);
 		for (PortalItemCategory  category: categories) {
 			categoryMap.put(category.getId(), category.getName());
 		}
@@ -2092,10 +2098,11 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
 
+		ValidatorUtil.validate(cmd);
+
 		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
 		sequenceService.syncSequence();
-
 
 		//同步和发布的时候不用预览账号
 		UserContext.current().setPreviewPortalVersionId(null);
@@ -2490,7 +2497,7 @@ public class PortalServiceImpl implements PortalService {
 				itemCategory.setUpdateTime(createTimestamp);
 			}
 			//复制item，未分组
-			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, 0L, id, newVersionId);
+			copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, 0L, null, newVersionId);
 
 			portalItemCategoryProvider.createPortalItemCategories(portalItemCategories);
 		}
