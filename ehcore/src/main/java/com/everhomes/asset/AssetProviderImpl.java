@@ -2086,6 +2086,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVABLE.sub(amountReceivable))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVED.sub(amountReceived))
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amountOwed))
+                .where(t.ID.eq(billId))
                 .execute();
     }
 
@@ -2113,14 +2114,17 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amount))
+                .where(t.ID.eq(billId))
                 .execute();
         if(amount.compareTo(new BigDecimal("0"))<0){
             context.update(t)
                     .set(t.AMOUNT_EXEMPTION,t.AMOUNT_EXEMPTION.add(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }else{
             context.update(t)
                     .set(t.AMOUNT_SUPPLEMENT,t.AMOUNT_SUPPLEMENT.sub(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }
     }
