@@ -3193,7 +3193,11 @@ public class AssetServiceImpl implements AssetService {
             String building = data[buildingIndex];
             String apartment = data[apartmentIndex];
             //客户属性也是
-            switch (data[targetTypeIndex]){
+            String datum = data[targetTypeIndex];
+            if(datum!=null){
+                datum = datum.trim();
+            }
+            switch (datum){
                 case "企业客户":
                     cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
                     break;
