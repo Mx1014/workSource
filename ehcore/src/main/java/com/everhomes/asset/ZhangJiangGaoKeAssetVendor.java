@@ -3,6 +3,8 @@ package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -189,17 +193,32 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     private ShowBillForClientDTO v2BillDTO2v1BillDTO(List<ListAllBillsForClientDTO> showBillForClientV2DTOS) {
         ShowBillForClientDTO ret = new ShowBillForClientDTO();
         List<BillDetailDTO> billDetailDTOList = new ArrayList<>();
+        BigDecimal overAllAmountOwed = null;
+        Integer billPeriodMonth = 0;
         for(ListAllBillsForClientDTO target : showBillForClientV2DTOS){
             BillDetailDTO dto = new BillDetailDTO();
             dto.setBillId(target.getBillId());
             dto.setAmountReceviable(new BigDecimal(target.getAmountReceivable()));
-            dto.setAmountOwed(new BigDecimal(target.getAmountOwed()));
+            BigDecimal owed = new BigDecimal(target.getAmountOwed());
+            dto.setAmountOwed(owed);
+            if(overAllAmountOwed == null){
+                overAllAmountOwed = new BigDecimal("0");
+            }
+            overAllAmountOwed = overAllAmountOwed.add(owed);
             dto.setDateStrBegin(target.getDateStrBegin());
             dto.setDateStrEnd(target.getDateStrEnd());
+            Calendar beginC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrBegin());
+            Calendar endC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrEnd());
+            if(beginC != null && endC != null){
+                int period = endC.get(Calendar.MONTH) - beginC.get(Calendar.MONTH);
+                billPeriodMonth += period;
+            }
             dto.setDateStr(target.getDateStr());
             billDetailDTOList.add(dto);
         }
         ret.setBillDetailDTOList(billDetailDTOList);
+        ret.setAmountOwed(overAllAmountOwed);
+        ret.setBillPeriodMonths(billPeriodMonth);
         return ret;
     }
 
