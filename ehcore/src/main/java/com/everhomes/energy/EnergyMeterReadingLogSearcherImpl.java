@@ -121,12 +121,19 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("meterName", meter.getName());
                 builder.field("meterNumber", meter.getMeterNumber());
 
-//                List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-//                if(existAddress != null && existAddress.size() > 0) {
-//                    builder.field("buildingId", existAddress.get(0).getBuildingId());
-//                    builder.field("addressId", existAddress.get(0).getAddressId());
-//                    builder.field("address", existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
-//                }
+                List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+                StringBuffer addressString = new StringBuffer();
+                StringBuffer buildingString = new StringBuffer();
+                if(existAddress!=null && existAddress.size()>0){
+                    existAddress.forEach((r)->{
+                        addressString.append(r.getAddressId().toString()).append("|");
+                        buildingString.append(r.getBuildingId().toString()).append("|");
+                    });
+                }
+                if(existAddress != null && existAddress.size() > 0) {
+                    builder.field("buildingId", addressString);
+                    builder.field("addressId", buildingString);
+                }
             }
 
             if(operator != null) {
@@ -170,6 +177,14 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
 //                    .field("meterNumber", 5.0f)
                     .field("meterName", 5.0f);
         }
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
+        }
 
         if (StringUtils.isNotEmpty(cmd.getOperatorName())) {
             MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getOperatorName(), "operatorName");
@@ -202,15 +217,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             filterBuilders.add(meterIdTerm);
         }
 
-//        if (cmd.getBuildingId() != null) {
-//            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
-//            filterBuilders.add(buildingIdFilter);
-//        }
-//
-//        if (cmd.getAddressId() != null) {
-//            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
-//            filterBuilders.add(addressIdFilter);
-//        }
+        if (cmd.getBuildingId() != null) {
+            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+            filterBuilders.add(buildingIdFilter);
+        }
+
+        if (cmd.getAddressId() != null) {
+            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+            filterBuilders.add(addressIdFilter);
+        }
         RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
             rangeTimeTerm.gte(cmd.getStartTime());

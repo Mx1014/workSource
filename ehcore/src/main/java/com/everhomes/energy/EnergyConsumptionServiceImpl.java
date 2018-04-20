@@ -419,6 +419,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterFormulaMapProvider energyMeterFormulaMapProvider;
 
+    @Autowired
+    private EnergyMeterReadingLogProvider energyMeterReadingLogProvider;
+
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
