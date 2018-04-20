@@ -52,6 +52,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     @Autowired
     private PayService payService;
 
+
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
@@ -534,7 +535,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
             LOGGER.error("Request ShenZhouShuMa Failed"+e);
-            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
+//            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             ContractListResponse response =(ContractListResponse) StringHelper.fromJsonString(postJson, ContractListResponse.class);
@@ -579,7 +580,18 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
                 result.setCustomerName(customerName);
             }else{
                 LOGGER.error("Request ShenZhouShuMa Failed"+response.getErrorDescription());
-                throw new RuntimeException("Request ShenZhouShuMa Failed"+response.getErrorDescription());
+//                throw new RuntimeException("Request ShenZhouShuMa Failed"+response.getErrorDescription());
+                String customerName = null;
+                if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){
+                    Organization organizationById = organizationProvider.findOrganizationById(cmd.getTargetId());
+                    if(organizationById != null){
+                        customerName = organizationById.getName();
+                    }
+                }else if(targetType.equals(AssetTargetType.USER.getCode())){
+                    // 一定有用户，用户不会为null
+                    customerName = UserContext.current().getUser().getNickName();
+                }
+                result.setCustomerName(customerName);
             }
         }
         return result;
