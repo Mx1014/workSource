@@ -2936,7 +2936,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		Integer exportType = cmd.getExportType();
 		if(null == exportType){
-			return;
+			LOGGER.error("ExportType cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ExportType cannot be null.");
 		}
 
 		XSSFWorkbook wb = new XSSFWorkbook();
