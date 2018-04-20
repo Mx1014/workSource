@@ -580,8 +580,15 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillStatus(r.getValue(t.STATUS));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
-                    dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
-                    dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                    String addrBuildingName = r.getValue(t2.APARTMENT_NAME);
+                    String addrAartName = r.getValue(t2.BUILDING_NAME);
+                    if(addrBuildingName!=null || addrAartName!=null){
+                        dto.setApartmentName(addrAartName);
+                        dto.setBuildingName(addrBuildingName);
+                    }else{
+                        dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
+                        dto.setBuildingName(r.getValue(t.BUILDING_NAME));
+                    }
                     dtos.add(dto);
                     });
         List<BillDTO> fines = new ArrayList<>();
