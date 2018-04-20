@@ -59,7 +59,9 @@ public class UpdateNewsCommand {
     private String visibleType;
 	private byte status;
 	private Long currentPMId;
+    @NotNull
 	private Long currentProjectId;
+    @NotNull
 	private Long appId;
 
 	public Long getAppId() {

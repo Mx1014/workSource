@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属ID</li>
  * <li>newsToken: 新闻标识</li>
  * <li>currentPMId: 当前项目PM公司id</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class DeleteNewsCommand {
@@ -24,7 +25,16 @@ public class DeleteNewsCommand {
 	private String newsToken;
 	@NotNull
 	private Long currentPMId;
+	@NotNull
+	private Long appId;
+	
+	public Long getAppId() {
+		return appId;
+	}
 
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getCurrentPMId() {
 		return currentPMId;
