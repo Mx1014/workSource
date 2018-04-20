@@ -1707,7 +1707,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             ma.setApartmentName(address.getApartmentName());
                             ma.setAddressId(address.getId());
                             ma.setApartmentFloor(address.getApartmentFloor());
-                            ma.setBurdenRate(new BigDecimal(Double.valueOf(str.getBurdenRate().get(i))));
+                            ma.setBurdenRate(new BigDecimal(str.getBurdenRate().get(i)));
                             Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
                             if (building != null) {
                                 ma.setBuildingId(building.getId());
