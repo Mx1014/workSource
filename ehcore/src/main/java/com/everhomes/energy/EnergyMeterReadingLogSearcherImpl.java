@@ -290,7 +290,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
             dto.setOperatorName((String)source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
-            List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(Long.valueOf((String)source.get("meterId")));
+            List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(Long.valueOf(source.get("meterId").toString()));
             dto.setMeterAddress(addressDTOS);
 
             dtoList.add(dto);
