@@ -4,9 +4,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +19,9 @@ import javax.validation.Valid;
 @RequestMapping("/launchpadbase")
 public class LaunchPadBaseController extends ControllerBase {
 
+    @Autowired
+    private LaunchPadService launchPadService;
+
     /**
      * <b>URL: /launchpad/getLaunchPadLayout</b>
      * <p>根据id获取服务市场样式</p>
@@ -24,7 +29,8 @@ public class LaunchPadBaseController extends ControllerBase {
     @RequestMapping("getLaunchPadLayout")
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
-        RestResponse response =  new RestResponse();
+        LaunchPadLayoutDTO dto = launchPadService.getLaunchPadLayout(cmd);
+        RestResponse response =  new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -37,6 +43,7 @@ public class LaunchPadBaseController extends ControllerBase {
     @RequestMapping("listLaunchPadApps")
     @RestReturn(value=ListLaunchPadAppsResponse.class)
     public RestResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
+        ListLaunchPadAppsResponse res = launchPadService.listLaunchPadApps(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
