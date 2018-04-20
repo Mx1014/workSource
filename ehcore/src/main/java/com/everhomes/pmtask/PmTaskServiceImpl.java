@@ -2787,13 +2787,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskStatDTO pmTaskStatDTO = new PmTaskStatDTO();
 		result.entrySet().forEach(elem ->{
 			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey())
-				pmTaskStatDTO.setProcessingCount(elem.getValue().intValue());
+				pmTaskStatDTO.setProcessing(elem.getValue().intValue());
 			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey())
-				pmTaskStatDTO.setCloseCount(elem.getValue().intValue());
+				pmTaskStatDTO.setClose(elem.getValue().intValue());
 			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey())
-				pmTaskStatDTO.setCompleteCount(elem.getValue().intValue());
+				pmTaskStatDTO.setComplete(elem.getValue().intValue());
 		});
-		pmTaskStatDTO.setTotalCount(pmTaskStatDTO.getProcessingCount() + pmTaskStatDTO.getCloseCount() + pmTaskStatDTO.getCompleteCount());
+		pmTaskStatDTO.setTotal(pmTaskStatDTO.getProcessing() + pmTaskStatDTO.getClose() + pmTaskStatDTO.getComplete());
 		return pmTaskStatDTO;
 	}
 
@@ -2854,9 +2854,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 				bean.setOwnerName(community.getName());
 			else
 				bean.setOwnerName("");
-			bean.setInitCount(elem.getValue());
-			bean.setAgentCount(agentCount.get(elem.getKey()));
-			bean.setTotalCount(bean.getInitCount() + bean.getAgentCount());
+			bean.setInit(elem.getValue());
+			bean.setAgent(agentCount.get(elem.getKey()));
+			bean.setTotal(bean.getInit() + bean.getAgent());
 			return bean;
 		}).collect(Collectors.toList());
 		return dtolist;
@@ -2880,23 +2880,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 			else
 				bean.setOwnerName("");
 			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().getStatus())
-				bean.setProcessingCount(elem.getValue().intValue());
+				bean.setProcessing(elem.getValue().intValue());
 			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().getStatus())
-				bean.setCloseCount(elem.getValue().intValue());
+				bean.setClose(elem.getValue().intValue());
 			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey().getStatus())
-				bean.setCompleteCount(elem.getValue().intValue());
+				bean.setComplete(elem.getValue().intValue());
 			return bean;
 		}).collect(Collectors.toList());
 		Map<Long,PmTaskStatDTO> dtoMap = new HashMap<>();
 		dtolist.forEach(elem -> {
 			if (dtoMap.keySet().contains(elem.getOwnerId())){
 				PmTaskStatDTO target = dtoMap.get(elem.getOwnerId());
-				if(null != elem.getProcessingCount())
-					target.setProcessingCount(elem.getProcessingCount());
-				if(null != elem.getCloseCount())
-					target.setCloseCount(elem.getCloseCount());
-				if(null != elem.getCompleteCount())
-					target.setCompleteCount(elem.getCompleteCount());
+				if(null != elem.getProcessing())
+					target.setProcessing(elem.getProcessing());
+				if(null != elem.getClose())
+					target.setClose(elem.getClose());
+				if(null != elem.getComplete())
+					target.setComplete(elem.getComplete());
 				dtoMap.put(elem.getOwnerId(),target);
 			} else {
 				dtoMap.put(elem.getOwnerId(),elem);
@@ -3033,9 +3033,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Row tempRow = sheet.createRow(rownum);
 			tempRow.createCell(0).setCellValue(rownum++);
 			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
-			tempRow.createCell(2).setCellValue(bean.getInitCount());
-			tempRow.createCell(3).setCellValue(bean.getAgentCount());
-			tempRow.createCell(4).setCellValue(bean.getTotalCount());
+			tempRow.createCell(2).setCellValue(bean.getInit());
+			tempRow.createCell(3).setCellValue(bean.getAgent());
+			tempRow.createCell(4).setCellValue(bean.getTotal());
 		}
 
 	}
@@ -3059,10 +3059,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Row tempRow = sheet.createRow(rownum);
 			tempRow.createCell(0).setCellValue(rownum++);
 			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
-			tempRow.createCell(2).setCellValue(bean.getCompleteCount());
-			tempRow.createCell(3).setCellValue(bean.getProcessingCount());
-			tempRow.createCell(4).setCellValue(bean.getCloseCount());
-			tempRow.createCell(5).setCellValue(bean.getTotalCount());
+			tempRow.createCell(2).setCellValue(bean.getComplete());
+			tempRow.createCell(3).setCellValue(bean.getProcessing());
+			tempRow.createCell(4).setCellValue(bean.getClose());
+			tempRow.createCell(5).setCellValue(bean.getTotal());
 		}
 
 	}

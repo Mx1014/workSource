@@ -8,12 +8,12 @@ import java.util.Objects;
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目id</li>
  * <li>ownerName: 所属项目名称</li>
- * <li>totalCount: 合计</li>
- * <li>completeCount: 处理完成数量</li>
- * <li>processingCount: 处理中数量</li>
- * <li>closeCount: 已取消数量</li>
- * <li>initCount: 用户发起数量</li>
- * <li>agentCount: 员工代发数量</li>
+ * <li>total: 合计</li>
+ * <li>complete: 处理完成数量</li>
+ * <li>processing: 处理中数量</li>
+ * <li>close: 已取消数量</li>
+ * <li>init: 用户发起数量</li>
+ * <li>agent: 员工代发数量</li>
  * </ul>
  */
 public class PmTaskStatDTO {
@@ -22,21 +22,21 @@ public class PmTaskStatDTO {
     private String ownerType;
     private Long ownerId;
     private String ownerName;
-    private Integer totalCount;
-    private Integer completeCount;
-    private Integer processingCount;
-    private Integer closeCount;
-    private Integer initCount;
-    private Integer agentCount;
+    private Integer total;
+    private Integer complete;
+    private Integer processing;
+    private Integer close;
+    private Integer init;
+    private Integer agent;
 
     public PmTaskStatDTO() {
         super();
-        this.totalCount = 0;
-        this.completeCount = 0;
-        this.processingCount = 0;
-        this.closeCount = 0;
-        this.initCount = 0;
-        this.agentCount = 0;
+        this.total = 0;
+        this.complete = 0;
+        this.processing = 0;
+        this.close = 0;
+        this.init = 0;
+        this.agent = 0;
     }
 
     @Override
@@ -85,51 +85,51 @@ public class PmTaskStatDTO {
         this.ownerName = ownerName;
     }
 
-    public Integer getTotalCount() {
-        return totalCount;
+    public Integer getTotal() {
+        return total;
     }
 
-    public void setTotalCount(Integer totalCount) {
-        this.totalCount = totalCount;
+    public void setTotal(Integer total) {
+        this.total = total;
     }
 
-    public Integer getCompleteCount() {
-        return completeCount;
+    public Integer getComplete() {
+        return complete;
     }
 
-    public void setCompleteCount(Integer completeCount) {
-        this.completeCount = completeCount;
+    public void setComplete(Integer complete) {
+        this.complete = complete;
     }
 
-    public Integer getProcessingCount() {
-        return processingCount;
+    public Integer getProcessing() {
+        return processing;
     }
 
-    public void setProcessingCount(Integer processingCount) {
-        this.processingCount = processingCount;
+    public void setProcessing(Integer processing) {
+        this.processing = processing;
     }
 
-    public Integer getCloseCount() {
-        return closeCount;
+    public Integer getClose() {
+        return close;
     }
 
-    public void setCloseCount(Integer closeCount) {
-        this.closeCount = closeCount;
+    public void setClose(Integer close) {
+        this.close = close;
     }
 
-    public Integer getInitCount() {
-        return initCount;
+    public Integer getInit() {
+        return init;
     }
 
-    public void setInitCount(Integer initCount) {
-        this.initCount = initCount;
+    public void setInit(Integer init) {
+        this.init = init;
     }
 
-    public Integer getAgentCount() {
-        return agentCount;
+    public Integer getAgent() {
+        return agent;
     }
 
-    public void setAgentCount(Integer agentCount) {
-        this.agentCount = agentCount;
+    public void setAgent(Integer agent) {
+        this.agent = agent;
     }
 }
