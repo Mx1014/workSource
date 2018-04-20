@@ -2815,7 +2815,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
                     String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
                     EnergyAutoReadHandler handler = null;
-                    if (meter.getNamespaceId() == 999961) {
+                    if (meter.getNamespaceId() == 999961 || meter.getNamespaceId() == 999992) {
                          handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
                     }
                     if (handler != null) {
