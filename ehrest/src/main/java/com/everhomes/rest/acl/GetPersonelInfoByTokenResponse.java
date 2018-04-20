@@ -9,6 +9,7 @@ package com.everhomes.rest.acl;
  * <li>isTopAdminFlag：是否是超级管理员</li>
  * <li>isSystemAdminFlag：是否是系统管理员</li>
  * <li>isSigned: 是否已经注册</li>
+ * <li>isJoined: 是否已经加入了公司</li>
  * </ul>
  */
 public class GetPersonelInfoByTokenResponse {
@@ -20,6 +21,8 @@ public class GetPersonelInfoByTokenResponse {
     private Byte isSystemAdminFlag;
     //用来判断是否已经注册的标志
     private Byte isSigned;
+    //是否加入了企业
+    private Byte isJoined;
 
     public Long getUserId() {
         return userId;
@@ -75,5 +78,13 @@ public class GetPersonelInfoByTokenResponse {
 
     public void setIsSigned(Byte isSigned) {
         this.isSigned = isSigned;
+    }
+
+    public Byte getIsJoined() {
+        return isJoined;
+    }
+
+    public void setIsJoined(Byte isJoined) {
+        this.isJoined = isJoined;
     }
 }
