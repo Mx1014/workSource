@@ -6,20 +6,15 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.parking.*;
-import com.everhomes.parking.qididaoding.QidiDaodingMonthCardEntity;
-import com.everhomes.parking.qididaoding.QidiDaodingResponse;
-import com.everhomes.parking.qididaoding.QidiDaodingSignUtil;
-import com.everhomes.parking.qididaoding.QidiDaodingTokenEntity;
-import com.everhomes.parking.yinxingzhijiexiaomao.*;
-import com.everhomes.parking.zhongbaichang.ZhongBaiChangCardInfo;
-import com.everhomes.parking.zhongbaichang.ZhongBaiChangData;
+import com.everhomes.parking.qididaoding.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import kafka.utils.Json;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +24,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 启迪香山，启迪香山
@@ -58,10 +50,69 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
     private static final String OPENAPI_PARKING_TEMPORARY_OPEN_LIST = "/openapi/parking/temporary/open/list";// 临时放行记录
 
     private static final String PARKING_QIDI_DAODING_TICKENT = "PARKING_QIDI_DAODING_TICKENT";//存token
+//    private static final String PARKING_GET_FREE_SPACE_NUM = "PARKING_GET_FREE_SPACE_NUM";//存空余车位数量
 
     @Autowired
     public BigCollectionProvider bigCollectionProvider;
 
+
+    @Override
+    public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
+                cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+        Integer requestMonthCount = REQUEST_MONTH_COUNT;
+        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+        if(null != parkingFlow) {
+            requestMonthCount = parkingFlow.getRequestMonthCount();
+            requestRechargeType = parkingFlow.getRequestRechargeType();
+        }
+
+        OpenCardInfoDTO dto = new OpenCardInfoDTO();
+        String cardTypeId = parkingCardRequest.getCardTypeId();
+
+        ParkingLot lot = ConvertHelper.convert(cmd,ParkingLot.class);
+        lot.setId(cmd.getParkingLotId());
+
+        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(lot, null, null);
+        if(null != parkingRechargeRates && !parkingRechargeRates.isEmpty()) {
+
+            ParkingRechargeRateDTO rate = null;
+            for (ParkingRechargeRateDTO r : parkingRechargeRates) {
+                if (r.getCardTypeId().equals(cardTypeId)) {
+                    rate = r;
+                    break;
+                }
+            }
+
+            if (null == rate) {
+                return null;
+            }
+//            dto = ConvertHelper.convert(rate,OpenCardInfoDTO.class);
+            dto.setOwnerId(cmd.getOwnerId());
+            dto.setOwnerType(cmd.getOwnerType());
+            dto.setParkingLotId(cmd.getParkingLotId());
+            dto.setRateToken(rate.getRateToken());
+            dto.setRateName(rate.getRateName());
+            dto.setCardType(rate.getCardType());
+//            dto.setMonthCount(rate.getMonthCount());
+            dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
+            dto.setPrice(rate.getPrice().divide(rate.getMonthCount(), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
+
+            dto.setPlateNumber(cmd.getPlateNumber());
+            long now = System.currentTimeMillis();
+            dto.setOpenDate(now);
+            dto.setExpireDate(Utils.getTimestampByAddRealMonth(now, requestMonthCount));
+            dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+        }
+        return dto;
+    }
 
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -99,22 +150,179 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
         map.put("parkingId",parkingId);
         map.put("plateNo",plateNumber);
 
-        return postWithToken(map,OPENAPI_PARKING_MONTHCARD_GET,QidiDaodingResponse.class);
+        return postWithToken(map,OPENAPI_PARKING_MONTHCARD_GET,QidiDaodingResponse.class,QidiDaodingMonthCardEntity.class);
     }
 
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
-        return null;
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+
+        QidiDaodingResponse<List> response = postWithToken(map, OPENAPI_PARKING_MONTHCARD_TYPE_GET, QidiDaodingResponse.class, List.class);
+        List<ParkingRechargeRateDTO> list = new ArrayList<>();
+        if (!isRequestDataSuccess(response)) {
+            return null;
+        }
+        String typeId = null;
+        if(plateNumber!=null){
+            QidiDaodingResponse<QidiDaodingMonthCardEntity> cardInfo = getCardInfo(plateNumber);
+            if(!isRequestDataSuccess(response)){
+                return null;
+            }
+            typeId = cardInfo.getData().getTypeId();
+        }
+        for (Object o : response.getData()) {
+            QidiDaodingCardTypeEntity entity = JSONObject.parseObject(o.toString(),QidiDaodingCardTypeEntity.class);
+            if(typeId!=null){
+                if(typeId.equals(entity.getId())){
+                    ParkingRechargeRateDTO dto = generateParkingRechargeRateDTO(entity, parkingLot);
+                    list.add(dto);
+                    break;
+                }
+            }else {
+                ParkingRechargeRateDTO dto = generateParkingRechargeRateDTO(entity,parkingLot);
+                list.add(dto);
+            }
+        }
+        return list;
+    }
+
+    private ParkingRechargeRateDTO generateParkingRechargeRateDTO(QidiDaodingCardTypeEntity entity, ParkingLot parkingLot) {
+        ParkingRechargeRateDTO dto = ConvertHelper.convert(parkingLot,ParkingRechargeRateDTO.class);
+        dto.setCardTypeId(entity.getId());
+        dto.setCardType(entity.getTypeName());
+        dto.setRateName(entity.getMonthCount()+"个月");
+        dto.setPrice(entity.getUnitPrice());
+        dto.setRateToken(entity.getId());
+        dto.setMonthCount(new BigDecimal(entity.getMonthCount()));
+        return dto;
     }
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        return null;
+        if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+            if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+                return rechargeMonthlyCard(order);
+            }else if(order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
+                return payTempCardFee(order);
+            }
+        } else if(order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+			return openMonthCard(order);
+        }
+        LOGGER.info("unknown type = " + order.getRechargeType());
+        return false;
+    }
+
+    private Boolean payTempCardFee(ParkingRechargeOrder order) {
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap<String,String> map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",order.getPlateNumber());
+        map.put("receivable",String.valueOf(order.getPrice()));
+        map.put("calcId",order.getOrderToken());
+        map.put("paymentType", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "121001" : "120901");
+        QidiDaodingResponse<JSONObject> response = postWithToken(map, OPENAPI_PARKING_TEMPORARY_CREATE, QidiDaodingResponse.class, null);
+        order.setErrorDescription(response.getErrorMsg());
+        order.setErrorDescriptionJson(response.toString());
+        return isRequestDataSuccess(response);
+    }
+
+    private Boolean openMonthCard(ParkingRechargeOrder order) {
+        ParkingCardRequest request;
+        if (null != order.getCardRequestId()) {
+            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+        }else {
+            request = getParkingCardRequestByOrder(order);
+        }
+
+        Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
+        Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+        order.setStartPeriod(timestampStart);
+        order.setEndPeriod(timestampEnd);
+
+        if(addMonthCard(order, request)) {
+            updateFlowStatus(request);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean addMonthCard(ParkingRechargeOrder order, ParkingCardRequest request) {
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap<String,String> map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",order.getPlateNumber());
+        map.put("typeId",request.getCardTypeId());
+//        map.put("plateColor",request.getCardTypeId());
+        map.put("ownerMobile",request.getPlateOwnerPhone());
+        map.put("ownerName",request.getPlateOwnerName());
+//        map.put("address",request.getPlateOwnerEntperiseName());
+//        map.put("ownerNo",request.getPlateOwnerEntperiseName());
+        map.put("typeCount",String.valueOf(order.getMonthCount().intValue()));
+        map.put("receivable",String.valueOf(order.getPrice().multiply(new BigDecimal("100"))));//单位分
+        map.put("paymentMode",VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "121001" : "120901");
+        QidiDaodingResponse response = postWithToken(map, OPENAPI_PARKING_MONTHCARD_CREATE, QidiDaodingResponse.class, null);
+        order.setErrorDescriptionJson(response.toString());
+        order.setErrorDescription(response.getErrorMsg());
+        if(isRequestSuccess(response)){
+            updateFlowStatus(request);
+            return true;
+        }
+        return false;
+
+    }
+
+    private Boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
+        QidiDaodingResponse<QidiDaodingMonthCardEntity> cardInfo = getCardInfo(order.getPlateNumber());
+        if (isRequestDataSuccess(cardInfo)) {
+            String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+            TreeMap<String, String> map = new TreeMap();
+            map.put("parkingId", parkingId);
+            map.put("plateNo", order.getPlateNumber());
+            map.put("typeId", cardInfo.getData().getTypeId());
+            map.put("typeCount", String.valueOf(order.getMonthCount().intValue()));
+            map.put("receivable", String.valueOf(order.getPrice().multiply(new BigDecimal("100"))));//单位分
+            map.put("paymentMode", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "121001" : "120901");
+            QidiDaodingResponse qidiDaodingResponse = postWithToken(map, OPENAPI_PARKING_MONTHCARD_RENEWALS, QidiDaodingResponse.class, null);
+            order.setErrorDescriptionJson(qidiDaodingResponse.toString());
+            order.setErrorDescription(qidiDaodingResponse.getErrorMsg());
+            return isRequestSuccess(qidiDaodingResponse);
+        }
+        return false;
+    }
+
+    @Override
+    public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+        return super.getParkingCarLockInfo(cmd);
     }
 
     @Override
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-        return null;
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+
+        QidiDaodingResponse<List> response = postWithToken(map, OPENAPI_PARKING_MONTHCARD_TYPE_GET, QidiDaodingResponse.class, List.class);
+        List<ParkingRechargeRateDTO> list = new ArrayList<>();
+        if (!isRequestDataSuccess(response)) {
+            return null;
+        }
+        ListCardTypeResponse listCardTypeResponse = new ListCardTypeResponse();
+        List<ParkingCardType> cardTypes = new ArrayList<>();
+        for (Object o : response.getData()) {
+            QidiDaodingCardTypeEntity entity = JSONObject.parseObject(o.toString(),QidiDaodingCardTypeEntity.class);
+            ParkingCardType dto = new ParkingCardType();
+            dto.setTypeId(entity.getId());
+            dto.setTypeName(entity.getTypeName());
+            cardTypes.add(dto);
+        }
+        listCardTypeResponse.setCardTypes(cardTypes);
+        return listCardTypeResponse;
     }
 
     @Override
@@ -122,15 +330,40 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     }
 
+    @Override
+    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
 
-    private <T extends QidiDaodingResponse> T postWithToken(TreeMap map, String context, Class<T> cls) {
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+
+        QidiDaodingResponse<QidiDaodingParkingInfoEntity> response = postWithToken(map,OPENAPI_PARKING_INFO,QidiDaodingResponse.class,QidiDaodingParkingInfoEntity.class);
+        if(isRequestDataSuccess(response)) {
+            ParkingFreeSpaceNumDTO dto = ConvertHelper.convert(cmd, ParkingFreeSpaceNumDTO.class);
+            dto.setFreeSpaceNum(response.getData().getEmptyParks());
+            return  dto;
+        }
+        return null;
+    }
+
+    private <T extends QidiDaodingResponse,S>  T postWithToken(TreeMap map, String context, Class<T> cls, Class<S> subCls) {
         map.put("token",getToken(false));
         String result = post(map, context);
+        if(StringUtils.isEmpty(result)){
+           return null;
+        }
         T response = JSONObject.parseObject(result,cls);
         if(isTokenOutOfDate(response)){
             map.put("token",getToken(true));
             result = post(map,context);
-            return JSONObject.parseObject(result,cls);
+            response = JSONObject.parseObject(result,cls);
+        }
+        if(!isRequestSuccess(response)){
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_RESULT,
+                    response!=null?response.getErrorCode()+","+response.getErrorMsg():"请求停车系统失败");
+        }
+        if(subCls!=null) {
+            response.setData(JSONObject.parseObject(response.getData().toString(), subCls));
         }
         return response;
     }
@@ -179,6 +412,35 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     }
 
+    @Override
+    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",plateNumber);
+//        map.put("plateColor",plateNumber);//车颜色
+        QidiDaodingResponse<QidiDaodingTemporaryCarEntity> response =
+                postWithToken(map, OPENAPI_PARKING_TEMPORARY_GET, QidiDaodingResponse.class, QidiDaodingTemporaryCarEntity.class);
+        if(!isRequestDataSuccess(response)){
+            return  null;
+        }
+        ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+        Long aLong = Utils.subtractionTime(System.currentTimeMillis(), response.getData().getValidLeavingTime());
+        dto.setDelayTime(0);
+        if(aLong!=null && aLong>0) {
+            dto.setRemainingTime(Integer.valueOf(aLong.toString()));
+            dto.setDelayTime(Integer.valueOf(aLong.toString()));
+        }
+        dto.setPrice(response.getData().getPaidAmt());
+        dto.setEntryTime(Utils.strToLong(response.getData().getEntryTime(),Utils.DateStyle.DATE_TIME));
+        dto.setParkingTime(response.getData().getParkingTimes());
+        dto.setPlateNumber(plateNumber);
+        dto.setPayTime(System.currentTimeMillis());
+        dto.setOrderToken(response.getData().getCalcId());
+        return dto;
+    }
+
     /**
      *
      * @return 从第三方获取token
@@ -204,10 +466,10 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
         int i = 0;
         for (;;) {
-            String result = post(map,OPENAPI_TOKEN_GET);
-            QidiDaodingResponse<QidiDaodingTokenEntity> response = JSONObject.parseObject(result, new TypeReference<QidiDaodingResponse<QidiDaodingTokenEntity>>() {
+            String result =Utils.postUrlencoded(url+OPENAPI_TOKEN_GET,map);
+            QidiDaodingResponse response = JSONObject.parseObject(result, new TypeReference<QidiDaodingResponse>() {
             });
-            if (!response.isSuccess() || response.getData()==null || response.getData().getToken()==null) {
+            if (!response.isSuccess() || response.getData()==null || JSONObject.parseObject(response.getData().toString()).getString("token")==null) {
                 i++;
                 LOGGER.error("get token from elive failed, try again times {}",i);
                 if(i>2) {
@@ -216,14 +478,14 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
                 }
                 continue;
             }
-            return response.getData().getToken();
+            return JSONObject.parseObject(response.getData().toString()).getString("token");
         }
     }
 
     private String post(TreeMap map, String conext){
         String url = configProvider.getValue("parking.qididaoding.url", "");
-        String key = configProvider.getValue("parking.qididaoding.key", "");
-        map.put("sign", QidiDaodingSignUtil.getSign(map,key));
+        String paramKey = configProvider.getValue("parking.qididaoding.paramKey", "");
+        map.put("sign", QidiDaodingSignUtil.getSign(map,paramKey));
         return  Utils.postUrlencoded(url+conext,map);
     }
 

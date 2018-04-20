@@ -8,7 +8,7 @@ public class QidiDaodingSignUtil {
 		
 		StringBuilder sb = new StringBuilder();
 		for (String key : treeMap.keySet()) {
-			sb.append(key).append("=").append(treeMap.get(key)).append("&");
+			sb.append(key).append("=").append(String.valueOf(treeMap.get(key))).append("&");
 		}
 		sb.deleteCharAt(sb.length()-1);
 		sb.append(signkey);
