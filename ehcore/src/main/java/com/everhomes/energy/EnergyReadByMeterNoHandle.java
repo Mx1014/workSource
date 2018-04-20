@@ -1,6 +1,5 @@
 package com.everhomes.energy;
 
-import com.everhomes.pmtask.PmTaskHandle;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -30,7 +29,7 @@ import java.util.Map;
 /**
  * Created by Rui.Jia  2018/4/16 11 :01
  */
-@Component(EnergyAutoReadHandler.AUTO_PREFIX + PmTaskHandle.YUE_KONG_JIAN)
+@Component(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI)
 public class EnergyReadByMeterNoHandle implements EnergyAutoReadHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnergyReadByMeterNoHandle.class);
     private static final String KEY_ALGORITHM = "RSA";
