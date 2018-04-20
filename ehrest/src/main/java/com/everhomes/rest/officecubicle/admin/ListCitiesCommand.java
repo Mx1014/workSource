@@ -5,12 +5,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>parentName: 父名称，如果不传此值，则获取省，如果传为省名称，则获取省下所有城市</li>
  * <li>namespaceId: 域空间id</li>
  * <li>nextPageAnchor: 下一页锚点</li>
  * <li>pageSize: 页大小</li>
  * </ul>
  */
 public class ListCitiesCommand {
+	
+	private String parentName;
 
     private Integer namespaceId;
 
@@ -18,7 +21,15 @@ public class ListCitiesCommand {
 
     private Integer pageSize;
 
-    public Integer getNamespaceId() {
+    public String getParentName() {
+		return parentName;
+	}
+
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 
