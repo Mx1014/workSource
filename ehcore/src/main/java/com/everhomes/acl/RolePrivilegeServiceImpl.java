@@ -1735,28 +1735,51 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd) {
 		GetPersonelInfoByTokenResponse response = new GetPersonelInfoByTokenResponse();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getContactToken());
-		if(userIdentifier == null)
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USERTOKEN,
-					"invalid params");
-		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-		// 昵称
-		response.setNickName(user.getNickName());
 
-		GetAdministratorInfosByUserIdCommand getMethodCmd = new GetAdministratorInfosByUserIdCommand();
-		getMethodCmd.setOrganizationId(cmd.getOrganizationId());
-		getMethodCmd.setUserId(userIdentifier.getOwnerUid());
-		GetAdministratorInfosByUserIdResponse getMethodResponse = this.getAdministratorInfosByUserId(getMethodCmd);
-		// 用户id
-		response.setUserId(userIdentifier.getOwnerUid());
-		// 管理员flag
-		response.setIsTopAdminFlag(getMethodResponse.getIsTopAdminFlag());
-		response.setIsSystemAdminFlag(getMethodResponse.getIsSystemAdminFlag());
+		//add by lei yuan
+//		boolean flag = checkAdministrators(cmd.getOrganizationId());
+//		response.setIsSystemAdminFlag(flag == true ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+						OrganizationMemberTargetType.UNTRACK.getCode(), 1000, new ListingLocator());
 
-		OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(userIdentifier.getOwnerUid(), cmd.getOrganizationId());
-		if(details != null){
-			// 档案信息和id
-			response.setCotactName(details.getContactName());
-			response.setDetailId(details.getId());
+		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
+		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
+
+		if(userIdentifier == null){
+			/*throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USERTOKEN,
+					"invalid params");*/
+			//说明没有进行注册，那么我们需要给前端一个标识，代表未注册
+			response.setIsSigned(TrueOrFalseFlag.FALSE.getCode());
+			response.setIsTopAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+		}else{
+
+			//现在可以说明的是已经注册了，那么就将isSigned状态置为1
+			response.setIsSigned(TrueOrFalseFlag.TRUE.getCode());
+
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			// 昵称
+			response.setNickName(user.getNickName());
+			// 用户id
+			response.setUserId(user.getId());
+
+			GetAdministratorInfosByUserIdCommand getMethodCmd = new GetAdministratorInfosByUserIdCommand();
+			getMethodCmd.setOrganizationId(cmd.getOrganizationId());
+			getMethodCmd.setUserId(userIdentifier.getOwnerUid());
+			//add by leiyuan
+			getMethodCmd.setContactToken(userIdentifier.getIdentifierToken());
+			GetAdministratorInfosByUserIdResponse getMethodResponse = this.getAdministratorInfosByUserId(getMethodCmd);
+			// 管理员flag
+			response.setIsTopAdminFlag(getMethodResponse.getIsTopAdminFlag());
+			response.setIsSystemAdminFlag(getMethodResponse.getIsSystemAdminFlag());
+
+			OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(userIdentifier.getOwnerUid(), cmd.getOrganizationId());
+			if(details != null){
+				// 档案信息和id
+				response.setCotactName(details.getContactName());
+				response.setDetailId(details.getId());
+			}
 		}
 		return response;
 	}
@@ -2602,9 +2625,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<OrganizationContactDTO> targetDtos = systemAdminDtos.getDtos().stream().filter(r->r.getTargetId().equals(cmd.getUserId())).collect(Collectors.toList());
 		response.setIsTopAdminFlag((targetDtos != null && targetDtos.size() > 0) ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
 
-		//add by lei yuan
+		/*//add by lei yuan
 		boolean flag = checkAdministrators(cmd.getOrganizationId());
-		response.setIsSystemAdminFlag(flag == true ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
+		response.setIsSystemAdminFlag(flag == true ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());*/
+
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+						OrganizationMemberTargetType.UNTRACK.getCode(), 1000, new ListingLocator());
+
+		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
+		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
 
 
 		//modify by lei yuan
