@@ -606,14 +606,18 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("parkCodes",parkCode);
 		params.put("attributes",paramattrs);
 		String result = post(params.toJSONString());
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse<String,String> response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
-		if(!isRequestSuccess(response) || response.getDataItems()==null || response.getDataItems().size()==0){
+		if(!isRequestSuccess(response) || response.getDataItems()==null){
 			return null;
 		}
-		JSONObject jsonObject = JSONObject.parseObject(response.getDataItems().get(0).getAttributes());
+		JSONArray array = JSONObject.parseArray(response.getDataItems());
+		if(array==null || array.size()<1){
+			return null;
+		}
+		JSONObject jsonObject =array.getJSONObject(0);
 		ParkingFreeSpaceNumDTO dto = ConvertHelper.convert(cmd,ParkingFreeSpaceNumDTO.class);
 		dto.setFreeSpaceNum(jsonObject.getInteger("restSpace"));
 		return dto;
