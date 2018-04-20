@@ -1545,12 +1545,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 data.setRate(r.getK().trim());
             }
 
-            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
-                if(data == null) {
-                    data = new ImportEnergyMeterDataDTO();
-                }
-                data.setAmountFormula(r.getL().trim());
-            }
+//            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
+//                if(data == null) {
+//                    data = new ImportEnergyMeterDataDTO();
+//                }
+//                data.setAmountFormula(r.getL().trim());
+//            }
 
             if(data != null) {
                 result.add(data);
