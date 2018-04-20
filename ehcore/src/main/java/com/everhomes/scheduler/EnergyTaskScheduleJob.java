@@ -71,10 +71,10 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -302,38 +302,16 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     private void generateTaskPaymentExpectancies(EnergyMeterTask task) {
         Boolean generateFlag = false;
         EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
-        if(meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
-            return ;
+        if (meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+            return;
         }
         //task关联的表关联的门牌有没有合同
         List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
         if (addresses != null && addresses.size() > 0) {
-            EnergyMeterAddress address = addresses.get(0);
             //add parameter address
             Map<Long, BigDecimal> amountMap = calculateAmount(task, meter, addresses);
             //EnergyMeterAddress address = addresses.get(0);
-            if (addresses.size() > 1) {
-                addresses.forEach((a) -> {
-                    //eh_contract_charging_item_addresses
-                    Timestamp endDate = getEndDate(task.getExecutiveExpireTime(), task.getExecutiveStartTime());
-                    List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(a.getAddressId(), meter.getMeterType(), task.getExecutiveStartTime(), endDate);
-                    if (contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
-                        List<FeeRules> feeRules = new ArrayList<>();
-                        List<Long> contractId = new ArrayList<>();
-                        contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
-                            ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
-                            BigDecimal amount = (amountMap != null ? amountMap.get(a.getAddressId()) : new BigDecimal(0));
-                            FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), a);
-                            feeRules.add(feeRule);
-                            contractId.add(item.getContractId());
-                        });
-                        //suanqian paymentExpectancies_re_struct();
-                        paymentExpectancies_re_struct(task, a, feeRules, contractId.get(0));
-                    }
-                });
-                generateFlag = true;
-            } else if (addresses.size() == 1) {
+            for (EnergyMeterAddress address : addresses) {
                 Timestamp endDate = getEndDate(task.getExecutiveExpireTime(), task.getExecutiveStartTime());
                 List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType(), task.getExecutiveStartTime(), endDate);
                 if (contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
@@ -399,7 +377,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             }
 
         }
-        if(generateFlag) {
+        //eh_contract_charging_item_addresses
+        if (generateFlag) {
             task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
         } else {
             task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.NON_CHARGING_ITEM.getCode());
