@@ -1740,19 +1740,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//add by lei yuan
 //		boolean flag = checkAdministrators(cmd.getOrganizationId());
 //		response.setIsSystemAdminFlag(flag == true ? AllFlagType.YES.getCode() : AllFlagType.NO.getCode());
-		List<OrganizationMember> members =
-				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
-						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
-						OrganizationMemberTargetType.UNTRACK.getCode(), 1000, new ListingLocator());
-
-		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
-		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
 
 		if(userIdentifier == null){
 			/*throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USERTOKEN,
 					"invalid params");*/
 			//说明没有进行注册，那么我们需要给前端一个标识，代表未注册
 			response.setIsSigned(TrueOrFalseFlag.FALSE.getCode());
+			List<OrganizationMember> members =
+					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+							OrganizationMemberTargetType.UNTRACK.getCode(), 1000, new ListingLocator());
+
+			boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
+			response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
 			response.setIsTopAdminFlag(TrueOrFalseFlag.FALSE.getCode());
 		}else{
 
@@ -2646,7 +2646,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
-						OrganizationMemberTargetType.UNTRACK.getCode(), 1000, new ListingLocator());
+						OrganizationMemberTargetType.USER.getCode(), 1000, new ListingLocator());
 
 		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
 		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
