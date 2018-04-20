@@ -88,6 +88,9 @@ WHERE m.id IS NULL;
 
 -- 住总报修地址 by st.zheng
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ( 'pmtask.zhuzong.url', 'http://139.129.204.232:8007/LsInterfaceServer', '物业报修', '0');
+
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`) VALUES ( 'pmtask.handler-999955', 'zhuzong', '住总handler', '0');
+
 -- by zheng 初始化communityId
 update `eh_lease_promotions`  right join `eh_lease_buildings` on `eh_lease_promotions`.building_id = `eh_lease_buildings`.id
 set `eh_lease_promotions`.community_id = `eh_lease_buildings`.community_id
