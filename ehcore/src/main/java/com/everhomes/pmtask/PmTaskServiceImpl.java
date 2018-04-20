@@ -60,14 +60,12 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2938,16 +2936,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		Integer exportType = cmd.getExportType();
 		if(null == exportType){
-
-		}
-		List<PmTaskStatSubDTO> datalist1 = new ArrayList();
-		List<PmTaskStatDTO> datalist2 = new ArrayList();
-//		1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据
-		switch (exportType){
-			case 1 : datalist1 = this.getStatByCategory(cmd);break;
-			case 2 : datalist2 = this.getStatByCreator(cmd);break;
-			case 3 : datalist2 = this.getStatByStatus(cmd);break;
-			case 4 : datalist1 = this.getStatByArea(cmd);break;
+			return;
 		}
 
 		XSSFWorkbook wb = new XSSFWorkbook();
@@ -2961,50 +2950,147 @@ public class PmTaskServiceImpl implements PmTaskService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 
-		Set<String> titles = new HashSet<String>();
-		datalist1.forEach(elem ->{
+//		1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据
+		switch (exportType){
+			case 1 : this.exportTaskStatByCategory(cmd,sheet);break;
+			case 2 : this.exportTaskStatByCreator(cmd,sheet);break;
+			case 3 : this.exportTaskStatByStatus(cmd,sheet);break;
+			case 4 : this.exportTaskStatByArea(cmd,sheet);break;
+		}
+
+		exportExcel(wb, resp);
+
+	}
+
+	private void exportTaskStatByCategory(GetTaskStatCommand cmd,Sheet sheet){
+	    List<PmTaskStatSubDTO> datalist = this.getStatByCategory(cmd);
+        List<String> titles = new ArrayList<>();
+		datalist.forEach(elem ->{
 			if (!titles.contains(elem.getType())){
 				titles.add(elem.getType());
 			}
 		});
+		Map<Long,Map<String,Integer>> datamap = new HashMap<>();
+		datalist.forEach(elem->{
+            if(datamap.keySet().contains(elem.getOwnerId())) {
+                Map<String, Integer> elemmap = datamap.get(elem.getOwnerId());
+                elemmap.put(elem.getType(), elem.getTotal());
+            } else {
+                Map<String, Integer> elemmap = new HashMap<String,Integer>();
+                elemmap.put(elem.getType(),elem.getTotal());
+                datamap.put(elem.getOwnerId(),elemmap);
+            }
+        });
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("序號");
-		row.createCell(1).setCellValue("項目名稱");
-		row.createCell(2).setCellValue("新增");
-		row.createCell(3).setCellValue("总量");
-		row.createCell(4).setCellValue("剩余未处理");
-		row.createCell(5).setCellValue("任务完成率");
-		row.createCell(6).setCellValue("任务关闭率");
-		row.createCell(7).setCellValue("客户评价均分");
-//		for(int i=0;i<list.size();i++){
-//			Row tempRow = sheet.createRow(i + 1);
-//			PmTaskStatistics pts = list.get(i);
-//			Category category = checkCategory(pts.getTaskCategoryId());
-//			Community community = communityProvider.findCommunityById(pts.getOwnerId());
-//			tempRow.createCell(0).setCellValue(community.getName());
-//			tempRow.createCell(1).setCellValue(category.getName());
-//			tempRow.createCell(2).setCellValue(pts.getTotalCount());
-//			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getTaskCategoryId(), null);
-//			tempRow.createCell(3).setCellValue(totalCount);
-//			tempRow.createCell(4).setCellValue(pts.getUnprocessCount());
-//			CellStyle cellStyle = wb.createCellStyle();
-//			XSSFDataFormat fmt = wb.createDataFormat();
-//			cellStyle.setDataFormat(fmt.getFormat("0.00%"));
-//			Cell cell4 = tempRow.createCell(5);
-//			cell4.setCellStyle(cellStyle);
-//			cell4.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getProcessedCount()/pts.getTotalCount():0);
-//			Cell cell5 = tempRow.createCell(6);
-//			cell5.setCellStyle(cellStyle);
-//			cell5.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getCloseCount()/pts.getTotalCount():0);
-//			float avgStar = calculatePerson(pts)!=0?(float) (calculateStar(pts)) / (calculatePerson(pts)):0;
-//			tempRow.createCell(7).setCellValue(avgStar);
-//		}
-
-		exportExcel(wb, resp);
-
-
+		int columnnum = 0;
+		int rownum = 1;
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("項目名稱");
+		tableHead.addAll(titles);
+		tableHead.add("合计");
+		for(String th:tableHead){
+			row.createCell(columnnum++).setCellValue(th);
+		}
+		for (Map.Entry<Long, Map<String, Integer>> elem : datamap.entrySet()) {
+			Row temprow = sheet.createRow(rownum);
+			temprow.createCell(0).setCellValue(rownum++);
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			if(null != community)
+				temprow.createCell(1).setCellValue(community.getName());
+			else
+				temprow.createCell(1).setCellValue("");
+			int n = 2;
+			int sum = 0;
+			for (String title: titles) {
+				int amount = 0;
+				if(null != elem.getValue().get(title)) {
+					amount = elem.getValue().get(title);
+				}
+				sum += amount;
+				temprow.createCell(n++).setCellValue(amount);
+			}
+			temprow.createCell(n).setCellValue(sum);
+		}
 	}
 
+	private void exportTaskStatByCreator(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatDTO> datalist = this.getStatByCreator(cmd);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("项目名称");
+		tableHead.add("用户发起");
+		tableHead.add("员工代发");
+		tableHead.add("合计");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
+			tempRow.createCell(2).setCellValue(bean.getInitCount());
+			tempRow.createCell(3).setCellValue(bean.getAgentCount());
+			tempRow.createCell(4).setCellValue(bean.getTotalCount());
+		}
+
+	}
+	private void exportTaskStatByStatus(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatDTO> datalist = this.getStatByStatus(cmd);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("项目名称");
+		tableHead.add("处理完成");
+		tableHead.add("处理中");
+		tableHead.add("已取消");
+		tableHead.add("合计");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
+			tempRow.createCell(2).setCellValue(bean.getCompleteCount());
+			tempRow.createCell(3).setCellValue(bean.getProcessingCount());
+			tempRow.createCell(4).setCellValue(bean.getCloseCount());
+			tempRow.createCell(5).setCellValue(bean.getTotalCount());
+		}
+
+	}
+	private void exportTaskStatByArea(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatSubDTO> datalist = this.getStatByArea(cmd);
+
+		int rownum = 0;
+		int sum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("楼栋名称");
+		tableHead.add("提单数量");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatSubDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getType() ? "" : bean.getType());
+			tempRow.createCell(2).setCellValue(bean.getTotal());
+			sum += bean.getTotal();
+		}
+		Row lastRow	= sheet.createRow(rownum++);
+		lastRow.createCell(1).setCellValue("合计");
+		lastRow.createCell(2).setCellValue(sum);
+	}
 
 	private List<Long> getOwnerIds(GetTaskStatCommand cmd){
 		List<Long> ownerIds = new ArrayList<>();
