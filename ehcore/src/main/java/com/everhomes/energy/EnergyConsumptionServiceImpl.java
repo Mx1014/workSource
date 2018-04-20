@@ -1579,6 +1579,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
+            if (str.getBurdenRate() != null && str.getBurdenRate().size() > 0) {
+                for (String burden : str.getBurdenRate()) {
+                    if (!NumberUtils.isNumber(burden)) {
+                        LOGGER.error("energy meter burdenRate is not number, data = {}", str);
+                        log.setData(str);
+                        log.setErrorLog("energy meter burdenRate is not number");
+                        log.setCode(EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_IS_NOT_NUMBER);
+                        errorDataLogs.add(log);
+                        return;
+                    }
+                }
+            }
             if (org.apache.commons.lang.StringUtils.isBlank(str.getName())) {
                 LOGGER.error("energy meter name is null, data = {}", str);
                 log.setData(str);
@@ -1740,7 +1752,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private Boolean validateBurdenRateString(List<String> burdenRate) {
-        Boolean result = false;
+        Boolean result = true;
         if (burdenRate != null && burdenRate.size() > 0) {
             BigDecimal sum = new BigDecimal(0);
             sum = burdenRate.stream().map(BigDecimal::new).reduce(sum, BigDecimal::add);
