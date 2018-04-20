@@ -24,7 +24,7 @@ public class LaunchPadBaseController extends ControllerBase {
 
     /**
      * <b>URL: /launchpad/getLaunchPadLayout</b>
-     * <p>根据id获取服务市场样式</p>
+     * <p>根据id获取服务市场样式   </p>
      */
     @RequestMapping("getLaunchPadLayout")
     @RestReturn(value=LaunchPadLayoutDTO.class)
