@@ -6110,6 +6110,9 @@ public class UserServiceImpl implements UserService {
 	public ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd) {
 
 		User user = UserContext.current().getUser();
+		if(user == null || user.getId() == null){
+			return null;
+		}
 
 		List<AddressUserDTO> dtos = new ArrayList<>();
 

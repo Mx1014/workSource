@@ -2769,9 +2769,29 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 			}
 
+			IndexDTO dto = processIndexDto(index);
 
-			dtos.add(ConvertHelper.convert(index, IndexDTO.class));
+			dtos.add(dto);
 		}
 		return dtos;
+	}
+
+	private IndexDTO processIndexDto(LaunchPadIndex index){
+
+		IndexDTO dto = ConvertHelper.convert(index, IndexDTO.class);
+
+		if(index.getIconUri() != null){
+			String inconUrl = contentServerService.parserUri(index.getIconUri(), IndexDTO.class.getSimpleName(), dto.getId());
+			dto.setIconUrl(inconUrl);
+
+		}
+
+		if(index.getSelectedIconUri() != null){
+			String selectInconUrl = contentServerService.parserUri(index.getSelectedIconUri(), IndexDTO.class.getSimpleName(), dto.getId());
+			dto.setSelectIconUrl(selectInconUrl);
+		}
+
+		return dto;
+
 	}
 }
