@@ -1,1 +1,0 @@
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ( 'asset.zhuzong.url', 'http://139.129.204.232:8007/LsInterfaceServer', '物业查费', '999955');
