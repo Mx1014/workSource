@@ -1571,17 +1571,23 @@ public class AssetProviderImpl implements AssetProvider {
             }
         }
         //把水费和电费的用量干掉
+        //现在把公摊/自用水电费干掉，用contains，如果不想用中文，就用variableIdentifier by wentian 2018/4/20
         String itemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
                 .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
                 .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
-        if(itemName.equals(AssetPaymentConstants.CHARGING_ITEM_NAME_WATER) || itemName.equals(AssetPaymentConstants.CHARGING_ITEM_NAME_ELECTRICITY)) {
+        if(itemName.contains(AssetPaymentConstants.CHARGING_ITEM_NAME_WATER) || itemName.contains(AssetPaymentConstants.CHARGING_ITEM_NAME_ELECTRICITY)) {
             for( int i = 0; i < list.size(); i ++){
                 ListChargingStandardsDTO dto = list.get(i);
                 List<PaymentVariable> variables = dto.getVariables();
                 for(int j = 0; j < variables.size(); j ++){
                     PaymentVariable variable = variables.get(j);
                     if(variable.getVariableName().equals(AssetPaymentConstants.VARIABLE_YJ)){
+                        variables.remove(j);
+                        j--;
+                    }
+                    //把比例系数干掉
+                    if(variable.getVariableName().equals(AssetPaymentConstants.VARIABLE_BLXS)){
                         variables.remove(j);
                         j--;
                     }
