@@ -739,7 +739,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		String result = post(params.toJSONString());
 		return  result;
 	}
-	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	@Override
 	public String applyTempCard(ParkingClearanceLog log) {
 
@@ -797,15 +797,13 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 	private String generateClearanceStartTime(Timestamp clearanceTime) {
 		LocalDateTime start = clearanceTime.toLocalDateTime();
-		return start.format(dtf2);
+		return start.format(dtf2)+" 00:00:00";
 //		return "2018-03-16 00:00:00";
 	}
 
 	private String generateClearanceEndTime(Timestamp clearanceTime) {
 		LocalDateTime end = clearanceTime.toLocalDateTime();
-		end = end.plusDays(1L);
-		end = end.minusSeconds(1L);
-		return end.format(dtf2);
+		return end.format(dtf2)+" 23:59:59";
 //		return "2018-04-12 00:00:00";
 	}
 
