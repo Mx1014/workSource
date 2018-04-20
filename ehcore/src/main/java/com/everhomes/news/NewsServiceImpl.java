@@ -2,6 +2,8 @@
 package com.everhomes.news;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -284,7 +286,7 @@ public class NewsServiceImpl implements NewsService {
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
 		News news = ConvertHelper.convert(cmd, News.class);
 		news.setNamespaceId(namespaceId);
-		news.setOwnerType(cmd.getOwnerType().toLowerCase());
+		news.setOwnerType(cmd.getOwnerType());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
 		news.setTopIndex(0L);
 		news.setTopFlag(NewsTopFlag.NONE.getCode());
@@ -1379,10 +1381,8 @@ public class NewsServiceImpl implements NewsService {
 				cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true, NewsStatus.ACTIVE.getCode()),
 				ListNewsBySceneResponse.class);
 
-		// 根据category_id获取到应用名称
-		response.setTitle(getModuleNameByCategoryId(namespaceId, cmd.getCategoryId()));
-		response.setNeedUseUrl(NewsNormalFlag.ENABLED.getCode());
-		// response.setRenderUrl(renderUrl);
+		// 填充app端点击“查看更多”返回页面
+		filledRenderUrl(response, namespaceId, cmd.getCategoryId());
 
 		return response;
 
@@ -1946,14 +1946,14 @@ public class NewsServiceImpl implements NewsService {
 
 	/**
 	 * @Function: NewsServiceImpl.java
-	 * @Description:根据app请求的categoryId获取到当前新闻模块的名称
-	 *
+	 * @Description:填充app端新闻“查看更多”跳转地址
+	 * 园区快讯v1.8 #issue-26479
 	 * @version: v1.0.0
 	 * @author: 黄明波
 	 * @date: 2018年4月20日 下午3:45:54
 	 *
 	 */
-	private String getModuleNameByCategoryId(Integer namespaceId, Long categoryId) {
+	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long categoryId) {
 
 		// 获取最新的版本
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
@@ -1962,19 +1962,47 @@ public class NewsServiceImpl implements NewsService {
 					NewsServiceErrorCode.ERROR_PORTAL_VERSION_NOT_FOUND, "protal version not exist");
 		}
 
-		// 根据version_id, namespace_id, module_id获取到应用id
+		// 获取相应应用
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, maxBigVersion.getId(),
 				NEWS_MODULE_ID, "" + categoryId);
 		if (null == moduleApp) {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "protal version not exist");
+					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
 		}
-
-		return moduleApp.getName();
+		
+		//拼装renderUrl
+		JSONObject json = JSONObject.parseObject(moduleApp.getInstanceConfig());
+		String timeWidgetStyle = json.getString("timeWidgetStyle");
+		String title = moduleApp.getName();
+		String renderUrl = getNewsRenderUrl(namespaceId, categoryId, title, "NewsFlash", timeWidgetStyle);
+		
+		// 设置response
+		response.setNeedUseUrl(NewsNormalFlag.ENABLED.getCode());
+		response.setRenderUrl(renderUrl);
+		response.setTitle(title);
 	}
 
-	// private String getRenderUrl() {
-	//
-	// }
+	 private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget, String timeWidgetStyle) {
+		 
+		 String encodeTitile;
+		try {
+			//标题为中文时需要转码
+			encodeTitile = URLEncoder.encode(title, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+		} 
+		 
+		 String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
+		 StringBuilder renderUrl = new StringBuilder(homeUrl);
+		 renderUrl.append("/park-news-web/build/index.html?");
+		 renderUrl.append("categoryId="+categoryId);
+		 renderUrl.append("&title="+encodeTitile);
+		 renderUrl.append("&widget=NewsFlash");
+		 renderUrl.append("&timeWidgetStyle="+timeWidgetStyle);
+		 renderUrl.append("#/newsList#sign_suffix");
+		 
+		 return renderUrl.toString();
+	 }
 
 }
