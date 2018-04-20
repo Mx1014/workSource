@@ -186,7 +186,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
+            //app端要只根据跟进人名称搜索
+            if(StringUtils.isNotEmpty(cmd.getTrackingName())){
+                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("trackingName", 5.5f);
+            }else {
+                qb = QueryBuilders.matchAllQuery();
+            }
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("name", 1.5f)
@@ -228,6 +234,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (!isAdmin) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
         }
+        //有无跟进人
         if(null != cmd.getType()){
             if(2 == cmd.getType()){
                 fb = FilterBuilders.andFilter(fb ,FilterBuilders.existsFilter("trackingUid"));
@@ -235,6 +242,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 ExistsFilterBuilder notFilter = FilterBuilders.existsFilter("trackingUid");
                 fb = FilterBuilders.andFilter(fb ,FilterBuilders.notFilter(notFilter));
             }
+        }
+
+        if(cmd.getTrackingUids()!=null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
         }
         //跟进时间、资产类型、资产面积、资产单价增加筛选
         if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){

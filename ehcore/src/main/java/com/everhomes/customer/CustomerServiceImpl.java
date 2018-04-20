@@ -24,12 +24,12 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
-import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -455,6 +455,8 @@ public class CustomerServiceImpl implements CustomerService {
         List<String> sheetNames = new ArrayList<>();
         sheetNames.add("客户信息");
         String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        cmd.setIsAdmin(isAdmin);
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
     }
 
@@ -794,22 +796,19 @@ public class CustomerServiceImpl implements CustomerService {
             task.setOwnerId(cmd.getOwnerId());
             task.setType(ImportFileTaskType.ENTERPRISE_CUSTOMER.getCode());
             task.setCreatorUid(userId);
-            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
-                @Override
-                public ImportFileResponse importFile() {
-                    ImportFileResponse response = new ImportFileResponse();
-                    List<ImportEnterpriseCustomerDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
-                    if(datas.size() > 0){
-                        //设置导出报错的结果excel的标题
-                        response.setTitle(datas.get(0));
-                        datas.remove(0);
-                    }
-                    List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
-                    response.setTotalCount((long)datas.size());
-                    response.setFailCount((long)results.size());
-                    response.setLogs(results);
-                    return response;
+            task = importFileService.executeTask(() -> {
+                ImportFileResponse response = new ImportFileResponse();
+                List<ImportEnterpriseCustomerDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
+                if(datas.size() > 0){
+                    //设置导出报错的结果excel的标题
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
                 }
+                List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
+                response.setTotalCount((long)datas.size());
+                response.setFailCount((long)results.size());
+                response.setLogs(results);
+                return response;
             }, task);
 
         } catch (IOException e) {
@@ -822,7 +821,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, List<ImportEnterpriseCustomerDataDTO> list, Long userId){
         List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> errorDataLogs = new ArrayList<>();
-
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
         for (ImportEnterpriseCustomerDataDTO str : list) {
             ImportFileResultLog<ImportEnterpriseCustomerDataDTO> log = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
             EnterpriseCustomer customer = new EnterpriseCustomer();
@@ -902,7 +901,15 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCommunityId(cmd.getCommunityId());
             customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
-            customer.setTrackingUid(-1L);
+            if (!isAdmin) {
+                customer.setTrackingUid(UserContext.currentUserId());
+                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(userId);
+                if (organizationMembers != null && organizationMembers.size() > 0) {
+                    customer.setTrackingName(organizationMembers.get(0).getContactName());
+                }
+            } else {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
             OrganizationDTO organizationDTO = createOrganization(customer);
@@ -2755,9 +2762,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
-            return trackings.stream().map(tracking -> {
-                return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
-            }).collect(Collectors.toList());
+            return trackings.stream().map(tracking -> convertCustomerTrackingDTO(tracking, cmd.getCommunityId())).collect(Collectors.toList());
         }
         return null;
 	}
@@ -2968,9 +2973,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
 		List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
         if(events != null && events.size() > 0) {
-            return events.stream().map(event -> {
-                return convertCustomerEventDTO(event);
-            }).collect(Collectors.toList());
+            return events.stream().map(this::convertCustomerEventDTO).collect(Collectors.toList());
         }
         return null;
 	}
@@ -2995,6 +2998,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
 		//checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
         customer.setTrackingUid(cmd.getTrackingUid());
         if(cmd.getTrackingUid() != -1){
 	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
@@ -3002,6 +3006,8 @@ public class CustomerServiceImpl implements CustomerService {
 	    		customer.setTrackingName(detail.getContactName());
 	    	}
         }
+        //保存事件
+        saveCustomerEvent( 3  ,customer ,exist);
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 	}
@@ -3234,7 +3240,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<OrganizationMemberDTO> listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
-        enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
-        return null;
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        List<OrganizationMemberDTO> members = new ArrayList<>();
+        if (customers != null && customers.size() > 0) {
+            customers.forEach((customer) -> {
+                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+                if (organizationMembers != null && organizationMembers.size() > 0) {
+                    members.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+                }
+            });
+        }
+        return members;
     }
 }

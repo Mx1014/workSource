@@ -4,9 +4,16 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.dynamicExcel.*;
+import com.everhomes.dynamicExcel.DynamicColumnDTO;
+import com.everhomes.dynamicExcel.DynamicExcelHandler;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.dynamicExcel.DynamicField;
+import com.everhomes.dynamicExcel.DynamicRowDTO;
+import com.everhomes.dynamicExcel.DynamicSheet;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -18,9 +25,12 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.varField.*;
+import com.everhomes.varField.FieldGroup;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeField;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
@@ -33,12 +43,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -93,6 +104,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
+//            //去除普通人员的跟进人cell
+//            ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+//            fields = fields.stream()
+//                    .filter((r) -> !groupCommand.getIsAdmin() && "trackingUid".equals(r.getFieldName()))
+//                    .collect(Collectors.toList());
             fields.forEach(fieldDTO -> {
                 LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {

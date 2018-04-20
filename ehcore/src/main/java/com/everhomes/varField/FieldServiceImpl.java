@@ -9,11 +9,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
-import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.customer.CustomerAccountDTO;
@@ -48,9 +49,34 @@ import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -139,6 +165,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -675,9 +704,10 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
-                    cmd0.setPageSize(Integer.MAX_VALUE-1);
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
-                    if(response.getDtos() != null && response.getDtos().size() > 0) {
+                    cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOwnerId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
+                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
                             EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
@@ -911,6 +941,22 @@ public class FieldServiceImpl implements FieldService {
                 break;
         }
         return data;
+    }
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
     }
 
     private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName) {

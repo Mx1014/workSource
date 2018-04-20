@@ -1,12 +1,17 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  *     <li>ownerId: organizationId</li>
  *     <li>oenerType: 类型</li>
  *     <li>keyword: 关键字：手机号或地址或客户名称</li>
+ *     <li>trackingName:关键字：手跟进人名称 app用</li>
+ *     <li>trackingUids: 跟进人id列表</li>
  *     <li>customerCategoryId: 客户类型id</li>
  *     <li>corpIndustryItemId: 行业类别id</li>
  *     <li>levelId: 客户级别id,如果多选用英文逗号分隔,eg: 1,2</li>
@@ -32,6 +37,8 @@ public class SearchEnterpriseCustomerCommand {
     private String ownerType;
 
     private String keyword;
+
+    private String trackingName;
 
     private Long customerCategoryId;
 
@@ -64,6 +71,9 @@ public class SearchEnterpriseCustomerCommand {
     private Integer namespaceId;
 
     private Long orgId;
+
+    @ItemType(Long.class)
+    private List<Long> trackingUids;
 
     public Long getOwnerId() {
         return ownerId;
@@ -219,7 +229,23 @@ public class SearchEnterpriseCustomerCommand {
 		this.propertyArea = propertyArea;
 	}
 
-	@Override
+    public List<Long> getTrackingUids() {
+        return trackingUids;
+    }
+
+    public void setTrackingUids(List<Long> trackingUids) {
+        this.trackingUids = trackingUids;
+    }
+
+    public String getTrackingName() {
+        return trackingName;
+    }
+
+    public void setTrackingName(String trackingName) {
+        this.trackingName = trackingName;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
