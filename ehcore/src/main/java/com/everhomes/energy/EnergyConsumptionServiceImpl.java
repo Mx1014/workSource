@@ -1108,7 +1108,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READING_SEARCH);
-        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READING_SEARCH, cmd.getOrganizationId(),  cmd.getCommunityId());
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READING_SEARCH, cmd.getOrganizationId(), cmd.getCommunityId());
         return readingLogSearcher.queryMeterReadingLogs(cmd);
     }
 
@@ -4941,7 +4941,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                             List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
                             if(existAddress != null && existAddress.size() > 0) {
-                                logDTO.setMeterAddress(existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+                                logDTO.setMeterAddress(existAddress.stream()
+                                        .map((r) -> ConvertHelper.convert(r, EnergyMeterAddressDTO.class))
+                                        .collect(Collectors.toList()));
                             }
 
                         }

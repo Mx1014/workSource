@@ -1,6 +1,7 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
@@ -9,8 +10,8 @@ import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -19,7 +20,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.AndFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -113,12 +121,12 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("meterName", meter.getName());
                 builder.field("meterNumber", meter.getMeterNumber());
 
-                List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-                if(existAddress != null && existAddress.size() > 0) {
-                    builder.field("buildingId", existAddress.get(0).getBuildingId());
-                    builder.field("addressId", existAddress.get(0).getAddressId());
-                    builder.field("address", existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
-                }
+//                List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+//                if(existAddress != null && existAddress.size() > 0) {
+//                    builder.field("buildingId", existAddress.get(0).getBuildingId());
+//                    builder.field("addressId", existAddress.get(0).getAddressId());
+//                    builder.field("address", existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+//                }
             }
 
             if(operator != null) {
@@ -194,15 +202,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             filterBuilders.add(meterIdTerm);
         }
 
-        if (cmd.getBuildingId() != null) {
-            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
-            filterBuilders.add(buildingIdFilter);
-        }
-
-        if (cmd.getAddressId() != null) {
-            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
-            filterBuilders.add(addressIdFilter);
-        }
+//        if (cmd.getBuildingId() != null) {
+//            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+//            filterBuilders.add(buildingIdFilter);
+//        }
+//
+//        if (cmd.getAddressId() != null) {
+//            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+//            filterBuilders.add(addressIdFilter);
+//        }
         RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
             rangeTimeTerm.gte(cmd.getStartTime());
@@ -267,12 +275,23 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
             dto.setOperatorName((String)source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
-            Object address = source.get("address");
-            dto.setMeterAddress(address != null ? String.valueOf(source.get("address")) : "");
+            List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(dto.getId());
+            dto.setMeterAddress(addressDTOS);
 
             dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    private List<EnergyMeterAddressDTO> populateEnergyMeterAddresses(Long meterId) {
+        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
+        List<EnergyMeterAddressDTO> dtos = new ArrayList<>();
+        if(existAddress != null && existAddress.size() > 0) {
+            existAddress.forEach((id, meterAddress) -> {
+                dtos.add(ConvertHelper.convert(meterAddress, EnergyMeterAddressDTO.class));
+            });
+        }
+        return dtos;
     }
 
     @Override
