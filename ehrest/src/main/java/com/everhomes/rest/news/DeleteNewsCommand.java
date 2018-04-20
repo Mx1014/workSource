@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>newsToken: 新闻标识</li>
+ * <li>currentPMId: 当前项目PM公司id</li>
  * </ul>
  */
 public class DeleteNewsCommand {
@@ -21,6 +22,17 @@ public class DeleteNewsCommand {
 	private Long ownerId;
 	@NotNull
 	private String newsToken;
+	@NotNull
+	private Long currentPMId;
+
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
 
 	public String getOwnerType() {
 		return ownerType;

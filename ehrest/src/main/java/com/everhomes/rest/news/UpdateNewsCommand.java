@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 参数
+ * <li>id: news id</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>categoryId: 新闻类型ID</li>
