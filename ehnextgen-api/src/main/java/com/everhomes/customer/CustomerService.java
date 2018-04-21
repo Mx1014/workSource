@@ -114,6 +114,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
+import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -332,4 +333,6 @@ public interface CustomerService {
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
     List<OrganizationMemberDTO> listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd);
+
+    List<OrganizationMemberDTO> listCommunityRelatedMembers(ListCommnutyRelatedMembersCommand cmd);
 }

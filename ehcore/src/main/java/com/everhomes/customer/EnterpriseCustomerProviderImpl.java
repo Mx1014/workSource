@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -61,6 +62,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
+import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
@@ -1889,4 +1891,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
         return result.get(0).getVersion();
     }
+
+    @Override
+    public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhAuthorizationRelationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATION_RELATIONS);
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%"));
+        return null;
+    }
+
 }

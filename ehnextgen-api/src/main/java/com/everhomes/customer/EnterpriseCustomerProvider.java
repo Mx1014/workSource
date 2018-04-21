@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.*;
@@ -151,4 +152,5 @@ public interface EnterpriseCustomerProvider {
 
     String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
+    List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);
 }

@@ -121,6 +121,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
+import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -1507,9 +1508,22 @@ public class CustomerController extends ControllerBase {
      * <p>列出项目下相关的跟进人（只有管理员才有）</p>
      */
     @RequestMapping("listCommnityUserRelatedTrackUsers")
-    @RestReturn(value = OrganizationMemberDTO.class)
+    @RestReturn(value = OrganizationMemberDTO.class,collection = true)
     public RestResponse listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCommnityUserRelatedTrackUsers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCommunityRelatedMembers</b>
+     * <p>列出项目下相关的所有人</p>
+     */
+    @RequestMapping("listCommnityUserRelatedTrackUsers")
+    @RestReturn(value = OrganizationMemberDTO.class,collection = true)
+    public RestResponse listCommnityUserRelatedTrackUsers(ListCommnutyRelatedMembersCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCommunityRelatedMembers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
