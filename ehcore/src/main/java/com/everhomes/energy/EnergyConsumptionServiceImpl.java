@@ -1578,11 +1578,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.error("energy meter number is exist, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("energy meter number is exist");
-                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NUMBER_EXIST);
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_GT_ONE);
                 errorDataLogs.add(log);
                 return;
             }
             if (burdenRate != null && burdenRate.size() > 0) {
+                if(Objects.equals(burdenRate.get(0), "")){
+                    return;
+                }
                 for (String burden : burdenRate) {
                     if (!NumberUtils.isNumber(burden)) {
                         LOGGER.error("energy meter burdenRate is not number, data = {}", str);

@@ -15,3 +15,9 @@ VALUES
 
 UPDATE `eh_payment_charging_items` SET `name` = '自用水费' where `name` = '水费';
 UPDATE `eh_payment_charging_items` SET `name` = '自用电费' where `name` = '电费';
+
+-- 增加错误码 by jiarui
+set @id = IFNULL((SELECT MAX(id) from eh_locale_strings),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@d+1), 'energy', '10032', 'zh_CN', '分摊比例大于1');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@d+1), 'energy', '10033', 'zh_CN', '比例系数不是数字');
+
