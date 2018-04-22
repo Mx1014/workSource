@@ -131,8 +131,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                     });
                 }
                 if(existAddress != null && existAddress.size() > 0) {
-                    builder.field("buildingId", addressString);
-                    builder.field("addressId", buildingString);
+                    builder.field("buildingId", buildingString);
+                    builder.field("addressId", addressString);
                 }
             }
 
