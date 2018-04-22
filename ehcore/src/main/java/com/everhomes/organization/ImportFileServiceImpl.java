@@ -205,6 +205,8 @@ public class ImportFileServiceImpl implements ImportFileService{
                         String entryValues = "";
                         if (entry.getValue() != null && entry.getValue() instanceof Collection) {
                             entryValues = Arrays.toString(((Collection) entry.getValue()).toArray());
+                        }else {
+                            entryValues = entry.getValue().toString();
                         }
                         row.createCell(cellNum ++).setCellValue(entryValues);
                     }
