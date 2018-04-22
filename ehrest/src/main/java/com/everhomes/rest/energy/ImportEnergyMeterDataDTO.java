@@ -1,6 +1,7 @@
 package com.everhomes.rest.energy;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -21,15 +22,15 @@ public class ImportEnergyMeterDataDTO {
     private String maxReading = "";
     private String startReading = "";
     private String Rate = "";
-    private String amountFormula = "";
+   // private String amountFormula = "";
 
-    public String getAmountFormula() {
-        return amountFormula;
-    }
+    //public String getAmountFormula() {
+   //     return amountFormula;
+   // }
 
-    public void setAmountFormula(String amountFormula) {
-        this.amountFormula = amountFormula;
-    }
+   // public void setAmountFormula(String amountFormula) {
+    //    this.amountFormula = amountFormula;
+   // }
 
     public String getBillCategory() {
         return billCategory;
@@ -117,5 +118,10 @@ public class ImportEnergyMeterDataDTO {
 
     public void setBurdenRate(List<String> burdenRate) {
         this.burdenRate = burdenRate;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

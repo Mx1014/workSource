@@ -1684,10 +1684,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meter.setRate(new BigDecimal(str.getRate()));
             }
 
-            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getAmountFormula());
-            if (formula != null) {
-                meter.setAmountFormulaId(formula.getId());
-            }
+      //      EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getAmountFormula());
+      //      if (formula != null) {
+        //        meter.setAmountFormulaId(formula.getId());
+        //    }
 
             meter.setOwnerId(cmd.getOwnerId());
             meter.setOwnerType(cmd.getOwnerType());
