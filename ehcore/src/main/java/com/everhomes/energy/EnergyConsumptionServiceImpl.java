@@ -1757,6 +1757,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private Boolean validateBurdenRateString(List<String> burdenRate) {
         Boolean result = true;
         if (burdenRate != null && burdenRate.size() > 0) {
+            if(Objects.equals(burdenRate.get(0), "")){
+                return true;
+            }
             BigDecimal sum = new BigDecimal(0);
             sum = burdenRate.stream().map(BigDecimal::new).reduce(sum, BigDecimal::add);
             result = sum.compareTo(new BigDecimal(1)) <= 0;
