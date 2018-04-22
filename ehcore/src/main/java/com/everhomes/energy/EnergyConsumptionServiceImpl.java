@@ -1510,21 +1510,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setBuildingName(Arrays.asList(r.getF().trim().split("，")));
+                data.setBuildingName(r.getF().trim());
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getG())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setApartmentName(Arrays.asList(r.getG().trim().split("，")));
+                data.setApartmentName(r.getG().trim());
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getH())) {
                 if(data == null) {
                     data = new ImportEnergyMeterDataDTO();
                 }
-                data.setBurdenRate(Arrays.asList(r.getH().trim().split("，")));
+                data.setBurdenRate(r.getH().trim());
             }
 
             if(org.apache.commons.lang.StringUtils.isNotBlank(r.getI())) {
@@ -1570,8 +1570,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
+            List<String> burdenRate = Arrays.asList(str.getBurdenRate().split("，"));
+            List<String> apartment = Arrays.asList(str.getApartmentName().split("，"));
+            List<String> building = Arrays.asList(str.getBuildingName().split("，"));
             //校验excel的比例系数不大于1
-            if (!validateBurdenRateString(str.getBurdenRate())) {
+            if (!validateBurdenRateString(burdenRate)){
                 LOGGER.error("energy meter number is exist, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("energy meter number is exist");
@@ -1579,8 +1582,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
-            if (str.getBurdenRate() != null && str.getBurdenRate().size() > 0) {
-                for (String burden : str.getBurdenRate()) {
+            if (burdenRate != null && burdenRate.size() > 0) {
+                for (String burden : burdenRate) {
                     if (!NumberUtils.isNumber(burden)) {
                         LOGGER.error("energy meter burdenRate is not number, data = {}", str);
                         log.setData(str);
@@ -1699,18 +1702,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meterProvider.createEnergyMeter(meter);
 
                 if (!StringUtils.isEmpty(str.getBuildingName()) && !StringUtils.isEmpty(str.getApartmentName())) {
-                    for (int i = 0; i < str.getBuildingName().size(); i++) {
-                        Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), str.getBuildingName().get(i), str.getApartmentName().get(i));
+                    for (int i = 0; i < building.size(); i++) {
+                        Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), building.get(i), apartment.get(i));
                         if (address != null) {
                             EnergyMeterAddress ma = new EnergyMeterAddress();
                             ma.setBuildingName(address.getBuildingName());
                             ma.setApartmentName(address.getApartmentName());
                             ma.setAddressId(address.getId());
                             ma.setApartmentFloor(address.getApartmentFloor());
-                            ma.setBurdenRate(new BigDecimal(str.getBurdenRate().get(i)));
-                            Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
-                            if (building != null) {
-                                ma.setBuildingId(building.getId());
+                            ma.setBurdenRate(new BigDecimal(burdenRate.get(i)));
+                            Building buildingData = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
+                            if (buildingData != null) {
+                                ma.setBuildingId(buildingData.getId());
                             }
                             ma.setMeterId(meter.getId());
                             energyMeterAddressProvider.createEnergyMeterAddress(ma);

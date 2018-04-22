@@ -1,9 +1,6 @@
 package com.everhomes.rest.energy;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/11/10.
@@ -14,11 +11,9 @@ public class ImportEnergyMeterDataDTO {
     private String meterType = "";
     private String billCategory = "";
     private String serviceCategory = "";
-    @ItemType(String.class)
-    private List<String> buildingName = null;
-    @ItemType(String.class)
-    private List<String> apartmentName = null;
-    private List<String>  burdenRate = null;
+    private String buildingName = "";
+    private String apartmentName = "";
+    private String  burdenRate = "";
     private String maxReading = "";
     private String startReading = "";
     private String Rate = "";
@@ -40,20 +35,29 @@ public class ImportEnergyMeterDataDTO {
         this.billCategory = billCategory;
     }
 
-    public List<String> getBuildingName() {
+    public String getBuildingName() {
         return buildingName;
     }
 
-    public void setBuildingName(List<String> buildingName) {
+    public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
     }
 
-    public List<String> getApartmentName() {
+    public String getApartmentName() {
         return apartmentName;
     }
 
-    public void setApartmentName(List<String> apartmentName) {
+    public void setApartmentName(String apartmentName) {
         this.apartmentName = apartmentName;
+    }
+
+
+    public String getBurdenRate() {
+        return burdenRate;
+    }
+
+    public void setBurdenRate(String burdenRate) {
+        this.burdenRate = burdenRate;
     }
 
     public String getMaxReading() {
@@ -110,14 +114,6 @@ public class ImportEnergyMeterDataDTO {
 
     public void setStartReading(String startReading) {
         this.startReading = startReading;
-    }
-
-    public List<String> getBurdenRate() {
-        return burdenRate;
-    }
-
-    public void setBurdenRate(List<String> burdenRate) {
-        this.burdenRate = burdenRate;
     }
 
     @Override
