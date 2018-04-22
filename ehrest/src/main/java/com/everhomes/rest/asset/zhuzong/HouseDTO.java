@@ -1,6 +1,7 @@
 package com.everhomes.rest.asset.zhuzong;
 
-public class QueryHouseByPhoneNumberDTO {
+
+public class HouseDTO {
 	private String pk_client;
 	private String pk_project;
 	private String pk_house;
