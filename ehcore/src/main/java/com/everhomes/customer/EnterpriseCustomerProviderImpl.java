@@ -21,6 +21,7 @@ import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
@@ -1899,8 +1900,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
-        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%"));
-        return null;
+        if (appId != null) {
+            query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.APP_ID.eq(appId));
+        }
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.ALL_PROJECT_FLAG.eq(AllFlag.ALL.getCode())
+                .or(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%")));
+        return query.fetchInto(AuthorizationRelation.class);
     }
 
 }

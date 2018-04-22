@@ -3284,6 +3284,10 @@ public class CustomerServiceImpl implements CustomerService {
             });
             return null;
         }).collect(Collectors.toList());
+
+        if(relatedMembers!=null && relatedMembers.size()>0){
+            relatedMembers.forEach((r)->r.setDepartmentName(organizationProvider.findOrganizationById(r.getOrganizationId()).getName()));
+        }
         return relatedMembers;
     }
 }
