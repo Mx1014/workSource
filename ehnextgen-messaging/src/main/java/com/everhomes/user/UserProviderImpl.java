@@ -443,7 +443,13 @@ public class UserProviderImpl implements UserProvider {
         
         return null;
     }
-    
+
+    /**
+     * 根据域空间id和注册的手机号来查询对应的注册信息
+     * @param namespaceId
+     * @param identifierToken
+     * @return
+     */
     @Override
     public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();

@@ -153,6 +153,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
     }
 
+    /**
+     * 根据组织id来查询eh_organizations表信息
+     * @param id
+     * @return
+     */
     //	@Cacheable(value="OrganizationById", key="#id")
     @Override
     public Organization findOrganizationById(Long id) {
@@ -178,6 +183,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return dao.fetchById(ids).stream().map(o -> ConvertHelper.convert(o, Organization.class)).collect(Collectors.toList());
     }
 
+    /**
+     * 根据组织id和手机号来查询eh_organization_members表中有效的用户信息
+     * @param id
+     * @param phone
+     * @return
+     */
     @Override
     public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4728,6 +4739,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
+    /**
+     * 根据OrganizationMemberDetails来获取detailId的方法
+     * @param organizationMemberDetails
+     * @return
+     */
     public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails) {
         if (organizationMemberDetails.getNamespaceId() == null) {
             Integer namespaceId = UserContext.getCurrentNamespaceId(null);

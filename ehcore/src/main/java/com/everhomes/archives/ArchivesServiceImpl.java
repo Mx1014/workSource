@@ -266,13 +266,14 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
-
+        //获取域空间id
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
-
+        //根据域空间id和组织id和每页显示的数量来查询人员档案信息
         List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
         if (!StringUtils.isEmpty(cmd.getKeywords()) || detailIds == null) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
@@ -339,7 +340,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         return dto;
     }
 
-    private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {
+    private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response,
+                                                          List<Long> detailIds) {
         List<ArchivesContactDTO> contacts = new ArrayList<>();
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
         orgCommand.setOrganizationId(cmd.getOrganizationId());

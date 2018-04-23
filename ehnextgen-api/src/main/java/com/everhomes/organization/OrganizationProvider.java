@@ -32,6 +32,7 @@ public interface OrganizationProvider {
 	void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now);
 	void deleteOrganization(Organization organization);
 	void deleteOrganizationById(Long id);
+	/**根据组织id来查询eh_organizations表信息**/
 	Organization findOrganizationById(Long id);
 	/**
 	 * 获取指定小区对应的政府机构。
@@ -78,6 +79,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
 
 	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
+	/**根据手机号和组织id来查询对应的OrganizationMember信息**/
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 	OrganizationMember findMemberDepartmentByDetailId(Long detailId);
 	List<OrganizationMember> findMemberJobPositionByDetailId(Long detailId);
@@ -146,6 +148,7 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 
+	/**根据组织id和手机号来查询eh_organization_members表中有效的用户信息**/
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 
 	/**
@@ -374,6 +377,7 @@ public interface OrganizationProvider {
 
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 
+	/**根据OrganizationMemberDetails来获取detailId的方法**/
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
 
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);

@@ -627,6 +627,7 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
+	/**创建机构账号，包括注册、把用户添加到公司**/
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
 
 	/**组织架构批量调整**/

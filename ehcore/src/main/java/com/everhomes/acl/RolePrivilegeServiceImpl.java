@@ -499,11 +499,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return resp;
 	}
 
+	/**
+	 * 创建超级管理员
+	 * @param cmd
+	 * @return
+	 */
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
-			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
+			//根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
+			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+					PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
 			dtos.add(dto);
 			return null;
 		});
@@ -1580,7 +1587,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         return o != null ? o.toString() : def;
     }
 
-    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken, Long adminPrivilegeId, Long roleId){
+	/**
+	 * 根据组织id、用户名、手机号、超级管理员代号 来创建超级管理员
+	 * @param organizationId
+	 * @param contactName
+	 * @param contactToken
+	 * @param adminPrivilegeId 超级管理员代号
+	 * @param roleId  拥有 所有权限、来创建超级管理员
+	 * @return
+	 */
+    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
+														   String contactToken, Long adminPrivilegeId,
+														   Long roleId){
 		//创建机构账号，包括注册、把用户添加到公司
 		OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(organizationId, contactName, contactToken);
 
@@ -1721,7 +1739,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
-						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), targetType, pageSize, locator);
+						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+						targetType, pageSize, locator);
 		for (OrganizationMember member: members ) {
 			dtos.add(processOrganizationContactDTO(member));
 		}

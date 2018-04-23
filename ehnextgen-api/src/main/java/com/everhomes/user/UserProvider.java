@@ -38,6 +38,7 @@ public interface UserProvider {
     List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId,List<String> identifiers);
 
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
+    /**根据域空间id和注册的手机号来查询对应的注册信息**/
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
 

@@ -5883,7 +5883,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //:todo
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords,
+                cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
 
         Map<String, OrganizationMember> contact_member = new HashMap<>();
 
@@ -7223,10 +7224,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 
  
         return member;
-    } 
+    }
 
+
+    /**
+     * 根据组织id、用户名、手机号
+     * 创建机构账号，包括注册、把用户添加到公司
+     * @param organizationId
+     * @param contactName
+     * @param contactToken
+     * @return
+     */
     @Override
-    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken) {
+    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName,
+                                                                                        String contactToken) {
 
         if (null == contactToken) {
             LOGGER.error("contactToken can not be empty.");
@@ -7238,14 +7249,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
         }
 
-
+        //获取登录App的用户信息
         User user = UserContext.current().getUser();
+        //根据组织id来查询eh_organizations表信息
         Organization org = checkOrganization(organizationId);
+        //获取当前App所在的域空间
         Integer namespaceId = UserContext.getCurrentNamespaceId(org.getNamespaceId());
+        //根据组织id和手机号来查询eh_organization_members表中有效的用户信息
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken);
+        //根据域空间id和注册的手机号来查询对应的注册信息
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
+        //声明一个boolean类型的变量
         boolean sendMsgFlag = false;
+
         if (null == member) {
+            //说明eh_organization_members表中没有对应的有效的用户信息，那么久新建一个对象，并且将信息封装在对象中
             member = new OrganizationMember();
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
             member.setContactType(IdentifierType.MOBILE.getCode());
@@ -7260,15 +7278,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
             member.setOrganizationId(organizationId);
             if (null != userIdentifier) {
+                //说明该用户之前已经注册过，eh_user_identifiers表中是存在注册信息的，但是eh_organization_members表中是不存在人员信息的，
+                //那么我们就需要将members表中的target_type字段更改为USER,表示已经注册
                 member.setTargetType(OrganizationMemberTargetType.USER.getCode());
                 member.setTargetId(userIdentifier.getOwnerUid());
                 sendMsgFlag = true;
             } else {
+                //说明用户之前是没有进行注册的，也没有加入公司的OA体系，那么我们就设置target_type为UNTRACK表示未注册
                 member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
                 member.setTargetId(0L);
             }
             createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
         } else {
+            //说明organizationMember信息不为空
             if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
                 LOGGER.error("This user has been added to the administrator list.");
                 throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
@@ -9389,7 +9411,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-
+    /**
+     * 根据组织id来查询
+     * @param orgId
+     * @return
+     */
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
         if (org == null) {
@@ -10236,6 +10262,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dto;
     }
 
+    /**
+     * 根据organizationId来查询eh_organizations表中的总公司的organizationId
+     * @param organizationId
+     * @return
+     */
     @Override
     public Long getTopOrganizationId(Long organizationId) {
         Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -11989,9 +12020,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         return getDetailFromOrganizationMember(member, true, null);
     }
 
+    /**
+     * 根据organizationMember对象来创建OrganizationMemberDetails对象
+     * @param member
+     * @param isCreate
+     * @param find_detail
+     * @return
+     */
     private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member, Boolean isCreate, OrganizationMemberDetails find_detail) {
+        //创建OrganizationMemberDetails对象
         OrganizationMemberDetails detail = new OrganizationMemberDetails();
+        //声明一个Date对象
         java.util.Date nDate = new java.util.Date();
+        //声明一个SimpleDateFormat对象
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
@@ -12102,12 +12143,16 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     private Long getEnableDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId) {
 
-        //更新或创建detail记录
+        //更新或创建detail记录，根据组织id和手机号来查询eh_organization_memner_details表中的信息
         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, organizationMember.getContactToken());
         Long new_detail_id = 0L;
-        if (old_detail == null) { /**如果档案表中无记录**/
+        if (old_detail == null) {
+            /**如果档案表中无记录**/
+            //根据OrganizationMember对象来创建organization_member_details表信息
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
+            //organizationMemberDetails表中的organizationId指的是总公司的organizationId
             organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
+            //根据OrganizationMemberDetails来获取detailId的方法
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /**如果档案表中有记录**/
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, false, old_detail);
@@ -12205,14 +12250,16 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param _organizationMember
      * @param organizationId
      */
-    private OrganizationMember createOrganiztionMemberWithDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
+    private OrganizationMember createOrganiztionMemberWithDetailAndUserOrganization(OrganizationMember _organizationMember,
+                                                                                    Long organizationId) {
         User user = UserContext.current().getUser();
         //深拷贝
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         /**创建/更新detail,并获取detailId**/
         Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
-
-        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
+        //根据手机号和组织id来查询对应的OrganizationMember信息
+        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(),
+                organizationId);
 
         //如果企业中没有有该记录
         if (null == desOrgMember) {
