@@ -1,24 +1,20 @@
 package com.everhomes.util;
 
+import com.everhomes.message.MessageRecord;
+import com.everhomes.message.MessageService;
 import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.message.PersistMessageRecordCommand;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.statistics.event.StatEventDeviceLogProvider;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
@@ -26,13 +22,13 @@ public class MessagePersistWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorker.class);
 
     //    @Value("${core.service.uri}")
-    private String coreServiceUri = "http://10.1.10.37:8080/evh";
+    // private String coreServiceUri = "http://10.1.10.37:8080/evh";
 
     //    @Value("${border.app.key}")
-    private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
+    // private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
 
     //    @Value("${border.app.secret}")
-    private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
+    // private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
     private static volatile ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
 
@@ -58,8 +54,14 @@ public class MessagePersistWorker {
 //    private final static CountDownLatch countDownLatch3 = new CountDownLatch(3);
 //    private final static CountDownLatch countDownLatch4 = new CountDownLatch(4);
 
+    // @Autowired
+    // private TaskScheduler taskScheduler;
+
     @Autowired
-    private TaskScheduler taskScheduler;
+    private MessageService messageService;
+
+    @Autowired
+    private StatEventDeviceLogProvider statEventDeviceLogProvider;
 
     @PostConstruct
     public void setup() {
@@ -127,23 +129,34 @@ public class MessagePersistWorker {
 
     }
 
-
     //消息持久化
-    public void handleMessagePersist(List<MessageRecordDto> recordDtos) {
+    private void handleMessagePersist(List<MessageRecordDto> recordDtos) {
+        List<MessageRecord> records = new ArrayList<>();
+        for (MessageRecordDto dto : recordDtos) {
+            MessageRecord record = ConvertHelper.convert(dto, MessageRecord.class);
 
-        List<PersistMessageRecordCommand> dtos = new ArrayList<>();
+            //当存在自sessionToken时，使用sessionToken解析接收者
+            if (StringUtils.isNotEmpty(dto.getSessionToken())) {
+                LoginToken login = WebTokenGenerator.getInstance().fromWebToken(dto.getSessionToken(), LoginToken.class);
+                if (login != null) {
+                    record.setDstChannelToken(String.valueOf(login.getUserId()));
+                    record.setDstChannelType(ChannelType.USER.getCode());
+                }
+            }
 
-        recordDtos.forEach(r -> {
-            PersistMessageRecordCommand cmd = new PersistMessageRecordCommand();
-            cmd.setMessageRecordDto(r.toString());
-            dtos.add(cmd);
-        });
+            //当deviceId存在时，使用deviceId解析接收者
+            if (StringUtils.isNotEmpty(dto.getDeviceId())) {
+                Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(dto.getDeviceId());
+                if (dstChannelToken != null && dstChannelToken != 0L) {
+                    record.setDstChannelToken(dstChannelToken.toString());
+                    record.setDstChannelType(ChannelType.USER.getCode());
+                }
+            }
+            records.add(record);
+        }
+        messageService.persistMessage(records);
 
-        Map<String, String> params = new HashMap<>();
-//        params.put("messageRecordDto", dtos.toString());
-        params.put("dtos", dtos.toString());
-
-        this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
+        /*this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 
             @Override
             public void onSuccess(ResponseEntity<String> result) {
@@ -156,11 +169,11 @@ public class MessagePersistWorker {
             public void onFailure(Throwable ex) {
                 LOGGER.error("call core server error=", ex);
             }
-        });
+        });*/
     }
 
 
-    public void restCall(String cmd, Map<String, String> params, ListenableFutureCallback<ResponseEntity<String>> responseCallback) {
+    /*public void restCall(String cmd, Map<String, String> params, ListenableFutureCallback<ResponseEntity<String>> responseCallback) {
         AsyncRestTemplate template = new AsyncRestTemplate();
         String url = getRestUri(cmd);
         HttpHeaders headers = new HttpHeaders();
@@ -191,7 +204,7 @@ public class MessagePersistWorker {
             sb.append(relativeUri);
 
         return sb.toString();
-    }
+    }*/
 
 
     public void setQueue(ConcurrentLinkedQueue<MessageRecordDto> queue) {
@@ -220,7 +233,7 @@ public class MessagePersistWorker {
             try {
                 List<MessageRecordDto> dtos = new ArrayList<>();
 
-                for (; ; ) {
+                for (;;) {
                     while (!queue.isEmpty() && !this.finished) {
                         MessageRecordDto record = queue.poll();
                         if (record != null)
@@ -233,7 +246,7 @@ public class MessagePersistWorker {
                         } else if (this.finished) {
                             handleMessagePersist(dtos);
                             dtos.clear();
-                            Thread.sleep(60*1000L);
+                            Thread.sleep(60 * 1000L);
                         }
                     }
 

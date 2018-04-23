@@ -8,7 +8,6 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordResponse;
@@ -50,7 +49,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Autowired
 	private MessageRecordSearcher messageRecordSearcher;
-	
+
 	@Override
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd) {
 		if (cmd.getCommunityId() == null 

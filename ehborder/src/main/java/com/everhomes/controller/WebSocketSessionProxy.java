@@ -6,6 +6,7 @@ import com.everhomes.rest.message.PersistMessageRecordCommand;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -29,13 +30,13 @@ public class WebSocketSessionProxy {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WebSocketSessionProxy.class);
 
-    //    @Value("${core.service.uri}")
+    @Value("${core.service.uri}")
     private String coreServiceUri = "http://10.1.10.37:8080/evh";
 
-    //    @Value("${border.app.key}")
+    @Value("${border.app.key}")
     private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
 
-    //    @Value("${border.app.secret}")
+    @Value("${border.app.secret}")
     private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
     private static ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();

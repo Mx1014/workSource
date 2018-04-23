@@ -4,6 +4,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -82,6 +84,34 @@ public class MessageProviderImpl implements MessageProvider {
         return query.fetch().map(r->{
            return ConvertHelper.convert(r,MessageRecord.class);
         });
+    }
+
+    @Override
+    public List<MessageRecord> listMessageRecords(int pageSize, ListingLocator locator, ListingQueryBuilderCallback callback) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhMessageRecords t = Tables.EH_MESSAGE_RECORDS;
+
+        SelectQuery<EhMessageRecordsRecord> query = context.selectQuery(t);
+        if (callback != null) {
+            callback.buildCondition(locator, query);
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(t.ID.ge(locator.getAnchor()));
+        }
+
+        if (pageSize > 0) {
+            query.addLimit(pageSize + 1);
+        }
+        query.addOrderBy(t.ID.asc());
+
+        List<MessageRecord> list = query.fetchInto(MessageRecord.class);
+        if (list.size() > pageSize && pageSize > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
     }
 
     @Override
