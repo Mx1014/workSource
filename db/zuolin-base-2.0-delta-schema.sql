@@ -11,6 +11,7 @@
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
+-- 公司安装应用表
 CREATE TABLE `eh_organization_apps` (
   `id` bigint(20) NOT NULL,
   `app_origin_id` bigint(20) DEFAULT NULL,
@@ -28,7 +29,7 @@ CREATE TABLE `eh_organization_apps` (
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 
-
+-- 园区应用配置表（不跟随管理公司时的自定义配置）
 CREATE TABLE `eh_app_community_config` (
   `id` bigint(20) NOT NULL,
   `organization_app_id` bigint(20) DEFAULT NULL,
@@ -127,6 +128,13 @@ ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  int(11) NULL ;
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL;
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  int(11) NULL;
 
+-- 功能模块入口列表
+CREATE TABLE `eh_service_module_entries` (
+  `id` bigint(20) DEFAULT NULL,
+  `module_id` bigint(20) NOT NULL,
+  `entry_type` tinyint(4) NOT NULL COMMENT '参考枚举EntryType',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
 

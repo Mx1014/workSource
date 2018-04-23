@@ -39,7 +39,9 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
+import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -2796,6 +2798,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
+
+		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
+			Card cardConfig = ConvertHelper.convert(cmd.getInstanceConfig(), Card.class);
+
+
+
+
+			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
+
+			}
+
+
+		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
+
+		}
 
 
 		return null;

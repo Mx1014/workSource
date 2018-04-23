@@ -2,19 +2,22 @@
 package com.everhomes.rest.launchpadbase;
 
 
+import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *     <li>layoutId: layoutId</li>
- *     <li>itemGroup: 当前item归属哪个组，来源layout里的itemGroup</li>
+ *     <li>widget: 组件 参考{@link Widget}</li>
+ *     <li>instanceConfig: instanceConfig</li>
  *     <li>context: 上下文信息context {@link ContextDTO}</li>
  * </ul>
  */
 public class ListLaunchPadAppsCommand {
 
     private Long layoutId;
-    private String itemGroup;
+    private String widget;
+    private String instanceConfig;
     private ContextDTO context;
 
     public Long getLayoutId() {
@@ -25,12 +28,20 @@ public class ListLaunchPadAppsCommand {
         this.layoutId = layoutId;
     }
 
-    public String getItemGroup() {
-        return itemGroup;
+    public String getWidget() {
+        return widget;
     }
 
-    public void setItemGroup(String itemGroup) {
-        this.itemGroup = itemGroup;
+    public void setWidget(String widget) {
+        this.widget = widget;
+    }
+
+    public String getInstanceConfig() {
+        return instanceConfig;
+    }
+
+    public void setInstanceConfig(String instanceConfig) {
+        this.instanceConfig = instanceConfig;
     }
 
     public ContextDTO getContext() {
