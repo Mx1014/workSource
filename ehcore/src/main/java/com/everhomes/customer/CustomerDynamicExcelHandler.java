@@ -256,7 +256,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
                             //企业客户新增成功,保存客户事件
-                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
 
                             OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
                             enterpriseCustomer.setOrganizationId(organizationDTO.getId());
