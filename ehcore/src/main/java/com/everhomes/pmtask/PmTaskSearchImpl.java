@@ -256,7 +256,6 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     public List<PmTaskDTO> searchAllDocsByType(SearchTasksCommand cmd, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
-
         FilterBuilder fb;
 //      int namespaceId = UserContext.getCurrentNamespaceId();
         List<Long> ownerIds = new ArrayList<>();

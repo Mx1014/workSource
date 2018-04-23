@@ -2786,11 +2786,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		构建响应数据对象
 		PmTaskStatDTO pmTaskStatDTO = new PmTaskStatDTO();
 		result.entrySet().forEach(elem ->{
-			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey())
+			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setProcessing(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey())
+			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setClose(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey())
+			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setComplete(elem.getValue().intValue());
 		});
 		pmTaskStatDTO.setTotal(pmTaskStatDTO.getProcessing() + pmTaskStatDTO.getClose() + pmTaskStatDTO.getComplete());
@@ -2804,22 +2804,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		查询数据
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
 //		聚合统计
-		Map<PmTask.OwnerCategory,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerCategory,Collectors.counting()));
+		Map<Long,Map<Long,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getCategoryId)));
 //		构建响应数据对象
-		List<PmTaskStatSubDTO> dtoList = result.entrySet().stream().map(elem ->{
-			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
-			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
-			bean.setOwnerId(elem.getKey().getOwnerId());
-			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
-			if (null != community)
-				bean.setOwnerName(community.getName());
-			Category category = categoryProvider.findCategoryById(elem.getKey().getTaskCategoryId());
-			if (null != category)
-				bean.setType(category.getName());
-			bean.setTotal(elem.getValue().intValue());
-			return bean;
-		}).collect(Collectors.toList());
+		List<PmTaskStatSubDTO> dtoList = new ArrayList<>();
+		for (Map.Entry<Long,Map<Long,List<PmTask>>> elem: result.entrySet()
+			 ) {
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			for (Map.Entry<Long,List<PmTask>> elem1:elem.getValue().entrySet()
+				 ) {
+				PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+				bean.setOwnerId(elem.getKey());
+				bean.setOwnerName(null != community ? community.getName() : "");
+				Category category = categoryProvider.findCategoryById(elem1.getKey());
+				bean.setType(null != category ? category.getName() : "");
+				bean.setTotal(elem1.getValue().size());
+				dtoList.add(bean);
+			}
+		}
 		return dtoList;
 	}
 
@@ -2868,42 +2869,28 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> ownerIds = getOwnerIds(cmd);
 //		查询数据
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
-		Map<PmTask.OwnerStatus,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerStatus,Collectors.counting()));
-		List<PmTaskStatDTO> dtolist = result.entrySet().stream().map(elem -> {
+		Map<Long,Map<Byte,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getStatus)));
+		List<PmTaskStatDTO> dtolist = new ArrayList<>();
+		for (Map.Entry<Long,Map<Byte,List<PmTask>>> elem : result.entrySet()
+			 ) {
 			PmTaskStatDTO bean = new PmTaskStatDTO();
-			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
-			bean.setOwnerId(elem.getKey().getOwnerId());
-			Community community = communityProvider.findCommunityById(elem.getKey().getOwnerId());
-			if (null != community)
-				bean.setOwnerName(community.getName());
-			else
-				bean.setOwnerName("");
-			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().getStatus())
-				bean.setProcessing(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().getStatus())
-				bean.setClose(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey().getStatus())
-				bean.setComplete(elem.getValue().intValue());
-			return bean;
-		}).collect(Collectors.toList());
-		Map<Long,PmTaskStatDTO> dtoMap = new HashMap<>();
-		dtolist.forEach(elem -> {
-			if (dtoMap.keySet().contains(elem.getOwnerId())){
-				PmTaskStatDTO target = dtoMap.get(elem.getOwnerId());
-				if(null != elem.getProcessing())
-					target.setProcessing(elem.getProcessing());
-				if(null != elem.getClose())
-					target.setClose(elem.getClose());
-				if(null != elem.getComplete())
-					target.setComplete(elem.getComplete());
-				dtoMap.put(elem.getOwnerId(),target);
-			} else {
-				dtoMap.put(elem.getOwnerId(),elem);
-			}
-		});
+			bean.setOwnerId(elem.getKey());
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			bean.setOwnerName(null != community ? community.getName() : "");
+			for (Map.Entry<Byte,List<PmTask>> elem1 : elem.getValue().entrySet()
+				 ) {
+				if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem1.getKey().byteValue())
+					bean.setProcessing(elem1.getValue().size());
+				if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem1.getKey().byteValue())
+					bean.setClose(elem1.getValue().size());
+				if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem1.getKey().byteValue())
+					bean.setComplete(elem1.getValue().size());
 
-		return dtoMap.values().stream().collect(Collectors.toList());
+			}
+			bean.setTotal(bean.getProcessing() + bean.getClose() + bean.getComplete());
+			dtolist.add(bean);
+		}
+		return dtolist;
 	}
 
 	@Override
