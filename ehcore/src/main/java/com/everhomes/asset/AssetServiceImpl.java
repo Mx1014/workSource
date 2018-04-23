@@ -511,6 +511,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+    	//AssetVendor assetVendor = checkAssetVendor(999966, 0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType(),cmd.getOrganizationId());
@@ -2947,7 +2948,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-//        AssetVendor assetVendor = checkAssetVendor(999983);
+        //AssetVendor assetVendor = checkAssetVendor(999966, 0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
@@ -2984,6 +2985,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+    	//AssetVendor vendor = checkAssetVendor(999966, 0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
     }
@@ -3009,6 +3011,11 @@ public class AssetServiceImpl implements AssetService {
             case 999983:
                 //hasContractView = 0;
                 //正中会要求可以看合同
+                hasContractView = 1;
+                hasPay = 0;
+                break;
+            case 999966:
+            	//深圳湾要求可以看合同，只查费不显示支付按钮
                 hasContractView = 1;
                 hasPay = 0;
                 break;
@@ -3190,10 +3197,14 @@ public class AssetServiceImpl implements AssetService {
             }
             cmd.setDateStr(dateStr);
             //楼栋门牌也是
-            String building = headers[buildingIndex];
-            String apartment = headers[apartmentIndex];
+            String building = data[buildingIndex];
+            String apartment = data[apartmentIndex];
             //客户属性也是
-            switch (data[targetTypeIndex]){
+            String datum = data[targetTypeIndex];
+            if(datum!=null){
+                datum = datum.trim();
+            }
+            switch (datum){
                 case "企业客户":
                     cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
                     break;

@@ -82,6 +82,9 @@ public enum CoordinationLocks {
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
 
     PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
+    
+    OFFICE_CUBICLE_CITY_LOCK("office.cubicle.city.lock"),
+	
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
@@ -120,7 +123,12 @@ public enum CoordinationLocks {
     SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments"),
     SOCIAL_SECURITY_INCRESE("social_security_increse"),
     SOCIAL_SECURITY_ADD("social_security_add"),
-    FIXED_ASSET_CATEGORY_COPY_DEFAULT("fixed_asset_category_copy_default");
+    FIXED_ASSET_CATEGORY_COPY_DEFAULT("fixed_asset_category_copy_default"),
+    DEFAULT_REMIND_CATEGORY_ADD("default_remind_category_add"),
+    REMIND_DEMO_ADD("remind_demo_add"),
+    REMIND_CATEGORY_SORTING("remind_category_sorting"),
+    REMIND_SORTING("remind_sorting"),
+    REMIND_SCHEDULED("remind_scheduled");
 
     private String code;
 

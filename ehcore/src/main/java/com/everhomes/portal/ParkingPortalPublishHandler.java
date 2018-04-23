@@ -61,9 +61,10 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
         if (null == identify)
             identify = RentalV2ResourceType.DEFAULT.getCode();
         rentalResourceType.setPageType(pageType);
-        rentalResourceType.setPageType(payMode);
+        rentalResourceType.setPayMode(payMode);
         rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
+        rentalResourceType.setUnauthVisible((byte)0);
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }

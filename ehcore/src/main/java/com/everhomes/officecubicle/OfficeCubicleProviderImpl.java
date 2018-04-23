@@ -366,4 +366,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			return result;
 		return null;
 	}
+
+	@Override
+	public void updateSpaceByProvinceAndCity(Integer currentNamespaceId, String provinceName, String cityName) {
+		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_OFFICE_CUBICLE_SPACES)
+				.set(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS,OfficeStatus.DELETED.getCode())
+				.where(Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.equal(currentNamespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.PROVINCE_NAME.equal(provinceName))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_NAME.equal(cityName))
+				.execute();
+	}
 }

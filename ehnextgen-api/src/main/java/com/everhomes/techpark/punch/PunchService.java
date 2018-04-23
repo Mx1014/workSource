@@ -3,7 +3,6 @@ package com.everhomes.techpark.punch;
 import java.io.OutputStream;
 import java.sql.Time;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
@@ -267,4 +266,18 @@ public interface PunchService {
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId);
+
+	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
+
+	public void updateVacationBalances(UpdateVacationBalancesCommand cmd);
+
+	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd);
+
+	public ListVacationBalanceLogsResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd);
+
+	public void exportVacationBalances(ExportVacationBalancesCommand cmd);
+
+	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
+
+	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
 }

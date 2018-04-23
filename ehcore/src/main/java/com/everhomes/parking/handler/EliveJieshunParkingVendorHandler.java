@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.parking.handler;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -9,37 +8,18 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
-import com.everhomes.parking.elivejieshun.EliveJieShunCardAttr;
 import com.everhomes.parking.elivejieshun.EliveJieShunDataItems;
 import com.everhomes.parking.elivejieshun.EliveJieShunLogonReponse;
 import com.everhomes.parking.elivejieshun.EliveJieShunSignTools;
-import com.everhomes.parking.zhongbaichang.ZhongBaiChangCardInfo;
-import com.everhomes.parking.zhongbaichang.ZhongBaiChangData;
-import com.everhomes.parking.zhongbaichang.ZhongBaiChangSignatureUtil;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.wx.JsapiTicketResponse;
-import kafka.utils.Json;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +27,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -62,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 住总停车
@@ -341,7 +316,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-
+		order.setOriginalPrice(order.getPrice());
 	}
 
 //	/**
@@ -582,18 +557,19 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 				JSONObject.parseObject(result, new TypeReference
 						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
 				});
+		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(!isRequestSuccess(response)){
-			return null;
+			return dto;
 		}
 
 
 		String attributes = response.getDataItems().get(0).getAttributes();
 		JSONObject jsonAttributes = JSONObject.parseObject(attributes);
 		if(jsonAttributes==null || jsonAttributes.size()==0 || 0!=jsonAttributes.getInteger("retcode")){
-			return null;
+			return dto;
 		}
 
-		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+		
 		dto.setPrice(new BigDecimal(jsonAttributes.getString("serviceFee")));
 		dto.setRemainingTime(jsonAttributes.getInteger("surplusMinute"));
 		dto.setPlateNumber(plateNumber);
@@ -630,14 +606,18 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("parkCodes",parkCode);
 		params.put("attributes",paramattrs);
 		String result = post(params.toJSONString());
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse<String,String> response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
-		if(!isRequestSuccess(response) || response.getDataItems()==null || response.getDataItems().size()==0){
+		if(!isRequestSuccess(response) || response.getDataItems()==null){
 			return null;
 		}
-		JSONObject jsonObject = JSONObject.parseObject(response.getDataItems().get(0).getAttributes());
+		JSONArray array = JSONObject.parseArray(response.getDataItems());
+		if(array==null || array.size()<1){
+			return null;
+		}
+		JSONObject jsonObject =array.getJSONObject(0);
 		ParkingFreeSpaceNumDTO dto = ConvertHelper.convert(cmd,ParkingFreeSpaceNumDTO.class);
 		dto.setFreeSpaceNum(jsonObject.getInteger("restSpace"));
 		return dto;
@@ -763,7 +743,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		String result = post(params.toJSONString());
 		return  result;
 	}
-	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	@Override
 	public String applyTempCard(ParkingClearanceLog log) {
 
@@ -821,15 +801,13 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 	private String generateClearanceStartTime(Timestamp clearanceTime) {
 		LocalDateTime start = clearanceTime.toLocalDateTime();
-		return start.format(dtf2);
+		return start.format(dtf2)+" 00:00:00";
 //		return "2018-03-16 00:00:00";
 	}
 
 	private String generateClearanceEndTime(Timestamp clearanceTime) {
 		LocalDateTime end = clearanceTime.toLocalDateTime();
-		end = end.plusDays(1L);
-		end = end.minusSeconds(1L);
-		return end.format(dtf2);
+		return end.format(dtf2)+" 23:59:59";
 //		return "2018-04-12 00:00:00";
 	}
 
