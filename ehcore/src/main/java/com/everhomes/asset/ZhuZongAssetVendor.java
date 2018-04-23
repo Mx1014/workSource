@@ -24,6 +24,7 @@ import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillForClientV2;
 import com.everhomes.rest.asset.BillIdAndType;
 import com.everhomes.rest.asset.BillIdCommand;
 import com.everhomes.rest.asset.BillItemIdCommand;
@@ -351,11 +352,23 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 				clientid += houseDTOs.get(i).getPk_client() + ",";//业户ID如果是多个以英文逗号隔开
 			}
 			String onlyws = "1";//首页只查询未缴费:0：全部费用；1：未收；2：已收
+			//根据房屋查询费用
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			for(int i = 0;i < costDTOs.size();i++) {
 				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
 				CostDTO costDTO = costDTOs.get(i);
-				
+				showBillForClientV2DTO.setAddressStr(costDTO.getHouseName());
+				showBillForClientV2DTO.setBillGroupName(costDTO.getFeename());
+				List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
+				BillForClientV2 bill = new BillForClientV2();
+				bill.setBillId(costDTO.getFeeid());
+				bill.setAmountOwed(costDTO.getWs_amount() != null ? costDTO.getWs_amount().toString() : "");//待缴金额
+				bill.setAmountReceivable(costDTO.getAmount() != null ? costDTO.getAmount().toString() : "");//应缴金额
+				String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
+				bill.setBillDuration(billDuration);//账期
+				bills.add(bill);
+				showBillForClientV2DTO.setBills(bills);
+				response.add(showBillForClientV2DTO);
 			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor showBillForClientV2() cmd={}", cmd, e);
