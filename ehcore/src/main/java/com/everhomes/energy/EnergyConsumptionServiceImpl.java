@@ -631,17 +631,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterCategory serviceCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), meter.getServiceCategoryId());
         dto.setServiceCategory(serviceCategory != null ? serviceCategory.getName() : null);
 
-        // 当前价格
-        EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.PRICE);
-        dto.setPrice(priceLog != null ? priceLog.getSettingValue() : null);
-
-        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(priceLog.getCalculationType()))) {
-            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceLog.getConfigId(), meter.getOwnerId(),
-                    meter.getOwnerType(), meter.getCommunityId(), UserContext.getCurrentNamespaceId(namespaceId));
-            if(priceConfig != null) {
-                dto.setPriceConfig(toEnergyMeterPriceConfigDTO(priceConfig));
-            }
-        }
+//        // 当前价格
+//        EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.PRICE);
+//        dto.setPrice(priceLog != null ? priceLog.getSettingValue() : null);
+//
+//        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(priceLog.getCalculationType()))) {
+//            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceLog.getConfigId(), meter.getOwnerId(),
+//                    meter.getOwnerType(), meter.getCommunityId(), UserContext.getCurrentNamespaceId(namespaceId));
+//            if(priceConfig != null) {
+//                dto.setPriceConfig(toEnergyMeterPriceConfigDTO(priceConfig));
+//            }
+//        }
         // 当前倍率
         EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(UserContext.getCurrentNamespaceId(namespaceId), meter.getId(), EnergyMeterSettingType.RATE);
         dto.setRate(rateLog != null ? rateLog.getSettingValue() : null);
