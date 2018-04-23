@@ -38,9 +38,12 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
@@ -189,12 +192,15 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -295,9 +301,6 @@ public class CustomerServiceImpl implements CustomerService {
     private ContractProvider contractProvider;
 
     @Autowired
-    private RolePrivilegeService rolePrivilegeService;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -317,6 +320,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -3265,7 +3271,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<AuthorizationRelation> authorizationRelations = enterpriseCustomerProvider
                 .listAuthorizationRelations(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId(), cmd.getAppId(), cmd.getCommunityId());
 
-        authorizationRelations.stream().map((r) -> {
+        authorizationRelations.forEach((r) -> {
             String targetJson = r.getTargetJson();
             // String privilegeJson = r.getPrivilegeJson();
             AssignmentTarget[] targetArr = (AssignmentTarget[]) StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
@@ -3282,12 +3288,42 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 }
             });
-            return null;
-        }).collect(Collectors.toList());
-
-        if(relatedMembers!=null && relatedMembers.size()>0){
-            relatedMembers.forEach((r)->r.setDepartmentName(organizationProvider.findOrganizationById(r.getOrganizationId()).getName()));
+        });
+        //获取超级管理员和应用管理员
+        ListServiceModuleAdministratorsCommand administratorsCommand = new ListServiceModuleAdministratorsCommand();
+        administratorsCommand.setModuleId(cmd.getModuleId());
+        administratorsCommand.setActivationFlag(ActivationFlag.YES.getCode());
+        administratorsCommand.setOrganizationId(cmd.getOwnerId());
+        administratorsCommand.setOwnerId(cmd.getOwnerId());
+        administratorsCommand.setOwnerType(cmd.getOwnerType());
+        ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
+        List<OrganizationContactDTO> superAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(administratorsCommand);
+        List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
+        if(adminUserId!=null && adminUserId.size()>0){
+            adminUserId.forEach((r)->{
+                relatedMembers.add(ConvertHelper.convert(organizationProvider.listOrganizationMembersByUId(r), OrganizationMemberDTO.class));
+            });
+        }
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach((r) -> r.setDepartmentName(organizationProvider.findOrganizationById(r.getOrganizationId()).getName()));
         }
         return relatedMembers;
+    }
+
+    private List<Long> getAdminUserIds(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
+        List<Long> userIds = new ArrayList<>();
+        if (superAdmins != null && superAdmins.size() > 0) {
+            superAdmins.forEach(s -> userIds.add(s.getTargetId()));
+        }
+        List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+        if (moduleAdmins != null && moduleAdmins.size() > 0) {
+            moduleAdmins.forEach((r) -> {
+                //这里权限那边并不会返回null  getCommunityControlIds
+                if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || r.getCommunityControlApps().getCommunityControlIds().contains(communityId)) {
+                    userIds.add(r.getTargetId());
+                }
+            });
+        }
+        return null;
     }
 }

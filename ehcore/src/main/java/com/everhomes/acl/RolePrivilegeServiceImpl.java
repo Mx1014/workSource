@@ -1697,8 +1697,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(ActivationFlag.YES == activationFlag){
 			targetType = OrganizationMemberTargetType.USER.getCode();
 		}else if(ActivationFlag.NO == activationFlag){
-			targetType = OrganizationMemberTargetType.UNTRACK.getCode();
 		}
+		targetType = OrganizationMemberTargetType.UNTRACK.getCode();
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
 		for (OrganizationMember member: members ) {

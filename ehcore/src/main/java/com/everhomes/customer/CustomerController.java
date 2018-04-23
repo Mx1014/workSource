@@ -1518,7 +1518,7 @@ public class CustomerController extends ControllerBase {
 
     /**
      * <b>URL: /customer/listCommunityRelatedMembers</b>
-     * <p>列出项目下相关的所有人</p>
+     * <p>列出项目下相关的所有人(包含超级管理员和应用管理员)</p>
      */
     @RequestMapping("listCommnityUserRelatedTrackUsers")
     @RestReturn(value = OrganizationMemberDTO.class,collection = true)
