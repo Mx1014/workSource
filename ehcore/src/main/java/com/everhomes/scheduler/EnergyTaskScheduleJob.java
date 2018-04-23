@@ -321,7 +321,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
                         BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                         FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
+                                task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                         feeRules.add(feeRule);
                         contractId.add(item.getContractId());
                     });
@@ -335,7 +335,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                             BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                             FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
+                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                             feeRules.add(feeRule);
                         });
                         //suanqian paymentExpectancies_re_struct();
@@ -349,7 +349,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                                 BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                                 FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                        task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
+                                        task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                                 feeRules.add(feeRule);
                             });
                             //suanqian paymentExpectancies_re_struct();
@@ -363,7 +363,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                     DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                                     BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                                     FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                            task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
+                                            task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                                     feeRules.add(feeRule);
                                 });
                                 //suanqian paymentExpectancies_re_struct();
@@ -462,7 +462,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     }
 
     private FeeRules generateChargingItemsFeeRule(BigDecimal amount, Long chargingItemId, Long chargingStandardId,
-            Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address) {
+            Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address,Byte meterType) {
         Gson gson = new Gson();
         FeeRules feeRule = new FeeRules();
         feeRule.setChargingItemId(chargingItemId);
@@ -492,7 +492,11 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             variableIdAndValue.setVaribleIdentifier("yl");
             //用量
             variableIdAndValue.setVariableValue(amount);
+            VariableIdAndValue variableIdAndValueBurden = new VariableIdAndValue();
+            variableIdAndValue.setVaribleIdentifier("blxs");
+            variableIdAndValue.setVariableValue(new BigDecimal(1));
             vv.add(variableIdAndValue);
+            vv.add(variableIdAndValueBurden);
         }
         feeRule.setVariableIdAndValueList(vv);
 
