@@ -680,5 +680,10 @@ public interface OrganizationService {
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
 
+	/**
+	 * 根据域空间id、关键字、企业类型、来查询企业信息
+	 * @param cmd
+	 * @return
+	 */
 	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
 }

@@ -335,23 +335,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return listEnterpriseByNamespaceIds(namespaceId, organizationType, setAdminFlag, locator, pageSize);
     }
 
+    /**
+     * 根据域空间id、企业属性、关键字来查询企业信息（分页）
+     * @param namespaceId
+     * @param organizationType
+     * @param setAdminFlag
+     * @param keywords
+     * @param locator
+     * @param pageSize
+     * @return
+     */
     @Override
     public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
-                                                           Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize) {
+                                                           Byte setAdminFlag, String keywords,
+                                                           CrossShardListingLocator locator, int pageSize) {
+        //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
+        //声明一个List<Organization>集合
         List<Organization> result = new ArrayList<Organization>();
+        //查询Eh_organizations表
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         if (null != namespaceId) {
+            //添加命名空间查询条件
             query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
         }
         if (!StringUtils.isEmpty(keywords)) {
+            //添加关键字查询条件
             query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
         }
+        //添加查询条件为有效的，active表示的是有效的数据
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
+        //添加查询条件为：节点为企业
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         if (!StringUtils.isEmpty(organizationType)) {
+            //添加企业属性查询条件
             query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
         }
         if (setAdminFlag != null) {

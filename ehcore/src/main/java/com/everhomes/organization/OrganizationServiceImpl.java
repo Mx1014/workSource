@@ -12359,12 +12359,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     }
 
+    /**
+     * 根据域空间id、企业类型、关键字、来查询企业信息
+     * @param cmd
+     * @return
+     */
     @Override
     public ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd) {
+        //创建分页的对象
         CrossShardListingLocator locator = new CrossShardListingLocator();
+        //设置第几页
         locator.setAnchor(cmd.getPageAnchor());
+        //定义页面大小
         Integer pageSize = cmd.getPageSize();
-        List<Organization> dtos = this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(), null, cmd.getKeywords(), locator, pageSize);
+        //根据域空间id、企业类型、关键字、来查询企业信息
+        List<Organization> dtos = this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(),
+                null, cmd.getKeywords(), locator, pageSize);
         ListPMOrganizationsResponse res = new ListPMOrganizationsResponse();
         if(dtos != null){
             List<OrganizationDTO> dtoList = dtos.stream().map(r->ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());

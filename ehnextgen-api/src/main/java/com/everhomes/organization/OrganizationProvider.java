@@ -197,6 +197,17 @@ public interface OrganizationProvider {
 	OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId);
 	List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator);
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize);
+
+	/**
+	 * 根据域空间id、企业类型、关键字、来查询企业信息
+	 * @param namespaceId
+	 * @param organizationType
+	 * @param setAdminFlag
+	 * @param keywords
+	 * @param locator
+	 * @param pageSize
+	 * @return
+	 */
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
 													Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize);
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
