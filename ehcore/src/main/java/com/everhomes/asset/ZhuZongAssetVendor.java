@@ -168,6 +168,10 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		
 	}
 	
+	private queryHouseByPhoneNumber() {
+		
+	}
+	
 	@Override
 	public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
 		try {
