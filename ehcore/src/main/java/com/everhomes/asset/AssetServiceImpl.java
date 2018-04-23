@@ -510,7 +510,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        //AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+    	AssetVendor assetVendor = checkAssetVendor(999955,0);//杨崇鑫测试
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType(),cmd.getOrganizationId());
@@ -2946,8 +2947,8 @@ public class AssetServiceImpl implements AssetService {
                         "not valid corp manager");
             }
         }
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-//        AssetVendor assetVendor = checkAssetVendor(999983);
+        //AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+    	AssetVendor assetVendor = checkAssetVendor(999955, 0);//杨崇鑫测试
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
@@ -2983,7 +2984,8 @@ public class AssetServiceImpl implements AssetService {
                         "not valid corp manager");
             }
         }
-        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        //AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+    	AssetVendor vendor = checkAssetVendor(999955,0);//杨崇鑫测试
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
     }

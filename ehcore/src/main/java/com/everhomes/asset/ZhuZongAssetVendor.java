@@ -227,17 +227,19 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		try {
 			String url = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_QUERYHOUSEBYPHONENUMBER_URL,""); 
 			String AccountCode = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_ACCOUNTCODE,""); 
-			for(int i = 0;i < phoneNumbers.size();i++) {
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("AccountCode", AccountCode);
-				params.put("phone", phoneNumbers.get(i));
-				String response = HttpUtils.post(url, params, 600, false);
-				try {
-					QueryHouseByPhoneNumberDTO queryHouseByPhoneNumberDTO = 
-							(QueryHouseByPhoneNumberDTO) StringHelper.fromJsonString(response, QueryHouseByPhoneNumberDTO.class);
-					houseDTOs.addAll(queryHouseByPhoneNumberDTO.getResult());
-				} catch (Exception e) {
-					LOGGER.error("ZhuZongAssetVendor queryHouseByPhoneNumber() {}", phoneNumbers.get(i), e);
+			if(phoneNumbers != null) {
+				for(int i = 0;i < phoneNumbers.size();i++) {
+					Map<String, String> params = new HashMap<String, String>();
+					params.put("AccountCode", AccountCode);
+					params.put("phone", phoneNumbers.get(i));
+					String response = HttpUtils.post(url, params, 600, false);
+					try {
+						QueryHouseByPhoneNumberDTO queryHouseByPhoneNumberDTO = 
+								(QueryHouseByPhoneNumberDTO) StringHelper.fromJsonString(response, QueryHouseByPhoneNumberDTO.class);
+						houseDTOs.addAll(queryHouseByPhoneNumberDTO.getResult());
+					} catch (Exception e) {
+						LOGGER.error("ZhuZongAssetVendor queryHouseByPhoneNumber() {}", phoneNumbers.get(i), e);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -251,7 +253,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	 * onlyws 是	0：全部费用；1：未收；2：已收
 	 */
 	private List<CostDTO> queryCostByHouseList(String houseid, String clientid, String onlyws) {
-		List<CostDTO> costDTOs = new ArrayList<>();
+		List<CostDTO> costDTOs = new ArrayList<CostDTO>();
 		try {
 			String url = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_QUERYCOSTBYHOUSELIST_URL,""); 
 			String AccountCode = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_ACCOUNTCODE,""); 
@@ -304,6 +306,22 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	}
 	
 	/**
+	 * 组装ListAllBillsForClientDTO
+	 */
+	private ListAllBillsForClientDTO assembleListAllBillsForClientDTO(CostDTO costDTO, Byte chargeStatus) {
+		ListAllBillsForClientDTO listAllBillsForClientDTO = new ListAllBillsForClientDTO();
+		listAllBillsForClientDTO.setBillGroupName(costDTO.getFeename());
+		listAllBillsForClientDTO.setAmountOwed(costDTO.getWs_amount() != null ? costDTO.getWs_amount().toString() : "");//待缴金额
+		listAllBillsForClientDTO.setAmountReceivable(costDTO.getAmount() != null ? costDTO.getAmount().toString() : "");//应缴金额
+		listAllBillsForClientDTO.setDateStrBegin(costDTO.getBegintime() != null ? costDTO.getBegintime().toString() : "");
+		listAllBillsForClientDTO.setDateStrEnd(costDTO.getEndtime() != null ? costDTO.getEndtime().toString() : "");
+		String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
+		listAllBillsForClientDTO.setDateStr(billDuration);
+		listAllBillsForClientDTO.setChargeStatus(chargeStatus);//chargeStatus：0：未付款；1：已付款
+		return listAllBillsForClientDTO;
+	}
+	
+	/**
 	 * 个人直接获取手机号码，企业获取所有企业管理员的手机号码
 	 */
 	private List<String> getPhoneNumber(String targetType, Long targetId, Integer namespaceId){
@@ -343,32 +361,37 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		try {
 			//个人直接获取手机号码，企业获取所有企业管理员的手机号码
 			List<String> phoneNumbers = getPhoneNumber(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId());
-			phoneNumbers.add("15650723221");//用于测试的手机号码，杨崇鑫
+			phoneNumbers.add("15650723221");//杨崇鑫测试
 			//根据手机号返回房产
 			List<HouseDTO> houseDTOs = queryHouseByPhoneNumber(phoneNumbers);
 			String houseid = "",clientid = "";
-			for(int i = 0 ;i < houseDTOs.size();i++){
-				houseid += houseDTOs.get(i).getPk_house() + ",";//房屋ID如果是多个以英文逗号隔开
-				clientid += houseDTOs.get(i).getPk_client() + ",";//业户ID如果是多个以英文逗号隔开
+			if(houseDTOs != null) {
+				for(int i = 0 ;i < houseDTOs.size();i++){
+					houseid += houseDTOs.get(i).getPk_house() + ",";//房屋ID如果是多个以英文逗号隔开
+					clientid += houseDTOs.get(i).getPk_client() + ",";//业户ID如果是多个以英文逗号隔开
+				}
 			}
 			String onlyws = "1";//首页只查询未缴费:0：全部费用；1：未收；2：已收
+			onlyws = "0";//杨崇鑫测试
 			//根据房屋查询费用
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
-			for(int i = 0;i < costDTOs.size();i++) {
-				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
-				CostDTO costDTO = costDTOs.get(i);
-				showBillForClientV2DTO.setAddressStr(costDTO.getHouseName());
-				showBillForClientV2DTO.setBillGroupName(costDTO.getFeename());
-				List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
-				BillForClientV2 bill = new BillForClientV2();
-				bill.setBillId(costDTO.getFeeid());
-				bill.setAmountOwed(costDTO.getWs_amount() != null ? costDTO.getWs_amount().toString() : "");//待缴金额
-				bill.setAmountReceivable(costDTO.getAmount() != null ? costDTO.getAmount().toString() : "");//应缴金额
-				String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
-				bill.setBillDuration(billDuration);//账期
-				bills.add(bill);
-				showBillForClientV2DTO.setBills(bills);
-				response.add(showBillForClientV2DTO);
+			if(costDTOs != null) {
+				for(int i = 0;i < costDTOs.size();i++) {
+					ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
+					CostDTO costDTO = costDTOs.get(i);
+					showBillForClientV2DTO.setAddressStr(costDTO.getHousename());
+					showBillForClientV2DTO.setBillGroupName(costDTO.getFeename());
+					List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
+					BillForClientV2 bill = new BillForClientV2();
+					bill.setBillId(costDTO.getFeeid());
+					bill.setAmountOwed(costDTO.getWs_amount() != null ? costDTO.getWs_amount().toString() : "");//待缴金额
+					bill.setAmountReceivable(costDTO.getAmount() != null ? costDTO.getAmount().toString() : "");//应缴金额
+					String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
+					bill.setBillDuration(billDuration);//账期
+					bills.add(bill);
+					showBillForClientV2DTO.setBills(bills);
+					response.add(showBillForClientV2DTO);
+				}
 			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor showBillForClientV2() cmd={}", cmd, e);
@@ -378,13 +401,47 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	
 	@Override
 	public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+		List<ListAllBillsForClientDTO> response = new ArrayList<ListAllBillsForClientDTO>();
 		try {
-			
+			//个人直接获取手机号码，企业获取所有企业管理员的手机号码
+			List<String> phoneNumbers = getPhoneNumber(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId());
+			phoneNumbers.add("15650723221");//杨崇鑫测试
+			//根据手机号返回房产
+			List<HouseDTO> houseDTOs = queryHouseByPhoneNumber(phoneNumbers);
+			String houseid = "",clientid = "";
+			if(houseDTOs != null) {
+				for(int i = 0 ;i < houseDTOs.size();i++){
+					houseid += houseDTOs.get(i).getPk_house() + ",";//房屋ID如果是多个以英文逗号隔开
+					clientid += houseDTOs.get(i).getPk_client() + ",";//业户ID如果是多个以英文逗号隔开
+				}
+			}
+			//由于对接查询全部没有字段用于区分是“待支付”还是“已支付”，所以第一次查询所有未缴，第二次查询所有已缴，再作相加
+			String onlyws = "1";//0：全部费用；1：未收；2：已收
+			//根据房屋查询费用
+			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
+			if(costDTOs != null) {
+				for(int i = 0;i < costDTOs.size();i++) {
+					CostDTO costDTO = costDTOs.get(i);
+					//chargeStatus：0：未付款；1：已付款
+					ListAllBillsForClientDTO listAllBillsForClientDTO = assembleListAllBillsForClientDTO(costDTO, Byte.valueOf("0"));
+					response.add(listAllBillsForClientDTO);
+				}
+			}
+			onlyws = "2";//0：全部费用；1：未收；2：已收
+			//根据房屋查询费用
+			costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
+			if(costDTOs != null) {
+				for(int i = 0;i < costDTOs.size();i++) {
+					CostDTO costDTO = costDTOs.get(i);
+					//chargeStatus：0：未付款；1：已付款
+					ListAllBillsForClientDTO listAllBillsForClientDTO = assembleListAllBillsForClientDTO(costDTO, Byte.valueOf("1"));
+					response.add(listAllBillsForClientDTO);
+				}
+			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor listAllBillsForClient() cmd={}", cmd, e);
 		}
-		//return response;
-		return null;
+		return response;
 	}
 	
 	@Override

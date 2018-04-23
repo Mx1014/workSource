@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class CostDTO {
 	
-	private String houseName;
+	private String housename;
 	private String feename;
 	private BigDecimal amount;
 	private BigDecimal ws_amount;
@@ -12,12 +12,7 @@ public class CostDTO {
 	private String begintime;
 	private String endtime;
 	private String feeid;
-	public String getHouseName() {
-		return houseName;
-	}
-	public void setHouseName(String houseName) {
-		this.houseName = houseName;
-	}
+	
 	public String getFeename() {
 		return feename;
 	}
@@ -59,6 +54,12 @@ public class CostDTO {
 	}
 	public void setFeeid(String feeid) {
 		this.feeid = feeid;
+	}
+	public String getHousename() {
+		return housename;
+	}
+	public void setHousename(String housename) {
+		this.housename = housename;
 	}
 	
 }

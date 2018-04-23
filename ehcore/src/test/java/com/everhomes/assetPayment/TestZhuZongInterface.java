@@ -65,7 +65,7 @@ public class TestZhuZongInterface {
 				costDTOs.addAll(costByHouseListDTO.getDatas());
 			}
 			System.out.println(costDTOs.get(0).getFeename());
-			System.out.println(costDTOs.get(0).getAmount());
+			System.out.println(costDTOs.get(0).getHousename());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -89,8 +89,8 @@ public class TestZhuZongInterface {
 	
 	public static void main(String[] args) {
 		//QueryHouseByPhoneNumber();
-		//QueryCostByHouseList();
-		QueryCostDetailByID();
+		QueryCostByHouseList();
+		//QueryCostDetailByID();
 	}
 
 }
