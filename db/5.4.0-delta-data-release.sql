@@ -239,3 +239,6 @@ VALUES
 
 
 delete from eh_var_fields where group_id = 35 and display_name = '开始时间' or display_name = '结束时间';
+
+-- 客户同步的secret key，用于第三方的客户自动同步 by wentian
+INSERT INTO eh_configurations(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) select @cid:=@cid+1, 'shenzhoushuma.secret.key', '2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==', NULL, '999971', NULL FROM DUAL WHERE NOT EXISTS(select id from `eh_configurations` where `name` = 'shenzhoushuma.secret.key');
