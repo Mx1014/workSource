@@ -3257,7 +3257,7 @@ public class CustomerServiceImpl implements CustomerService {
             customers.forEach((customer) -> {
                 List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
                 if (organizationMembers != null && organizationMembers.size() > 0) {
-                    members.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+                    members.add(ConvertHelper.convert(organizationMembers.get(0), OrganizationMemberDTO.class));
                 }
             });
         }
