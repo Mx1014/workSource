@@ -2215,10 +2215,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
 		}
+
 		preOrderCommand.setClientAppName(clientAppName);
 
 		return payService.createPreOrder(preOrderCommand);
-
 	}
 
 	public PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
@@ -3278,7 +3278,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 生成某个资源的单元格
 	 * */
 	private void processCells(RentalResource rs, byte rentalType){
-		Long timeCost = System.currentTimeMillis();
+
 		GetResourceRuleAdminCommand getResourceRuleCmd = new GetResourceRuleAdminCommand();
 		getResourceRuleCmd.setResourceId(rs.getId());
 		getResourceRuleCmd.setResourceType(rs.getResourceType());
