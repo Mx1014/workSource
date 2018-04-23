@@ -493,8 +493,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             //用量
             variableIdAndValue.setVariableValue(amount);
             VariableIdAndValue variableIdAndValueBurden = new VariableIdAndValue();
-            variableIdAndValue.setVaribleIdentifier("blxs");
-            variableIdAndValue.setVariableValue(new BigDecimal(1));
+            variableIdAndValueBurden.setVaribleIdentifier("blxs");
+            variableIdAndValueBurden.setVariableValue(new BigDecimal(1));
             vv.add(variableIdAndValue);
             vv.add(variableIdAndValueBurden);
         }
