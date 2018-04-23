@@ -108,6 +108,7 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
                 Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID,
                 Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.countDistinct()
         ).from(Tables.EH_SOCIAL_SECURITY_REPORT).where(Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.in(detailIds))
+        .and(Tables.EH_SOCIAL_SECURITY_REPORT.IS_FILED.eq(NormalFlag.NO.getCode()))
                 .and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(month)).groupBy(
 //                        Tables.EH_SOCIAL_SECURITY_REPORT.CREATOR_UID,
 //                        Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME,

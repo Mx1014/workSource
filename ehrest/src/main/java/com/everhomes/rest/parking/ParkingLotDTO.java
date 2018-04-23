@@ -76,6 +76,15 @@ public class ParkingLotDTO {
 
     private Byte vipParkingFlag;
     private String vipParkingUrl;
+    private Byte identityCardFlag;
+
+    public Byte getIdentityCardFlag() {
+        return identityCardFlag;
+    }
+
+    public void setIdentityCardFlag(Byte identityCardFlag) {
+        this.identityCardFlag = identityCardFlag;
+    }
 
     public Byte getBusinessLicenseFlag() {
         return businessLicenseFlag;

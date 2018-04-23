@@ -23,6 +23,24 @@ public class GetRequisitionDetailResponse {
     private Long typeId;
     private String description;
     private String attachmentUrl;
+    private Long flowCaseId;
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
     public String getTheme() {
         return theme;

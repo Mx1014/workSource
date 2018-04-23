@@ -58,10 +58,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.everhomes.rest.oauth2.ControlTargetOption.ALL_COMMUNITY;
@@ -223,12 +220,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(null != cmd.getModuleId()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
             startLevel = module.getLevel() + 1;
-            if(null != module)//查找三级菜单
+            if(null != module){//查找三级菜单
                 serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
+                serviceModules.sort(Comparator.comparingInt(ServiceModule::getDefaultOrder));
                 if(serviceModules == null || serviceModules.size() == 0){//如果三级菜单不存在，则直接使用二级菜单
                     serviceModules = Collections.singletonList(module);
                     startLevel --;
                 }
+            }
         }else{
             serviceModules =  serviceModuleProvider.listServiceModule(startLevel, types);
         }
@@ -250,6 +249,29 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 results.add(s);
             }
         }
+
+        // 根据应用id进行过滤不需要的权限项
+        BanPrivilegeHandler handler = getBanPrivilegeHandler();
+        if (null != handler && results != null && results.size() > 0) {
+            List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+            if(banPrivilegeIds != null && banPrivilegeIds.size() > 0){
+                banPrivilegeIds = banPrivilegeIds.stream().filter(r-> r != 0L).collect(Collectors.toList());
+                Iterator<ServiceModuleDTO> it = results.iterator();
+                while (it.hasNext()) {
+                    // 进入禁止权限显示的方法
+                    ServiceModuleDTO nextDto = it.next();
+                    if (nextDto.getServiceModules() != null && nextDto.getServiceModules().size() > 0 && banPrivilegeIds != null && banPrivilegeIds.size() > 0) {
+                        for (ServiceModuleDTO dto : nextDto.getServiceModules()) {
+                            if (dto.getType() == ServiceModuleTreeVType.PRIVILEGE.getCode() && banPrivilegeIds.contains(dto.getId())) {
+                                LOGGER.debug("privilegeId ban, privilegeId = {}, namespaceId= {}, moduleId= {}, appId = {}", dto.getId(), UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+                                results.remove(nextDto);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         return results;
     }
@@ -291,6 +313,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             dto.setServiceModules(childrens);
         else {
             List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
+
             List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
             for (ServiceModulePrivilege modulePrivilege : modulePrivileges) {
                 ServiceModuleDTO p = new ServiceModuleDTO();
@@ -947,10 +970,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
-                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);
                 }
                 reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), customTag);
                 break;
@@ -1176,4 +1199,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     }
 
+    public BanPrivilegeHandler getBanPrivilegeHandler() {
+        BanPrivilegeHandler handler = null;
+
+        String handlerPrefix = BanPrivilegeHandler.BAN_PRIVILEGE_OBJECT_PREFIX;
+        handler = PlatformContext.getComponent(handlerPrefix);
+
+        return handler;
+    }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>dtos: 管理员对象</;i>
+ * <li>dtos: 管理员对象</li>
  * <li>pageAnchor:分页锚点</li>
  * <li>pageSize: 页数</li>
  * </ul>

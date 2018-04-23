@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>返回值：
  * 
  * <li>approveType: 审批类型，{@link com.everhomes.rest.approval.ApprovalType}</li>
- * <li>approvalStatus: 审批状态，参考{@link com.everhomes.rest.approval.ApprovalStatus}
+ * <li>approvalStatus: 审批状态，参考{@link com.everhomes.rest.approval.ApprovalStatus}</li>
  * <li>title: 申请的标题文字-根据类型不同,文字不同</li>
  * <li>approvalLogAndFlowOfRequestList: 申请的审批日志 与审批流程列表，参考{@link com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO}</li>
  * <li>punchDate: 异常申请字段:打卡日期</li>

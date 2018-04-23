@@ -4,6 +4,7 @@ package com.everhomes.community;
 import com.everhomes.acl.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -39,6 +40,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.BuildingDTO;
@@ -58,11 +60,13 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.*;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
@@ -71,6 +75,7 @@ import com.everhomes.version.VersionUpgradeRule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.JoinType;
@@ -90,6 +95,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -175,6 +182,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private PropertyMgrService propertyMgrService;
+
+	@Autowired
+	private AssetService assetService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -267,6 +277,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaName(area.getName());
 		community.setCityName(city.getName());
 		community.setAreaSize(cmd.getAreaSize());
+		community.setName(cmd.getName());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
 			communitySearcher.feedDoc(community);
@@ -648,6 +659,45 @@ public class CommunityServiceImpl implements CommunityService {
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
+	}
+
+	@Override
+	public void exportBuildingByCommunityId(ListBuildingCommand cmd, HttpServletResponse response) {
+		cmd.setPageSize(10000);
+		List<BuildingDTO> buildings = listBuildings(cmd).getBuildings();
+		if (buildings != null && buildings.size() > 0) {
+			String fileName = String.format("楼栋信息_%s", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
+
+			List<BuildingExportDetailDTO> data = buildings.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			String[] propertyNames = {"communtiyName", "name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "areaSize", "managerName", "contact"};
+			String[] titleNames = {"园区名称", "楼栋名称", "楼栋编号", "简称", "地址", "经纬度", "面积", "联系人", "联系电话"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+
+	private BuildingExportDetailDTO convertToExportDetail(BuildingDTO dto) {
+		BuildingExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, BuildingExportDetailDTO.class);
+		try {
+			exportDetailDTO.setName(dto.getBuildingName());
+			Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if(community != null) {
+				exportDetailDTO.setCommuntiyName(community.getName());
+			}
+
+			if(dto.getLatitude() != null && dto.getLongitude() != null) {
+				exportDetailDTO.setLatitudeLongitude(dto.getLongitude() + "," + dto.getLatitude());
+			}
+		} catch (Exception e) {
+			LOGGER.error("dto : {}", dto);
+			throw e;
+		}
+
+		return exportDetailDTO;
 	}
 
 	@Override
@@ -1111,6 +1161,7 @@ public class CommunityServiceImpl implements CommunityService {
 	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,
 			Long userId, Long communityId) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		Community community = communityProvider.findCommunityById(communityId);
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
 		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
 		if(orgMem != null) {
@@ -1134,6 +1185,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setName(data.getName());
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));
@@ -1156,13 +1208,14 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
 				
-				building.setNamespaceId(org.getNamespaceId());
+				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.createBuilding(userId, building);
 			}else {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));
@@ -1188,7 +1241,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
 				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
-				building.setNamespaceId(org.getNamespaceId());
+				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.updateBuilding(building);
@@ -1385,8 +1438,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		// Long communityId = cmd.getCommunityId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
         if (resourceList == null) {
             return new CommunityAuthUserAddressResponse();
         }
@@ -1448,7 +1501,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     private List<GroupMemberDTO> listCommunityWaitingApproveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
         List<GroupMemberDTO> memberDTOList;
-        List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
+        List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize + 1, (loc, query) -> {
             Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
             c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
 
@@ -1474,6 +1527,12 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+		if (memberDTOList != null && memberDTOList.size() > pageSize) {
+			locator.setAnchor(memberDTOList.get(memberDTOList.size() - 1).getId());
+			memberDTOList = memberDTOList.subList(0, pageSize);
+		} else {
+			locator.setAnchor(null);
+		}
         return memberDTOList;
     }
 
@@ -1718,9 +1777,17 @@ public class CommunityServiceImpl implements CommunityService {
 			if(addressDTO != null){
 				if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
 					addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
+
+					//有一个地址认证了就是认证了
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 				}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
 					addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
+
+					//有一个地址是认证中，则状态是认证中或者已认证
+					if(!AuthFlag.AUTHENTICATED.getCode().equals(dto.getIsAuth())){
+						dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+					}
+
 				}else {
 					addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
 				}
@@ -3121,6 +3188,8 @@ public class CommunityServiceImpl implements CommunityService {
 		organization.setShowFlag((byte) 1);
 		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganization(organization);
+		assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create organization success: namespaceId="+namespaceId+", organizationId="+organization.getId()+", organizationName"+organizationName);
 		}
@@ -3509,7 +3578,7 @@ public class CommunityServiceImpl implements CommunityService {
     				"ResourceType cannot be null.");
         }
 
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
 		if(null != rca) {
@@ -3522,11 +3591,12 @@ public class CommunityServiceImpl implements CommunityService {
 				communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
 			}
 		}else{
-			if(null == cmd.getResourceCategoryId()) {
-	        	LOGGER.error("CategoryId cannot be null.");
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-	    				"CategoryId cannot be null.");
-	        }
+			//分类无可以改成无
+//			if(null == cmd.getResourceCategoryId()) {
+//	        	LOGGER.error("CategoryId cannot be null.");
+//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//	    				"CategoryId cannot be null.");
+//	        }
 			ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
 			checkResourceCategoryIsNull(category);
 			rca = new ResourceCategoryAssignment();

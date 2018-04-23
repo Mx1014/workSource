@@ -3,8 +3,10 @@ package com.everhomes.rest.news;
 import javax.validation.constraints.NotNull;
 
 /**
+ * <ul>
  * <li>isSearch: 传1只显示筛选项 为空都显示</li>
  * <li>categoryId: 分类id</li>
+ * </ul>
  */
 public class GetNewsTagCommand {
     @NotNull

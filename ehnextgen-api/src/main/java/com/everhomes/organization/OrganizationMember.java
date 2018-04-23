@@ -47,10 +47,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private String contactShortToken;
 
-    private Byte socialSecurityStatus;
-
-    private Byte accumulationFundStatus;
-
     public OrganizationMember() {
     }
     public java.lang.String getNickName() {
@@ -207,22 +203,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     public void setContactShortToken(String contactShortToken) {
         this.contactShortToken = contactShortToken;
-    }
-
-    public Byte getSocialSecurityStatus() {
-        return socialSecurityStatus;
-    }
-
-    public void setSocialSecurityStatus(Byte socialSecurityStatus) {
-        this.socialSecurityStatus = socialSecurityStatus;
-    }
-
-    public Byte getAccumulationFundStatus() {
-        return accumulationFundStatus;
-    }
-
-    public void setAccumulationFundStatus(Byte accumulationFundStatus) {
-        this.accumulationFundStatus = accumulationFundStatus;
     }
 
     @Override

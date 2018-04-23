@@ -123,6 +123,10 @@ public class LocalEvent {
         return p.toString();
     }
 
+    public <T> T getObjParam(String key, Class<T> clz) {
+        return (T) StringHelper.fromJsonString(getStringParam(key), clz);
+    }
+
     public void setTargetUid(Long targetUid) {
         this.context.setUid(targetUid);
     }

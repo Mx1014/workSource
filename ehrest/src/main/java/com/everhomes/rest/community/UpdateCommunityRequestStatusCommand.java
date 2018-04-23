@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>id: 小区Id</li>
  * <li>requestStatus: 收集状态，参考{@link com.everhomes.rest.community.RequestStatus}}</li>

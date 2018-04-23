@@ -43,13 +43,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -586,7 +583,7 @@ public class PointServiceImpl implements PointService {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Fetch point goods from biz, response = {}", entity.getBody());
             }
-        } catch (InterruptedException | ExecutionException | UnsupportedEncodingException | TimeoutException e) {
+        } catch (Exception e) {
             LOGGER.error("Point biz call error", e);
             throw RuntimeErrorException.errorWith(e, PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BIZ_CALL_ERROR_CODE,
                     "Point biz call error");
@@ -867,12 +864,25 @@ public class PointServiceImpl implements PointService {
         pointLog.setCategoryId(category.getId());
         pointLog.setCategoryName(category.getDisplayName());
 
+        String operatorName = "unknown";
+        String operatorPhone = "unknown";
+
         Long operatorUid = UserContext.currentUserId();
         UserInfo operator = userService.getUserSnapshotInfoWithPhone(operatorUid);
+        if (operator != null) {
+            operatorName = operator.getNickName();
+            if (operator.getPhones() != null && operator.getPhones().size() > 0) {
+                operatorPhone = operator.getPhones().iterator().next();
+            } else {
+                LOGGER.warn("User phones not found for uid = {}", operatorUid);
+            }
+        } else {
+            LOGGER.warn("User not found for uid = {}", operatorUid);
+        }
 
         pointLog.setOperatorUid(operatorUid);
-        pointLog.setOperatorName(operator.getNickName());
-        pointLog.setOperatorPhone(operator.getPhones().get(0));
+        pointLog.setOperatorName(operatorName);
+        pointLog.setOperatorPhone(operatorPhone);
         pointLog.setOperatorType(PointOperatorType.MANUALLY.getCode());
 
         dbProvider.execute(status -> {

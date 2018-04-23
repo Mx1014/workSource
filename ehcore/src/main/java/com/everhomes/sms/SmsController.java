@@ -76,7 +76,6 @@ public class SmsController extends ControllerBase {
      */
     @RequestMapping("listSmsLogs")
     @RestReturn(value = ListSmsLogsResponse.class)
-    @RequireAuthentication(false)
     public RestResponse listReportLogs(ListReportLogCommand cmd) {
         ListSmsLogsResponse resp = smsService.listReportLogs(cmd);
         RestResponse response = new RestResponse(resp);
@@ -93,7 +92,8 @@ public class SmsController extends ControllerBase {
     @RestReturn(value = String.class)
     @RequireAuthentication(false)
     @SuppressDiscover
-    public RestResponse smsReport(@PathVariable("handler") String handlerName, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public RestResponse smsReport(@PathVariable("handler") String handlerName,
+                                  HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         smsService.smsReport(handlerName, httpServletRequest, httpServletResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

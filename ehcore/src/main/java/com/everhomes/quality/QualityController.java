@@ -46,7 +46,6 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionCommand;
 import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
-import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
@@ -306,10 +305,7 @@ public class QualityController extends ControllerBase {
 	 */
 	@RequestMapping("exportInspectionTasks")
 	public HttpServletResponse exportInspectionTasks(@Valid ListQualityInspectionTasksCommand cmd,HttpServletResponse response) {
-		
-		HttpServletResponse commandResponse = qualityService.exportInspectionTasks(cmd, response);
-		
-		return commandResponse;
+		return qualityService.exportInspectionTasks(cmd, response);
 	}
 	
 	/**
@@ -679,17 +675,17 @@ public class QualityController extends ControllerBase {
 	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
 	 * <p>用户关联项目</p>
 	 */
-//	@RequestMapping("listUserRelatedProjectByModuleId")
-//	@RestReturn(value = CommunityDTO.class, collection = true)
-//	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-//
-//		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
-//
-//		RestResponse response = new RestResponse(dtos);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("listUserRelatedProjectByModuleId")
+	@RestReturn(value = CommunityDTO.class, collection = true)
+	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /quality/createSampleQualityInspection</b>
@@ -958,30 +954,46 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/OfflineTaskReport</b>
+	 * <b>URL: /quality/offlineTaskReport</b>
 	 * <p>品质核查离线同步到服务端</p>
 	 */
-	@RequestMapping("OfflineTaskReport")
+	@RequestMapping("offlineTaskReport")
 	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
-	public RestResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
-		QualityOfflineTaskReportResponse offlineTaskReportResponse = qualityService.OfflineTaskReport(cmd);
+	public RestResponse offlineTaskReport(OfflineTaskReportCommand cmd) {
+		QualityOfflineTaskReportResponse offlineTaskReportResponse = qualityService.offlineTaskReport(cmd);
 		RestResponse res = new RestResponse(offlineTaskReportResponse);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
 	}
 
+//	/**
+//	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
+//	 * <p>绩效考核-app离线</p>
+//	 */
+//	@RequestMapping("getOfflineSampleQualityInspection")
+//	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)
+//	public RestResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+//		OfflineSampleQualityInspectionResponse offlineSampleQualityInspection = qualityService.getOfflineSampleQualityInspection(cmd);
+//		RestResponse response = new RestResponse(offlineSampleQualityInspection);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+
 	/**
-	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
-	 * <p>绩效考核-app离线</p>
+	 * <b>URL: /quality/startCrontabTask</b>
+	 * <p>上线时间影响问题</p>
 	 */
-	@RequestMapping("getOfflineSampleQualityInspection")
-	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)
-	public RestResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
-		OfflineSampleQualityInspectionResponse offlineSampleQualityInspection = qualityService.getOfflineSampleQualityInspection(cmd);
-		RestResponse response = new RestResponse(offlineSampleQualityInspection);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
+	@RequestMapping("startCrontabTask")
+	@RestReturn(value = String.class)
+	public RestResponse startCrontabTask() {
+		UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+		qualityService.startCrontabTask();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
 	}
 }

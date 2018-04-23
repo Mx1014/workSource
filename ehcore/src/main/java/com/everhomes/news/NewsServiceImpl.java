@@ -25,8 +25,10 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.*;
+import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
@@ -69,13 +71,6 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SearchTypes;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLike;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -83,6 +78,8 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -133,8 +130,15 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private FamilyProvider familyProvider;
 
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null,0L);//全部权限
+		}
+
 		final Long userId = UserContext.current().getUser().getId();
 
 		// 检查参数等信息
@@ -144,6 +148,10 @@ public class NewsServiceImpl implements NewsService {
 		checkBlacklist(null, null);
 
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		
+		if(cmd.getCurrentProjectId()!=null){
+//			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -179,8 +187,14 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void updateNews(UpdateNewsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null,0L);//全部权限
+		}
 		final Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		if(cmd.getCurrentProjectId()!=null){
+//			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 		News news = ConvertHelper.convert(cmd, News.class);
 		news.setNamespaceId(namespaceId);
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -326,8 +340,14 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null,0L);//全部权限
+		}
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		if(cmd.getCurrentProjectId()!=null){
+//			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
 
@@ -448,9 +468,11 @@ public class NewsServiceImpl implements NewsService {
 	 * <p>isSearchDraft: true 检索草稿出来，false 不检索草稿</p>
 	 */
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null,0L);//全部权限
+		}
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 			if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
@@ -513,7 +535,7 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
 				.getUser().getId()));
 		}
-		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		newsDTO.setNewsUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 
 		newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 		if (commentForbiddenFlag) {
@@ -598,9 +620,9 @@ public class NewsServiceImpl implements NewsService {
 
 		// 设置排序条件
 		JSONArray sort = json.getJSONArray("sort");
-		sort.add(JSONObject.parseObject("{\"status\":{\"order\":\"asc\"}}"));
+//		sort.add(JSONObject.parseObject("{\"status\":{\"order\":\"asc\"}}"));
 		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
-		sort.add(JSONObject.parseObject("{\"createTime\":{\"order\":\"desc\"}}"));
+		sort.add(JSONObject.parseObject("{\"publishTime\":{\"order\":\"desc\"}}"));
 
 		
 		// 设置查询关键字
@@ -621,9 +643,14 @@ public class NewsServiceImpl implements NewsService {
 		}else if(enumStatus == NewsStatus.DRAFT){
 			must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.DRAFT.getCode() + "}}"));
 		}
-		if (null != tagIds)
-			for (Long id : tagIds)
+		if (null != tagIds) {
+			for (Long id : tagIds) {
+				if (id == null){
+					continue;
+				}
 				must.add(JSONObject.parse("{\"term\":{\"tag\":" + id + "}}"));
+			}
+		}
 
 		if (null != communityId) {
 			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
@@ -824,7 +851,7 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
 				.getUser().getId()));
 		}
-		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		newsDTO.setNewsUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setNewsWebShareUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
 
@@ -837,27 +864,27 @@ public class NewsServiceImpl implements NewsService {
 		return newsDTO;
 	}
 
-	private String getNewsUrl(Integer namespaceId, String newsToken) {
-		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
-		String contentUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "");
-		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
-			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
-		} else {
-			return homeUrl + contentUrl  + newsToken;
-		}
-	}
+//	private String getNewsUrl(Integer namespaceId, String newsToken) {
+//		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+//		String contentUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "");
+//		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
+//			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+//			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+//					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+//		} else {
+//			return homeUrl + contentUrl  + newsToken;
+//		}
+//	}
 
 	private String getNewsWebUrl(Integer namespaceId, String newsToken) {
 		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
-		String contenWebtUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_WEB_PAGE_URL, "/park-news-web/build/index.html?widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=");
+		String contenWebtUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "/park-news-web/build/index.html?ns=%s&isFS=1&widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=%s");
 		if (homeUrl.length() == 0 || contenWebtUrl.length() == 0) {
 			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contenWebtUrl);
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
 		} else {
-			return homeUrl + contenWebtUrl  + newsToken;
+			return homeUrl + String.format(contenWebtUrl,namespaceId,newsToken);
 		}
 	}
 
@@ -1719,6 +1746,8 @@ public class NewsServiceImpl implements NewsService {
 		if(eStatus == NewsStatus.DRAFT){
 			news.setStatus(NewsStatus.ACTIVE.getCode());
 			newsProvider.updateNews(news);
+
+			syncNews(news.getId());
 		}
 	}
 }

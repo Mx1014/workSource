@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.community.CommunityProvider;
@@ -255,7 +256,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         BigDecimal amountReceivable = new BigDecimal("0");
         BigDecimal amountOwed = new BigDecimal("0");
@@ -295,7 +296,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountOwed(amount2);
             amountOwed = amountOwed.add(amount2);
             dto.setBillItemName(source.getFiCategory());
-            dto.setAddressName(source.getBuildingRename());
+            dto.setAddressName(source.getBuildingRename()==null?"":source.getBuildingRename());
             list.add(dto);
         }
         response.setShowBillDetailForClientDTOList(list);
@@ -456,7 +457,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
-            String key = source.getContractId()+"-"+source.getFiProperty();
+            String key = source.getContractId()+"$"+source.getFiProperty();
             if(tabs.containsKey(key)){
                 tabs.get(key).add(source);
             }else{
@@ -466,8 +467,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             }
         }
         for(Map.Entry<String,List<GetLeaseContractBillOnFiPropertyData>> entry : tabs.entrySet()){
-            String[] fiPropertyAndContractId = entry.getKey().split("-");
-            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[0]),fiPropertyAndContractId[1]);
+            LOGGER.info("tab key is = {}",entry.getKey());
+            String[] fiPropertyAndContractId = entry.getKey().split("\\$");
+            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[1]),fiPropertyAndContractId[0]);
             //把正中会传过来的contratId转为左邻存储的contractId
             String zuolinContractId = contractProvider.findContractIdByThirdPartyId(dto.getContractId(), NamespaceContractType.EBEI.getCode());
             dto.setContractId(zuolinContractId);
@@ -488,7 +490,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 addresses.add(value.getBuildingRename());
                 bills.add(bill);
             }
-            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
+//            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
             dto.setOverAllAmountOwed(overallOwedAmount.toString());
             Iterator<String> it = addresses.iterator();
@@ -543,6 +545,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return list;
     }
 
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
@@ -555,3 +564,4 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 }
+

@@ -61,7 +61,7 @@ public class IncubatorProviderImpl implements IncubatorProvider {
     }
 
     @Override
-    public List<IncubatorApply> listIncubatorApplies(Integer namespaceId, Long applyUserId, String keyWord, Byte approveStatus, Byte needReject, Integer pageOffset, Integer pageSize, Byte orderBy, Byte applyType) {
+    public List<IncubatorApply> listIncubatorApplies(Integer namespaceId, Long applyUserId, String keyWord, Byte approveStatus, Byte needReject, Integer pageOffset, Integer pageSize, Byte orderBy, Byte applyType, Long startTime, Long endTime) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
 
@@ -91,6 +91,16 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         if(applyType != null){
             query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_TYPE.eq(applyType));
         }
+
+
+        if(startTime != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.ge(new Timestamp(startTime)));
+        }
+
+        if(endTime != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.le(new Timestamp(endTime)));
+        }
+
 
         //排序 默认、0-创建时间，1-审核时间
         if(orderBy == null || orderBy == 0){
@@ -154,11 +164,14 @@ public class IncubatorProviderImpl implements IncubatorProvider {
     }
 
     @Override
-    public List<IncubatorApply> listIncubatorAppling(Long applyUserId) {
+    public List<IncubatorApply> listIncubatorAppling(Long applyUserId, Long rootId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
         query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_USER_ID.eq(applyUserId));
         query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPROVE_STATUS.eq(ApproveStatus.WAIT.getCode()));
+        if(rootId != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.ROOT_ID.eq(rootId));
+        }
 
         List<IncubatorApply> result = new ArrayList<>();
         query.fetch().map((r) -> {

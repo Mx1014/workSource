@@ -7,7 +7,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>requests: 申请信息，参考{@link  com.everhomes.rest.family.FamilyMembershipRequestDTO}</li>

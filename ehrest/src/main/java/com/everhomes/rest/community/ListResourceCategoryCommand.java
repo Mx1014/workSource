@@ -4,7 +4,6 @@ package com.everhomes.rest.community;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>ownerType: 所属实体类型</li>
  * <li>ownerId:  所属实体id</li>

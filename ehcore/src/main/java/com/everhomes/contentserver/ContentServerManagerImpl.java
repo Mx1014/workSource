@@ -1,10 +1,11 @@
 package com.everhomes.contentserver;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.urlvendor.ContentURLVendors;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.rest.contentserver.ContentServerErrorCode;
 import com.everhomes.rest.user.LoginToken;
-import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
@@ -13,15 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
 public class ContentServerManagerImpl implements ContentServerMananger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentServerManagerImpl.class);
-
-    @Autowired
-    private ConnectionProvider connectionProvider;
 
     @Autowired
     private ContentServerProvider contentServerProvider;
@@ -33,7 +32,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     private CoordinationProvider coordinationProvider;
 
     @Autowired
-    private UserService userService;
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
@@ -85,11 +84,26 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     private String createUrl(ContentServer content, String resourceId, String type, String token, String schemeInRequest) {
         int port = content.getPublicPort();
-        if("https".equalsIgnoreCase(schemeInRequest)) {
+        if ("https".equalsIgnoreCase(schemeInRequest)) {
             port = 443;
         }
-        return String.format("%s://%s:%d/%s/%s?token=%s", schemeInRequest, content.getPublicAddress(), port, type,
-                Generator.encodeUrl(resourceId), token);
+
+        Map<String, Object> uriParams = new LinkedHashMap<>();
+        uriParams.put("token", token);
+
+        String uri = String.format("%s/%s", type, Generator.encodeUrl(resourceId));
+        // 这里指定用Simple, 因为有些业务是把url直接存在数据库的,所以不能返回CDN链接
+        return ContentURLVendors.evaluateURL(schemeInRequest,
+                content.getPublicAddress(), port, uri, uriParams, "Simple");
+
+        // boolean cdnOn = configurationProvider.getBooleanValue("content.cdn.on", true);
+        // if (cdnOn) {
+        //     return contentServerService.cdnurl(schemeInRequest, content.getPublicAddress(), port, Generator.encodeUrl(resourceId), uriParams);
+        // } else {
+        //     return contentServerService.contenturl(schemeInRequest, content.getPublicAddress(), port, Generator.encodeUrl(resourceId), uriParams);
+        // }
+        // return String.format("%s://%s:%d/%s/%s?token=%s", schemeInRequest, content.getPublicAddress(), port, type,
+        //         Generator.encodeUrl(resourceId), token);
     }
 
     private ContentServerResource createResource(Long serverId, Long uid, MessageHandleRequest request) {

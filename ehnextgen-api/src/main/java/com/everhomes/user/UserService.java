@@ -2,26 +2,33 @@
 package com.everhomes.user;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
 
+import org.springframework.web.context.request.async.DeferredResult;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * 
+ *
  * Define business logic interface for user management
- * 
+ *
  * @author Kelven Yang
  *
  */
@@ -31,41 +38,43 @@ public interface UserService {
     void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
-    
-    User logonDryrun(String userIdentifierToken, String password);
+
+    User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
     void logoff(UserLogin login);
     boolean isValidLoginToken(LoginToken loginToken);
-    
+
     UserLogin registerLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
     UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
     void saveLogin(UserLogin login);
     List<UserLogin> listUserLogins(long uid);
-    
+
     UserInfo getUserInfo();
     UserInfo getUserInfo(Long uid);
     UserInfo getUserSnapshotInfo(Long uid);
     UserInfo getUserSnapshotInfoWithPhone(Long uid);
     User findUserByIndentifier(Integer namespaceId, String indentifierToken);
-    void setUserInfo(SetUserInfoCommand cmd); 
-    void setUserAccountInfo(SetUserAccountInfoCommand cmd); 
+    void setUserInfo(SetUserInfoCommand cmd);
+    void setUserAccountInfo(SetUserAccountInfoCommand cmd);
     CommunityDTO setUserCurrentCommunity(long communityId);
     Long setDefaultCommunity(Long userId, Integer namespaceId);
     void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId);
-    
+
     List<UserIdentifierDTO> listUserIdentifiers();
     void deleteUserIdentifier(long identifierId);
-    
+
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
-    
+
+    void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
-    
+
     void assumePortalRole(AssumePortalRoleCommand cmd);
-    
+
     long getNextStoreSequence(UserLogin login, int namespaceId, long appId);
-    
+
     List<ListUsersWithAddrResponse> listUsersWithAddr(ListUsersWithAddrCommand cmd);
     UsersWithAddrResponse searchUsersWithAddr(SearchUsersWithAddrCommand cmd);
     ListInvitatedUserResponse listInvitatedUser(ListInvitatedUserCommand cmd);
@@ -90,7 +99,7 @@ public interface UserService {
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);
-	void toOrganizationSceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, 
+	void toOrganizationSceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList,
 	    List<OrganizationDTO> organizationDtoList, SceneType sceneType);
 	SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType);
@@ -107,7 +116,7 @@ public interface UserService {
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
 
-    
+
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
 
     SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
@@ -142,7 +151,7 @@ public interface UserService {
      * @param sceneType
      */
     void checkUserScene(SceneType sceneType);
-    
+
     /**
      * 查询命名空间下的用户
      * @param cmd
@@ -172,7 +181,7 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
-    
+
     SearchUsersResponse searchUsers(SearchUsersCommand cmd);
 
     /**
@@ -181,7 +190,7 @@ public interface UserService {
      * @param identifierToken   手机号
      */
     void checkSmsBlackList(String smsAction, String identifierToken);
- 
+
     /**
      * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
      * @param cmd
@@ -222,9 +231,9 @@ public interface UserService {
      * @return
      */
     UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
-	
+
 	//added by R 20170713, 通讯录2.4增加
- 
+
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
 	//added by R 20170824, 人事1.4,  判断管理员
@@ -251,7 +260,7 @@ public interface UserService {
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
-	
+
     UserIdentifier getUserIdentifier(Long userId);
 
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
@@ -271,13 +280,13 @@ public interface UserService {
     SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
 
     List<SceneDTO> listAllCommunityScenes();
-    
+
     /**
      * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
      */
     String checkServerStatus();
-    
-    /** 
+
+    /**
      * 客户端更新设备信息到服务器端
      * @param cmd
      * @param request
@@ -287,5 +296,32 @@ public interface UserService {
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
 
+    void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
+
+    PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
+
+
+    //通过安邦提供的token调用他方接口进行验证，并拿到用户信息
+    UserLogin verifyUserByTokenFromAnBang(String token);
+
+    //通过安邦提供的token获取本地用户并登录
+    void logonBuAnBangToken();
+
+    void pushUserDemo();
+
     SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
+
+    QRCodeDTO querySubjectIdForScan();
+
+    DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest request, HttpServletResponse response);
+
+    String getSercetKeyForScan(String args);
+
+    void logonByScan(String subjectId, String message);
+
+    List<FunctionCardDto> listUserRelatedCards();
+    User getUserFromAnBangToken(String token);
+    List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
+    String makeAnbangRedirectUrl(Long userId, String location,
+            Map<String, String[]> paramMap);
 }

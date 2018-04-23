@@ -318,18 +318,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 
 			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+
+			//getVersion
+			PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
+
+			Long versionId = version != null ? version.getId() : null;
+
 			appTuples.stream().map(r -> {
 				if (Long.valueOf(r.first()) == 0L) {
 					List<ServiceModuleApp> appDtos = null;
 					switch (ModuleManagementType.fromCode(r.second())) {
 						case COMMUNITY_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
 							break;
 						case ORG_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
 							break;
 						case UNLIMIT_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 							break;
 					}
 					if (appDtos != null && appDtos.size() > 0) {
@@ -347,6 +353,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			appOriginIds = appIds;
 		}
 
+		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
 		// 根据应用id拿菜单
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
@@ -358,19 +365,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	private List<WebMenuDTO> listWebMenuByApp(String webMenuType, List<Long> appOriginIds){
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		//TODO for test waiting for delete
-		if(appOriginIds == null || appOriginIds.size() == 0){
-			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
-			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
-				return null;
-			}
-
-			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+		if(appOriginIds == null || appOriginIds.size() == 0 ){
+			return null;
 		}
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, webMenuType, appOriginIds);
+
+		if(webMenus == null || webMenus.size() == 0){
+			return null;
+		}
+
 		List<WebMenu> parentMenus = listParentMenus(webMenus);
 		webMenus.addAll(parentMenus);
 
@@ -411,10 +417,21 @@ public class WebMenuServiceImpl implements WebMenuService {
 //		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 
 
+		//TODO 暂时普通公司是按照所有应用找菜单的
+		List<Long> appOriginIds = null;
+		if(appOriginIds == null || appOriginIds.size() == 0){
+			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
+			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
+				return null;
+			}
+
+			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+		}
+
+
 		//TODO 前面的代码需要提供当前用户有权限的appOriginIds，其他的所有逻辑都不要了
 		//全部appOriginIds   参考serviceModuleAppService.listReleaseServiceModuleApps
 
-		List<Long> appOriginIds = null;
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.ORGANIZATION.getCode(), appOriginIds);
 		return webMenuDTOS;
 
@@ -558,6 +575,19 @@ public class WebMenuServiceImpl implements WebMenuService {
 				dtos.add(menuDto);
 			}
 		}
+
+		Collections.sort(dtos,new Comparator<WebMenuDTO>(){
+			public int compare(WebMenuDTO arg0, WebMenuDTO arg1) {
+				if(arg0.getSortNum() == null){
+					arg0.setSortNum(0);
+				}
+				if (arg1.getSortNum() == null){
+					arg1.setSortNum(0);
+				}
+				return arg0.getSortNum().compareTo(arg1.getSortNum());
+			}
+		});
+
 		dto.setDtos(dtos);
 		
 		return dto;

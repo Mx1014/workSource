@@ -88,19 +88,7 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
             outputStream = socialSecurityService.getSocialSecurityInoutReportsOutputStream(ownerId, payMonth);
         }
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
-
-
-        Task task = taskService.findById(taskId);
-        if (fileLocationDTO != null && fileLocationDTO.getUri() != null) {
-            task.setProcess(100);
-            task.setStatus(TaskStatus.SUCCESS.getCode());
-            task.setResultString1(fileLocationDTO.getUri());
-            if (fileLocationDTO.getSize() != null) {
-                task.setResultLong1(fileLocationDTO.getSize().longValue());
-            }
-            taskService.updateTask(task);
-        }
-
+        taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 
 

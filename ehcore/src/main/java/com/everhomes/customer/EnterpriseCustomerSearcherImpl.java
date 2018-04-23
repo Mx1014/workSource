@@ -128,6 +128,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("contactName", customer.getContactName());
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
+            builder.field("corpIndustryItemId", customer.getCorpIndustryItemId());
             builder.field("levelItemId", customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
@@ -213,6 +214,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getCustomerCategoryId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));
 
+        if(cmd.getCorpIndustryItemId() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
+
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
         
@@ -278,6 +282,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             } else if(cmd.getSortType() == 1) {
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
+        } else {
+            builder.addSort("id", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -299,38 +305,38 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ids.forEach(id -> {
                 EnterpriseCustomer customer = customers.get(id);
                 if(customer != null) {
-                    EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+                    EnterpriseCustomerDTO dto = convertToDTO(customer);
 //                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
-                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
-                    if(categoryItem != null) {
-                        dto.setCategoryItemName(categoryItem.getItemDisplayName());
-                    }
-//                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
-                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-                    if(levelItem != null) {
-                        dto.setLevelItemName(levelItem.getItemDisplayName());
-                    }
-                    if(null != dto.getCorpIndustryItemId()){
-                        ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getCorpIndustryItemId());
-                        if(null != corpIndustryItem){
-                            dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
-                        }
-                    }
-                    if(null != dto.getContactGenderItemId()){
-                        ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getContactGenderItemId());
-                        if(null != contactGenderItem){
-                            dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
-                        }
-                    }
-                    if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
-                        dto.setTrackingName(dto.getTrackingName());
-                    }
-                    if(null != dto.getPropertyType()){
-                        ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getPropertyType());
-                        if(null != propertyTypeItem){
-                            dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
-                        }
-                    }
+//                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+//                    if(categoryItem != null) {
+//                        dto.setCategoryItemName(categoryItem.getItemDisplayName());
+//                    }
+////                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+//                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+//                    if(levelItem != null) {
+//                        dto.setLevelItemName(levelItem.getItemDisplayName());
+//                    }
+//                    if(null != dto.getCorpIndustryItemId()){
+//                        ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getCorpIndustryItemId());
+//                        if(null != corpIndustryItem){
+//                            dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+//                        }
+//                    }
+//                    if(null != dto.getContactGenderItemId()){
+//                        ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getContactGenderItemId());
+//                        if(null != contactGenderItem){
+//                            dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+//                        }
+//                    }
+//                    if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+//                        dto.setTrackingName(dto.getTrackingName());
+//                    }
+//                    if(null != dto.getPropertyType()){
+//                        ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getPropertyType());
+//                        if(null != propertyTypeItem){
+//                            dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+//                        }
+//                    }
                     dtos.add(dto);
                 }
             });
@@ -338,6 +344,96 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 //        Collections.sort(dtos);
         response.setDtos(dtos);
         return response;
+    }
+
+    private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+//        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+        ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+        if(categoryItem != null) {
+            dto.setCategoryItemName(categoryItem.getItemDisplayName());
+        }
+//        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+        if(levelItem != null) {
+            dto.setLevelItemName(levelItem.getItemDisplayName());
+        }
+        if(null != dto.getCorpIndustryItemId()){
+            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
+            if(null != corpIndustryItem){
+                dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+            }
+        }
+        if(null != dto.getContactGenderItemId()){
+            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
+            if(null != contactGenderItem){
+                dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+            }
+        }
+        if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+            dto.setTrackingName(dto.getTrackingName());
+        }
+        if(null != dto.getPropertyType()){
+            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
+            if(null != propertyTypeItem){
+                dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getRegistrationTypeId()){
+            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
+            if(null != registrationTypeItem){
+                dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTechnicalFieldId()){
+            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
+            if(null != technicalFieldItem){
+                dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTaxpayerTypeId()){
+            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
+            if(null != taxpayerTypeItem){
+                dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getRelationWillingId()){
+            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
+            if(null != relationWillingItem){
+                dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getHighAndNewTechId()){
+            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
+            if(null != highAndNewTechItem){
+                dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getEntrepreneurialCharacteristicsId()){
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            if(null != entrepreneurialCharacteristicsItem){
+                dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getSerialEntrepreneurId()){
+            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            if(null != serialEntrepreneurItem){
+                dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }
+        }
+
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
+        return dto;
     }
     
     private Long getTomorrowLastTimestamp(Integer lastTrackingTime) {

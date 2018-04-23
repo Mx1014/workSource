@@ -18,12 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +36,7 @@ abstract public class BaseSmsHandler implements SmsHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseSmsHandler.class);
 
-    private static final int MAX_LIMIT = 100;
+    protected static final int HUNDRED = 100;
 
     @Autowired
     protected ConfigurationProvider configurationProvider;
@@ -42,9 +45,10 @@ abstract public class BaseSmsHandler implements SmsHandler {
     protected LocaleTemplateService localeTemplateService;
 
     @Override
-    public SmsLog doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId,
-                         String templateLocale, List<Tuple<String, Object>> variables) {
-        List<SmsLog> smsLogs = doSend(namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    public SmsLog doSend(Integer namespaceId, String phoneNumber, String templateScope,
+                         int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        List<SmsLog> smsLogs = doSend(namespaceId, new String[]{phoneNumber},
+                templateScope, templateId, templateLocale, variables);
         if (smsLogs != null && smsLogs.size() > 0) {
             return smsLogs.get(0);
         }
@@ -52,11 +56,11 @@ abstract public class BaseSmsHandler implements SmsHandler {
     }
 
     @Override
-    public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
-                               String templateLocale, List<Tuple<String, Object>> variables) {
+    public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope,
+                               int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
         initAccount();
 
-        List<SmsLog> smsLogList = new ArrayList<>();
+        List<SmsLog> smsLogList = new ArrayList<>(phoneNumbers.length);
 
         Map<String, Object> model = new HashMap<>();
         if (variables != null) {
@@ -64,47 +68,102 @@ abstract public class BaseSmsHandler implements SmsHandler {
         }
 
         String signScope = SmsTemplateCode.SCOPE + ".sign";
-        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
+        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(
+                namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
         if (sign == null) {
-            LOGGER.error("can not found sign content by "+getHandlerName()+" handler, namespaceId = {}", namespaceId);
-            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms sign is empty");
+            LOGGER.error("can not found sign content by " +
+                    getHandlerName() + " handler, namespaceId = {}", namespaceId);
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0],
+                    templateScope, templateId, templateLocale, "", "sms sign is empty");
             smsLogList.add(log);
             return smsLogList;
         }
 
         templateScope = templateScope + "." + getHandlerName();
-        String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
-        if (content == null || content.isEmpty()) {
-            content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
-        }
-        if (content == null || content.isEmpty()) {
-            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
-        }
-        if (content == null || content.isEmpty()) {
-            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
-        }
+        String content = getSmsContent(namespaceId, templateId, templateLocale, model);
 
         if (content != null && content.trim().length() > 0) {
-            for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
-                int length = MAX_LIMIT;
-                if (i + MAX_LIMIT > phoneNumbers.length) {
-                    length = phoneNumbers.length - i;
-                }
-                String[] phonesPart = new String[length];
-                System.arraycopy(phoneNumbers, i, phonesPart, 0, length);
+            Tuple<String[], String[]> tuple = regionPartition(phoneNumbers);
+            // 国内手机号
+            String[] chinaPhonesArr = tuple.first();
+            // 国际手机号
+            String[] internationalPhonesArr = tuple.second();
 
-                RspMessage rspMessage = createAndSend(phonesPart, sign.getText(), content);
-                smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, sign.getText()+content, rspMessage));
-            }
+            final String finalTplScope = templateScope;
+            final String finalContent = content;
+
+            splitSend(chinaPhonesArr, chinaSmsMaxLimit(), (splitPhones) -> {
+                RspMessage rspMessage = createAndSend(splitPhones, sign.getText(), finalContent);
+                smsLogList.addAll(buildSmsLogs(namespaceId, splitPhones, finalTplScope,
+                        templateId, templateLocale, sign.getText() + finalContent, rspMessage));
+            });
+
+            splitSend(internationalPhonesArr, internationalSmsMaxLimit(), (splitPhones) -> {
+                RspMessage rspMessage = createAndSendInternationalPhones(splitPhones, sign.getText(), finalContent);
+                smsLogList.addAll(buildSmsLogs(namespaceId, splitPhones, finalTplScope,
+                        templateId, templateLocale, sign.getText() + finalContent, rspMessage));
+            });
         } else {
-            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms content is empty");
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0],
+                    templateScope, templateId, templateLocale, content, "sms content is empty");
             smsLogList.add(log);
-            LOGGER.error("can not found sms content by "+getHandlerName()+" namespaceId = {}, templateId = {}", namespaceId, templateId);
+            LOGGER.error("can not found sms content by " +
+                    getHandlerName() + " namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
         return smsLogList;
     }
 
-    protected SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
+    private Tuple<String[], String[]> regionPartition(String[] phoneNumbers) {
+        List<String> chinaPhones = new ArrayList<>(phoneNumbers.length);
+        List<String> internationalPhones = new ArrayList<>(phoneNumbers.length);
+
+        for (String phoneNumber : phoneNumbers) {
+            // 国际手机号必须加区号
+            if (phoneNumber.startsWith("00")) {
+                internationalPhones.add(phoneNumber);
+            } else {
+                chinaPhones.add(phoneNumber);
+            }
+        }
+        // 国内手机号
+        String[] chinaPhonesArr = chinaPhones.toArray(new String[chinaPhones.size()]);
+        // 国际手机号
+        String[] internationalPhonesArr = internationalPhones.toArray(new String[internationalPhones.size()]);
+        return new Tuple<>(chinaPhonesArr, internationalPhonesArr);
+    }
+
+    private String getSmsContent(Integer namespaceId, int templateId, String templateLocale, Map<String, Object> model) {
+        String content = localeTemplateService.getLocaleTemplateString(namespaceId,
+                SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
+        if (content == null || content.isEmpty()) {
+            content = localeTemplateService.getLocaleTemplateString(namespaceId,
+                    SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
+        }
+        if (content == null || content.isEmpty()) {
+            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE,
+                    SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
+        }
+        if (content == null || content.isEmpty()) {
+            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE,
+                    SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
+        }
+        return content;
+    }
+
+    protected void splitSend(String[] phoneNumbers, int maxLimit, Consumer<String[]> c) {
+        for (int i = 0; i < phoneNumbers.length; i += maxLimit) {
+            int length = maxLimit;
+            if (i + maxLimit > phoneNumbers.length) {
+                length = phoneNumbers.length - i;
+            }
+            String[] phonesPart = new String[length];
+            System.arraycopy(phoneNumbers, i, phonesPart, 0, length);
+            c.accept(phonesPart);
+        }
+    }
+
+    protected SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber,
+                                    String templateScope, int templateId, String templateLocale, String content, String error) {
         SmsLog log = new SmsLog();
         log.setCreateTime(new Timestamp(System.currentTimeMillis()));
         log.setNamespaceId(namespaceId);
@@ -114,7 +173,7 @@ abstract public class BaseSmsHandler implements SmsHandler {
         log.setMobile(phoneNumber);
         log.setResult(error);
         log.setHandler(getHandlerName());
-        log.setText("");
+        log.setText(content);
         log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
         return log;
     }
@@ -154,6 +213,14 @@ abstract public class BaseSmsHandler implements SmsHandler {
         return bf.toString();
     }
 
+    protected String URLEncode(String plainText) {
+        try {
+            return URLEncoder.encode(plainText, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected static <T> T xmlToBean(String xml, Class<T> c) {
         T t = null;
         try {
@@ -167,7 +234,6 @@ abstract public class BaseSmsHandler implements SmsHandler {
     }
 
     protected static class ToString {
-        @Override
         public String toString() {
             return StringHelper.toJsonString(this);
         }
@@ -177,8 +243,18 @@ abstract public class BaseSmsHandler implements SmsHandler {
 
     abstract void initAccount();
 
-    abstract RspMessage createAndSend(String[] phones, String sign, String content);
+    protected int internationalSmsMaxLimit() {
+        return HUNDRED;
+    }
 
-    abstract List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
-                                      String templateLocale, String content, RspMessage rspMessage);
+    protected int chinaSmsMaxLimit() {
+        return HUNDRED;
+    }
+
+    protected abstract RspMessage createAndSend(String[] phones, String sign, String content);
+
+    protected abstract RspMessage createAndSendInternationalPhones(String[] phones, String sign, String content);
+
+    abstract List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope,
+                                       int templateId, String templateLocale, String content, RspMessage rspMessage);
 }

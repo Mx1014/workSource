@@ -154,6 +154,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
 
     }
 
+    @Cacheable(value = "listContentServers")
     @Override
     public List<ContentServer> listContentServers() {
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContentServer.class));

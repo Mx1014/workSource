@@ -28,6 +28,16 @@ public class DeleteContractCommand {
         this.paymentFlag = paymentFlag;
     }
 
+    private Boolean checkAuth;
+
+    public Boolean getCheckAuth() {
+        return checkAuth;
+    }
+
+    public void setCheckAuth(Boolean checkAuth) {
+        this.checkAuth = checkAuth;
+    }
+
     public Long getId() {
         return id;
     }

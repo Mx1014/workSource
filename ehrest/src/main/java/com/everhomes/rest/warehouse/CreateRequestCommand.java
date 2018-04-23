@@ -15,6 +15,8 @@ import java.util.List;
  *     <li>requestType: 申请类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>stocks: 库存列表 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialStock}</li>
  *     <li>requisitionId:关联的请示单id</li>
+ *     <li>startFlow: 是否直接发起审批，1：是；0：否</li>
+ *     <li>requestId: 领用申请的id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -45,6 +47,18 @@ public class CreateRequestCommand {
         this.namespaceId = namespaceId;
     }
     private Long requisitionId;
+
+    private Byte startFlow;
+
+    private Long requestId;
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
 
     public Long getRequisitionId() {
         return requisitionId;
@@ -110,7 +124,16 @@ public class CreateRequestCommand {
         this.stocks = stocks;
     }
 
+    public Byte getStartFlow() {
+        return startFlow;
+    }
+
+    public void setStartFlow(Byte startFlow) {
+        this.startFlow = startFlow;
+    }
+
     @Override
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }

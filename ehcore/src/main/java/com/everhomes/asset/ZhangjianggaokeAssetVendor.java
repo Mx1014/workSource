@@ -1,3 +1,4 @@
+
 //@formatter:off
 package com.everhomes.asset;
 
@@ -318,7 +319,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType,Long organizationId) {
         ShowBillDetailForClientResponse result = new ShowBillDetailForClientResponse();
         List<ShowBillDetailForClientDTO> list = new ArrayList<>();
         String postJson = "";
@@ -360,13 +361,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     amountOwed = amountOwed.add(sourceDto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountOwed()));
                     amountReceivable = amountReceivable.add(sourceDto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountReceivable()));
                     List<CommunityAddressDTO> apartments = sourceDto.getApartments();
-                    String buildingName = "";
-                    String apartmentName = "";
+                    String buildingName = null;
+                    String apartmentName = null;
                     if(apartments!=null&&apartments.size()>0){
                         buildingName = apartments.get(0).getBuildingName()==null?"":apartments.get(0).getBuildingName();
                         apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
                     }
-                    dto.setAddressName(buildingName+apartmentName);
+                    dto.setAddressName(buildingName==null?"":buildingName+apartmentName==null?"":apartmentName);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     dto.setDateStr(sourceDto.getBillDate());
                     dto.setDateStrBegin(sourceDto.getDateStrBegin());
@@ -810,6 +811,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, zjgkhandler showCreateBill");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         return null;
     }
@@ -1182,3 +1190,4 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
 }
+

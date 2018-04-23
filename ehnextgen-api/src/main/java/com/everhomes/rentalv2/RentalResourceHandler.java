@@ -1,6 +1,10 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author sw on 2017/12/25.
@@ -14,4 +18,8 @@ public interface RentalResourceHandler {
     void updateRentalResource(String resourceJson);
 
     void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource);
+
+    default void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response){}
+
+    default void exportRentalBills(SearchRentalOrdersCommand cmd, HttpServletResponse response){}
 }

@@ -31,6 +31,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -124,14 +126,23 @@ public class ContractScheduleJob extends QuartzJobBean {
                                 if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                                     //正常合同转即将过期
                                     Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
-                                    if(time.after(contract.getContractEndDate())) {
+                                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+                                    Date date = new Date();
+                                    try {
+                                        date = df.parse(df.format(contract.getContractEndDate()));
+                                    } catch (ParseException e) {
+                                        LOGGER.error("contract end date ");
+                                    }
+
+                                    Timestamp contractEndTime = new Timestamp(date.getTime());
+                                    if(time.after(contractEndTime)) {
                                         contract.setStatus(ContractStatus.EXPIRING.getCode());
                                         contractProvider.updateContract(contract);
                                         contractSearcher.feedDoc(contract);
                                     }
 
                                     Timestamp notifyTime = addPeriod(now, param.getNotifyPeriod(), param.getNotifyUnit());
-                                    if(notifyTime.after(contract.getContractEndDate())) {
+                                    if(notifyTime.after(contractEndTime)) {
                                         List<ContractParamGroupMap> maps = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
                                         if(maps != null && maps.size() > 0) {
                                             Set<Long> userIds = new HashSet<Long>();
@@ -145,6 +156,7 @@ public class ContractScheduleJob extends QuartzJobBean {
 
                                                 }
                                             });
+                                            LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                             if(userIds.size() > 0) {
                                                 String notifyText = getNotifyMessage(contract.getName(), contract.getContractEndDate());
                                                 userIds.forEach(userId -> {
@@ -186,6 +198,7 @@ public class ContractScheduleJob extends QuartzJobBean {
 
                                                     }
                                                 });
+                                                LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                                 if(userIds.size() > 0) {
                                                     String notifyText = getMessage(contract.getName(), plan.getPaidTime(), plan.getPaidAmount(), ContractNotificationTemplateCode.SCOPE, locale, ContractNotificationTemplateCode.NOTIFY_CONTRACT_PAY);
                                                     userIds.forEach(userId -> {
@@ -228,6 +241,7 @@ public class ContractScheduleJob extends QuartzJobBean {
     }
 
     private void sendMessageToUser(Long userId, String content) {
+        LOGGER.debug("contractScheduleJob sendMessageToUser, userId: {}, content: {}", userId, content);
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());

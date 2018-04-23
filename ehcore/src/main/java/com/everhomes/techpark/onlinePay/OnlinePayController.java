@@ -22,7 +22,7 @@ public class OnlinePayController  extends ControllerBase{
 	private OnlinePayService onlinePay;
 	/**
 	 * <b>URL: /techpark/onlinePay/onlinePayBill</b>
-	 * <p>线上支付
+	 * <p>线上支付</p>
 	 */
 	@RequestMapping("onlinePayBill")
 	@RestReturn(value=RechargeInfoDTO.class)

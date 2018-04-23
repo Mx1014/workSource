@@ -320,6 +320,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.eq(type));
 
         query.addConditions(cond);
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.DEFAULT_ORDER.asc());
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
             return null;
@@ -736,6 +737,20 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             return null;
         });
         return appMap;
+    }
+
+    @Override
+    public List<ServiceModuleFunction> listFunctionsByIds(List<Long> ids) {
+        List<ServiceModuleFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
+        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
+        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.ID.in(ids));
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            return null;
+        });
+        return results;
     }
 
     @Override

@@ -40,7 +40,7 @@ public interface ContractService {
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
 	String generateContractNumber();
-	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag);
 
 	Boolean checkAdmin(CheckAdminCommand cmd);
 	ContractDetailDTO findContractForApp(FindContractCommand cmd);
@@ -50,4 +50,5 @@ public interface ContractService {
 
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
+    ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
 }

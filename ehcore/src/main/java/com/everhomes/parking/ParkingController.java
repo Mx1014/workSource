@@ -820,6 +820,20 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /parking/exportParkingSpaceLogs</b>
+     * <p>获取停车位操作日志</p>
+     */
+    @RequestMapping("exportParkingSpaceLogs")
+    @RestReturn(value=ListParkingSpaceLogsResponse.class)
+    public RestResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse resp) {
+    	
+    	RestResponse response = new RestResponse(parkingService.exportParkingSpaceLogs(cmd,resp));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
 
     /**
      * <b>URL: /parking/raiseParkingSpaceLock</b>

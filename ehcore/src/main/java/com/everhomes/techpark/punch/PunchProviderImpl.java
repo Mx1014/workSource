@@ -312,34 +312,34 @@ long id = sequenceProvider.getNextSequence(NameMapper
 	}
 	@Override
 	public void deletePunchTimeRule(PunchTimeRule punchTimeRule) {
-
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchTimeRulesDao dao = new EhPunchTimeRulesDao(context.configuration());
-		dao.deleteById(punchTimeRule.getId());
-
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchTimeRules.class,
-				punchTimeRule.getId());
+//
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		EhPunchTimeRulesDao dao = new EhPunchTimeRulesDao(context.configuration());
+//		dao.deleteById(punchTimeRule.getId());
+//
+//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchTimeRules.class,
+//				punchTimeRule.getId());
 	}
 
 	@Override
 	public void deletePunchTimeRuleById(Long id) {
 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchTimeRulesDao dao = new EhPunchTimeRulesDao(context.configuration());
-		dao.deleteById(id);
-
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchTimeRules.class,id);
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		EhPunchTimeRulesDao dao = new EhPunchTimeRulesDao(context.configuration());
+//		dao.deleteById(id);
+//
+//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchTimeRules.class,id);
 	}
 	@Override
 	public void deletePunchTimeRuleByOwnerAndId(String ownerType,Long ownerId,Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhPunchTimeRulesRecord> step = context
-				.delete(Tables.EH_PUNCH_TIME_RULES);
-		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.equal(id)
-				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
-				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
-		step.where(condition);
-		step.execute();
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		DeleteWhereStep<EhPunchTimeRulesRecord> step = context
+//				.delete(Tables.EH_PUNCH_TIME_RULES);
+//		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.equal(id)
+//				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+//				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
+//		step.where(condition);
+//		step.execute();
 	}
 
 	@Override
@@ -2486,14 +2486,14 @@ long id = sequenceProvider.getNextSequence(key);
 	public void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
 			String targetType, Long targetId) {
 
-        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
-		Condition condition = Tables.EH_PUNCH_TIME_RULES.TARGET_ID.equal(targetId)
-				.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.equal(targetType))
-				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
-				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
-		step.where(condition);
-		step.execute();
+//        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+//		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+//		Condition condition = Tables.EH_PUNCH_TIME_RULES.TARGET_ID.equal(targetId)
+//				.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.equal(targetType))
+//				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+//				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
+//		step.where(condition);
+//		step.execute();
 	}
 
 	@Override
@@ -2551,11 +2551,11 @@ long id = sequenceProvider.getNextSequence(key);
 
 	@Override
 	public void deletePunchTimeRuleByPunchOrgId(Long punchOrgId) {
-		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-			DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
-			Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(punchOrgId); 
-			step.where(condition);
-			step.execute();
+//		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+//			DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+//			Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(punchOrgId); 
+//			step.where(condition);
+//			step.execute();
 	}
 
 	@Override
@@ -2712,11 +2712,11 @@ long id = sequenceProvider.getNextSequence(key);
 
 	@Override
 	public void deletePunchTimeRuleByRuleId(Long id) {
-		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
-		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
-		step.where(condition);
-		step.execute();
+//		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+//		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+//		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
+//		step.where(condition);
+//		step.execute();
 	}
 
 	@Override

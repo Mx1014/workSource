@@ -1,42 +1,26 @@
 // @formatter:off
 package com.everhomes.address;
 
-import com.everhomes.asset.AddressIdAndName;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.namespace.Namespace;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.address.AddressAdminStatus;
-import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhAddressesDao;
 import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.records.EhAddressesRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
+
+import com.everhomes.asset.AddressIdAndName;
+
+import com.everhomes.rest.address.*;
+import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -47,12 +31,27 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAddressesDao;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -397,6 +396,26 @@ public class AddressProviderImpl implements AddressProvider {
 		}
 		return null;
 	}
+
+    @Override
+    public Address findActiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+                .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+
+        Record record = step.fetchAny();
+
+        LOGGER.debug("findAddressByBuildingApartmentName, sql=" + step.getSQL());
+        LOGGER.debug("findAddressByBuildingApartmentName, bindValues=" + step.getBindValues());
+        if (record != null) {
+            return ConvertHelper.convert(record, Address.class);
+        }
+        return null;
+    }
 
     @Override
     public List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId,

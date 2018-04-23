@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>anchor: 锚点</li>
  * <li>pageSize: 每页个数</li>
- * <li>status: 状态码，List<Byte></li>
+ * <li>status: 状态码</li>
  * </ul>
  */
 public class FindRentalSitesCommand {

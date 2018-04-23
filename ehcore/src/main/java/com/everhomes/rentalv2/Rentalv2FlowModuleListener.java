@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
@@ -88,6 +93,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	private SmsProvider smsProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private RentalOrderEmbeddedHandler rentalOrderEmbeddedHandler;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -147,7 +154,11 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
-				rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.FAIL.getCode(), false);
+				CancelRentalBillCommand cmd = new CancelRentalBillCommand();
+				cmd.setRentalBillId(order.getId());
+				if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
+						&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode())
+					rentalv2Service.cancelRentalBill(cmd);
 			}
 
 		}
@@ -670,6 +681,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null, null);
 		if (resourceTypes==null || resourceTypes.size()==0)
 			return null;
+		if (resourceTypes==null || resourceTypes.size()==0)
+			return null;
 		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
 			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
 			dto.setId(r.getId());
@@ -678,5 +691,31 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			return dto;
 		}).collect(Collectors.toList());
 		return dtos;
+	}
+
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("金额");
+		dto.setName("amount");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		dto.setOperators(new ArrayList<>());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.GREATER_THEN.getCode());
+		list.add(dto);
+		return list;
+	}
+
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+		//目前只有类型一个分支参数
+		if ("amount".equals(variable)) {
+			FlowCase flowcase = ctx.getFlowCase();
+			RentalOrder order = rentalv2Provider.findRentalBillById(flowcase.getReferId());
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(order.getPayTotalMoney());
+			return flowConditionNumberVariable;
+		}
+		return null;
 	}
 }

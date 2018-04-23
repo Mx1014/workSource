@@ -13,7 +13,7 @@ import java.util.List;
  * <li>enterpriseId: 公司Id</li>
  * <li>versionCode: 版本号</li>
  * <li>targetId: 目标Id</li>
- * <li>targetType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</LI>
+ * <li>targetType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</li>
  * </ul>
  */
 public class SaveUniongroupConfiguresCommand {

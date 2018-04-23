@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：所属者类型，通常为园区清醒，园区情形下：EhCommunities</li>
  * <li>ownerId：所属者id，园区情况下为园区id</li>
  * <li>namespaceId：域空间id</li>
+ * <li>communityId：园区id</li>
  *</ul>
  */
 public class SearchPurchasesCommand {
@@ -28,6 +29,15 @@ public class SearchPurchasesCommand {
     private Integer namespaceId;
     private Long ownerId;
     private String ownerType;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     @Override
     public String toString() {

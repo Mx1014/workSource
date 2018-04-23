@@ -23,13 +23,12 @@ import java.util.List;
  * <li>dtos:采购物品列表，参考{@link com.everhomes.rest.purchase.PurchaseMaterialDTO}</li>
  * <li>xxxx</li>
  * <li>xxxx</li>
- * <li>xxxx</li>
  *</ul>
  */
 public class CreateOrUpdatePurchaseOrderCommand {
     private Long purchaseRequestId;
     private Long supplierId;
-    private Timestamp deliveryDate;
+    private String deliveryDate;
     private String remark;
     private Long approvalSheetId;
     private List<PurchaseMaterialDTO> dtos;
@@ -39,7 +38,15 @@ public class CreateOrUpdatePurchaseOrderCommand {
     private Long communityId;
     private String contactTel;
     private String contactName;
+    private Byte startFlow;
 
+    public Byte getStartFlow() {
+        return startFlow;
+    }
+
+    public void setStartFlow(Byte startFlow) {
+        this.startFlow = startFlow;
+    }
 
     public Long getCommunityId() {
         return communityId;
@@ -110,11 +117,11 @@ public class CreateOrUpdatePurchaseOrderCommand {
         this.supplierId = supplierId;
     }
 
-    public Timestamp getDeliveryDate() {
+    public String getDeliveryDate() {
         return deliveryDate;
     }
 
-    public void setDeliveryDate(Timestamp deliveryDate) {
+    public void setDeliveryDate(String deliveryDate) {
         this.deliveryDate = deliveryDate;
     }
 

@@ -86,6 +86,7 @@ public enum CoordinationLocks {
 
     USER_APPEAL_LOG("user.appeal.log"),
 	SALARY_GROUP_LOCK("salary.group"), 
+	SALARY_NEWMONTH_LOCK("salary.newmonth"), 
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 

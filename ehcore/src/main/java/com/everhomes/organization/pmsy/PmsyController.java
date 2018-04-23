@@ -75,8 +75,8 @@ public class PmsyController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmsy/listPmKeXingBills
-	 * <p>根据条件查询物业缴费单
+	 * <b>URL: /pmsy/listPmBills</b>
+	 * <p>根据条件查询物业缴费单</p>
 	 */
 	@RequestMapping(value="listPmBills",method = RequestMethod.POST)
 	@RestReturn(value=PmsyBillsResponse.class)
@@ -89,8 +89,8 @@ public class PmsyController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmsy/findMonthlyPmBill
-	 * <p>查询单月物业缴费单
+	 * <b>URL: /pmsy/findMonthlyPmBill</b>
+	 * <p>查询单月物业缴费单</p>
 	 */
 	@RequestMapping(value="getPmsyBills")
 	@RestReturn(value=PmsyBillsDTO.class)
@@ -103,8 +103,8 @@ public class PmsyController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pmsy/serachBillingOrders
-	 * <p>根据条件搜索缴费记录
+	 * <b>URL: /pmsy/serachBillingOrders</b>
+	 * <p>根据条件搜索缴费记录</p>
 	 */
 	@RequestMapping("searchBillingOrders")
 	@RestReturn(value=SearchBillsOrdersResponse.class)

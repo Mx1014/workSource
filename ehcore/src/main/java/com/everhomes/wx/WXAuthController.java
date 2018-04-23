@@ -105,7 +105,10 @@ public class WXAuthController {// extends ControllerBase
     private final static String WX_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
 
     private final static String WX_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
-    
+
+    private final static String WX_SCOPE_SNSAPI_USERINFO = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect";
+    private final static String WX_SCOPE_SNSAPI_BASE = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_base&state=%s#wechat_redirect";
+
     @Autowired
     private UserService userService;
     
@@ -400,10 +403,16 @@ public class WXAuthController {// extends ControllerBase
 
         String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
 
-        String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-                + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
-                URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
-        
+        String scope = params.get("scope");
+        String authorizeUri;
+
+        //静默授权、一般授权
+        if(scope != null && scope.equals("snsapi_base")){
+            authorizeUri  = String.format(WX_SCOPE_SNSAPI_BASE, appId, URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
+        }else {
+            authorizeUri  = String.format(WX_SCOPE_SNSAPI_USERINFO, appId, URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
+        }
+
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(send auth to weixin), authorizeUrl={}, callbackUrl={}", authorizeUri, callbackUrl);
         }
@@ -489,27 +498,34 @@ public class WXAuthController {// extends ControllerBase
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get access token from webchat");
         }
-        
-        // 获取用户信息
-        String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
-        String userInfoJson = httpGet(userInfoUri, userInfoUri);
-        WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
-        if (userInfo.getErrcode()!=null) {
-            LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}", 
-                namespaceId, appId, userInfoJson, userInfoUri);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
-                "Failed to get user information from webchat");
-        }
 
         User wxUser = new User();
         wxUser.setNamespaceId(namespaceId);
         wxUser.setNamespaceUserType(NamespaceUserType.WX.getCode());
-        wxUser.setNamespaceUserToken(userInfo.getOpenid());
-        wxUser.setNickName(userInfo.getNickname());
-        wxUser.setAvatar(userInfo.getHeadimgurl());
-        // 0: undisclosured, 1: male, 2: female 微信的值恰好与左邻的定义是一致的
-        UserGender gender = UserGender.fromCode(userInfo.getSex());
-        wxUser.setGender(gender.getCode());
+        wxUser.setNamespaceUserToken(accessToken.getOpenid());
+
+        String scope = request.getParameter("scope");
+        //静默授权不用获取用户信息
+        if(scope != null && scope.equals("snsapi_base")){
+            wxUser.setNickName("unKnow");
+            wxUser.setGender(UserGender.UNDISCLOSURED.getCode());
+        }else {
+            // 获取用户信息
+            String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
+            String userInfoJson = httpGet(userInfoUri, userInfoUri);
+            WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
+            if (userInfo.getErrcode()!=null) {
+                LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}",
+                        namespaceId, appId, userInfoJson, userInfoUri);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get user information from webchat");
+            }
+            wxUser.setNickName(userInfo.getNickname());
+            wxUser.setAvatar(userInfo.getHeadimgurl());
+            // 0: undisclosured, 1: male, 2: female 微信的值恰好与左邻的定义是一致的
+            UserGender gender = UserGender.fromCode(userInfo.getSex());
+            wxUser.setGender(gender.getCode());
+        }
         
         userService.signupByThirdparkUser(wxUser, request);
         UserLogin userLogin = userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);

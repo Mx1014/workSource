@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.purchase;
 
+import com.everhomes.rest.purchase.GetWarehouseMaterialPurchaseHistoryDTO;
 import com.everhomes.rest.purchase.SearchPurchasesDTO;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
 
@@ -26,4 +27,6 @@ public interface PurchaseProvider {
     void deleteOrderById(Long purchaseRequestId);
 
     void deleteOrderItemsByOrderId(Long purchaseRequestId);
+
+    List<GetWarehouseMaterialPurchaseHistoryDTO> getWarehouseMaterialPurchaseHistory(Long communityId, Long ownerId, String ownerType, Long materialId);
 }

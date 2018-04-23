@@ -128,6 +128,8 @@ public interface CommunityService {
 	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
 	ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file);
 
+	void exportBuildingByCommunityId(ListBuildingCommand cmd, HttpServletResponse response);
+
     /**
      * 用户认证的弹窗管理
      */

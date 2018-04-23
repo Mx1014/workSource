@@ -83,5 +83,7 @@ public interface QualityService {
 
     QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd);
 
-    QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd);
+    QualityOfflineTaskReportResponse offlineTaskReport(OfflineTaskReportCommand cmd);
+
+    void startCrontabTask();
 }

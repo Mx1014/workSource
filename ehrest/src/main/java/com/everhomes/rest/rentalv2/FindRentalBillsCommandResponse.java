@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 订单DTO
  * <li>nextPageAnchor：下页锚点</li>
- * <li>rentalBills：List<RentalBillDTO> 订单列表</li> 
+ * <li>rentalBills：订单列表，参考{@link com.everhomes.rest.rentalv2.RentalBillDTO}</li> 
  * </ul>
  */
 public class FindRentalBillsCommandResponse {

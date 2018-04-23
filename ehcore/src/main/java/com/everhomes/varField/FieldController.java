@@ -7,6 +7,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -156,6 +157,21 @@ public class FieldController extends ControllerBase {
     @RestReturn(value=FieldItemDTO.class, collection = true)
     public RestResponse listFieldItems(@Valid ListFieldItemCommand cmd) {
         List<FieldItemDTO> items = fieldService.listFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listScopeFieldItems</b>
+     * <p>获取域空间模块字段选择项</p>
+     * @return {@link FieldItemDTO}
+     */
+    @RequestMapping("listScopeFieldItems")
+    @RestReturn(value=FieldItemDTO.class, collection = true)
+    public RestResponse listScopeFieldItems(@Valid ListScopeFieldItemCommand cmd) {
+        List<FieldItemDTO> items = fieldService.listScopeFieldItems(cmd);
         RestResponse res = new RestResponse(items);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

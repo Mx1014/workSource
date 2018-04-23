@@ -3,6 +3,7 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +15,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 
 /**
  * <ul>
@@ -41,7 +34,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceTypeList<b>
+	 * <b>URL: /rental/admin/getResourceTypeList</b>
 	 * <p>
 	 * 查询资源类型列表
 	 * </p>
@@ -56,9 +49,26 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceType</b>
+	 * <p>
+	 * 查询资源类型
+	 * </p>
+	 */
+	@RequestMapping("getResourceType")
+	@RestReturn(ResourceTypeDTO.class)
+	public RestResponse getResourceType(@Valid GetResourceTypeCommand cmd) {
+		ResourceTypeDTO resp = this.rentalService.getResourceType(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 //	/**
 //	 *
-//	 * <b>URL: /rental/admin/createResourceType<b>
+//	 * <b>URL: /rental/admin/createResourceType</b>
 //	 * <p>
 //	 * 添加资源类型
 //	 * </p>
@@ -75,7 +85,7 @@ public class Rentalv2AdminController extends ControllerBase {
 //
 //	/**
 //	 *
-//	 * <b>URL: /rental/admin/deleteResourceType<b>
+//	 * <b>URL: /rental/admin/deleteResourceType</b>
 //	 * <p>
 //	 * 删除资源类型
 //	 * </p>
@@ -93,7 +103,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	/**
 	 *
-	 * <b>URL: /rental/admin/deleteResource<b>
+	 * <b>URL: /rental/admin/deleteResource</b>
 	 * <p>
 	 * 删除资源
 	 * </p>
@@ -110,7 +120,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 //	/**
 //	 *
-//	 * <b>URL: /rental/admin/closeResourceType<b>
+//	 * <b>URL: /rental/admin/closeResourceType</b>
 //	 * <p>
 //	 * 关闭资源类型
 //	 * </p>
@@ -127,7 +137,7 @@ public class Rentalv2AdminController extends ControllerBase {
 //
 //	/**
 //	 *
-//	 * <b>URL: /rental/admin/openResourceType<b>
+//	 * <b>URL: /rental/admin/openResourceType</b>
 //	 * <p>
 //	 * 开启资源类型
 //	 * </p>
@@ -144,7 +154,7 @@ public class Rentalv2AdminController extends ControllerBase {
 //
 //	/**
 //	 *
-//	 * <b>URL: /rental/admin/updateResourceType<b>
+//	 * <b>URL: /rental/admin/updateResourceType</b>
 //	 * <p>
 //	 * 修改资源类型
 //	 * </p>
@@ -162,7 +172,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	/**
 	 *
-	 * <b>URL: /rental/admin/queryDefaultRule<b>
+	 * <b>URL: /rental/admin/queryDefaultRule</b>
 	 * <p>
 	 * 查询默认规则
 	 * </p>
@@ -179,7 +189,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceRule<b>
+	 * <b>URL: /rental/admin/getResourceRule</b>
 	 * <p>
 	 * 查询资源的规则
 	 * </p>
@@ -196,7 +206,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultRule<b>
+	 * <b>URL: /rental/admin/updateDefaultRule</b>
 	 * <p>
 	 * 修改默认规则
 	 * </p>
@@ -212,7 +222,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultDateRule<b>
+	 * <b>URL: /rental/admin/updateDefaultDateRule</b>
 	 * <p>
 	 * 修改默认规则时间
 	 * </p>
@@ -228,7 +238,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultAttachmentRule<b>
+	 * <b>URL: /rental/admin/updateDefaultAttachmentRule</b>
 	 * <p>
 	 * 修改默认规则提示文字
 	 * </p>
@@ -244,7 +254,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceList<b>
+	 * <b>URL: /rental/admin/getResourceList</b>
 	 * <p>
 	 * 获取资源列表
 	 * </p>
@@ -261,7 +271,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/addResource<b>
+	 * <b>URL: /rental/admin/addResource</b>
 	 * <p>
 	 * 添加一个预约资源
 	 * </p>
@@ -278,7 +288,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateResource<b>
+	 * <b>URL: /rental/admin/updateResource</b>
 	 * <p>
 	 * 更新资源
 	 * </p>
@@ -295,7 +305,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 *
-	 * <b>URL: /rental/admin/updateResourceOrder<b>
+	 * <b>URL: /rental/admin/updateResourceOrder</b>
 	 * <p>
 	 * 更新资源顺序
 	 * </p>
@@ -510,6 +520,16 @@ public class Rentalv2AdminController extends ControllerBase {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
+	/**
+	 * <b>URL: /rental/admin/exportVipRentalBills</b>
+	 * <p>
+	 * 导出预订详情（vip车位预约用）
+	 * </p>
+	 */
+	@RequestMapping("exportVipRentalBills")
+	public void exportVipRentalBills(@Valid SearchRentalOrdersCommand cmd, HttpServletResponse response) {
+		rentalService.exportRentalBills(cmd, response );
+	}
 
 //	/**
 //	 * <b>URL: /rental/admin/findRentalSitesStatus</b>
@@ -793,6 +813,19 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse searchRentalOrders(SearchRentalOrdersCommand cmd) {
 
 		RestResponse response = new RestResponse(rentalService.searchRentalOrders(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getRentalOrderById</b>
+	 * <p>通过id查询订单</p>
+	 */
+	@RequestMapping("getRentalOrderById")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse getRentalOrderById(GetRentalBillCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getRentalOrderById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

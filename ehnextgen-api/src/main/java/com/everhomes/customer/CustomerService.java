@@ -3,8 +3,11 @@ package com.everhomes.customer;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -90,7 +93,7 @@ public interface CustomerService {
     ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd);
     ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd);
 
-    String syncEnterpriseCustomers(SyncCustomersCommand cmd);
+    String syncEnterpriseCustomers(SyncCustomersCommand cmd, Boolean authFlag);
     String syncIndividualCustomers(SyncCustomersCommand cmd);
     
     
@@ -134,6 +137,15 @@ public interface CustomerService {
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
 
+
     ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd);
+
+    void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response);
+    void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist);
+    OrganizationDTO createOrganization(EnterpriseCustomer customer);
+
+
 
 }

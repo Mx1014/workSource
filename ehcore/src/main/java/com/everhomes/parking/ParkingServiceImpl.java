@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -79,6 +81,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -123,7 +126,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private Rentalv2Provider rentalv2Provider;
 	@Autowired
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -310,6 +314,18 @@ public class ParkingServiceImpl implements ParkingService {
 			checkRequestCondition(cmd, flowId);
 		}
 		ParkingCardRequest parkingCardRequest = buildParkingCardRequest(cmd, Integer.valueOf(requestFlowType));
+		ListCardTypeResponse listCardTypeResponse = handler.listCardType(ConvertHelper.convert(cmd,ListCardTypeCommand.class));
+		if(listCardTypeResponse!=null&&listCardTypeResponse.getCardTypes()!=null){
+			for (ParkingCardType parkingCardType : listCardTypeResponse.getCardTypes()) {
+				if(parkingCardType!=null
+						&&parkingCardRequest!=null
+						&&parkingCardRequest.getCardTypeId()!=null
+						&&parkingCardRequest.getCardTypeId().equals(parkingCardType.getTypeId())){
+					parkingCardRequest.setCardTypeName(parkingCardType.getTypeName());
+					break;
+				}
+			}
+		}
 
 		dbProvider.execute((TransactionStatus status) -> {
 
@@ -668,7 +684,12 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 //        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+
 		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 //        preOrderCommand.setAmount(amount);
 //
 //        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
@@ -701,7 +722,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
-			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			orderCmd.setTotalFee(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		} else {
 			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 		}
@@ -793,6 +814,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//订单记录权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040840L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
@@ -839,6 +864,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040810L, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
+		}
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		Timestamp startDate = null;
 		Timestamp endDate = null;
@@ -885,10 +913,12 @@ public class ParkingServiceImpl implements ParkingService {
 			response.setRequests(list.stream().map(r -> {
 				ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
 
-				ParkingCardType cardType =getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
-						cmd.getParkingLotId(), r.getCardTypeId());
-				if (null != cardType) {
-					dto.setCardTypeName(cardType.getTypeName());
+				if(dto.getCardTypeName()==null) {
+					ParkingCardType cardType = getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
+							cmd.getParkingLotId(), r.getCardTypeId());
+					if (null != cardType && cardType.getTypeName() != null) {
+						dto.setCardTypeName(cardType.getTypeName());
+					}
 				}
 				return dto;
 			}).collect(Collectors.toList()));
@@ -1318,7 +1348,8 @@ public class ParkingServiceImpl implements ParkingService {
 		style.setFont(font);
 
 		Sheet sheet = wb.createSheet("parkingRechargeOrders");
-		sheet.setDefaultColumnWidth(20);
+//		sheet.autoSizeColumn(1);
+//		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("订单号");
@@ -1326,10 +1357,16 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(2).setCellValue("用户名");
 		row.createCell(3).setCellValue("手机号");
 		row.createCell(4).setCellValue("缴费时间");
-		row.createCell(5).setCellValue("缴费月数");
-		row.createCell(6).setCellValue("金额");
-		row.createCell(7).setCellValue("支付方式");
-		row.createCell(8).setCellValue("缴费类型");
+		row.createCell(5).setCellValue("月卡充值起始时间");
+		row.createCell(6).setCellValue("月卡充值结束时间");
+		row.createCell(7).setCellValue("缴费月数");
+		row.createCell(8).setCellValue("临时车进场时间");
+		row.createCell(9).setCellValue("临时车出场时间");
+		row.createCell(10).setCellValue("临时车停车时长(分钟)");
+		row.createCell(11).setCellValue("金额");
+		row.createCell(12).setCellValue("支付方式");
+		row.createCell(13).setCellValue("缴费类型");
+
 
 		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for(int i=0, size = list.size();i<size;i++){
@@ -1346,6 +1383,16 @@ public class ParkingServiceImpl implements ParkingService {
 			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
 			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
 
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+		List valueLengths = null;
+		if(handler != null){
+			handler.setCellValues(list,sheet);
+		}
+
+		for (int i = 0; i < 14; i++) {
+			String stringCellValue = sheet.getRow(0).getCell(i).getStringCellValue();
+			sheet.setColumnWidth(i,stringCellValue.length() * 700);
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -1499,7 +1546,8 @@ public class ParkingServiceImpl implements ParkingService {
 			String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
 			if (parkingFlow.getCardAgreementFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
-				dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+//				dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+				dto.setCardAgreementUrl(host + configProvider.getValue("parking.agreement.url", "/park_payment_review/index.html?configId=") + parkingFlow.getId());
 			}
 		}else {
 			dto = ConvertHelper.convert(cmd, ParkingRequestCardConfigDTO.class);
@@ -1893,6 +1941,10 @@ public class ParkingServiceImpl implements ParkingService {
 		BigDecimal price = order.getPrice();
 
 		Long amount = payService.changePayAmount(price);
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 
 		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
@@ -1925,7 +1977,7 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if (flag) {
-			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			refundCmd.setRefundAmount(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		}else {
 			refundCmd.setRefundAmount(order.getPrice());
 		}
@@ -1975,9 +2027,9 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"time out.");
-		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L, exceptionResult);
+		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.RECHARE_TIME_OUT,
+				"回调超时，请稍后再试");
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(60000L, exceptionResult);
 //        System.out.println(Thread.currentThread().getName());
 //        map.put("test", deferredResult);
 
@@ -2084,13 +2136,33 @@ public class ParkingServiceImpl implements ParkingService {
 				}
 			}
 		}else {
-			String json = configProvider.getValue("parking.default.card.type", "");
-			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
-			ParkingCardRequestTypeDTO dto = ConvertHelper.convert(cmd, ParkingCardRequestTypeDTO.class);
-			dto.setCardTypeId(cardType.getTypeId());
-			dto.setCardTypeName(cardType.getTypeName());
-			dto.setNamespaceId(UserContext.getCurrentNamespaceId());
-			dtos.add(dto);
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+			ListCardTypeCommand cardTypeCmd = new ListCardTypeCommand(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getParkingLotId());
+			ListCardTypeResponse listCardTypeResponse = handler.listCardType(cardTypeCmd);
+
+			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
+			if(list==null || list.size()==0){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,
+						"未查询到月卡类型信息");
+			}
+
+			dtos = list.stream().map(r ->{
+				ParkingCardRequestTypeDTO dto = new ParkingCardRequestTypeDTO();
+				dto.setCardTypeId(r.getTypeId());
+				dto.setCardTypeName(r.getTypeName());
+				return dto;
+			}).collect(Collectors.toList());
+
+//			String json = configProvider.getValue("parking.default.card.type", "");
+//			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+//			ParkingCardRequestTypeDTO dto = ConvertHelper.convert(cmd, ParkingCardRequestTypeDTO.class);
+//			dto.setCardTypeId(cardType.getTypeId());
+//			dto.setCardTypeName(cardType.getTypeName());
+//			dto.setNamespaceId(UserContext.getCurrentNamespaceId());
+//			dtos.add(dto);
 		}
 
 		return dtos;
@@ -2129,6 +2201,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//车辆认证申请
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040820L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -2354,7 +2430,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != parkingSpace) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
 		}
 
@@ -2362,8 +2438,14 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != parkingSpace) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
+		}
+
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+			LOGGER.error("LockId conn failed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
+					"您输入的车锁ID无效，请重新输入");
 		}
 
 		parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
@@ -2384,6 +2466,20 @@ public class ParkingServiceImpl implements ParkingService {
 			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ParkingSpace not found.");
+		}
+
+		ParkingSpace parkingSpaceByLockId = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
+
+		if (null != parkingSpaceByLockId && !cmd.getId().equals(parkingSpaceByLockId.getId())) {
+			LOGGER.error("LockId exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
+					"LockId exist.");
+		}
+
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+			LOGGER.error("LockId conn failed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
+					"您输入的车锁ID无效，请重新输入");
 		}
 
 		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());
@@ -2432,7 +2528,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//VIP车位管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040830L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 		SearchParkingSpacesResponse response = new SearchParkingSpacesResponse();
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -2487,6 +2586,73 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
+	public ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response) {
+		cmd.setPageSize(1000);
+		ListParkingSpaceLogsResponse resp =  listParkingSpaceLogs(cmd);
+
+		List<ParkingSpaceLogDTO> requests = resp.getLogDTOS();
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("parkingSpaceLogDTOs");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("操作");
+		row.createCell(1).setCellValue("操作时间");
+		row.createCell(2).setCellValue("操作人");
+		row.createCell(3).setCellValue("手机号");
+		row.createCell(4).setCellValue("用户类型");
+		row.createCell(5).setCellValue("公司名称");
+
+		DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+		if (null != requests) {
+			for(int i = 0, size = requests.size(); i < size; i++){
+				Row tempRow = sheet.createRow(i + 1);
+				ParkingSpaceLogDTO logDto = requests.get(i);
+
+				tempRow.createCell(0).setCellValue(getOperateTypeChineseDesc(logDto.getOperateType()));
+				tempRow.createCell(1).setCellValue(logDto.getOperateTime().toLocalDateTime().format(datetimeSF));
+				tempRow.createCell(2).setCellValue(logDto.getContactName());
+				tempRow.createCell(3).setCellValue(logDto.getContactPhone());
+				ParkingSpaceLockOperateUserType enumOperateUserType = ParkingSpaceLockOperateUserType.fromCode(logDto.getUserType());
+				tempRow.createCell(4).setCellValue(enumOperateUserType==null?"未知类型":enumOperateUserType.getDesc());
+				tempRow.createCell(5).setCellValue(logDto.getContactEnterpriseName());
+			}
+		}
+
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingCardRequests is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingCardRequests is fail.");
+		}
+		return resp;
+
+	}
+
+	private String getOperateTypeChineseDesc(Byte operateType) {
+		ParkingSpaceLockOperateType enumOperateType = ParkingSpaceLockOperateType.fromCode(operateType);
+		if(enumOperateType == ParkingSpaceLockOperateType.UP){
+			return "车锁升起";
+		}
+		if(enumOperateType == ParkingSpaceLockOperateType.DOWN){
+			return "车锁降下";
+		}
+		return "未知操作";
+	}
+
+	@Override
 	public void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
 
 		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.RESERVE_PERSON,
@@ -2513,7 +2679,7 @@ public class ParkingServiceImpl implements ParkingService {
 		//TODO:
 		if (flag) {
 			ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
-
+			space.setLockStatus(operateType.getStatus());
 			ParkingSpaceLog log;
 			if (userType == ParkingSpaceLockOperateUserType.RESERVE_PERSON) {
 				log = buildParkingSpaceLog(space, order);
@@ -2523,6 +2689,7 @@ public class ParkingServiceImpl implements ParkingService {
 			log.setOperateType(operateType.getCode());
 
 			parkingProvider.createParkingSpaceLog(log);
+			parkingProvider.updateParkingSpace(space);
 		}else {
 			if (operateType == ParkingSpaceLockOperateType.UP) {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,

@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>status: 处理状态， 0-未处理， 1-已处理
+ *  <li>status: 处理状态， 0-未处理， 1-已处理</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 每页的数量</li>
  * </ul>

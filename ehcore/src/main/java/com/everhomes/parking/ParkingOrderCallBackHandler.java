@@ -59,60 +59,29 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
-		//TODO:ceshi
-		if (configProvider.getBooleanValue("parking.order.amount", false)) {
-			Long orderId = cmd.getOrderId();
-			Long payTime = System.currentTimeMillis();
-			Timestamp payTimeStamp = new Timestamp(payTime);
-
-			ParkingRechargeOrder order = checkOrder(orderId);
-			order.setPaidTime(payTimeStamp);
-			PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
-			if (null != paymentType) {
-				if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
-					order.setPaidType(VendorType.WEI_XIN.getCode());
-				}else {
-					order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-				}
-			}
-			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
-			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-			parkingProvider.updateParkingRechargeOrder(order);
-			return;
-		}
-
-//		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
-//		if(roster == null){
-//			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());
-//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-//					"no roster.");
+//		//TODO:ceshi
+//		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+//			Long orderId = cmd.getOrderId();
+//			Long payTime = System.currentTimeMillis();
+//			Timestamp payTimeStamp = new Timestamp(payTime);
+//
+//			ParkingRechargeOrder order = checkOrder(orderId);
+//			order.setPaidTime(payTimeStamp);
+//			PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+//			if (null != paymentType) {
+//				if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
+//					order.setPaidType(VendorType.WEI_XIN.getCode());
+//				}else {
+//					order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+//				}
+//			}
+//			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+//			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+//			parkingProvider.updateParkingRechargeOrder(order);
+//			return;
 //		}
-//		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-//		if(activity == null){
-//			LOGGER.info("can not find activity by id = {}", roster.getActivityId());
-//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-//					"no activity.");
-//		}
-//		//检验支付结果和应价格是否相等
-//		checkPayAmount(cmd.getAmount(), activity.getChargePrice());
-//		//支付宝回调时，可能会同时回调多次，
-//		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-//		Long paytime = DateHelper.parseDataString(cmd.getPayDatetime(), "YYYY-MM-DD HH:mm:ss").getTime();
-//		roster.setPayTime(new Timestamp(paytime));
-//		BigDecimal amount = payService.changePayAmount(cmd.getAmount());
-//		roster.setPayAmount(amount);
-//		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
-//		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
-//		roster.setPayVersion(ActivityRosterPayVersionFlag.V2.getCode());
-//		activityProvider.updateRoster(roster);
-
 
 		LOGGER.info("Parking pay info, cmd={}", cmd);
-
-//		this.checkOrderNoIsNull(cmd.getOrderNo());
-//		this.checkVendorTypeIsNull(cmd.getVendorType());
-//		this.checkPayAmountIsNull(cmd.getPayAmount());
-//		this.checkVendorTypeFormat(cmd.getVendorType());
 
 		Long orderId = cmd.getOrderId();
 		BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());

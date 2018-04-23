@@ -17,5 +17,7 @@ public interface SupplierService {
 
     GetSupplierDetailDTO getSupplierDetail(GetSupplierDetailCommand cmd);
 
-    List<SearchSuppliersDTO> searchSuppliers(String nameKeyword);
+    List<SearchSuppliersDTO> searchSuppliers(SearchSuppliersCommand cmd);
+
+    ListSuppliersResponse listSuppliersForSecondeParty(ListSuppliersCommand cmd);
 }

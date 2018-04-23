@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;import javax.validation.constraints.NotNu
  * <li>sceneType: 场景类型</li>
  * <li>pageAnchor: 下一页开始的锚点</li>
  * <li>pageSize: 每页大小</li>
- * </li>
+ * </ul>
  */
 public class ListBannersByOwnerCommand {
 	@NotNull

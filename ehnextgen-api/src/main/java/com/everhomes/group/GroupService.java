@@ -13,6 +13,9 @@ public interface GroupService {
 //    GroupDTO createGroup(CreateGroupCommand cmd);
     GroupDTO updateGroup(UpdateGroupCommand cmd);
     GroupDTO getGroup(GetGroupCommand cmd);
+
+    List<GroupDTO> listOwnerGroupsByType(Byte clubType);
+
     List<GroupDTO> listUserRelatedGroups();
     List<GroupDTO> listUserGroups();
     List<GroupDTO> listPublicGroups(ListPublicGroupCommand cmd);
@@ -110,6 +113,9 @@ public interface GroupService {
     //Just for route message
     List<GroupMember> listMessageGroupMembers(ListingLocator locator, int pageSize);
     void deleteGroupByCreator(long groupId);
+
+    Group findGroupByForumId(long forumId);
+
     ListGroupCommandResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd);
     ListNearbyGroupCommandResponse listNearbyGroupsByScene(ListNearbyGroupBySceneCommand cmd);
 	void quitAndTransferPrivilege(QuitAndTransferPrivilegeCommand cmd);

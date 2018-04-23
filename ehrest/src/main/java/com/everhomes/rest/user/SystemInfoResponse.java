@@ -1,9 +1,10 @@
 package com.everhomes.rest.user;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -12,17 +13,31 @@ import com.everhomes.util.StringHelper;
  *     <li>paymentPlatform: 0旧支付  1新支付</li>
  *     <li>accessPoints: borderServer 的链接地址。如果用户不登录，则此地址不返回</li>
  *     <li>myPublishFlag: "我"-"我的发布"是否显示，参考{@link MyPublishFlag}</li>
+ *     <li>scanForLogonServer: 扫码登录服务器地址</li>
+ *     <li>contentCacheConfig: 资源缓存配置 {@link com.everhomes.rest.contentserver.ContentCacheConfigDTO}</li>
  * </ul>
  */
 public class SystemInfoResponse {
+
     private String contentServer;
     private String uploadUrlInBrowser;
     private Long paymentPlatform;
+    private String scanForLogonServer;
 
     @ItemType(String.class)
     private List<String> accessPoints;
 
     private Byte myPublishFlag;
+
+    private ContentCacheConfigDTO contentCacheConfig;
+
+    public ContentCacheConfigDTO getContentCacheConfig() {
+        return contentCacheConfig;
+    }
+
+    public void setContentCacheConfig(ContentCacheConfigDTO contentCacheConfig) {
+        this.contentCacheConfig = contentCacheConfig;
+    }
 
     public String getContentServer() {
         return contentServer;
@@ -67,5 +82,13 @@ public class SystemInfoResponse {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getScanForLogonServer() {
+        return scanForLogonServer;
+    }
+
+    public void setScanForLogonServer(String scanForLogonServer) {
+        this.scanForLogonServer = scanForLogonServer;
     }
 }

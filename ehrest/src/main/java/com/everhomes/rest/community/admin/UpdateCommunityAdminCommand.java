@@ -10,7 +10,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>communityId: 被更新的小区Id</li>
  * <li>address: 小区地址</li>
@@ -19,6 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>areaSize: 面积</li>
  * <li>geoPointList: 小区经纬度列表,参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
  * <li>communityNumber: 园区编号</li>
+ * <li>aliasName: 简称</li>
+ * <li>name: 项目名称</li>
  * </ul>
  */
 public class UpdateCommunityAdminCommand {
@@ -39,8 +40,17 @@ public class UpdateCommunityAdminCommand {
     private String communityNumber;
 
     private String aliasName;
-    
+    private String name;
+
     public UpdateCommunityAdminCommand() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAliasName() {

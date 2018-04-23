@@ -338,23 +338,23 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return instanceConfig;
     }
     
-    final Pattern pattern = Pattern.compile("^.*\"parentId\":[\\s]*([\\d]*)");
+    final Pattern pattern = Pattern.compile("^.*\"type\":[\\s]*([\\d]*)");
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-    	if(actionData == null || actionData.length() == 0){
-    		return null;
-    	}
-    	Matcher m = pattern.matcher(actionData);
-    	if(m.find()){
-    		return m.group(1);
-    	}
-    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = "+actionData);
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+        LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
+        if(instanceConfig == null || instanceConfig.length() == 0){
+            return null;
+        }
+        Matcher m = pattern.matcher(instanceConfig);
+        if(m.find()){
+            return m.group(1);
+        }
     	return null;
     }
 
     @Override
-    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-       String categoriesId = this.getCustomTag(namespaceId,moudleId,actionData,instanceConfig);
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
+       String categoriesId = this.getCustomTag(namespaceId,moudleId,instanceConfig);
        ServiceAllianceCategories category = yellowPageProvider.findCategoryById(Long.valueOf(categoriesId));
        if(category == null || category.getEntryId() == null){
            return null;

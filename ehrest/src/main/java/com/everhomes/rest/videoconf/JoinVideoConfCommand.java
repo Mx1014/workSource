@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>confId: 会议id或主持人手机号</li>
  *  <li>namespaceId: 命名空间</li>
  *  <li>enterpriseId: 企业id</li>
- *
+ *  </ul>
  */
 public class JoinVideoConfCommand {
 	@NotNull

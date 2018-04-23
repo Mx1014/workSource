@@ -31,6 +31,15 @@ public class GetPurchaseOrderDTO {
     private String remark;
     private Long approvalSheetId;
     private List<PurchaseMaterialDetailDTO> dtos;
+    private Long flowCaseId;
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
     @Override
     public String toString() {

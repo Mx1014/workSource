@@ -15,6 +15,7 @@ import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
@@ -34,6 +35,8 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +85,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private FieldProvider fieldProvider;
 
     @Override
     public String generatePaymentApplicationNumber() {
@@ -142,6 +148,13 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             dto.setContractName(contract.getName());
             dto.setContractNumber(contract.getContractNumber());
             dto.setContractAmount(contract.getRent());
+            if(contract.getCategoryItemId() != null) {
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getCategoryItemId()));
+                if(item != null) {
+                    dto.setCategoryItemName(item.getItemDisplayName());
+                }
+            }
+
             if(CustomerType.SUPPLIER.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 WarehouseSupplier supplier = supplierProvider.findSupplierById(contract.getCustomerId());
                 if(supplier != null) {
@@ -177,10 +190,10 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
         Flow flow = flowService.getEnabledFlow(application.getNamespaceId(), FlowConstants.PAYMENT_APPLICATION_MODULE,
                 FlowModuleType.NO_MODULE.getCode(), application.getCommunityId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
         if(null == flow) {
-            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
-            throw RuntimeErrorException.errorWith(PaymentApplicationErrorCode.SCOPE, PaymentApplicationErrorCode.ERROR_ENABLE_FLOW,
-                    localeStringService.getLocalizedString(String.valueOf(PaymentApplicationErrorCode.SCOPE),
-                            String.valueOf(PaymentApplicationErrorCode.ERROR_ENABLE_FLOW),
+            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PAYMENT_APPLICATION_MODULE);
+            throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
+                    localeStringService.getLocalizedString(String.valueOf(ContractErrorCode.SCOPE),
+                            String.valueOf(ContractErrorCode.ERROR_ENABLE_FLOW),
                             UserContext.current().getUser().getLocale(),"Enable request flow not found."));
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
@@ -191,7 +204,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
         createFlowCaseCommand.setReferId(application.getId());
         createFlowCaseCommand.setReferType(EntityType.PAYMENT_APPLICATION.getCode());
-        createFlowCaseCommand.setContent(application.getRemark());
+        createFlowCaseCommand.setContent(application.getApplicationNumber());
         createFlowCaseCommand.setServiceType("付款申请");
         createFlowCaseCommand.setProjectId(application.getCommunityId());
         createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());

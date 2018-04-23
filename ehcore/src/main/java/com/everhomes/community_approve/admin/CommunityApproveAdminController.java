@@ -141,7 +141,7 @@ public class CommunityApproveAdminController extends ControllerBase{
 
     /**
      * <b>URL: /admin/Community_approve/exportApproveVals</b>
-     * <p>导出申请记录/p>
+     * <p>导出申请记录</p>
      */
     @RequestMapping("exportApproveVals")
     @RestReturn(value=String.class)

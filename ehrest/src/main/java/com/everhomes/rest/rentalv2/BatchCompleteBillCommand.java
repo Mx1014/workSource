@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>查询订单
- * <li>rentalBillIds：List<Long>  场所ID列表</li> 
+ * <li>rentalBillIds：场所ID列表</li> 
  * </ul>
  */
 public class BatchCompleteBillCommand {

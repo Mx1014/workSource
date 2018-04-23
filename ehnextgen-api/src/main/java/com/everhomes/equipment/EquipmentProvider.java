@@ -71,7 +71,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
 	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
-	List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(Long equipmentId, List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize);
+	List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listTasksByStandardId(Long standardId, CrossShardListingLocator locator, Integer pageSize);
 
 	List<Long> listStandardIdsByType(Byte type);
@@ -139,7 +139,7 @@ public interface EquipmentProvider {
 
 
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
+		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
 
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
@@ -197,7 +197,7 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId);
 
-	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize,List<Byte> taskStatus);
+	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<Long> planIds, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize,List<Byte> taskStatus);
 
     void deleteEquipmentInspectionPlanGroupMapByPlanId(Long id);
 
@@ -217,9 +217,13 @@ public interface EquipmentProvider {
 
 	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
 
+	void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId);
+
+	void deleteReviewExpireDaysByReferId(Long id);
+
 	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
 
-    EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
+	List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 
@@ -237,6 +241,8 @@ public interface EquipmentProvider {
 
     void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void populateReviewTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
+
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
     void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId);
@@ -248,4 +254,6 @@ public interface EquipmentProvider {
 	void batchUpdateUnusedTaskStatus();
 
     void updateEquipmentTaskByPlanId(Long planId);
+
+    List<EquipmentInspectionTasks> listPersonalDoneTasks(Long targetId, Long inspectionCategoryId, int pageSize, Integer offset, Timestamp startTime);
 }

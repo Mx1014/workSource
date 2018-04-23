@@ -49,97 +49,100 @@ import java.util.List;
  *  <li>createTime : 创建时间</li>
  *  <li>executiveTime : 执行时间</li>
  *  <li>processTime : 整改时间</li>
+ *  <li>reviewTime : 审阅时间</li>
  *  <li>lastSyncTime : 上次最大同步时间</li>
  *  <li>verificationResult :offline CORRECT((byte)1), INSPECT_COMPLETE((byte)2)</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
-	
+
 	private Long id;
-	
+
 	private Long standardId;
-	
+
 	private Long parentId;
-	
+
 	private Long childCount;
 
 	private String ownerType;
-	
+
 	private Long ownerId;
-	
+
 	private String targetType;
-	
+
 	private Long targetId;
 
 	private String targetName;
-	
+
 	private String taskName;
-	
+
 	private String taskNumber;
-	
+
 	private String executiveGroupName;
 
 	private String groupName;
 
 	private String categoryName;
-	
+
 	private Long executiveGroupId;
-	
+
 	private Long executivePositionId;
-	
+
 	private Long executorId;
-	
+
 	private String executorName;
 
 	private Long operatorId;
-	
+
 	private String operatorName;
 
 	private String operatorType;
-	
+
 	private Timestamp executiveStartTime;
-	
+
 	private Timestamp executiveExpireTime;
-	
+
 	private Timestamp processExpireTime;
-	
+
 	private Byte status;
-	
+
 	private Byte result;
-	
+
 	private Byte processResult;
-	
+
 	private Byte reviewResult;
-	
+
 	private Long reviewerId;
-	
+
 	private String reviewerName;
-	
+
 	private Long categoryId;
-	
+
 	@ItemType(QualityInspectionTaskRecordsDTO.class)
-    private QualityInspectionTaskRecordsDTO record;
-	
+	private QualityInspectionTaskRecordsDTO record;
+
 	@ItemType(GroupUserDTO.class)
 	private List<GroupUserDTO> groupUsers;
-	
+
 	private Byte taskFlag;
-	
+
 	private Long manualFlag;
-	
+
 	private Long creatorUid;
-	
+
 	private String creatorName;
-	
+
 	private String standardDescription;
-	
+
 	private String categoryDescription;
-	
+
 	private Timestamp createTime;
 
 	private Timestamp executiveTime;
 
 	private Timestamp processTime;
+
+	private Timestamp reviewTime;
 
 	private String lastSyncTime;
 
@@ -481,6 +484,14 @@ public class QualityInspectionTaskDTO {
 		this.processTime = processTime;
 	}
 
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
+	}
+
 	public String getLastSyncTime() {
 		return lastSyncTime;
 	}
@@ -498,8 +509,8 @@ public class QualityInspectionTaskDTO {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

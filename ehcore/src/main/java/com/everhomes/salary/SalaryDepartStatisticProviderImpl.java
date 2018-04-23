@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.server.schema.tables.records.EhSalaryDepartStatisticsRecord;
 import org.jooq.DSLContext;
 import org.jooq.DeleteConditionStep;
@@ -63,7 +64,7 @@ public class SalaryDepartStatisticProviderImpl implements SalaryDepartStatisticP
     }
 
     @Override
-    public List<SalaryDepartStatistic> listSalaryDepartStatistic() {
+    public List<SalaryDepartStatistic> listFiledSalaryDepartStatistic() {
         return getReadOnlyContext().select().from(Tables.EH_SALARY_DEPART_STATISTICS)
                 .orderBy(Tables.EH_SALARY_DEPART_STATISTICS.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SalaryDepartStatistic.class));
@@ -93,10 +94,16 @@ public class SalaryDepartStatisticProviderImpl implements SalaryDepartStatisticP
     }
 
     @Override
-    public List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, String month) {
+    public List<SalaryDepartStatistic> listFiledSalaryDepartStatistic(Long ownerId, String month) {
+        return listSalaryDepartStatistic(ownerId, NormalFlag.YES.getCode(), month);
+    }
+
+    @Override
+    public List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, Byte isFile, String month) {
         Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SALARY_DEPART_STATISTICS)
                 .where(Tables.EH_SALARY_DEPART_STATISTICS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_SALARY_DEPART_STATISTICS.SALARY_PERIOD.eq(month))
+                .and(Tables.EH_SALARY_DEPART_STATISTICS.IS_FILE.eq(isFile))
                 .orderBy(Tables.EH_SALARY_DEPART_STATISTICS.ID.asc())
                 .fetch();
         if (null == record) {

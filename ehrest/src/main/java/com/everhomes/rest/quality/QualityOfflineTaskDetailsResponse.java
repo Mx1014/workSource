@@ -1,6 +1,8 @@
 package com.everhomes.rest.quality;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import java.util.List;
 
@@ -8,6 +10,13 @@ import java.util.List;
  * <ul>
  * <li>tasks:任务列表</li>
  * <li>specifications:specifications</li>
+ * <li>categories:规范类型</li>
+ * <li>taskCount:任务数目统计</li>
+ * <li>organizations:组织架构</li>
+ * <li>organizationMembers:人员</li>
+ * <li>jobPositions:岗位</li>
+ * <li>groupMaps:计划和group关系</li>
+ * <li>taskGroupMap:任务执行group关系</li>
  * <li>nextPageAnchor:下一页锚点</li>
  * </ul>
  */
@@ -19,6 +28,24 @@ public class QualityOfflineTaskDetailsResponse {
 
     @ItemType(QualityInspectionSpecificationDTO.class)
     private List<QualityInspectionSpecificationDTO> specifications;
+
+    @ItemType(QualityInspectionSpecificationDTO.class)
+    private List<QualityInspectionSpecificationDTO> categories;
+
+    @ItemType(OfflineTaskCount.class)
+    private List<OfflineTaskCount> taskCount;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> organizations;
+
+    @ItemType(OrganizationMemberDTO.class)
+    private List<OrganizationMemberDTO> organizationMembers;
+
+    @ItemType(OfflineJobPositionDTO.class)
+    private List<OfflineJobPositionDTO> jobPositions;
+
+    @ItemType(QualityInspectionStandardGroupMapDTO.class)
+    private List<QualityInspectionStandardGroupMapDTO> groupMaps;
 
     private Long nextPageAnchor;
 
@@ -36,6 +63,54 @@ public class QualityOfflineTaskDetailsResponse {
 
     public void setSpecifications(List<QualityInspectionSpecificationDTO> specifications) {
         this.specifications = specifications;
+    }
+
+    public List<QualityInspectionSpecificationDTO> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<QualityInspectionSpecificationDTO> categories) {
+        this.categories = categories;
+    }
+
+    public List<OfflineTaskCount> getTaskCount() {
+        return taskCount;
+    }
+
+    public void setTaskCount(List<OfflineTaskCount> taskCount) {
+        this.taskCount = taskCount;
+    }
+
+    public List<OrganizationDTO> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<OrganizationDTO> organizations) {
+        this.organizations = organizations;
+    }
+
+    public List<OrganizationMemberDTO> getOrganizationMembers() {
+        return organizationMembers;
+    }
+
+    public void setOrganizationMembers(List<OrganizationMemberDTO> organizationMembers) {
+        this.organizationMembers = organizationMembers;
+    }
+
+    public List<OfflineJobPositionDTO> getJobPositions() {
+        return jobPositions;
+    }
+
+    public void setJobPositions(List<OfflineJobPositionDTO> jobPositions) {
+        this.jobPositions = jobPositions;
+    }
+
+    public List<QualityInspectionStandardGroupMapDTO> getGroupMaps() {
+        return groupMaps;
+    }
+
+    public void setGroupMaps(List<QualityInspectionStandardGroupMapDTO> groupMaps) {
+        this.groupMaps = groupMaps;
     }
 
     public Long getNextPageAnchor() {

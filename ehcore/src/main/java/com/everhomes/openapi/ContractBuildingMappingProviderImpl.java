@@ -178,6 +178,22 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		return result;
 	}
 
+	@Override
+	public List<ContractBuildingMapping> listByAddress(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractBuildingMappingsRecord> query = context.selectQuery(Tables.EH_CONTRACT_BUILDING_MAPPINGS);
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+		List<ContractBuildingMapping> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ContractBuildingMapping.class));
+			return null;
+		});
+
+		return result;
+	}
+
 	private EhContractBuildingMappingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

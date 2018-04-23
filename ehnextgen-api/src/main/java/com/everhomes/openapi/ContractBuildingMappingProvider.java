@@ -31,4 +31,5 @@ public interface ContractBuildingMappingProvider {
 	List<ContractBuildingMapping> listContractBuildingMappingByContract(Integer namespaceId, Long organizationId,
 			String contractNumber);
 	List<ContractBuildingMapping> listByContract(Long contractId);
+	List<ContractBuildingMapping> listByAddress(Long addressId);
 }

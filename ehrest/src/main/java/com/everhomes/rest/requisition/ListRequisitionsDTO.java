@@ -19,6 +19,7 @@ import java.math.BigDecimal;
  * <li>type: 请示类型</li>
  * <li>status: 审批状态,审批状态，1:处理中；2:已完成; 3:已取消</li>
  * <li>amount: 金额</li>
+ * <li>flowCaseId: 工作流id</li>
  * </ul>
  */
 public class ListRequisitionsDTO {
@@ -31,7 +32,15 @@ public class ListRequisitionsDTO {
     private Byte status;
     private String amount;
     private Long id;
+    private Long flowCaseId;
 
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
     @Override
     public String toString() {

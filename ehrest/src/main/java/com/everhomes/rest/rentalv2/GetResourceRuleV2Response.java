@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.RentalHolidayType;
 import com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO;
 import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
+import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
  * <li>rentalType: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>dayOpenTime: 按天模式下 每天开始时间</li>
  * <li>dayCloseTime: 按天模式下 每天结束时间</li>
+ * <li>timeIntervals : 按小时模式下 预约时段</li>
  * <li>refundStrategy: 退款策略 {@link RentalOrderStrategy}</li>
  * <li>overtimeStrategy: 超时加收策略 {@link RentalOrderStrategy}</li>
  * <li>refundStrategies: 退款策略列表 {@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
@@ -44,6 +46,9 @@ public class GetResourceRuleV2Response {
 
     private Byte holidayOpenFlag;
     private Byte holidayType;
+
+    @ItemType(TimeIntervalDTO.class)
+    private List<TimeIntervalDTO> timeIntervals;
 
     private Double dayOpenTime;
     private Double dayCloseTime;
@@ -153,6 +158,14 @@ public class GetResourceRuleV2Response {
 
     public void setDayCloseTime(Double dayCloseTime) {
         this.dayCloseTime = dayCloseTime;
+    }
+
+    public List<TimeIntervalDTO> getTimeIntervals() {
+        return timeIntervals;
+    }
+
+    public void setTimeIntervals(List<TimeIntervalDTO> timeIntervals) {
+        this.timeIntervals = timeIntervals;
     }
 
     public Byte getRefundStrategy() {

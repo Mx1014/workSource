@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactName：联系人名称，非必填</li>
  * <li>pageAnchor：锚点，对应返回response中的nextPageAnchor，第一次请求时没有不传即可</li>
  * <li>pageSize：页大小</li>
+ * <li>communityId：园区id</li>
  *</ul>
  */
 public class ListSuppliersCommand {
@@ -26,6 +27,15 @@ public class ListSuppliersCommand {
     private String contactName;
     private Long pageAnchor;
     private Integer pageSize;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     @Override
     public String toString() {

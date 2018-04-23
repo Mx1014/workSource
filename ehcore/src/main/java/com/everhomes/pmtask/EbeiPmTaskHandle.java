@@ -19,6 +19,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
@@ -311,6 +312,18 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         param.put("type", "1");
         param.put("remarks", task.getContent());
         param.put("projectId", projectId);
+        //把科兴的园区映射到一碑的projectId
+        if ("community".equals(task.getOwnerType())){
+            String jsonString = configProvider.getValue("pmtask.projectId.mapping","{}");
+            JSONObject object = JSONObject.parseObject(jsonString);
+            Community community = communityProvider.findCommunityById(task.getOwnerId());
+            if (community!=null) {
+                String pid = object.getString(community.getName());
+                if (!StringUtils.isEmpty(pid))
+                    param.put("projectId", pid);
+            }
+
+        }
         param.put("anonymous", "0");
         param.put("fileAddrs", fileAddrs);
         param.put("callBackUrl", configProvider.getValue(999983,"pmtask.ebei.callback", ""));
@@ -486,10 +499,17 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
 
 
     private void createFlowCase(PmTask task) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(task.getNamespaceId());
 
-        Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                FlowModuleType.REPAIR_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        Flow flow = null;
+        Long parentTaskId = categoryProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
+
+        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        else
+             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
@@ -577,7 +597,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             if(cancelTask(task)) {
                 User user = UserContext.current().getUser();
                 Timestamp now = new Timestamp(System.currentTimeMillis());
-                task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
+                task.setStatus(FlowCaseStatus.ABSORTED.getCode());
                 task.setDeleteUid(user.getId());
                 task.setDeleteTime(now);
                 pmTaskProvider.updateTask(task);
@@ -769,10 +789,6 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
-                if (null!=dto.getFlowCaseId()) {
-                    FlowCase flowCase = flowService.getFlowCaseById(dto.getFlowCaseId());
-                    dto.setStatus(flowCase.getStatus());
-                }
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){

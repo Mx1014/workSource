@@ -70,12 +70,39 @@ public class AddResourceAdminCommand {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private String offlinePayeeUid;
-    private Long aclinkId;
+    private String aclinkId;
 	private Byte multiUnit;
 	private java.lang.Byte       autoAssign;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -241,11 +268,11 @@ public class AddResourceAdminCommand {
 		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
-	public Long getAclinkId() {
+	public String getAclinkId() {
 		return aclinkId;
 	}
 
-	public void setAclinkId(Long aclinkId) {
+	public void setAclinkId(String aclinkId) {
 		this.aclinkId = aclinkId;
 	}
 

@@ -66,6 +66,20 @@ public class SupplierController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /supplier/listSuppliersForSecondParty</b>
+     * <p>展示供应商的列表</p>
+     */
+    @RequestMapping("listSuppliersForSecondParty")
+    @RestReturn(value = ListSuppliersResponse.class)
+    private RestResponse listSuppliersForSecondParty(ListSuppliersCommand cmd){
+        ListSuppliersResponse response = supplierService.listSuppliersForSecondeParty(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
      * <b>URL: /supplier/getSupplierDetail</b>
      * <p>获得一个供应商的信息</p>
      */
@@ -86,7 +100,7 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("searchSuppliers")
     @RestReturn(value = SearchSuppliersDTO.class,collection = true)
     private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
-        List<SearchSuppliersDTO> dtos = supplierService.searchSuppliers(cmd.getNameKeyword());
+        List<SearchSuppliersDTO> dtos = supplierService.searchSuppliers(cmd);
         RestResponse restResponse = new RestResponse(dtos);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

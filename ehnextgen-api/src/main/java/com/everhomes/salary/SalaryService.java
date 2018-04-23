@@ -120,6 +120,8 @@ public interface SalaryService {
 //	//  added by R, for salaryGroup 20170706
 //	SalaryEmployeeDTO getPersonnelInfoByDetailIdForSalary(Long userId);
 
+    String getDptPathNameByDetailId(Long detailId);
+
     ListEnterprisesResponse listEnterprises(ListEnterprisesCommand cmd);
 
     ListGroupEntitiesResponse listGroupEntities(ListGroupEntitiesCommand cmd);

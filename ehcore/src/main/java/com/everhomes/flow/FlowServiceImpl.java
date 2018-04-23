@@ -68,6 +68,7 @@ import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -251,7 +252,8 @@ public class FlowServiceImpl implements FlowService {
             cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
         }
 
-        Flow flow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
+        Flow flow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
         if (flow != null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NAME_EXISTS, "flow name exists");
         }
@@ -273,7 +275,7 @@ public class FlowServiceImpl implements FlowService {
         flowListenerManager.onFlowCreating(obj);
 
         Flow resultObj = this.dbProvider.execute(status -> {
-            Flow execObj = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
+            Flow execObj = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
             if (execObj != null) {
                 //already exists
                 return null;
@@ -301,7 +303,8 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
         }
 
-        Flow flow = flowProvider.findFlowByName(oldFlow.getNamespaceId(), oldFlow.getModuleId(), oldFlow.getModuleType(), oldFlow.getOwnerId(), oldFlow.getOwnerType(), cmd.getNewFlowName());
+        Flow flow = flowProvider.findFlowByName(oldFlow.getNamespaceId(), oldFlow.getModuleId(), oldFlow.getModuleType(),
+                oldFlow.getProjectType(), oldFlow.getProjectId(), oldFlow.getOwnerId(), oldFlow.getOwnerType(), cmd.getNewFlowName());
         if (flow != null && !flow.getId().equals(cmd.getFlowId())) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NAME_EXISTS, "flow name exists");
         }
@@ -1366,9 +1369,9 @@ public class FlowServiceImpl implements FlowService {
         checkFlowValidationStatus(flow);
 
         // 避免同时启用工作流的问题
-        String lockKey = String.format("%s:%s:%s:%s:%s:%s:%s:%s",
+        String lockKey = MD5Utils.getMD5(String.format("%s:%s:%s:%s:%s:%s:%s:%s",
                 CoordinationLocks.FLOW.getCode(), flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
-                flow.getModuleType(), flow.getModuleId(), flow.getOwnerType(), flow.getOwnerId());
+                flow.getModuleType(), flow.getModuleId(), flow.getOwnerType(), flow.getOwnerId()));
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流
@@ -2902,9 +2905,16 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public List<UserInfo> getSupervisor(FlowCase flowCase) {
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
-                , FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
-        return resolveSelectionUsers(flowCase.getFlowMainId(), selections);
+        List<FlowEventLog> logList = flowEventLogProvider.findFlowCaseSupervisors(flowCase);
+        List<UserInfo> userInfos = new ArrayList<>();
+        for (FlowEventLog eventLog : logList) {
+            UserInfo userInfo = userService.getUserSnapshotInfo(eventLog.getFlowUserId());
+            if (userInfo != null) {
+                fixupUserInfo(flowCase.getOrganizationId(), userInfo);
+                userInfos.add(userInfo);
+            }
+        }
+        return userInfos;
     }
 
     @Override
@@ -2961,12 +2971,15 @@ public class FlowServiceImpl implements FlowService {
                 if (flowNode != null) {
                     updateCaseDTO(detail, flowNode, dto, type);
                 }
-                if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
-                    if (detail.getServiceType() != null && detail.getServiceType().length() > 0) {
+                if (StringUtils.isEmpty(dto.getTitle())) {
+                    if (StringUtils.isNotBlank(detail.getServiceType())) {
                         dto.setTitle(detail.getServiceType());
                     } else {
                         dto.setTitle(detail.getModuleName());
                     }
+                }
+                if (StringUtils.isEmpty(dto.getServiceType())) {
+                    dto.setServiceType(dto.getTitle());
                 }
                 dtos.add(dto);
             }

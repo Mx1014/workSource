@@ -29,10 +29,10 @@ import java.util.List;
  * <li>	cancelFlag：       	是否允许取消 1是 0否	</li>
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
  * <li>anchorTime：规则日期</li>
- * <li>siteDays：List<RentalSiteDayRulesDTO>  每一天的单元格</li>
- * <li>sitePics：List<RentalSitePicDTO> 详情图片多张 </li>
- * <li>attachments：List<AttachmentDTO> 附件列表 </li>
- * <li>siteItems：List<SiteItemDTO> 商品列表</li>
+ * <li>siteDays：每一天的单元格，参考{@link com.everhomes.rest.rentalv2.RentalSiteDayRulesDTO}</li> 
+ * <li>sitePics：详情图片多张，参考{@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li> 
+ * <li>attachments：附件列表，参考{@link com.everhomes.rest.rentalv2.AttachmentDTO} </li> 
+ * <li>siteItems：商品列表，参考{@link com.everhomes.rest.rentalv2.SiteItemDTO}</li> 
  * </ul>
  */
 public class FindRentalSiteMonthStatusByWeekCommandResponse {

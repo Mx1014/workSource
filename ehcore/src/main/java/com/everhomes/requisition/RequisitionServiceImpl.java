@@ -4,17 +4,24 @@ package com.everhomes.requisition;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.requisition.*;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.ListPMOrganizationsCommand;
+import com.everhomes.rest.organization.ListPMOrganizationsResponse;
+import com.everhomes.rest.requisition.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -43,9 +50,16 @@ public class RequisitionServiceImpl implements RequisitionService {
     private DbProvider dbProvider;
     @Autowired
     private FlowService flowService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationService organizationService;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.REQUISITION_CREATE);
         Requisition req = ConvertHelper.convert(cmd, Requisition.class);
         req.setCreateUid(UserContext.currentUserId());
         long nextReqId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo
@@ -70,8 +84,8 @@ public class RequisitionServiceImpl implements RequisitionService {
         createFlowCaseCommand.setApplyUserId(req.getCreateUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-        createFlowCaseCommand.setReferId(req.getId());
-        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+//        createFlowCaseCommand.setReferId(req.getId());
+//        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
         createFlowCaseCommand.setServiceType("requisition");
         createFlowCaseCommand.setProjectId(req.getOwnerId());
         createFlowCaseCommand.setProjectType(req.getOwnerType());
@@ -85,13 +99,14 @@ public class RequisitionServiceImpl implements RequisitionService {
 
     @Override
     public ListRequisitionsResponse listRequisitions(ListRequisitionsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.REQUISITION_VIEW);
         ListRequisitionsResponse response = new ListRequisitionsResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
         List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
-                ,cmd.getOwnerId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
         if(result.size() > pageSize){
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);
@@ -102,6 +117,11 @@ public class RequisitionServiceImpl implements RequisitionService {
 
     @Override
     public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.REQUISITION_VIEW);
+        if(cmd.getRequisitionId() == null){
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
+            cmd.setRequisitionId(flowCase.getReferId());
+        }
         Requisition requisition = requisitionProvider.findRequisitionById(cmd.getRequisitionId());
         GetRequisitionDetailResponse response = new GetRequisitionDetailResponse();
         response.setAmount(requisition.getAmount().toPlainString());
@@ -111,6 +131,11 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setDescription(requisition.getDescription());
         response.setTheme(requisition.getTheme());
         response.setTypeId(requisition.getRequisitionTypeId());
+        response.setFileName(requisition.getFileName());
+        FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.REQUISITION_MODULE, null, null, "requisitionId", cmd.getRequisitionId(), true);
+        if(flowcase!=null){
+            response.setFlowCaseId(flowcase.getId());
+        }
         return response;
     }
 
@@ -137,4 +162,32 @@ public class RequisitionServiceImpl implements RequisitionService {
         return requisitionProvider.getNameById(requisitionId);
     }
 
+    @Override
+    public ListRequisitionsResponse listRequisitionsForSecondParty(ListRequisitionsCommand cmd) {
+        ListRequisitionsResponse response = new ListRequisitionsResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
+        if(result.size() > pageSize){
+            result.remove(result.size()-1);
+            response.setNextPageAnchor(pageSize + pageAnchor);
+        }
+        response.setList(result);
+        return response;
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListPMOrganizationsResponse listPMOrganizationsResponse = organizationService.listPMOrganizations(cmd);
+        Long currentOrgId = null;
+        try{
+            currentOrgId = listPMOrganizationsResponse.getDtos().get(0).getId();
+        }catch (ArrayIndexOutOfBoundsException e){
+        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.REQUISITION_MODULE, (byte)13, null, null, communityId);
+    }
 }

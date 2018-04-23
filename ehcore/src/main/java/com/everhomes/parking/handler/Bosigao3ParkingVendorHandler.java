@@ -136,7 +136,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		if(entity.isSuccess()) {
 			JSONObject obj = (JSONObject) entity.getData();
-			Integer result = obj.getInteger("SendResult");
+			Integer result = obj.getInteger("Result");
 			if (0 == result) {
 				return true;
 			}

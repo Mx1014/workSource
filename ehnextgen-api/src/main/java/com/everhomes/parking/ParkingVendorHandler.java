@@ -3,8 +3,11 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public interface ParkingVendorHandler {
     String PARKING_VENDOR_PREFIX = "ParkingVendor-";
@@ -113,4 +116,15 @@ public interface ParkingVendorHandler {
      * @return
      */
     ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd);
+
+    /**
+     * excel导出
+     * @param list
+     * @param sheet
+     */
+    void setCellValues(List<ParkingRechargeOrder> list, Sheet sheet);
+
+    List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r);
+
+    String applyTempCard(ParkingClearanceLog log);
 }

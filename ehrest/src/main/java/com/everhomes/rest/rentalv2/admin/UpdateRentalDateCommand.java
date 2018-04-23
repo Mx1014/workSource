@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId: 资源id</li> 
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
- * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天List< Integer></li>
+ * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天Integer列表</li>
  * <li>closeDates: 关闭日期</li>
  * </ul>
  */

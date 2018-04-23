@@ -21,8 +21,9 @@ public enum EquipmentTaskStatus {
 	CLOSE((byte) 4, "任务完成待审核"),
 	DELAY((byte) 5, "任务已延期"),
 	QUALIFIED((byte) 6, "任务完成审核通过"),
-	REVIEW_DELAY((byte) 7, "任务完成审批过期");
-	
+	REVIEW_DELAY((byte) 7, "任务完成审批过期"),
+	PERSONAL_DONE((byte) 8, "个人已经完成");
+
 	private byte code;
 	private String name;
 	

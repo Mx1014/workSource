@@ -823,6 +823,13 @@ public class ForumServiceImpl implements ForumService {
 	            
 	            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
 	            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+	            if(post.getStartTime() != null){
+                    dto.setStartTime(post.getStartTime().getTime());
+                }
+
+                if(post.getEndTime() != null){
+                    dto.setEndTime(post.getEndTime().getTime());
+                }
 	            
 	            //attachment也要转成dto modified by xiongying 20160920
 	            List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();
@@ -2352,7 +2359,7 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
 
-        checkStickPostPrivilege(operatorId, cmd.getOrganizationId());
+        checkStickPostPrivilege(operatorId, cmd.getOrganizationId(), cmd.getPostId());
         checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
 
         dbProvider.execute((status) -> {
@@ -2383,7 +2390,7 @@ public class ForumServiceImpl implements ForumService {
         });
     }
 
-    private void checkStickPostPrivilege(Long operatorId, Long organizationId) {
+    private void checkStickPostPrivilege(Long operatorId, Long organizationId, Long postId) {
 
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
@@ -2391,9 +2398,33 @@ public class ForumServiceImpl implements ForumService {
         if(resolver.checkSuperAdmin(operatorId, organizationId)){
             return;
         }
+
+        //检查该用户是否是该该帖子所在群组的创建者。
+        boolean result = checkGroupCreater(operatorId, postId);
+        if(result){
+            return;
+        }
+
         //检查超级管理员，此处不成立会报错
         resolver.checkUserPrivilege(operatorId, 0);
 
+    }
+
+
+    private boolean checkGroupCreater(Long userId, Long postId){
+
+        boolean result = false;
+
+        Post postById = forumProvider.findPostById(postId);
+        Group group = null;
+        if(postById != null){
+            group = groupService.findGroupByForumId(postById.getForumId());
+        }
+
+        if(group != null && userId != null && userId.equals(group.getCreatorUid())){
+            result = true;
+        }
+        return result;
     }
 
     private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
@@ -6951,12 +6982,31 @@ public class ForumServiceImpl implements ForumService {
         return res;
     }
 
-    private void scheduleAnnouncement(Post post){
 
+    @Override
+    public ListTopicsByForumEntryIdResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd) {
 
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20L);
+        }
+        FindDefaultForumCommand defaultForumCommand = new FindDefaultForumCommand();
+        defaultForumCommand.setNamespaceId(cmd.getNamespaceId());
+        FindDefaultForumResponse defaultForum = findDefaultForum(defaultForumCommand);
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+
+        List<Post> posts = this.forumProvider.queryPosts(locator, cmd.getPageSize().intValue() + 1, (loc, query) -> {
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(defaultForum.getDefaultForum().getId()));
+            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+            query.addConditions(Tables.EH_FORUM_POSTS.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            return query;
+        });
+
+        List<PostDTO> collect = posts.stream().map(r -> ConvertHelper.convert(r, PostDTO.class)).collect(Collectors.toList());
+        ListTopicsByForumEntryIdResponse response = new ListTopicsByForumEntryIdResponse();
+        response.setDtos(collect);
+        return response;
     }
-
-
-
-
 }

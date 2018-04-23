@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>xData:x轴数据<li>
- * <li>yData:y轴数据<li>
+ * <li>xData:x轴数据</li>
+ * <li>yData:y轴数据</li>
  *</ul>
  */
 public class LineChart {

@@ -1,7 +1,9 @@
 // @formatter:off
 package com.everhomes.user;
 
-
+import com.alibaba.fastjson.JSON;
+import com.everhomes.PictureValidate.PictureValidateService;
+import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -62,17 +64,25 @@ import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
+import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.point.UserLevel;
 import com.everhomes.point.UserPointService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -85,11 +95,14 @@ import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -104,8 +117,8 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -116,9 +129,19 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -129,7 +152,12 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -167,6 +195,8 @@ public class UserServiceImpl implements UserService {
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 	private static final Byte SCENE_EXAMPLE = 5;
 
+	private static final String SCAN_FOR_LOGON_SERVER = "http://web.zuolin.com";
+
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
@@ -175,7 +205,16 @@ public class UserServiceImpl implements UserService {
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @Autowired
+
+	private static String ANBANG_CLIENTID;
+	private static String ANBANG_CLIENTSECRET;
+	private static String ANBANG_OAUTH_URL;
+	private static String ANBANG_USERS_URL;
+	private static String ANBANG_CURRENT_USER_URL;
+	private static Integer ANBANG_NAMESPACE_ID;
+
+
+	@Autowired
 	private DbProvider dbProvider;
 
 	@Autowired
@@ -317,6 +356,12 @@ public class UserServiceImpl implements UserService {
 	private NamespaceResourceService namespaceResourceService;
 
 	@Autowired
+	List<FunctionCardHandler> functionCardHandlers;
+
+	@Autowired
+	private QRCodeService qrCodeService;
+	
+	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
 
 //
@@ -329,12 +374,27 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private CommunityService communityService;
 
+	@Autowired
+    private PictureValidateService pictureValidateService;
+
 
 	private static final String DEVICE_KEY = "device_login";
 
 	@PostConstruct
 	public void setup() {
 		localBus.subscribe("border.close", LocalBusMessageDispatcher.getDispatcher(this));
+	}
+
+	/**
+	 * 从数据库Load安邦的配置信息
+	 */
+	private void loadAnbangConfigFromDb(){
+		ANBANG_NAMESPACE_ID = configurationProvider.getIntValue("anbang.namespace.id", 999949);
+		ANBANG_OAUTH_URL =  configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/auth/oauth/token";
+		ANBANG_CLIENTID = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientid", "zuolin");
+		ANBANG_CLIENTSECRET = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.clientsecret", "enVvbGluMjAxODAxMDI=");
+		ANBANG_USERS_URL = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/permission/user/synchronization";
+		ANBANG_CURRENT_USER_URL = configurationProvider.getValue(ANBANG_NAMESPACE_ID, "anbang.oauth.url", "http://139.196.255.176:8000") + "/api/auth/current-user";
 	}
 
 	@Override
@@ -421,7 +481,7 @@ public class UserServiceImpl implements UserService {
         });
 
         LOGGER.info("Send verfication code: " + identifier.getVerificationCode() + " for new user: " + identifierToken);
-        sendVerificationCodeSms(identifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), identifier.getVerificationCode());
+        sendVerificationCodeSms(identifier.getNamespaceId(), this.getRegionPhoneNumber(identifierToken, cmd.getRegionCode()), identifier.getVerificationCode());
 
         SignupToken signupToken = new SignupToken(identifier.getOwnerUid(), identifierType, identifierToken);
 		if(StringUtils.isEmpty(signupToken.getIdentifierToken())) {
@@ -659,14 +719,14 @@ public class UserServiceImpl implements UserService {
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
 				//增加区号发送短信 by sfyan 20161012
-				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
 			} else {
 
 				// TODO
 				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
-				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -898,14 +958,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User logonDryrun(String userIdentifierToken, String password) {
+	public User logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
 		User user;
 		user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
             }
-			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
+			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(identifier != null) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
@@ -1642,6 +1702,9 @@ public class UserServiceImpl implements UserService {
 	public void setUserInfo(SetUserInfoCommand cmd) {
 		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
 
+		// 修改用户信息之前的user
+        User oldUser = ConvertHelper.convert(user, User.class);
+
 		user.setAvatar(cmd.getAvatarUri());
 		String birthdayString = cmd.getBirthday();
 		if(StringUtils.isNotEmpty(birthdayString)) {
@@ -1674,6 +1737,9 @@ public class UserServiceImpl implements UserService {
             event.setEntityType(EntityType.USER.getCode());
             event.setEntityId(user.getId());
             event.setEventName(SystemEvent.ACCOUNT_COMPLETE_INFO.dft());
+
+            event.addParam("oldUser", StringHelper.toJsonString(oldUser));
+            event.addParam("newUser", StringHelper.toJsonString(user));
         });
 	}
 
@@ -1832,13 +1898,34 @@ public class UserServiceImpl implements UserService {
         userIdentifier.setRegionCode(cmd.getRegionCode());
         userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
 
         this.userProvider.updateIdentifier(userIdentifier);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
         }
+	}
+
+
+
+	@Override
+	public void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request) {
+
+		//校验图片验证码
+		Boolean validateFlag = pictureValidateService.validateCode(request, cmd.getPictureCode());
+		if(!validateFlag){
+			LOGGER.error("invalid picture code, validate fail");
+			throw errorWith(PictureValidateServiceErrorCode.SCOPE,
+					PictureValidateServiceErrorCode.ERROR_INVALID_CODE, "invalid picture code");
+		}
+
+		//发送手机验证码
+		ResendVerificationCodeByIdentifierCommand sendcmd = new ResendVerificationCodeByIdentifierCommand();
+		sendcmd.setNamespaceId(cmd.getNamespaceId());
+		sendcmd.setIdentifier(cmd.getIdentifier());
+		sendcmd.setRegionCode(cmd.getRegionCode());
+		resendVerficationCode(sendcmd, request);
 	}
 
 	@Override
@@ -2612,7 +2699,7 @@ public class UserServiceImpl implements UserService {
 	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
 	    if("true".equalsIgnoreCase(value)) {
 	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
-	        sendVerificationCodeSms(namespaceId,this.getYzxRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
+	        sendVerificationCodeSms(namespaceId,this.getRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
 	    }
 	}
 
@@ -2985,10 +3072,6 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-    public static void main(String[] args) {
-        System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
-    }
-
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
 		SceneDTO sceneDto = new SceneDTO();
@@ -3114,7 +3197,9 @@ public class UserServiceImpl implements UserService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		checkSceneToken(userId, cmd.getSceneToken());
+		if(!StringUtils.isEmpty(cmd.getSceneToken())) {
+		    checkSceneToken(userId, cmd.getSceneToken());    
+		}
 
 		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
 		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
@@ -3767,6 +3852,13 @@ public class UserServiceImpl implements UserService {
 		String namespaceUserToken = user.getNamespaceUserToken();
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
+
+			//将微信头像下载下来
+			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
+			if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+				user.setAvatar(fileLocationDTO.getUri());
+			}
+
 			userProvider.createUser(user);
 
 			//设定默认园区  add by  yanjun 20170915
@@ -4151,7 +4243,7 @@ public class UserServiceImpl implements UserService {
                 log.setOwnerUid(currUserId);
                 userIdentifierLogProvider.createUserIdentifierLog(log);
             }
-            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
         }
         // 给新手机号发送短信验证码
         else {
@@ -4175,7 +4267,7 @@ public class UserServiceImpl implements UserService {
                         "please try again to the first step");
             }
 
-            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
         }
     }
 
@@ -4373,7 +4465,7 @@ public class UserServiceImpl implements UserService {
                 List<Tuple<String, Object>> variables = smsProvider.toTupleList("newIdentifier", log.getNewIdentifier());
                 String templateScope = SmsTemplateCode.SCOPE;
                 int templateId = SmsTemplateCode.RESET_IDENTIFIER_APPEAL_SUCCESS_CODE;
-                smsProvider.sendSms(log.getNamespaceId(), getYzxRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
+                smsProvider.sendSms(log.getNamespaceId(), getRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
                 break;
             case INACTIVE:
                 String messageBody = localeStringService.getLocalizedString(UserLocalStringCode.SCOPE, UserLocalStringCode.REJECT_APPEAL_IDENTIFIER_CODE, locale, "");
@@ -4421,9 +4513,9 @@ public class UserServiceImpl implements UserService {
 		return sign;
 	}
 
-	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
+	private String getRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
-		if(null == regionCode || 86 == regionCode ){
+		if(null == regionCode || 86 == regionCode){
 			return identifierToken;
 		}
 		return "00" + regionCode + identifierToken;
@@ -4752,6 +4844,8 @@ public class UserServiceImpl implements UserService {
 				}
 				return dto;
 			}
+		}else{
+        	return dto;
 		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
@@ -4813,6 +4907,22 @@ public class UserServiceImpl implements UserService {
 
 		return communityId;
 	}
+	
+	   private Long getOrgIdBySceneToken(SceneTokenDTO sceneTokenDTO) {
+	        SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+
+	        switch (sceneType) {
+	            case PM_ADMIN:// 无小区ID
+	            case ENTERPRISE: // 增加两场景，与园区企业保持一致
+	            case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致
+	                return sceneTokenDTO.getEntityId();
+	            default:
+	                break;
+	        }
+
+	        return null;
+	    }
+
 
 	public List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		if(cmd.getSceneType() == null){
@@ -5409,12 +5519,19 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
-    public SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
-            HttpServletRequest request, HttpServletResponse response) {
+    public SystemInfoResponse updateUserBySystemInfo(
+            SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         User user = UserContext.current().getUser();
         UserLogin login = UserContext.current().getLogin();
+
         SystemInfoResponse resp = new SystemInfoResponse();
-        String urlInBrowser = configProvider.getValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER, "https://upload.zuolin.com");
+        String urlInBrowser = configProvider.getValue(
+                namespaceId,
+                ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER,
+                "https://upload.zuolin.com");
+
         resp.setUploadUrlInBrowser(urlInBrowser);
         
         if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
@@ -5450,17 +5567,511 @@ public class UserServiceImpl implements UserService {
             resp.setContentServer(contentServerService.getContentServer());
         }
 
-        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
-
+        Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
 
-		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
-
+		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
-        
+
+		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
+
+		// 客户端资源缓存配置
+		String clientCacheConfig = configurationProvider.getValue(
+		        namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
+                // Default config
+                "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
+		resp.setContentCacheConfig(
+		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+
         return resp;
     }
 
+	@Override
+	public void syncUsersFromAnBangWuYe( SyncUsersFromAnBangWuYeCommand cmd) {
+		this.loadAnbangConfigFromDb();
+		//调用授权接口
+		String timestamp = null;
+		if(cmd.getIsAll() == 1){//全量
+			timestamp = null;
+		}else if(cmd.getIsAll() == 0){//从上次同步时间的增量
+			SimpleDateFormat  formatter = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
+			timestamp = formatter.format(DateHelper.currentGMTTime());
+		}
+		List<String> timestampList = new ArrayList<>();
+		timestampList.add(timestamp);
+
+		String secret = String.format("%s:%s", ANBANG_CLIENTID, ANBANG_CLIENTSECRET);
+		String baseStr = new String(Base64.getEncoder().encode(secret.getBytes()));
+
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+		headerParam.add("Authorization", "Basic " + baseStr);
+
+
+
+		MultiValueMap<String, Object> bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("client_id", ANBANG_CLIENTID);
+		bodyParam.add("client_secret", ANBANG_CLIENTSECRET);
+		bodyParam.add("grant_type", "client_credentials");
+
+		dbProvider.execute(r -> {
+			try {
+				restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+					@Override
+					public void onSuccess(ResponseEntity<String> result) {
+						Map resultMap = JSON.parseObject(result.getBody().toString());
+						String acess_token = String.valueOf(resultMap.get("access_token"));
+
+
+						Map headerParam = new HashMap();
+						headerParam.put("Authorization", "bearer "+ acess_token);
+
+						StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+						if(timestampList.get(0) != null){
+							getUrl.append("?").append("startDate=").append(timestampList.get(0));
+						}
+
+						try {
+							ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString() , headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
+
+								@Override
+								public void onSuccess(ResponseEntity<String> result) {
+									List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
+									if(userList != null && userList.size() > 0) {
+//										if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
+//											// 删除全部的用户
+//											userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
+//										}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+//											//如果有之前同步过的用户，删掉重建
+//											List<String> namespaceUserTokens = new ArrayList<>();
+//											for (Map userInfo : userList) {
+//												namespaceUserTokens.add(userInfo.get("id").toString());
+//											}
+//											userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
+//										}
+										LOGGER.debug("AnBang user size" + userList.size());
+
+										List<User> users = userList.stream().map(r2 -> {
+											User user = new User();
+											user.setNamespaceId(ANBANG_NAMESPACE_ID);
+											user.setNickName(r2.get("nickname") != null ? r2.get("nickname").toString() : "");
+											user.setIdentifierToken(r2.get("login") != null ? r2.get("login").toString() : "");
+											user.setAvatar(r2.get("avatar") != null ? r2.get("avatar").toString() : "");
+											user.setCreateTime(r2.get("createdDate") != null ?Timestamp.valueOf(r2.get("createdDate").toString()) : null);
+											user.setPasswordHash(r2.get("password") != null ? r2.get("password").toString() : "");
+											user.setStatus(UserStatus.ACTIVE.getCode());
+											user.setLocale(Locale.CHINA.toString());
+											user.setNamespaceUserToken(r2.get("id") != null ? r2.get("id").toString() : "");
+											user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+											user.setThirdData(r2.toString());
+											return user;
+										}).collect(Collectors.toList());
+
+										//create
+										createUsersAndUserIdentifiers(users);
+										LOGGER.debug("AnBang createUsersAndUserIdentifiers completed");
+									}
+								}
+
+								@Override
+								public void onFailure(Throwable ex) {
+									LOGGER.error(ex.getMessage());
+									throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+											"Unable to sync2");
+								}
+							});
+						} catch (UnsupportedEncodingException e) {
+							e.printStackTrace();
+						}
+					}
+
+					@Override
+					public void onFailure(Throwable ex) {
+						LOGGER.error(ex.getMessage());
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								"Unable to sync1");
+					}
+				});
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
+	}
+	
+	@Override
+	public String makeAnbangRedirectUrl(Long userId, String location, Map<String, String[]> paramMap) {
+		this.loadAnbangConfigFromDb();
+	    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+	    
+	    if(paramMap.get("sceneToken") != null) {
+	        String sceneToken = StringUtils.join(paramMap.get("sceneToken"));
+	        SceneTokenDTO sceneDTO = checkSceneToken(userId, sceneToken);
+	        Long communityId = getCommunityIdBySceneToken(sceneDTO);
+	        Long orgId = getOrgIdBySceneToken(sceneDTO);
+	        if(communityId != null) {
+	            builder.queryParam("communityId", communityId);
+	        }
+	        if(orgId != null) {
+	            builder.queryParam("organizationId", orgId);
+	        }
+	    }
+	    
+	    builder.queryParam("ns", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("namespaceId", ANBANG_NAMESPACE_ID);
+	    builder.queryParam("userId", userId);
+	    
+	    for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+	        if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && !entry.getKey().equals("abtoken")) {
+	            builder.queryParam(entry.getKey(), entry.getValue());
+	           }
+	    }
+	    
+	    return builder.build().toUriString();
+	}
+
+	@Override
+	public void pushUserDemo() {
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+
+		Map bodyMap = new HashMap();
+		bodyMap.put("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+//		bodyMap.put("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyMap.put("timestamp", "1515490912375");
+		bodyMap.put("nonce", "10036426855237293345");
+		bodyMap.put("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyMap.put("nickName", "慧盟管家");
+		bodyMap.put("identifierToken", "18844157372");
+		bodyMap.put("avatar", null);
+		bodyMap.put("namespaceUserToken", "2018103116310798698");
+
+		MultiValueMap bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+//		bodyParam.add("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyParam.add("timestamp", "1515490912375");
+		bodyParam.add("nonce", "10036426855237293345");
+		bodyParam.add("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyParam.add("nickName", "慧盟管家");
+		bodyParam.add("identifierToken", "18844157372");
+		bodyParam.add("avatar", null);
+		bodyParam.add("namespaceUserToken", "2018103116310798698");
+
+		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
+
+
+		try {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://printtest.zuolin.com/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                    LOGGER.debug(result.toString());
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error(ex.getMessage());
+                }
+            });
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
+		this.loadAnbangConfigFromDb();
+		dbProvider.execute(r -> {
+			List<String> tokens = Collections.singletonList(cmd.getNamespaceUserToken());
+//			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
+			User user = new User();
+			user.setStatus(UserStatus.ACTIVE.getCode());
+			user.setNamespaceId(ANBANG_NAMESPACE_ID);
+			user.setNickName(cmd.getNickName());
+			user.setGender(UserGender.UNDISCLOSURED.getCode());
+			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+			user.setNamespaceUserToken(cmd.getNamespaceUserToken());
+			user.setLevel(UserLevel.L1.getCode());
+			user.setAvatar(cmd.getAvatar() != null ? cmd.getAvatar() : "");
+			String salt = EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			try {
+				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
+			} catch (Exception e) {
+				LOGGER.error("encode password failed");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+			}
+
+			List<User> users = new ArrayList<>();
+			users.add(user);
+			createUsersAndUserIdentifiers(users);
+			return null;
+		});
+		return null;
+	}
+	
+	@Override
+	public User getUserFromAnBangToken(String token) {
+		this.loadAnbangConfigFromDb();
+        StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
+        Map headerParam = new HashMap();
+        headerParam.put("Authorization", "bearer " + token);
+
+	    try {
+            ResponseEntity<String> result = restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null);
+            Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
+            String userIdentifierToken = currentUser.get("login").toString();
+            int regionCode = 86;
+            int namespaceId = ANBANG_NAMESPACE_ID;
+            User user = userProvider.findUserByAccountName(userIdentifierToken);
+            if (user == null) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+                // 把 regionCode 的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+                if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
+                    user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                }
+                
+            }
+            
+            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+                return null;
+            }
+            
+            return user;
+            
+	    } catch(Exception ex) {
+	        LOGGER.error("anbang error", ex);
+	        return null;
+	    }
+	    
+	}
+
+	@Override
+	public UserLogin verifyUserByTokenFromAnBang(String token) {
+		this.loadAnbangConfigFromDb();
+		List<UserLogin> logins = new ArrayList<>();
+		User user = getUserFromAnBangToken(token);
+		if(user == null) {
+		    return null;
+		}
+		
+		dbProvider.execute(r -> {
+				UserLogin login = createLogin(ANBANG_NAMESPACE_ID, user, null, null);
+				login.setStatus(UserLoginStatus.LOGGED_IN);
+				logins.add(login);
+				return null;
+		});
+		return logins.size() > 0 ? logins.get(0) : null;
+
+	}
+	
+	@Override
+	public List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
+		this.loadAnbangConfigFromDb();
+        User user = getUserFromAnBangToken(cmd.getAbtoken());
+        if(user != null) {
+            ListUserRelatedScenesCommand cmd2 = new ListUserRelatedScenesCommand();
+            cmd2.setDefaultFlag(0);
+            UserContext.current().setUser(user);
+            UserContext.current().setNamespaceId(ANBANG_NAMESPACE_ID);
+            List<SceneDTO> sceneDtoList = listUserRelatedScenes(cmd2);
+            return sceneDtoList;
+        }
+        
+        return null;
+   }
+
+	@Override
+	public void logonBuAnBangToken() {
+
+	}
+
+	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
+
+ 		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
+		ListenableFuture<ResponseEntity<String>> future = template.exchange(url, method, requestEntity, String.class);
+
+		if(responseCallback != null) {
+			future.addCallback(responseCallback);
+		}
+
+		return future;
+	}
+
+	public ResponseEntity<String> restCallSync(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam) throws UnsupportedEncodingException {
+		RestTemplate template = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
+
+		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
+		ResponseEntity<String> future = template.exchange(url, method, requestEntity, String.class);
+
+		return future;
+	}
+
+	private void createUsersAndUserIdentifiers(List<User> users){
+		for (User user : users) {
+			UserIdentifier old_userIdentifier = this.userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), user.getIdentifierToken());
+
+			if(old_userIdentifier != null){
+				User old_user = this.userProvider.findUserById(old_userIdentifier.getOwnerUid());
+				if(old_user != null){
+					old_user.setUpdateTime(user.getUpdateTime());
+					old_user.setNamespaceUserToken(user.getNamespaceUserToken());
+					old_user.setNamespaceUserType(user.getNamespaceUserType());
+					this.userProvider.updateUser(old_user);
+					
+               old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+               old_userIdentifier.setRegionCode(86);
+               old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+               this.userProvider.updateIdentifierByUid(old_userIdentifier);
+				} else {
+				    old_userIdentifier.setClaimStatus(IdentifierClaimStatus.FREE_STANDING.getCode());
+				    this.userProvider.deleteIdentifier(old_userIdentifier);
+				    old_userIdentifier = null;
+				}
+			}
+			
+			if(old_userIdentifier == null) {
+				this.userProvider.createUser(user);
+				UserIdentifier userIdentifier = new UserIdentifier();
+				userIdentifier.setOwnerUid(user.getId());
+				userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				userIdentifier.setIdentifierToken(user.getIdentifierToken());
+				userIdentifier.setNamespaceId(user.getNamespaceId());
+				userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userIdentifier.setRegionCode(86);
+				userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				this.userProvider.createIdentifier(userIdentifier);
+			}
+		}
+	}
+
+	// 生成随机key
+	@Override
+    public QRCodeDTO querySubjectIdForScan(){
+		String uuid = UUID.randomUUID().toString();
+		String subjectId = "waitScanForLogon" + uuid.replace("-", "");
+		NewQRCodeCommand cmd = new NewQRCodeCommand();
+		cmd.setActionData(subjectId);
+		return qrCodeService.createQRCode(cmd);
+	}
+
+	// 登录等待
+	@Override
+	public DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest contextRequest, HttpServletResponse contextResponse){
+
+
+		DeferredResult<RestResponse> finalResult =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
+			@Override
+			public void handleResult(Object result) {
+				RestResponse restResponse = (RestResponse)result;
+				BlockingEventResponse response = (BlockingEventResponse)restResponse.getResponseObject();
+				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+				if(!response.getSubject().equals("blockingEventKey." + subjectId)){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+				if(StringUtils.isEmpty(response.getMessage())){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+
+				String token = null;
+				try {
+					token = URLDecoder.decode(response.getMessage(), "utf-8");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+//					String[] tokenParam = token.substring(1,token.length()-2).split("&");
+				if(token.indexOf("\"") == 0)
+					token = token.substring(1, token.length());
+				if(token.indexOf("\"") == token.length() - 1)
+					token = token.substring(0, token.length() -1);
+				String[] tokenParam = token.trim().split("&");
+				String salt = tokenParam[0];
+				if (salt.equals(SALT)) {
+					Long userId = Long.valueOf(tokenParam[1]);
+					Integer namespaceId = Integer.valueOf(tokenParam[2]);
+					String userToken = tokenParam[3];
+					LOGGER.debug("userLoginToken = {}", userToken);
+
+					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+					Map valueMap = new HashMap();
+					valueMap.put("userLogin", GsonUtil.toJson(logintoken));
+					valueMap.put("args",tokenParam[4]);
+					valueMap.put("contentServer",contentServerService.getContentServer());
+					response.setMessage(GsonUtil.toJson(valueMap));
+					restResponse.setResponseObject(response);
+					restResponse.setErrorCode(ErrorCodes.SUCCESS);
+					restResponse.setErrorDescription("OK");
+
+//					//todo 验证
+					UserLogin origin_login = logonByToken(logintoken);
+					User user = userProvider.findUserById(origin_login.getUserId());
+					UserLogin login = createLogin(namespaceId, user, null, null);
+					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
+					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
+				} else {
+					restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+			}
+
+		});
+
+		return finalResult;
+	}
+
+	private static final String SALT = "salt";
+
+	// 获取当前准备登录用户的混淆key
+	@Override
+	public String getSercetKeyForScan(String args) {
+		String userToken = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + userToken + "&" + args;
+		String token = null;
+		try {
+			token = URLEncoder.encode(plain, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return token;
+	}
+
+	// 扫码登录
+	@Override
+	public void logonByScan(String subjectId, String message){
+		this.messagingService.signalBlockingEvent(subjectId, message, 3*1000);
+	}
+
+
+	// 获取统一的功能卡片
+	@Override
+	public List<FunctionCardDto> listUserRelatedCards(){
+		List<FunctionCardDto> cardDtos = new ArrayList<>();
+		functionCardHandlers.forEach(r->{
+			cardDtos.add(r.listCards(1000000, 1L));
+		});
+		return cardDtos;
+	}
 	@Override
 	public SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd) {
 

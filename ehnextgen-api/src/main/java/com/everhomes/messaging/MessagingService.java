@@ -1,12 +1,14 @@
 // @formatter:off
 package com.everhomes.messaging;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.user.UserLogin;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Message routing service
@@ -86,5 +88,9 @@ public interface MessagingService {
     void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption);
     FetchMessageCommandResponse fetchRecentToPastMessagesAny(FetchRecentToPastMessageAdminCommand cmd);
-     
+
+    DeferredResult<RestResponse> blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler);
+
+    String signalBlockingEvent(String subjectId, String message, Integer timeOut);
+
 }

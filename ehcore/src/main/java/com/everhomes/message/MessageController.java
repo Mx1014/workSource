@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.message;
 
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.BlockingEventResponse;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController
 @RequestMapping("/message")
@@ -30,6 +34,10 @@ public class MessageController extends ControllerBase {
 	
 	@Autowired
 	private MessageService messageService;
+
+	@Autowired
+	private MessagingService messagingService;
+
 	@Autowired
 	private StatEventDeviceLogProvider statEventDeviceLogProvider;
 
@@ -42,6 +50,17 @@ public class MessageController extends ControllerBase {
 	public RestResponse pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd){
 		messageService.pushMessageToAdminAndBusinessContacts(cmd);
 		return new RestResponse();
+	}
+
+
+	@RequestMapping("blockingEvent")
+	public DeferredResult<RestResponse> blockingEvent(BlockingEventCommand cmd){
+		return messagingService.blockingEvent(cmd.getSubjectId(), cmd.getType(), cmd.getTimeOut(), null);
+	}
+
+	@RequestMapping("signalBlockingEvent")
+	public String signalBlockingEvent(BlockingEventCommand cmd){
+		return messagingService.signalBlockingEvent(cmd.getSubjectId(), cmd.getMessage(), cmd.getTimeOut());
 	}
 
 	/**

@@ -7,7 +7,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>nextPageOffset：下一页页码</li>
  * <li>requests: 成员列表，参考{@link  com.everhomes.rest.family.FamilyMemberFullDTO}</li>

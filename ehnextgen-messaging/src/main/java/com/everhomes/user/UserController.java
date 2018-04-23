@@ -28,10 +28,13 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
@@ -47,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -265,6 +269,27 @@ public class UserController extends ControllerBase {
         SignupToken token = userService.signup(newCmd, request);
         return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
     }
+
+	@RequestMapping("signupForCodeRequest")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse signupForCodeRequest(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+		// 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+		// 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+		// by lqs 20170714
+
+
+		// 敢哥说开一个口给创业场用
+		if(cmd.getNamespaceId().intValue() != 999964){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					100000000, "Forbidden");
+		}
+		SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+		newCmd.setToken(cmd.getUserIdentifier());
+
+		SignupToken token = userService.signup(newCmd, request);
+		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+	}
 
 	/**
 	 * <b>URL: /user/resendVerificationCode</b>
@@ -764,6 +789,24 @@ public class UserController extends ControllerBase {
         return new RestResponse("OK");
     }
 
+
+	/**
+	 * <b>URL: /user/resendVerificationCodeByIdentifierAndAppKey</b>
+	 * <p></p>
+	 * @return OK
+	 */
+	@RequestMapping("sendCodeWithPictureValidate")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
+		assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+		userService.sendCodeWithPictureValidate(cmd, request);
+		return new RestResponse("OK");
+	}
+
+
+
 	/**
 	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
 	 * <p>发送修改手机号的短信验证码</p>
@@ -1095,7 +1138,7 @@ public class UserController extends ControllerBase {
 
 		//TODO use uri parser to do better hear.
 		String uri = cmd.getUri();
-		int i = uri.indexOf("#");
+		int i =  uri.indexOf("#");
 		if(i > 0) {
 			uri = uri.substring(0, i);
 		}
@@ -1365,6 +1408,7 @@ public class UserController extends ControllerBase {
 	 * @return  OK
 	 */
 	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RequireAuthentication(false)
 	@RestReturn(String.class)
 	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
 		userService.checkVerifyCodeAndResetPassword(cmd);
@@ -1394,7 +1438,7 @@ public class UserController extends ControllerBase {
 	
 	/**
      * <b>URL: /user/systemInfo</b>
-     * <p>登录</p>
+     * <p>SystemInfo</p>
      * @return {@link SystemInfoResponse}
      */
     @RequestMapping("systemInfo")
@@ -1421,4 +1465,77 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp; 
     }
+
+	/**
+	 * <b>URL: /user/querySubjectIdForScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("querySubjectIdForScan")
+	@RequireAuthentication(false)
+	@RestReturn(QRCodeDTO.class)
+	public RestResponse querySubjectIdForScan() {
+		RestResponse resp = new RestResponse(userService.querySubjectIdForScan());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/waitScanForLogon</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("waitScanForLogon")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public DeferredResult<RestResponse> waitScanForLogon(BlockingEventCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		return userService.waitScanForLogon(cmd.getSubjectId(), request, response);
+	}
+
+
+	/**
+	 * <b>URL: /user/getSercetKeyForScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("getSercetKeyForScan")
+	@RestReturn(String.class)
+	public RestResponse getSercetKeyForScan(GetSercetKeyForScanCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(cmd.getArgs()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/logonByScan</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("logonByScan")
+	@RestReturn(String.class)
+	public RestResponse logonByScan(BlockingEventCommand cmd) {
+		userService.logonByScan(cmd.getSubjectId(), cmd.getMessage());
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/listUserRelatedCards</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("listUserRelatedCards")
+	@RestReturn(String.class)
+	public RestResponse listUserRelatedCards() {
+		RestResponse resp = new RestResponse(userService.listUserRelatedCards());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 }

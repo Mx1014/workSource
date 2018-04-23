@@ -8,8 +8,10 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -330,4 +332,50 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
         return null;
     }
+
+    @Override
+    public void setCellValues(List<ParkingRechargeOrder> list, Sheet sheet) {
+        SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for(int i=0, size = list.size();i<size;i++){
+            Row tempRow = sheet.createRow(i + 1);
+            ParkingRechargeOrder order = list.get(i);
+            tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
+            tempRow.createCell(1).setCellValue(order.getPlateNumber());
+            tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
+            tempRow.createCell(3).setCellValue(order.getPayerPhone());
+            tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
+            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
+                    order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+                tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                tempRow.createCell(6).setCellValue(datetimeSF.format(order.getEndPeriod()));
+            }else{
+                tempRow.createCell(5).setCellValue("");
+                tempRow.createCell(6).setCellValue("");
+            }
+            tempRow.createCell(7).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
+            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
+                    order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
+                tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                tempRow.createCell(9).setCellValue(datetimeSF.format(order.getEndPeriod()));
+                tempRow.createCell(10).setCellValue(order.getParkingTime());
+            }else{
+                tempRow.createCell(8).setCellValue("");
+                tempRow.createCell(9).setCellValue("");
+                tempRow.createCell(10).setCellValue("");
+            }
+            tempRow.createCell(11).setCellValue(String.valueOf(order.getPrice().doubleValue()));
+            VendorType type = VendorType.fromCode(order.getPaidType());
+            tempRow.createCell(12).setCellValue(null==type?"":type.getDescribe());
+            tempRow.createCell(13).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+        }
+    }
+    @Override
+    public List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r){
+        return null;
+    }
+    @Override
+    public String applyTempCard(ParkingClearanceLog log){
+        return null;
+    }
+
 }

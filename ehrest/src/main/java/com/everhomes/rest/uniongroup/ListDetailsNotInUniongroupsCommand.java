@@ -3,9 +3,11 @@ package com.everhomes.rest.uniongroup;
 import com.everhomes.util.StringHelper;
 
 /**
+ * <ul>
  * <li>organizaitonId 公司id</li>
  * <li>namespaceId 域空间</li>
  * <li>contactName 联系人</li>
+ * </ul>
  */
 public class ListDetailsNotInUniongroupsCommand {
 

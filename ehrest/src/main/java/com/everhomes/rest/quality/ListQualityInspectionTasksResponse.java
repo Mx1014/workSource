@@ -11,6 +11,7 @@ import java.util.List;
  *  <li>tasks: 参考com.everhomes.rest.quality.QualityInspectionTaskDTO</li>
  *  <li>sampleName: 例行检查名称</li>
  *  <li>todayExecutedCount: 当日已执行任务数</li>
+ *  <li>todayTotalCount: 当日全部任务数</li>
  *  <li>communityCount: 例行检查关联项目数</li>
  *  <li>startTime: 例行检查开始时间</li>
  *  <li>endTime: 例行检查结束时间</li>
@@ -23,6 +24,8 @@ public class ListQualityInspectionTasksResponse {
 	private List<QualityInspectionTaskDTO> tasks;
 
 	private Integer todayExecutedCount;
+
+	private Integer todayTotalCount;
 
 	private String sampleName;
 
@@ -49,6 +52,14 @@ public class ListQualityInspectionTasksResponse {
 
 	public void setTodayExecutedCount(Integer todayExecutedCount) {
 		this.todayExecutedCount = todayExecutedCount;
+	}
+
+	public Integer getTodayTotalCount() {
+		return todayTotalCount;
+	}
+
+	public void setTodayTotalCount(Integer todayTotalCount) {
+		this.todayTotalCount = todayTotalCount;
 	}
 
 	public List<QualityInspectionTaskDTO> getTasks() {

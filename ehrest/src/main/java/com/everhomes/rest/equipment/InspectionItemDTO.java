@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
  *  <li>valueType: 巡检项类型0-none、1-two-tuple、2-range</li>
  *  <li>unit: 单位</li>
  *  <li>valueJason: 值，包含参考值referenceValue和偏差范围offsetRange</li>
+ *  <li>defaultOrder: 巡检项的顺序</li>
  * </ul>
  */
 public class InspectionItemDTO {
@@ -35,6 +36,8 @@ public class InspectionItemDTO {
 
 	//add for offline
 	private  Long standardId;
+
+	private Integer defaultOrder;
 
 	public Long getId() {
 		return id;
@@ -98,6 +101,14 @@ public class InspectionItemDTO {
 
 	public void setStandardId(Long standardId) {
 		this.standardId = standardId;
+	}
+
+	public Integer getDefaultOrder() {
+		return defaultOrder;
+	}
+
+	public void setDefaultOrder(Integer defaultOrder) {
+		this.defaultOrder = defaultOrder;
 	}
 
 	@Override

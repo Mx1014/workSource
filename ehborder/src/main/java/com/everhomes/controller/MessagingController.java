@@ -1,13 +1,9 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.message.GreetingMessage;
+import com.everhomes.message.HelloMessage;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +15,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.everhomes.message.GreetingMessage;
-import com.everhomes.message.HelloMessage;
-import com.everhomes.util.StringHelper;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class MessagingController {
@@ -32,7 +30,10 @@ public class MessagingController {
     
     @Autowired
     private ApplicationContext applicationContext;
-    
+
+//    @Autowired
+//    private BlockingEventHandler blockingEventHandler;
+
     @Value("${admin.auth:@$##fyhbuRR45678}")
     private String auth;
     
@@ -91,4 +92,5 @@ public class MessagingController {
         
         return null;
     }
+
 }

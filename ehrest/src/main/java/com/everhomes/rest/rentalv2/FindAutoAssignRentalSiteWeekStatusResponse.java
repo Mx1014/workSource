@@ -30,10 +30,10 @@ import com.everhomes.util.StringHelper;
  * <li>anchorTime：规则日期</li>  
  * <li>	siteCounts：资源数量</li>
  * <li>	siteNames：资源编号名称列表 {String}</li>
- * <li>siteDays：List<RentalSiteNumberDayRulesDTO>  每一天的单元格</li> 
- * <li>sitePics：List<RentalSitePicDTO> 详情图片多张 </li> 
- * <li>attachments：List<AttachmentDTO> 附件列表 </li> 
- * <li>siteItems：List<SiteItemDTO> 商品列表</li> 
+ * <li>siteDays：每一天的单元格，参考{@link com.everhomes.rest.rentalv2.RentalSiteDayRulesDTO}</li> 
+ * <li>sitePics：详情图片多张，参考{@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li> 
+ * <li>attachments：附件列表，参考{@link com.everhomes.rest.rentalv2.AttachmentDTO} </li> 
+ * <li>siteItems：商品列表，参考{@link com.everhomes.rest.rentalv2.SiteItemDTO}</li> 
  * </ul>
  */
 public class FindAutoAssignRentalSiteWeekStatusResponse {

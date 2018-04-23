@@ -3,10 +3,7 @@ package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
- * <p>
  * <ul>
  * <li>ownerId: 范围id</li>
  * <li>ownerType: 范围类型</li>

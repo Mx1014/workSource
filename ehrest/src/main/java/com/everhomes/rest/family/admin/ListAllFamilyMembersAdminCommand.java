@@ -4,7 +4,6 @@ package com.everhomes.rest.family.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>pageOffset: 当前页码</li>
  * <li>pageSize: 每页的数量</li>

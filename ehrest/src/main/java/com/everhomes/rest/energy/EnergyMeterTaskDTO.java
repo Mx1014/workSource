@@ -36,6 +36,7 @@ import java.util.List;
  *     <li>monthPrompt: 每月读表提示</li>
  *     <li>maxReading: 最大量程</li>
  *     <li>startReading: 起始读数</li>
+ *     <li>meterStatus: 表计状态 参考{@link com.everhomes.rest.energy.EnergyMeterStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/10/23.
  */
@@ -76,6 +77,16 @@ public class EnergyMeterTaskDTO {
     private String billCategory;
 
     private String lastTime;
+
+    private Byte meterStatus;
+
+    public Byte getMeterStatus() {
+        return meterStatus;
+    }
+
+    public void setMeterStatus(Byte meterStatus) {
+        this.meterStatus = meterStatus;
+    }
 
     public String getLastTime() {
         return lastTime;

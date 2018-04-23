@@ -3,7 +3,7 @@ package com.everhomes.rest.domain;
 /**
  * <ul>
  * <li>domain: 域名</li>
- * <ul>
+ * </ul>
  */
 
 public class GetDomainInfoCommand {

@@ -69,7 +69,7 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
     @Override
     public List<Long> listCities() {
         return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID).from(Tables.EH_SOCIAL_SECURITY_BASES)
-                .fetch().map(Record1::value1);
+                .fetch().map(Record1<Long>::value1);
     }
 
     @Override
@@ -126,6 +126,9 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
 
     @Override
     public List<SocialSecurityBase> listSocialSecurityBase(Long cityId, String householdType, byte accumOrSocial) {
+        if (null == cityId) {
+            return null;
+        }
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_BASES)
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId))
                 .and(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(accumOrSocial));
@@ -133,8 +136,12 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
             step.and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType));
 
         }
-        return step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
+        List<SocialSecurityBase> records = step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
+        if (records.size() == 0) {
+            return null;
+        }
+        return records;
     }
 
     private EhSocialSecurityBasesDao getReadWriteDao() {

@@ -321,6 +321,22 @@ public class WarehouseController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /warehouse/searchWarehouseStockLogsByOrder</b>
+     * <p>通过出入库单查看库存日志</p>
+     */
+    @RequestMapping("searchWarehouseStockLogsByOrder")
+    @RestReturn(value = SearchWarehouseStockLogsResponse.class)
+    public RestResponse searchWarehouseStockLogsByOrder(SearchWarehouseStockLogsCommand cmd) {
+
+        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.queryByOrder(cmd);
+
+        RestResponse response = new RestResponse(logs);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
     /**
      * <b>URL: /warehouse/createRequest</b>
@@ -350,6 +366,22 @@ public class WarehouseController extends ControllerBase {
         WarehouseRequestDetailsDTO request = warehouseService.findRequest(cmd);
 
         RestResponse response = new RestResponse(request);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /warehouse/deleteRequest</b>
+     * <p>根据id删除申请</p>
+     */
+    @RequestMapping("deleteRequest")
+    @RestReturn(value = String.class)
+    public RestResponse deleteRequest(DeleteRequestCommand cmd) {
+
+        warehouseService.deleteRequest(cmd);
+
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -661,7 +693,8 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("listMaterialLogsBySupplier")
     @RestReturn(value=ListMaterialLogsBySupplierResponse.class)
     public RestResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
-        RestResponse res = new RestResponse();
+        ListMaterialLogsBySupplierResponse response = warehouseService.listMaterialLogsBySupplier(cmd);
+        RestResponse res = new RestResponse(response);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

@@ -1,61 +1,70 @@
 package com.everhomes.rest.flow;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
+/**
+ * <ul>
+ *     <li>flowEntityId: flowEntityId</li>
+ *     <li>flowEntityType: flowEntityType</li>
+ *     <li>images: images</li>
+ *     <li>title: title</li>
+ *     <li>content: content</li>
+ * </ul>
+ */
 public class FlowPostSubjectDTO {
-	private Long flowEntityId;
-	private String flowEntityType;
-	
-	@ItemType(String.class)
-	private List<String> images;
-	
-	private String title;
-	private String content;
+    private Long flowEntityId;
+    private String flowEntityType;
 
-	public Long getFlowEntityId() {
-		return flowEntityId;
-	}
+    @ItemType(String.class)
+    private List<String> images;
 
-	public void setFlowEntityId(Long flowEntityId) {
-		this.flowEntityId = flowEntityId;
-	}
+    private String title;
+    private String content;
 
-	public String getFlowEntityType() {
-		return flowEntityType;
-	}
+    public Long getFlowEntityId() {
+        return flowEntityId;
+    }
 
-	public void setFlowEntityType(String flowEntityType) {
-		this.flowEntityType = flowEntityType;
-	}
+    public void setFlowEntityId(Long flowEntityId) {
+        this.flowEntityId = flowEntityId;
+    }
 
-	public List<String> getImages() {
-		return images;
-	}
+    public String getFlowEntityType() {
+        return flowEntityType;
+    }
 
-	public void setImages(List<String> images) {
-		this.images = images;
-	}
+    public void setFlowEntityType(String flowEntityType) {
+        this.flowEntityType = flowEntityType;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public List<String> getImages() {
+        return images;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	@Override
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

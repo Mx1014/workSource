@@ -215,7 +215,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 callback.buildCondition(locator, query);
             }
             query.addOrderBy(Tables.EH_FLOW_CASES.ID.desc());
-            query.addLimit(count);
+            query.addLimit(count + 1);
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
 
@@ -223,15 +223,16 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		// 	return ConvertHelper.convert(r, FlowCaseDetail.class);
     		// }).collect(Collectors.toList());
 
-            if(objs.size() >= count) {
+            if(objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
             } else {
                 locator.setAnchor(null);
             }
             return objs;
     	} else {
     		return null;
-    	}   	
+    	}
     }
 
     private Condition buildSearchFlowCaseCmdCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
@@ -244,7 +245,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         cond = cond.and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
         if(locator.getAnchor() != null) {
-            cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+            cond = cond.and(Tables.EH_FLOW_CASES.ID.le(locator.getAnchor()));
         }
 
         if(cmd.getModuleId() != null) {
@@ -252,6 +253,12 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         }
         if(cmd.getOrganizationId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+        }
+        if(cmd.getProjectId() != null) {
+            cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_ID.eq(cmd.getProjectId()));
+        }
+        if(cmd.getProjectType() != null) {
+            cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_TYPE.eq(cmd.getProjectType()));
         }
         if(cmd.getOwnerId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
@@ -261,6 +268,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         }
         if(cmd.getFlowCaseStatus() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        } else {
+           cond = cond.and(Tables.EH_FLOW_CASES.STATUS.notIn(
+                   FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.INVALID.getCode())
+           );
         }
         if(cmd.getServiceType() != null) {
             cond = cond.and(
@@ -324,13 +335,15 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
 
+
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getPageAnchor());
     	}
 
-        FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-        if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
-            Condition cond = buildSearchFlowCaseCmdCondition(locator, cmd);
+    	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+    	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
+
+           Condition cond = buildSearchFlowCaseCmdCondition(locator,cmd);
 
             SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
                     .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
@@ -344,9 +357,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
 
-            if(objs.size() >= count) {
-                objs.remove(objs.size() - 1);
+            if(objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
             } else {
                 locator.setAnchor(null);
             }

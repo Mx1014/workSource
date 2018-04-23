@@ -5,6 +5,7 @@ package com.everhomes.rest.contract;
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
  *     <li>denunciationUid: 退约经办人</li>
+ *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
@@ -16,6 +17,7 @@ public class DenunciationContractCommand {
     private Long partyAId;
 
     private Long denunciationUid;
+    private Long denunciationTime;
 
     private String denunciationReason;
 
@@ -26,6 +28,14 @@ public class DenunciationContractCommand {
     private Integer namespaceId;
 
     private Byte paymentFlag = 0;
+
+    public Long getDenunciationTime() {
+        return denunciationTime;
+    }
+
+    public void setDenunciationTime(Long denunciationTime) {
+        this.denunciationTime = denunciationTime;
+    }
 
     public Byte getPaymentFlag() {
         return paymentFlag;

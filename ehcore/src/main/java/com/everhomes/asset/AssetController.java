@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -15,8 +16,8 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import org.elasticsearch.http.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -366,7 +368,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("listLateFineStandards")
     @RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
-    public RestResponse listLateFineStandards(OwnerIdentityCommand cmd) {
+    public RestResponse listLateFineStandards(ListLateFineStandardsCommand cmd) {
         List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
         RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
@@ -394,7 +396,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示一个收费项目的客户可见的所有标准列表         4
     /**
-     * <p>展示一* <b>URL: /asset/listChargingStandards</b>
+     * <p>展示一* <b>URL: /asset/listChargingStandards</b></p>
      * <p>个收费项目的园区下的所有标准列表</p>
      *
      * */
@@ -1174,15 +1176,15 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/activeLateFine</b>
      * <p>主动调用定期催缴的功能</p>
      */
-    @RequestMapping("activeLateFine")
-    @RestReturn(String.class)
-    public RestResponse activeLateFine(){
-        assetService.activeLateFine();
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
+//    @RequestMapping("activeLateFine")
+//    @RestReturn(String.class)
+//    public RestResponse activeLateFine(){
+//        assetService.activeLateFine();
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 
     /**
      * <b>URL: /asset/functionDisableList</b>
@@ -1202,13 +1204,39 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/sc</b>
      * <p></p>
      */
-    @RequestMapping("sc")
-    @RequireAuthentication(value = false)
-    public RestResponse syncCustomer(SyncCustomerCommand cmd){
-        RestResponse restResponse = new RestResponse();
-        assetService.syncCustomer(cmd.getNamespaceId());
+//    @RequestMapping("sc")
+//    @RequireAuthentication(value = false)
+//    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+//        RestResponse restResponse = new RestResponse();
+//        assetService.syncCustomer(cmd.getNamespaceId());
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
+
+    /**
+     * <b>URL: /asset/batchImportBills</b>
+     * <p>批量导入账单</p>
+     */
+    @RequestMapping("batchImportBills")
+    @RestReturn(value = BatchImportBillsResponse.class)
+    public RestResponse batchImportBills(MultipartFile attachment,BatchImportBillsCommand cmd){
+        BatchImportBillsResponse  res = assetService.batchImportBills(cmd, attachment);
+        RestResponse restResponse = new RestResponse(res);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+
+    /**
+     * <b>URL: /asset/exportBillTemplates</b>
+     * <p>导出账单的模板</p>
+     */
+    @RequestMapping("exportBillTemplates")
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response){
+        assetService.exportBillTemplates(cmd, response);
+    }
+
+
 }
+

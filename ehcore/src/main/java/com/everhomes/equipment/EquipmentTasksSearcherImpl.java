@@ -2,12 +2,14 @@ package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
 import com.everhomes.rest.quality.OwnerType;
@@ -142,7 +144,10 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         }
 
+
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
+        fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(nfb));
         if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
@@ -179,9 +184,12 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         }
 
         qb = QueryBuilders.filteredQuery(qb, fb);
+        LOGGER.debug("FilterBuilder:",fb.toString());
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        //unMappedType
+        builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC));
         builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
 
         SearchResponse rsp = builder.execute().actionGet();
@@ -232,9 +240,18 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                     equipments.add(equipmentStandardRelation);
                     dto.setEquipments(equipments);
                 }
+                if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+                    List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+                    if(executors != null && executors.size() > 0) {
+                        dto.setExecutorName(executors.get(0).getContactName());
+                    }
+                }
                 tasks.add(dto);
             }
         }
+//        if (tasks != null && tasks.size() > 0) {
+//            tasks = tasks.stream().sorted(Comparator.comparing(EquipmentTaskDTO::getStatus)).collect(Collectors.toList());
+//        }
         response.setTasks(tasks);
 
         return response;
@@ -260,7 +277,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("startTime", task.getExecutiveStartTime());
             b.field("endTime", task.getExecutiveExpireTime());
             b.field("status", task.getStatus());
-            b.field("taskName", task.getTaskName()).field("index","not_analyzed");
+            //b.field("taskName", task.getTaskName()).field("index","not_analyzed");
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
             EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());

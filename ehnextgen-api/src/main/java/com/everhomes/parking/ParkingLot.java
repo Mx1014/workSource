@@ -39,9 +39,17 @@ public class ParkingLot extends EhParkingLots {
     private String tempFeeDiscount;
 
     private Byte invoiceFlag;
-    private Byte businessLicenseFlag;
     private Byte vipParkingFlag;
+    private byte businessLicenseFlag;
+    private Byte identityCardFlag;
 
+    public Byte getIdentityCardFlag() {
+        return identityCardFlag;
+    }
+
+    public void setIdentityCardFlag(Byte identityCardFlag) {
+        this.identityCardFlag = identityCardFlag;
+    }
     public Byte getVipParkingFlag() {
         return vipParkingFlag;
     }

@@ -4,7 +4,6 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>id: 通用岗位id</li>
  * <li>name: 名称</li>

@@ -30,6 +30,8 @@ import java.util.List;
  *  <li>equipmentId: 设备id</li>
  *  <li>normalCount: 正常item数</li>
  *  <li>abnormalCount: 异常item数</li>
+ *  <li>maintanceType: 维修类型</li>
+ *  <li>maintanceStatus: 维修状态</li>
  *  <li>flowCaseId: 维修工作流flowCaseId</li>
  * </ul>
  */
@@ -77,6 +79,10 @@ public class EquipmentTaskLogsDTO {
 	private Integer abnormalCount;
 
 	private Long  flowCaseId;
+
+	private String maintanceType;
+
+	private Byte maintanceStatus;
 
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
@@ -286,6 +292,23 @@ public class EquipmentTaskLogsDTO {
 
 	public void setEquipmentId(Long equipmentId) {
 		this.equipmentId = equipmentId;
+	}
+
+
+	public String getMaintanceType() {
+		return maintanceType;
+	}
+
+	public void setMaintanceType(String maintanceType) {
+		this.maintanceType = maintanceType;
+	}
+
+	public Byte getMaintanceStatus() {
+		return maintanceStatus;
+	}
+
+	public void setMaintanceStatus(Byte maintanceStatus) {
+		this.maintanceStatus = maintanceStatus;
 	}
 
 	@Override

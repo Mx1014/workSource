@@ -264,7 +264,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
-		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+		Timestamp tempEnd = null;
+		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
+			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
+		}else{
+			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+
+		}
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
 
@@ -479,7 +485,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 				dto.setPayMoney(price);
 			}
-
+			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){
+				LOGGER.debug("parking.ketuo.debug is true, pay 0.01 RMB");
+				dto.setPayMoney(new BigDecimal(0.01));
+			}
 			dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
 		}
 

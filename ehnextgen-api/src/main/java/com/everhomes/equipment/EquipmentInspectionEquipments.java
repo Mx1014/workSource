@@ -9,6 +9,7 @@ public class EquipmentInspectionEquipments extends EhEquipmentInspectionEquipmen
 
 	//invoke 赋值时候防止异常
 	private  String attachments;
+	//private  String geohash;
 
     public String getAttachments() {
         return attachments;

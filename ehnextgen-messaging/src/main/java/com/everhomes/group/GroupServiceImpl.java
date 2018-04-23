@@ -74,6 +74,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.version.VersionService;
@@ -665,6 +666,11 @@ public class GroupServiceImpl implements GroupService {
 
         }
     }
+
+    @Override
+    public Group findGroupByForumId(long forumId) {
+        return groupProvider.findGroupByForumId(forumId);
+    }
     
     @Override
     public ListGroupCommandResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd){
@@ -713,6 +719,31 @@ public class GroupServiceImpl implements GroupService {
          }).collect(Collectors.toList()));
          
          return cmdResponse;
+    }
+
+    @Override
+    public List<GroupDTO> listOwnerGroupsByType(Byte clubType){
+
+        Long userId = UserContext.current().getUser().getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        int pageSize = 100000;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Group> groups = this.groupProvider.queryGroups(locator, pageSize + 1, (loc, query)-> {
+            query.addConditions(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+            query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.GROUP.getCode()));
+            query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(GroupPrivacy.PUBLIC.getCode()));
+            query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(clubType));
+            query.addConditions(Tables.EH_GROUPS.CREATOR_UID.eq(userId));
+            return query;
+        });
+
+        List<GroupDTO> dtos = new ArrayList<>();
+        if(groups != null){
+            dtos = groups.stream().map(group -> toGroupDTO(userId, group)).collect(Collectors.toList());
+        }
+
+        return dtos;
     }
     
     @Override
@@ -2837,10 +2868,19 @@ public class GroupServiceImpl implements GroupService {
 
         UserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
         boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
-        if (!result) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
+
+        if(result){
+            return;
         }
+
+        //最后检查root权限，没有权限报错
+        SystemUserPrivilegeMgr systemResolver = PlatformContext.getComponent("SystemUser");
+        systemResolver.checkUserPrivilege(uid, 0);
+
+//        if (!result) {
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
 
     }
     
@@ -4766,7 +4806,7 @@ public class GroupServiceImpl implements GroupService {
         
         sendNotifactionToMembers(members, alias, group, locale);
 
-        // 删除group
+        // 删除group事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setNamespaceId(group.getNamespaceId());
@@ -4780,6 +4820,24 @@ public class GroupServiceImpl implements GroupService {
             event.addParam("group", StringHelper.toJsonString(group));
             GroupMember member = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), user.getId());
             if (member != null) {
+                event.addParam("member", StringHelper.toJsonString(member));
+            }
+        });
+
+        // 退出group事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(user.getId());
+            event.setContext(context);
+
+            GroupMember member = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), user.getId());
+            if (member != null) {
+                event.setEntityType(EhGroupMembers.class.getSimpleName());
+                event.setEntityId(member.getId());
+                event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
+
+                event.addParam("group", StringHelper.toJsonString(group));
                 event.addParam("member", StringHelper.toJsonString(member));
             }
         });
@@ -5142,6 +5200,7 @@ public class GroupServiceImpl implements GroupService {
             event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
 
             event.addParam("group", StringHelper.toJsonString(group));
+            event.addParam("member", StringHelper.toJsonString(gm));
         });
 	}
 
@@ -5471,9 +5530,9 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
-		if (cmd.getTitle().length() > 10) {
+		if (cmd.getTitle().length() > 30) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_TITLE_LENGTH,
-					"title length cannot be greater than 10!");
+					"title length cannot be greater than 30!");
 		}
 		if (cmd.getContent().length() > 200) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_CONTENT_LENGTH,
@@ -5571,7 +5630,7 @@ public class GroupServiceImpl implements GroupService {
         if(ClubType.fromCode(cmd.getClubType()) == ClubType.GUILD){
             forumModuleType = ForumModuleType.GUILD.getCode();
         }
-        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, null, cmd.getMemberCommentFlag());
+        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, 0L, cmd.getMemberCommentFlag());
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
@@ -5639,7 +5698,7 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	private Category checkDuplicationGroupCategoryName(Integer namespaceId, String categoryName, Long id) {
-		Category category = categoryProvider.findCategoryByNamespaceAndName(2L, namespaceId, categoryName);
+		Category category = categoryProvider.findCategoryByNamespaceAndName(2L, namespaceId,null,null, categoryName);
 		if (category != null && (id == null || id.longValue() != category.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_CATEGORY_NAME_EXIST,
 					"exist name, name="+categoryName);

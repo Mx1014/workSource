@@ -65,6 +65,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>resourceTypeId: 资源类型id</li>
  * <li>payMode: 支付模式</li>
+ * <li>identify: 资源类型的类型 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>AclinkId: 门禁组id</li>
@@ -104,7 +105,7 @@ public class RentalSiteDTO {
 	private java.lang.Byte     status;
 	private Long createTime;
 	private Double siteCounts;
-	@ItemType(String.class)
+	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
@@ -130,10 +131,11 @@ public class RentalSiteDTO {
 
     private Long resourceTypeId;
     private Byte payMode;
+    private String identify;
 
     private Byte unauthVisible;
 
-	private Long aclinkId;
+	private String aclinkId;
 	private String aclinkName;
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
@@ -688,11 +690,11 @@ public class RentalSiteDTO {
 		this.rentalEndTime = rentalEndTime;
 	}
 
-	public Long getAclinkId() {
+	public String getAclinkId() {
 		return aclinkId;
 	}
 
-	public void setAclinkId(Long aclinkId) {
+	public void setAclinkId(String aclinkId) {
 		this.aclinkId = aclinkId;
 	}
 
@@ -702,5 +704,13 @@ public class RentalSiteDTO {
 
 	public void setAclinkName(String aclinkName) {
 		this.aclinkName = aclinkName;
+	}
+
+	public String getIdentify() {
+		return identify;
+	}
+
+	public void setIdentify(String identify) {
+		this.identify = identify;
 	}
 }

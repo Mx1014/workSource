@@ -112,6 +112,17 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
         return result;
     }
 
+    @Override
+    public void updateSalaryGroupEntityOperator(Long organizationId) {
+
+        Long uid = UserContext.currentUserId() == null ? 0 : UserContext.currentUserId();
+        getReadWriteContext().update(Tables.EH_SALARY_GROUP_ENTITIES)
+                .set(Tables.EH_SALARY_GROUP_ENTITIES.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime())).set(Tables.EH_SALARY_GROUP_ENTITIES.OPERATOR_UID, uid)
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+
+    }
+
 //	@Override
 //	public List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryId) {
 //        SelectQuery<Record> query = getReadOnlyContext().select(Tables.EH_SALARY_GROUP_ENTITIES.fields()).getQuery();

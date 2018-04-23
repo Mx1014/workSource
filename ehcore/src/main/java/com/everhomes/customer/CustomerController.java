@@ -2,9 +2,12 @@ package com.everhomes.customer;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +128,24 @@ public class CustomerController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /customer/exportEnterpriseCustomer</b>
+     * <p>导出企业客户</p>
+     */
+    @RequestMapping("exportEnterpriseCustomer")
+    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomer(cmd, response);
+    }
+
+    /**
+     * <b>URL: /customer/exportEnterpriseCustomerTemplate</b>
+     * <p>导出企业客户</p>
+     */
+    @RequestMapping("exportEnterpriseCustomerTemplate")
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomerTemplate(cmd, response);
     }
 
     /**
@@ -975,7 +996,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("syncEnterpriseCustomers")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
-        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd));
+        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, true));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

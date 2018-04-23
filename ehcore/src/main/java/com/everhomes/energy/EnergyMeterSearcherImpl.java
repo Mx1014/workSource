@@ -115,8 +115,17 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             if(existAddress != null && existAddress.size() > 0) {
                 builder.field("buildingId", existAddress.get(0).getBuildingId());
                 builder.field("addressId", existAddress.get(0).getAddressId());
-                builder.field("buildingName", existAddress.get(0).getBuildingName());
-                builder.field("apartmentName", existAddress.get(0).getApartmentName());
+                if(existAddress.get(0).getBuildingName() != null) {
+                    builder.field("buildingName", existAddress.get(0).getBuildingName());
+                } else {
+                    builder.field("buildingName", "");
+                }
+
+                if(existAddress.get(0).getApartmentName() != null) {
+                    builder.field("apartmentName", existAddress.get(0).getApartmentName());
+                } else {
+                    builder.field("apartmentName", "");
+                }
             } else {
                 builder.field("buildingId", 0);
                 builder.field("addressId", 0);

@@ -94,6 +94,8 @@ public class QueryDefaultRuleAdminResponse {
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
+	private Byte holidayOpenFlag;
+	private Byte holidayType;
 //	private Double dayOpenTime;
 //	private Double dayCloseTime;
 	@ItemType(Integer.class)
@@ -278,6 +280,22 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
+	}
+
+	public Byte getHolidayOpenFlag() {
+		return holidayOpenFlag;
+	}
+
+	public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+		this.holidayOpenFlag = holidayOpenFlag;
+	}
+
+	public Byte getHolidayType() {
+		return holidayType;
+	}
+
+	public void setHolidayType(Byte holidayType) {
+		this.holidayType = holidayType;
 	}
 
 	public List<Integer> getOpenWeekday() {
