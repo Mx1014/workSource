@@ -500,7 +500,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         //企业客户新增成功,保存客户事件
-        saveCustomerEvent(1, customer, null);
+        saveCustomerEvent(1, customer, null,cmd.getDeviceType());
 
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
@@ -597,6 +597,10 @@ public class CustomerServiceImpl implements CustomerService {
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if (!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
+        }
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+        if (members != null && members.size()>0) {
+            dto.setTrackingPhone(members.get(0).getContactToken());
         }
         return dto;
     }
@@ -704,7 +708,7 @@ public class CustomerServiceImpl implements CustomerService {
         //保存之后重查一遍 因为数据类型导致 fix 22978
         updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
-        saveCustomerEvent(3, updateCustomer, customer);
+        saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
@@ -771,7 +775,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerSearcher.feedDoc(customer);
 
         //企业客户新增成功,保存客户事件
-        saveCustomerEvent(2, customer, null);
+        saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -2976,8 +2980,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
-        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist);
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
+        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist,deviceType);
     }
 
     @Override
@@ -3018,7 +3022,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         //保存事件
-        saveCustomerEvent(3, customer, exist);
+        saveCustomerEvent(3, customer, exist,cmd.getDeviceType());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
     }
@@ -3324,6 +3328,6 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return null;
+        return userIds;
     }
 }

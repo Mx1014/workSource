@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 客户id</li>
  *     <li>trackingUid：跟进人</li>
+ *     <li>deviceType：客户端类型</li>
  * </ul>
  */
 public class AllotEnterpriseCustomerCommand {
@@ -14,6 +15,8 @@ public class AllotEnterpriseCustomerCommand {
 
     
     private  Long trackingUid;
+
+    private  Byte deviceType ;
 
 
     public Long getId() {
@@ -34,7 +37,15 @@ public class AllotEnterpriseCustomerCommand {
 		this.trackingUid = trackingUid;
 	}
 
-	@Override
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

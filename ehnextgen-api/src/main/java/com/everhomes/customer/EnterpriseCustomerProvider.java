@@ -132,7 +132,7 @@ public interface EnterpriseCustomerProvider {
 	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
-	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	
 	void allotEnterpriseCustomer(EnterpriseCustomer customer);

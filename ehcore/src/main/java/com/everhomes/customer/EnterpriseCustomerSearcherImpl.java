@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -451,6 +452,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
+        }
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+        if (members != null && members.size()>0) {
+            dto.setTrackingPhone(members.get(0).getContactToken());
         }
         return dto;
     }
