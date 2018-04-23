@@ -3296,7 +3296,7 @@ public class CustomerServiceImpl implements CustomerService {
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
                     if (members != null && members.size() > 0) {
-                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(r, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
                     }
                 }
             });
