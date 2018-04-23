@@ -1665,6 +1665,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//设置当前场景公司id
 		rentalBill.setUserEnterpriseId(orgId);
 		rentalBill.setResourceName(rs.getResourceName());
+		rentalBill.setAddress(null);
 		rentalBill.setNamespaceId(rsType.getNamespaceId());
 		rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
@@ -3277,7 +3278,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 生成某个资源的单元格
 	 * */
 	private void processCells(RentalResource rs, byte rentalType){
-
+		Long timeCost = System.currentTimeMillis();
 		GetResourceRuleAdminCommand getResourceRuleCmd = new GetResourceRuleAdminCommand();
 		getResourceRuleCmd.setResourceId(rs.getId());
 		getResourceRuleCmd.setResourceType(rs.getResourceType());
@@ -3311,6 +3312,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for(AddRentalSiteSingleSimpleRule singleCmd: addSingleRules){
 			//在这里统一处理
 			addRentalSiteSingleSimpleRule(singleCmd);
+		}
+
+		if(LOGGER.isDebugEnabled()) {
+			timeCost = System.currentTimeMillis()- timeCost;
+			LOGGER.debug("Rentalv2 process cell resourceId = {} rentalType = {} time cost = {} ",rs.getId(),rentalType,timeCost);
 		}
 
 //		BigDecimal workdayPrice = priceRule.getWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getWorkdayPrice();
