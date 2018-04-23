@@ -3865,8 +3865,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 		}
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		PreOrderDTO callBack = null;
+		if (amount>0)
+		 callBack = payService.createPreOrder(preOrderCommand);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
 		response.setPreOrderDTO(callBack);
@@ -4033,8 +4034,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("orderId",bill.getId());
 		scheduleProvider.scheduleSimpleJob(
-				queueName,
-				queueName,
+				queueName+bill.getId(),
+				queueName+bill.getId(),
 				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
 				RentalCancelOrderJob.class,
 				messageMap

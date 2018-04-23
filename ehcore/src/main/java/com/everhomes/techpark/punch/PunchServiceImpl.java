@@ -330,32 +330,32 @@ public class PunchServiceImpl implements PunchService {
     @Autowired
     private FlowCaseProvider flowCaseProvider;
 
-    private static ThreadLocal<SimpleDateFormat> dayStatusSF = new ThreadLocal<SimpleDateFormat>() {
+    private ThreadLocal<SimpleDateFormat> dayStatusSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("MM月dd");
         }
     };
-    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
+    private ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     };
-    private static ThreadLocal<SimpleDateFormat> timeSF = new ThreadLocal<SimpleDateFormat>() {
+    private ThreadLocal<SimpleDateFormat> timeSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("HH:mm:ss");
         }
     };
-    private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>() {
+    private ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyyMM");
         }
     };
-    private static ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>() {
+    private ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
     };
-    private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>();
+    private ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>();
 
     public static final Integer CONFIG_VERSION_CODE = 0;
     @Autowired
@@ -4216,7 +4216,9 @@ public class PunchServiceImpl implements PunchService {
             PunchTimeRuleDTO ptrDTO = convertPunchTimeRule2DTO(ptr);
 
             if (pdl.getStatusList() != null) {
-                Byte isNormal = NormalFlag.YES.getCode();
+            	//2018年4月23日:这里的定义改了,不是是否为正常,而是统计出勤天数:
+            	//出勤天数的计算是:打卡(包括正常,迟到,早退) + 出差/外出申请审核通过视为出勤（不计算请假，不重复统计）
+                Byte isNormal = NormalFlag.NO.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
                     if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
@@ -4259,6 +4261,24 @@ public class PunchServiceImpl implements PunchService {
                         }
                     }
                 }
+                //countOneDayStatistic方法已经计算了打卡的出勤天数
+                //下面要看外出/出差等申请结果 
+                Timestamp dayStart = new Timestamp(pdl.getPunchDate().getTime() - (ptr.getBeginPunchTime() == null ? 14400000L : ptr.getBeginPunchTime()));
+                Timestamp dayEnd = new Timestamp(pdl.getPunchDate().getTime() + (ptr.getDaySplitTimeLong() == null ? 104400000L : ptr.getDaySplitTimeLong()));
+         
+                List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(pdl.getUserId(), pdl.getEnterpriseId(),
+                    dayStart, dayEnd);
+                if (null != exceptionRequests) { 
+		            for (PunchExceptionRequest request : exceptionRequests) {
+		            	List workApprovalAttribute = new ArrayList<>();
+		            	workApprovalAttribute.add(GeneralApprovalAttribute.BUSINESS_TRIP.getCode());
+		            	workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
+//		            	workApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
+		                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
+		                	isNormal=NormalFlag.YES.getCode();
+		                }
+		            }
+	            }
                 if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {
@@ -4299,7 +4319,7 @@ public class PunchServiceImpl implements PunchService {
                                       int punchTimeNo, List<TimeInterval> tiDTOs, java.sql.Date punchDate, PunchTimeRuleDTO ptrDTO) {
         if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
+//            isNormal = NormalFlag.NO.getCode();
             //缺勤计算小时
             if (null != ptrDTO) {
                 PunchTimeIntervalDTO interval = ptrDTO.getPunchTimeIntervals().get(punchTimeNo - 1);
@@ -4338,15 +4358,15 @@ public class PunchServiceImpl implements PunchService {
         } else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
+            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.BLANDLE.getCode()))) {
             statistic.setBlandleCount(statistic.getBlandleCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
+            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
             statistic.setBelateCount(statistic.getBelateCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
+            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
 //<<<<<<< HEAD
             statistic.setForgotCount(statistic.getForgotCount() + 1);
@@ -4354,7 +4374,9 @@ public class PunchServiceImpl implements PunchService {
 //            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
 //>>>>>>> master
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
+//            isNormal = NormalFlag.NO.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
         }
         return isNormal;
     }
