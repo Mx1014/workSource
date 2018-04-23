@@ -1537,7 +1537,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
 	@Override
-	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
+	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
 		CustomerEvent event = new CustomerEvent(); 
 		event.setId(id);
@@ -1546,7 +1546,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		event.setCustomerId(customer.getId());
 		event.setCustomerName(customer.getName());
 		event.setContactName(customer.getContactName());
-		String content = null;
+        event.setDeviceType(deviceType);
+        String content = null;
 		switch(i){
 		case 1 : 
 			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");

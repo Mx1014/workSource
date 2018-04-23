@@ -328,7 +328,7 @@ public interface CustomerService {
 
     void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
 
-    void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
+    void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
 
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
