@@ -11,6 +11,7 @@
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
+-- 公司安装应用表
 CREATE TABLE `eh_organization_apps` (
   `id` bigint(20) NOT NULL,
   `app_origin_id` bigint(20) DEFAULT NULL,
@@ -28,7 +29,7 @@ CREATE TABLE `eh_organization_apps` (
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 
-
+-- 园区应用配置表（不跟随管理公司时的自定义配置）
 CREATE TABLE `eh_app_community_config` (
   `id` bigint(20) NOT NULL,
   `organization_app_id` bigint(20) DEFAULT NULL,
