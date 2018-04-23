@@ -25,8 +25,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -123,6 +121,8 @@ import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
 import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.NotifyTargetDTO;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
@@ -2064,5 +2064,26 @@ public class YellowPageServiceImpl implements YellowPageService {
                 break;
             }
         }
+	}
+
+	@Override
+	public SearchRequestInfoResponse listSeviceAllianceAppRecordsByEnterpriseId(Long enterpriseId,
+			Long pageAnchor, Integer pageSize) {
+		if(pageAnchor==null){
+			pageAnchor=0L;
+		}
+		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
+		List<ServiceAllianceApplicationRecord> lists = saapplicationRecordProvider.listServiceAllianceApplicationRecordByEnterpriseId(enterpriseId, pageAnchor, pageSize+1);
+		if (null == lists)
+			return null;
+		Long nextPageAnchor = null;
+		if (lists != null && lists.size() > pageSize) {
+			lists.remove(lists.size() - 1);
+			nextPageAnchor = lists.get(lists.size() - 1).getId();
+		}
+		SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setDtos(lists.stream().map(r->ConvertHelper.convert(r, RequestInfoDTO.class)).collect(Collectors.toList()));
+		return response;
 	}
 }

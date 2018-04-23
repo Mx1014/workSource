@@ -9,6 +9,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
@@ -16,41 +17,12 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
-import com.everhomes.rest.customer.CustomerAccountDTO;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTaxDTO;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ListCustomerAccountsCommand;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTaxesCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.*;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -151,6 +123,26 @@ public class FieldServiceImpl implements FieldService {
             //处理group的树状结构
             SystemFieldGroupDTO fieldGroupDTO = processSystemFieldGroupnTree(groups, null);
             List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
+            //把企业服务和资源预定放到第一位和第二位 客户管理2.9 by wentian
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("企业服务".equals(groupDTO.getTitle())) {
+                    groupDTOs.remove(i);
+                    groupDTOs.add(1, groupDTO);
+                    break;
+                }
+            }
+            // 编译ok， 运行时自动拆箱调用了intValue()，会导致空指针
+//            if(firstIndex != 0 && firstIndex != null){
+            for(int i = groupDTOs.size() - 1; i >= 0 ; i--){
+                SystemFieldGroupDTO groupDTO = groupDTOs.get(i);
+                if("资源预定".equals(groupDTO.getTitle())) {
+                    groupDTOs.remove(i);
+                    groupDTOs.add(1, groupDTO);
+                    break;
+                }
+            }
+
             return groupDTOs;
         }
         return null;
@@ -193,6 +185,8 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("企业情况");
                 sheetNames.remove("员工情况");
                 sheetNames.remove("客户合同");
+                sheetNames.remove("资源预定");
+                sheetNames.remove("企业服务");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -907,6 +901,37 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerAccountDTOs.size(); j++){
                     LOGGER.info("银行账号 "+j+":"+customerAccountDTOs.get(j));
                     setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            // 增加企业服务和资源预定
+            case "企业服务":
+                ListCustomerRentalBillsCommand cmd15 = new ListCustomerRentalBillsCommand();
+                cmd15.setCustomerId(customerId);
+                cmd15.setCustomerType(customerType);
+                cmd15.setCommunityId(communityId);
+                cmd15.setNamespaceId(namespaceId);
+                cmd15.setOrgId(orgId);
+                cmd15.setPageSize(Integer.MAX_VALUE / 2);
+                List<RentalBillDTO> rentalBillDTOS = customerService.listCustomerRentalBills(cmd15).getRentalBills();
+                if(rentalBillDTOS == null) rentalBillDTOS = new ArrayList<>();
+                for(int j = 0; j < rentalBillDTOS.size(); j++){
+                    LOGGER.info("企业服务 "+j+":"+rentalBillDTOS.get(j));
+                    setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "资源预定":
+                ListCustomerSeviceAllianceAppRecordsCommand cmd16 = new ListCustomerSeviceAllianceAppRecordsCommand();
+                cmd16.setCustomerId(customerId);
+                cmd16.setCustomerType(customerType);
+                cmd16.setCommunityId(communityId);
+                cmd16.setNamespaceId(namespaceId);
+                cmd16.setOrgId(orgId);
+                cmd16.setPageSize(Integer.MAX_VALUE / 2);
+                List<RequestInfoDTO> requestInfoDTOS = customerService.listCustomerSeviceAllianceAppRecords(cmd16).getDtos();
+                if(requestInfoDTOS == null) requestInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < requestInfoDTOS.size(); j++){
+                    LOGGER.info("资源预定 "+j+":"+requestInfoDTOS.get(j));
+                    setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
         }

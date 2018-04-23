@@ -99,6 +99,8 @@ public interface Rentalv2Service {
 
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
+	ListRentalBillsCommandResponse listRentalBillsByOrdId(ListRentalBillsByOrdIdCommand cmd);
+
 	ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd);
 
 	void deleteRentalBill(DeleteRentalBillCommand cmd);

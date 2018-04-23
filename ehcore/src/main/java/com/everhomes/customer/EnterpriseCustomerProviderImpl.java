@@ -487,6 +487,27 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public CustomerTalent findCustomerTalentByPhone(String phone, Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.PHONE.eq(phone));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTalent> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTalent.class));
+            return null;
+        });
+
+        if(result != null && result.size() > 0) {
+            return result.get(0);
+        }
+
+        return null;
+    }
+
+    @Override
     public void updateCustomerTalent(CustomerTalent talent) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, talent.getId()));
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
