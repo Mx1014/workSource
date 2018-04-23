@@ -511,8 +511,12 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
         for (Object o : array) {
             JSONObject item  = JSONObject.parseObject(o.toString());
             ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
+            String plateNo = item.getString("plateNo");
             String inTime = item.getString("inTime");
             String outTime = item.getString("outTime");
+            if(plateNo==null || !plateNo.equals(r.getPlateNumber())){
+                continue;
+            }
             if(inTime!=null) {
                 dto.setEntryTime(Utils.strToTimeStamp(inTime,Utils.DateStyle.DATE_TIME));
             }
