@@ -38,10 +38,10 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
         List<UserInfo> userInfoList = new ArrayList<>();
         for (Long userId : getProcessorIdList()) {
             UserInfo ui = fixupUserInfo(organizationId, userId);
-            if(ui != null) {
-                userInfoList.add(ui);    
+            if (ui != null) {
+                userInfoList.add(ui);
             }
-            
+
         }
         return userInfoList;
     }
@@ -83,7 +83,7 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
                         r ->
                                 FlowLogType.fromCode(r.getLogType()) == FlowLogType.NODE_ENTER
                                         && r.getStepCount()
-                                                .equals(flowCaseState.getFlowCase().getStepCount()))
+                                        .equals(flowCaseState.getFlowCase().getStepCount()))
                 .map(FlowEventLog::getFlowUserId)
                 .collect(Collectors.toList());
     }

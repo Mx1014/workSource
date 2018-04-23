@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * 业务模块必须实现的接口
  * @author janson
- *
  */
 public interface FlowModuleListener {
 

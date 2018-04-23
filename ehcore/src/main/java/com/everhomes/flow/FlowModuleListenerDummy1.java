@@ -1,26 +1,19 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.util.Tuple;
+import com.everhomes.rest.flow.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// @Component
-public class FlowModuleListenerDummy1 implements FlowModuleListener {
+@Component
+public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctionListener {
+
     @Autowired
     private FlowService flowService;
 
     private Long moduleId = 40100L;
-
-    @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-        return null;
-    }
 
     @Override
     public FlowModuleInfo initModule() {
@@ -31,39 +24,68 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     }
 
     @Override
-    public void onFlowCaseStart(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseAbsorted(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseEnd(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseActionFired(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
-        // TODO Auto-generated method stub
-        return "testKey1: testValue1\ntestKey2: testValue2";
+        return null;
+    }
+
+    @ExportFunction(
+            desc = @LocaleText(
+                    value = "When enter in end node, trigger this function.",
+                    scope = FlowServiceErrorCode.SCOPE,
+                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+            params = {
+                    @FuncParam(
+                            name = @LocaleText(
+                                    value = "vendor",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            desc = @LocaleText(
+                                    value = "Vendor name",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
+                    @FuncParam(
+                            name = @LocaleText(
+                                    value = "server url",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            desc = @LocaleText(
+                                    value = "Vendor server url",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
+                    @FuncParam(
+                            name = @LocaleText(
+                                    value = "vendor key",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            desc = @LocaleText(
+                                    value = "Vendor app key",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
+            },
+            version = 1
+    )
+    public void testExportFlowFunction(
+            FlowCaseState ctx,
+            @FuncParam(
+                    desc = @LocaleText(
+                            value = "Vendor app key",
+                            scope = FlowServiceErrorCode.SCOPE,
+                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
+                    String vendor,
+            @FuncParam(
+                    desc = @LocaleText(
+                            value = "Vendor server url",
+                            scope = FlowServiceErrorCode.SCOPE,
+                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
+                    String vendorServer,
+            @FuncParam(
+                    desc = @LocaleText(
+                            value = "Vendor app key",
+                            scope = FlowServiceErrorCode.SCOPE,
+                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
+                    String appKey) {
+
+
     }
 
     @Override
@@ -97,39 +119,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCreating(Flow flow) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseCreating(FlowCase flowCase) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseCreated(FlowCase flowCase) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-                                        List<Tuple<String, Object>> variables) {
-        // TODO Auto-generated method stub
 
     }
 

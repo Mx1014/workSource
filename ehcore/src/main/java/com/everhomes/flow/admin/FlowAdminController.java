@@ -1,9 +1,11 @@
 package com.everhomes.flow.admin;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -13,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.script.*;
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestDoc(value="Flow Admin controller", site="core")
 @RestController
@@ -761,5 +766,82 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listFlowFunctions</b>
+     * <p>获取工作流函数列表</p>
+     */
+    @RequestMapping("listFlowFunctions")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse listFlowFunctions(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowFunction</b>
+     * <p>创建工作流函数</p>
+     */
+    @RequestMapping("createFlowFunction")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse createFlowFunction(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowFunction</b>
+     * <p>删除工作流函数</p>
+     */
+    @RequestMapping("deleteFlowFunction")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse deleteFlowFunction(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowFunction</b>
+     * <p>修改工作流函数</p>
+     */
+    @RequestMapping("updateFlowFunction")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse updateFlowFunction(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    public static void main(String[] args) throws ScriptException {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine js = manager.getEngineByName("js");
+
+        ScriptContext context = js.getContext();
+
+        Compilable js1 = (Compilable) js;
+        CompiledScript compile = js1.compile("print('Hello');");
+        Bindings bindings = js.createBindings();
+
+        Map<String, CompiledScript> scriptMap = new HashMap<>();
+        scriptMap.put("function_main_id:function_version", compile);
+
+
+        CompiledScript compiledScript = scriptMap.get("111:2");
+
+        Bindings binding = compiledScript.getEngine().createBindings();
+        binding.put("ctx", new FlowCaseState());
+        binding.put("platformCtx", PlatformContext.class);
+
+
+
+        Object eval = compiledScript.eval(binding);
     }
 }
