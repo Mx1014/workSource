@@ -290,6 +290,8 @@ CREATE TABLE `eh_remind_shares` (
 --
 ALTER TABLE eh_launch_advertisements ADD COLUMN resource_name VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'Resource name';
 
+ALTER TABLE eh_apps DROP INDEX u_eh_app_reg_name;
+
 -- end xq.tian
 
 
