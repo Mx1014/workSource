@@ -1504,7 +1504,7 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/listCommnityRelatedTrackUsers</b>
+     * <b>URL: /customer/listCommnityUserRelatedTrackUsers</b>
      * <p>列出项目下相关的跟进人（只有管理员才有）</p>
      */
     @RequestMapping("listCommnityUserRelatedTrackUsers")
@@ -1520,7 +1520,7 @@ public class CustomerController extends ControllerBase {
      * <b>URL: /customer/listCommunityRelatedMembers</b>
      * <p>列出项目下相关的所有人(包含超级管理员和应用管理员)</p>
      */
-    @RequestMapping("listCommnityUserRelatedTrackUsers")
+    @RequestMapping("listCommunityRelatedMembers")
     @RestReturn(value = OrganizationMemberDTO.class,collection = true)
     public RestResponse listCommnityUserRelatedTrackUsers(ListCommnutyRelatedMembersCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCommunityRelatedMembers(cmd));
