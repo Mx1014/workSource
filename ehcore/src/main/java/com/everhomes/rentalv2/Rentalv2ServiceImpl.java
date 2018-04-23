@@ -3865,8 +3865,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 		}
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		PreOrderDTO callBack = null;
+		if (amount>0)
+		 callBack = payService.createPreOrder(preOrderCommand);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
 		response.setPreOrderDTO(callBack);
