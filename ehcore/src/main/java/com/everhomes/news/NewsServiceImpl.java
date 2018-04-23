@@ -513,17 +513,13 @@ public class NewsServiceImpl implements NewsService {
 		// return listNews(userId, namespaceId, null, cmd.getCategoryId(),
 		// cmd.getPageAnchor(), cmd.getPageSize());
 		cmd.setStatus(NewsStatus.ACTIVE.getCode());
-		return listNews(cmd);
+		return listNews(cmd, true);
 	}
 
 	/**
-	 * 
 	 * <b>listNews:/</b>
-	 * <p>
-	 * isSearchDraft: true 检索草稿出来，false 不检索草稿
-	 * </p>
 	 */
-	public ListNewsResponse listNews(ListNewsCommand cmd) {
+	public ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene) {
 		
 		//先进行权限验证
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && cmd.getCurrentProjectId() != null
@@ -538,7 +534,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// 若无关键字查询，直接返回简单查询
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds() == null) {
-			return listNewsByProject(cmd, userId, namespaceId);
+			return listNewsByProject(cmd, userId, namespaceId, isScene);
 		}
 
 		// 有关键字的查询
@@ -1878,7 +1874,7 @@ public class NewsServiceImpl implements NewsService {
 	 * @date: 2018年4月19日 下午3:33:19
 	 *
 	 */
-	private ListNewsResponse listNewsByProject(ListNewsCommand cmd, Long userId, Integer namespaceId) {
+	private ListNewsResponse listNewsByProject(ListNewsCommand cmd, Long userId, Integer namespaceId, boolean isScene) {
 		// 1.总的项目列表
 		List<Long> projectIds = new ArrayList<Long>(10);
 
@@ -1888,7 +1884,11 @@ public class NewsServiceImpl implements NewsService {
 			// 如果携带了projectId则直接添加
 			projectIds.add(projectId);
 
-		} else {
+		} else if (isScene && NewsOwnerType.COMMUNITY.getCode().equals(cmd.getOwnerType())) {
+			projectIds.add(cmd.getOwnerId());
+		}
+
+		else {
 
 			// 未携带id时，需要查询当前用户所属项目
 			ListUserRelatedProjectByModuleCommand listCmd = new ListUserRelatedProjectByModuleCommand();
@@ -1908,7 +1908,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// 4.进行条件查询
 		return listNews(userId, namespaceId, projectIds, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(),
-				cmd.getStatus());
+				isScene, cmd.getStatus());
 	}
 
 	/**
@@ -2004,5 +2004,20 @@ public class NewsServiceImpl implements NewsService {
 		 
 		 return renderUrl.toString();
 	 }
+	 
+	 
+		/** 
+		* @see com.everhomes.news.NewsService#listNews(com.everhomes.rest.news.ListNewsCommand)   
+		* @Function: NewsServiceImpl.java
+		* @Description: 用于后台显示新闻列表
+		*
+		* @version: v1.0.0
+		* @author:	 黄明波
+		* @date: 2018年4月23日 下午1:14:30 
+		*
+		*/
+		public ListNewsResponse listNews(ListNewsCommand cmd) {
+			return listNews(cmd, false);
+		}
 
 }
