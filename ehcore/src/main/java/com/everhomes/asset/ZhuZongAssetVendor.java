@@ -170,102 +170,35 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	
 	@Override
 	public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-		JSONObject jsonObject = new JSONObject();
-		//企业客户，按名称查询，个人按电话号码查询
-		String cusName = null;
-		String type = null;
-		if (cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
-	    	cmd.setTargetId(UserContext.currentUserId());
-	    	cusName = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId()).getIdentifierToken();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "1";
-	    }else if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-	    	Long orgId = cmd.getTargetId();
-	    	cusName = organizationProvider.findOrganizationById(orgId).getName();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "0";
-	    }
-		jsonObject.put("cusName", cusName);
-		//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
-		jsonObject.put("startDate", "1900-01-01");
-		jsonObject.put("endDate", "2900-01-01");
-		jsonObject.put("type", type);
-		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
-		jsonObject.put("state", "0");
-		//通过WebServices接口查询数据
-		SZWQuery szyQuery = new SZWQuery();
-		List<ShowBillForClientV2DTO> response = szyQuery.showBillForClientV2(jsonObject.toString());
-		return response;
+		try {
+			
+		}catch (Exception e) {
+			LOGGER.error("ZhuZongAssetVendor showBillForClientV2() cmd={}",cmd,e);
+		}
+		//return response;
+		return null;
 	}
 	
 	@Override
 	public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-		JSONObject jsonObject = new JSONObject();
-		//企业客户，按名称查询，个人按电话号码查询
-		String cusName = null;
-		String type = null;
-		if (cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
-	    	cmd.setTargetId(UserContext.currentUserId());
-	    	cusName = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId()).getIdentifierToken();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "1";
-	    }else if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-	    	Long orgId = cmd.getTargetId();
-	    	cusName = organizationProvider.findOrganizationById(orgId).getName();
-	    	//0：企业客户，1：个人（判断）
-	    	type = "0";
-	    }
-		jsonObject.put("cusName", cusName);
-		//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
-		jsonObject.put("startDate", "1900-01-01");
-		jsonObject.put("endDate", "2900-01-01");
-		jsonObject.put("type", type);
-		//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
-		jsonObject.put("state", "0");
-		//通过WebServices接口查询数据
-		SZWQuery szyQuery = new SZWQuery();
-		List<ListAllBillsForClientDTO> response = szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("0"));
-		//由于对接查询全部没有字段用于区分是“待支付”还是“已支付”，所以第一次查询所有未缴，第二次查询所有已缴，再作相加
-		jsonObject.put("state", "1");
-		response.addAll(szyQuery.listAllBillsForClient(jsonObject.toString(), Byte.valueOf("1")));
-		return response;
+		try {
+			
+		}catch (Exception e) {
+			LOGGER.error("ZhuZongAssetVendor listAllBillsForClient() cmd={}",cmd,e);
+		}
+		//return response;
+		return null;
 	}
 	
 	@Override
 	public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
-		LOGGER.info("ShenZhenWanAssetVendor call getBillDetailForClient() ownerId=" + ownerId + ", targetType=" + targetType);
-		JSONObject jsonObject = new JSONObject();
-		//企业客户，按名称查询，个人按电话号码查询
-		String cusName = null;
-		String type = null;
-		ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
 		try {
-			if (targetType.equals(AssetTargetType.USER.getCode())) {
-		    	Long targetId = UserContext.currentUserId();
-		    	Integer namespaceId = UserContext.getCurrentNamespaceId();
-		    	cusName = userProvider.findUserIdentifiersOfUser(targetId, namespaceId).getIdentifierToken();
-		    	//0：企业客户，1：个人（判断）
-		    	type = "1";
-		    }else if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())) {
-		    	cusName = organizationProvider.findOrganizationById(organizationId).getName();
-		    	//0：企业客户，1：个人（判断）
-		    	type = "0";
-		    }
-			jsonObject.put("cusName", cusName);
-			//由于查询的是全部，金蝶对接需要时间段，所以设置一个足够大的时间范围
-			jsonObject.put("startDate", "1900-01-01");
-			jsonObject.put("endDate", "2900-01-01");
-			jsonObject.put("type", type);
-			//初始默认展示所有的未缴账单 (1：已缴，0：未缴，2：全部)
-			jsonObject.put("state", "2");
-			jsonObject.put("fid", billId);
-			//通过WebServices接口查询数据
-			SZWQuery szyQuery = new SZWQuery();
-			response = szyQuery.getBillDetailForClient(jsonObject.toString());
+			
 		}catch (Exception e) {
-			LOGGER.error("ShenZhenWanAssetVendor call getBillDetailForClient() : " + e);
+			LOGGER.error("ZhuZongAssetVendor getBillDetailForClient() cmd={}",ownerId,billId,targetType,organizationId,e);
 		}
-		return response;
+		//return response;
+		return null;
 	}
     
 }
