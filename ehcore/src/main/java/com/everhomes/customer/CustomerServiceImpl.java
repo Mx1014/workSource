@@ -3265,7 +3265,15 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return members;
+        Map<Long, OrganizationMemberDTO> memberDTOMap = new HashMap<>();
+        if(members!=null && members.size()>0){
+            members.forEach((r)->{
+                memberDTOMap.putIfAbsent(r.getTargetId(), r);
+            });
+        }
+        List<OrganizationMemberDTO> result = new ArrayList<>();
+        result = new ArrayList<>(memberDTOMap.values());
+        return result;
     }
 
     @Override
@@ -3309,7 +3317,14 @@ public class CustomerServiceImpl implements CustomerService {
             });
         }
         if (relatedMembers != null && relatedMembers.size() > 0) {
-            relatedMembers.forEach((r) -> r.setDepartmentName(organizationProvider.findOrganizationById(r.getOrganizationId()).getName()));
+            relatedMembers.forEach((r) ->{
+                Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
+                if(organization!=null){
+                    r.setDepartmentName(organization.getName());
+                }else {
+                    r.setDepartmentName("");
+                }
+            });
         }
         return relatedMembers;
     }
