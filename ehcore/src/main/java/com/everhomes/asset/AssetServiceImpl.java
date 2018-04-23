@@ -3014,6 +3014,11 @@ public class AssetServiceImpl implements AssetService {
                 hasContractView = 1;
                 hasPay = 0;
                 break;
+            case 999966:
+            	//深圳湾要求可以看合同，只查费不显示支付按钮
+                hasContractView = 1;
+                hasPay = 0;
+                break;
             default:
                 break;
         }
