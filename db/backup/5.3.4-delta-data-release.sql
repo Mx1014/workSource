@@ -20,3 +20,16 @@ VALUES ((@eh_apps_id := @eh_apps_id + 1), 1, '03c9d78c-5369-4269-8a46-2058d1c546
 set @id = (select MAX(`id`) from `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`, `preview_portal_version_id`) VALUES (@id:=@id+1, '999966', '0', '1', '0', '/home', 'Bizs', '费用查询', '物业查费', null, '1', '1', '13', '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\"}', '1', '0', '1', '1', NULL, '0', NULL, NULL, NULL, '1', 'park_tourist', '1', NULL, NULL, '0', NULL, NULL, NULL);
 
+
+-- 深圳湾webservice对接访问地址配置 by 杨崇鑫
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.EASLogin_address', 'http://192.168.3.202:6888/ormrpc/services/EASLogin', '深圳湾webservice对接', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.WSWSSyncMyBayFacade_address', 'http://192.168.3.202:6888/ormrpc/services/WSWSSyncMyBayFacade', '深圳湾webservice对接', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.username', 'mybay', '深圳湾webservice对接用户名', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.password', 'mybay', '深圳湾webservice对接密码', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.slnName', 'eas', '深圳湾webservice对接slnName', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.dcName', 'cs200', '深圳湾webservice对接dcName', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.language', 'l2', '深圳湾webservice对接language', 999966, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('asset.shenzhenwan.dbType', '2', '深圳湾webservice对接dbType', 999966, NULL);
+
+
+

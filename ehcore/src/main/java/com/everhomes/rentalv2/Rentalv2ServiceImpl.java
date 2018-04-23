@@ -2184,7 +2184,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return dto;
 	}
 
-	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName) {
+	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName,Byte paymentType ) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
@@ -2200,7 +2200,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-//        preOrderCommand.setExpiration(expiredTime);
+		//公众号支付
+		if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()){
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			paymentParamsDTO.setPayType("no_credit");
+			User user = UserContext.current().getUser();
+			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			//TODO: 临时给越空间解决公众号支付
+			String vspCusid = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"tempVspCusid","");
+			paymentParamsDTO.setVspCusid(vspCusid);
+			preOrderCommand.setPaymentParams(paymentParamsDTO);
+			preOrderCommand.setCommitFlag(1);
+		}
 
 		preOrderCommand.setClientAppName(clientAppName);
 
@@ -2221,7 +2233,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order has been canceled");
 		}
 
-		return buildPreOrderDTO(order, cmd.getClientAppName());
+		return buildPreOrderDTO(order, cmd.getClientAppName(),cmd.getPaymentType());
 	}
 
 	@Override
@@ -8063,7 +8075,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd) {
 		RentalOrder bill = actualRenewRentalOrder(cmd);
 
-		return buildPreOrderDTO(bill, cmd.getClientAppName());
+		return buildPreOrderDTO(bill, cmd.getClientAppName(),null);
 	}
 
 	private RentalOrder actualRenewRentalOrder(RenewRentalOrderCommand cmd) {
