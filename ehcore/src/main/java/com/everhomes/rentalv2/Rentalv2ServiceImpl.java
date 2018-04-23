@@ -1665,6 +1665,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//设置当前场景公司id
 		rentalBill.setUserEnterpriseId(orgId);
 		rentalBill.setResourceName(rs.getResourceName());
+		rentalBill.setAddress(null);
 		rentalBill.setNamespaceId(rsType.getNamespaceId());
 		rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
