@@ -262,7 +262,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter formula error");
             }
             realAmountMap.put(address.getAddressId(), realAmount);*/
-            if(address.getBurdenRate()!=null && address.getBurdenRate().longValue()!=0L){
+            if (address.getBurdenRate() != null && address.getBurdenRate().compareTo(new BigDecimal(0)) != 0) {
                 BigDecimal  burdenRate = address.getBurdenRate();
                 realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()).multiply(burdenRate));
             }else {
