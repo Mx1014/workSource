@@ -158,7 +158,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, 0L);// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
 		}
 
 		final Long userId = UserContext.current().getUser().getId();
