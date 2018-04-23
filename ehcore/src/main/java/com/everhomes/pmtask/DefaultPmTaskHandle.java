@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -62,6 +65,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
 	private FlowService flowService;
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -308,9 +313,11 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
-				cmd.getPageAnchor(), pageSize+1);
+//		V3.5修改兼容查询域空间下全部项目
+		List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
+//		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+//				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
+//				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
     		response.setRequests(list.stream().map(t -> {

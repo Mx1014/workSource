@@ -3096,12 +3096,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private List<Long> getOwnerIds(GetTaskStatCommand cmd){
 		List<Long> ownerIds = new ArrayList<>();
-		if(null == cmd.getOwnerId()){
+		if(null == cmd.getOwnerId() || -1L == cmd.getOwnerId()){
 			ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
 			cmd1.setModuleId(20100L);
 			cmd1.setAppId(cmd.getAppId());
 			cmd1.setOrganizationId(cmd.getCurrentPMId());
-			List<ProjectDTO> dtos =  serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+			List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
 			ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
 		} else {
 			ownerIds.add(cmd.getOwnerId());
