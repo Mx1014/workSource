@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.Host;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +54,15 @@ import com.everhomes.rest.asset.ShowBillForClientV2Command;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.zhuzong.CostByHouseListDTO;
+import com.everhomes.rest.asset.zhuzong.CostDTO;
+import com.everhomes.rest.asset.zhuzong.CostDetailDTO;
 import com.everhomes.rest.asset.zhuzong.HouseDTO;
+import com.everhomes.rest.asset.zhuzong.QueryCostByHouseListDTO;
+import com.everhomes.rest.asset.zhuzong.QueryCostDetailByIDDTO;
 import com.everhomes.rest.asset.zhuzong.QueryHouseByPhoneNumberDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.user.UserIdentifierDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -215,8 +220,6 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	
 	/**
 	 * 根据手机号返回房产
-	 * @param phoneNumbers
-	 * @return
 	 */
 	private List<HouseDTO> queryHouseByPhoneNumber(List<String> phoneNumbers) {
 		List<HouseDTO> houseDTOs = new ArrayList<HouseDTO>();
@@ -228,21 +231,79 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 				params.put("AccountCode", AccountCode);
 				params.put("phone", phoneNumbers.get(i));
 				String response = HttpUtils.post(url, params, 600, false);
-				QueryHouseByPhoneNumberDTO queryHouseByPhoneNumberDTO = (QueryHouseByPhoneNumberDTO) StringHelper.fromJsonString(response, QueryHouseByPhoneNumberDTO.class);
-				houseDTOs.addAll(queryHouseByPhoneNumberDTO.getResult());
+				try {
+					QueryHouseByPhoneNumberDTO queryHouseByPhoneNumberDTO = 
+							(QueryHouseByPhoneNumberDTO) StringHelper.fromJsonString(response, QueryHouseByPhoneNumberDTO.class);
+					houseDTOs.addAll(queryHouseByPhoneNumberDTO.getResult());
+				} catch (Exception e) {
+					LOGGER.error("ZhuZongAssetVendor queryHouseByPhoneNumber() {}", phoneNumbers.get(i), e);
+				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("ZhuZongAssetVendor queryHouseByPhoneNumber() {}", phoneNumbers, e);
+			LOGGER.error("ZhuZongAssetVendor queryHouseByPhoneNumber() {}", e);
 		}
 		return houseDTOs;
 	}
 	
 	/**
+	 * 根据房屋查询费用
+	 * onlyws 是	0：全部费用；1：未收；2：已收
+	 */
+	private List<CostDTO> queryCostByHouseList(String houseid, String clientid, String onlyws) {
+		List<CostDTO> costDTOs = new ArrayList<>();
+		try {
+			String url = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_QUERYCOSTBYHOUSELIST_URL,""); 
+			String AccountCode = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_ACCOUNTCODE,""); 
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("AccountCode", AccountCode);
+			params.put("houseid", houseid);
+			params.put("clientid", clientid);
+			params.put("onlyws", onlyws);
+			params.put("pageOprator", "next");
+			params.put("currenpage", "0");//从首页开始查询
+			String response = HttpUtils.post(url, params, 600, false);
+			QueryCostByHouseListDTO queryCostByHouseListDTO = 
+					(QueryCostByHouseListDTO) StringHelper.fromJsonString(response, QueryCostByHouseListDTO.class);
+			CostByHouseListDTO costByHouseListDTO = queryCostByHouseListDTO.getResult();
+			costDTOs = costByHouseListDTO.getDatas();
+			Integer totalpage = costByHouseListDTO.getTotalpage();//获取总页数
+			for(int currentpage = 1;currentpage < totalpage;currentpage++) {
+				params.put("currenpage", new Integer(currentpage).toString());
+				response = HttpUtils.post(url, params, 600, false);
+				queryCostByHouseListDTO = 
+						(QueryCostByHouseListDTO) StringHelper.fromJsonString(response, QueryCostByHouseListDTO.class);
+				costByHouseListDTO = queryCostByHouseListDTO.getResult();
+				costDTOs.addAll(costByHouseListDTO.getDatas());
+			}
+		}catch (Exception e) {
+			LOGGER.error("ZhuZongAssetVendor queryCostByHouseList() {}", houseid, clientid, onlyws, e);
+		}
+		return costDTOs;
+	}
+	
+	/**
+	 * 查询费用明细
+	 */
+	private List<CostDetailDTO> queryCostDetailByID(String feeid) {
+		List<CostDetailDTO> costDetailDTOs = new ArrayList<CostDetailDTO>();
+		try {
+			String url = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_QUERYCOSTDETAILBYID_URL,""); 
+			String AccountCode = configurationProvider.getValue(999955, ConfigConstants.ASSET_ZHUZONG_ACCOUNTCODE,""); 
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("AccountCode", AccountCode);
+			params.put("feeid", feeid);
+			String response = HttpUtils.post(url, params, 600, false);
+			QueryCostDetailByIDDTO queryCostDetailByIDDTO = 
+					(QueryCostDetailByIDDTO) StringHelper.fromJsonString(response, QueryCostDetailByIDDTO.class);
+			costDetailDTOs = queryCostDetailByIDDTO.getResult();
+		} catch (Exception e) {
+			LOGGER.error("ZhuZongAssetVendor queryCostDetailByID() {}", feeid, e);
+		}
+		return costDetailDTOs;
+	}
+	
+	/**
 	 * 个人直接获取手机号码，企业获取所有企业管理员的手机号码
-	 * @param targetType
-	 * @param targetId
-	 * @param namespaceId
-	 * @return
 	 */
 	private List<String> getPhoneNumber(String targetType, Long targetId, Integer namespaceId){
 		List<String> phoneNumbers = new ArrayList<String>(); 
@@ -277,17 +338,29 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	
 	@Override
 	public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+		List<ShowBillForClientV2DTO> response = new ArrayList<ShowBillForClientV2DTO>();
 		try {
 			//个人直接获取手机号码，企业获取所有企业管理员的手机号码
 			List<String> phoneNumbers = getPhoneNumber(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId());
 			phoneNumbers.add("15650723221");//用于测试的手机号码，杨崇鑫
+			//根据手机号返回房产
 			List<HouseDTO> houseDTOs = queryHouseByPhoneNumber(phoneNumbers);
-			
+			String houseid = "",clientid = "";
+			for(int i = 0 ;i < houseDTOs.size();i++){
+				houseid += houseDTOs.get(i).getPk_house() + ",";//房屋ID如果是多个以英文逗号隔开
+				clientid += houseDTOs.get(i).getPk_client() + ",";//业户ID如果是多个以英文逗号隔开
+			}
+			String onlyws = "1";//首页只查询未缴费:0：全部费用；1：未收；2：已收
+			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
+			for(int i = 0;i < costDTOs.size();i++) {
+				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
+				CostDTO costDTO = costDTOs.get(i);
+				
+			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor showBillForClientV2() cmd={}", cmd, e);
 		}
-		//return response;
-		return null;
+		return response;
 	}
 	
 	@Override
