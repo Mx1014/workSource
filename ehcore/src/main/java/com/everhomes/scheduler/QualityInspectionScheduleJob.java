@@ -75,7 +75,7 @@ public class QualityInspectionScheduleJob  extends QuartzJobBean {
 
 			}
 
-			sendTaskMsg();
+			//sendTaskMsg();
 		}
 	}
 

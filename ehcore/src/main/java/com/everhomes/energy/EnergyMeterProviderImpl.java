@@ -3,6 +3,7 @@ package com.everhomes.energy;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.EnergyAutoReadingFlag;
 import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMetersDao;
@@ -113,6 +114,14 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
                 .and(EH_ENERGY_METERS.STATUS.ne(EnergyMeterStatus.INACTIVE.getCode()))
                 .and(EH_ENERGY_METERS.METER_NUMBER.eq(number))
                 .fetchAnyInto(EnergyMeter.class);
+    }
+
+    @Override
+    public List<EnergyMeter> listAutoReadingMeters() {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.AUTO_FLAG.eq(EnergyAutoReadingFlag.TURE.getCode()))
+                .and(EH_ENERGY_METERS.STATUS.eq(EnergyMeterStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyMeter.class);
     }
 
     private DSLContext context() {
