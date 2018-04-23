@@ -5774,7 +5774,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd) {
         if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0) {
-            LOGGER.error("DetailIds is null");
+            LOGGER.error("DetailId is null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PARAMETER_NOT_EXIST, "DetailIds is null");
         }
         Organization org = checkOrganization(cmd.getOrganizationId());
@@ -5787,7 +5787,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<Long> detailIds = cmd.getDetailIds();
 
-        //:todo 调整组织架构
         if(departmentIds != null && departmentIds.size() > 0){
 
             // 需要添加直属的企业ID集合
@@ -5795,7 +5794,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             // 离开公司的人员集合
             List<OrganizationMember> leaveMembers = new ArrayList<>();
-
 
             //总公司和分公司的ID集合
             organizationPersonelsDatasProcess(enterpriseIds, departmentIds, direct_under_enterpriseIds, org);
@@ -5813,13 +5811,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
                     //重复添加纪录
                     repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
-                    /*OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                    departmentIds.remove(getEnableEnterprisePersonel(org, detailId).getOrganizationId());
-                    if (departmentIds != null && departmentIds.size() > 0)
-                        memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
-                    memberDetail.setDepartment(convertToOrganizationName(departmentIds));
-                    organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());*/
-
                     //删除置顶信息
                     archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
                 }
@@ -5827,7 +5818,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-        //:todo 根据通用岗位ID和detailIds进行批量调岗
         if (cmd.getJobPositionIds() != null) {
             //1. 删除通用岗位+detailIds所确认的部门岗位条目
 //            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
@@ -5844,15 +5834,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobPositionIds(), token, enterpriseIds, enterprise_member);
-                /*OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0)
-                    memberDetail.setJobPositionIds(JSON.toJSONString(cmd.getJobPositionIds()));
-                memberDetail.setJobPosition(convertToOrganizationName(cmd.getJobPositionIds()));
-                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());*/
             });
         }
 
-        //:todo 调整职级
         if (cmd.getJobLevelIds() != null) {
             //1.统一删除原有职级
             this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_LEVEL.getCode());
@@ -5861,11 +5845,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobLevelIds(), token, enterpriseIds, enterprise_member);
-                /*OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0)
-                    memberDetail.setJobLevelIds(JSON.toJSONString(cmd.getJobLevelIds()));
-                memberDetail.setJobLevel(convertToOrganizationName(cmd.getJobLevelIds()));
-                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());*/
             });
         }
     }
@@ -12425,9 +12404,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
 //            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
         }
-        members = members.stream().filter(r -> {
-            return r.getOrganizationId().equals(org.getId());
-        }).collect(Collectors.toList());
+        members = members.stream().filter(r -> r.getOrganizationId().equals(org.getId())).collect(Collectors.toList());
         OrganizationMember enterprise_member = members.get(0);
         enterprise_member.setContactToken(token);
         return enterprise_member;
