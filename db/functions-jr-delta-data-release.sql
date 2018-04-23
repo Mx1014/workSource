@@ -21,3 +21,15 @@ set @id = IFNULL((SELECT MAX(id) from eh_locale_strings),0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy', '10032', 'zh_CN', '分摊比例大于1');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy', '10033', 'zh_CN', '比例系数不是数字');
 
+-- 增加表计类型及文案修改 by jiarui
+set @id=(select MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy.meter.type', '4', 'zh_CN', '公摊水表');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy.meter.type', '5', 'zh_CN', '公摊电表');
+
+
+UPDATE `eh_locale_strings`
+SET `text`='自用水表' WHERE scope = 'energy.meter.type' and `code` = 1;
+
+UPDATE `eh_locale_strings`
+SET `text`='自用电表' WHERE scope='energy.meter.type' and `code` = 2 ;
+
