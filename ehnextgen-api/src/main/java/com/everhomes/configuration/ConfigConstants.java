@@ -153,5 +153,11 @@ public interface ConfigConstants {
 	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
 	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";
+	
+	
+	public static final String ASSET_ZHUZONG_QUERYHOUSEBYPHONENUMBER_URL = "asset.zhuzong.QueryHouseByPhoneNumber.url";
+	public static final String ASSET_ZHUZONG_QUERYCOSTBYHOUSELIST_URL = "asset.zhuzong.QueryCostByHouseList.url";
+	public static final String ASSET_ZHUZONG_QUERYCOSTDETAILBYID_URL = "asset.zhuzong.QueryCostDetailByID.url";
+	public static final String ASSET_ZHUZONG_ACCOUNTCODE = "asset.zhuzong.AccountCode";
 
 }
