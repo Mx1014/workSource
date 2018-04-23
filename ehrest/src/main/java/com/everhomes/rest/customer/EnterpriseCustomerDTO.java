@@ -172,6 +172,7 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Boolean thirdPartFlag = false;
 
     private String trackingPhone;
+    private String deviceType;
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -883,6 +884,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setTrackingPhone(String trackingPhone) {
         this.trackingPhone = trackingPhone;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     @Override
