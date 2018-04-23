@@ -153,8 +153,16 @@ public interface ConfigConstants {
 	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
 	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";
-
-    String REMIND_COLOUR_LIST = "remind.colour.list";
+	
+	String REMIND_COLOUR_LIST = "remind.colour.list";
     String REMIND_COLOUR_SHARE = "remind.colour.share";
 
+	public static final String ASSET_SHENZHENWAN_EASLOGIN_ADDRESS = "asset.shenzhenwan.EASLogin_address";
+	public static final String ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS = "asset.shenzhenwan.WSWSSyncMyBayFacade_address";
+	public static final String ASSET_SHENZHENWAN_USERNAME = "asset.shenzhenwan.username";
+	public static final String ASSET_SHENZHENWAN_PASSWORD = "asset.shenzhenwan.password";
+	public static final String ASSET_SHENZHENWAN_SLNNAME = "asset.shenzhenwan.slnName";
+	public static final String ASSET_SHENZHENWAN_DCNAME = "asset.shenzhenwan.dcName";
+	public static final String ASSET_SHENZHENWAN_LANGUAGE = "asset.shenzhenwan.language";
+	public static final String ASSET_SHENZHENWAN_DBTYPE = "asset.shenzhenwan.dbType";
 }
