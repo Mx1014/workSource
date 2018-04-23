@@ -19,6 +19,7 @@ import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,18 +54,28 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	private static final String PARKING_ELIVE_JIESHUN_TICKENT = "PARKING_ELIVE_JIESHUN_TICKENT";//存token
 	private static final String PARKING_ELIVE_JIESHUN_RATE = "PARKING_ELIVE_JIESHUN_RATE";//存车辆的费率，免得两次请求一直搞
 
+	private JSONObject transformAttributes(Object attributes){
+		return JSONObject.parseObject(String.valueOf(attributes));
+	}
+
+	private JSONArray transformSubItems(Object subItems){
+		return JSONObject.parseArray(String.valueOf(subItems));
+	}
 
 	@Override
 	public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> cardInfo = getCardInfo(plateNumber);
+		EliveJieShunLogonReponse cardInfo = getCardInfo(plateNumber);
 		List<ParkingCardDTO> resultList = new ArrayList<>();
 		if(!isRequestDataItemsSuccess(cardInfo)){
 			return resultList;
 		}
 		ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		// 格式yyyyMMddHHmmss
-		String subItems = cardInfo.getDataItems().get(0).getSubItems();
-		JSONArray jsonArray = JSONObject.parseArray(subItems);
+		JSONArray jsonArrayitems = transformSubItems(cardInfo.getDataItems());
+		if(jsonArrayitems==null || jsonArrayitems.size()==0){
+			return resultList;
+		}
+		JSONArray jsonArray = jsonArrayitems.getJSONObject(0).getJSONArray("subItems");
 		if(jsonArray==null || jsonArray.size()==0){
 			return resultList;
 		}
@@ -85,8 +96,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
 			parkingCardDTO.setParkingLotId(parkingLot.getId());
 
-			String jsonAttrabject = cardInfo.getDataItems().get(0).getAttributes();
-			JSONObject ownerAttributes = JSONObject.parseObject(jsonAttrabject);
+			JSONObject ownerAttributes = jsonArrayitems.getJSONObject(0).getJSONObject("attributes");
 			if(ownerAttributes!=null) {
 				parkingCardDTO.setPlateOwnerName(ownerAttributes.getString("personName"));// 车主名称
 			}
@@ -101,8 +111,8 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		return resultList;
 	}
 
-	private boolean isRequestDataItemsSuccess(EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> cardInfo) {
-		return cardInfo != null && cardInfo.isSuccess() && cardInfo.getDataItems()!=null && cardInfo.getDataItems().size()>0;
+	private boolean isRequestDataItemsSuccess(EliveJieShunLogonReponse cardInfo) {
+		return cardInfo != null && cardInfo.isSuccess() && cardInfo.getDataItems()!=null;
 	}
 
 	private boolean isRequestSuccess(EliveJieShunLogonReponse delayMonthCardResult) {
@@ -121,7 +131,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		return plateNumber==null?plateNumber:plateNumber.replace("-","");
 	}
 
-	private EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> getCardInfo(String plateNumber) {
+	private EliveJieShunLogonReponse getCardInfo(String plateNumber) {
 		String areaCode = configProvider.getValue("parking.elivejieshun.areaCode", "");
 //		String areaCode = "0000006666";
 
@@ -133,10 +143,10 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		attributes.put("carNo",transformPlateNumberToThirdpartFormat(plateNumber));
 		jsonObject.put("attributes",attributes);
 		String result = post(jsonObject.toJSONString());
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
-		});
+						<EliveJieShunLogonReponse>() {
+				});
 //		if(!isRequestMonthCardSuccess(response) && isErrorToken(response)){
 //			result = postRefreshToken(plateNumber);
 //			response = JSONObject.parseObject(result, new TypeReference
@@ -182,10 +192,10 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			result = Utils.get((Map<String, Object>) null,urlbuffer.substring(0,urlbuffer.length()-1).toString());
 			jsonObject = JSONObject.parseObject(result);
 		}
-		if(jsonObject!=null && jsonObject.getInteger("resultCode")!=0){
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_TOKEN,
-					jsonObject.getInteger("resultCode")+','+jsonObject.getString("message"));
-		}
+//		if(jsonObject!=null && jsonObject.getInteger("resultCode")!=0){
+//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_TOKEN,
+//					jsonObject.getInteger("resultCode")+','+jsonObject.getString("message"));
+//		}
 		return result;
 	}
 
@@ -247,14 +257,16 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	}
 
 	private Boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
-		EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> cardInfo
+		EliveJieShunLogonReponse cardInfo
 				= getCardInfo(order.getPlateNumber());
 		if(!isRequestDataItemsSuccess(cardInfo)){
 			return false;
 		}
-
-		String subItems = cardInfo.getDataItems().get(0).getSubItems();
-		JSONArray jsonArray = JSONObject.parseArray(subItems);
+		JSONArray jsonArrayitems = transformSubItems(cardInfo.getDataItems());
+		if(jsonArrayitems==null || jsonArrayitems.size()==0){
+			return false;
+		}
+		JSONArray jsonArray = jsonArrayitems.getJSONObject(0).getJSONArray("subItems");
 		if(jsonArray==null || jsonArray.size()==0){
 			return false;
 		}
@@ -364,12 +376,14 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	private List<ParkingRechargeRateDTO> getRateByPlateNumber(ParkingLot parkingLot,String plateNumber,boolean isRequestFromThird) {
 		Object o = null;
 		if(isRequestFromThird){
-			EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> cardInfo = getCardInfo(plateNumber);
+			EliveJieShunLogonReponse cardInfo = getCardInfo(plateNumber);
 			if(!isRequestDataItemsSuccess(cardInfo)){
 				return null;
 			}
-			String subItems = cardInfo.getDataItems().get(0).getSubItems();
-			JSONArray jsonArray = JSONObject.parseArray(subItems);
+			JSONArray jsonArrayitems = JSONObject.parseArray(String.valueOf(cardInfo.getDataItems()));
+			JSONArray jsonArray = jsonArrayitems.getJSONObject(0).getJSONArray("subItems");
+//			String subItems = cardInfo.getDataItems().get(0).getSubItems();
+//			JSONArray jsonArray = JSONObject.parseArray(subItems);
 			if(jsonArray==null || jsonArray.size()==0){
 				return null;
 			}
@@ -553,22 +567,24 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("carNo",transformPlateNumberToThirdpartFormat(plateNumber));
 		params.put("attributes",paramattrs);
 		String result = post(params.toJSONString());
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
-		if(!isRequestSuccess(response)){
-			return null;
-		}
-
-
-		String attributes = response.getDataItems().get(0).getAttributes();
-		JSONObject jsonAttributes = JSONObject.parseObject(attributes);
-		if(jsonAttributes==null || jsonAttributes.size()==0 || 0!=jsonAttributes.getInteger("retcode")){
-			return null;
-		}
-
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+		if(!isRequestSuccess(response)){
+			return dto;
+		}
+
+		JSONArray jsonArrayitems = JSONObject.parseArray(String.valueOf(response.getDataItems()));
+		JSONObject jsonAttributes = jsonArrayitems.getJSONObject(0).getJSONObject("attributes");
+
+//		String attributes = response.getDataItems().get(0).getAttributes();
+//		JSONObject jsonAttributes = JSONObject.parseObject(attributes);
+		if(jsonAttributes==null || jsonAttributes.size()==0 || 0!=jsonAttributes.getInteger("retcode")){
+			return dto;
+		}
+
 		dto.setPrice(new BigDecimal(jsonAttributes.getString("serviceFee")));
 		dto.setRemainingTime(jsonAttributes.getInteger("surplusMinute"));
 		dto.setPlateNumber(plateNumber);
@@ -605,16 +621,20 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		paramattrs.put("parkCodes",parkCode);
 		params.put("attributes",paramattrs);
 		String result = post(params.toJSONString());
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
-		if(!isRequestSuccess(response) || response.getDataItems()==null || response.getDataItems().size()==0){
+		if(!isRequestSuccess(response) || response.getDataItems()==null){
 			return null;
 		}
-		JSONObject jsonObject = JSONObject.parseObject(response.getDataItems().get(0).getAttributes());
+		JSONArray array = JSONObject.parseArray(String.valueOf(response.getDataItems()));
+		if(array==null || array.size()<1){
+			return null;
+		}
+		JSONObject jsonObject =array.getJSONObject(0);
 		ParkingFreeSpaceNumDTO dto = ConvertHelper.convert(cmd,ParkingFreeSpaceNumDTO.class);
-		dto.setFreeSpaceNum(jsonObject.getInteger("restSpace"));
+		dto.setFreeSpaceNum(jsonObject.getJSONObject("attributes").getInteger("restSpace"));
 		return dto;
 	}
 
@@ -624,26 +644,26 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 //		String personCode = configProvider.getValue("parking.elivejieshun.personCode", "");
 //		String parkCode = configProvider.getValue("parking.elivejieshun.parkCode", "");
 
-		EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> inRecordResponse = queryParkInRecord(r);
+		EliveJieShunLogonReponse inRecordResponse = queryParkInRecord(r);
 		if(isOutedParkingLot(inRecordResponse)){
-			EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> outRecordResponse = queryParkOutRecord(r);
+			EliveJieShunLogonReponse outRecordResponse = queryParkOutRecord(r);
 			return generateClearanceLogList(inRecordResponse,outRecordResponse);
 		}
 		return generateClearanceLogList(inRecordResponse,null);
 	}
 
-	private List<ParkingActualClearanceLogDTO> generateClearanceLogList(EliveJieShunLogonReponse<String,
-			List<EliveJieShunDataItems<String, String, String>>> inRecordResponse,
-					EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> outRecordResponse) {
+	private List<ParkingActualClearanceLogDTO> generateClearanceLogList(EliveJieShunLogonReponse inRecordResponse,
+																		EliveJieShunLogonReponse outRecordResponse) {
 		if(!isRequestDataItemsSuccess(inRecordResponse)){
 			return null;
 		}
 		List<ParkingActualClearanceLogDTO> dtos = new ArrayList<>();
-		List<EliveJieShunDataItems<String, String, String>> dataItems = inRecordResponse.getDataItems();
-		for (EliveJieShunDataItems<String, String, String> dataItem : dataItems) {
+
+		JSONArray dataItems = transformSubItems(inRecordResponse.getDataItems());
+		for (Object dataItem : dataItems) {
 			ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
-			JSONObject attr = JSONObject.parseObject(dataItem.getAttributes());
-			String inTime = attr.getString("inTime");
+			JSONObject jsonDataItem = JSONObject.parseObject(String.valueOf(dataItem));
+			String inTime = jsonDataItem.getJSONObject("attributes").getString("inTime");
 			dto.setEntryTime(Utils.strToTimeStamp(inTime,Utils.DateStyle.DATE_TIME));
 			dtos.add(dto);
 		}
@@ -651,9 +671,10 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			return dtos;
 		}
 		int i = 0;
-		for (EliveJieShunDataItems<String, String, String> dataItem : outRecordResponse.getDataItems()) {
-			JSONObject attr = JSONObject.parseObject(dataItem.getAttributes());
-			String outTime = attr.getString("outTime");
+		JSONArray dataItemsOut = JSONObject.parseArray(String.valueOf(outRecordResponse.getDataItems()));
+		for (Object dataItem :dataItemsOut) {
+			JSONObject jsonDataItem = JSONObject.parseObject(String.valueOf(dataItem));
+			String outTime = jsonDataItem.getJSONObject("attributes").getString("outTime");
 			ParkingActualClearanceLogDTO dto = dtos.get(i++);
 			if(dto==null){
 				dto=new ParkingActualClearanceLogDTO();
@@ -663,28 +684,28 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		return dtos;
 	}
 
-	private boolean isOutedParkingLot(EliveJieShunLogonReponse<String, List<EliveJieShunDataItems<String, String, String>>> inRecordResponse) {
+	private boolean isOutedParkingLot(EliveJieShunLogonReponse inRecordResponse) {
 		if(!isRequestDataItemsSuccess(inRecordResponse)){
 			return false;
 		}
-		EliveJieShunDataItems<String, String, String> dateItems = inRecordResponse.getDataItems().get(0);
-		JSONObject attr = JSONObject.parseObject(dateItems.getAttributes());
-		Integer isout = attr.getInteger("isOut");
+		JSONArray dateItems = JSONObject.parseArray(String.valueOf(inRecordResponse.getDataItems()));
+		JSONObject attr = JSONObject.parseObject(String.valueOf(dateItems.get(0)));
+		Integer isout = attr.getJSONObject("attributes").getInteger("isOut");
 		if(isout==null){
 			return false;
 		}
 		return isout==1;
 	}
 
-	private EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> queryParkOutRecord(ParkingClearanceLog r){
+	private EliveJieShunLogonReponse queryParkOutRecord(ParkingClearanceLog r){
 		return queryParkRecord(r,"3c.park.queryparkout");
 	}
 
-	private EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> queryParkInRecord(ParkingClearanceLog r){
+	private EliveJieShunLogonReponse queryParkInRecord(ParkingClearanceLog r){
 		return queryParkRecord(r,"3c.park.queryparkinrecord");
 	}
 
-	private EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> queryParkRecord(ParkingClearanceLog r, String serviceId){
+	private EliveJieShunLogonReponse queryParkRecord(ParkingClearanceLog r, String serviceId){
 		String parkCode = configProvider.getValue("parking.elivejieshun.parkCode", "");
 
 		JSONObject params=new JSONObject();
@@ -694,7 +715,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		JSONObject paramattrs=new JSONObject();
 		paramattrs.put("parkCode",parkCode);
 		paramattrs.put("carNo",transformPlateNumberToThirdpartFormat(r.getPlateNumber()));
-//		paramattrs.put("carNo","粤-R654321");
+//		paramattrs.put("carNo","粤-Y22222");
 		if("3c.park.queryparkinrecord".equals(serviceId)) {
 			paramattrs.put("beginTime", generateClearanceStartTime(r.getClearanceTime()));
 			paramattrs.put("endTime", generateClearanceEndTime(r.getClearanceTime()));
@@ -708,9 +729,9 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 		String result = post(params.toJSONString());
 
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
 		return response;
 	}
@@ -738,15 +759,15 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		String result = post(params.toJSONString());
 		return  result;
 	}
-	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	@Override
 	public String applyTempCard(ParkingClearanceLog log) {
 
 		String result = post(generateTempCardParams(log).toJSONString());
 
-		EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>> response =
+		EliveJieShunLogonReponse response =
 				JSONObject.parseObject(result, new TypeReference
-						<EliveJieShunLogonReponse<String,List<EliveJieShunDataItems<String,String,String>>>>() {
+						<EliveJieShunLogonReponse>() {
 				});
 		if(!isRequestSuccess(response)){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_INVITE_FAILD,
@@ -754,7 +775,7 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		}
 //		JSONObject attrubiter = JSONObject.parseObject(response.getAttributes());
 //		return attrubiter.getString("visitorId");
-		return response.getAttributes();
+		return String.valueOf(response);
 	}
 
 	private JSONObject generateTempCardParams(ParkingClearanceLog log) {
@@ -796,16 +817,14 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 
 	private String generateClearanceStartTime(Timestamp clearanceTime) {
 		LocalDateTime start = clearanceTime.toLocalDateTime();
-		return start.format(dtf2);
-//		return "2018-03-16 00:00:00";
+		return start.format(dtf2)+" 00:00:00";
+//		return "2018-03-24 00:00:00";
 	}
 
 	private String generateClearanceEndTime(Timestamp clearanceTime) {
 		LocalDateTime end = clearanceTime.toLocalDateTime();
-		end = end.plusDays(1L);
-		end = end.minusSeconds(1L);
-		return end.format(dtf2);
-//		return "2018-04-12 00:00:00";
+		return end.format(dtf2)+" 23:59:59";
+//		return "2018-04-23 00:00:00";
 	}
 
 }
