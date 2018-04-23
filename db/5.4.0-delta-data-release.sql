@@ -240,5 +240,9 @@ VALUES
 
 delete from eh_var_fields where group_id = 35 and display_name = '开始时间' or display_name = '结束时间';
 
--- 客户同步的secret key，用于第三方的客户自动同步 by wentian
+-- 客户同步的secret key，用于第三方的客户自动同步 by wentian 2018/4/23
 INSERT INTO eh_configurations(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) select @cid:=@cid+1, 'shenzhoushuma.secret.key', '2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==', NULL, '999971', NULL FROM DUAL WHERE NOT EXISTS(select id from `eh_configurations` where `name` = 'shenzhoushuma.secret.key');
+
+-- 资源预定和企业服务的tab卡的导出所需要的类的包名 by wentian 2018/4/23
+update eh_var_field_groups set name = 'com.everhomes.yellowPage.ServiceAllianceApplicationRecord' where title = '企业服务';
+update eh_var_field_groups set name = 'com.everhomes.rentalv2.RentalV2Order' where title = '资源预定';
