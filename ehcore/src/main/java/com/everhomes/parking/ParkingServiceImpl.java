@@ -1,19 +1,6 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -21,40 +8,6 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.order.PayService;
-import com.everhomes.parking.handler.DefaultParkingVendorHandler;
-import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
-import com.everhomes.rentalv2.*;
-import com.everhomes.rentalv2.utils.RentalUtils;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.parking.*;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.rentalv2.*;
-
-import com.everhomes.server.schema.Tables;
-import com.everhomes.util.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.SortField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.http.*;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -65,25 +18,61 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.parking.handler.DefaultParkingVendorHandler;
+import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.rentalv2.*;
+import com.everhomes.rentalv2.utils.RentalUtils;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.VendorType;
-
+import com.everhomes.rest.parking.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.SortField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -1369,19 +1358,22 @@ public class ParkingServiceImpl implements ParkingService {
 
 
 		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for(int i=0, size = list.size();i<size;i++){
-			Row tempRow = sheet.createRow(i + 1);
-			ParkingRechargeOrder order = list.get(i);
-			tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
-			tempRow.createCell(1).setCellValue(order.getPlateNumber());
-			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
-			tempRow.createCell(3).setCellValue(order.getPayerPhone());
-			tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
-			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
-			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
-			VendorType type = VendorType.fromCode(order.getPaidType());
-			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
-			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+		for(int i=0, size = list.size();i<size;i++) {
+            Row tempRow = sheet.createRow(i + 1);
+            ParkingRechargeOrder order = list.get(i);
+            tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
+            tempRow.createCell(1).setCellValue(order.getPlateNumber());
+            tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
+            tempRow.createCell(3).setCellValue(order.getPayerPhone());
+            tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
+            tempRow.createCell(5).setCellValue(null == order.getMonthCount() ? "" : order.getMonthCount().toString());
+            tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
+            VendorType type = VendorType.fromCode(order.getPaidType());
+            tempRow.createCell(7).setCellValue(null == type ? "" : type.getDescribe());
+            tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+        }
+
+        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);

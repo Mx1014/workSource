@@ -1,27 +1,25 @@
 // @formatter:off
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.parking.*;
+import com.everhomes.parking.ketuo.*;
+import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.parking.*;
+import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.everhomes.flow.FlowCase;
-import com.everhomes.parking.*;
-import com.everhomes.parking.ketuo.*;
-import com.everhomes.rest.parking.*;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.parking.ketuo.KetuoTempFee;
-import com.everhomes.rest.organization.VendorType;
-import com.everhomes.util.RuntimeErrorException;
 
 /**
  * 停车对接
@@ -35,6 +33,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 	private static final String GET_CARd_RULE = "/api/pay/GetCardRule";
 	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
+
+    protected static final String ADD_NATURAL_MONTH = "ADD_NATURAL_MONTH";//按照自然月计算
+    protected static final String ADD_DISTANCE_MONTH = "ADD_DISTANCE_MONTH";//用户新有效期=目标月份自然月月底-「1」所得剩余天数。rp6.4
+
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
 	//月租车 : 2
@@ -254,6 +256,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
     }
 
 	protected boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
+		return rechargeMonthlyCard(order,ADD_NATURAL_MONTH);
+	}
+
+	protected final boolean rechargeMonthlyCard(ParkingRechargeOrder order, String monthCardTimeArithmetic) {
 
 		JSONObject param = new JSONObject();
 		String plateNumber = order.getPlateNumber();

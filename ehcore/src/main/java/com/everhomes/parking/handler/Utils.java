@@ -1,26 +1,12 @@
 package com.everhomes.parking.handler;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -36,15 +22,20 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.util.RuntimeErrorException;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Utils {
 
@@ -193,6 +184,34 @@ public class Utils {
     static Timestamp getTimestampByAddNatureMonth(Long source, int month) {
 
         return new Timestamp(getLongByAddNatureMonth(source, month));
+    }
+
+    /* rp6.4
+    * 深圳湾项目生态园停车场（对接科拓系统），月卡充值计算有效期采用独立规则：
+    1，首先获得车辆当前的月卡有效期，得到该有效期距离该月自然月底的剩余天数；
+    2，用户选择充值月数后，得到目标月份的自然月天数；
+    3，用户新有效期=目标月份自然月月底-「1」所得剩余天数。*/
+    static Timestamp getTimestampByAddDistanceMonth(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        int daysToEndOfMonth = getDaysToEndOfMonth(calendar);
+
+        //加month个月
+        calendar.add(Calendar.MONTH,month);
+        //计算最后一天
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.add(Calendar.DAY_OF_MONTH,-daysToEndOfMonth);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    //获取到月底的天数
+    static int getDaysToEndOfMonth(Calendar calendar){
+        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-calendar.get(Calendar.DAY_OF_MONTH);
     }
 
     static Long strToLong(String str, String style) {
