@@ -1,20 +1,21 @@
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.parking.*;
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.parking.qididaoding.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import kafka.utils.Json;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +48,7 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
     private static final String OPENAPI_PARKING_TEMPORARY_GET = "/openapi/parking/temporary/get";// 临停车费用查询
     private static final String OPENAPI_PARKING_TEMPORARY_CREATE = "/openapi/parking/temporary/create";// 临停车创建缴费订单
     private static final String OPENAPI_PARKING_LOCKCAR_INFO = "/openapi/parking/lockCar/info";// 锁车状态查询
-    private static final String PARKING_LOCKCAR_OPERATING = "/parking/lockCar/operating";// 锁车/解锁
+    private static final String OPENAPI_PARKING_LOCKCAR_OPERATING = "/openapi/parking/lockCar/operating";// 锁车/解锁
     private static final String OPENAPI_PARKING_TEMPORARY_OPEN_ADD = "/openapi/parking/temporary/open/add";// 临时放行
     private static final String OPENAPI_PARKING_TEMPORARY_OPEN_LIST = "/openapi/parking/temporary/open/list";// 临时放行记录
 
@@ -297,7 +300,52 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     @Override
     public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-        return super.getParkingCarLockInfo(cmd);
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",cmd.getPlateNumber());
+
+        QidiDaodingResponse<QidiDaodingLockCarInfo> response = postWithToken(map, OPENAPI_PARKING_LOCKCAR_INFO, QidiDaodingResponse.class, QidiDaodingLockCarInfo.class);
+        if (!isRequestDataSuccess(response)) {
+            return null;
+        }
+
+        ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+        Long time = Utils.strToLong(response.getData().getLockCarTime(),Utils.DateStyle.DATE_TIME);
+//        dto.setEntryTime(time);
+        dto.setLockCarTime(time);
+        dto.setLockStatus(response.getData().getStatus().byteValue());
+        return dto;
+//        map.put("token",getToken(false));
+//        String result = post(map, OPENAPI_PARKING_LOCKCAR_INFO);
+//        if(StringUtils.isEmpty(result)){
+//            return null;
+//        }
+//        JSONObject jsonObject = JSONObject.parseObject(result);
+//        ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+//        Long time = Utils.strToLong(jsonObject.getJSONObject("data").getString("lockCarTime"),Utils.DateStyle.DATE_TIME);
+//        dto.setEntryTime(time);
+//        dto.setLockCarTime(time);
+//        dto.setLockStatus(jsonObject.getJSONObject("data").getByte("status").byteValue());
+//        return dto;
+    }
+
+    @Override
+    public void lockParkingCar(LockParkingCarCommand cmd) {
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",cmd.getPlateNumber());
+        //客户端回传的是车位当前状态，现在是要当前状态的相反操作
+        map.put("status",String.valueOf(1-cmd.getLockStatus()));
+
+        QidiDaodingResponse<QidiDaodingLockCarInfo> response = postWithToken(map, OPENAPI_PARKING_LOCKCAR_OPERATING, QidiDaodingResponse.class, null);
+        if (!isRequestSuccess(response)) {
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_RESULT,
+                    response!=null&&response.getErrorCode()!=null?response.getErrorCode()+","+response.getErrorMsg():"请求停车系统失败");
+        }
     }
 
     @Override
@@ -327,7 +375,7 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     @Override
     public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-
+        order.setOriginalPrice(order.getPrice());
     }
 
     @Override
@@ -360,7 +408,7 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
         }
         if(!isRequestSuccess(response)){
             throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_RESULT,
-                    response!=null?response.getErrorCode()+","+response.getErrorMsg():"请求停车系统失败");
+                    response!=null&&response.getErrorCode()!=null?response.getErrorCode()+","+response.getErrorMsg():"请求停车系统失败");
         }
         if(subCls!=null) {
             response.setData(JSONObject.parseObject(response.getData().toString(), subCls));
@@ -441,6 +489,64 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
         return dto;
     }
 
+    @Override
+    public List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r){
+        List<ParkingActualClearanceLogDTO> list = new ArrayList<>();
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",r.getPlateNumber());
+        map.put("startTime",generateClearanceStartTime(r.getClearanceTime()));
+        map.put("endTime",generateClearanceEndTime(r.getClearanceTime()));
+        QidiDaodingResponse response =
+                postWithToken(map, OPENAPI_PARKING_TEMPORARY_OPEN_LIST, QidiDaodingResponse.class, null);
+        if(!isRequestDataSuccess(response)){
+            return list;
+        }
+        JSONArray array =JSONObject.parseArray(response.getData().toString());
+        if(array==null||array.size()==0){
+            return list;
+        }
+        for (Object o : array) {
+            JSONObject item  = JSONObject.parseObject(o.toString());
+            ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
+            String inTime = item.getString("inTime");
+            String outTime = item.getString("outTime");
+            if(inTime!=null) {
+                dto.setEntryTime(Utils.strToTimeStamp(inTime,Utils.DateStyle.DATE_TIME));
+            }
+            if(outTime!=null) {
+                dto.setExitTime(Utils.strToTimeStamp(outTime,Utils.DateStyle.DATE_TIME));
+            }
+            list.add(dto);
+        }
+        return list;
+    }
+    @Override
+    public String applyTempCard(ParkingClearanceLog log){
+        String parkingId = configProvider.getValue("parking.qididaoding.parkingId", "");
+
+        TreeMap map = new TreeMap();
+        map.put("parkingId",parkingId);
+        map.put("plateNo",log.getPlateNumber());
+        map.put("startTime",generateClearanceStartTime(log.getClearanceTime()));
+        map.put("endTime",generateClearanceEndTime(log.getClearanceTime()));
+        QidiDaodingResponse<QidiDaodingTemporaryCarEntity> response =
+                postWithToken(map, OPENAPI_PARKING_TEMPORARY_OPEN_ADD, QidiDaodingResponse.class, null);
+        return response.toString();
+    }
+
+    DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private String generateClearanceStartTime(Timestamp clearanceTime) {
+        LocalDateTime start = clearanceTime.toLocalDateTime();
+        return start.format(dtf2)+" 00:00:00";
+    }
+
+    private String generateClearanceEndTime(Timestamp clearanceTime) {
+        LocalDateTime end = clearanceTime.toLocalDateTime();
+        return end.format(dtf2) + " 23:59:59";
+    }
     /**
      *
      * @return 从第三方获取token
