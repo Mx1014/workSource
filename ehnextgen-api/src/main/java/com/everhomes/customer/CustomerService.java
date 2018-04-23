@@ -332,7 +332,7 @@ public interface CustomerService {
 
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
-    List<OrganizationMemberDTO> listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd);
+    List<OrganizationMemberDTO> listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd);
 
     List<OrganizationMemberDTO> listCommunityRelatedMembers(ListCommnutyRelatedMembersCommand cmd);
 }

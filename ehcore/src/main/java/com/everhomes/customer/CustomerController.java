@@ -1504,13 +1504,13 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/listCommnityUserRelatedTrackUsers</b>
+     * <b>URL: /customer/listCommunityUserRelatedTrackUsers</b>
      * <p>列出项目下相关的跟进人（只有管理员才有）</p>
      */
-    @RequestMapping("listCommnityUserRelatedTrackUsers")
+    @RequestMapping("listCommunityUserRelatedTrackUsers")
     @RestReturn(value = OrganizationMemberDTO.class,collection = true)
-    public RestResponse listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
-        RestResponse response = new RestResponse(customerService.listCommnityUserRelatedTrackUsers(cmd));
+    public RestResponse listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCommunityUserRelatedTrackUsers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

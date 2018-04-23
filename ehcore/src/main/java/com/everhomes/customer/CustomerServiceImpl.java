@@ -3250,7 +3250,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<OrganizationMemberDTO> listCommnityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
+    public List<OrganizationMemberDTO> listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<OrganizationMemberDTO> members = new ArrayList<>();
         if (customers != null && customers.size() > 0) {
