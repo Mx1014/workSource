@@ -1584,6 +1584,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             if (burdenRate != null && burdenRate.size() > 0) {
                 if(Objects.equals(burdenRate.get(0), "")){
+                    LOGGER.error("energy meter number is exist, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("energy meter burden rate  is not exist");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_NOT_EXIST);
+                    errorDataLogs.add(log);
                     return;
                 }
                 for (String burden : burdenRate) {

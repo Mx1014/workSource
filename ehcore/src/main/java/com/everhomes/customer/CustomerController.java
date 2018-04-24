@@ -1528,4 +1528,17 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/checkCustomerCurrentUserAdmin</b>
+     * <p>校验管理员(app拿不到appId 暂时不改公共接口)</p>
+     */
+    @RequestMapping("checkCustomerCurrentUserAdmin")
+    @RestReturn(value = Byte.class,collection = true)
+    public RestResponse checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd) {
+        RestResponse response = new RestResponse(customerService.checkCustomerCurrentUserAdmin(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

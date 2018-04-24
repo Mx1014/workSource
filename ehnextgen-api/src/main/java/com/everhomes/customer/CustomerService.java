@@ -335,4 +335,6 @@ public interface CustomerService {
     List<OrganizationMemberDTO> listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd);
 
     List<OrganizationMemberDTO> listCommunityRelatedMembers(ListCommnutyRelatedMembersCommand cmd);
+
+    Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd);
 }

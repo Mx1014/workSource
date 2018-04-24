@@ -44,4 +44,5 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERROR_READING_IS_NOT_NUMBER = 10031;//读数不为小数
     int ERROR_BURDENRATE_GT_ONE = 10032;//分摊比例大于1
     int ERROR_BURDENRATE_IS_NOT_NUMBER = 10033;//比例系数不是数字
+    int ERROR_BURDENRATE_NOT_EXIST = 10034;//比例系数不是数字
 }

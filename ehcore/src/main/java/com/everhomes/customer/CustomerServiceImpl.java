@@ -3345,4 +3345,14 @@ public class CustomerServiceImpl implements CustomerService {
         }
         return userIds;
     }
+
+    @Override
+    public Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd) {
+        Boolean result = checkCustomerAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        if (result) {
+            return (byte) 1;
+        } else {
+            return (byte) 0;
+        }
+    }
 }

@@ -17,6 +17,8 @@ public class ListCommnutyRelatedMembersCommand {
 
     private Long communityId;
 
+    private Integer namespaceId;
+
     public String getOwnerType() {
         return ownerType;
     }
@@ -55,6 +57,14 @@ public class ListCommnutyRelatedMembersCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override
