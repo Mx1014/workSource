@@ -1570,9 +1570,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
-            List<String> burdenRate = Arrays.asList(str.getBurdenRate().split("，"));
-            List<String> apartment = Arrays.asList(str.getApartmentName().split("，"));
-            List<String> building = Arrays.asList(str.getBuildingName().split("，"));
+            List<String> burdenRate = Arrays.stream(str.getBurdenRate().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
+            List<String> apartment = Arrays.stream(str.getApartmentName().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
+            List<String> building = Arrays.stream(str.getBuildingName().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
+
             //校验excel的比例系数不大于1
             if (!validateBurdenRateString(burdenRate)){
                 LOGGER.error("energy meter number is exist, data = {}", str);
@@ -1590,8 +1591,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
-            if (burdenRate.size() > 0 && building.size() > 0) {
-                if(Objects.equals(burdenRate.get(0), "")&& !Objects.equals(building.get(0), "")){
+            if (burdenRate!=null && building.size() > 0) {
+                if(burdenRate.size() == 0){
                     LOGGER.error("energy meter burden rate is not  exist, data = {}", str);
                     log.setData(str);
                     log.setErrorLog("energy meter burden rate  is not exist");
