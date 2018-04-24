@@ -59,17 +59,17 @@ public class LaunchAdServiceImpl implements LaunchAdService {
     public LaunchAdDTO getLaunchAd(GetLaunchAdCommand cmd) {
         LaunchAd launchAd = launchAdProvider.findByNamespaceId(cmd.getNamespaceId());
         if (launchAd != null) {
-            return this.toClientLaunchAdDTO(launchAd);
+            return this.toLaunchAdDTO(launchAd);
         }
         return new LaunchAdDTO();
     }
 
-    private LaunchAdDTO toClientLaunchAdDTO(LaunchAd launchAd) {
+    /*private LaunchAdDTO toClientLaunchAdDTO(LaunchAd launchAd) {
         LaunchAdDTO launchAdDTO = this.toLaunchAdDTO(launchAd);
         // 分钟化秒
-        launchAd.setDisplayInterval(launchAd.getDisplayInterval() != null ? launchAd.getDisplayInterval() * 60 : 0);
+        launchAdDTO.setDisplayInterval(launchAd.getDisplayInterval() != null ? launchAd.getDisplayInterval() * 60 : 0);
         return launchAdDTO;
-    }
+    }*/
 
     @Override
     public LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
