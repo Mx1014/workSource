@@ -377,12 +377,12 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 			//根据房屋查询费用
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			if(costDTOs != null) {
+				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
+				BigDecimal overAllAmountOwed = BigDecimal.ZERO;//待缴金额总计
+				String addressStr = "";//包含的地址
+				List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
 				for(int i = 0;i < costDTOs.size();i++) {
-					ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
 					CostDTO costDTO = costDTOs.get(i);
-					showBillForClientV2DTO.setAddressStr(costDTO.getHousename());
-					showBillForClientV2DTO.setBillGroupName(costDTO.getFeename());
-					List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
 					BillForClientV2 bill = new BillForClientV2();
 					bill.setBillId(costDTO.getFeeid());
 					bill.setAmountOwed(costDTO.getWs_amount() != null ? costDTO.getWs_amount().toString() : "");//待缴金额
@@ -390,9 +390,18 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 					String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
 					bill.setBillDuration(billDuration);//账期
 					bills.add(bill);
-					showBillForClientV2DTO.setBills(bills);
-					response.add(showBillForClientV2DTO);
+					//账单组包含的所有地址（去除重复地址）
+					if(!addressStr.contains(costDTO.getHousename())){
+						addressStr += costDTO.getHousename() + "," ;//包含的地址
+					}
+					overAllAmountOwed = overAllAmountOwed.add(costDTO.getWs_amount());//待缴金额总计
 				}
+				showBillForClientV2DTO.setBills(bills);
+				//showBillForClientV2DTO.setBillGroupName("");
+				showBillForClientV2DTO.setOverAllAmountOwed(String.valueOf(overAllAmountOwed));
+				addressStr = addressStr.substring(0, addressStr.length() - 1);
+				showBillForClientV2DTO.setAddressStr(addressStr);
+				response.add(showBillForClientV2DTO);
 			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor showBillForClientV2() cmd={}", cmd, e);
@@ -451,12 +460,21 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		try {
 			List<CostDetailDTO> costDetailDTOs = queryCostDetailByID(billId);
 			if(costDetailDTOs != null) {
-				BigDecimal fappamount;//
+				CostDetailDTO costDetailDTO = costDetailDTOs.get(0);//住总ELive通过账单ID只会返回一个对应的收费细项
+				String dateStr = costDetailDTO.getBeginTime() + "~" + costDetailDTO.getEndTime();//账期
 				List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList = new ArrayList<ShowBillDetailForClientDTO>();
-				for(int i = 0;i < costDetailDTOs.size();i++) {
-					ShowBillDetailForClientDTO showBillDetailForClientDTO = new ShowBillDetailForClientDTO();
-					//showBillDetailForClientDTO.set
-				}
+				ShowBillDetailForClientDTO showBillDetailForClientDTO = new ShowBillDetailForClientDTO();
+				showBillDetailForClientDTO.setBillItemName(costDetailDTO.getFeename());
+				showBillDetailForClientDTO.setAmountOwed(costDetailDTO.getWs_amount());//待缴金额
+				showBillDetailForClientDTO.setAddressName(costDetailDTO.getHouseName());
+				showBillDetailForClientDTO.setAmountReceivable(costDetailDTO.getAmount());//应收金额
+				showBillDetailForClientDTO.setDateStrBegin(costDetailDTO.getBeginTime());
+				showBillDetailForClientDTO.setDateStrEnd(costDetailDTO.getEndTime());
+				showBillDetailForClientDTO.setDateStr(dateStr);
+				showBillDetailForClientDTOList.add(showBillDetailForClientDTO);
+				response.setShowBillDetailForClientDTOList(showBillDetailForClientDTOList);
+				response.setDatestr(dateStr);
+				response.setAmountOwed(costDetailDTO.getWs_amount());
 			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor getBillDetailForClient() cmd={}", ownerId, billId, targetType, organizationId, e);
