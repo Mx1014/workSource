@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.Host;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +49,7 @@ import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesResponse;
 import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientDTO;
 import com.everhomes.rest.asset.ShowBillForClientV2Command;
@@ -446,13 +447,21 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	
 	@Override
 	public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
+		ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
 		try {
-			
+			List<CostDetailDTO> costDetailDTOs = queryCostDetailByID(billId);
+			if(costDetailDTOs != null) {
+				BigDecimal fappamount;//
+				List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList = new ArrayList<ShowBillDetailForClientDTO>();
+				for(int i = 0;i < costDetailDTOs.size();i++) {
+					ShowBillDetailForClientDTO showBillDetailForClientDTO = new ShowBillDetailForClientDTO();
+					//showBillDetailForClientDTO.set
+				}
+			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor getBillDetailForClient() cmd={}", ownerId, billId, targetType, organizationId, e);
 		}
-		//return response;
-		return null;
+		return response;
 	}
     
 }
