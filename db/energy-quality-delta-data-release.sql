@@ -20,6 +20,7 @@ UPDATE `eh_payment_charging_items` SET `name` = '自用电费' where `name` = '�
 set @id = IFNULL((SELECT MAX(id) from eh_locale_strings),0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy', '10032', 'zh_CN', '分摊比例大于1');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy', '10033', 'zh_CN', '比例系数不是数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy', '10034', 'zh_CN', '比例系数未添加');
 
 -- 增加表计类型及文案修改 by jiarui
 set @id=(select MAX(id) from eh_locale_strings);
