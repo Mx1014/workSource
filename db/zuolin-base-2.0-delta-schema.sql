@@ -137,5 +137,6 @@ CREATE TABLE `eh_service_module_entries` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
-
+-- 增加字段member_range人员规模
+-- add by lei yuan
 alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';

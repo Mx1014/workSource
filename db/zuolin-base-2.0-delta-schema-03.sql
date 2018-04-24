@@ -1,1 +1,0 @@
-alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
