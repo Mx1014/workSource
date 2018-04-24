@@ -292,6 +292,12 @@ public interface OrganizationService {
 	
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
 	ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd);
+
+	/**
+	 * 创建企业
+	 * @param cmd
+	 * @return
+	 */
 	OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd);
 	void createRoleOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
@@ -686,4 +692,6 @@ public interface OrganizationService {
 	 * @return
 	 */
 	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
+
+	OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd);
 }
