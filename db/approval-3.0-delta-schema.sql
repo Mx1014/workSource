@@ -1,6 +1,6 @@
 -- 审批类型组表
--- DROP TABLE IF EXISTS `eh_general_approval_groups`;
-CREATE TABLE `eh_general_approval_groups` (
+-- DROP TABLE IF EXISTS `eh_enterprise_approval_groups`;
+CREATE TABLE `eh_enterprise_approval_groups` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INT NOT NULL DEFAULT '0',
 	`owner_type` VARCHAR(32),
