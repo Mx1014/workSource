@@ -8,54 +8,41 @@ import java.util.List;
 
 /**
  * <ul>
- *  *     <li>communityNums: 项目数量</li>
- *  *     <li>longList: 企业编号</li>
- *  *     <li>avatar: 企业logo</li>
  *  *     <li>memberCount: 人员规模</li>
  *  * </ul>
  */
 public class Organization extends EhOrganizations {
 	private static final long serialVersionUID = 8428338216022084922L;
 
-    //项目数量
-    private int communityNums;
-    //企业编号
-    private List<Long> longList;
-    //企业logo
-    private String avatar;
     //人员规模
-    private Long memberCount;
+    private String memberRange;
 
-    public int getCommunityNums() {
-        return communityNums;
+    private String avatarUri;
+
+    private Integer projectsCount;
+
+    public String getMemberRange() {
+        return memberRange;
     }
 
-    public void setCommunityNums(int communityNums) {
-        this.communityNums = communityNums;
+    public void setMemberRange(String memberRange) {
+        this.memberRange = memberRange;
     }
 
-    public List<Long> getLongList() {
-        return longList;
+    public String getAvatarUri() {
+        return avatarUri;
     }
 
-    public void setLongList(List<Long> longList) {
-        this.longList = longList;
+    public void setAvatarUri(String avatarUri) {
+        this.avatarUri = avatarUri;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public Integer getProjectsCount() {
+        return projectsCount;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public Long getMemberCount() {
-        return memberCount;
-    }
-
-    public void setMemberCount(Long memberCount) {
-        this.memberCount = memberCount;
+    public void setProjectsCount(Integer projectsCount) {
+        this.projectsCount = projectsCount;
     }
 
     @Override

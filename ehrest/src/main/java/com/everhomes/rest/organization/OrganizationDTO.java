@@ -120,6 +120,17 @@ public class OrganizationDTO {
 
 	private Integer projectsCount;
 
+	//人员规模
+	private String memberRange;
+
+	public String getMemberCount() {
+		return memberRange;
+	}
+
+	public void setMemberCount(String memberRange) {
+		this.memberRange = memberRange;
+	}
+
 	public Long getAreaId() {
 		return areaId;
 	}

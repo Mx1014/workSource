@@ -12384,26 +12384,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         //定义页面大小
         Integer pageSize = cmd.getPageSize();
         //根据域空间id、企业类型、关键字、来查询企业信息
-        List<Organization> dtos = this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(),
+        List<Organization> organizations = this.organizationProvider.listEnterpriseByNamespaceIds(cmd.getNamespaceId(), cmd.getType(),
                 null, cmd.getKeywords(), locator, pageSize);
-        if(dtos != null || !"".equals(dtos)){
+        if(organizations != null || !"".equals(organizations)){
             //采用forEach循环遍历集合
-            for(Organization organization : dtos){
+            for(Organization organization : organizations){
                 //将数据封装在对象Organization中
-                organization.setAvatar(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getAvatar());
-                organization.setCommunityNums(organizationProvider.getCommunityByOrganizationId(organization.getId()));
-                //创建一个List<Long>集合
-                //将organizationId添加到集合List<Long>中
-                List<Long> longList = Lists.newArrayList();
-                //todo 添加查询管理项目数
-                longList.add(organization.getId());
-                organization.setLongList(longList);
-                organization.setMemberCount(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getMemberCount());
+                organization.setAvatarUri(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getAvatar());
+                organization.setProjectsCount(organizationProvider.getCommunityByOrganizationId(organization.getId()));
+//                organization.setMemberRange(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getMemberCount());
             }
         }
 
-        if(dtos != null){
-            List<OrganizationDTO> dtoList = dtos.stream().map(r->ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+        if(organizations != null){
+            List<OrganizationDTO> dtoList = organizations.stream().map(r->ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
             res.setDtos(dtoList);
         }
         return res;
