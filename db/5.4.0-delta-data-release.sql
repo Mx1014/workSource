@@ -165,7 +165,7 @@ WHERE s.id IS NULL;
 -- volgo 添加日程图标.
 SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
-VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '日程', '日程', 'cs://1/image/aW1hZ2UvTVRvNE5XWXdPVFl6Wm1SaVpqWmxaVFJpT0RkaE56WXpNR1EyTnpsa1ptSmpZZw', '1', '1', '73', '{"title":"日程"}', '11', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
+VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '日程', '日程', 'cs://1/image/aW1hZ2UvTVRveU5HTTVZV0ZtT0RGaU56TXlaR0ptTVRBeFkyWTJaakJsTldOaU16a3hZZw', '1', '1', '73', '{"title":"日程"}', '11', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
 
 
 -- End by: zhiwei zhang

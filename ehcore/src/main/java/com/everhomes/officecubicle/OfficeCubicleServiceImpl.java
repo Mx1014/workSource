@@ -537,8 +537,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue(dto.getReserveContactToken());
 
 		// 工作流状态
-		OfficeOrderWorkFlowStatus workFlowStatus = OfficeOrderWorkFlowStatus.fromType(dto.getWorkFlowStatus());
-		row.createCell(++i).setCellValue(workFlowStatus==null?"":workFlowStatus.getDescription());
+		if(dto.getWorkFlowStatus()!=null) {
+			OfficeOrderWorkFlowStatus workFlowStatus = OfficeOrderWorkFlowStatus.fromType(dto.getWorkFlowStatus());
+			row.createCell(++i).setCellValue(workFlowStatus == null ? "" : workFlowStatus.getDescription());
+		}else{
+			row.createCell(++i).setCellValue("");
+		}
 	}
 
 	@Override
