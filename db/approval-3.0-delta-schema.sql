@@ -6,8 +6,8 @@ CREATE TABLE `eh_general_approval_groups` (
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
 	`name` VARCHAR(64) NOT NULL COMMENT 'name of the approval group',
-	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
-	`group_attribute` NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT, CUSTOMIZE',
+	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0. inactive, 1.active',
+	`group_attribute` VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT, CUSTOMIZE',
 	`operator_uid` BIGINT,
 	`operator_time` DATETIME,
 	PRIMARY KEY (`id`)
