@@ -1582,9 +1582,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
+            if (validateBurdenRateWithOneAddress(apartment,burdenRate)){
+                LOGGER.error("energy meter burden rate not eq 1, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter burden rate not eq 1");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_NO_ONE);
+                errorDataLogs.add(log);
+                return;
+            }
             if (burdenRate != null && burdenRate.size() > 0) {
                 if(Objects.equals(burdenRate.get(0), "")){
-                    LOGGER.error("energy meter number is exist, data = {}", str);
+                    LOGGER.error("energy meter burden rate is not  exist, data = {}", str);
                     log.setData(str);
                     log.setErrorLog("energy meter burden rate  is not exist");
                     log.setCode(EnergyConsumptionServiceErrorCode.ERROR_BURDENRATE_NOT_EXIST);
@@ -1760,6 +1768,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             });
         });
         return errorDataLogs;
+    }
+
+    private boolean validateBurdenRateWithOneAddress(List<String> address, List<String> burdenRate) {
+        if (address != null && address.size() == 1) {
+            if (burdenRate != null && burdenRate.size() > 0) {
+                if (!Objects.equals(burdenRate.get(0), "1")) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return true;
     }
 
     private Boolean validateBurdenRateString(List<String> burdenRate) {
