@@ -17,10 +17,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -341,4 +338,27 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				RecordHelper.convert(r, ServiceModuleApp.class)
 				);
 	}
+
+
+	@Override
+	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte appTyp, Byte entryType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+
+		//入口类型
+		query.addJoin(Tables.EH_SERVICE_MODULE_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID));
+		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_TYPE.eq(entryType));
+
+		//安装信息
+		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
+		query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
+
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
+		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
 }

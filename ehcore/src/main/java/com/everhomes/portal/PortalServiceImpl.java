@@ -232,6 +232,8 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCustomTag(cmd.getCustomTag());
 		moduleApp.setCustomPath(cmd.getCustomPath());
 
+		moduleApp.setAppType(serviceModule.getAppType());
+
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
@@ -261,6 +263,8 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setCustomTag(createModuleApp.getCustomTag());
 			moduleApp.setCustomPath(createModuleApp.getCustomPath());
 			moduleApp.setModuleControlType(serviceModule.getModuleControlType());
+
+			moduleApp.setAppType(serviceModule.getAppType());
 
 			serviceModuleApps.add(moduleApp);
 		}

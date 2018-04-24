@@ -1,14 +1,24 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.module.*;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.acl.ServiceModuleEntryConstans;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.launchpad.Widget;
+import com.everhomes.rest.launchpadbase.AppDTO;
+import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
+import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
@@ -54,6 +64,20 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Autowired
 	private OrganizationAppProvider organizationAppProvider;
 
+	@Autowired
+	private ContentServerService contentServerService;
+
+	@Autowired
+	private OrganizationService organizationService;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private ServiceModuleEntryProvider serviceModuleEntryProvider;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -287,6 +311,64 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		ListServiceModuleAppsByOrgIdResponse response = new  ListServiceModuleAppsByOrgIdResponse();
 		response.setServiceModuleApps(dtos);
+		return response;
+	}
+
+
+	@Override
+	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
+
+		List<AppDTO> appDtos = new ArrayList<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+		Long orgId = null;
+		Byte entryType = null;
+		Byte appType = null;
+
+		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
+			Card cardConfig = ConvertHelper.convert(cmd.getInstanceConfig(), Card.class);
+			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
+				orgId = cmd.getContext().getOrgId();
+				entryType = ServiceModuleEntryConstans.app_oa_client;
+				appType = ServiceModuleAppType.OA.getCode();
+			}else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){
+				OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
+				orgId = organizationProperty.getOrganizationId();
+				entryType = ServiceModuleEntryConstans.app_community_management;
+				appType = ServiceModuleAppType.COMMUNITY.getCode();
+			}
+		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
+			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
+			orgId = organizationProperty.getOrganizationId();
+			entryType = ServiceModuleEntryConstans.app_community_client;
+			appType = ServiceModuleAppType.COMMUNITY.getCode();
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, appType, entryType);
+
+		if(apps != null && apps.size() > 0){
+			for (ServiceModuleApp app: apps){
+
+				AppDTO appDTO = new AppDTO();
+				appDTO.setName(app.getName());
+				String url = null;
+				if(app.getMobileUri() != null){
+					url = contentServerService.parserUri(app.getMobileUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+				}
+				appDTO.setIconUrl(url);
+
+				ServiceModuleRouterHandler handler = serviceModuleService.getServiceModuleRouterHandler(app.getModuleId());
+				if(handler != null){
+					String router = handler.getRouter(app);
+					appDTO.setRouter(router);
+				}
+				appDtos.add(appDTO);
+			}
+		}
+
+		ListLaunchPadAppsResponse response = new ListLaunchPadAppsResponse();
+		response.setApps(appDtos);
 		return response;
 	}
 }

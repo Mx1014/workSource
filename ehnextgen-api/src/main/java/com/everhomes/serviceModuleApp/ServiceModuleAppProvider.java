@@ -36,4 +36,6 @@ public interface ServiceModuleAppProvider {
     List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword);
 
     List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, Byte appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag);
+
+    List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte appTyp, Byte entryType);
 }

@@ -18,11 +18,16 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.module.ServiceModuleEntryProvider;
+import com.everhomes.module.ServiceModuleRouterHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.business.BusinessDTO;
@@ -47,7 +52,10 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrgIdCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrgIdResponse;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
@@ -59,6 +67,8 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.transaction.BizBusinessInfo;
 import com.everhomes.statistics.transaction.ListBusinessInfoResponse;
@@ -119,6 +129,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private BusinessProvider businessProvider;
 	@Autowired
 	private OrganizationService organizationService;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Autowired
 	private UserService userService;	 
@@ -2795,26 +2807,4 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	}
 
-
-	@Override
-	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
-
-		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
-			Card cardConfig = ConvertHelper.convert(cmd.getInstanceConfig(), Card.class);
-
-
-
-
-			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
-
-			}
-
-
-		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
-
-		}
-
-
-		return null;
-	}
 }

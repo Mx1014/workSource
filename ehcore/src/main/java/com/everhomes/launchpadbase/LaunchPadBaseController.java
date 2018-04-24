@@ -8,6 +8,8 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,8 @@ public class LaunchPadBaseController extends ControllerBase {
 
     @Autowired
     private LaunchPadService launchPadService;
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 
     /**
      * <b>URL: /launchpad/getLaunchPadLayout</b>
@@ -37,14 +41,14 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpad/listLaunchPadApps</b>
+     * <b>URL: /launchpadbase/listLaunchPadApps</b>
      * <p>广场根据组件获取应用</p>
      */
     @RequestMapping("listLaunchPadApps")
     @RestReturn(value=ListLaunchPadAppsResponse.class)
     public RestResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
-        ListLaunchPadAppsResponse res = launchPadService.listLaunchPadApps(cmd);
-        RestResponse response =  new RestResponse();
+        ListLaunchPadAppsResponse res = serviceModuleAppService.listLaunchPadApps(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
