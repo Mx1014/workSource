@@ -269,7 +269,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("searchEnterpriseCustomerWithoutAuth")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomerWithoutAuth(@Valid SearchEnterpriseCustomerCommand cmd) {
-        RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd,null));
+        RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd,true));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
