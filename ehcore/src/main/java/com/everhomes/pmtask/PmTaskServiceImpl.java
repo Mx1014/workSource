@@ -2932,21 +2932,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> ownerIds = getOwnerIds(cmd);
 //		查询数据
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
-		Map<String,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getBuildingName,Collectors.counting()));
-		List<PmTaskStatSubDTO> dtolist = result.entrySet().stream().map(elem -> {
-			PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
-			bean.setNamespaceId(cmd.getNamespaceId());
-			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
-			bean.setOwnerId(cmd.getOwnerId());
-			Community community = communityProvider.findCommunityById(bean.getOwnerId());
-			if (null != community)
-				bean.setOwnerName(community.getName());
-			else
-				bean.setOwnerName("");
-			bean.setType(elem.getKey());
-			bean.setTotal(elem.getValue().intValue());
-			return bean;
-		}).collect(Collectors.toList());
+//		聚合统计
+		Map<Long,Map<String,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getBuildingName)));
+//		构建响应数据对象
+		List<PmTaskStatSubDTO> dtolist = new ArrayList<>();
+		for(Map.Entry<Long,Map<String,List<PmTask>>> elem : result.entrySet()){
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			for(Map.Entry<String,List<PmTask>> elem1 : elem.getValue().entrySet()){
+				PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+				bean.setNamespaceId(cmd.getNamespaceId());
+				bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
+				bean.setOwnerId(elem.getKey());
+				bean.setOwnerName(null != community ? community.getName() : "");
+				bean.setType(elem1.getKey());
+				bean.setTotal(elem1.getValue().size());
+				dtolist.add(bean);
+			}
+		}
 		return dtolist;
 	}
 
