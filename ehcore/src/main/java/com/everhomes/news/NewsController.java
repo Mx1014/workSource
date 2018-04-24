@@ -127,6 +127,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("listNewsForWeb")
 	@RestReturn(ListNewsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listNewsForWeb(ListNewsCommand cmd) {
 		ListNewsResponse listNewsResponse = newsService.listNewsForWeb(cmd);
 
@@ -366,6 +367,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("getNewsTag")
 	@RestReturn(GetNewsTagResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse getNewsTag(GetNewsTagCommand cmd){
 		GetNewsTagResponse getNewsTagResponse = newsService.getNewsTag(cmd);
 
