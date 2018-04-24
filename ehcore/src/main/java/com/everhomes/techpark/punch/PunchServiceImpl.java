@@ -4374,7 +4374,7 @@ public class PunchServiceImpl implements PunchService {
 //            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
 //>>>>>>> master
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-//            isNormal = NormalFlag.NO.getCode();
+            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
             isNormal = NormalFlag.YES.getCode();
         }
