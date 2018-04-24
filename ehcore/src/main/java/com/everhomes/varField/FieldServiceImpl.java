@@ -904,7 +904,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 break;
             // 增加企业服务和资源预定
-            case "企业服务":
+            case "资源预定":
                 ListCustomerRentalBillsCommand cmd15 = new ListCustomerRentalBillsCommand();
                 cmd15.setCustomerId(customerId);
                 cmd15.setCustomerType(customerType);
@@ -915,11 +915,11 @@ public class FieldServiceImpl implements FieldService {
                 List<RentalBillDTO> rentalBillDTOS = customerService.listCustomerRentalBills(cmd15).getRentalBills();
                 if(rentalBillDTOS == null) rentalBillDTOS = new ArrayList<>();
                 for(int j = 0; j < rentalBillDTOS.size(); j++){
-                    LOGGER.info("企业服务 "+j+":"+rentalBillDTOS.get(j));
+                    LOGGER.info("资源预定 "+j+":"+rentalBillDTOS.get(j));
                     setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
-            case "资源预定":
+            case "企业服务":
                 ListCustomerSeviceAllianceAppRecordsCommand cmd16 = new ListCustomerSeviceAllianceAppRecordsCommand();
                 cmd16.setCustomerId(customerId);
                 cmd16.setCustomerType(customerType);
@@ -930,7 +930,7 @@ public class FieldServiceImpl implements FieldService {
                 List<RequestInfoDTO> requestInfoDTOS = customerService.listCustomerSeviceAllianceAppRecords(cmd16).getDtos();
                 if(requestInfoDTOS == null) requestInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < requestInfoDTOS.size(); j++){
-                    LOGGER.info("资源预定 "+j+":"+requestInfoDTOS.get(j));
+                    LOGGER.info("企业服务 "+j+":"+requestInfoDTOS.get(j));
                     setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
