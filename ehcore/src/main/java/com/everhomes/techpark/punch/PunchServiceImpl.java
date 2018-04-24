@@ -4506,7 +4506,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
         row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
-        row.createCell(++i).setCellValue(actWorkDayCount(statistic.getStatusList()));
+        row.createCell(++i).setCellValue(statistic.getWorkCount());
         row.createCell(++i).setCellValue(objToString(statistic.getAnnualLeaveBalance()));
         row.createCell(++i).setCellValue(objToString(statistic.getOvertimeCompensationBalance()));
         if (null != statistic.getExts()) {
@@ -4552,19 +4552,6 @@ public class PunchServiceImpl implements PunchService {
             }
         }
 
-    }
-
-    private int actWorkDayCount(List<DayStatusDTO> statusList) {
-        if (org.springframework.util.CollectionUtils.isEmpty(statusList)) {
-            return 0;
-        }
-        int count = 0;
-        for (DayStatusDTO status : statusList) {
-            if (WORK_STATUS_LIST.contains(status.getStatus())) {
-                count++;
-            }
-        }
-        return count;
     }
 
     public Workbook createPunchStatisticsBook(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId) {
@@ -7205,7 +7192,7 @@ public class PunchServiceImpl implements PunchService {
                 dto.setLeaveEarlyTime(new BigDecimal(statistic.getLeaveEarlyTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
             }
             // 实际考勤天数
-            dto.setWorkCount(Double.valueOf(actWorkDayCount(dto.getStatusList())));
+//            dto.setWorkCount(Double.valueOf(actWorkDayCount(dto.getStatusList())));
 //=======
 //>>>>>>> master
             punchCountDTOList.add(dto);
