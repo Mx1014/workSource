@@ -4219,8 +4219,10 @@ public class PunchServiceImpl implements PunchService {
             	//2018年4月23日:这里的定义改了,不是是否为正常,而是统计出勤天数:
             	//出勤天数的计算是:打卡(包括正常,迟到,早退) + 出差/外出申请审核通过视为出勤（不计算请假，不重复统计）
                 Byte isNormal = NormalFlag.NO.getCode();
+                Byte isWorkDay = NormalFlag.NO.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+                    isWorkDay = countWorkDay(status);
                     if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                         String[] asList = StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(), PunchConstants.STATUS_SEPARATOR);
                         for (int i = 0; i < asList.length && i < status.length; i++) {
@@ -4279,7 +4281,7 @@ public class PunchServiceImpl implements PunchService {
 		                }
 		            }
 	            }
-                if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
+                if (NormalFlag.fromCode(isWorkDay).equals(NormalFlag.YES)) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {
                     statistic.setExceptionDayCount(statistic.getExceptionDayCount() + 1);
@@ -4289,6 +4291,15 @@ public class PunchServiceImpl implements PunchService {
         }
 //<<<<<<< HEAD
 
+    }
+
+    private Byte countWorkDay(String[] status) {
+        for (String s : status) {
+            if (NormalFlag.fromCode(countWorkDay(s)) == NormalFlag.YES) {
+                return NormalFlag.YES.getCode();
+            }
+        }
+        return NormalFlag.NO.getCode();
     }
 
     private void processStatisticsTime(PunchLog log, PunchStatistic statistic, Byte status) {
@@ -4314,7 +4325,22 @@ public class PunchServiceImpl implements PunchService {
 //        new  .divide(new BigDecimal(8*3600*1000),2, RoundingMode.HALF_UP);
         return getTimeLong(punchTime, null) - log.getRuleTime();
     }
+    private Byte countWorkDay(String status){
+        Byte isNormal = NormalFlag.NO.getCode();
+        if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.BLANDLE.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        }
+        return isNormal;
 
+    }
     private Byte countOneDayStatistic(String status, PunchStatistic statistic, Byte isNormal,
                                       int punchTimeNo, List<TimeInterval> tiDTOs, java.sql.Date punchDate, PunchTimeRuleDTO ptrDTO) {
         if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
