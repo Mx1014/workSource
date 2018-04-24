@@ -57,6 +57,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -393,6 +394,31 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
         return result;
+    }
+
+    /**
+     * 根据公司id来查询对应的管理的项目
+     * @param organizationId
+     * @return
+     */
+    public int getCommunityByOrganizationId(Long organizationId){
+        //1.获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_organizations表
+        SelectJoinStep<Record1<Integer>> nums = context.selectCount().from(Tables.EH_ORGANIZATION_COMMUNITIES);
+            return nums.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId)).fetchOneInto(Integer.class);
+    }
+
+    /**
+     * 根据公司id来查询公司详细信息的方法
+     * @param organizationId
+     * @return
+     */
+    public OrganizationDetail getOrganizationDetailByOrgId(Long organizationId){
+        //1.获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询eh_organization_details表
+        return context.select().from(Tables.EH_ORGANIZATION_DETAILS).where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId)).fetchAnyInto(OrganizationDetail.class);
     }
 
     @Caching(evict = {@CacheEvict(value = "listGroupMessageMembers", allEntries = true), @CacheEvict(value = "ListOrganizationMemberByPath", allEntries = true)})

@@ -406,10 +406,10 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>创建企业</p>
      */
     @RequestMapping("createStandardEnterprise")
-    @RestReturn(value = String.class)
+    @RestReturn(value = OrganizationDTO.class)
     public RestResponse createStandardEnterprise(@Valid CreateEnterpriseStandardCommand cmd) {
 //        cmd.setCheckPrivilege(true);
-//        organizationService.createEnterprise(cmd);
+        OrganizationDTO organizationDTO = organizationService.createStandardEnterprise(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

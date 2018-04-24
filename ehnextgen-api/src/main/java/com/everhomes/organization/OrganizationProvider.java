@@ -210,6 +210,20 @@ public interface OrganizationProvider {
 	 */
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
 													Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize);
+
+	/**
+	 * 根据公司id来查询对应的管理的项目
+	 * @param organizationId
+	 * @return
+	 */
+	int getCommunityByOrganizationId(Long organizationId);
+
+	/**
+	 * 根据公司id来查询公司详细信息的方法
+	 * @param organizationId
+	 * @return
+	 */
+	OrganizationDetail getOrganizationDetailByOrgId(Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
 	Organization getOrganizationByGoupId(Long groupId);
