@@ -237,7 +237,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("dataMigration")
-    public RestResponse exprotSpaceOrders() {
+    public RestResponse dataMigration() {
         this.officeCubicleService.dataMigration();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
