@@ -2930,6 +2930,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             plan.setStatus(CommonStatus.AUTO.getCode());
             plan.setOwnerId(meters.get(0).getOwnerId());
             plan.setOwnerType(meters.get(0).getOwnerType());
+            plan.setTargetId(meters.get(0).getCommunityId());
             RepeatSettings repeatSetting = new RepeatSettings();
             //调用此的时候已经是每月月底
             LocalDate localDate = LocalDate.now();
