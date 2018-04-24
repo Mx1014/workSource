@@ -8,6 +8,7 @@ import java.util.List;
 public interface SyncDataTaskProvider {
     void createSyncDataTask(SyncDataTask task);
     void updateSyncDataTask(SyncDataTask task);
+    void updateSyncDataTask(SyncDataTask task, boolean doUpdateTime);
     SyncDataTask findSyncDataTaskById(Long taskId);
     SyncDataTask findExecutingSyncDataTask(Long communityId, String syncType);
     List<SyncDataTask> listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor);
