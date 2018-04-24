@@ -138,3 +138,4 @@ CREATE TABLE `eh_service_module_entries` (
 
 ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
 
+alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
