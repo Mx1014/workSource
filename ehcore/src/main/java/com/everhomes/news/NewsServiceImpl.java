@@ -57,6 +57,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalItemGroup;
+import com.everhomes.portal.PortalItemGroupProvider;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.search.SearchContentType;
@@ -154,6 +156,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;
+	
+	@Autowired
+	private PortalItemGroupProvider portalItemGroupProvider;
 
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
@@ -1386,7 +1391,7 @@ public class NewsServiceImpl implements NewsService {
 				ListNewsBySceneResponse.class);
 
 		// 填充app端点击“查看更多”返回页面
-		filledRenderUrl(response, namespaceId, cmd.getCategoryId());
+		filledRenderUrl(response, namespaceId, cmd.getGroupId(), cmd.getWidget(), cmd.getCategoryId());
 
 		return response;
 
@@ -1960,7 +1965,54 @@ public class NewsServiceImpl implements NewsService {
 	 * @date: 2018年4月20日 下午3:45:54
 	 *
 	 */
-	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long categoryId) {
+	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long categoryId) {
+		
+		//旧版本无法获得groupId
+		if (null == groupId) {
+			filledRenderUrl(response, namespaceId, widget, categoryId);
+			return;
+		}
+		
+		//获取item_group
+		PortalItemGroup group = portalItemGroupProvider.findPortalItemGroupById(groupId);
+		if (null == group) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_PORTAL_ITEM_GROUP_NOT_FOUND, "portal item group not found");
+		}
+		
+		//获取模块
+		JSONObject json = JSONObject.parseObject(group.getInstanceConfig());
+		Long moduleAppId = json.getLong("moduleAppId");
+		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
+		if (null == moduleApp) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+		}
+		
+		// 拼装renderUrl
+		JSONObject moduleJson = JSONObject.parseObject(moduleApp.getInstanceConfig());
+		String timeWidgetStyle = moduleJson.getString("timeWidgetStyle");
+		String title = moduleApp.getName();
+		String renderUrl = getNewsRenderUrl(namespaceId, categoryId, title, group.getWidget(), timeWidgetStyle);
+
+		// 设置response
+		response.setNeedUseUrl(NewsNormalFlag.ENABLED.getCode());
+		response.setRenderUrl(renderUrl);
+		response.setTitle(title);
+	}
+	
+	
+	/**   
+	* @Function: NewsServiceImpl.java
+	* @Description: 旧版本app端无法传送group id，使用该方法
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年4月24日 下午3:44:29 
+	*
+	*/
+	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, String widget,
+			Long categoryId) {
 
 		// 获取最新的版本
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
@@ -1981,13 +2033,14 @@ public class NewsServiceImpl implements NewsService {
 		JSONObject json = JSONObject.parseObject(moduleApp.getInstanceConfig());
 		String timeWidgetStyle = json.getString("timeWidgetStyle");
 		String title = moduleApp.getName();
-		String renderUrl = getNewsRenderUrl(namespaceId, categoryId, title, "NewsFlash", timeWidgetStyle);
+		String renderUrl = getNewsRenderUrl(namespaceId, categoryId, title, widget, timeWidgetStyle);
 
 		// 设置response
 		response.setNeedUseUrl(NewsNormalFlag.ENABLED.getCode());
 		response.setRenderUrl(renderUrl);
 		response.setTitle(title);
 	}
+
 
 	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
@@ -2006,7 +2059,7 @@ public class NewsServiceImpl implements NewsService {
 		renderUrl.append("/park-news-web/build/index.html?");
 		renderUrl.append("categoryId=" + categoryId);
 		renderUrl.append("&title=" + encodeTitile);
-		renderUrl.append("&widget=NewsFlash");
+		renderUrl.append("&widget=" + widget);
 		renderUrl.append("&timeWidgetStyle=" + timeWidgetStyle);
 		renderUrl.append("#/newsList#sign_suffix");
 
