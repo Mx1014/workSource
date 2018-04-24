@@ -368,6 +368,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if(categoryItem != null) {
@@ -457,6 +458,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
+        if(customer.getLastTrackingTime()!=null){
+             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
+        }
+        dto.setTrackingPeriod(result);
         return dto;
     }
     
