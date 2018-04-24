@@ -1582,7 +1582,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
-            if (validateBurdenRateWithOneAddress(apartment,burdenRate)){
+            if (!validateBurdenRateWithOneAddress(apartment, burdenRate)) {
                 LOGGER.error("energy meter burden rate not eq 1, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("energy meter burden rate not eq 1");

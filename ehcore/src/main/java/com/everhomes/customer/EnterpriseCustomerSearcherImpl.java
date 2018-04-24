@@ -189,7 +189,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                qb = QueryBuilders.multiMatchQuery(cmd.getTrackingName())
                         .field("trackingName", 5.5f);
             }else {
                 qb = QueryBuilders.matchAllQuery();
