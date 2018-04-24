@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2.message_handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.*;
@@ -41,6 +42,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
@@ -150,7 +153,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             smsProvider.addToTupleList(variables, "userPhone", order.getUserPhone());
             smsProvider.addToTupleList(variables, "useDetail", useDetail);
             smsProvider.addToTupleList(variables, "spaceAddress", useInfoDTO.getSpaceAddress());
-            smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+            String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+            smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/evh/aclink/id=1283jh213a");
 
             int templateId = SmsTemplateCode.PAY_ORDER_SUCCESS;
 
