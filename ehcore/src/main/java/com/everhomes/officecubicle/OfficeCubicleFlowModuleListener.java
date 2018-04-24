@@ -125,7 +125,8 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     	list.add(new FlowCaseEntity("发起人", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("发起人电话", order.getReserveContactToken(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司名称", order.getReserveEnterprise(), FlowCaseEntityType.MULTI_LINE.getCode()));
-    	list.add(new FlowCaseEntity("预订类型", OfficeOrderType.fromCode(order.getRentType()).getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
+        OfficeOrderType officeOrderType = OfficeOrderType.fromCode(order.getOrderType());
+        list.add(new FlowCaseEntity("预订类型", officeOrderType==null?"无":officeOrderType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司人数", order.getEmployeeNumber()==null?"无":order.getEmployeeNumber()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
     	if(order.getFinancingFlag()==null){
     		list.add(new FlowCaseEntity("是否已融资","否", FlowCaseEntityType.MULTI_LINE.getCode()));

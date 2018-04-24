@@ -23,3 +23,15 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'secondCategoryName', '服务类型', 'String', '36', '/36/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'workflowStatus', '处理状态', 'String', '36', '/36/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'createTime', '提交时间', 'Long', '36', '/36/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+
+
+-- after 5.4.0
+-- 更改资源预定的字段开始时间结束时间，为使用时间 by wentian 2018/4/20
+set @id = IFNULL((select MAX(`id`) from eh_var_fields),0);
+INSERT INTO `eh_var_fields`
+(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES
+  (@id:=@id+1, 'enterprise_customer', 'useDetail', '使用时间', 'String', '35', '/35/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 128}');
+
+
+delete from eh_var_fields where group_id = 35 and display_name = '开始时间' or display_name = '结束时间';

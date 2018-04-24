@@ -507,7 +507,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		row.createCell(++i).setCellValue("工位数/面积");
 		row.createCell(++i).setCellValue("预订人");
 		row.createCell(++i).setCellValue("联系电话");
-		row.createCell(++i).setCellValue("公司名称");
+		row.createCell(++i).setCellValue("状态");
 	}
 
 	private void setNewRentalBillsBookRow(Sheet sheet, OfficeOrderDTO dto) {
@@ -536,8 +536,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 联系电话
 		row.createCell(++i).setCellValue(dto.getReserveContactToken());
 
-		// 公司名称
-		row.createCell(++i).setCellValue(dto.getReserveEnterprise());
+		// 工作流状态
+		OfficeOrderWorkFlowStatus workFlowStatus = OfficeOrderWorkFlowStatus.fromType(dto.getWorkFlowStatus());
+		row.createCell(++i).setCellValue(workFlowStatus==null?"":workFlowStatus.getDescription());
 	}
 
 	@Override

@@ -3873,6 +3873,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
 		response.setPreOrderDTO(callBack);
 		response.setFlowCaseUrl(flowCaseUrl);
+		response.setBillId(order.getId());
 
 		return response;
 	}
@@ -3959,6 +3960,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (compare == 0) {
 					// 总金额为0，直接预订成功状态
 					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+					//发短信
+					RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+					handler.sendRentalSuccessSms(bill);
 				}else{
 					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 					orderCancelFlag[0] = true;
@@ -4036,7 +4040,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		messageMap.put("orderId",bill.getId());
 		scheduleProvider.scheduleSimpleJob(
 				queueName+bill.getId(),
-				queueName+bill.getId(),
+				"cancelBill"+bill.getId(),
 				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
 				RentalCancelOrderJob.class,
 				messageMap
