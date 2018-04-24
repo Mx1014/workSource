@@ -196,4 +196,6 @@ public interface QualityProvider {
 
 	void getTodayTaskCountStat(ListQualityInspectionTasksResponse response,List<Long> executeStandardIds, List<Long> reviewStandardIds,
 							   List<ExecuteGroupAndPosition> groupDtos, Timestamp todayBegin,ListingQueryBuilderCallback builderCallback);
+
+	List<QualityInspectionStandardGroupMap> listPlanGroupMapsByPlanId(Long standardId);
 }

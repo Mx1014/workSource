@@ -180,7 +180,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 
 SET @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-	VALUES (@mp_id:=@mp_id+1, 10900, '0', 1090010900, '启动广告 全部权限', '0', NOW());
+	VALUES (@mp_id:=@mp_id+1, 10900, '0', 1090010000, '启动广告 全部权限', '0', NOW());
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`)
     VALUES (16021500, '启动广告', 16020000, NULL, 'startup-advert', 1, 2, '/16000000/16020000/16021500', 'zuolin', 15, 10900, 3, 'system', 'module', NULL);

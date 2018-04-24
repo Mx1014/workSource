@@ -10,15 +10,15 @@ import java.util.List;
 /**
  * <ul>
  *  <li>ownerId: 标准所属的主体id</li>
- *  <li>ownerType: 标准所属的主体，com.everhomes.rest.quality.OwnerType</li>
+ *  <li>ownerType: 标准所属的主体，{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 标准所属的项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
  *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
- *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
- *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
+ *  <li>repeat: 执行周期 {@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
+ *  <li>group: 业务组信息 {@link com.everhomes.rest.quality.StandardGroupDTO}</li>
  *  <li>communities: 应用到的项目id列表</li>
  *  <li>namespaceId: namespaceId</li>
  * </ul>

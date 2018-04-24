@@ -20,6 +20,7 @@ import java.util.List;
  *     <li>changeExpiredTime: 执行结束日期</li>
  *     <li>remark: 备注</li>
  *     <li>apartments: 计划适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
+ *     <li>changeDurationDays: 调整的天数</li>
  * </ul>
  * Created by ying.xiong on 2017/10/10.
  */
@@ -38,6 +39,16 @@ public class ContractChargingChangeDTO {
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
     private String remark;
+    // 增加免租天数
+    private Integer changeDurationDays;
+
+    public Integer getChangeDurationDays() {
+        return changeDurationDays;
+    }
+
+    public void setChangeDurationDays(Integer changeDurationDays) {
+        this.changeDurationDays = changeDurationDays;
+    }
 
     public List<BuildingApartmentDTO> getApartments() {
         return apartments;

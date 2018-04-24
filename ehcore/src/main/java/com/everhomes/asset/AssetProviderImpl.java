@@ -947,6 +947,13 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            String apartmentName = null;
+            String buildingName = null;
+            if(list1!=null && list1.size() > 0){
+                BillItemDTO itemDTO = list1.get(0);
+                apartmentName= itemDTO.getApartmentName();
+                buildingName = itemDTO.getBuildingName();
+            }
             //需要billGroup查看生成账单周期
             PaymentBillGroup group = getBillGroupById(billGroupId);
             //根据billGroup获得时间，如需重复使用，则请抽象出来
@@ -1157,12 +1164,12 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setDateStrEnd(dates.get(1));
             newBill.setDateStrDue(dates.get(2));
             newBill.setDueDayDeadline(dates.get(3));
-
+            //新增时只填了一个楼栋门牌，所以也可以放到bill里去 by wentian 2018/4/24
+            newBill.setBuildingName(buildingName);
+            newBill.setApartmentName(apartmentName);
 
             //添加客户的手机号，用来之后定位用户 by wentian.V.Brytania 2018/4/13
             newBill.setCustomerTel(customerTel);
-
-
 
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
