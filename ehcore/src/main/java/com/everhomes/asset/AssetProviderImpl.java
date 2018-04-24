@@ -571,8 +571,9 @@ public class AssetProviderImpl implements AssetProvider {
                         dto.setApartmentName(addrAartName);
                         dto.setBuildingName(addrBuildingName);
                     }else{
-                        dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
-                        dto.setBuildingName(r.getValue(t.BUILDING_NAME));
+                        // 使用t.APARTMENT_NAME仍然识别不了
+                        dto.setApartmentName(r.getValue(11).toString());
+                        dto.setBuildingName(r.getValue(10).toString());
                     }
                     dtos.add(dto);
                     });
