@@ -529,8 +529,9 @@ public class NewsServiceImpl implements NewsService {
 					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
 		}
 		
-		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		// 如果是在场景中获取时，不需要登录
+		Long userId = isScene ? null :UserContext.current().getUser().getId();
+		Integer	namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		// 若无关键字查询，直接返回简单查询
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds() == null) {
@@ -544,10 +545,10 @@ public class NewsServiceImpl implements NewsService {
 		SearchNewsResponse response = null;
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
 			response = searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
-					pageAnchor, pageSize, cmd.getStatus());
+					pageAnchor, pageSize, isScene, cmd.getStatus());
 		} else {
 			response = searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
-					cmd.getTagIds(), pageAnchor, pageSize, cmd.getStatus());
+					cmd.getTagIds(), pageAnchor, pageSize, isScene, cmd.getStatus());
 		}
 		return ConvertHelper.convert(response, ListNewsResponse.class);
 	}
@@ -658,11 +659,11 @@ public class NewsServiceImpl implements NewsService {
 
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
 			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
-					pageAnchor, pageSize, cmd.getStatus());
+					pageAnchor, pageSize, false, cmd.getStatus());
 
 		} else {
 			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
-					cmd.getTagIds(), pageAnchor, pageSize, cmd.getStatus());
+					cmd.getTagIds(), pageAnchor, pageSize, false, cmd.getStatus());
 		}
 	}
 
@@ -736,7 +737,7 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId,
-			String keyword, List<Long> tagIds, Long pageAnchor, Integer pageSize, Byte status) {
+			String keyword, List<Long> tagIds, Long pageAnchor, Integer pageSize, boolean isScene, Byte status) {
 
 		String jsonString = getSearchJson(communityId, userId, namespaceId, categoryId, keyword, tagIds, pageAnchor,
 				pageSize, status);
@@ -770,7 +771,9 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeCount(o.getLong("likeCount"));
 			newsDTO.setChildCount(o.getLong("childCount"));
 			newsDTO.setTopFlag(o.getByte("topFlag"));
-			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
+			if (!isScene) {
+				newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
+			}
 			newsDTO.setCategoryId(o.getLong("categoryId"));
 			newsDTO.setVisibleType(o.getString("visibleType"));
 			// es存在的bug，原本的title 测试点赞
