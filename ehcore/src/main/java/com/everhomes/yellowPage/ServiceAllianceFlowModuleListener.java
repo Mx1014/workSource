@@ -83,9 +83,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 	
-	@Autowired
-	private GroupProvider groupProvider;
-
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();

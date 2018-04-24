@@ -93,15 +93,9 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
             JSONObject json = JSONObject.parseObject(instanceConfig);
-            String url = json.getString("url");
-            String[] arrs = url.split("&");
-            for (String s: arrs) {
-                int spe = s.indexOf("=");
-                String key = s.substring(0, spe);
-                String value = s.substring(spe + 1);
-                if ("taskCategoryId".equals(key)) {
-                    return value;
-                }
+            String value = json.getString("taskCategoryId");
+            if(!StringUtils.isEmpty(value)){
+                return value;
             }
         }
 
