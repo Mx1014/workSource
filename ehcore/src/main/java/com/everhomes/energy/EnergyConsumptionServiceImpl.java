@@ -1590,7 +1590,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
-            if (burdenRate != null && burdenRate.size() > 0 && building != null && building.size() > 0) {
+            if (burdenRate.size() > 0 && building.size() > 0) {
                 if(Objects.equals(burdenRate.get(0), "")&& !Objects.equals(building.get(0), "")){
                     LOGGER.error("energy meter burden rate is not  exist, data = {}", str);
                     log.setData(str);
@@ -1771,13 +1771,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private boolean validateBurdenRateWithOneAddress(List<String> address, List<String> burdenRate) {
-        if (address != null && address.size() == 1) {
+        if (address != null && address.size() == 1 && !"".equals(address.get(0))) {
             if (burdenRate != null && burdenRate.size() > 0) {
-                if (!Objects.equals(burdenRate.get(0), "1")) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return Objects.equals(burdenRate.get(0), "1");
             }
         }
         return true;
