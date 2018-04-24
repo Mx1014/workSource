@@ -11116,7 +11116,10 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
         //
-
+    	Boolean refreshDayLogFlag = true;
+    	if(null == cmd.getQueryTime()){
+    		refreshDayLogFlag = false;
+    	}
         Long userId = UserContext.current().getUser().getId();
         if (null != cmd.getUserId()) {
             userId = cmd.getUserId();
@@ -11173,7 +11176,7 @@ public class PunchServiceImpl implements PunchService {
 //<<<<<<< HEAD
 //        String[] statusList = null;
 //=======
-		if (null != ptr && pdl == null) {
+		if (refreshDayLogFlag && null != ptr && pdl == null) {
 //			LOGGER.debug("ptr is {},pdl is {}", StringHelper.toJsonString(ptr), StringHelper.toJsonString(pdl));
 			//2018年4月11日 修改:  
 			//之前直接添加一条,理论上应该是没问题的,但是现网出错了,看来这里需要先确定有没有旧数据
