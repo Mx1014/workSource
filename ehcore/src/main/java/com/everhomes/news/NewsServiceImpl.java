@@ -96,6 +96,8 @@ public class NewsServiceImpl implements NewsService {
 
 	private static final Long NEWS_MODULE_ID = 10800L;
 
+	private static final Integer NEWS_CONTENT_ABSTRACT_DEFAULT_LEN = 100;
+
 	@Autowired
 	private UserService userService;
 
@@ -230,19 +232,21 @@ public class NewsServiceImpl implements NewsService {
 		news.setTitle(cmd.getTitle());
 		news.setAuthor(cmd.getAuthor());
 		news.setCoverUri(cmd.getCoverUri());
+		news.setContentAbstract(cmd.getContentAbstract());
 		// news.setCategoryId(cmd.getCategoryId());
 		news.setContent(cmd.getContent());
 		news.setSourceDesc(cmd.getSourceDesc());
 		news.setSourceUrl(cmd.getSourceUrl());
 		news.setPhone(cmd.getPhone());
 		news.setVisibleType(cmd.getVisibleType());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+
 		news.setStatus(generateNewsStatus(cmd.getStatus()));
 		news.setDeleterUid(0L);
 
-		if (StringUtils.isEmpty(news.getContentAbstract())) {
-			String content = news.getContent().replaceAll("<p>.*</p>", ""); // 删除图片
-			news.setContentAbstract(content.substring(content.length() > 100 ? 100 : content.length()));
-		}
+		// 调整摘要
+		adjustNewsContentAbstract(news);
 
 		if (cmd.getPublishTime() != null) {
 			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
@@ -294,13 +298,14 @@ public class NewsServiceImpl implements NewsService {
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
 		news.setPhone(cmd.getPhone());
-		if (StringUtils.isEmpty(news.getContentAbstract())) {
-			String content = news.getContent().replaceAll("<p>.*</p>", ""); // 删除图片
-			news.setContentAbstract(content.substring(content.length() > 100 ? 100 : content.length()));
-		}
+		
+		//调整摘要
+		adjustNewsContentAbstract(news);
+		
 		if (cmd.getPublishTime() != null) {
 			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
 		}
+		
 		return news;
 	}
 
@@ -386,7 +391,7 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
-		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null 
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
 					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
@@ -520,18 +525,18 @@ public class NewsServiceImpl implements NewsService {
 	 * <b>listNews:/</b>
 	 */
 	public ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene) {
-		
-		//先进行权限验证
+
+		// 先进行权限验证
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && cmd.getCurrentProjectId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
-			
+
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
 					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
 		}
-		
+
 		// 如果是在场景中获取时，不需要登录
-		Long userId = isScene ? null :UserContext.current().getUser().getId();
-		Integer	namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		Long userId = isScene ? null : UserContext.current().getUser().getId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		// 若无关键字查询，直接返回简单查询
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds() == null) {
@@ -1949,8 +1954,7 @@ public class NewsServiceImpl implements NewsService {
 
 	/**
 	 * @Function: NewsServiceImpl.java
-	 * @Description:填充app端新闻“查看更多”跳转地址
-	 * 园区快讯v1.8 #issue-26479
+	 * @Description:填充app端新闻“查看更多”跳转地址 园区快讯v1.8 #issue-26479
 	 * @version: v1.0.0
 	 * @author: 黄明波
 	 * @date: 2018年4月20日 下午3:45:54
@@ -1972,55 +1976,83 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
 		}
-		
-		//拼装renderUrl
+
+		// 拼装renderUrl
 		JSONObject json = JSONObject.parseObject(moduleApp.getInstanceConfig());
 		String timeWidgetStyle = json.getString("timeWidgetStyle");
 		String title = moduleApp.getName();
 		String renderUrl = getNewsRenderUrl(namespaceId, categoryId, title, "NewsFlash", timeWidgetStyle);
-		
+
 		// 设置response
 		response.setNeedUseUrl(NewsNormalFlag.ENABLED.getCode());
 		response.setRenderUrl(renderUrl);
 		response.setTitle(title);
 	}
 
-	 private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget, String timeWidgetStyle) {
-		 
-		 String encodeTitile;
+	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
+			String timeWidgetStyle) {
+
+		String encodeTitile;
 		try {
-			//标题为中文时需要转码
+			// 标题为中文时需要转码
 			encodeTitile = URLEncoder.encode(title, "utf-8");
 		} catch (UnsupportedEncodingException e) {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
-		} 
-		 
-		 String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
-		 StringBuilder renderUrl = new StringBuilder(homeUrl);
-		 renderUrl.append("/park-news-web/build/index.html?");
-		 renderUrl.append("categoryId="+categoryId);
-		 renderUrl.append("&title="+encodeTitile);
-		 renderUrl.append("&widget=NewsFlash");
-		 renderUrl.append("&timeWidgetStyle="+timeWidgetStyle);
-		 renderUrl.append("#/newsList#sign_suffix");
-		 
-		 return renderUrl.toString();
-	 }
-	 
-	 
-		/** 
-		* @see com.everhomes.news.NewsService#listNews(com.everhomes.rest.news.ListNewsCommand)   
-		* @Function: NewsServiceImpl.java
-		* @Description: 用于后台显示新闻列表
-		*
-		* @version: v1.0.0
-		* @author:	 黄明波
-		* @date: 2018年4月23日 下午1:14:30 
-		*
-		*/
-		public ListNewsResponse listNews(ListNewsCommand cmd) {
-			return listNews(cmd, false);
 		}
 
+		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
+		StringBuilder renderUrl = new StringBuilder(homeUrl);
+		renderUrl.append("/park-news-web/build/index.html?");
+		renderUrl.append("categoryId=" + categoryId);
+		renderUrl.append("&title=" + encodeTitile);
+		renderUrl.append("&widget=NewsFlash");
+		renderUrl.append("&timeWidgetStyle=" + timeWidgetStyle);
+		renderUrl.append("#/newsList#sign_suffix");
+
+		return renderUrl.toString();
+	}
+
+	/**
+	 * @see com.everhomes.news.NewsService#listNews(com.everhomes.rest.news.ListNewsCommand)
+	 * @Function: NewsServiceImpl.java
+	 * @Description: 用于后台显示新闻列表
+	 *
+	 * @version: v1.0.0
+	 * @author: 黄明波
+	 * @date: 2018年4月23日 下午1:14:30
+	 *
+	 */
+	public ListNewsResponse listNews(ListNewsCommand cmd) {
+		return listNews(cmd, false);
+	}
+
+	/**
+	 * @Function: NewsServiceImpl.java
+	 * @Description: 在更新或新增新闻时，对摘要进行调整，避免摘要为空
+	 *
+	 * @version: v1.0.0
+	 * @author: 黄明波
+	 * @date: 2018年4月24日 下午1:25:53
+	 *
+	 */
+	private void adjustNewsContentAbstract(News news) {
+
+		if (!StringUtils.isEmpty(news.getContentAbstract())) {
+			return;
+		}
+
+		//对html文本进行解析
+		String contentAbstract = NewsUtils.Html2Text(news.getContent());
+		contentAbstract = StringUtils.isEmpty(contentAbstract) ? news.getTitle() : contentAbstract;
+
+		//文字较短，直接赋值
+		if (contentAbstract.length() < NEWS_CONTENT_ABSTRACT_DEFAULT_LEN) {
+			news.setContentAbstract(contentAbstract);
+			return;
+		}
+		
+		//文字较长，截取默认长度
+		news.setContentAbstract(contentAbstract.substring(0, NEWS_CONTENT_ABSTRACT_DEFAULT_LEN));
+	}
 }
