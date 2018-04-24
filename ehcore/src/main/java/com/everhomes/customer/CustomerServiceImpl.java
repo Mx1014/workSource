@@ -427,10 +427,10 @@ public class CustomerServiceImpl implements CustomerService {
     private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
         ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
         listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-        listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
-        checkModuleManageCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
         checkModuleManageCommand.setOrganizationId(ownerId);
         checkModuleManageCommand.setOwnerType(ownerType);
         checkModuleManageCommand.setUserId(UserContext.currentUserId());
