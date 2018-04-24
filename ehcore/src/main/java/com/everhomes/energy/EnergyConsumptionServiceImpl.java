@@ -1570,9 +1570,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
-            List<String> burdenRate = Arrays.stream(str.getBurdenRate().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
-            List<String> apartment = Arrays.stream(str.getApartmentName().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
-            List<String> building = Arrays.stream(str.getBuildingName().split("，")).filter(r-> Objects.equals(r, "")).collect(Collectors.toList());
+            List<String> burdenRate = Arrays.stream(str.getBurdenRate().split("，")).filter(r-> !Objects.equals(r, "")).collect(Collectors.toList());
+            List<String> apartment = Arrays.stream(str.getApartmentName().split("，")).filter(r-> !Objects.equals(r, "")).collect(Collectors.toList());
+            List<String> building = Arrays.stream(str.getBuildingName().split("，")).filter(r-> !Objects.equals(r, "")).collect(Collectors.toList());
 
             //校验excel的比例系数不大于1
             if (!validateBurdenRateString(burdenRate)){
