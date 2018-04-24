@@ -7,6 +7,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
@@ -51,4 +52,6 @@ public interface ServiceModuleService {
 	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
 
 	ServiceModuleAppDTO findServiceModuleAppById(Long id);
+
+    ServiceModuleRouterHandler getServiceModuleRouterHandler(Long moduleId);
 }

@@ -1,0 +1,17 @@
+// @formatter:off
+package com.everhomes.module;
+
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.acl.ServiceModuleDTO;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import org.jooq.Condition;
+
+import java.util.List;
+import java.util.Map;
+
+public interface ServiceModuleEntryProvider {
+
+    List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte entryType);
+}
