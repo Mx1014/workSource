@@ -12392,7 +12392,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //将数据封装在对象Organization中
                 organization.setAvatarUri(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getAvatar());
                 organization.setProjectsCount(organizationProvider.getCommunityByOrganizationId(organization.getId()));
-//                organization.setMemberRange(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getMemberCount());
+                organization.setMemberRange(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getMemberRange());
             }
         }
 
