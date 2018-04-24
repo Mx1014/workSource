@@ -2666,6 +2666,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     @PostConstruct
     @Override
     public void initArchivesNotification() {
+        if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
+            return;
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDateTime initTime = LocalDateTime.now().plusHours(1);
         initTime = LocalDateTime.of(initTime.getYear(), initTime.getMonthValue(), initTime.getDayOfMonth(), initTime.getHour(), 0);
