@@ -2423,7 +2423,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
 
-		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
+		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");

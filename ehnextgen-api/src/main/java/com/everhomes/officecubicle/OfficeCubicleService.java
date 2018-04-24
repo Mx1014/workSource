@@ -5,12 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.officecubicle.*;
-import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
-import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
+import com.everhomes.rest.officecubicle.admin.*;
 
 public interface OfficeCubicleService {
 
@@ -40,4 +35,20 @@ public interface OfficeCubicleService {
 	QuerySpacesResponse querySpaces(QuerySpacesCommand cmd);
 
     void dataMigration();
+
+	ListRegionsResponse listRegions(ListRegionsCommand cmd);
+
+	ListCitiesResponse listCities(ListCitiesCommand cmd);
+
+    void deleteCity(DeleteCityCommand cmd);
+
+	void createOrUpdateCity(CreateOrUpdateCityCommand cmd);
+
+	void reOrderCity(ReOrderCityCommand cmd);
+
+	void updateCurrentUserSelectedCity(String provinceName, String cityName);
+
+	CityDTO getCityById(GetCityByIdCommand cmd);
+
+	ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd);
 }

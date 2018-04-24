@@ -5517,27 +5517,29 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
 
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
-				if (position != null) {
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				if (r.getPositionId() != null && r.getPositionId() != 0) {
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+					if (position != null) {
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+						} else {
+							dto.setGroupName(position.getName());
+						}
 					} else {
-						dto.setGroupName(position.getName());
-					}
-				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
-					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					String positionName = null;
-					if(organization!=null){
-						positionName = organization.getName();
-					}
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + positionName);
-					} else {
-						dto.setGroupName(positionName);
+						Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+						String positionName = null;
+						if (organization != null) {
+							positionName = organization.getName();
+						}
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + positionName);
+						} else {
+							dto.setGroupName(positionName);
+						}
 					}
 				}
 				return dto;
@@ -6463,7 +6465,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private void setNewEquipmentRepairLogsBookRow(Sheet sheet, EquipmentInspectionTasksLogs dto) {
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getMaintanceType());
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(dto.getEquipmentId());

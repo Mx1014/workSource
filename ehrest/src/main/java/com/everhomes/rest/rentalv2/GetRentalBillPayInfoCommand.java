@@ -12,7 +12,7 @@ public class GetRentalBillPayInfoCommand {
 
     private String clientAppName;
 
-    private Byte paymentType;
+    private Integer paymentType;
 
     public String getClientAppName() {
         return clientAppName;
@@ -34,11 +34,11 @@ public class GetRentalBillPayInfoCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public Byte getPaymentType() {
+    public Integer getPaymentType() {
         return paymentType;
     }
 
-    public void setPaymentType(Byte paymentType) {
+    public void setPaymentType(Integer paymentType) {
         this.paymentType = paymentType;
     }
 }

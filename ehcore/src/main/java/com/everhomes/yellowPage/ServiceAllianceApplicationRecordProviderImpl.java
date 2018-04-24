@@ -60,6 +60,15 @@ public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAlli
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceAllianceApplicationRecord.class));
 	}
 	
+	@Override
+	public List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecordByEnterpriseId(Long enterpriseId,Long pageAnchor, Integer pageSize) {
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS)
+				.where(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS.ID.gt(pageAnchor))
+				.and(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS.CREATOR_ORGANIZATION_ID.eq(enterpriseId))
+				.orderBy(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS.ID.asc()).limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceAllianceApplicationRecord.class));
+	}
+	
 	private EhServiceAllianceApplicationRecordsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

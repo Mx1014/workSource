@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.SyncDataTaskStatus;
+import com.everhomes.rest.customer.SyncResultViewedFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSyncDataTasksDao;
@@ -93,5 +94,15 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
         });
 
         return result;
+    }
+
+    @Override
+    public Integer countNotViewedSyncResult(Long communityId, String syncType) {
+        return dbProvider.getDslContext(AccessSpec.readOnly()).selectCount().from(Tables.EH_SYNC_DATA_TASKS)
+                .where(Tables.EH_SYNC_DATA_TASKS.OWNER_ID.eq(communityId))
+                .and(Tables.EH_SYNC_DATA_TASKS.TYPE.eq(syncType))
+                .and(Tables.EH_SYNC_DATA_TASKS.STATUS.eq(SyncDataTaskStatus.EXCEPTION.getCode()))
+                .and(Tables.EH_SYNC_DATA_TASKS.VIEW_FLAG.eq(SyncResultViewedFlag.NOT_VIEWED.getCode()))
+                .fetchAny().value1();
     }
 }

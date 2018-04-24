@@ -77,6 +77,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 	

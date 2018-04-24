@@ -114,7 +114,7 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 			jsonObject.put("fid", "QgwAAAAIZAsx0Rp+");*/
 			response = szwQuery.getBillDetailForClient(jsonObject.toString());//通过WebServices接口查询数据
 		}catch (Exception e) {
-			LOGGER.error("ShenZhenWanAssetVendor call getBillDetailForClient() : " + e);
+			LOGGER.error("ShenZhenWanAssetVendor call getBillDetailForClient() {}",ownerId,billId,targetType,organizationId,e);
 		}
 		return response;
 	}

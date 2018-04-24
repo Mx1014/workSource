@@ -3014,6 +3014,11 @@ public class AssetServiceImpl implements AssetService {
                 hasContractView = 1;
                 hasPay = 0;
                 break;
+            case 999966:
+            	//深圳湾要求可以看合同，只查费不显示支付按钮
+                hasContractView = 1;
+                hasPay = 0;
+                break;
             default:
                 break;
         }
@@ -3192,10 +3197,14 @@ public class AssetServiceImpl implements AssetService {
             }
             cmd.setDateStr(dateStr);
             //楼栋门牌也是
-            String building = headers[buildingIndex];
-            String apartment = headers[apartmentIndex];
+            String building = data[buildingIndex];
+            String apartment = data[apartmentIndex];
             //客户属性也是
-            switch (data[targetTypeIndex]){
+            String datum = data[targetTypeIndex];
+            if(datum!=null){
+                datum = datum.trim();
+            }
+            switch (datum){
                 case "企业客户":
                     cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
                     break;
