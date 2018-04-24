@@ -87,7 +87,7 @@ public class SZWQuery {
 					for(int i = 0;i < jsonArray.size();i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
 						ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
-						showBillForClientV2DTO.setBillGroupName((jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null) + "的全部账单");
+						showBillForClientV2DTO.setBillGroupName((jsonObject.get("tenCustomerDes") != null ? jsonObject.get("tenCustomerDes").toString() : null) + "的账单");
 						//showBillForClientV2DTO.setBillGroupId(jsonObject.get("number") != null ? jsonObject.get("number").toString() : null);
 						//合同编号默认给前端传0，因为深圳湾对接传的合同ID是字符串，我们是Long，无法转换
 						showBillForClientV2DTO.setContractId("0");
