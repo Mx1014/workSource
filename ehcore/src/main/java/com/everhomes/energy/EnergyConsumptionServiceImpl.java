@@ -1590,8 +1590,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 errorDataLogs.add(log);
                 return;
             }
-            if (burdenRate != null && burdenRate.size() > 0) {
-                if(Objects.equals(burdenRate.get(0), "")){
+            if (burdenRate != null && burdenRate.size() > 0 && building != null && building.size() > 0) {
+                if(Objects.equals(burdenRate.get(0), "")&& !Objects.equals(building.get(0), "")){
                     LOGGER.error("energy meter burden rate is not  exist, data = {}", str);
                     log.setData(str);
                     log.setErrorLog("energy meter burden rate  is not exist");
