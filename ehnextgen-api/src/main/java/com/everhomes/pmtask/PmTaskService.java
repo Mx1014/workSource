@@ -111,7 +111,7 @@ public interface PmTaskService {
 	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
 
 	void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp);
-	
+
 	Object getThirdAddress(HttpServletRequest req);
 
 	Object createThirdTask(HttpServletRequest req);
