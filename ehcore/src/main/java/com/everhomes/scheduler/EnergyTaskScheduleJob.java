@@ -234,34 +234,11 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
         //获取公式,计算当天的费用
         EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,task.getExecutiveStartTime());
-        EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,task.getExecutiveStartTime());
-        if(amountSetting == null || rateSetting == null) {
-            return null;
-        }
-//
-//        String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-//
-//        ScriptEngineManager manager = new ScriptEngineManager();
-//        ScriptEngine engine = manager.getEngineByName("js");
-//
-//        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-//        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-//        BigDecimal realAmount = new BigDecimal(0);
 
         Map<Long, BigDecimal> realAmountMap = new HashMap<>();
 
         for (EnergyMeterAddress address : addresses) {
             //这里对接缴费之后去除  直接变成  读数 * 倍率 * 分摊比列
-           /* //address  meter关系表中带上burdenDate
-            engine.put(MeterFormulaVariable.BURDEN_RATE.getCode(), address.getBurdenRate());
-            try {
-                realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
-            } catch (ScriptException e) {
-                e.printStackTrace();
-                LOGGER.error("The energy meter amount formula: {} error", aoumtFormula);
-                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter formula error");
-            }
-            realAmountMap.put(address.getAddressId(), realAmount);*/
             if (address.getBurdenRate() != null && address.getBurdenRate().compareTo(new BigDecimal(0)) != 0) {
                 BigDecimal  burdenRate = address.getBurdenRate();
                 realAmountMap.put(address.getAddressId(), amount.multiply(rateSetting.getSettingValue()).multiply(burdenRate));
