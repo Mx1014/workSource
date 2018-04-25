@@ -8528,7 +8528,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (i<response.getOrgStatistics().size())
 				tmp.add(response.getOrgStatistics().get(i));
 		if (response.getOrgStatistics().size()>cmd.getPageAnchor()+cmd.getPageSize())
-			response.setNextPageAnchor(cmd.getPageAnchor()+response.getOrgStatistics().size());
+			response.setNextPageAnchor(cmd.getPageAnchor()+tmp.size());
 		response.setOrgStatistics(tmp);
         return response;
     }
