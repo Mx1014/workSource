@@ -2667,6 +2667,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.insert(organizationDetail);
     }
 
+    /**
+     * 向表eh_organization_communities中添加数据
+     * @param organizationCommunity
+     */
+    @Override
+    public void insertOrganizationCommunity(OrganizationCommunity organizationCommunity){
+        //拿到一个id序列
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunities.class));
+        //拿到上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建EhOrganizationCommunitiesDao对象，通过该对象来将OrganizationCommunity对象持久化到数据库
+        EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
+        //设置表中的主键id值
+        organizationCommunity.setId(id);
+        //持久化到数据库
+        dao.insert(organizationCommunity);
+    }
+
     @Override
     public void updateOrganizationDetail(OrganizationDetail organizationDetail) {
         // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getCommunityId()));

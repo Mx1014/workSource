@@ -1312,6 +1312,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
+            //根据是否是管理员来进行添加eh_organization_communities表数据
+            if(cmd.getPmFlag() != null && cmd.getPmFlag() == Integer.valueOf(TrueOrFalseFlag.TRUE.getCode())){
+                //说明是管理员，那么我们就可以将管理的项目添加到eh_organization_communities表中
+                if(cmd.getProjectIds()!= null){
+                    for(Long lon : cmd.getProjectIds()){
+                        OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+                        organizationCommunity.setCommunityId(lon);
+                        organizationCommunity.setOrganizationId(organization.getId());
+                        organizationProvider.insertOrganizationCommunity(organizationCommunity);
+                    }
+                }
+
+            }
             OrganizationDetail organizationDetail = new OrganizationDetail();
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setAddress(cmd.getAddress());
