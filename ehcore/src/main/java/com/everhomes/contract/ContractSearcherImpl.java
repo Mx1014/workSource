@@ -175,7 +175,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                             buildings.add(building.getId());
                         }
                     }catch (Exception e){
+                        LOGGER.error("error occured during sync contract",e);
                         LOGGER.error("find building failed, contractApartment = {}, contract id ={}", contractApartment, contract.getId());
+                        continue;
                     }
                 }
 
