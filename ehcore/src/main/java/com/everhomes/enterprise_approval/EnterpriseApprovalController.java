@@ -47,6 +47,39 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /enterprise_approval/createEnterpriseApproval</b>
+     * <p>OA 新增审批模板</p>
+     * @return
+     */
+    @RequestMapping("createEnterpriseApproval")
+    @RestReturn(value=EnterpriseApprovalDTO.class)
+    public RestResponse createEnterpriseApproval(@Valid CreateEnterpriseApprovalCommand cmd) {
+        EnterpriseApprovalDTO res = enterpriseApprovalService.createEnterpriseApproval(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterprise_approval/updateEnterpriseApproval</b>
+     * <p>OA 编辑审批模板</p>
+     * @return
+     */
+    @RequestMapping("updateEnterpriseApproval")
+    @RestReturn(value=EnterpriseApprovalDTO.class)
+    public RestResponse updateEnterpriseApproval(@Valid UpdateEnterpriseApprovalCommand cmd) {
+        EnterpriseApprovalDTO res = enterpriseApprovalService.updateEnterpriseApproval(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+
+    /**
      * <b>URL: /enterprise_approval/listEnterpriseApprovals</b>
      * <p>OA 审批列表</p>
      */
