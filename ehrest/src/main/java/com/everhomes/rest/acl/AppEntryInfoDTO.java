@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>entryName: 应用入口名称</li>
- *     <li>terminalType: 终端类型 {@link TerminalType}</li>
- *     <li>locationType: 位置类型 {@link ServiceModuleLocationType}</li>
+ *     <li>terminalType: 终端类型 {@link com.everhomes.rest.module.TerminalType}</li>
+ *     <li>locationType: 位置类型 {@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
  *     <li>sceneType: 形态类型 {@link com.everhomes.rest.module.ServiceModuleSceneType}</li>
  * </ul>
  */
