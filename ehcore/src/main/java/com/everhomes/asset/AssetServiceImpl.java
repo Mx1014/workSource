@@ -73,7 +73,6 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -113,9 +112,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private OrganizationSearcher organizationSearcher;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -171,23 +167,14 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
-//    @Autowired
-//    private ContractService contractService;
-
     @Autowired
-    private UserService userService;
-
-//    @Autowired
-//    private ZhangjianggaokeAssetVendor handler;
+    private PaymentService paymentService;
 
     @Autowired
     private CustomerService customerService;
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
-
-    @Autowired
-    private PortalService portalService;
 
     @Autowired
     private ContractProvider contractProvider;
@@ -1452,6 +1439,10 @@ public class AssetServiceImpl implements AssetService {
         });
         LOGGER.error("插入完成");
         assetProvider.setInworkFlagInContractReceiverWell(contractId);
+        // 重新计算
+        for(EhPaymentBills bill : billList){
+            assetProvider.reCalBillById(bill.getId());
+        }
         LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
@@ -2828,6 +2819,8 @@ public class AssetServiceImpl implements AssetService {
                     fine.setCustomerType(item.getTargetType());
                     fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
+                    // 重新计算下账单
+                    assetProvider.reCalBillById(item.getBillId());
                 }
             }
         });
@@ -3140,6 +3133,51 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.linkOrganizationToBill(ownerUid, token);
         }else{
             LOGGER.error("link customer to bill failed, code={}, token = {}", code, token);
+        }
+    }
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="namespaceId"
+//
+//            999970
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="orderType"
+//
+//    wuyeCode
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="userId"
+//
+//            1024527
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="userType"
+//
+//    EhOrganizations
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="pageSize"
+//
+//            10
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="communityId"
+//
+//            240111044331050367
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="organizationId"
+//
+//            1024527
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu--
+    // bill_id 获得 所属的order_id 然后根据order_num进行查询支付系统
+    @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillRelatedTransac(cmd);
+    }
+
+    @Override
+    public void reCalBill(ReCalBillCommand cmd) {
+        List<Long> ids = assetProvider.findbillIdsByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
+        for(Long id : ids){
+            assetProvider.reCalBillById(id);
         }
     }
 

@@ -818,6 +818,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler showCreateBill");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         return null;
     }

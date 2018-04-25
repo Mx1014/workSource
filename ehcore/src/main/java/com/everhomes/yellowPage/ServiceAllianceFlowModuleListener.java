@@ -461,11 +461,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				}
 
 				//企业
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_COMPANY.getCode());
-				if (val != null) {
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+				OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
+				//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
+				if(ocr != null) {//如果查询出来公司为空，就不显示公司字段
+					val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+							GeneralFormDataSourceType.USER_COMPANY.getCode());
+					if (val != null) {
+						dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+						entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+					}
 				}
 
 				//楼栋门牌
