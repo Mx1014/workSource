@@ -4595,7 +4595,11 @@ public class PunchServiceImpl implements PunchService {
         ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
         taskService.updateTaskProcess(taskId, 50);
         createPunchDetailsBookSheet(resp1.getPunchDayDetails(), cmd1, taskId, wb);
-        List<PunchLog> logs = punchProvider.listPunchLogs(cmd.getOwnerId(), cmd.getStartDay(), cmd.getEndDay());
+        List<Long> userIds = new ArrayList<>();
+        for (PunchCountDTO dto : resp.getPunchCountList()) {
+            userIds.add(dto.getUserId());
+        }
+        List<PunchLog> logs = punchProvider.listPunchLogs(getTopEnterpriseId(cmd.getOwnerId()),userIds, cmd.getStartDay(), cmd.getEndDay());
         createPunchLogsSheet(logs,cmd, taskId, wb, userDeptMap);
         return wb;
     }
