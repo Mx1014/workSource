@@ -77,6 +77,15 @@ public class ServiceModuleAppProfileProviderImpl implements ServiceModuleAppProf
     }
 
     @Override
+    public ServiceModuleAppProfile findServiceModuleAppProfileByOriginId(Long originId) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppProfile.class));
+        SelectQuery<EhServiceModuleAppProfileRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_APP_PROFILE);
+        query.addConditions(Tables.EH_SERVICE_MODULE_APP_PROFILE.ORIGIN_ID.eq(originId));
+        return query.fetchAnyInto(ServiceModuleAppProfile.class);
+    }
+
+    @Override
     public List<ServiceModuleAppProfile> queryServiceModuleAppProfiles(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppProfile.class));
 

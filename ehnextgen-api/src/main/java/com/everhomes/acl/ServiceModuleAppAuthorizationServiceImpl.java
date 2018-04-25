@@ -169,6 +169,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     public void updateAppProfile(UpdateAppProfileCommand cmd) {
 
         ServiceModuleAppProfile profile = ConvertHelper.convert(cmd, ServiceModuleAppProfile.class);
+
         if(cmd.getMobileUris() != null){
             profile.setMobileUri(cmd.getMobileUris().toString());
         }
@@ -180,9 +181,12 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
         }
 
-        if(profile.getId() == null){
+        ServiceModuleAppProfile oldProfile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());
+
+        if(oldProfile == null){
             serviceModuleAppProfileProvider.createServiceModuleAppProfile(profile);
         }else {
+            profile.setId(oldProfile.getId());
             serviceModuleAppProfileProvider.updateServiceModuleAppProfile(profile);
         }
     }
