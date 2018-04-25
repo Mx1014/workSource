@@ -379,6 +379,9 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			if(costDTOs != null) {
 				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
+				showBillForClientV2DTO.setBillGroupName("    ");
+				showBillForClientV2DTO.setContractId("      ");
+				showBillForClientV2DTO.setContractNum("       ");
 				BigDecimal overAllAmountOwed = BigDecimal.ZERO;//待缴金额总计
 				String addressStr = "";//包含的地址
 				List<BillForClientV2> bills = new ArrayList<BillForClientV2>();
@@ -398,7 +401,6 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 					overAllAmountOwed = overAllAmountOwed.add(costDTO.getWs_amount());//待缴金额总计
 				}
 				showBillForClientV2DTO.setBills(bills);
-				//showBillForClientV2DTO.setBillGroupName("");
 				showBillForClientV2DTO.setOverAllAmountOwed(String.valueOf(overAllAmountOwed));
 				addressStr = addressStr.substring(0, addressStr.length() - 1);
 				showBillForClientV2DTO.setAddressStr(addressStr);
