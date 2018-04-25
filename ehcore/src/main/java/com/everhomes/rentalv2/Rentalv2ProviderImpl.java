@@ -935,10 +935,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
 		if (null != startTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.gt(new Timestamp(startTime)));
 		}
 		if (null != endTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.lt(new Timestamp(endTime)));
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
