@@ -374,7 +374,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 				}
 			}
 			String onlyws = "1";//首页只查询未缴费:0：全部费用；1：未收；2：已收
-			//onlyws = "0";//杨崇鑫测试
+			onlyws = "0";//杨崇鑫测试
 			//根据房屋查询费用
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			if(costDTOs != null) {
