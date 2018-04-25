@@ -4165,6 +4165,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (order.getRentalType().equals(RentalType.HOUR.getCode())||order.getRentalType().equals(RentalType.HALFDAY.getCode())
 				||order.getRentalType().equals(RentalType.THREETIMEADAY.getCode())||order.getRentalType().equals(RentalType.DAY.getCode())){
 			RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
+			statistics.setOrderId(order.getId());
 			statistics.setValidTimeLong(order.getEndTime().getTime()-order.getStartTime().getTime());
 			rentalv2Provider.createRentalOrderStatistics(statistics);
 		}else{
@@ -4178,6 +4179,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long time = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 				if (!closeTime.contains(time)){
 					RentalOrderStatistics statistics = ConvertHelper.convert(order,RentalOrderStatistics.class);
+                    statistics.setOrderId(order.getId());
 					List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(order.getResourceType(),
 							RuleSourceType.RESOURCE.getCode(),order.getRentalResourceId(),order.getRentalType());
 					if (dayopenTimes != null && dayopenTimes.size()>0){
