@@ -3338,7 +3338,8 @@ public class CustomerServiceImpl implements CustomerService {
         if (moduleAdmins != null && moduleAdmins.size() > 0) {
             moduleAdmins.forEach((r) -> {
                 //这里权限那边并不会返回null  getCommunityControlIds
-                if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || r.getCommunityControlApps().getCommunityControlIds().contains(communityId)) {
+                List<Long> communityControlIds = r.getCommunityControlApps().getCommunityControlIds();
+                if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || (communityControlIds != null && communityControlIds.contains(communityId))) {
                     userIds.add(r.getTargetId());
                 }
             });
