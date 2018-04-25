@@ -297,4 +297,8 @@ public interface AssetProvider {
     void linkIndividualUserToBill(Long ownerUid, String token);
 
     void linkOrganizationToBill(Long ownerUid, String orgName);
+
+    List<AssetPaymentOrder> findAssetOrderByBillId(String billId);
+
+    PaymentBills findPaymentBillById(Long billId);
 }
