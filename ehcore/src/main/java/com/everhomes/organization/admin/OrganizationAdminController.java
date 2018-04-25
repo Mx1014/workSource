@@ -403,7 +403,7 @@ public class OrganizationAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/org/createStandardEnterprise</b>
-     * <p>创建企业</p>
+     * <p>创建企业（标准版）</p>
      */
     @RequestMapping("createStandardEnterprise")
     @RestReturn(value = OrganizationDTO.class)

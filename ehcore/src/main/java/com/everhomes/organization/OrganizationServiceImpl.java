@@ -1257,6 +1257,130 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @return
      */
     @Override
+    public OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd) {
+        //1.从上下文中拿到用户信息
+        User user = UserContext.current().getUser();
+        //2.从上下文中拿到域空间ID
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(cmd.getCheckPrivilege() != null && cmd.getCheckPrivilege()) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(),
+                    PrivilegeConstants.ORGANIZATION_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE,
+                    ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        }
+
+
+        if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
+            checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
+        }
+        checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
+        //创建公司Organization类的对象
+        Organization organization = new Organization();
+        dbProvider.execute((TransactionStatus status) -> {
+            //创建群组Group类的对象
+            Group group = new Group();
+            //将数据封装在对象中
+            group.setName(cmd.getName());
+            group.setDisplayName(cmd.getDisplayName());
+            group.setEnterpriseAddress(cmd.getAddress());
+
+            group.setDescription(cmd.getContactsPhone());
+            group.setStatus(OrganizationStatus.ACTIVE.getCode());
+
+            group.setCreatorUid(user.getId());
+
+            group.setNamespaceId(namespaceId);
+
+            group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+
+            group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+
+            groupProvider.createGroup(group);
+
+            organization.setParentId(0L);
+            organization.setLevel(1);
+            organization.setPath("");
+            organization.setName(cmd.getName());
+            organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+            organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+            organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+            organization.setNamespaceId(namespaceId);
+            organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setGroupId(group.getId());
+            organization.setWebsite(cmd.getWebsite());
+            organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+            organizationProvider.createOrganization(organization);
+
+            OrganizationDetail organizationDetail = new OrganizationDetail();
+            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setAddress(cmd.getAddress());
+            organizationDetail.setDescription(cmd.getDescription());
+            organizationDetail.setAvatar(cmd.getAvatar());
+            organizationDetail.setCreateTime(organization.getCreateTime());
+            if (!StringUtils.isEmpty(cmd.getCheckinDate())) {
+                java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+                if (null != checkinDate) {
+                    organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
+                }
+            }
+            organizationDetail.setContact(cmd.getContactsPhone());
+            organizationDetail.setDisplayName(cmd.getDisplayName());
+            organizationDetail.setPostUri(cmd.getPostUri());
+            organizationDetail.setMemberCount(cmd.getMemberCount());
+            organizationDetail.setEmailDomain(cmd.getEmailDomain());
+            organizationDetail.setServiceUserId(cmd.getServiceUserId());
+            if (cmd.getLatitude() != null)
+                organizationDetail.setLatitude(Double.valueOf(cmd.getLatitude()));
+            if (cmd.getLongitude() != null)
+                organizationDetail.setLongitude(Double.valueOf(cmd.getLongitude()));
+            organizationProvider.createOrganizationDetail(organizationDetail);
+
+            // 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
+            createActiveOrganizationCommunityRequest(user.getId(), organizationDetail.getOrganizationId(), cmd.getCommunityId());
+//			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+//			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
+//			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+//			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
+//
+//			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+//			organizationCommunityRequest.setCreatorUid(user.getId());
+//			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//
+//	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+
+            // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
+            //organization.setCommunityId(cmd.getCommunityId());
+            organization.setDescription(organizationDetail.getDescription());
+
+            List<AttachmentDescriptor> attachments = cmd.getAttachments();
+
+            if (null != attachments && 0 != attachments.size()) {
+                this.addAttachments(organization.getId(), attachments, user.getId());
+            }
+
+            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+            if (null != addressDTOs && 0 != addressDTOs.size()) {
+                this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            }
+
+            createEnterpriseCustomer(organization, cmd.getAvatar(), organizationDetail, cmd.getCommunityId(), addressDTOs);
+            return null;
+        });
+
+        organizationSearcher.feedDoc(organization);
+
+
+        return ConvertHelper.convert(organization, OrganizationDTO.class);
+    }
+
+    /**
+     * 创建企业
+     * @param cmd
+     * @return
+     */
+    @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
         if(cmd.getCheckPrivilege() != null && cmd.getCheckPrivilege()) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(),
@@ -12405,11 +12529,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return res;
     }
 
-    @Override
-    public OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd) {
 
-        return null;
-    }
 
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize) {
