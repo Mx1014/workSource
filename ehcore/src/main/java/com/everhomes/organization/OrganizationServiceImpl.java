@@ -1365,7 +1365,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 this.addAddresses(organization.getId(), addressDTOs, user.getId());
             }
 
-            createEnterpriseCustomer(organization, cmd.getAvatar(), organizationDetail, cmd.getCommunityId(), addressDTOs);
+//            createEnterpriseCustomer(organization, cmd.getAvatar(), organizationDetail, cmd.getCommunityId(), addressDTOs);
             return null;
         });
 
