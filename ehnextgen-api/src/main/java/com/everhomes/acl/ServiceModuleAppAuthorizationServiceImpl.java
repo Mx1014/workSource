@@ -6,8 +6,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.acl.UpdateAppProfileCommand;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -30,6 +32,8 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     private CommunityProvider communityProvider;
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    @Autowired
+    private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 
     @Override
     public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
@@ -161,4 +165,17 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         }
     }
 
+    @Override
+    public void updateAppProfile(UpdateAppProfileCommand cmd) {
+
+        ServiceModuleAppProfile profile = ConvertHelper.convert(cmd, ServiceModuleAppProfile.class);
+        profile.setMobileUri(cmd.getMobileUris().toString());
+        profile.setPcUri(cmd.getPcUris().toString());
+        profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
+        if(profile.getId() == null){
+            serviceModuleAppProfileProvider.createServiceModuleAppProfile(profile);
+        }else {
+            serviceModuleAppProfileProvider.updateServiceModuleAppProfile(profile);
+        }
+    }
 }

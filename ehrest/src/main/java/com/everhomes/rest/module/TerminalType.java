@@ -2,8 +2,8 @@ package com.everhomes.rest.module;
 
 /**
  * <ul>
- * <li>MOBILE: 移动端</li>
- * <li>PC: PC端</li>
+ *     <li>MOBILE((byte) 1): 移动端 </li>
+ *     <li>PC((byte) 2): PC端 </li>
  * </ul>
  */
 public enum TerminalType {
@@ -20,18 +20,12 @@ public enum TerminalType {
     }
 
     public static TerminalType fromCode(Byte code) {
-        if (code == null)
-            return null;
-
-        switch (code.byteValue()) {
-            case 1:
-                return MOBILE;
-
-            case 2:
-                return PC;
-
-            default:
-                break;
+        if (code != null) {
+            for (TerminalType value : TerminalType.values()) {
+                if (value.equals(code)) {
+                    return value;
+                }
+            }
         }
         return null;
     }

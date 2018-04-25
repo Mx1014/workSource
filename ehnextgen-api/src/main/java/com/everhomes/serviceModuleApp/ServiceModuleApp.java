@@ -9,6 +9,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
 
     private static final long serialVersionUID = -4427568958167322339L;
 
+    private Long profileId;
     private Long menuId;
     private String displayVersion;
     private String appCategory;
@@ -27,6 +28,15 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+
+    public Long getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(Long profileId) {
+        this.profileId = profileId;
     }
 
     public Long getMenuId() {

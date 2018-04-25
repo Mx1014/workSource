@@ -2,6 +2,7 @@ package com.everhomes.acl;
 
 import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.acl.UpdateAppProfileCommand;
 
 import java.util.List;
 
@@ -12,4 +13,6 @@ public interface ServiceModuleAppAuthorizationService {
     List<ServiceModuleAppAuthorization> listCommunityRelationOfOrgIdAndAppId(Integer namespaceId, Long organizationId, Long appId);
     List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId);
     void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd);
+
+    void updateAppProfile(UpdateAppProfileCommand cmd);
 }

@@ -14,7 +14,7 @@ import java.util.List;
  * <li>mobile_uri: 移动端图片</li>
  * <li>pc_flag: 支持PC端（0：不支持，1：支持）</li>
  * <li>pc_uri: PC端图片</li>
- * <li>app_entry_infos: 应用入口信息, 参考{@link AppEntryInfosDTO}</li>
+ * <li>app_entry_infos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
  * <li>independent_config_flag: 允许独立配置</li>
  * <li>config_appIds: 若不支持独立配置，选择同时需要配置的应用</li>
  * <li>support_third_flag: 支持对接硬件和第三方系统</li>
@@ -30,7 +30,7 @@ public class CreateAppProfileCommand {
     private List<String> mobile_uri;
     private Integer pc_flag;
     private List<String> pc_uri;
-    private List<AppEntryInfosDTO> app_entry_infos;
+    private List<AppEntryInfoDTO> app_entry_infos;
     private Integer independent_config_flag;
     private List<Long> config_appIds;
     private Integer support_third_flag;
@@ -139,11 +139,11 @@ public class CreateAppProfileCommand {
         this.originId = originId;
     }
 
-    public List<AppEntryInfosDTO> getApp_entry_infos() {
+    public List<AppEntryInfoDTO> getApp_entry_infos() {
         return app_entry_infos;
     }
 
-    public void setApp_entry_infos(List<AppEntryInfosDTO> app_entry_infos) {
+    public void setApp_entry_infos(List<AppEntryInfoDTO> app_entry_infos) {
         this.app_entry_infos = app_entry_infos;
     }
 }
