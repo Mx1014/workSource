@@ -8481,10 +8481,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
         }
         QueryOrgRentalStatisticsResponse response = new QueryOrgRentalStatisticsResponse();
-		ListingLocator locator = new ListingLocator();
 		int pageSize = Integer.MAX_VALUE;
 		response.setOrgStatistics(new ArrayList<>());
-		List<Enterprise> enterprises = enterpriseService.listEnterpriseByCommunityId(locator,null,cmd.getCommunityId(),null,pageSize);
+		List<Enterprise> enterprises = enterpriseService.listEnterpriseByCommunityId(null,null,cmd.getCommunityId(),null,pageSize);
 		if (enterprises == null || enterprises.size()==0)
 			return response;
 		for (Enterprise enterprise:enterprises){
