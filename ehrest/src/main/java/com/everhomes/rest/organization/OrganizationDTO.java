@@ -123,11 +123,11 @@ public class OrganizationDTO {
 	//人员规模
 	private String memberRange;
 
-	public String getMemberCount() {
+	public String getMemberRange() {
 		return memberRange;
 	}
 
-	public void setMemberCount(String memberRange) {
+	public void setMemberRange(String memberRange) {
 		this.memberRange = memberRange;
 	}
 
