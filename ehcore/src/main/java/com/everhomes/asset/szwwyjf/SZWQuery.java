@@ -168,6 +168,7 @@ public class SZWQuery {
 							BigDecimal amountOwed = fappamount.subtract(factMount).setScale(2,BigDecimal.ROUND_HALF_DOWN);
 							listAllBillsForClientDTO.setAmountOwed(amountOwed.toString());
 							listAllBillsForClientDTO.setChargeStatus(chargeStatus);
+							listAllBillsForClientDTO.setBillId(receDataJSONObject.get("fid") != null ? receDataJSONObject.get("fid").toString() : null);
 							response.add(listAllBillsForClientDTO);
 						}
 					}
