@@ -1229,7 +1229,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
+        , r.INVOICE_NUMBER)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1241,6 +1242,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setTargetName(f.getValue(r.TARGET_NAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
+                    vo.setInvoiceNum(f.getValue(r.INVOICE_NUMBER));
                     //bill can has multiple addresses, thus one single address may confuse user
 //                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
 //                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));

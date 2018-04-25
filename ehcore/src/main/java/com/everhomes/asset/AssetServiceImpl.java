@@ -3062,7 +3062,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        handler.exportBillTem\plates(cmd, response);
+        handler.exportBillTemplates(cmd, response);
     }
 
     /**
