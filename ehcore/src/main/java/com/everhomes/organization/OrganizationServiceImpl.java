@@ -2396,6 +2396,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         forumService.cancelLikeTopic(cmd);
     }
 
+
     @Caching(evict = {@CacheEvict(value = "ForumPostById", key = "#topicId")})
     private void sendComment(long topicId, long forumId, long orgId, OrganizationMember member, long category, int namespaceId) {
         User user = UserContext.current().getUser();
@@ -12390,9 +12391,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             //采用forEach循环遍历集合
             for(Organization organization : organizations){
                 //将数据封装在对象Organization中
-                organization.setAvatarUri(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getAvatar());
+                OrganizationDetail organizationDetail = organizationProvider.getOrganizationDetailByOrgId(organization.getId());
+                organization.setAvatarUri(organizationDetail.getAvatar());
                 organization.setProjectsCount(organizationProvider.getCommunityByOrganizationId(organization.getId()));
-                organization.setMemberRange(organizationProvider.getOrganizationDetailByOrgId(organization.getId()).getMemberRange());
+                organization.setMemberRange(organizationDetail.getMemberRange());
             }
         }
 
