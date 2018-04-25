@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class RentalStatisticsDTO {
     private String name;
     private BigDecimal amount;
-    private Integer OrderCount;
+    private Integer orderCount;
     private Long usedTime;
 
     public String getName() {
@@ -33,11 +33,11 @@ public class RentalStatisticsDTO {
     }
 
     public Integer getOrderCount() {
-        return OrderCount;
+        return orderCount;
     }
 
     public void setOrderCount(Integer orderCount) {
-        OrderCount = orderCount;
+        this.orderCount = orderCount;
     }
 
     public Long getUsedTime() {

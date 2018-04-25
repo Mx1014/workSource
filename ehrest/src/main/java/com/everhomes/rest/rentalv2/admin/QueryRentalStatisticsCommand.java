@@ -1,7 +1,10 @@
 package com.everhomes.rest.rentalv2.admin;
 
 /**
- * Created by Administrator on 2018/4/17.
+ * <ul>
+ * <li>orderBy: 排序字段{@link RentalStatisticsOrder}</li>
+ * <li>order: 1:顺序 -1:逆序/li>
+ * </ul>
  */
 public class QueryRentalStatisticsCommand {
 
@@ -13,6 +16,9 @@ public class QueryRentalStatisticsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private String orderBy;
+    private Integer order;
 
     private Long currentPMId;
     private Long currentProjectId;
@@ -64,6 +70,22 @@ public class QueryRentalStatisticsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getOrderBy() {
+        return orderBy;
+    }
+
+    public void setOrderBy(String orderBy) {
+        this.orderBy = orderBy;
+    }
+
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 
     public Long getCurrentPMId() {

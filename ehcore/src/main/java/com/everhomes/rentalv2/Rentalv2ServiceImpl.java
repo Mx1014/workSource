@@ -8482,8 +8482,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         }
         QueryOrgRentalStatisticsResponse response = new QueryOrgRentalStatisticsResponse();
 		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(cmd.getPageAnchor());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = Integer.MAX_VALUE;
 		response.setOrgStatistics(new ArrayList<>());
 		List<Enterprise> enterprises = enterpriseService.listEnterpriseByCommunityId(locator,null,cmd.getCommunityId(),null,pageSize);
 		if (enterprises == null || enterprises.size()==0)
@@ -8497,9 +8496,40 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					cmd.getEndDate(),null,enterprise.getId()));
 			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
 					cmd.getEndDate(),null,enterprise.getId()));
+			dto.setAmount(dto.getAmount()==null?new BigDecimal(0):dto.getAmount());
+			dto.setUsedTime(dto.getUsedTime()==null?0L:dto.getUsedTime());
+			dto.setOrderCount(dto.getOrderCount()==null?0:dto.getOrderCount());
 			response.getOrgStatistics().add(dto);
 		}
-		response.setNextPageAnchor(locator.getAnchor());
+
+		if (RentalStatisticsOrder.amount.equals(cmd.getOrderBy())) {
+			response.getOrgStatistics().sort((o1, o2) -> {
+				return o1.getAmount().compareTo(o2.getAmount()) * cmd.getOrder();
+			});
+		}
+
+		if (RentalStatisticsOrder.orderCount.equals(cmd.getOrderBy())) {
+			response.getOrgStatistics().sort((o1, o2) -> {
+				return o1.getOrderCount().compareTo(o2.getOrderCount()) * cmd.getOrder();
+			});
+		}
+
+		if (RentalStatisticsOrder.usedTime.equals(cmd.getOrderBy())) {
+			response.getOrgStatistics().sort((o1, o2) -> {
+				return o1.getUsedTime().compareTo(o2.getUsedTime()) * cmd.getOrder();
+			});
+		}
+
+		List<RentalStatisticsDTO> tmp = new ArrayList<>();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(0L);
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
+		for (Integer i = cmd.getPageAnchor().intValue();i<cmd.getPageAnchor().intValue()+cmd.getPageSize();i++)
+			if (i<response.getOrgStatistics().size())
+				tmp.add(response.getOrgStatistics().get(i));
+		if (response.getOrgStatistics().size()>cmd.getPageAnchor()+cmd.getPageSize())
+			response.setNextPageAnchor(cmd.getPageAnchor()+response.getOrgStatistics().size());
+		response.setOrgStatistics(tmp);
         return response;
     }
 }
