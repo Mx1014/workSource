@@ -18,7 +18,22 @@ public class EnterpriseServiceImpl implements EnterpriseApprovalService{
     }
 
     @Override
+    public EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd) {
+        return null;
+    }
+
+    @Override
     public ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         return null;
     }
 }
