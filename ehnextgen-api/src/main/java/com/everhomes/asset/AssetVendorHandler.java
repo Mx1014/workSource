@@ -69,5 +69,7 @@ public interface AssetVendorHandler {
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
 
     void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
+
+    ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd);
 }
 

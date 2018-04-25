@@ -3,6 +3,7 @@ package com.everhomes.asset;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.szwwyjf.SZWQuery;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.OrganizationProvider;
 
 import com.everhomes.rest.asset.*;
@@ -11,6 +12,7 @@ import com.everhomes.rest.order.PreOrderDTO;
 
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -270,5 +272,12 @@ public class ShenZhenWanAssetVendor implements AssetVendorHandler{
 		// TODO Auto-generated method stub
 		
 	}
-    
+
+	@Override
+	public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+		LOGGER.error("Insufficient privilege, shenzhenwanAssetHandler");
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+				"Insufficient privilege");
+	}
+
 }

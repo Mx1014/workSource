@@ -3161,31 +3161,10 @@ public class AssetServiceImpl implements AssetService {
     // bill_id 获得 所属的order_id 然后根据order_num进行查询支付系统
     @Override
     public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
-        Long billId = cmd.getBillId();
-        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
-        PaymentBills bill = assetProvider.findPaymentBillById(billId);
-        if(bill == null || assetOrders.size() < 1){
-            return new ListPaymentBillResp();
-        }
-        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
-        paycmd.setNamespaceId(bill.getNamespaceId());
-        paycmd.setOrderType("wuyecode");
-        paycmd.setPageAnchor(cmd.getPageAnchor());
-        paycmd.setPageSize(cmd.getPageSize());
-        if(cmd.getCommunityId() == null){
-            paycmd.setCommunityId(bill.getOwnerId());
-        }else{
-            paycmd.setCommunityId(cmd.getCommunityId());
-        }
-        paycmd.setUserType(cmd.getUserType());
-        paycmd.setUserId(cmd.getUserId());
-        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
-        try {
-            return paymentService.listPaymentBill(paycmd);
-        } catch (Exception e) {
-            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
-            return new ListPaymentBillResp();
-        }
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillRelatedTransac(cmd);
     }
 
     private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch) {
