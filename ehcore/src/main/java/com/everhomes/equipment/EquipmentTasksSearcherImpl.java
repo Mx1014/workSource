@@ -190,7 +190,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         builder.setQuery(qb);
         //unMappedType
         builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC));
-        builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
+//        builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
 
         SearchResponse rsp = builder.execute().actionGet();
 
