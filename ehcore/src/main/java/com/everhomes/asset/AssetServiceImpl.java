@@ -1439,6 +1439,10 @@ public class AssetServiceImpl implements AssetService {
         });
         LOGGER.error("插入完成");
         assetProvider.setInworkFlagInContractReceiverWell(contractId);
+        // 重新计算
+        for(EhPaymentBills bill : billList){
+            assetProvider.reCalBillById(bill.getId());
+        }
         LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
@@ -2815,6 +2819,8 @@ public class AssetServiceImpl implements AssetService {
                     fine.setCustomerType(item.getTargetType());
                     fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
+                    // 重新计算下账单
+                    assetProvider.reCalBillById(item.getBillId());
                 }
             }
         });
@@ -3165,6 +3171,14 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillRelatedTransac(cmd);
+    }
+
+    @Override
+    public void reCalBill(ReCalBillCommand cmd) {
+        List<Long> ids = assetProvider.findbillIdsByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
+        for(Long id : ids){
+            assetProvider.reCalBillById(id);
+        }
     }
 
     private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch) {

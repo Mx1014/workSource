@@ -179,4 +179,6 @@ public interface AssetService {
 	void linkCustomerToBill(String code, Long ownerUid, String identifierToken);
 
 	ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd);
+
+    void reCalBill(ReCalBillCommand cmd);
 }

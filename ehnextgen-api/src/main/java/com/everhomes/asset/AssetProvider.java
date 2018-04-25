@@ -301,4 +301,6 @@ public interface AssetProvider {
     List<AssetPaymentOrder> findAssetOrderByBillId(String billId);
 
     PaymentBills findPaymentBillById(Long billId);
+
+    List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

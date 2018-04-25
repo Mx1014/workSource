@@ -1243,6 +1243,19 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <b>URL: /asset/reCalBill</b>
+     * <p>重新计算账单，不改变状态</p>
+     */
+    @RequestMapping("reCalBill")
+    public RestResponse reCalBill(ReCalBillCommand cmd){
+        assetService.reCalBill(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 
 }
 
