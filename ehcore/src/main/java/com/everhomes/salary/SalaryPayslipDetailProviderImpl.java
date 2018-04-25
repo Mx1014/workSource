@@ -36,7 +36,7 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 		salaryPayslipDetail.setId(id);
 		salaryPayslipDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryPayslipDetail.setCreatorUid(UserContext.current().getUser().getId());
-		salaryPayslipDetail.setUpdateTime(salaryPayslipDetail.getCreateTime());
+//		salaryPayslipDetail.setUpdateTime(salaryPayslipDetail.getCreateTime());
 		salaryPayslipDetail.setOperatorUid(salaryPayslipDetail.getCreatorUid());
 		getReadWriteDao().insert(salaryPayslipDetail);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryPayslipDetails.class, null);

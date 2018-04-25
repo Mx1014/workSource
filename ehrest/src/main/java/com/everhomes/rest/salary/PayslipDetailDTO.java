@@ -16,6 +16,10 @@ import com.everhomes.util.StringHelper;
  * <li>payslipContent: 导入内容key-value对的list</li>
  * <li>viewedFlag: 已查看0-否 1-是</li>
  * <li>status: 状态0-已发送 1-已撤回  2-已确认</li>
+ * <li>operatorUid: 发放者id</li>
+ * <li>operatorName: 发放人姓名</li>
+ * <li>operateTime: 发放时间</li>
+ * <li>confirmTime: 自动确认时间</li>
  * </ul>
  */
 public class PayslipDetailDTO {
@@ -27,6 +31,10 @@ public class PayslipDetailDTO {
     private List<Map<String,String>> payslipContent;
     private Byte viewedFlag;
     private Byte status;
+    private Long operatorUid;
+    private String operatorName;
+    private Long operateTime;
+    private Long confirmTime;
 	public Long getUserId() {
 		return userId;
 	}
@@ -79,6 +87,30 @@ public class PayslipDetailDTO {
 	}
 	public void setPayslipDetailId(Long payslipDetailId) {
 		this.payslipDetailId = payslipDetailId;
+	}
+	public Long getOperatorUid() {
+		return operatorUid;
+	}
+	public void setOperatorUid(Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+	public String getOperatorName() {
+		return operatorName;
+	}
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+	public Long getOperateTime() {
+		return operateTime;
+	}
+	public void setOperateTime(Long operateTime) {
+		this.operateTime = operateTime;
+	}
+	public Long getConfirmTime() {
+		return confirmTime;
+	}
+	public void setConfirmTime(Long confirmTime) {
+		this.confirmTime = confirmTime;
 	}
     
     
