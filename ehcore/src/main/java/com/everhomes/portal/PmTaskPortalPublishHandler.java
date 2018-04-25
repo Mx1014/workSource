@@ -3,6 +3,8 @@ package com.everhomes.portal;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -32,6 +34,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     private PmTaskProvider pmTaskProvider;
     @Autowired
     private WebMenuPrivilegeProvider webMenuProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
@@ -42,6 +46,12 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //        }else{
 //            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
 //        }
+        Byte angetSwitch = pmTaskInstanceConfig.getAgentSwitch();
+        if(0 == angetSwitch.intValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",1);
+        } else if (1 == angetSwitch.intValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",0);
+        }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
 

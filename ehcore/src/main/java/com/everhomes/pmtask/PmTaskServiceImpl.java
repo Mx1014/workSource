@@ -2836,7 +2836,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		查询数据
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()));
 //		聚合统计
-		Map<Long,Map<Long,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getCategoryId)));
+		Map<Long,Map<Long,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getTaskCategoryId)));
 //		构建响应数据对象
 		List<PmTaskStatSubDTO> dtoList = new ArrayList<>();
 		for (Map.Entry<Long,Map<Long,List<PmTask>>> elem: result.entrySet()
