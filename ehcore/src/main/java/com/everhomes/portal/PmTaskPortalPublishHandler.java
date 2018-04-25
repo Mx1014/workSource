@@ -47,9 +47,9 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
 //        }
         Byte angetSwitch = pmTaskInstanceConfig.getAgentSwitch();
-        if(0 == angetSwitch.intValue()){
+        if(0 == angetSwitch.byteValue()){
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",1);
-        } else if (1 == angetSwitch.intValue()){
+        } else if (1 == angetSwitch.byteValue()){
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",0);
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
