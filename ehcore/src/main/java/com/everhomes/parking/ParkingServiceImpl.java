@@ -89,7 +89,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
-
+	@Autowired
+	private List<ParkingVendorHandler> allListeners;
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -2737,5 +2738,24 @@ public class ParkingServiceImpl implements ParkingService {
 	public void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
 		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
 				ParkingSpaceLockOperateType.DOWN);
+	}
+
+	@Override
+	public void refreshToken(RefreshTokenCommand cmd) {
+		if(cmd.getParkingLotId()==null){
+			for (ParkingVendorHandler listener : allListeners) {
+				try {
+					listener.refreshToken();
+				}catch (Exception e){
+					LOGGER.error("listener {}, exception = ", listener.getClass().getSimpleName(),e);
+				}
+			}
+		}else {
+			ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+			handler.refreshToken();
+		}
 	}
 }

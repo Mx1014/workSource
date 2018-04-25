@@ -603,4 +603,9 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 //        System.out.println(new QiqiDaodingParkingVendorHandler().requestToken(OPENAPI_TOKEN_GET));
 //    }
 
+
+    @Override
+    public void refreshToken() {
+        this.requestToken();
+    }
 }

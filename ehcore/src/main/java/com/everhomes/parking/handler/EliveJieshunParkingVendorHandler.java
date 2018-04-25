@@ -826,5 +826,8 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 		return end.format(dtf2)+" 23:59:59";
 //		return "2018-04-23 00:00:00";
 	}
-
+	@Override
+	public void refreshToken() {
+		this.requestToken();
+	}
 }

@@ -894,4 +894,19 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/refreshToken</b>
+     * <p>刷新token</p>
+     */
+    @RequestMapping("refreshToken")
+    @RestReturn(value=String.class)
+    public RestResponse refreshToken(RefreshTokenCommand cmd) {
+
+        parkingService.refreshToken(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
