@@ -36,7 +36,7 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
 		salaryPayslip.setId(id);
 		salaryPayslip.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryPayslip.setCreatorUid(UserContext.current().getUser().getId());
-		salaryPayslip.setUpdateTime(salaryPayslip.getCreateTime());
+//		salaryPayslip.setUpdateTime(salaryPayslip.getCreateTime());
 		salaryPayslip.setOperatorUid(salaryPayslip.getCreatorUid());
 		getReadWriteDao().insert(salaryPayslip);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryPayslips.class, null);
@@ -45,7 +45,7 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
 	@Override
 	public void updateSalaryPayslip(SalaryPayslip salaryPayslip) {
 		assert (salaryPayslip.getId() != null);
-		salaryPayslip.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryPayslip.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryPayslip.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryPayslip);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryPayslips.class, salaryPayslip.getId());

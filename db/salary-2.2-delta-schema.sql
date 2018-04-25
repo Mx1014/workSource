@@ -11,7 +11,7 @@ CREATE TABLE `eh_salary_payslips` (
   `name` VARCHAR(1024) NOT NULL COMMENT '工资表名称',
   `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-  `operate_time` DATETIME COMMENT '记录更新时间',
+  `update_time` DATETIME COMMENT '记录更新时间',
   `operator_uid` BIGINT COMMENT '记录更新人userId',
   PRIMARY KEY(`id`),
   KEY `ix_owner_period` (`owner_id`,`salary_period`)
@@ -35,7 +35,7 @@ CREATE TABLE `eh_salary_payslip_details` (
   `status` TINYINT COMMENT '状态0-已发送 1-已撤回  2-已确认',
   `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-  `operate_time` DATETIME COMMENT '记录更新时间',
+  `update_time` DATETIME COMMENT '记录更新时间',
   `operator_uid` BIGINT COMMENT '记录更新人userId',
   PRIMARY KEY(`id`),
   KEY `ix_payslip_id` (`payslip_id`),
