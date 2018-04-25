@@ -6,33 +6,53 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>description: 应用描述</li>
- * <li>mobile_flag: 支持移动端（0：不支持，1：支持）</li>
- * <li>mobile_uri: 移动端图片</li>
- * <li>pc_flag: 支持PC端（0：不支持，1：支持）</li>
- * <li>pc_uri: PC端图片</li>
- * <li>app_entry_infos: 应用入口信息, 参考{@link AppEntryInfosDTO}</li>
- * <li>independent_config_flag: 允许独立配置</li>
- * <li>config_appIds: 若不支持独立配置，选择同时需要配置的应用</li>
- * <li>support_third_flag: 支持对接硬件和第三方系统</li>
- * <li>default_flag: 新建企业默认安装</li>
+ *     <li>id: 来自list接口中的profileId。如果没有的话不传，但是要传下面一个参数originId</li>
+ *     <li>originId: 应用originId</li>
+ *     <li>description: 应用描述</li>
+ *     <li>mobileFlag: 支持移动端（0：不支持，1：支持）</li>
+ *     <li>mobileUri: 移动端图片</li>
+ *     <li>pcFlag: 支持PC端（0：不支持，1：支持）</li>
+ *     <li>pcUri: PC端图片</li>
+ *     <li>appEntryInfos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
+ *     <li>independentConfigFlag: 允许独立配置</li>
+ *     <li>configAppIds: 若不支持独立配置，选择同时需要配置的应用，此处Id为originId</li>
+ *     <li>supportThirdFlag: 支持对接硬件和第三方系统</li>
+ *     <li>defaultFlag: 新建企业默认安装</li>
  * </ul>
  */
 public class UpdateAppProfileCommand {
+    private Long id;
+    private Long originId;
     private String description;
-    private Integer mobile_flag;
-    private List<String> mobile_uri;
-    private Integer pc_flag;
-    private List<String> pc_uri;
-    private List<AppEntryInfosDTO> app_entry_infos;
-    private Integer independent_config_flag;
-    private List<Long> config_appIds;
-    private Integer support_third_flag;
-    private Integer default_flag;
+    private Byte mobileFlag;
+    private List<String> mobileUris;
+    private Byte pcFlag;
+    private List<String> pcUris;
+    private List<AppEntryInfoDTO> appEntryInfos;
+    private Byte independentConfigFlag;
+    private List<Long> configAppIds;
+    private Byte supportThirdFlag;
+    private Byte defaultFlag;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getOriginId() {
+        return originId;
+    }
+
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 
     public String getDescription() {
@@ -43,77 +63,75 @@ public class UpdateAppProfileCommand {
         this.description = description;
     }
 
-    public Integer getMobile_flag() {
-        return mobile_flag;
+    public Byte getMobileFlag() {
+        return mobileFlag;
     }
 
-    public void setMobile_flag(Integer mobile_flag) {
-        this.mobile_flag = mobile_flag;
+    public void setMobileFlag(Byte mobileFlag) {
+        this.mobileFlag = mobileFlag;
     }
 
-    public List<String> getMobile_uri() {
-        return mobile_uri;
+    public List<String> getMobileUris() {
+        return mobileUris;
     }
 
-    public void setMobile_uri(List<String> mobile_uri) {
-        this.mobile_uri = mobile_uri;
+    public void setMobileUris(List<String> mobileUris) {
+        this.mobileUris = mobileUris;
     }
 
-    public Integer getPc_flag() {
-        return pc_flag;
+    public Byte getPcFlag() {
+        return pcFlag;
     }
 
-    public void setPc_flag(Integer pc_flag) {
-        this.pc_flag = pc_flag;
+    public void setPcFlag(Byte pcFlag) {
+        this.pcFlag = pcFlag;
     }
 
-    public List<String> getPc_uri() {
-        return pc_uri;
+    public List<String> getPcUris() {
+        return pcUris;
     }
 
-    public void setPc_uri(List<String> pc_uri) {
-        this.pc_uri = pc_uri;
+    public void setPcUris(List<String> pcUris) {
+        this.pcUris = pcUris;
     }
 
-
-    public Integer getIndependent_config_flag() {
-        return independent_config_flag;
+    public List<AppEntryInfoDTO> getAppEntryInfos() {
+        return appEntryInfos;
     }
 
-    public void setIndependent_config_flag(Integer independent_config_flag) {
-        this.independent_config_flag = independent_config_flag;
+    public void setAppEntryInfos(List<AppEntryInfoDTO> appEntryInfos) {
+        this.appEntryInfos = appEntryInfos;
     }
 
-    public Integer getSupport_third_flag() {
-        return support_third_flag;
+    public Byte getIndependentConfigFlag() {
+        return independentConfigFlag;
     }
 
-    public void setSupport_third_flag(Integer support_third_flag) {
-        this.support_third_flag = support_third_flag;
+    public void setIndependentConfigFlag(Byte independentConfigFlag) {
+        this.independentConfigFlag = independentConfigFlag;
     }
 
-    public Integer getDefault_flag() {
-        return default_flag;
+    public List<Long> getConfigAppIds() {
+        return configAppIds;
     }
 
-    public void setDefault_flag(Integer default_flag) {
-        this.default_flag = default_flag;
+    public void setConfigAppIds(List<Long> configAppIds) {
+        this.configAppIds = configAppIds;
     }
 
-    public List<Long> getConfig_appIds() {
-        return config_appIds;
+    public Byte getSupportThirdFlag() {
+        return supportThirdFlag;
     }
 
-    public void setConfig_appIds(List<Long> config_appIds) {
-        this.config_appIds = config_appIds;
+    public void setSupportThirdFlag(Byte supportThirdFlag) {
+        this.supportThirdFlag = supportThirdFlag;
     }
 
-
-    public List<AppEntryInfosDTO> getApp_entry_infos() {
-        return app_entry_infos;
+    public Byte getDefaultFlag() {
+        return defaultFlag;
     }
 
-    public void setApp_entry_infos(List<AppEntryInfosDTO> app_entry_infos) {
-        this.app_entry_infos = app_entry_infos;
+    public void setDefaultFlag(Byte defaultFlag) {
+        this.defaultFlag = defaultFlag;
     }
 }

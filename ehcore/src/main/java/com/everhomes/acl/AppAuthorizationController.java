@@ -94,7 +94,8 @@ public class AppAuthorizationController {
      */
     @RequestMapping("updateAppProfile")
     @RestReturn(value = String.class)
-    public RestResponse updateAppProfile(@Valid UpdateAppProfileCommand cmd) {
+    public RestResponse updateAppProfile(UpdateAppProfileCommand cmd) {
+        serviceModuleAppAuthorizationService.updateAppProfile(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
