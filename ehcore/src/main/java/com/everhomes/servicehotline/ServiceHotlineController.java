@@ -171,4 +171,24 @@ public class ServiceHotlineController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	@RequestMapping("getChatGroupList")
+	@RestReturn(value=GetChatGroupListResponse.class)
+	public RestResponse getChatGroupList(@Valid GetChatGroupListCommand cmd) {
+		GetChatGroupListResponse chatGroup = this.hotlineService.getChatGroupList(cmd);
+		RestResponse response =  new RestResponse(chatGroup);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("getChatRecordList")
+	@RestReturn(value=GetChatRecordListResponse.class)
+	public RestResponse getChatRecordList(@Valid GetChatRecordListCommand cmd) {
+		GetChatRecordListResponse chatRecordList = this.hotlineService.getChatRecordList(cmd);
+		RestResponse response =  new RestResponse(chatRecordList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

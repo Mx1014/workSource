@@ -8,16 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.everhomes.community.Community;
+
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.region.Region;
 import com.everhomes.rest.servicehotline.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
-import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
-import org.hibernate.type.YesNoType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +27,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.message.MessageProvider;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
@@ -70,6 +70,10 @@ public class HotlineServiceImpl implements HotlineService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 		@Autowired
 	private ConfigurationProvider configProvider;
+		
+	@Autowired
+	private MessageProvider messageProvider;		
+		
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(
 			GetHotlineSubjectCommand cmd) {
@@ -393,6 +397,131 @@ public class HotlineServiceImpl implements HotlineService {
 				info.setContractName(member.getContactName());
 		}
 		return info;
+	}
+	
+	
+	
+	/*
+	 * @see
+	 * com.everhomes.techpark.servicehotline.HotlineService#listChatGroup(com.
+	 * everhomes.rest.servicehotline.ListChatGroupCommand)
+	 * 
+	 * 根据条件获取会话列表。 相同的两个人的会话定义为一个会话。 例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话
+	 * 客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话 客服A与用户C的无聊天记录，不属于会话。
+	 * 
+	 */
+	@Override
+	public GetChatGroupListResponse getChatGroupList(GetChatGroupListCommand cmd) {
+
+		// 检查权限
+		// if(configProvider.getBooleanValue("privilege.community.checkflag",
+		// true)){
+		// userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(),
+		// cmd.getCurrentPMId(), 4030040300L, cmd.getAppId(),
+		// null,cmd.getCurrentProjectId());//订单记录权限
+		// }
+
+		// 获取namespaceId
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+
+		// 获取页码数据
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(pageAnchor);
+		// messageProvider.listMessageRecords(pageSize, locator, (a,b)->{});
+
+		// 模拟数据
+		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, pageAnchor, cmd.getServicerId(),
+				cmd.getKeyword());
+
+		// if (list.size() > pageSize) {
+		// nextPageAnchor += 1;
+		// list.remove(list.size() - 1);
+		// } else {
+		// nextPageAnchor = null;
+		// }
+
+		GetChatGroupListResponse rsp = new GetChatGroupListResponse();
+		rsp.setNextPageAnchor(pageAnchor + 1);
+		rsp.setChatGroupList(dtoList);
+
+		return rsp;
+	}
+
+	/*
+	 * @see
+	 * com.everhomes.techpark.servicehotline.HotlineService#getChatRecordList(
+	 * com.everhomes.rest.servicehotline.GetChatRecordListCommand)
+	 * 查询客服id与用户id的聊天记录
+	 * 
+	 */
+	public GetChatRecordListResponse getChatRecordList(GetChatRecordListCommand cmd) {
+		// 检查权限
+		// if(configProvider.getBooleanValue("privilege.community.checkflag",
+		// true)){
+		// userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(),
+		// cmd.getCurrentPMId(), 4030040300L, cmd.getAppId(),
+		// null,cmd.getCurrentProjectId());//订单记录权限
+		// }
+
+		// 获取页码数据
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, pageAnchor, cmd.getServicerId(),
+				cmd.getCustomerId());
+
+		GetChatRecordListResponse rsp = new GetChatRecordListResponse();
+		rsp.setNextPageAnchor(pageAnchor + 1);
+		rsp.setChatRecordList(chatRecordList);
+		return rsp;
+	}
+
+	/**
+	 * private方法。用于查询会话列表逻辑
+	 */
+	private List<ChatGroupDTO> getChatGroupList(Integer namespaceId, Integer pageSize, Long pageAnchor, Long servicerId,
+			String keyword) {
+
+		ChatGroupDTO dto = new ChatGroupDTO();
+		TargetDTO servicer = userProvider.findUserByToken("19107797118", namespaceId); // 晁倩2
+		TargetDTO customer = userProvider.findUserByToken("13816368413", namespaceId);// 科技园官方帐号
+
+		dto.setServicer(servicer);
+		dto.setCustomer(customer);
+
+		List<ChatGroupDTO> dtoList = new ArrayList<>(pageSize);
+		dtoList.add(dto);
+
+		return dtoList;
+	}
+
+	/**
+	 * private方法。用于查询某个会话的聊天记录
+	 */
+	private List<ChatRecordDTO> getChatRecordList(Integer pageSize, Long pageAnchor, Long servicerId, Long customerId) {
+
+		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(pageSize);
+		ChatRecordDTO dto = null;
+		long nowTime = System.currentTimeMillis();
+		for (int i = 0; i < pageSize; i++, nowTime++) {
+
+			String senderName = (i % 2 == 0) ? "晁倩2" : "科技园官方帐号";
+			dto = new ChatRecordDTO();
+			dto.setSenderName(senderName);
+			dto.setMessageType(ChatMessageType.TEXT.getCode());
+			Timestamp now = new Timestamp(nowTime);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String time = sdf.format(now);
+			dto.setMessage("msg" + i + " nowTime:" + time);
+			dto.setSendTime(now);
+
+			chatRecordDtos.add(dto);
+		}
+
+		return chatRecordDtos;
 	}
 
 }

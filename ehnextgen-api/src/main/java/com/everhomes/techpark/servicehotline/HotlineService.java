@@ -21,6 +21,15 @@ public interface HotlineService {
 	void updateHotlineOrder(UpdateHotlinesCommand cmd);
 
 	GetUserInfoByIdResponse getUserInfoById(GetUserInfoByIdCommand cmd);
+	
+	/**
+	 * 获取专属客服的会话列表
+	 */
+	GetChatGroupListResponse getChatGroupList(GetChatGroupListCommand cmd);
 
+	/**
+	 * 获取专属客服的聊天记录
+	 */
+	GetChatRecordListResponse getChatRecordList(GetChatRecordListCommand cmd);
 
 }
