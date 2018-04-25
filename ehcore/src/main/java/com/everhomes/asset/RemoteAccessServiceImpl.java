@@ -420,6 +420,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
+        if(cmd.getOrderIds() != null) {
+            QueryCondition tempCondition = PaymentAttributes.REMARK2.in(cmd.getOrderIds());
+            if(condition == null) {
+                condition = tempCondition;
+            } else {
+                condition = condition.and(tempCondition);
+            }
+        }
         //加入remark3，对园区id进行筛选
         if(cmd.getCommunityId() != null) {
             QueryCondition tempCondition = PaymentAttributes.REMARK3.eq(cmd.getCommunityId());

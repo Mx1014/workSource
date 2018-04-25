@@ -571,8 +571,9 @@ public class AssetProviderImpl implements AssetProvider {
                         dto.setApartmentName(addrAartName);
                         dto.setBuildingName(addrBuildingName);
                     }else{
-                        dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
-                        dto.setBuildingName(r.getValue(t.BUILDING_NAME));
+                        // 使用t.APARTMENT_NAME仍然识别不了
+                        dto.setApartmentName(r.getValue(11).toString());
+                        dto.setBuildingName(r.getValue(10).toString());
                     }
                     dtos.add(dto);
                     });
@@ -2299,6 +2300,31 @@ public class AssetProviderImpl implements AssetProvider {
             id = idSet.iterator().next();
         }
         return id;
+    }
+
+    @Override
+    public List<AssetPaymentOrder> findAssetOrderByBillId(String billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        return context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.eq(billId))
+                .fetchInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public PaymentBills findPaymentBillById(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list =  context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchInto(PaymentBills.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+
     }
 
     @Override

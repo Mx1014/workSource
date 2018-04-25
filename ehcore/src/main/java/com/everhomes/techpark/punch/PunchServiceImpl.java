@@ -4219,8 +4219,10 @@ public class PunchServiceImpl implements PunchService {
             	//2018年4月23日:这里的定义改了,不是是否为正常,而是统计出勤天数:
             	//出勤天数的计算是:打卡(包括正常,迟到,早退) + 出差/外出申请审核通过视为出勤（不计算请假，不重复统计）
                 Byte isNormal = NormalFlag.NO.getCode();
+                Byte isWorkDay = NormalFlag.NO.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+                    isWorkDay = countWorkDay(status);
                     if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                         String[] asList = StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(), PunchConstants.STATUS_SEPARATOR);
                         for (int i = 0; i < asList.length && i < status.length; i++) {
@@ -4275,11 +4277,11 @@ public class PunchServiceImpl implements PunchService {
 		            	workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
 //		            	workApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 		                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
-		                	isNormal=NormalFlag.YES.getCode();
+		                	isWorkDay=NormalFlag.YES.getCode();
 		                }
 		            }
 	            }
-                if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
+                if (NormalFlag.fromCode(isWorkDay).equals(NormalFlag.YES)) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {
                     statistic.setExceptionDayCount(statistic.getExceptionDayCount() + 1);
@@ -4291,10 +4293,21 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
+    private Byte countWorkDay(String[] status) {
+        for (String s : status) {
+            if (NormalFlag.fromCode(countWorkDay(s)) == NormalFlag.YES) {
+                return NormalFlag.YES.getCode();
+            }
+        }
+        return NormalFlag.NO.getCode();
+    }
+
     private void processStatisticsTime(PunchLog log, PunchStatistic statistic, Byte status) {
         if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(status)) {
+            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
             statistic.setLeaveEarlyTime(statistic.getLeaveEarlyTime() + processLeaveEarlyTime(log));
         } else if (PunchStatus.BELATE == PunchStatus.fromCode(status)) {
+            statistic.setBelateCount(statistic.getBelateCount()+1);
             statistic.setBelateTime(statistic.getBelateTime() + processBelateTime(log));
         }
     }
@@ -4314,7 +4327,22 @@ public class PunchServiceImpl implements PunchService {
 //        new  .divide(new BigDecimal(8*3600*1000),2, RoundingMode.HALF_UP);
         return getTimeLong(punchTime, null) - log.getRuleTime();
     }
+    private Byte countWorkDay(String status){
+        Byte isNormal = NormalFlag.NO.getCode();
+        if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.BLANDLE.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        }
+        return isNormal;
 
+    }
     private Byte countOneDayStatistic(String status, PunchStatistic statistic, Byte isNormal,
                                       int punchTimeNo, List<TimeInterval> tiDTOs, java.sql.Date punchDate, PunchTimeRuleDTO ptrDTO) {
         if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
@@ -4356,17 +4384,17 @@ public class PunchServiceImpl implements PunchService {
                 statistic.setUnpunchCount(statistic.getUnpunchCount() + b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         } else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
-            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+//            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.YES.getCode();
+//            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.BLANDLE.getCode()))) {
             statistic.setBlandleCount(statistic.getBlandleCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
             isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
-            statistic.setBelateCount(statistic.getBelateCount() + 1);
+//            statistic.setBelateCount(statistic.getBelateCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.YES.getCode();
+//            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
 //<<<<<<< HEAD
             statistic.setForgotCount(statistic.getForgotCount() + 1);
@@ -4374,9 +4402,9 @@ public class PunchServiceImpl implements PunchService {
 //            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
 //>>>>>>> master
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-//            isNormal = NormalFlag.NO.getCode();
+//            isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-            isNormal = NormalFlag.YES.getCode();
+//            isNormal = NormalFlag.YES.getCode();
         }
         return isNormal;
     }
@@ -4569,7 +4597,11 @@ public class PunchServiceImpl implements PunchService {
         ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
         taskService.updateTaskProcess(taskId, 50);
         createPunchDetailsBookSheet(resp1.getPunchDayDetails(), cmd1, taskId, wb);
-        List<PunchLog> logs = punchProvider.listPunchLogs(cmd.getOwnerId(), cmd.getStartDay(), cmd.getEndDay());
+        List<Long> userIds = new ArrayList<>();
+        for (PunchCountDTO dto : resp.getPunchCountList()) {
+            userIds.add(dto.getUserId());
+        }
+        List<PunchLog> logs = punchProvider.listPunchLogs(getTopEnterpriseId(cmd.getOwnerId()),userIds, cmd.getStartDay(), cmd.getEndDay());
         createPunchLogsSheet(logs,cmd, taskId, wb, userDeptMap);
         return wb;
     }

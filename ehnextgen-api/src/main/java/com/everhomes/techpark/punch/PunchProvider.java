@@ -353,5 +353,5 @@ public interface PunchProvider {
 
 	void updatePunchLog(PunchLog onDutyLog);
 
-	List<PunchLog> listPunchLogs(Long ownerId, Long startDay, Long endDay);
+	List<PunchLog> listPunchLogs(Long ownerId, List<Long> userIds, Long startDay, Long endDay);
 }

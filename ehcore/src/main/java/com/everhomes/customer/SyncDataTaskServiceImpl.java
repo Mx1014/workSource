@@ -139,7 +139,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                 results.add(result);
 
                 task.setViewFlag(SyncResultViewedFlag.VIEWED.getCode());
-                syncDataTaskProvider.updateSyncDataTask(task);
+                syncDataTaskProvider.updateSyncDataTask(task, false);
             }
 
             if(tasks.size() > pageSize) {

@@ -56,6 +56,17 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
     }
 
     @Override
+    public void updateSyncDataTask(SyncDataTask task, boolean doUpdateTime) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSyncDataTasks.class));
+        EhSyncDataTasksDao dao = new EhSyncDataTasksDao(context.configuration());
+        if(doUpdateTime){
+            task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+        dao.update(task);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSyncDataTasks.class, task.getId());
+    }
+
+    @Override
     public SyncDataTask findSyncDataTaskById(Long taskId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhSyncDataTasksDao dao = new EhSyncDataTasksDao(context.configuration());
