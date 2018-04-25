@@ -1235,8 +1235,12 @@ public class AssetController extends ControllerBase {
      * <p>列出账单所属的交易明细</p>
      */
     @RequestMapping("listBillRelatedTransac")
-    public void listBillRelatedTransac(listBillRelatedTransacCommand cmd){
-        assetService.listBillRelatedTransac(cmd);
+    public RestResponse listBillRelatedTransac(listBillRelatedTransacCommand cmd){
+        ListPaymentBillResp listPaymentBillResp = assetService.listBillRelatedTransac(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 
 
