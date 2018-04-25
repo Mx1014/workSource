@@ -17,14 +17,14 @@ public class ImportPayslipResponse {
 
 	private String salaryPeriod;
 
-	@ItemType(payslipDetailDTO.class)
-	private List<payslipDetailDTO> details;
+	@ItemType(PayslipDetailDTO.class)
+	private List<PayslipDetailDTO> details;
 
 	public ImportPayslipResponse() {
 
 	}
 
-	public ImportPayslipResponse(String salaryPeriod, List<payslipDetailDTO> details) {
+	public ImportPayslipResponse(String salaryPeriod, List<PayslipDetailDTO> details) {
 		super();
 		this.salaryPeriod = salaryPeriod;
 		this.details = details;
@@ -38,11 +38,11 @@ public class ImportPayslipResponse {
 		this.salaryPeriod = salaryPeriod;
 	}
 
-	public List<payslipDetailDTO> getDetails() {
+	public List<PayslipDetailDTO> getDetails() {
 		return details;
 	}
 
-	public void setDetails(List<payslipDetailDTO> details) {
+	public void setDetails(List<PayslipDetailDTO> details) {
 		this.details = details;
 	}
 
