@@ -705,7 +705,7 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
                     cmd0.setPageSize(Integer.MAX_VALUE - 1);
-                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOwnerId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
+                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
