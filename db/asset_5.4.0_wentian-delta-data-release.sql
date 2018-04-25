@@ -1,10 +1,5 @@
-
--- 张江高科缴费对接园区指定
-INSERT INTO `eh_asset_vendor` ()
-    VALUES ();
--- 正中会
-INSERT INTO `eh_asset_vendor` ()
-  VALUES ();
+-- 张江高科现在可以展示批量导入导出的按钮了
+delete from eh_service_module_exclude_functions where module_id = 20400 and function_id = 95 and namespace_id = 999971;
 
 
 

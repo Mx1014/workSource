@@ -942,6 +942,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         headList.add("增收备注");
         cur++;
         mandatoryIndex.add(0);
+        //发票
+        headList.add("发票单号");
+        cur++;
+        mandatoryIndex.add(0);
         String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
         if(fileName == null) fileName = "";
@@ -1229,6 +1233,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     if(increaseItemDTO != null){
                         increaseItemDTO.setRemark(data[j]);
                     }
+                }else if(headers[j].contains("发票")){
+                    cmd.setInvoiceNum(data[j]);
                 }
             }
             billGroupDTO.setBillGroupId(billGroupId);
