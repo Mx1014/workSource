@@ -1,27 +1,56 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.salary.*;
-import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.salary.ConfirmPayslipCommand;
+import com.everhomes.rest.salary.DeletePayslipCommand;
+import com.everhomes.rest.salary.ExportEmployeeSalaryTemplateCommand;
+import com.everhomes.rest.salary.ExportSalaryReportCommand;
+import com.everhomes.rest.salary.FileSalaryGroupCommand;
+import com.everhomes.rest.salary.FileSalaryGroupResponse;
+import com.everhomes.rest.salary.GetEmployeeEntitiesCommand;
+import com.everhomes.rest.salary.GetEmployeeEntitiesResponse;
+import com.everhomes.rest.salary.GetImportFileResultCommand;
+import com.everhomes.rest.salary.GetSalaryGroupStatusCommand;
+import com.everhomes.rest.salary.GetSalaryGroupStatusResponse;
+import com.everhomes.rest.salary.GetSalaryTaskStatusCommand;
+import com.everhomes.rest.salary.GetSalaryTaskStatusResponse;
+import com.everhomes.rest.salary.ImportPayslipCommand;
+import com.everhomes.rest.salary.ImportPayslipResponse;
+import com.everhomes.rest.salary.ListEnterprisesCommand;
+import com.everhomes.rest.salary.ListEnterprisesResponse;
+import com.everhomes.rest.salary.ListGroupEntitiesCommand;
+import com.everhomes.rest.salary.ListGroupEntitiesResponse;
+import com.everhomes.rest.salary.ListMonthPayslipSummaryCommand;
+import com.everhomes.rest.salary.ListMonthPayslipSummaryResponse;
+import com.everhomes.rest.salary.ListPayslipsDetailCommand;
+import com.everhomes.rest.salary.ListPayslipsDetailResponse;
+import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
+import com.everhomes.rest.salary.ListSalaryEmployeesResponse;
+import com.everhomes.rest.salary.ListSendPayslipDetailsCommand;
+import com.everhomes.rest.salary.ListSendPayslipDetailsResponse;
+import com.everhomes.rest.salary.ListUserPayslipsCommand;
+import com.everhomes.rest.salary.ListUserPayslipsResponse;
+import com.everhomes.rest.salary.ListYearPayslipSummaryCommand;
+import com.everhomes.rest.salary.ListYearPayslipSummaryResponse;
+import com.everhomes.rest.salary.NewSalaryMonthCommand;
+import com.everhomes.rest.salary.ResendPayslipCommand;
+import com.everhomes.rest.salary.RevokePayslipCommand;
+import com.everhomes.rest.salary.SendPayslipCommand;
+import com.everhomes.rest.salary.UpdateGroupEntitiesCommand;
 
 @RestController
 @RequestMapping("/salary")
@@ -226,5 +255,120 @@ public class SalaryController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <p>后台按年份查询每月工资条发放情况</p>
+	 * <b>URL: /salary/listYearPayslipSummary</b>
+	 */
+	@RequestMapping("listYearPayslipSummary")
+	@RestReturn(ListYearPayslipSummaryResponse.class)
+	public RestResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd){
+		return new RestResponse(salaryService.listYearPayslipSummary(cmd));
+	}	
+
+	/**
+	 * <p>上传工资条</p>
+	 * <b>URL: /salary/importPayslip</b>
+	 */
+	@RequestMapping("importPayslip")
+	@RestReturn(ImportPayslipResponse.class)
+	public RestResponse importPayslip(ImportPayslipCommand cmd){
+		return new RestResponse(salaryService.importPayslip(cmd));
+	}
+
+	/**
+	 * <p>发放工资条</p>
+	 * <b>URL: /salary/sendPayslip</b>
+	 */
+	@RequestMapping("sendPayslip")
+	@RestReturn(String.class)
+	public RestResponse sendPayslip(SendPayslipCommand cmd){
+		salaryService.sendPayslip(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>查看(某月)工资条记录</p>
+	 * <b>URL: /salary/listMonthPayslipSummary</b>
+	 */
+	@RequestMapping("listMonthPayslipSummary")
+	@RestReturn(ListMonthPayslipSummaryResponse.class)
+	public RestResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd){
+		return new RestResponse(salaryService.listMonthPayslipSummary(cmd));
+	}
+
+	/**
+	 * <p>查看(某次)工资条发放详情</p>
+	 * <b>URL: /salary/listSendPayslipDetails</b>
+	 */
+	@RequestMapping("listSendPayslipDetails")
+	@RestReturn(ListSendPayslipDetailsResponse.class)
+	public RestResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd){
+		return new RestResponse(salaryService.listSendPayslipDetails(cmd));
+	}
+
+	/**
+	 * <p>重发工资条</p>
+	 * <b>URL: /salary/resendPayslip</b>
+	 */
+	@RequestMapping("resendPayslip")
+	@RestReturn(String.class)
+	public RestResponse resendPayslip(ResendPayslipCommand cmd){
+		salaryService.resendPayslip(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>撤销工资条</p>
+	 * <b>URL: /salary/revokePayslip</b>
+	 */
+	@RequestMapping("revokePayslip")
+	@RestReturn(String.class)
+	public RestResponse revokePayslip(RevokePayslipCommand cmd){
+		salaryService.revokePayslip(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>删除工资条</p>
+	 * <b>URL: /salary/deletePayslip</b>
+	 */
+	@RequestMapping("deletePayslip")
+	@RestReturn(String.class)
+	public RestResponse deletePayslip(DeletePayslipCommand cmd){
+		salaryService.deletePayslip(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>查询工资条列表 </p>
+	 * <b>URL: /salary/listUserPayslips</b>
+	 */
+	@RequestMapping("listUserPayslips")
+	@RestReturn(ListUserPayslipsResponse.class)
+	public RestResponse listUserPayslips(ListUserPayslipsCommand cmd){
+		return new RestResponse(salaryService.listUserPayslips(cmd));
+	}
+
+	/**
+	 * <p>查询工资条详情</p>
+	 * <b>URL: /salary/listPayslipsDetail</b>
+	 */
+	@RequestMapping("listPayslipsDetail")
+	@RestReturn(ListPayslipsDetailResponse.class)
+	public RestResponse listPayslipsDetail(ListPayslipsDetailCommand cmd){
+		return new RestResponse(salaryService.listPayslipsDetail(cmd));
+	}
+
+	/**
+	 * <p>确认工资条</p>
+	 * <b>URL: /salary/confirmPayslip</b>
+	 */
+	@RequestMapping("confirmPayslip")
+	@RestReturn(String.class)
+	public RestResponse confirmPayslip(ConfirmPayslipCommand cmd){
+		salaryService.confirmPayslip(cmd);
+		return new RestResponse();
+	}
 
 }

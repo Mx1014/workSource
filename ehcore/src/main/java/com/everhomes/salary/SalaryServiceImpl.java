@@ -1903,5 +1903,71 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
+ 
+	@Override
+	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
+	
+		return new ListYearPayslipSummaryResponse();
+	}
+
+	@Override
+	public ImportPayslipResponse importPayslip(ImportPayslipCommand cmd) {
+	
+		return new ImportPayslipResponse();
+	}
+
+	@Override
+	public void sendPayslip(SendPayslipCommand cmd) {
+	
+
+	}
+
+	@Override
+	public ListMonthPayslipSummaryResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd) {
+	
+		return new ListMonthPayslipSummaryResponse();
+	}
+
+	@Override
+	public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
+	
+		return new ListSendPayslipDetailsResponse();
+	}
+
+	@Override
+	public void resendPayslip(ResendPayslipCommand cmd) {
+	
+
+	}
+
+	@Override
+	public void revokePayslip(RevokePayslipCommand cmd) {
+	
+
+	}
+
+	@Override
+	public void deletePayslip(DeletePayslipCommand cmd) {
+	
+
+	}
+
+	@Override
+	public ListUserPayslipsResponse listUserPayslips(ListUserPayslipsCommand cmd) {
+	
+		return new ListUserPayslipsResponse();
+	}
+
+	@Override
+	public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
+	
+		return new ListPayslipsDetailResponse();
+	}
+
+	@Override
+	public void confirmPayslip(ConfirmPayslipCommand cmd) {
+	
+
+	}
 
 }

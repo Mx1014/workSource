@@ -1,4 +1,4 @@
--- Designer: zhiwei zhang
+-- Designer: wuhan
 -- Description: ISSUE#24392 固定资产管理V1.0（支持对内部各类固定资产进行日常维护）
 
 CREATE TABLE `eh_salary_payslips` (
@@ -21,6 +21,7 @@ CREATE TABLE `eh_salary_payslips` (
 CREATE TABLE `eh_salary_payslip_details` (
   `id` BIGINT NOT NULL COMMENT '主键',
   `payslip_id` BIGINT NOT NULL COMMENT '父键;工资条id',
+  `salary_period` VARCHAR(12) COMMENT 'example:201705',
   `owner_type` VARCHAR(32)  COMMENT 'organization',
   `owner_id` BIGINT  COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT  COMMENT '属于哪一个总公司的',
