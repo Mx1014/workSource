@@ -1416,7 +1416,7 @@ public class ParkingServiceImpl implements ParkingService {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String prefix = sdf.format(new Date());
 
-		Tuple<Long, Boolean> enter = this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_GENERATE_ORDER_NO.getCode() + lot.getId()).enter(r -> {
+		Tuple<Long, Boolean> enter = this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_GENERATE_ORDER_NO.getCode() + lot.getId()).enter(() -> {
 			ParkingLot parkingLot = checkParkingLot(lot.getOwnerType(), lot.getOwnerId(), lot.getId());
 			String orderCode = (lot.getOrderCode()+1)+"";
 			while (orderCode.length()<8){
@@ -1427,7 +1427,7 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 			int ordertaglength = configProvider.getIntValue("parking.ordertag.length", 3);
 			if(lot.getOrderTag()==null || lot.getOrderTag().length()!=ordertaglength){
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO,	"生成订单编号失败,ordertaglength!=3");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO,	"生成订单编号失败,ordertaglength!={}",ordertaglength);
 			}
 
 			Long orderNo = Long.valueOf(String.valueOf(prefix) + lot.getOrderTag() + orderCode);
