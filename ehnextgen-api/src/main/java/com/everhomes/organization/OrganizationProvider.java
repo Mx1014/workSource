@@ -219,6 +219,12 @@ public interface OrganizationProvider {
 	int getCommunityByOrganizationId(Long organizationId);
 
 	/**
+	 *  向表eh_organization_communities中添加数据
+	 * @param organizationCommunity
+	 */
+	void insertOrganizationCommunity(OrganizationCommunity organizationCommunity);
+
+	/**
 	 * 根据公司id来查询公司详细信息的方法
 	 * @param organizationId
 	 * @return
