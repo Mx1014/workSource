@@ -7,7 +7,7 @@ package com.everhomes.rest.module;
  * </ul>
  */
 public enum ServiceModuleSceneType {
-    Management((byte) 1), client((byte) 2);
+    MANAGEMENT((byte) 1), CLIENT((byte) 2);
 
     private byte code;
 
