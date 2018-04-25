@@ -319,6 +319,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		String billDuration = costDTO.getBegintime() + "~" + costDTO.getEndtime();
 		listAllBillsForClientDTO.setDateStr(billDuration);
 		listAllBillsForClientDTO.setChargeStatus(chargeStatus);//chargeStatus：0：未付款；1：已付款
+		listAllBillsForClientDTO.setBillId(costDTO.getFeeid());
 		return listAllBillsForClientDTO;
 	}
 	
