@@ -1,6 +1,6 @@
 package com.everhomes.enterprise_approval;
 
-import com.everhomes.rest.enterprise_approval.*;
+import com.everhomes.rest.enterpriseApproval.*;
 import org.springframework.stereotype.Component;
 
 @Component

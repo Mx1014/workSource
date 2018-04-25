@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_approval;
+package com.everhomes.rest.enterpriseApproval;
 
 public class ListEnterpriseApprovalsCommand {
 }

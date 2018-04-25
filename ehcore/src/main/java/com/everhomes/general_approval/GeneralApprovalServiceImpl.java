@@ -24,7 +24,7 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;

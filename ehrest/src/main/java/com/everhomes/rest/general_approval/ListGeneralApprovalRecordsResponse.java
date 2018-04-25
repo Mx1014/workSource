@@ -1,7 +1,7 @@
 package com.everhomes.rest.general_approval;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 
 import java.util.List;
 

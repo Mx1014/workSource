@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_approval;
+package com.everhomes.rest.enterpriseApproval;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;

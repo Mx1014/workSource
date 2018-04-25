@@ -4,7 +4,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.enterprise_approval.*;
+import com.everhomes.rest.enterpriseApproval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/enterprise_approval")
+@RequestMapping("/enterpriseApproval")
 public class EnterpriseApprovalController extends ControllerBase{
 
     @Autowired
     private EnterpriseApprovalService enterpriseApprovalService;
 
     /**
-     * <b>URL: /enterprise_approval/listApprovalFlowRecords</b>
+     * <b>URL: /enterpriseApproval/listApprovalFlowRecords</b>
      * <p>OA 流程记录(流程查询)</p>
      */
     @RequestMapping("listApprovalFlowRecords")
@@ -33,7 +33,7 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterprise_approval/listApprovalFlowMonitors</b>
+     * <b>URL: /enterpriseApproval/listApprovalFlowMonitors</b>
      * <p>OA 流程监控</p>
      */
     @RequestMapping("listApprovalFlowMonitors")
@@ -47,7 +47,7 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterprise_approval/createEnterpriseApproval</b>
+     * <b>URL: /enterpriseApproval/createEnterpriseApproval</b>
      * <p>OA 新增审批模板</p>
      * @return
      */
@@ -58,12 +58,11 @@ public class EnterpriseApprovalController extends ControllerBase{
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-
         return response;
     }
 
     /**
-     * <b>URL: /enterprise_approval/updateEnterpriseApproval</b>
+     * <b>URL: /enterpriseApproval/updateEnterpriseApproval</b>
      * <p>OA 编辑审批模板</p>
      * @return
      */
@@ -74,13 +73,12 @@ public class EnterpriseApprovalController extends ControllerBase{
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-
         return response;
     }
 
 
     /**
-     * <b>URL: /enterprise_approval/listEnterpriseApprovals</b>
+     * <b>URL: /enterpriseApproval/listEnterpriseApprovals</b>
      * <p>OA 审批列表</p>
      */
     @RequestMapping("listEnterpriseApprovals")
@@ -93,6 +91,18 @@ public class EnterpriseApprovalController extends ControllerBase{
         return response;
     }
 
-
+    /**
+     * <b>URL: /enterpriseApproval/listAvailableEnterpriseApprovals</b>
+     * <p>OA 可见的审批列表</p>
+     */
+    @RequestMapping("listAvailableEnterpriseApprovals")
+    @RestReturn(value = ListEnterpriseApprovalsResponse.class)
+    public RestResponse listAvailableEnterpriseApprovals(@Valid ListEnterpriseApprovalsCommand cmd){
+        ListEnterpriseApprovalsResponse res = enterpriseApprovalService.listAvailableEnterpriseApprovals(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

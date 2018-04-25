@@ -3,7 +3,7 @@ package com.everhomes.rest.techpark.punch.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.util.StringHelper;
 

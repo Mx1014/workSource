@@ -1,7 +1,7 @@
 package com.everhomes.general_approval;
 
 import com.everhomes.flow.FlowCase;
-import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.general_approval.*;
 
 import java.io.OutputStream;

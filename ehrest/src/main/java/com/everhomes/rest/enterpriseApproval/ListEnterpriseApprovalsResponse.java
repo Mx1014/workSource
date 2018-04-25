@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_approval;
+package com.everhomes.rest.enterpriseApproval;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>groups: 审批组表 参考{@link com.everhomes.rest.enterprise_approval.EnterpriseApprovalGroupDTO}</li>
+ * <li>groups: 审批组表 参考{@link com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupDTO}</li>
  * </ul>
  */
 public class ListEnterpriseApprovalsResponse {
