@@ -24,15 +24,15 @@ public class UpdateAppProfileCommand {
     private Long id;
     private Long originId;
     private String description;
-    private Integer mobileFlag;
+    private Byte mobileFlag;
     private List<String> mobileUris;
-    private Integer pcFlag;
+    private Byte pcFlag;
     private List<String> pcUris;
     private List<AppEntryInfoDTO> appEntryInfos;
-    private Integer independentConfigFlag;
+    private Byte independentConfigFlag;
     private List<Long> configAppIds;
-    private Integer supportThirdFlag;
-    private Integer defaultFlag;
+    private Byte supportThirdFlag;
+    private Byte defaultFlag;
 
     @Override
     public String toString() {
@@ -63,11 +63,11 @@ public class UpdateAppProfileCommand {
         this.description = description;
     }
 
-    public Integer getMobileFlag() {
+    public Byte getMobileFlag() {
         return mobileFlag;
     }
 
-    public void setMobileFlag(Integer mobileFlag) {
+    public void setMobileFlag(Byte mobileFlag) {
         this.mobileFlag = mobileFlag;
     }
 
@@ -79,11 +79,11 @@ public class UpdateAppProfileCommand {
         this.mobileUris = mobileUris;
     }
 
-    public Integer getPcFlag() {
+    public Byte getPcFlag() {
         return pcFlag;
     }
 
-    public void setPcFlag(Integer pcFlag) {
+    public void setPcFlag(Byte pcFlag) {
         this.pcFlag = pcFlag;
     }
 
@@ -103,11 +103,11 @@ public class UpdateAppProfileCommand {
         this.appEntryInfos = appEntryInfos;
     }
 
-    public Integer getIndependentConfigFlag() {
+    public Byte getIndependentConfigFlag() {
         return independentConfigFlag;
     }
 
-    public void setIndependentConfigFlag(Integer independentConfigFlag) {
+    public void setIndependentConfigFlag(Byte independentConfigFlag) {
         this.independentConfigFlag = independentConfigFlag;
     }
 
@@ -119,19 +119,19 @@ public class UpdateAppProfileCommand {
         this.configAppIds = configAppIds;
     }
 
-    public Integer getSupportThirdFlag() {
+    public Byte getSupportThirdFlag() {
         return supportThirdFlag;
     }
 
-    public void setSupportThirdFlag(Integer supportThirdFlag) {
+    public void setSupportThirdFlag(Byte supportThirdFlag) {
         this.supportThirdFlag = supportThirdFlag;
     }
 
-    public Integer getDefaultFlag() {
+    public Byte getDefaultFlag() {
         return defaultFlag;
     }
 
-    public void setDefaultFlag(Integer defaultFlag) {
+    public void setDefaultFlag(Byte defaultFlag) {
         this.defaultFlag = defaultFlag;
     }
 }

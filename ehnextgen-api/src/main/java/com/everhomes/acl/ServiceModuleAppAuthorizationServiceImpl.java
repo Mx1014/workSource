@@ -169,9 +169,17 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     public void updateAppProfile(UpdateAppProfileCommand cmd) {
 
         ServiceModuleAppProfile profile = ConvertHelper.convert(cmd, ServiceModuleAppProfile.class);
-        profile.setMobileUri(cmd.getMobileUris().toString());
-        profile.setPcUri(cmd.getPcUris().toString());
-        profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
+        if(cmd.getMobileUris() != null){
+            profile.setMobileUri(cmd.getMobileUris().toString());
+        }
+        if(cmd.getPcUris() != null){
+            profile.setPcUri(cmd.getPcUris().toString());
+        }
+
+        if(cmd.getConfigAppIds() != null){
+            profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
+        }
+
         if(profile.getId() == null){
             serviceModuleAppProfileProvider.createServiceModuleAppProfile(profile);
         }else {
