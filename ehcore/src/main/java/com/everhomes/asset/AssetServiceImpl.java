@@ -73,7 +73,6 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -113,9 +112,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private OrganizationSearcher organizationSearcher;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -171,23 +167,14 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
-//    @Autowired
-//    private ContractService contractService;
-
     @Autowired
-    private UserService userService;
-
-//    @Autowired
-//    private ZhangjianggaokeAssetVendor handler;
+    private PaymentService paymentService;
 
     @Autowired
     private CustomerService customerService;
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
-
-    @Autowired
-    private PortalService portalService;
 
     @Autowired
     private ContractProvider contractProvider;
@@ -3140,6 +3127,64 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.linkOrganizationToBill(ownerUid, token);
         }else{
             LOGGER.error("link customer to bill failed, code={}, token = {}", code, token);
+        }
+    }
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="namespaceId"
+//
+//            999970
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="orderType"
+//
+//    wuyeCode
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="userId"
+//
+//            1024527
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="userType"
+//
+//    EhOrganizations
+//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="pageSize"
+//
+//            10
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="communityId"
+//
+//            240111044331050367
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu
+//    Content-Disposition: form-data; name="organizationId"
+//
+//            1024527
+//            ------WebKitFormBoundaryTHJjpTOenA3N9eNu--
+    // bill_id 获得 所属的order_id 然后根据order_num进行查询支付系统
+    @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        Long billId = cmd.getBillId();
+        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
+        PaymentBills bill = assetProvider.findPaymentBillById(billId);
+        if(bill == null || assetOrders.size() < 1){
+            return new ListPaymentBillResp();
+        }
+        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
+        paycmd.setNamespaceId(bill.getNamespaceId());
+        paycmd.setOrderType("wuyecode");
+        paycmd.setPageAnchor(cmd.getPageAnchor());
+        paycmd.setPageSize(cmd.getPageSize());
+        if(cmd.getCommunityId() == null){
+            paycmd.setCommunityId(bill.getOwnerId());
+        }else{
+            paycmd.setCommunityId(cmd.getCommunityId());
+        }
+        paycmd.setUserType(cmd.getUserType());
+        paycmd.setUserId(cmd.getUserId());
+        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
+        try {
+            return paymentService.listPaymentBill(paycmd);
+        } catch (Exception e) {
+            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
+            return new ListPaymentBillResp();
         }
     }
 

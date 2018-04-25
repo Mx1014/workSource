@@ -2303,6 +2303,31 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
+    public List<AssetPaymentOrder> findAssetOrderByBillId(String billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        return context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.eq(billId))
+                .fetchInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public PaymentBills findPaymentBillById(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list =  context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchInto(PaymentBills.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+
+    }
+
+    @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
         long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
