@@ -488,13 +488,17 @@ public class CustomerServiceImpl implements CustomerService {
             String geohash = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
             customer.setGeohash(geohash);
         }
-        if (customer.getTrackingUid() == null) {
-            customer.setTrackingUid(-1L);
-        }
+//        if (customer.getTrackingUid() == null) {
+//            customer.setTrackingUid(-1L);
+//        }
         if (null != customer && customer.getTrackingUid() != -1) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
+            }else {
+                User user = userProvider.findUserById(customer.getTrackingUid());
+                if(user!=null)
+                customer.setTrackingName(user.getNickName());
             }
         }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
