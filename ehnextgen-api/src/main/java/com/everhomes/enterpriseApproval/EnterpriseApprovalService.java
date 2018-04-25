@@ -1,4 +1,4 @@
-package com.everhomes.enterprise_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;

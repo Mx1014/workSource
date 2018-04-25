@@ -1,4 +1,4 @@
-package com.everhomes.enterprise_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;

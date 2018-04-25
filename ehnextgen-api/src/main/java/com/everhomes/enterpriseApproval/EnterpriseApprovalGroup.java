@@ -1,4 +1,4 @@
-package com.everhomes.enterprise_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseApprovalGroups;
 import com.everhomes.util.StringHelper;
