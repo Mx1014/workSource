@@ -420,7 +420,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
-        Boolean isAdmin = checkCustomerAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
     }
 
