@@ -15,6 +15,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.archives.VerifyPersonnelByPasswordCommand;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.util.RequireAuthentication;
 
@@ -172,6 +173,14 @@ public class ServiceHotlineController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /hotline/getChatGroupList</b>
+     * <p>获取所有会话列表</p>
+     * <p>根据条件获取会话列表。 相同的两个人的会话定义为一个会话。</p>
+     * <p>例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话</p>
+	 * <p>客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话</p>
+	 * <p>客服A与用户C的无聊天记录，不属于会话。</p>
+	 */
 	@RequestMapping("getChatGroupList")
 	@RestReturn(value=GetChatGroupListResponse.class)
 	public RestResponse getChatGroupList(@Valid GetChatGroupListCommand cmd) {
@@ -182,6 +191,10 @@ public class ServiceHotlineController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /hotline/getChatRecordList</b>
+     * <p>获取客服与用户的聊天记录</p>
+	 */
 	@RequestMapping("getChatRecordList")
 	@RestReturn(value=GetChatRecordListResponse.class)
 	public RestResponse getChatRecordList(@Valid GetChatRecordListCommand cmd) {
@@ -191,4 +204,34 @@ public class ServiceHotlineController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	
+	/**
+	 * <b>URL: /hotline/exportChatRecordList</b>
+     * <p>导出客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportChatRecordList")
+    @RestReturn(value = String.class)
+    public RestResponse exportChatRecordList(GetChatRecordListCommand cmd){
+    	hotlineService.exportChatRecordList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+	/**
+	 * <b>URL: /hotline/exportMultiChatRecordList</b>
+     * <p>导出客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportMultiChatRecordList")
+    @RestReturn(value = String.class)
+    public RestResponse exportMultiChatRecordList(GetChatGroupListCommand cmd){
+    	hotlineService.exportMultiChatRecordList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

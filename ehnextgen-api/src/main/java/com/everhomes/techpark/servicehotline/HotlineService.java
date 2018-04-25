@@ -31,5 +31,16 @@ public interface HotlineService {
 	 * 获取专属客服的聊天记录
 	 */
 	GetChatRecordListResponse getChatRecordList(GetChatRecordListCommand cmd);
+	
+	
+	/**
+	 * 导出专属客服的单个会话的聊天记录
+	 */
+	public void exportChatRecordList(GetChatRecordListCommand cmd);
+	
+	/**
+	 * 根据条件导出多个会话聊天记录
+	 */
+	public void exportMultiChatRecordList(GetChatGroupListCommand cmd);
 
 }

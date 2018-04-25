@@ -6,11 +6,12 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>TEXT: 文本（包括表情）</li>
  * <li>IMAGE: 图片</li>
- * <li>VOICE: 语音</li>
+ * <li>AUDIO: 语音</li>
+ *  当前对应 {@link com.everhomes.rest.messaging.MessageBodyType}前3种
  * </ul>
  */
 public enum ChatMessageType {
-	TEXT((byte) 0), IMAGE((byte) (1)) , VOICE((byte) (2));
+	TEXT((byte) 0), IMAGE((byte) (1)) , AUDIO((byte) (2));
 	
 	private Byte code;
 
