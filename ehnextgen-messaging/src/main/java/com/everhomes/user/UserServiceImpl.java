@@ -6151,7 +6151,9 @@ public class UserServiceImpl implements UserService {
 					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
 						for (OrganizationCommunity orgcom: organizationCommunitys){
 							Community community = communityProvider.findCommunityById(orgcom.getCommunityId());
-							communityUserDtos.add(ConvertHelper.convert(community, CommunityInfoDTO.class));
+							CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
+							communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+							communityUserDtos.add(communityInfoDTO);
 						}
 					}
 
@@ -6186,12 +6188,13 @@ public class UserServiceImpl implements UserService {
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
 					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
-					CommunityInfoDTO communityUserDto = new CommunityInfoDTO();
-					communityUserDto.setId(family.getCommunityId());
-					communityUserDto.setName(family.getCommunityName());
-					communityUserDto.setAliasName(family.getCommunityAliasName());
-					communityUserDto.setCommunityType(family.getCommunityType());
-					communityUserDtos.add(communityUserDto);
+					CommunityInfoDTO communityInfoDTO = new CommunityInfoDTO();
+					communityInfoDTO.setId(family.getCommunityId());
+					communityInfoDTO.setName(family.getCommunityName());
+					communityInfoDTO.setAliasName(family.getCommunityAliasName());
+					communityInfoDTO.setCommunityType(family.getCommunityType());
+					communityInfoDTO.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
+					communityUserDtos.add(communityInfoDTO);
 
 					dto.setCommunityUserDtos(communityUserDtos);
 
