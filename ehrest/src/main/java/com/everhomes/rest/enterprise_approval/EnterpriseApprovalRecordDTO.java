@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.enterprise_approval;
 
 import com.everhomes.util.StringHelper;
 
@@ -15,9 +15,11 @@ import com.everhomes.util.StringHelper;
  * <li>approvalStatus: 审批状态 参考{@link com.everhomes.rest.flow.FlowCaseStatus}</li>
  * <li>flowCaseId: 工作流id</li>
  * <li>approvalId: 所属审批id</li>
+ * <li>approvalGroupId: 所属审批组id</li>
+ * <li>approvalNode: 当前结点(类型暂未确定,待对接工作流)</li>
  * </ul>
  */
-public class GeneralApprovalRecordDTO {
+public class EnterpriseApprovalRecordDTO {
     private Long id;
 
     private Integer namespaceId;
@@ -47,7 +49,11 @@ public class GeneralApprovalRecordDTO {
     //  add by nan.rong at 02/27/2018
     private Long approvalId;
 
-    public GeneralApprovalRecordDTO() {
+    private Long approvalGroupId;
+
+    private String approvalNode;
+
+    public EnterpriseApprovalRecordDTO() {
     }
 
     public Long getId() {
@@ -160,6 +166,22 @@ public class GeneralApprovalRecordDTO {
 
     public void setApprovalId(Long approvalId) {
         this.approvalId = approvalId;
+    }
+
+    public Long getApprovalGroupId() {
+        return approvalGroupId;
+    }
+
+    public void setApprovalGroupId(Long approvalGroupId) {
+        this.approvalGroupId = approvalGroupId;
+    }
+
+    public String getApprovalNode() {
+        return approvalNode;
+    }
+
+    public void setApprovalNode(String approvalNode) {
+        this.approvalNode = approvalNode;
     }
 
     @Override

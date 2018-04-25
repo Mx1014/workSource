@@ -19,16 +19,47 @@ public class EnterpriseApprovalController extends ControllerBase{
     private EnterpriseApprovalService enterpriseApprovalService;
 
     /**
+     * <b>URL: /enterprise_approval/listApprovalFlowRecords</b>
+     * <p>OA 流程记录(流程查询)</p>
+     */
+    @RequestMapping("listApprovalFlowRecords")
+    @RestReturn(value = ListApprovalFlowRecordsResponse.class)
+    public RestResponse listApprovalFlowRecords(@Valid ListApprovalFlowRecordsCommand cmd){
+        ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listApprovalFlowRecords(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterprise_approval/listApprovalFlowMonitors</b>
+     * <p>OA 流程监控</p>
+     */
+    @RequestMapping("listApprovalFlowMonitors")
+    @RestReturn(value = ListApprovalFlowRecordsResponse.class)
+    public RestResponse listApprovalFlowMonitors(@Valid ListApprovalFlowRecordsCommand cmd){
+        ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listApprovalFlowMonitors(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /enterprise_approval/listEnterpriseApprovals</b>
-     * <p>OA审批列表</p>
+     * <p>OA 审批列表</p>
      */
     @RequestMapping("listEnterpriseApprovals")
     @RestReturn(value = ListEnterpriseApprovalsResponse.class)
-    public RestResponse addWorkReport(@Valid ListEnterpriseApprovalsCommand cmd){
+    public RestResponse listEnterpriseApprovals(@Valid ListEnterpriseApprovalsCommand cmd){
         ListEnterpriseApprovalsResponse res = enterpriseApprovalService.listEnterpriseApprovals(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+
+
 }

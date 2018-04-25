@@ -1,7 +1,6 @@
 package com.everhomes.general_approval;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -25,6 +24,7 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;
@@ -988,7 +988,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
-        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
+        List<EnterpriseApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -1025,7 +1025,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         if (details != null && details.size() > 0) {
             results = details.stream().map(r -> {
-                GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
+                EnterpriseApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -1036,9 +1036,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 
     @Override
-    public GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r) {
+    public EnterpriseApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r) {
         GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
-        GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
+        EnterpriseApprovalRecordDTO dto = new EnterpriseApprovalRecordDTO();
         dto.setId(r.getId());
         dto.setNamespaceId(r.getNamespaceId());
         dto.setModuleId(r.getModuleId());
@@ -1124,7 +1124,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private XSSFWorkbook createApprovalRecordsBook(
-            String mainTitle, String subTitle, List<String> titles, List<GeneralApprovalRecordDTO> data, Long taskId) {
+            String mainTitle, String subTitle, List<String> titles, List<EnterpriseApprovalRecordDTO> data, Long taskId) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("审批记录");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
@@ -1176,7 +1176,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
+    private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, EnterpriseApprovalRecordDTO data) {
 
         XSSFCellStyle wrapStyle = workbook.createCellStyle();
         wrapStyle.setWrapText(true);

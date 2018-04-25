@@ -33,7 +33,7 @@ import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.*;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
+import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
@@ -43,12 +43,9 @@ import com.everhomes.rest.techpark.punch.admin.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
-import com.google.gson.Gson;
 
-import org.apache.commons.collections.ArrayStack;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -63,7 +60,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.common.util.DoubleArray;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -116,7 +112,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -194,7 +189,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -5022,7 +5016,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
         if (null != dto.getApprovalRecords()) {
             StringBuilder sb = new StringBuilder();
-            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+            for (EnterpriseApprovalRecordDTO record : dto.getApprovalRecords()) {
                 sb.append(record.getApprovalNo());
             }
             row.createCell(++i).setCellValue(sb.toString());
@@ -5384,7 +5378,7 @@ public class PunchServiceImpl implements PunchService {
                 dto.setApprovalRecords(new ArrayList<>());
                 for (PunchExceptionRequest request : exceptionRequests) {
                     FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
-                    GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+                    EnterpriseApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
                     dto.getApprovalRecords().add(recordDTO);
                 }
             }

@@ -1,7 +1,6 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.enterprise_approval;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.enterprise_approval.EnterpriseApprovalRecordDTO;
 
 import java.util.List;
 
@@ -11,14 +10,14 @@ import java.util.List;
  * <li>records: 审批记录列表, 参考{@link EnterpriseApprovalRecordDTO}</li>
  * </ul>
  */
-public class ListGeneralApprovalRecordsResponse {
+public class ListApprovalFlowRecordsResponse {
 
     private Long nextPageAnchor;
 
     @ItemType(EnterpriseApprovalRecordDTO.class)
     private List<EnterpriseApprovalRecordDTO> records;
 
-    public ListGeneralApprovalRecordsResponse() {
+    public ListApprovalFlowRecordsResponse() {
     }
 
     public Long getNextPageAnchor() {
@@ -36,4 +35,6 @@ public class ListGeneralApprovalRecordsResponse {
     public void setRecords(List<EnterpriseApprovalRecordDTO> records) {
         this.records = records;
     }
+
+
 }
