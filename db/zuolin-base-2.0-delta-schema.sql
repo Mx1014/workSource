@@ -132,7 +132,9 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  int(11) NULL;
 CREATE TABLE `eh_service_module_entries` (
   `id` bigint(20) NOT NULL,
   `module_id` bigint(20) NOT NULL,
-  `entry_type` tinyint(4) NOT NULL COMMENT '参考列表ServiceModuleEntryConstans',
+  `terminal_type` tinyint(4) NOT NULL COMMENT '终端列表，1-mobile,2-pc',
+  `location_type` tinyint(4) NOT NULL COMMENT '位置，参考枚举ServiceModuleLocationType',
+  `scene_type` tinyint(4) NOT NULL COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
