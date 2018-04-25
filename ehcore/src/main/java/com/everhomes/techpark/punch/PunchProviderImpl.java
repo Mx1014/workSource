@@ -2974,7 +2974,7 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public List<PunchLog> listPunchLogs(Long ownerId, Long startDay, Long endDay) {
+	public List<PunchLog> listPunchLogs(Long ownerId, List<Long> userIds, Long startDay, Long endDay) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record> step = context.select().from(
@@ -2983,9 +2983,11 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition2 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.lessOrEqual(new Date(endDay));
 		Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId);
 		Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode());
+		Condition condition5 = Tables.EH_PUNCH_LOGS.USER_ID.in(userIds);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
 		condition = condition.and(condition4);
+		condition = condition.and(condition5);
 		step.where(condition);
 		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
 				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
