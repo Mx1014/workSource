@@ -1419,10 +1419,11 @@ public class ParkingServiceImpl implements ParkingService {
 		Tuple<Long, Boolean> enter = this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_GENERATE_ORDER_NO.getCode() + lot.getId()).enter(() -> {
 			ParkingLot parkingLot = checkParkingLot(lot.getOwnerType(), lot.getOwnerId(), lot.getId());
 			String orderCode = (lot.getOrderCode()+1)+"";
-			while (orderCode.length()<8){
+			int ordercodelength = configProvider.getIntValue("parking.ordercode.length", 8);
+			while (orderCode.length()<ordercodelength){
 				orderCode="0"+orderCode;
 			}
-			while (orderCode.length()>8){
+			while (orderCode.length()>ordercodelength){
 				orderCode=orderCode.substring(1,orderCode.length());
 			}
 			int ordertaglength = configProvider.getIntValue("parking.ordertag.length", 3);
