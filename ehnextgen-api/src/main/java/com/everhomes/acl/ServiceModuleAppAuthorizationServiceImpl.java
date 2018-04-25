@@ -180,8 +180,13 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         if(cmd.getConfigAppIds() != null){
             profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
         }
+        ServiceModuleAppProfile oldProfile = null;
+        if(cmd.getId() != null){
+            oldProfile = serviceModuleAppProfileProvider.getServiceModuleAppProfileById(cmd.getId());
+        }else if(cmd.getOriginId() != null){
+            oldProfile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());
+        }
 
-        ServiceModuleAppProfile oldProfile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());
 
         if(oldProfile == null){
             serviceModuleAppProfileProvider.createServiceModuleAppProfile(profile);
