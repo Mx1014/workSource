@@ -4277,7 +4277,7 @@ public class PunchServiceImpl implements PunchService {
 		            	workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
 //		            	workApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 		                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
-		                	isNormal=NormalFlag.YES.getCode();
+		                	isWorkDay=NormalFlag.YES.getCode();
 		                }
 		            }
 	            }
