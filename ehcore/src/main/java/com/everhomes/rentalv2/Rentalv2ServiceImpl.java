@@ -8449,25 +8449,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
         }
         QueryRentalStatisticsResponse response = new QueryRentalStatisticsResponse();
-       BigDecimal totalAmount =  rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getCommunityId(),
+       BigDecimal totalAmount =  rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),
                cmd.getStartDate(),cmd.getEndDate(),null,null);
         response.setTotalAmount(totalAmount);
-        Integer orderCount = rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getCommunityId(),
+        Integer orderCount = rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),
                 cmd.getStartDate(),cmd.getEndDate(),null,null);
         response.setOrderCount(orderCount);
 
         response.setClassifyStatistics(new ArrayList<>());
-        List<RentalResource> rentalSites = rentalv2Provider.findRentalSitesByCommunityId(cmd.getResourceType(),cmd.getCommunityId());
+        List<RentalResource> rentalSites = rentalv2Provider.findRentalSitesByCommunityId(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId());
         if (rentalSites == null || rentalSites.size()==0)
             return response;
         for (RentalResource rentalSite:rentalSites){
             RentalStatisticsDTO dto = new RentalStatisticsDTO();
             dto.setName(rentalSite.getResourceName());
-            dto.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),null,cmd.getStartDate(),
+            dto.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),null,null,cmd.getStartDate(),
                     cmd.getEndDate(),rentalSite.getId(),null));
-            dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),null,cmd.getStartDate(),
+            dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),null,null,cmd.getStartDate(),
                     cmd.getEndDate(),rentalSite.getId(),null));
-			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),null,cmd.getStartDate(),
+			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),null,null,cmd.getStartDate(),
 					cmd.getEndDate(),rentalSite.getId(),null));
             response.getClassifyStatistics().add(dto);
         }
@@ -8490,31 +8490,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (Enterprise enterprise:enterprises){
 			RentalStatisticsDTO dto = new RentalStatisticsDTO();
 			dto.setName(enterprise.getName());
-			dto.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
-					cmd.getEndDate(),null,enterprise.getId()));
-			dto.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
-					cmd.getEndDate(),null,enterprise.getId()));
-			dto.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),cmd.getCommunityId(),cmd.getStartDate(),
-					cmd.getEndDate(),null,enterprise.getId()));
-			dto.setAmount(dto.getAmount()==null?new BigDecimal(0):dto.getAmount());
-			dto.setUsedTime(dto.getUsedTime()==null?0L:dto.getUsedTime());
-			dto.setOrderCount(dto.getOrderCount()==null?0:dto.getOrderCount());
+			dto.setEnterpriseId(enterprise.getId());
 			response.getOrgStatistics().add(dto);
 		}
 
 		if (RentalStatisticsOrder.amount.equals(cmd.getOrderBy())) {
+			fillStatisticsAmount(response.getOrgStatistics(),cmd);
 			response.getOrgStatistics().sort((o1, o2) -> {
 				return o1.getAmount().compareTo(o2.getAmount()) * cmd.getOrder();
 			});
 		}
 
 		if (RentalStatisticsOrder.orderCount.equals(cmd.getOrderBy())) {
+			fillStatisticsOrderAmount(response.getOrgStatistics(),cmd);
 			response.getOrgStatistics().sort((o1, o2) -> {
 				return o1.getOrderCount().compareTo(o2.getOrderCount()) * cmd.getOrder();
 			});
 		}
 
 		if (RentalStatisticsOrder.usedTime.equals(cmd.getOrderBy())) {
+			fillStatisticsUsedTime(response.getOrgStatistics(),cmd);
 			response.getOrgStatistics().sort((o1, o2) -> {
 				return o1.getUsedTime().compareTo(o2.getUsedTime()) * cmd.getOrder();
 			});
@@ -8527,9 +8522,45 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (Integer i = cmd.getPageAnchor().intValue();i<cmd.getPageAnchor().intValue()+cmd.getPageSize();i++)
 			if (i<response.getOrgStatistics().size())
 				tmp.add(response.getOrgStatistics().get(i));
+
+		//剩余的两种 填充
+		fillStatisticsUsedTime(tmp,cmd);
+		fillStatisticsOrderAmount(tmp,cmd);
+		fillStatisticsAmount(tmp,cmd);
+
 		if (response.getOrgStatistics().size()>cmd.getPageAnchor()+cmd.getPageSize())
 			response.setNextPageAnchor(cmd.getPageAnchor()+tmp.size());
 		response.setOrgStatistics(tmp);
         return response;
     }
+
+    private void fillStatisticsAmount(List<RentalStatisticsDTO> dtos,QueryRentalStatisticsCommand cmd){
+		dtos.stream().forEach(r->{
+			if (r.getAmount()!=null)
+				return;
+			r.setAmount(rentalv2Provider.countRentalBillAmount(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,r.getEnterpriseId()));
+			r.setAmount(r.getAmount()==null?new BigDecimal(0):r.getAmount());
+		});
+	}
+
+	private void fillStatisticsOrderAmount(List<RentalStatisticsDTO> dtos,QueryRentalStatisticsCommand cmd){
+		dtos.stream().forEach(r->{
+			if (r.getOrderCount()!=null)
+				return;
+			r.setOrderCount(rentalv2Provider.countRentalBillNum(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,r.getEnterpriseId()));
+			r.setOrderCount(r.getOrderCount()==null?0:r.getOrderCount());
+		});
+	}
+
+	private void fillStatisticsUsedTime(List<RentalStatisticsDTO> dtos,QueryRentalStatisticsCommand cmd){
+		dtos.stream().forEach(r->{
+			if (r.getUsedTime()!=null)
+				return;
+			r.setUsedTime(rentalv2Provider.countRentalBillValidTime(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),cmd.getStartDate(),
+					cmd.getEndDate(),null,r.getEnterpriseId()));
+			r.setUsedTime(r.getUsedTime()==null?0L:r.getUsedTime());
+		});
+	}
 }

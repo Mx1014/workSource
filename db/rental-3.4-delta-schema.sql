@@ -14,6 +14,7 @@ CREATE TABLE `eh_rentalv2_order_statistics` (
   `user_enterprise_id` BIGINT(20) NULL DEFAULT NULL,
   `rental_type` TINYINT(4) NULL DEFAULT NULL,
   `resource_type` VARCHAR(64) NULL DEFAULT NULL,
+  `resource_type_id` BIGINT(20) NULL DEFAULT NULL,
   PRIMARY KEY (`id`));
 
   CREATE TABLE `eh_rentalv2_dayopen_time` (

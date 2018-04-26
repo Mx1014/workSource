@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  */
 public class RentalStatisticsDTO {
     private String name;
+    private Long enterpriseId;
     private BigDecimal amount;
     private Integer orderCount;
     private Long usedTime;
@@ -46,5 +47,13 @@ public class RentalStatisticsDTO {
 
     public void setUsedTime(Long usedTime) {
         this.usedTime = usedTime;
+    }
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
     }
 }

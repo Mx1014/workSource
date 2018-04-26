@@ -9,6 +9,7 @@ package com.everhomes.rest.rentalv2.admin;
 public class QueryRentalStatisticsCommand {
 
     private String resourceType;
+    private Long resourceTypeId;
     private Long communityId;
     private Long startDate;
     private Long endDate;
@@ -110,5 +111,13 @@ public class QueryRentalStatisticsCommand {
 
     public void setAppId(Long appId) {
         this.appId = appId;
+    }
+
+    public Long getResourceTypeId() {
+        return resourceTypeId;
+    }
+
+    public void setResourceTypeId(Long resourceTypeId) {
+        this.resourceTypeId = resourceTypeId;
     }
 }

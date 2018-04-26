@@ -984,13 +984,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public BigDecimal countRentalBillAmount(String resourceType,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+	public BigDecimal countRentalBillAmount(String resourceType,Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
 		BigDecimal count = new BigDecimal(0);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()).from(Tables.EH_RENTALV2_ORDERS);
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
 		if (null!=communityId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
 		if (null != startTime) {
@@ -1009,13 +1011,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer countRentalBillNum(String resourceType, Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+	public Integer countRentalBillNum(String resourceType, Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
 		Integer count = 0;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_RENTALV2_ORDERS);
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
 		if (null!=communityId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
 		if (null != startTime) {
@@ -1033,11 +1037,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Long countRentalBillValidTime(String resourceType, Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+	public Long countRentalBillValidTime(String resourceType, Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
 		Long count = 0l;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum()).from(Tables.EH_RENTALV2_ORDER_STATISTICS);
 		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE.eq(resourceType);
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE_ID.eq(resourceTypeId));
 		if (null!=communityId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.COMMUNITY_ID.eq(communityId));
 		if (null!=startTime)
@@ -1092,11 +1098,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalResource> findRentalSitesByCommunityId(String resouceType, Long communityId) {
+	public List<RentalResource> findRentalSitesByCommunityId(String resouceType,Long resourceTypeId, Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCES);
 		Condition condition = Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DELETED.getCode());
+		if (null!=resourceTypeId)
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE_ID.eq(resourceTypeId));
 		if(communityId  != null)
 			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
 		if (!StringUtils.isEmpty(resouceType))
