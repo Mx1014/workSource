@@ -11991,10 +11991,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member, Boolean isCreate, OrganizationMemberDetails find_detail) {
         OrganizationMemberDetails detail = new OrganizationMemberDetails();
-        java.util.Date nDate = new java.util.Date();
+/*        java.util.Date nDate = new java.util.Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
-        java.sql.Date now = java.sql.Date.valueOf(sDate);
+        java.sql.Date now = java.sql.Date.valueOf(sDate);*/
 
         if (isCreate && find_detail == null) {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
@@ -12002,7 +12002,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setContactName(member.getContactName());
             detail.setContactToken(member.getContactToken());
             detail.setContactDescription(member.getContactDescription());
-            detail.setEmployeeNo(member.getEmployeeNo());
+/*            detail.setEmployeeNo(member.getEmployeeNo());
             //  changed by ryan, there is a unique avatar for employee's archive
             //  detail.setAvatar(member.getAvatar());
             //  detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
@@ -12010,21 +12010,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
             detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
             detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
-            detail.setEmployeeType(member.getEmployeeType());
+            detail.setEmployeeType(member.getEmployeeType());*/
             detail.setTargetType(member.getTargetType());
             detail.setTargetId(member.getTargetId());
         } else {
             detail = find_detail;
             detail.setContactName(member.getContactName());
             detail.setGender(member.getGender());
-            detail.setEmployeeType(member.getEmployeeType());
+ /*           detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
             // changed by ryan, 20170720
             detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
             if (member.getEmployeeStatus() != null)
                 detail.setEmployeeStatus(member.getEmployeeStatus());
             if (member.getEmploymentTime() != null)
-                detail.setEmploymentTime(member.getEmploymentTime());
+                detail.setEmploymentTime(member.getEmploymentTime());*/
         }
         return detail;
     }
