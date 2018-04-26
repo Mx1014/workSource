@@ -6,13 +6,15 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 来自list接口中的profileId。如果没有的话不传，但是要传下面一个参数originId</li>
+ *     <li>id: 来自list接口中的profileId，无则不传</li>
  *     <li>originId: 应用originId</li>
+ *     <li>appNo: 编号</li>
+ *     <li>displayVersion: 版本</li>
  *     <li>description: 应用描述</li>
  *     <li>mobileFlag: 支持移动端（0：不支持，1：支持）</li>
- *     <li>mobileUri: 移动端图片</li>
+ *     <li>mobileUris: mobileUris</li>
  *     <li>pcFlag: 支持PC端（0：不支持，1：支持）</li>
- *     <li>pcUri: PC端图片</li>
+ *     <li>pcUris: pcUris</li>
  *     <li>appEntryInfos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
  *     <li>configAppIds: 若不支持独立配置，选择同时需要配置的应用，此处Id为originId</li>
@@ -23,6 +25,8 @@ import java.util.List;
 public class UpdateAppProfileCommand {
     private Long id;
     private Long originId;
+    private String appNo;
+    private String displayVersion;
     private String description;
     private Byte mobileFlag;
     private List<String> mobileUris;
@@ -133,5 +137,21 @@ public class UpdateAppProfileCommand {
 
     public void setDefaultFlag(Byte defaultFlag) {
         this.defaultFlag = defaultFlag;
+    }
+
+    public String getAppNo() {
+        return appNo;
+    }
+
+    public void setAppNo(String appNo) {
+        this.appNo = appNo;
+    }
+
+    public String getDisplayVersion() {
+        return displayVersion;
+    }
+
+    public void setDisplayVersion(String displayVersion) {
+        this.displayVersion = displayVersion;
     }
 }

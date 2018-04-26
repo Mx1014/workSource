@@ -40,6 +40,21 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /launchpadbase/listBanners</b>
+     * <p>获取banners</p>
+     */
+    @RequestMapping("listBanners")
+    @RestReturn(value=ListBannersResponse.class)
+    public RestResponse listBanners(ListBannersCommand cmd) {
+        ListBannersResponse res = new ListBannersResponse();
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /launchpadbase/listLaunchPadApps</b>
      * <p>广场根据组件获取应用</p>

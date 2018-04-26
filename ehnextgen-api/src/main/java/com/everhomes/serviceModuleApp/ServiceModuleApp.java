@@ -16,9 +16,9 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private String description;
     private Byte mobileFlag;
     private Byte pcFlag;
-    private String mobileUri;
-    private String pcUri;
-    private String appEntryInfo;
+    private String mobileUris;
+    private String pcUris;
+    private String appEntryInfos;
     private Byte independentConfigFlag;
     private String configAppIds;
     private Byte supportThirdFlag;
@@ -79,28 +79,32 @@ public class ServiceModuleApp extends EhServiceModuleApps {
         this.pcFlag = pcFlag;
     }
 
-    public String getMobileUri() {
-        return mobileUri;
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
-    public void setMobileUri(String mobileUri) {
-        this.mobileUri = mobileUri;
+    public String getMobileUris() {
+        return mobileUris;
     }
 
-    public String getPcUri() {
-        return pcUri;
+    public void setMobileUris(String mobileUris) {
+        this.mobileUris = mobileUris;
     }
 
-    public void setPcUri(String pcUri) {
-        this.pcUri = pcUri;
+    public String getPcUris() {
+        return pcUris;
     }
 
-    public String getAppEntryInfo() {
-        return appEntryInfo;
+    public void setPcUris(String pcUris) {
+        this.pcUris = pcUris;
     }
 
-    public void setAppEntryInfo(String appEntryInfo) {
-        this.appEntryInfo = appEntryInfo;
+    public String getAppEntryInfos() {
+        return appEntryInfos;
+    }
+
+    public void setAppEntryInfos(String appEntryInfos) {
+        this.appEntryInfos = appEntryInfos;
     }
 
     public Byte getIndependentConfigFlag() {

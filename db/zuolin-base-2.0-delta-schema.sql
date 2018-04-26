@@ -149,6 +149,7 @@ ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL
 -- 增加字段 service_support_flag 是否是服务商 1-是，0-否
 ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
 
+<<<<<<< HEAD
 -- 增加办公地点表
 -- add by leiyuan
 CREATE TABLE `eh_organization_workPlaces` (
@@ -172,3 +173,7 @@ CREATE TABLE `eh_communityAndBuilding_relationes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+=======
+-- 增加 应用icon信息  add by yanjun 20180426
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `icon_uri`  varchar(255) NULL;
+>>>>>>> 707eb9171d7156828cac95331b04d9b1fee1b6ef

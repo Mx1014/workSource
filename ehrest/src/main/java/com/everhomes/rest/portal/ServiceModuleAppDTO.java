@@ -1,5 +1,9 @@
 package com.everhomes.rest.portal;
 
+import com.everhomes.rest.acl.AppEntryInfoDTO;
+
+import java.util.List;
+
 /**
  * <ul>
  *     <li>id: 模块应用id</li>
@@ -16,12 +20,14 @@ package com.everhomes.rest.portal;
  *     <li>profileId: 应用描述id</li>
  *     <li>description: 应用描述</li>
  *     <li>displayVersion: displayVersion</li>
- *     <li>appCategory: 应用分类信息</li>
+ *     <li>appNo: 应用编号</li>
  *     <li>mobileFlag: 支持移动端</li>
  *     <li>pcFlag: 支持PC端</li>
- *     <li>mobileUri: 移动端uri</li>
- *     <li>pcUri: PC端uri</li>
- *     <li>appEntryInfo: 应用entry信息</li>
+ *     <li>mobileUris: mobileUris</li>
+ *     <li>mobileUrls: mobileUrls</li>
+ *     <li>pcUris: pcUris</li>
+ *     <li>pcUrls: pcUrls</li>
+ *     <li>appEntryInfos: 应用entry信息</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
  *     <li>configAppIds: 配置应用id</li>
  *     <li>supportThirdFlag: 支持第三方对接</li>
@@ -44,14 +50,16 @@ public class ServiceModuleAppDTO {
     private Long profileId;
     private String description;
     private String displayVersion;
-    private String appCategory;
+    private String appNo;
     private Byte mobileFlag;
     private Byte pcFlag;
-    private String mobileUri;
-    private String pcUri;
-    private String appEntryInfo;
+    private List<String> mobileUris;
+    private List<String> mobileUrls;
+    private List<String> pcUris;
+    private List<String> pcUrls;
+    private List<AppEntryInfoDTO> appEntryInfos;
     private Byte independentConfigFlag;
-    private String configAppIds;
+    private List<Long> configAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
 
@@ -160,12 +168,12 @@ public class ServiceModuleAppDTO {
         this.description = description;
     }
 
-    public String getAppCategory() {
-        return appCategory;
+    public String getAppNo() {
+        return appNo;
     }
 
-    public void setAppCategory(String appCategory) {
-        this.appCategory = appCategory;
+    public void setAppNo(String appNo) {
+        this.appNo = appNo;
     }
 
     public Byte getMobileFlag() {
@@ -184,28 +192,44 @@ public class ServiceModuleAppDTO {
         this.pcFlag = pcFlag;
     }
 
-    public String getMobileUri() {
-        return mobileUri;
+    public List<String> getMobileUris() {
+        return mobileUris;
     }
 
-    public void setMobileUri(String mobileUri) {
-        this.mobileUri = mobileUri;
+    public void setMobileUris(List<String> mobileUris) {
+        this.mobileUris = mobileUris;
     }
 
-    public String getPcUri() {
-        return pcUri;
+    public List<String> getMobileUrls() {
+        return mobileUrls;
     }
 
-    public void setPcUri(String pcUri) {
-        this.pcUri = pcUri;
+    public void setMobileUrls(List<String> mobileUrls) {
+        this.mobileUrls = mobileUrls;
     }
 
-    public String getAppEntryInfo() {
-        return appEntryInfo;
+    public List<String> getPcUris() {
+        return pcUris;
     }
 
-    public void setAppEntryInfo(String appEntryInfo) {
-        this.appEntryInfo = appEntryInfo;
+    public void setPcUris(List<String> pcUris) {
+        this.pcUris = pcUris;
+    }
+
+    public List<String> getPcUrls() {
+        return pcUrls;
+    }
+
+    public void setPcUrls(List<String> pcUrls) {
+        this.pcUrls = pcUrls;
+    }
+
+    public List<AppEntryInfoDTO> getAppEntryInfos() {
+        return appEntryInfos;
+    }
+
+    public void setAppEntryInfos(List<AppEntryInfoDTO> appEntryInfos) {
+        this.appEntryInfos = appEntryInfos;
     }
 
     public Byte getIndependentConfigFlag() {
@@ -216,11 +240,11 @@ public class ServiceModuleAppDTO {
         this.independentConfigFlag = independentConfigFlag;
     }
 
-    public String getConfigAppIds() {
+    public List<Long> getConfigAppIds() {
         return configAppIds;
     }
 
-    public void setConfigAppIds(String configAppIds) {
+    public void setConfigAppIds(List<Long> configAppIds) {
         this.configAppIds = configAppIds;
     }
 
