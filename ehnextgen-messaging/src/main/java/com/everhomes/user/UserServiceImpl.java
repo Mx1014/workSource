@@ -6265,8 +6265,8 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public User findUserInfoByUserId(UserCouponsCommand cmd){
-		User user = new User();
+	public UserDTO findUserInfoByUserId(UserCouponsCommand cmd){
+		UserDTO user = new UserDTO();
 		if(cmd.getUserId() != null){
 			user = userProvider.findUserInfoByUserId(cmd.getUserId());
 		}

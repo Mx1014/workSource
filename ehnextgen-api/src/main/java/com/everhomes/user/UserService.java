@@ -338,5 +338,5 @@ public interface UserService {
      * @param cmd
      * @return
      */
-    User findUserInfoByUserId(UserCouponsCommand cmd);
+    UserDTO findUserInfoByUserId(UserCouponsCommand cmd);
 }

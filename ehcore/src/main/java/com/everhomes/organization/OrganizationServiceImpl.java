@@ -1326,6 +1326,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             }
 
+
+
             OrganizationDetail organizationDetail = new OrganizationDetail();
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setAddress(cmd.getAddress());
@@ -12816,11 +12818,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         if(organizationAndDetailDTO.getAdminTargetId() != null){
             //创建User对象
-            UserDTO user = new UserDTO();
-            user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
+            UserDTO user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
             if(user != null){
                 organizationAndDetailDTO.setUser(user);
             }
+
 
 
 
