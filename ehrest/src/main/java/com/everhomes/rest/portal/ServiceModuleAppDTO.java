@@ -32,6 +32,8 @@ import java.util.List;
  *     <li>configAppIds: 配置应用id</li>
  *     <li>supportThirdFlag: 支持第三方对接</li>
  *     <li>defaultFlag: 默认flag</li>
+ *     <li>iconUri: iconUri</li>
+ *     <li>iconUrl: iconUrl</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -62,6 +64,8 @@ public class ServiceModuleAppDTO {
     private List<Long> configAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
+    private String iconUri;
+    private String iconUrl;
 
 
     public Long getId() {
@@ -270,5 +274,21 @@ public class ServiceModuleAppDTO {
 
     public void setDisplayVersion(String displayVersion) {
         this.displayVersion = displayVersion;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 }

@@ -360,6 +360,11 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
+		if(moduleApp.getIconUri() != null){
+			String url = contentServerService.parserUri(moduleApp.getIconUri(), ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
+			dto.setIconUrl(url);
+		}
+
 		if(moduleApp.getPcUris() != null){
 			List<String> pcUris = GsonUtil.fromJson(moduleApp.getPcUris(), new TypeToken<List<String>>(){}.getType());
 			//List<String> pcUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getPcUris(), List.class);
