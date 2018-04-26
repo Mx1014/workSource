@@ -34,6 +34,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Member;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -1911,8 +1912,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
-    public String processZLLink2PayslipDetail(Long payslipDetailId){
-    	return "zl://salary/payslip-detail?payslipDetailId="+payslipDetailId;
+    public String processZLLink2PayslipDetail(Long payslipDetailId , Long updateTime){
+    	return "zl://salary/payslip-detail?payslipDetailId={"+payslipDetailId+"}&updateTime={"+updateTime+"}";
     }
 	@Override
 	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
@@ -1943,34 +1944,72 @@ public class SalaryServiceImpl implements SalaryService {
 	public ImportPayslipResponse importPayslip(MultipartFile[] files,ImportPayslipCommand cmd) {
 		ArrayList resultList = punchService.processImportExcel2ArrayList(files);
 		List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList,cmd.getOwnerId());
-		return new ImportPayslipResponse(cmd.getSalaryPeriod(),details);
+		return new ImportPayslipResponse(cmd.getSalaryPeriod() , details);
 	}
 
 	private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
 		// TODO Auto-generated method stub
-		List<PayslipDetailDTO> payslipDetailDTOs=new ArrayList<PayslipDetailDTO>();
-
+		List<PayslipDetailDTO> payslipDetailDTOs = new ArrayList<PayslipDetailDTO>();
+		RowResult title = (RowResult) resultList.get(0);
+		String nameCellNumber = "";
+		String contactCellNumber = "";
+		Map<String, String> cellMap = new HashMap<>();
+		for(Entry<String, String> entry : title.getCells().entrySet()){
+			String key = entry.getKey();
+			String value = entry.getValue();
+			if(null != value){
+				value = value.trim();
+				if("姓名".equals(value)){
+					nameCellNumber=key;
+				}else if("手机号码".equals(value)){
+					nameCellNumber=key;
+				}else{
+					cellMap.put(key, value);
+				} 
+			}
+			
+		}
+		
         for (int rowIndex = 1; rowIndex < resultList.size(); rowIndex++) {
             RowResult r = (RowResult) resultList.get(rowIndex);
-            PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-            // 名字去空格
-             
-            dto.setContactName(r.getCells().get("A").replace(" ", ""));
-            dto.setDaySchedulings(new ArrayList<>());
-            for (int i = 0; i < r.getCells().size(); i++) {
-                String val = r.getCells().get(GetExcelLetter(i + 1));
-                if (!StringUtils.isEmpty(val)) {
-                    val = val.replace(" ", "");
-                }
-                dto.getDaySchedulings().add(val);
-            } 
+            PayslipDetailDTO dto = new PayslipDetailDTO();
+            // 名字去空格 
+            dto.setName(r.getCells().get(nameCellNumber));
+            dto.setUserContact(r.getCells().get(contactCellNumber));
+        	OrganizationMemberDetails memebrDetail = null;
+            // 手机号为空,手机号找不到用户
+            if(null==dto.getUserContact()){
+            	dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
+            }else{
+            	memebrDetail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, dto.getUserContact());
+            	if(null == memebrDetail ){
+            		dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
+            	}else{
+            		dto.setImportResult(PayslipImportResult.SUCESS.getCode());
+            		dto.setUserId(memebrDetail.getTargetId());
+            		dto.setUserDetailId(memebrDetail.getId());
+            	}
+            }
+            dto.setPayslipContent(processPayslipContent(r,cellMap));
         }
 		return payslipDetailDTOs;
 	}
 
+	private Map<String, String> processPayslipContent(RowResult r, Map<String, String> cellMap) {
+		Map<String, String> result = new HashMap<>();
+        for (Entry<String, String> entry : cellMap.entrySet()) {
+        	//key 是列号,cellMap取这列的结果是表头,r取这一列的结果是这一行的值
+        	result.put(entry.getValue(),r.getCells().get(entry.getKey()));
+        } 
+		return result;
+	}
+
 	@Override
 	public void sendPayslip(SendPayslipCommand cmd) {
-	
+		//存数据 发通知
+		for(PayslipDetailDTO dto : cmd.getDetails()){
+			
+		}
 
 	}
 
