@@ -24,3 +24,26 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 -- for 住总ELive物业查费对接 by 杨崇鑫  end
+
+	
+
+-- 新增一个企业管理员测试账号
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+	VALUES (825069,'EhOrganizations',1040129,1,10,867321,0,1,UTC_TIMESTAMP(),999955,'EhUsers','admin');
+
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`) 
+VALUES (867321,UUID(),'18220994181','四叶草',NULL,1,45,'1','2','zh_CN','06f37ba88f5a260c110f726c1319e67b','b6addf3ee9faff2b889507edfc4d1ad0b9f4c7c4c3135c29bd4621832a394eea',
+UTC_TIMESTAMP(),999955);
+
+INSERT INTO `eh_organization_member_details` (`id`, `organization_id`, `target_type`, `target_id`, `contact_name`, `contact_type`, `contact_token`, `check_in_time`, `namespace_id`) 
+	VALUES (829733,1040129,'USER',867321,'四叶草',0,'13810281614',UTC_TIMESTAMP(),999955);
+
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`) 
+	VALUES (8438642,867321,0,'13810281614',NULL,3,UTC_TIMESTAMP(),999955);	
+
+INSERT INTO `eh_organization_members` (id, organization_id, group_path, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`,`group_type`,`visible_flag`,detail_id) 
+	VALUES (82180316,1040129,'/1040129','USER',867321,'manager','四叶草',0,'13810281614',3,999955,'ENTERPRISE',0,829733);
+	
+	
+	
+	
