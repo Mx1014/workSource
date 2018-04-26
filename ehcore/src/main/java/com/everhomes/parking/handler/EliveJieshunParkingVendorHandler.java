@@ -828,6 +828,6 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	}
 	@Override
 	public void refreshToken() {
-		this.requestToken();
+		this.getToken(true);
 	}
 }
