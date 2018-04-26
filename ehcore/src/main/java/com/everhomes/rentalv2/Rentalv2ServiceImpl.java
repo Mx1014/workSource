@@ -39,10 +39,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayProvider;
 import com.everhomes.order.PayService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -66,6 +63,9 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
@@ -221,7 +221,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
 	@Autowired
-	private EnterpriseService enterpriseService;
+	private OrganizationService organizationService;
 	
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -7867,7 +7867,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		long currTime = System.currentTimeMillis();
 		//订单开始 置为使用中的状态,防止定时器没有更新到订单状态
-		if (bill.getStatus() == SiteBillStatus.SUCCESS.getCode() &&
+		if (bill.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode()) &&bill.getStatus() == SiteBillStatus.SUCCESS.getCode() &&
 				currTime >= bill.getStartTime().getTime() && currTime <= bill.getEndTime().getTime()) {
 			bill.setStatus(SiteBillStatus.IN_USING.getCode());
 			rentalv2Provider.updateRentalBill(bill);
@@ -8485,13 +8485,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		int pageSize = Integer.MAX_VALUE-1;
 		ListingLocator locator = new ListingLocator();
 		response.setOrgStatistics(new ArrayList<>());
-		List<Enterprise> enterprises = enterpriseService.listEnterpriseByCommunityId(locator,null,cmd.getCommunityId(),null,pageSize);
+		ListEnterprisesCommand cmd2 = new ListEnterprisesCommand();
+		cmd2.setCommunityId(cmd.getCommunityId());
+		cmd2.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd2.setPageSize(pageSize);
+		ListEnterprisesCommandResponse resp = organizationService.listNewEnterprises(cmd2);
+		List<OrganizationDetailDTO> enterprises = resp.getDtos();
 		if (enterprises == null || enterprises.size()==0)
 			return response;
-		for (Enterprise enterprise:enterprises){
+		for (OrganizationDetailDTO enterprise:enterprises){
 			RentalStatisticsDTO dto = new RentalStatisticsDTO();
 			dto.setName(enterprise.getName());
-			dto.setEnterpriseId(enterprise.getId());
+			dto.setEnterpriseId(enterprise.getOrganizationId());
 			response.getOrgStatistics().add(dto);
 		}
 		fillStatisticsOrderAmount(response.getOrgStatistics(),cmd);
