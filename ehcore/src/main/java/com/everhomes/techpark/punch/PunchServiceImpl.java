@@ -4286,6 +4286,7 @@ public class PunchServiceImpl implements PunchService {
                 if (request != null) {
                     isWorkDay = NormalFlag.YES.getCode();
                 }
+                
                 if (NormalFlag.fromCode(isWorkDay) == NormalFlag.YES) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {
