@@ -63,7 +63,7 @@ public class EnterpriseApprovalController extends ControllerBase{
 
     /**
      * <b>URL: /enterpriseApproval/listAvailableApprovalGroups</b>
-     * <p>OA 审批分类列表</p>
+     * <p>OA 审批分类列表(组列表)</p>
      */
     @RequestMapping("listAvailableApprovalGroups")
     @RestReturn(value = EnterpriseApprovalGroupDTO.class, collection = true)
@@ -107,11 +107,11 @@ public class EnterpriseApprovalController extends ControllerBase{
 
     /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovalTypes</b>
-     * <p>OA 获取审批类型列表</p>
+     * <p>OA 获取审批类型列表啊(用来做filter条件)</p>
      * @return
      */
     @RequestMapping("listEnterpriseApprovalTypes")
-    @RestReturn(value=EnterpriseApprovalDTO.class)
+    @RestReturn(value=ListEnterpriseApprovalsResponse.class)
     public RestResponse listEnterpriseApprovalTypes(@Valid ListEnterpriseApprovalsCommand cmd) {
         ListEnterpriseApprovalsResponse res = enterpriseApprovalService.listEnterpriseApprovalTypes(cmd);
         RestResponse response = new RestResponse(res);
