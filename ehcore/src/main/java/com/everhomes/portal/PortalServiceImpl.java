@@ -63,6 +63,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import com.google.gson.reflect.TypeToken;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -360,26 +361,30 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 		if(moduleApp.getPcUris() != null){
-			List<String> pcUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getPcUris(), List.class);
+			List<String> pcUris = GsonUtil.fromJson(moduleApp.getPcUris(), new TypeToken<List<String>>(){}.getType());
+			//List<String> pcUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getPcUris(), List.class);
 			List<String> pcUrls = contentServerService.parserUri(pcUris, ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
 			dto.setPcUris(pcUris);
 			dto.setPcUrls(pcUrls);
 		}
 
 		if(moduleApp.getMobileUris() != null){
-			List<String> mobileUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getMobileUris(), List.class);
+			List<String> mobileUris = GsonUtil.fromJson(moduleApp.getMobileUris(), new TypeToken<List<String>>(){}.getType());
+			//List<String> mobileUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getMobileUris(), List.class);
 			List<String> mobileUrls = contentServerService.parserUri(mobileUris, ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
-			dto.setPcUris(mobileUris);
-			dto.setPcUrls(mobileUrls);
+			dto.setMobileUris(mobileUris);
+			dto.setMobileUrls(mobileUrls);
 		}
 
 		if(moduleApp.getConfigAppIds() != null){
-			List<Long> configAppIds = (ArrayList<Long>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			List<Long> configAppIds = GsonUtil.fromJson(moduleApp.getConfigAppIds(), new TypeToken<List<Long>>(){}.getType());
+			//List<Long> configAppIds = (ArrayList<Long>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
 			dto.setConfigAppIds(configAppIds);
 		}
 
 		if(moduleApp.getAppEntryInfos() != null){
-			List<AppEntryInfoDTO> entryInfos = (ArrayList<AppEntryInfoDTO>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			//List<AppEntryInfoDTO> entryInfos = (ArrayList<AppEntryInfoDTO>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			List<AppEntryInfoDTO> entryInfos = GsonUtil.fromJson(moduleApp.getAppEntryInfos(), new TypeToken<List<AppEntryInfoDTO>>(){}.getType());
 			dto.setAppEntryInfos(entryInfos);
 		}
 

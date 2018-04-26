@@ -12,7 +12,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private Long profileId;
     private Long menuId;
     private String displayVersion;
-    private String appCategory;
+    private String appNo;
     private String description;
     private Byte mobileFlag;
     private Byte pcFlag;
@@ -47,12 +47,12 @@ public class ServiceModuleApp extends EhServiceModuleApps {
         this.menuId = menuId;
     }
 
-    public String getAppCategory() {
-        return appCategory;
+    public String getAppNo() {
+        return appNo;
     }
 
-    public void setAppCategory(String appCategory) {
-        this.appCategory = appCategory;
+    public void setAppNo(String appNo) {
+        this.appNo = appNo;
     }
 
     public String getDescription() {
