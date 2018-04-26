@@ -8494,7 +8494,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setEnterpriseId(enterprise.getId());
 			response.getOrgStatistics().add(dto);
 		}
+		fillStatisticsOrderAmount(response.getOrgStatistics(),cmd);
+		//筛除没有订单的公司
+		response.setOrgStatistics(response.getOrgStatistics().stream().filter(r->r.getOrderCount()>0).collect(Collectors.toList()));
 
+		if (StringUtils.isEmpty(cmd.getOrderBy()))
+			cmd.setOrderBy(RentalStatisticsOrder.orderCount);
+		if (cmd.getOrder() == null)
+			cmd.setOrder(-1);
 		if (RentalStatisticsOrder.amount.equals(cmd.getOrderBy())) {
 			fillStatisticsAmount(response.getOrgStatistics(),cmd);
 			response.getOrgStatistics().sort((o1, o2) -> {
@@ -8503,7 +8510,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		if (RentalStatisticsOrder.orderCount.equals(cmd.getOrderBy())) {
-			fillStatisticsOrderAmount(response.getOrgStatistics(),cmd);
 			response.getOrgStatistics().sort((o1, o2) -> {
 				return o1.getOrderCount().compareTo(o2.getOrderCount()) * cmd.getOrder();
 			});
