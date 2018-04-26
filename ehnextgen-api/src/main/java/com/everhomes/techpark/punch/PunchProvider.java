@@ -354,4 +354,6 @@ public interface PunchProvider {
 	void updatePunchLog(PunchLog onDutyLog);
 
 	List<PunchLog> listPunchLogs(Long ownerId, List<Long> userIds, Long startDay, Long endDay);
+
+	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Byte status);
 }

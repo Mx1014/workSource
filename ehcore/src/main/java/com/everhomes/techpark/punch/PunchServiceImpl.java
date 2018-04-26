@@ -4277,10 +4277,15 @@ public class PunchServiceImpl implements PunchService {
 		            	workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
 //		            	workApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 		                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
-		                	isWorkDay=NormalFlag.YES.getCode();
-		                }
+                            isWorkDay = NormalFlag.YES.getCode();
+                        }
 		            }
 	            }
+                //异常申请-如果有通过的异常申请,就算上班了
+                PunchExceptionRequest request = punchProvider.findPunchExceptionRequest(pdl.getUserId(), pdl.getEnterpriseId(), pdl.getPunchDate(), com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode());
+                if (request != null) {
+                    isWorkDay = NormalFlag.YES.getCode();
+                }
                 if (NormalFlag.fromCode(isWorkDay).equals(NormalFlag.YES)) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {

@@ -2925,8 +2925,12 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
-		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
-		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		if (null != punchIntervalNo) {
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
+		}
+		if (null != punchType) {
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		}
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
 
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
@@ -2942,6 +2946,29 @@ long id = sequenceProvider.getNextSequence(key);
 		return result.get(0);
 	}
 
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
 	@Override
 	public PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
