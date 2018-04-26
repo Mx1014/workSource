@@ -63,7 +63,7 @@ public class EnterpriseApprovalController extends ControllerBase{
 
     /**
      * <b>URL: /enterpriseApproval/listAvailableApprovalGroups</b>
-     * <p>OA 流程监控</p>
+     * <p>OA 审批分类列表</p>
      */
     @RequestMapping("listAvailableApprovalGroups")
     @RestReturn(value = EnterpriseApprovalGroupDTO.class, collection = true)
