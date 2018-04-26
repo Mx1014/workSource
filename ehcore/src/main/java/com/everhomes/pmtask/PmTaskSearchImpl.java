@@ -266,7 +266,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             cmd1.setOrganizationId(cmd.getCurrentPMId());
             List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
             ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
-            fb = FilterBuilders.termFilter("ownerId", ownerIds.toArray());
+            fb = FilterBuilders.inFilter("ownerId",ownerIds.toArray());
         } else{
             fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
         }
