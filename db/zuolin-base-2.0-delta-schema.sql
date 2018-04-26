@@ -146,3 +146,6 @@ alter table eh_organization_details add member_range varchar(25) default null co
 ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
 -- 增加字段 service_support_flag 是否是服务商 1-是，0-否
 ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+
+-- 增加 应用icon信息  add by yanjun 20180426
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `icon_uri`  varchar(255) NULL;
