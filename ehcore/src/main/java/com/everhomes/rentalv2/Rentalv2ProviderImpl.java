@@ -1658,10 +1658,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_DAYOPEN_TIME);
 		Condition condition = Tables.EH_RENTALV2_DAYOPEN_TIME.RESOURCE_TYPE.eq(resourceType);
-		condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType));
-		condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(ownerId));
+		condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(ownerId));
 		if (null != rentalType)
-			condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.RENTAL_TYPE.eq(rentalType));
+			condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.RENTAL_TYPE.eq(rentalType));
 		step.where(condition);
 		List<RentalDayopenTime> result = step.fetch().map(r->{
 			return ConvertHelper.convert(r,RentalDayopenTime.class);
