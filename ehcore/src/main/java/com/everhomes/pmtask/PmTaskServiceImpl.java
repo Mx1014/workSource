@@ -175,8 +175,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+//		查询用户全部项目权限
+		ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+		cmd1.setUserId(UserContext.currentUserId());
+		cmd1.setAppId(cmd.getAppId());
+		cmd1.setModuleId(20100L);
+		List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+			if(-1L == cmd.getCurrentProjectId()){
+				projects.forEach(r -> {
+					userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,r.getProjectId());//任务列表权限
+				});
+			} else {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+			}
 		}
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
