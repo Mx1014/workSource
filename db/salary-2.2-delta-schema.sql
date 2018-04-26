@@ -3,10 +3,10 @@
 
 CREATE TABLE `eh_salary_payslips` (
   `id` BIGINT NOT NULL COMMENT '主键',
+  `namespace_id` INT ,
   `owner_type` VARCHAR(32)  COMMENT 'organization',
   `owner_id` BIGINT  COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT  COMMENT '属于哪一个总公司的',
-  `namespace_id` INT ,
   `salary_period` VARCHAR(12) COMMENT 'example:201705',
   `name` VARCHAR(1024) NOT NULL COMMENT '工资表名称',
   `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
@@ -21,6 +21,7 @@ CREATE TABLE `eh_salary_payslips` (
 CREATE TABLE `eh_salary_payslip_details` (
   `id` BIGINT NOT NULL COMMENT '主键',
   `payslip_id` BIGINT NOT NULL COMMENT '父键;工资条id',
+  `namespace_id` INT ,
   `salary_period` VARCHAR(12) COMMENT 'example:201705',
   `owner_type` VARCHAR(32)  COMMENT 'organization',
   `owner_id` BIGINT  COMMENT '属于哪一个分公司的',
