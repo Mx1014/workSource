@@ -107,7 +107,7 @@ public class EnterpriseApprovalController extends ControllerBase{
 
     /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovalTypes</b>
-     * <p>OA 获取审批类型列表啊(用来做filter条件)</p>
+     * <p>OA 获取审批类型列表(用来做filter条件)</p>
      * @return
      */
     @RequestMapping("listEnterpriseApprovalTypes")
