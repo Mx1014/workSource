@@ -3295,7 +3295,9 @@ public class CustomerServiceImpl implements CustomerService {
             targets.forEach((p) -> {
                 //按用户分配的模块权限
                 if (EntityType.USER == EntityType.fromCode(p.getTargetType())) {
-                    relatedMembers.add(ConvertHelper.convert(organizationProvider.listOrganizationMembersByUId(p.getTargetId()), OrganizationMemberDTO.class));
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(p.getTargetId());
+                    if (members != null && members.size() > 0)
+                        relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
