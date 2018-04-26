@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchCountList：考勤统计信息列表，参考{@link com.everhomes.rest.techpark.punch.PunchCountDTO}</li>
  * <li>nextPageAnchor: 下页anchor</li>
  * <li>extColumns: String list 扩展列的列名集合</li>
+ * <li>dateList: String list 日期的集合</li>
  * </ul>
  */
 
@@ -24,7 +25,9 @@ public class ListPunchCountCommandResponse{
 
     @ItemType(String.class)
     private List<String> extColumns;
- 
+
+    private List<String> dateList;
+    
     
 	public List<PunchCountDTO> getPunchCountList() {
 		return punchCountList;
@@ -59,5 +62,15 @@ public class ListPunchCountCommandResponse{
 
 	public void setExtColumns(List<String> extColumns) {
 		this.extColumns = extColumns;
+	}
+
+
+	public List<String> getDateList() {
+		return dateList;
+	}
+
+
+	public void setDateList(List<String> dateList) {
+		this.dateList = dateList;
 	}
  }

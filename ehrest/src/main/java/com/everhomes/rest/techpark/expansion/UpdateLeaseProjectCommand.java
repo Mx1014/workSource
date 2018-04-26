@@ -21,6 +21,7 @@ public class UpdateLeaseProjectCommand {
     private Double latitude;
     private String contactName;
     private String contactPhone;
+    private String contactUid;
     private String description;
     private String trafficDescription;
     private String posterUri;
@@ -353,5 +354,13 @@ public class UpdateLeaseProjectCommand {
 
     public void setEnteredEnterprises(String enteredEnterprises) {
         this.enteredEnterprises = enteredEnterprises;
+    }
+
+    public String getContactUid() {
+        return contactUid;
+    }
+
+    public void setContactUid(String contactUid) {
+        this.contactUid = contactUid;
     }
 }

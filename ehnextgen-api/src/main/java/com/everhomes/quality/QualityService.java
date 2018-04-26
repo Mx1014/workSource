@@ -1,10 +1,15 @@
 package com.everhomes.quality;
 
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.quality.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Set;
 
 public interface QualityService {
 
@@ -86,4 +91,12 @@ public interface QualityService {
     QualityOfflineTaskReportResponse offlineTaskReport(OfflineTaskReportCommand cmd);
 
     void startCrontabTask();
+
+    void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd);
+
+	List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd);
+
+	void setPmNotifyParams(SetPmNotifyParamsCommand cmd);
+
+    Set<Long> getTaskGroupUsers(Long ownerId);
 }

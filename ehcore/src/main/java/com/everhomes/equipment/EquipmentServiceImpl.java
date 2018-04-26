@@ -5031,7 +5031,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 								List<ReceiverName> dtoReceivers = new ArrayList<>();
 								receiver.getReceiverIds().forEach(uId -> {
 									List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(uId);
-									if (members != null) {
+									if (members != null && members.size() > 0) {
 										ReceiverName receiverName = new ReceiverName();
 										receiverName.setId(members.get(0).getId());
 										receiverName.setName(members.get(0).getContactName());
@@ -5062,7 +5062,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		String ownerType = null;
+		if (EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))) {
+			ownerType = EntityType.QUALITY_TASK.getCode();
+		} else {
+			ownerType = EntityType.EQUIPMENT_TASK.getCode();
+		}
+		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), ownerType, scopeType, scopeId);
 		if (configuration != null) {
 			configuration.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
 			pmNotifyProvider.updatePmNotifyConfigurations(configuration);
@@ -5077,7 +5083,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		String ownerType = null;
+		if (EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))) {
+			ownerType = EntityType.QUALITY_TASK.getCode();
+		} else {
+			ownerType = EntityType.EQUIPMENT_TASK.getCode();
+		}
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId);
 		if (configurations != null && configurations.size() > 0) {
 			List<PmNotifyParamDTO> params = configurations.stream()
 					.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
@@ -5088,7 +5100,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
-				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId);
 				if (namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
 					List<PmNotifyParamDTO> params = namespaceConfigurations.stream()
 							.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
@@ -5106,7 +5118,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (cmd.getParams() != null && cmd.getParams().size() > 0) {
 			for (PmNotifyParams params : cmd.getParams()) {
 				PmNotifyConfigurations configuration = ConvertHelper.convert(params, PmNotifyConfigurations.class);
-				configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				if(EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))){
+					configuration.setOwnerType(EntityType.QUALITY_TASK.getCode());
+				}else {
+					configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				}
 				if (params.getCommunityId() != null && params.getCommunityId() != 0L) {
 					configuration.setScopeId(params.getCommunityId());
 					configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
@@ -5517,27 +5533,29 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
 
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
-				if (position != null) {
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				if (r.getPositionId() != null && r.getPositionId() != 0) {
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+					if (position != null) {
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+						} else {
+							dto.setGroupName(position.getName());
+						}
 					} else {
-						dto.setGroupName(position.getName());
-					}
-				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
-					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					String positionName = null;
-					if(organization!=null){
-						positionName = organization.getName();
-					}
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + positionName);
-					} else {
-						dto.setGroupName(positionName);
+						Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+						String positionName = null;
+						if (organization != null) {
+							positionName = organization.getName();
+						}
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + positionName);
+						} else {
+							dto.setGroupName(positionName);
+						}
 					}
 				}
 				return dto;
@@ -6463,7 +6481,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private void setNewEquipmentRepairLogsBookRow(Sheet sheet, EquipmentInspectionTasksLogs dto) {
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getMaintanceType());
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(dto.getEquipmentId());

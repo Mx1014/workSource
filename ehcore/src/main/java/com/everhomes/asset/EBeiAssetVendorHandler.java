@@ -552,6 +552,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 "Insufficient privilege");
     }
 
+    @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");

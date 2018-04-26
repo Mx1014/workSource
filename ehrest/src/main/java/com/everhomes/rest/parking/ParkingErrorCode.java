@@ -43,6 +43,7 @@ public interface ParkingErrorCode {
     int ERROR_REPEAT_LOCK_ID = 10125; //  重复车锁ID
     int ERROR_UNCONN_LOCK_ID = 10126; //  错误的车锁，没有上线，或者id就是错误的
     int ERROR_GET_TOKEN = 11000; //  获取token失败
+    int ERROR_GET_RESULT = 11010; //  返回参数失败
     int ERROR_INVITE_FAILD = 12000; //  发起访邀失败
 
     // ------------------ 车辆放行 ----------------------
