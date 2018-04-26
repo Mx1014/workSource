@@ -2061,6 +2061,7 @@ public class NewsServiceImpl implements NewsService {
 		renderUrl.append("&title=" + encodeTitile);
 		renderUrl.append("&widget=" + widget);
 		renderUrl.append("&timeWidgetStyle=" + timeWidgetStyle);
+		renderUrl.append("&ns=" + namespaceId);
 		renderUrl.append("#/newsList#sign_suffix");
 
 		return renderUrl.toString();
