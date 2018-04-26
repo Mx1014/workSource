@@ -3,9 +3,15 @@ package com.everhomes.enterpriseApproval;
 import com.everhomes.rest.enterpriseApproval.*;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class EnterpriseServiceImpl implements EnterpriseApprovalService{
 
+    @Override
+    public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
+        return null;
+    }
 
     @Override
     public ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd) {
@@ -13,8 +19,13 @@ public class EnterpriseServiceImpl implements EnterpriseApprovalService{
     }
 
     @Override
-    public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
+    public List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups() {
         return null;
+    }
+
+    @Override
+    public void exportApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
+
     }
 
     @Override
@@ -24,6 +35,11 @@ public class EnterpriseServiceImpl implements EnterpriseApprovalService{
 
     @Override
     public EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListEnterpriseApprovalsResponse listEnterpriseApprovalTypes(ListEnterpriseApprovalsCommand cmd) {
         return null;
     }
 

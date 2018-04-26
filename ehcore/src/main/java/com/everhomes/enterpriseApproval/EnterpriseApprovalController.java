@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/enterpriseApproval")
@@ -33,6 +34,20 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /enterpriseApproval/exportApprovalFlowRecords</b>
+     * <p>OA 导出流程记录</p>
+     */
+    @RequestMapping("exportApprovalFlowRecords")
+    @RestReturn(value = String.class)
+    public RestResponse exportApprovalFlowRecords(@Valid ListApprovalFlowRecordsCommand cmd){
+        enterpriseApprovalService.exportApprovalFlowRecords(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /enterpriseApproval/listApprovalFlowMonitors</b>
      * <p>OA 流程监控</p>
      */
@@ -40,6 +55,20 @@ public class EnterpriseApprovalController extends ControllerBase{
     @RestReturn(value = ListApprovalFlowRecordsResponse.class)
     public RestResponse listApprovalFlowMonitors(@Valid ListApprovalFlowRecordsCommand cmd){
         ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listApprovalFlowMonitors(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/listAvailableApprovalGroups</b>
+     * <p>OA 流程监控</p>
+     */
+    @RequestMapping("listAvailableApprovalGroups")
+    @RestReturn(value = EnterpriseApprovalGroupDTO.class, collection = true)
+    public RestResponse listAvailableApprovalGroups(){
+        List<EnterpriseApprovalGroupDTO> res = enterpriseApprovalService.listAvailableApprovalGroups();
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -76,6 +105,20 @@ public class EnterpriseApprovalController extends ControllerBase{
         return response;
     }
 
+    /**
+     * <b>URL: /enterpriseApproval/listEnterpriseApprovalTypes</b>
+     * <p>OA 获取审批类型列表</p>
+     * @return
+     */
+    @RequestMapping("listEnterpriseApprovalTypes")
+    @RestReturn(value=EnterpriseApprovalDTO.class)
+    public RestResponse listEnterpriseApprovalTypes(@Valid ListEnterpriseApprovalsCommand cmd) {
+        ListEnterpriseApprovalsResponse res = enterpriseApprovalService.listEnterpriseApprovalTypes(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovals</b>
