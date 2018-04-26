@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 来自list接口中的profileId。如果没有的话不传，但是要传下面一个参数originId</li>
+ *     <li>id: 来自list接口中的profileId，无则不传</li>
  *     <li>originId: 应用originId</li>
  *     <li>appNo: 编号</li>
  *     <li>displayVersion: 版本</li>
