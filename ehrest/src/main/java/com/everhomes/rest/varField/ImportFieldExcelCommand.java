@@ -21,6 +21,7 @@ public class ImportFieldExcelCommand {
     private String moduleName;
     private Integer namespaceId;
     private Long communityId;
+    private Long orgId;
 
     public Long getCustomerId() {
         return customerId;
@@ -60,5 +61,13 @@ public class ImportFieldExcelCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 }

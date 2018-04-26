@@ -17,6 +17,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
@@ -51,6 +52,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -357,8 +359,12 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
-
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+    }
+
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
 
     @Override
