@@ -274,5 +274,12 @@ SET @config_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`),1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@config_id :=@config_id+1), 'contractService', '999966', '增加深圳湾合同详情模块接口', '999966', NULL);
 
 
+-- 修改客户管理动态表单  jiarui
+UPDATE `eh_var_fields`  SET  `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' ,field_type = 'String'
+WHERE`module_name`='enterprise_customer' AND `name`='createTime';
+
+update eh_var_field_scopes
+set field_param = '{\"fieldParamType\": \"text\", \"length\": 32}'
+where group_id = 12022;
 
 
