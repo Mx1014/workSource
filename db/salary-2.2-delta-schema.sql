@@ -1,5 +1,5 @@
 -- Designer: wuhan
--- Description: ISSUE#24392 固定资产管理V1.0（支持对内部各类固定资产进行日常维护）
+-- Description: ISSUE#25515: 薪酬V2.2（工资条发放管理；app支持工资条查看/确认）
 
 CREATE TABLE `eh_salary_payslips` (
   `id` BIGINT NOT NULL COMMENT '主键',
@@ -21,12 +21,11 @@ CREATE TABLE `eh_salary_payslips` (
 CREATE TABLE `eh_salary_payslip_details` (
   `id` BIGINT NOT NULL COMMENT '主键',
   `payslip_id` BIGINT NOT NULL COMMENT '父键;工资条id',
-  `namespace_id` INT ,
+  `namespace_id` INT,
   `salary_period` VARCHAR(12) COMMENT 'example:201705',
   `owner_type` VARCHAR(32)  COMMENT 'organization',
   `owner_id` BIGINT  COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT  COMMENT '属于哪一个总公司的',
-  `namespace_id` INT ,
   `user_id` BIGINT,
   `user_detail_id` BIGINT,
   `name` VARCHAR(512) NOT NULL COMMENT '姓名',
