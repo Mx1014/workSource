@@ -342,15 +342,17 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 	@Override
-	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte appTyp, Byte entryType) {
+	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 
 		//入口类型
 		query.addJoin(Tables.EH_SERVICE_MODULE_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID));
-		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_TYPE.eq(entryType));
+		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
+		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
 
 		//安装信息
 		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));

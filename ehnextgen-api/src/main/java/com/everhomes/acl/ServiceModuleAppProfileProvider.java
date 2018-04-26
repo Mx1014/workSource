@@ -15,6 +15,8 @@ public interface ServiceModuleAppProfileProvider {
 
     ServiceModuleAppProfile getServiceModuleAppProfileById(Long id);
 
+    ServiceModuleAppProfile findServiceModuleAppProfileByOriginId(Long originId);
+
     List<ServiceModuleAppProfile> queryServiceModuleAppProfiles(
             ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback);

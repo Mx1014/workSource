@@ -49,19 +49,22 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
     private DbProvider dbProvider;
 
     @Override
-    @Cacheable(value = "listServiceModuleEntries", key = "{#moduleId,#entryType}", unless = "#result.size() == 0")
-    public List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte entryType) {
+    public List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte terminalType, Byte locationType, Byte sceneType) {
         List<ServiceModuleEntry> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhServiceModuleEntriesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ENTRIES);
         if(moduleId != null){
             query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID.eq(moduleId));
         }
-        if(entryType != null){
-            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_TYPE.eq(entryType));
+        if(terminalType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.TERMINAL_TYPE.eq(terminalType));
         }
-        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID);
-        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_TYPE);
+        if(locationType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
+        }
+        if(sceneType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
+        }
 
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModuleEntry.class));

@@ -20,6 +20,8 @@ import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.ServiceModuleAppType;
+import com.everhomes.rest.module.ServiceModuleLocationType;
+import com.everhomes.rest.module.ServiceModuleSceneType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -323,29 +325,32 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
 		Long orgId = null;
-		Byte entryType = null;
 		Byte appType = null;
+		Byte locationType = null;
+		Byte sceneType = null;
 
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
+			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
 			Card cardConfig = ConvertHelper.convert(cmd.getInstanceConfig(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
 				orgId = cmd.getContext().getOrgId();
-				entryType = ServiceModuleEntryConstans.app_oa_client;
 				appType = ServiceModuleAppType.OA.getCode();
+				sceneType = ServiceModuleSceneType.CLIENT.getCode();
 			}else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){
 				OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
 				orgId = organizationProperty.getOrganizationId();
-				entryType = ServiceModuleEntryConstans.app_community_management;
 				appType = ServiceModuleAppType.COMMUNITY.getCode();
+				sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
 			}
 		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
+			locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
 			orgId = organizationProperty.getOrganizationId();
-			entryType = ServiceModuleEntryConstans.app_community_client;
 			appType = ServiceModuleAppType.COMMUNITY.getCode();
+			sceneType = ServiceModuleSceneType.CLIENT.getCode();
 		}
 
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, appType, entryType);
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType);
 
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
