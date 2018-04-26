@@ -149,4 +149,6 @@ public interface CommunityService {
 	CommunityInfoDTO findDefaultCommunity();
 
     ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd);
+
+	CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd);
 }

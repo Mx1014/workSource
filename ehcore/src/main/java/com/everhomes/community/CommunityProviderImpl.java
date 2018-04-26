@@ -1796,6 +1796,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES).getQuery();
         query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.ne(CommunityAdminStatus.INACTIVE.getCode()));
         if(communityType != null){
             query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
         }

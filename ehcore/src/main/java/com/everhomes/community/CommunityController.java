@@ -492,7 +492,7 @@ public class CommunityController extends ControllerBase {
 
     /**
      * <b>URL: /community/listCommunities</b>
-     * <p>查询企业管理的小区</p>
+     * <p>查询园区</p>
      */
     @RequestMapping("listCommunities")
     @RestReturn(value=ListCommunitiesResponse.class)
