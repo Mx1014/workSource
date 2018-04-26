@@ -164,7 +164,7 @@ public interface SalaryService {
 	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd);
 
 
-	public ImportPayslipResponse importPayslip(ImportPayslipCommand cmd);
+	public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd);
 
 
 	public void sendPayslip(SendPayslipCommand cmd);

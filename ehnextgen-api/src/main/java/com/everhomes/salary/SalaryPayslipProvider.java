@@ -13,4 +13,6 @@ public interface SalaryPayslipProvider {
 
 	List<SalaryPayslip> listSalaryPayslip();
 
+	List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId, String payslipYear);
+
 }

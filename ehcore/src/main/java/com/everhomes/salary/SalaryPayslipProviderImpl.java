@@ -87,4 +87,11 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId,
+			String payslipYear) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

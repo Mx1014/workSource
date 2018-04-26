@@ -272,8 +272,8 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importPayslip")
 	@RestReturn(ImportPayslipResponse.class)
-	public RestResponse importPayslip(ImportPayslipCommand cmd){
-		return new RestResponse(salaryService.importPayslip(cmd));
+	public RestResponse importPayslip(@RequestParam(value = "attachment") MultipartFile[] files,ImportPayslipCommand cmd){
+		return new RestResponse(salaryService.importPayslip(files,cmd));
 	}
 
 	/**

@@ -23,6 +23,7 @@ import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
+import com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO;
 import com.everhomes.socialSecurity.SocialSecurityConstants;
 import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.techpark.punch.PunchService;
@@ -62,6 +63,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -156,6 +158,12 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired
     private SalaryGroupEntityProvider salaryGroupEntityProvider;
 
+    @Autowired
+    private SalaryPayslipProvider salaryPayslipProvider;
+
+    @Autowired
+    private SalaryPayslipDetailProvider salaryPayslipDetailProvider;
+    
     @Autowired
     private PunchService punchService;
 
@@ -1903,17 +1911,61 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
- 
+    public String processZLLink2PayslipDetail(Long payslipDetailId){
+    	return "zl://salary/payslip-detail?payslipDetailId="+payslipDetailId;
+    }
 	@Override
 	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
-		 
-		return new ListYearPayslipSummaryResponse();
+		List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOwnerId(),cmd.getOrganizationId(),cmd.getPayslipYear());
+		if(null ==results ){
+			return null;
+		}
+		List<MonthPayslipDTO> monthPayslip = new ArrayList<>();
+		Map<String,Integer> payslipMap = new HashMap<>();
+		results.stream().map(r->{
+			if(payslipMap.get(r.getSalaryPeriod())==null){
+				payslipMap.put(r.getSalaryPeriod(),salaryPayslipDetailProvider.countSend(r.getId()));
+			}else{
+				payslipMap.put(r.getSalaryPeriod(),payslipMap.get(r.getSalaryPeriod())+salaryPayslipDetailProvider.countSend(r.getId()));
+			}
+			return null;
+		});
+		for(Entry<String, Integer> entry : payslipMap.entrySet()){
+			MonthPayslipDTO e = new MonthPayslipDTO();
+			e.setSalaryPeriod(entry.getKey());
+			e.setSendCount(entry.getValue());
+			monthPayslip.add(e);
+		}
+		return new ListYearPayslipSummaryResponse(monthPayslip);
 	}
 
 	@Override
-	public ImportPayslipResponse importPayslip(ImportPayslipCommand cmd) {
-	
-		return new ImportPayslipResponse();
+	public ImportPayslipResponse importPayslip(MultipartFile[] files,ImportPayslipCommand cmd) {
+		ArrayList resultList = punchService.processImportExcel2ArrayList(files);
+		List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList,cmd.getOwnerId());
+		return new ImportPayslipResponse(cmd.getSalaryPeriod(),details);
+	}
+
+	private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
+		// TODO Auto-generated method stub
+		List<PayslipDetailDTO> payslipDetailDTOs=new ArrayList<PayslipDetailDTO>();
+
+        for (int rowIndex = 1; rowIndex < resultList.size(); rowIndex++) {
+            RowResult r = (RowResult) resultList.get(rowIndex);
+            PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
+            // 名字去空格
+             
+            dto.setContactName(r.getCells().get("A").replace(" ", ""));
+            dto.setDaySchedulings(new ArrayList<>());
+            for (int i = 0; i < r.getCells().size(); i++) {
+                String val = r.getCells().get(GetExcelLetter(i + 1));
+                if (!StringUtils.isEmpty(val)) {
+                    val = val.replace(" ", "");
+                }
+                dto.getDaySchedulings().add(val);
+            } 
+        }
+		return payslipDetailDTOs;
 	}
 
 	@Override

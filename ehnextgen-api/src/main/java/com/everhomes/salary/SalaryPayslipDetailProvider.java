@@ -13,4 +13,6 @@ public interface SalaryPayslipDetailProvider {
 
 	List<SalaryPayslipDetail> listSalaryPayslipDetail();
 
+	Integer countSend(Long payslipId);
+
 }

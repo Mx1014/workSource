@@ -15,11 +15,15 @@ public class ListYearPayslipSummaryResponse {
 	
 	private List<MonthPayslipDTO> monthPayslips; 
 
+	public ListYearPayslipSummaryResponse(){}
+	public ListYearPayslipSummaryResponse(List<MonthPayslipDTO> monthPayslips){
+		this.monthPayslips = monthPayslips;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
+	
 	public List<MonthPayslipDTO> getMonthPayslips() {
 		return monthPayslips;
 	}

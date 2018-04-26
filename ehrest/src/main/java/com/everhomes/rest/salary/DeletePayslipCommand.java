@@ -6,9 +6,9 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>organizationId: 所属id 总公司id</li>
- * <li>ownerId: 分公司id</li>
- * <li>payslipDetailId: 工资条详情id 删除某一个人的某条工资条详情</li>
+ * <li>organizationId: 所属id 总公司id 必填</li>
+ * <li>ownerId: 分公司id 必填</li>
+ * <li>payslipDetailId: 工资条详情id 删除某一个人的某条工资条详情 必填</li>
  * </ul>
  */
 public class DeletePayslipCommand {

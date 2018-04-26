@@ -6,9 +6,9 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>organizationId: 所属id 总公司id</li>
- * <li>ownerId: 分公司id</li>
- * <li>payslipDetailId: 某条工资条的id</li>
+ * <li>organizationId: 所属id 总公司id 必填</li>
+ * <li>ownerId: 分公司id 可选</li>
+ * <li>payslipDetailId: 某条工资条的id 必填</li>
  * </ul>
  */
 public class ConfirmPayslipCommand {

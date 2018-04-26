@@ -6,10 +6,10 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>organizationId: 所属id 总公司id</li>
- * <li>ownerId: 分公司id</li>
- * <li>payslipId: 工资条Id撤回工资条下所有人</li>
- * <li>payslipDetailId: 工资条详情id 只撤销某一个人的某条工资条详情</li>
+ * <li>organizationId: 所属id 总公司id 必填</li>
+ * <li>ownerId: 分公司id 必填</li>
+ * <li>payslipId: 工资条Id撤回工资条下所有人 可选</li>
+ * <li>payslipDetailId: 工资条详情id 只撤销某一个人的某条工资条详情 可选</li>
  * </ul>
  */
 public class RevokePayslipCommand {

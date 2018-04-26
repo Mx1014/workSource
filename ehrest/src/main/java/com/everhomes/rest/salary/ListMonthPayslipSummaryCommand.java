@@ -6,9 +6,9 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>organizationId: 所属id 总公司id</li>
- * <li>ownerId: 分公司id</li>
- * <li>salaryPeriod: 期数:类似201808</li>
+ * <li>organizationId: 所属id 总公司id 必填</li>
+ * <li>ownerId: 分公司id 必填</li>
+ * <li>salaryPeriod: 期数:类似201808 必填</li>
  * </ul>
  */
 public class ListMonthPayslipSummaryCommand {

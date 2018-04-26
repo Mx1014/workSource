@@ -9715,10 +9715,8 @@ public class PunchServiceImpl implements PunchService {
 
 //>>>>>>> master
     @Override
-    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
-        // TODO Auto-generated method stub
-
-        ArrayList resultList = new ArrayList();
+    public ArrayList processImportExcel2ArrayList(MultipartFile[] files){
+    	ArrayList resultList = new ArrayList();
         String rootPath = System.getProperty("user.dir");
         String filePath = rootPath + File.separator + UUID.randomUUID().toString() + ".xlsx";
         LOGGER.error("importOrganization-filePath=" + filePath);
@@ -9736,12 +9734,19 @@ public class PunchServiceImpl implements PunchService {
             resultList = PropMrgOwnerHandler.processorExcel(in);
         } catch (IOException e) {
             LOGGER.error("executeImportOrganization-parse file fail.message=" + e.getMessage());
-        } /*finally {
+        } 
+        return resultList;
+    }
+    @Override
+    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
+        // TODO Auto-generated method stub
+
+        /*finally {
             File file = new File(filePath);
 			if(file.exists())
 				file.delete();
 		}*/
-
+    	ArrayList resultList = processImportExcel2ArrayList(files);
         PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
         addOperateLog(0L, "", result.toString(), 0L, "importPunchScheduling");
         return result;

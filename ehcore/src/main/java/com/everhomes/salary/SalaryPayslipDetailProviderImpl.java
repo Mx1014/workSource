@@ -87,4 +87,10 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public Integer countSend(Long payslipId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
