@@ -565,15 +565,25 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillStatus(r.getValue(t.STATUS));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
-                    String addrBuildingName = r.getValue(t2.APARTMENT_NAME);
-                    String addrAartName = r.getValue(t2.BUILDING_NAME);
+                    String addrBuildingName = r.getValue(t2.BUILDING_NAME);
+                    String addrAartName = r.getValue(t2.APARTMENT_NAME);
                     if(addrBuildingName!=null || addrAartName!=null){
                         dto.setApartmentName(addrAartName);
                         dto.setBuildingName(addrBuildingName);
                     }else{
                         // 使用t.APARTMENT_NAME仍然识别不了
-                        dto.setApartmentName(r.getValue(11).toString());
-                        dto.setBuildingName(r.getValue(10).toString());
+                        if(r.getValue(11)!=null){
+                            try{
+                                dto.setApartmentName(r.getValue(11).toString());
+                            }catch (Exception e){
+                            }
+                        }
+                        if(r.getValue(10)!=null){
+                            try{
+                                dto.setBuildingName(r.getValue(10).toString());
+                            }catch (Exception e){
+                            }
+                        }
                     }
                     dtos.add(dto);
                     });
