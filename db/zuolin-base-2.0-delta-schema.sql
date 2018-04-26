@@ -139,6 +139,8 @@ CREATE TABLE `eh_service_module_entries` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
+
+
 -- 增加字段member_range人员规模
 -- add by lei yuan
 alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
@@ -146,3 +148,27 @@ alter table eh_organization_details add member_range varchar(25) default null co
 ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
 -- 增加字段 service_support_flag 是否是服务商 1-是，0-否
 ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+
+-- 增加办公地点表
+-- add by leiyuan
+CREATE TABLE `eh_organization_workPlaces` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `organization_id` bigint(20) DEFAULT NULL COMMENT '组织id',
+  `workplace_name` varchar(50) DEFAULT NULL COMMENT '办公点名称',
+  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
+  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 增加办公地点与楼栋门牌的关系表
+CREATE TABLE `eh_communityAndBuilding_relationes` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
+  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
+  `address_id` bigint(20) DEFAULT NULL COMMENT '地址id' ,
+  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+

@@ -31,6 +31,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.*;
@@ -1597,5 +1598,7 @@ public class UserController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
 
 }

@@ -10,6 +10,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.openapi.FunctionCardDto;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -331,4 +332,11 @@ public interface UserService {
     SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd);
     GenerateSmartCardCodeResponse generateSmartCardCode(
             GenerateSmartCardCodeCommand cmd);
+
+    /**
+     * 根据userId来查询用户信息的方法
+     * @param cmd
+     * @return
+     */
+    User findUserInfoByUserId(UserCouponsCommand cmd);
 }

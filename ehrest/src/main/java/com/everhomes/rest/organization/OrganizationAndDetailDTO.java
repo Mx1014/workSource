@@ -1,5 +1,6 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.rest.user.UserDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -80,6 +81,8 @@ public class OrganizationAndDetailDTO {
 
     //人员规模
     private String memberRange;
+
+    private UserDTO user;
 
     public Long getOrgId() {
         return orgId;
@@ -383,6 +386,14 @@ public class OrganizationAndDetailDTO {
 
     public void setMemberRange(String memberRange) {
         this.memberRange = memberRange;
+    }
+
+    public UserDTO getUser() {
+        return user;
+    }
+
+    public void setUser(UserDTO user) {
+        this.user = user;
     }
 
     @Override

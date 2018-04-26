@@ -10,6 +10,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.UserDTO;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
 public interface UserProvider {
@@ -170,4 +171,11 @@ public interface UserProvider {
     List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
 	
 	String findMobileByUid(Long contactId);
+
+    /**
+     * 根据UserId来查询用户信息
+     * @param userId
+     * @return
+     */
+    UserDTO findUserInfoByUserId(Long userId);
 }

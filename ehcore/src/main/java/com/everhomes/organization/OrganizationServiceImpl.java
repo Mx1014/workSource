@@ -136,16 +136,16 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.*;
-import org.elasticsearch.common.collect.Lists;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -1312,7 +1312,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
-            //根据是否是管理员来进行添加eh_organization_communities表数据
+            //根据是否是管理公司来进行添加eh_organization_communities表数据，只有是管理公司才能拥有管理的项目
             if(cmd.getPmFlag() != null && cmd.getPmFlag() == Integer.valueOf(TrueOrFalseFlag.TRUE.getCode())){
                 //说明是管理员，那么我们就可以将管理的项目添加到eh_organization_communities表中
                 if(cmd.getProjectIds()!= null){
@@ -1325,6 +1325,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
 
             }
+
             OrganizationDetail organizationDetail = new OrganizationDetail();
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setAddress(cmd.getAddress());
@@ -12807,9 +12808,21 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @return
      */
     public OrganizationDetail getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd){
+        //创建OrganizationAndDetailDTO对象
+        OrganizationAndDetailDTO organizationAndDetailDTO = new OrganizationAndDetailDTO();
         if(cmd.getOrganizationId() != null && cmd.getNamespaceId() != null){
             //根据organizationId和namespaceId进行查询节点信息以及明细
-            OrganizationAndDetailDTO organizationAndDetailDTO = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(cmd.getOrganizationId(),cmd.getNamespaceId());
+            organizationAndDetailDTO = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(cmd.getOrganizationId(),cmd.getNamespaceId());
+        }
+        if(organizationAndDetailDTO.getAdminTargetId() != null){
+            //创建User对象
+            UserDTO user = new UserDTO();
+            user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
+            if(user != null){
+                organizationAndDetailDTO.setUser(user);
+            }
+
+
 
         }
         return null;

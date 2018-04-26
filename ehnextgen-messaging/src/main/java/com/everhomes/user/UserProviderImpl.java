@@ -23,10 +23,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
@@ -1871,6 +1868,31 @@ public class UserProviderImpl implements UserProvider {
         User user = context.select().from(EH_USERS).where(EH_USERS.NAMESPACE_USER_TOKEN.eq(token))
                 .and(EH_USERS.NAMESPACE_USER_TYPE.eq(type))
                 .fetchAnyInto(User.class);
+        return user;
+    }
+
+
+    /**
+     * 根据UserId来查询用户信息
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserDTO findUserInfoByUserId(Long userId){
+        UserDTO user = new UserDTO();
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_users和表eh_user_identifiers进行联查
+        SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+        query.addJoin(Tables.EH_USERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_USERS.ID.eq(userId));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(userId));
+        query.fetch().map( r ->{
+            user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            return null;
+        });
         return user;
     }
 

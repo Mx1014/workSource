@@ -101,6 +101,7 @@ import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
 import com.everhomes.rest.openapi.FunctionCardDto;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
@@ -6257,5 +6258,19 @@ public class UserServiceImpl implements UserService {
         return resp;
         
     }
+
+	/**
+	 * 根据UserId来查询用户信息
+	 * @param cmd
+	 * @return
+	 */
+	@Override
+	public User findUserInfoByUserId(UserCouponsCommand cmd){
+		User user = new User();
+		if(cmd.getUserId() != null){
+			user = userProvider.findUserInfoByUserId(cmd.getUserId());
+		}
+		return user;
+	}
     
 }
