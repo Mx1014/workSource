@@ -491,7 +491,7 @@ public class CustomerServiceImpl implements CustomerService {
 //        if (customer.getTrackingUid() == null) {
 //            customer.setTrackingUid(-1L);
 //        }
-        if (null != customer && customer.getTrackingUid() != -1) {
+        if (customer.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
