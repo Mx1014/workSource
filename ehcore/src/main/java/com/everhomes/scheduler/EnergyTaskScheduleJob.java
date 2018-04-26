@@ -164,7 +164,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         }
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-//            calculateCloseTaskFee();
+            calculateCloseTaskFee();
             createTask();
         }
     }

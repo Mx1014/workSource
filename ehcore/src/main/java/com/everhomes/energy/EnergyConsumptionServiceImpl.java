@@ -448,7 +448,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @PostConstruct
     public void init() {
-        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */3 * * * ?");
+        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
