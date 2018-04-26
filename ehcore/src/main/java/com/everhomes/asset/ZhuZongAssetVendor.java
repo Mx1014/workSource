@@ -18,7 +18,6 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
@@ -82,8 +81,6 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
     
     @Autowired
     private UserProvider userProvider;
-    @Autowired
-    private OrganizationProvider organizationProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
 	@Autowired
@@ -363,7 +360,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		try {
 			//个人直接获取手机号码，企业获取所有企业管理员的手机号码
 			List<String> phoneNumbers = getPhoneNumber(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId());
-			//phoneNumbers.add("15650723221");//杨崇鑫测试
+			//phoneNumbers.add("13810281614");//杨崇鑫测试
 			//根据手机号返回房产
 			List<HouseDTO> houseDTOs = queryHouseByPhoneNumber(phoneNumbers);
 			String houseid = "",clientid = "";
@@ -379,7 +376,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			if(costDTOs != null) {
 				ShowBillForClientV2DTO showBillForClientV2DTO = new ShowBillForClientV2DTO();
-				showBillForClientV2DTO.setBillGroupName("    ");
+				showBillForClientV2DTO.setBillGroupName("待缴账单");
 				showBillForClientV2DTO.setContractId("      ");
 				showBillForClientV2DTO.setContractNum("       ");
 				BigDecimal overAllAmountOwed = BigDecimal.ZERO;//待缴金额总计
