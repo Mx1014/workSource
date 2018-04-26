@@ -2072,7 +2072,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setDtos(lists.stream().map((r)->{
 			RequestInfoDTO requestInfo = ConvertHelper.convert(r, RequestInfoDTO.class);
-			if (requestInfo != null)
+			if (requestInfo != null && r.getCreateTime() != null)
 			requestInfo.setCreateTime(r.getCreateTime().toLocalDateTime().format(dateSF));
 			return requestInfo;
 		}).collect(Collectors.toList()));
