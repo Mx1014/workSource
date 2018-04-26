@@ -357,11 +357,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 				AppDTO appDTO = new AppDTO();
 				appDTO.setName(app.getName());
-				String url = null;
-				if(app.getMobileUri() != null){
-					url = contentServerService.parserUri(app.getMobileUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+				if(app.getIconUri() != null){
+					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+					appDTO.setIconUrl(url);
 				}
-				appDTO.setIconUrl(url);
 
 				ServiceModuleRouterHandler handler = serviceModuleService.getServiceModuleRouterHandler(app.getModuleId());
 				if(handler != null){

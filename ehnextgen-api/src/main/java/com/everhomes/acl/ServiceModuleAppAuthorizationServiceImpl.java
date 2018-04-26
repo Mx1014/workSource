@@ -11,6 +11,7 @@ import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,19 +172,18 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         ServiceModuleAppProfile profile = ConvertHelper.convert(cmd, ServiceModuleAppProfile.class);
 
         if(cmd.getMobileUris() != null){
-            profile.setMobileUri(cmd.getMobileUris().toString());
+            profile.setMobileUris(StringHelper.toJsonString(cmd.getMobileUris()));
         }
         if(cmd.getPcUris() != null){
-            profile.setPcUri(cmd.getPcUris().toString());
+            profile.setPcUris(StringHelper.toJsonString(cmd.getPcUris()));
         }
 
         if(cmd.getConfigAppIds() != null){
-            profile.setAppEntryInfo(cmd.getAppEntryInfos().toString());
+            profile.setAppEntryInfos(StringHelper.toJsonString(cmd.getAppEntryInfos()));
         }
+
         ServiceModuleAppProfile oldProfile = null;
-        if(cmd.getId() != null){
-            oldProfile = serviceModuleAppProfileProvider.getServiceModuleAppProfileById(cmd.getId());
-        }else if(cmd.getOriginId() != null){
+        if(cmd.getOriginId() != null){
             oldProfile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());
         }
 

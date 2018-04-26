@@ -23,6 +23,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
@@ -357,6 +358,31 @@ public class PortalServiceImpl implements PortalService {
 				dto.setInstanceConfig(handler.processInstanceConfig(dto.getInstanceConfig()));
 			}
 		}
+
+		if(moduleApp.getPcUris() != null){
+			List<String> pcUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getPcUris(), List.class);
+			List<String> pcUrls = contentServerService.parserUri(pcUris, ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
+			dto.setPcUris(pcUris);
+			dto.setPcUrls(pcUrls);
+		}
+
+		if(moduleApp.getMobileUris() != null){
+			List<String> mobileUris = (ArrayList<String>)StringHelper.fromJsonString(moduleApp.getMobileUris(), List.class);
+			List<String> mobileUrls = contentServerService.parserUri(mobileUris, ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
+			dto.setPcUris(mobileUris);
+			dto.setPcUrls(mobileUrls);
+		}
+
+		if(moduleApp.getConfigAppIds() != null){
+			List<Long> configAppIds = (ArrayList<Long>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			dto.setConfigAppIds(configAppIds);
+		}
+
+		if(moduleApp.getAppEntryInfos() != null){
+			List<AppEntryInfoDTO> entryInfos = (ArrayList<AppEntryInfoDTO>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			dto.setAppEntryInfos(entryInfos);
+		}
+
 		return dto;
 	}
 
