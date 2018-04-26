@@ -1906,7 +1906,7 @@ public class SalaryServiceImpl implements SalaryService {
  
 	@Override
 	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
-	
+		 
 		return new ListYearPayslipSummaryResponse();
 	}
 

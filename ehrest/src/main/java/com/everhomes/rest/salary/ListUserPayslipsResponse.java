@@ -9,34 +9,32 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>payslipPeriods: 工资条列表{@link com.everhomes.rest.salary.PayslipPeriodDTO}</li>
+ * <li>payslipYears: 工资条年份列表{@link com.everhomes.rest.salary.PayslipYearDTO}</li>
  * </ul>
  */
 public class ListUserPayslipsResponse {
 
-	@ItemType(PayslipPeriodDTO.class)
-	private List<PayslipPeriodDTO> payslipPeriods;
+	@ItemType(PayslipYearDTO.class)
+	private List<PayslipYearDTO> payslipYears;
 
 	public ListUserPayslipsResponse() {
 
 	}
-
-	public ListUserPayslipsResponse(List<PayslipPeriodDTO> payslipPeriods) {
-		super();
-		this.payslipPeriods = payslipPeriods;
-	}
-
-	public List<PayslipPeriodDTO> getPayslipPeriods() {
-		return payslipPeriods;
-	}
-
-	public void setPayslipPeriods(List<PayslipPeriodDTO> payslipPeriods) {
-		this.payslipPeriods = payslipPeriods;
-	}
+ 
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+
+	public List<PayslipYearDTO> getPayslipYears() {
+		return payslipYears;
+	}
+
+
+	public void setPayslipYears(List<PayslipYearDTO> payslipYears) {
+		this.payslipYears = payslipYears;
 	}
 
 }
