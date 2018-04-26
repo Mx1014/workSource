@@ -20,9 +20,11 @@ import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.*;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -683,7 +685,7 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setId(customerId);
                     cmd0.setCommunityId(communityId);
                     EnterpriseCustomerDTO dto = customerService.getEnterpriseCustomer(cmd0);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "人才团队信息":
@@ -700,7 +702,7 @@ public class FieldServiceImpl implements FieldService {
                 //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
                 for(int j = 0; j < customerTalentDTOS.size(); j ++){
                     CustomerTalentDTO dto = customerTalentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             //母节点已经不在，全部使用叶节点
@@ -717,7 +719,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "专利信息":
@@ -733,7 +735,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerPatentDTOS.size(); j ++){
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "证书":
@@ -749,7 +751,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCertificateDTOS.size(); j ++){
                     CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "申报项目":
@@ -765,7 +767,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
                     CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "工商信息":
@@ -781,7 +783,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCommercialDTOS.size(); j ++){
                     CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "投融情况":
@@ -797,7 +799,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
                     CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "经济指标":
@@ -813,7 +815,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
                     CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "跟进信息":
@@ -826,7 +828,7 @@ public class FieldServiceImpl implements FieldService {
                 List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
                 if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
-                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "计划信息":
@@ -839,7 +841,7 @@ public class FieldServiceImpl implements FieldService {
                 List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
                 if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
-                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "入驻信息":
@@ -854,7 +856,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
                     LOGGER.info("入驻信息 "+j+":"+customerEntryInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "离场信息":
@@ -870,7 +872,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
                     LOGGER.info("离场信息 "+j+":"+customerDepartureInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "税务信息":
@@ -885,7 +887,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerTaxDTOS == null) customerTaxDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTaxDTOS.size(); j++){
                     LOGGER.info("税务信息 "+j+":"+ customerTaxDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "银行账号":
@@ -900,7 +902,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerAccountDTOs == null) customerAccountDTOs = new ArrayList<>();
                 for(int j = 0; j < customerAccountDTOs.size(); j++){
                     LOGGER.info("银行账号 "+j+":"+customerAccountDTOs.get(j));
-                    setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             // 增加企业服务和资源预定
@@ -916,7 +918,7 @@ public class FieldServiceImpl implements FieldService {
                 if(rentalBillDTOS == null) rentalBillDTOS = new ArrayList<>();
                 for(int j = 0; j < rentalBillDTOS.size(); j++){
                     LOGGER.info("资源预定 "+j+":"+rentalBillDTOS.get(j));
-                    setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "企业服务":
@@ -931,24 +933,24 @@ public class FieldServiceImpl implements FieldService {
                 if(requestInfoDTOS == null) requestInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < requestInfoDTOS.size(); j++){
                     LOGGER.info("企业服务 "+j+":"+requestInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
         }
         return data;
     }
 
-    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName) {
+    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName,String sheetName) {
         List<String> rowDatas = new ArrayList<>();
         for(int i = 0; i <  fields.size(); i++) {
             FieldDTO field = fields.get(i);
-            setRowData(dto, rowDatas, field,communityId,namespaceId,moduleName);
+            setRowData(dto, rowDatas, field,communityId,namespaceId,moduleName,sheetName);
         }
         //一个dto，获得一行数据后置入data中
         data.add(rowDatas);
     }
 
-    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field,Long communityId,Integer namespaceId,String moduleName) {
+    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field,Long communityId,Integer namespaceId,String moduleName,String sheetName) {
         String fieldName = field.getFieldName();
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
@@ -972,7 +974,7 @@ public class FieldServiceImpl implements FieldService {
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
-            String cellData = getFromObj(fieldName, params, field, dto,communityId,namespaceId,moduleName);
+            String cellData = getFromObj(fieldName, params, field, dto,communityId,namespaceId,moduleName,sheetName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
             }
@@ -988,13 +990,24 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
-
+        if(sheetName.equals("资源预定")){
+            if(fieldName.equalsIgnoreCase("status")){
+                invoke = SiteBillStatus.fromCode((byte)invoke).getDescribe();
+                return String.valueOf(invoke);
+            }
+        }
+        if(sheetName.equalsIgnoreCase("企业服务")){
+            if(fieldName.equalsIgnoreCase("workflowStatus")){
+                invoke = ServiceAllianceWorkFlowStatus.fromType((byte)invoke).getDescription();
+                return String.valueOf(invoke);
+            }
+        }
         if(invoke==null){
             return "";
         }
