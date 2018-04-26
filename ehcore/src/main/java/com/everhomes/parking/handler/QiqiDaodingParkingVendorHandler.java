@@ -606,6 +606,6 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     @Override
     public void refreshToken() {
-        this.requestToken();
+        this.getToken(true);
     }
 }
