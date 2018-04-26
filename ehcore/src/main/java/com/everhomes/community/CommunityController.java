@@ -489,4 +489,21 @@ public class CommunityController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /community/listCommunities</b>
+     * <p>查询企业管理的小区</p>
+     */
+    @RequestMapping("listCommunities")
+    @RestReturn(value=ListCommunitiesResponse.class)
+    public RestResponse listCommunities(ListCommunitiesCommand cmd) {
+
+        ListCommunitiesResponse cmdResponse = this.communityService.listCommunities(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
 }
