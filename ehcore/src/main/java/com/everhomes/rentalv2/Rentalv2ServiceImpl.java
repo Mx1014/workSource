@@ -4173,8 +4173,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(order.getResourceType(),
 					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
 			Set<Long> closeTime = closeDates==null?new HashSet<>():closeDates.stream().map(r-> r.getCloseDate().getTime()).collect(Collectors.toSet());
-			LocalDateTime startDate = new Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			LocalDateTime endDate = new Date(order.getEndTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime startDate = new java.util.Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime endDate = new java.util.Date(order.getEndTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			while (!startDate.isAfter(endDate)){
 				Long time = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 				if (!closeTime.contains(time)){
@@ -4195,6 +4195,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 	}
+
 
 	private FlowCase createFlowCase(RentalOrder order){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
