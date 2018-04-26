@@ -3,20 +3,28 @@ package com.everhomes.flow.admin;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.dbsync.NashornObjectService;
+import com.everhomes.dbsync.NashornObjectServiceImpl;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.*;
 import javax.validation.Valid;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -820,28 +828,86 @@ public class FlowAdminController extends ControllerBase {
         return response;
     }
 
-    public static void main(String[] args) throws ScriptException {
+    public static void main(String[] args) throws Exception {
+        String demoJs = "var config = require(\"config\");\n" +
+                "// var validator = require(\"validator\");\n" +
+                "// var DSL = require(\"dsl\");\n" +
+                "\n" +
+                "var app = {};\n" +
+                "app.config = {\n" +
+                "    \"vendor\": {\n" +
+                "        \"desc\": \"供应商名字\",\n" +
+                "        \"default\": \"通联支付\",\n" +
+                "        \"validator\": function(value) {\n" +
+                "            return value.indexOf(\"支付\") !== -1;\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"vendorURL\": {\n" +
+                "        \"desc\": \"供应商服务器地址\",\n" +
+                "        \"default\": \"http://zzz.com\",\n" +
+                "        \"validator\": \"\"\n" +
+                "    }\n" +
+                "};\n" +
+                "\n" +
+                "app.main = function() {\n" +
+                "    // tables = nashornObjs.getTables();\n" +
+                "    // for(var i = 0; i < tables.size(); i++) {\n" +
+                "    //     var table = tables.get(i);\n" +
+                "    //     var dtName = table.getName();\n" +
+                "    //     clsName = toClsName(dtName);\n" +
+                "    //     //print(clsName);\n" +
+                "    //     dsl.TABLES[clsName] = table;\n" +
+                "    //     dsl.TABLES[dtName.toUpperCase()] = dtName;\n" +
+                "    //     dsl.POJOS[clsName] = Java.type(\"com.everhomes.server.schema.tables.pojos.\" + clsName);\n" +
+                "    // }\n" +
+                "    var vendor = config.String(\"vendor\") || \"通联支付\";\n" +
+                "    var vendorURL = config.String(\"vendorURL\") || \"http://zzz.com\";\n" +
+                "    return vendorURL;\n" +
+                "};\n" +
+                "\n" +
+                "module.exports = app;";
+
         ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine js = manager.getEngineByName("js");
+        ScriptEngine engine = manager.getEngineByName("nashorn");
+        engine.put("nashornObjs", new NashornObjectServiceImpl());
 
-        ScriptContext context = js.getContext();
-
-        Compilable js1 = (Compilable) js;
-        CompiledScript compile = js1.compile("print('Hello');");
-        Bindings bindings = js.createBindings();
-
-        Map<String, CompiledScript> scriptMap = new HashMap<>();
-        scriptMap.put("function_main_id:function_version", compile);
+        engine.eval("load('ehcore/src/main/java/com/everhomes/flow/js/jvm-npm.js')");
+        engine.eval("load('ehcore/src/main/java/com/everhomes/flow/js/config.js')");
 
 
-        CompiledScript compiledScript = scriptMap.get("111:2");
+        Object ret = engine.eval("load(\""+demoJs+"\")");
+        ScriptObjectMirror mirror = (ScriptObjectMirror) ret;
 
-        Bindings binding = compiledScript.getEngine().createBindings();
-        binding.put("ctx", new FlowCaseState());
-        binding.put("platformCtx", PlatformContext.class);
+        FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        moduleInfo.setModuleId(40500L);
+        Long organizationId = 10000L;
+
+        Long functionId = 200L;
+        int version = 1;
+
+        Long flowButtonRefFunctionId = 1L;
+
+        Map<String, ScriptObjectMirror> mirrorMap = new HashMap<>();
+        String join = StringUtils.join(new Object[]{moduleInfo.getModuleId(), organizationId, functionId, version}, ":");
+        mirrorMap.put(join, mirror);
 
 
 
-        Object eval = compiledScript.eval(binding);
+
+
+        for (Map.Entry<String, Object> entry : mirror.entrySet()) {
+            ScriptObjectMirror m = (ScriptObjectMirror) entry.getValue();
+            System.out.println("isFunc"+m.isFunction()+":");
+
+            if (m.isFunction()) {
+                Object val = m.call(mirror);
+                System.out.println(val);
+                System.out.println(val.getClass());
+            }
+            System.out.print(entry.getKey() + ":");
+            System.out.print(mirror.hasMember(entry.getKey()) + ":");
+
+            System.out.println(entry.getValue().getClass());
+        }
     }
 }

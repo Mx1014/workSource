@@ -85,13 +85,13 @@ module = (typeof module === 'undefined') ? {} : module;
     Module._load = function _load(file, parent, core, main) {
         var module = new Module(file, parent, core);
         var body = readFile(module.filename, module.core);
-        var args = ['exports', 'module', 'require', '__filename', '__dirname'];
-        var params = ['module.exports', 'module', 'module.require', 'module.filename', 'module.dir'];
+        var args = ['exports', 'module', 'plugin', 'require', '__filename', '__dirname'];
+        var params = ['module.exports', 'module', 'plugin', 'module.require', 'module.filename', 'module.dir'];
 
         module = load({
             script: "(function(" + args.join(",") + ") { " +
-            body +
-            "})(" + params.join(",") + "); module;",
+                        body +
+                     "})(" + params.join(",") + "); module;",
             name: module.filename
         });
         module.loaded = true;
@@ -147,7 +147,6 @@ module = (typeof module === 'undefined') ? {} : module;
 
     Require.resolve = function (id, parent) {
         var roots = findRoots(parent);
-        // print(roots);
         for (var i = 0; i < roots.length; ++i) {
             var root = roots[i];
             var result = resolveCoreModule(id, root) ||
@@ -273,7 +272,7 @@ module = (typeof module === 'undefined') ? {} : module;
 
     function resolveCoreModule(id, root) {
         var name = normalizeName(id);
-        // var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+        //var classloader = java.lang.Thread.currentThread().getContextClassLoader();
         var classloader = nashornObjs;
         if (classloader.getResource(name)) {
             return {path: name, core: true};
@@ -292,7 +291,7 @@ module = (typeof module === 'undefined') ? {} : module;
         var input;
         try {
             if (core) {
-                // var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+                //var classloader = java.lang.Thread.currentThread().getContextClassLoader();
                 var classloader = nashornObjs;
                 return classloader.getResourceAsStream(filename);
             } else {
