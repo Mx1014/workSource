@@ -8482,55 +8482,33 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040430L, cmd.getAppId(), null,cmd.getCurrentProjectId());
         }
         QueryOrgRentalStatisticsResponse response = new QueryOrgRentalStatisticsResponse();
-		int pageSize = Integer.MAX_VALUE-1;
-		ListingLocator locator = new ListingLocator();
-		response.setOrgStatistics(new ArrayList<>());
-		ListEnterprisesCommand cmd2 = new ListEnterprisesCommand();
-		cmd2.setCommunityId(cmd.getCommunityId());
-		cmd2.setNamespaceId(UserContext.getCurrentNamespaceId());
-		cmd2.setPageSize(pageSize);
-		ListEnterprisesCommandResponse resp = organizationService.listNewEnterprises(cmd2);
-		List<OrganizationDetailDTO> enterprises = resp.getDtos();
-		if (enterprises == null || enterprises.size()==0)
-			return response;
-		for (OrganizationDetailDTO enterprise:enterprises){
-			RentalStatisticsDTO dto = new RentalStatisticsDTO();
-			dto.setName(enterprise.getName());
-			dto.setEnterpriseId(enterprise.getOrganizationId());
-			response.getOrgStatistics().add(dto);
-		}
-		fillStatisticsOrderAmount(response.getOrgStatistics(),cmd);
-		//筛除没有订单的公司
-		response.setOrgStatistics(response.getOrgStatistics().stream().filter(r->r.getOrderCount()>0).collect(Collectors.toList()));
+
 
 		if (StringUtils.isEmpty(cmd.getOrderBy()))
 			cmd.setOrderBy(RentalStatisticsOrder.orderCount);
 		if (cmd.getOrder() == null)
 			cmd.setOrder(-1);
+
 		if (RentalStatisticsOrder.amount.equals(cmd.getOrderBy())) {
-			fillStatisticsAmount(response.getOrgStatistics(),cmd);
-			response.getOrgStatistics().sort((o1, o2) -> {
-				return o1.getAmount().compareTo(o2.getAmount()) * cmd.getOrder();
-			});
+			response.setOrgStatistics(rentalv2Provider.listRentalBillAmountByOrgId(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),
+					cmd.getStartDate(),cmd.getEndDate(),cmd.getOrder()));
 		}
 
 		if (RentalStatisticsOrder.orderCount.equals(cmd.getOrderBy())) {
-			response.getOrgStatistics().sort((o1, o2) -> {
-				return o1.getOrderCount().compareTo(o2.getOrderCount()) * cmd.getOrder();
-			});
+			response.setOrgStatistics(rentalv2Provider.listRentalBillNumByOrgId(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),
+					cmd.getStartDate(),cmd.getEndDate(),cmd.getOrder()));
 		}
 
 		if (RentalStatisticsOrder.usedTime.equals(cmd.getOrderBy())) {
-			fillStatisticsUsedTime(response.getOrgStatistics(),cmd);
-			response.getOrgStatistics().sort((o1, o2) -> {
-				return o1.getUsedTime().compareTo(o2.getUsedTime()) * cmd.getOrder();
-			});
+			response.setOrgStatistics(rentalv2Provider.listRentalBillValidTimeByOrgId(cmd.getResourceType(),cmd.getResourceTypeId(),cmd.getCommunityId(),
+					cmd.getStartDate(),cmd.getEndDate(),cmd.getOrder()));
 		}
 
 		List<RentalStatisticsDTO> tmp = new ArrayList<>();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
+
 		for (Integer i = cmd.getPageAnchor().intValue();i<cmd.getPageAnchor().intValue()+cmd.getPageSize();i++)
 			if (i<response.getOrgStatistics().size())
 				tmp.add(response.getOrgStatistics().get(i));
@@ -8539,6 +8517,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		fillStatisticsUsedTime(tmp,cmd);
 		fillStatisticsOrderAmount(tmp,cmd);
 		fillStatisticsAmount(tmp,cmd);
+		tmp.forEach(r->{
+			Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+			if (org!=null)
+				r.setName(org.getName());
+		});
 
 		if (response.getOrgStatistics().size()>cmd.getPageAnchor()+cmd.getPageSize())
 			response.setNextPageAnchor(cmd.getPageAnchor()+tmp.size());

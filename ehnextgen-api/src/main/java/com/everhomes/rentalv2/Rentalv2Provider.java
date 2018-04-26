@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.rentalv2.MaxMinPrice;
+import com.everhomes.rest.rentalv2.RentalStatisticsDTO;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DayopenTime;
 
 public interface Rentalv2Provider {
@@ -217,9 +218,17 @@ public interface Rentalv2Provider {
 
 	BigDecimal countRentalBillAmount(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
 
+	List<RentalStatisticsDTO> listRentalBillAmountByOrgId(String resourceType, Long resourceTypeId, Long communityId,
+														  Long startTime, Long endTime, Integer order);
+
 	Integer countRentalBillNum(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	List<RentalStatisticsDTO> listRentalBillNumByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+													   Long startTime, Long endTime,Integer order);
 
 	Long countRentalBillValidTime(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
 
+	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+															 Long startTime, Long endTime,Integer order);
 
 }
