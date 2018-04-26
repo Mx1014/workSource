@@ -448,7 +448,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @PostConstruct
     public void init() {
-        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
+        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */3 * * * ?");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
@@ -2938,7 +2938,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
             repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
             repeatSetting.setRepeatInterval(1);
-            String expression = "{\"expression\":[{\"day\":{%s}}]}";
+            String expression = "{\"expression\":[{\"day\":%s}]}";
             expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
             repeatSetting.setExpression(expression);
             repeatService.createRepeatSettings(repeatSetting);

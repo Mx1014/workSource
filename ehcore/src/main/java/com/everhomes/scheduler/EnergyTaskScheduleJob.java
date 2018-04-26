@@ -164,7 +164,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         }
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            calculateCloseTaskFee();
+//            calculateCloseTaskFee();
             createTask();
         }
     }
@@ -487,7 +487,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<EnergyPlan> plans = energyPlanProvider.listActivePlan();
 
         if(plans != null && plans.size() > 0) {
-            plans.forEach(plan -> {
+            for (EnergyPlan plan : plans) {
                 List<EnergyPlanMeterMap> maps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
                 if(maps != null && maps.size() > 0) {
                     boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
@@ -507,7 +507,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         }
                     }
                 }
-            });
+            }
         }
     }
 
