@@ -230,6 +230,15 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	OrganizationDetail getOrganizationDetailByOrgId(Long organizationId);
+
+	/**
+	 * 根据节点编号organizationId和域空间ID来查询节点信息
+	 * @param organizationId
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationAndDetailDTO getOrganizationAndDetailByorgIdAndNameId(Long organizationId,Integer namespaceId);
+
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
 	Organization getOrganizationByGoupId(Long groupId);

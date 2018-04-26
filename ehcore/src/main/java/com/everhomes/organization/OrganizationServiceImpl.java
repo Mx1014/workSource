@@ -2535,7 +2535,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-    @Caching(evict = {@CacheEvict(value = "ForumPostById", key = "#topicId")})
+//    @Caching(evict = {@CacheEvict(value = "ForumPostById", key = "#topicId")})
     private void sendComment(long topicId, long forumId, long orgId, OrganizationMember member, long category, int namespaceId) {
         User user = UserContext.current().getUser();
         Post comment = new Post();
@@ -12798,5 +12798,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return null;
     }
+
+
+    /**
+     * 根据organizationId来查询公司详细信息
+     * 表eh_organizations和表eh_organization_details进行联查
+     * @param cmd
+     * @return
+     */
+    public OrganizationDetail getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd){
+        if(cmd.getOrganizationId() != null && cmd.getNamespaceId() != null){
+            //根据organizationId和namespaceId进行查询节点信息以及明细
+            OrganizationAndDetailDTO organizationAndDetailDTO = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(cmd.getOrganizationId(),cmd.getNamespaceId());
+
+        }
+        return null;
+    }
+
 }
 

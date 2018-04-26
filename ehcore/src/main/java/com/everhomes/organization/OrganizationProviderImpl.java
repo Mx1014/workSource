@@ -6101,4 +6101,65 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
 
+    /**
+     * 根据节点编号organizationId和域空间ID来查询节点信息
+     * @param organizationId
+     * @param namespaceId
+     * @return
+     */
+    @Override
+	public OrganizationAndDetailDTO getOrganizationAndDetailByorgIdAndNameId(Long organizationId,Integer namespaceId){
+        OrganizationAndDetailDTO organizationAndDetailDTO = new OrganizationAndDetailDTO();
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_organizations和表eh_organization_details进行联查
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addJoin(Tables.EH_ORGANIZATIONS,JoinType.JOIN,Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        //查询
+        query.fetch().map(r -> {
+            //将organizationId组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setOrgId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
+            //将parentId组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setParentId(r.getValue(Tables.EH_ORGANIZATIONS.PARENT_ID));
+            //将organizationType组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE));
+            //将节点名称组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            organizationAndDetailDTO.setAddressId(r.getValue(Tables.EH_ORGANIZATIONS.ADDRESS_ID));
+            organizationAndDetailDTO.setDescription(r.getValue(Tables.EH_ORGANIZATIONS.DESCRIPTION));
+            organizationAndDetailDTO.setPath(r.getValue(Tables.EH_ORGANIZATIONS.PATH));
+            organizationAndDetailDTO.setLevel(r.getValue(Tables.EH_ORGANIZATIONS.LEVEL));
+            organizationAndDetailDTO.setStatus(r.getValue(Tables.EH_ORGANIZATIONS.STATUS));
+            organizationAndDetailDTO.setDepartmentType(r.getValue(Tables.EH_ORGANIZATIONS.DEPARTMENT_TYPE));
+            organizationAndDetailDTO.setGroupType(r.getValue(Tables.EH_ORGANIZATIONS.GROUP_TYPE));
+            organizationAndDetailDTO.setDirectlyEnterpriseId(r.getValue(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID));
+            organizationAndDetailDTO.setGroupId(r.getValue(Tables.EH_ORGANIZATIONS.GROUP_ID));
+            organizationAndDetailDTO.setShowFlag(r.getValue(Tables.EH_ORGANIZATIONS.SHOW_FLAG));
+            organizationAndDetailDTO.setNamespaceOrganizationToken(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN));
+            organizationAndDetailDTO.setNamespaceOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE));
+            organizationAndDetailDTO.setCreatorUid(r.getValue(Tables.EH_ORGANIZATIONS.CREATOR_UID));
+            organizationAndDetailDTO.setOperatorUid(r.getValue(Tables.EH_ORGANIZATIONS.OPERATOR_UID));
+            organizationAndDetailDTO.setSetAdminFlag(r.getValue(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG));
+            organizationAndDetailDTO.setEmailContent(r.getValue(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT));
+            organizationAndDetailDTO.setWebsite(r.getValue(Tables.EH_ORGANIZATIONS.WEBSITE));
+            organizationAndDetailDTO.setAdminTargetId(r.getValue(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID));
+            organizationAndDetailDTO.setWorkPlatformFlag(r.getValue(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG));
+            organizationAndDetailDTO.setContact(r.getValue(Tables.EH_ORGANIZATION_DETAILS.CONTACT));
+            organizationAndDetailDTO.setAddress(r.getValue(Tables.EH_ORGANIZATION_DETAILS.ADDRESS));
+            organizationAndDetailDTO.setDisplayName(r.getValue(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME));
+            organizationAndDetailDTO.setContactor(r.getValue(Tables.EH_ORGANIZATION_DETAILS.CONTACTOR));
+            organizationAndDetailDTO.setMemberCount(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_COUNT));
+            organizationAndDetailDTO.setAvatar(r.getValue(Tables.EH_ORGANIZATION_DETAILS.AVATAR));
+            organizationAndDetailDTO.setPostUri(r.getValue(Tables.EH_ORGANIZATION_DETAILS.POST_URI));
+            organizationAndDetailDTO.setMemberRange(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE));
+            return null;
+        });
+        //将组装的对象进行返回
+        return organizationAndDetailDTO;
+    }
+
 }

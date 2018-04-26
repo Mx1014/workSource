@@ -1612,6 +1612,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("/enterprise/detail")
     @RestReturn(value = EnterpriseDTO.class)
     public RestResponse findEnterpriseDetail(@Valid FindEnterpriseDetailCommand cmd) {
+
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

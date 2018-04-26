@@ -142,3 +142,7 @@ ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`mod
 -- 增加字段member_range人员规模
 -- add by lei yuan
 alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
+-- 增加字段 pm_flag 是否是管理公司 1-是，0-否
+ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+-- 增加字段 service_support_flag 是否是服务商 1-是，0-否
+ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
