@@ -4240,6 +4240,7 @@ public class PunchServiceImpl implements PunchService {
                         //不上班跳过
                         continue;
                     } else {
+                        isWorkDay = countWorkDay(pdl.getStatusList());
                         String status = pdl.getStatusList();
                         if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
                             status = pdl.getApprovalStatusList();
@@ -4286,7 +4287,7 @@ public class PunchServiceImpl implements PunchService {
                 if (request != null) {
                     isWorkDay = NormalFlag.YES.getCode();
                 }
-                
+
                 if (NormalFlag.fromCode(isWorkDay) == NormalFlag.YES) {
                     statistic.setWorkCount(statistic.getWorkCount() + 1);
                 } else {
