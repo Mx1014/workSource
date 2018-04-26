@@ -10,6 +10,8 @@ import java.util.List;
 public class StandardAndStatus {
     private Long standardId;
 
+    private Long planId;
+
     @ItemType(Byte.class)
     private List<Byte> taskStatus;
 
@@ -27,5 +29,13 @@ public class StandardAndStatus {
 
     public void setTaskStatus(List<Byte> taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public Long getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(Long planId) {
+        this.planId = planId;
     }
 }

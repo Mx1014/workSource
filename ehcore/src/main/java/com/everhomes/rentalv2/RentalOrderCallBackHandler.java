@@ -56,7 +56,8 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private SmsProvider smsProvider;
-
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private PayService payService;
 	@Override
@@ -64,34 +65,35 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 			this.dbProvider.execute((TransactionStatus status) -> {
 
-				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
-				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+//				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+//				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+
+				RentalOrder order = rentalProvider.findRentalBillByOrderNo(String.valueOf(cmd.getOrderId()));
 
 				BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());
 
 				order.setPaidMoney(order.getPaidMoney().add(payAmount));
+				order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 				PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
 				if (null != paymentType) {
 					if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
 						order.setVendorType(VendorType.WEI_XIN.getCode());
-						orderMap.setVendorType(VendorType.WEI_XIN.getCode());
+//						orderMap.setVendorType(VendorType.WEI_XIN.getCode());
 					}else {
 						order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
-						orderMap.setVendorType(VendorType.ZHI_FU_BAO.getCode());
+//						orderMap.setVendorType(VendorType.ZHI_FU_BAO.getCode());
 					}
 				}
 
 				order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				rentalProvider.updateRentalOrderPayorderMap(orderMap);
+//				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
-				if(order.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
-					order.setStatus(SiteBillStatus.RESERVED.getCode());
-				}else if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
+				if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 					//判断支付金额与订单金额是否相同
-					if (order.getPaidMoney().multiply(new BigDecimal(100)).compareTo(new BigDecimal(cmd.getAmount())) == 0
-							&& order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 
 						if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
 							//支付成功之后创建工作流
@@ -99,16 +101,13 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 							rentalProvider.updateRentalBill(order);
 							rentalService.onOrderSuccess(order);
 							//发短信
-							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
-							if(null == userIdentifier){
-								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-							}else{
-								rentalService.sendRentalSuccessSms(order.getNamespaceId(),userIdentifier.getIdentifierToken(), order);
-							}
+							RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+							handler.sendRentalSuccessSms(order);
+
 						}else {
 
 //							rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
-
+							rentalProvider.updateRentalBill(order);
 							FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
 
 							FlowAutoStepDTO dto = new FlowAutoStepDTO();
@@ -125,7 +124,7 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 							Map<String, String> map = new HashMap<>();
 							map.put("useTime", order.getUseDetail());
 							map.put("resourceName", order.getResourceName());
-							rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+							rentalCommonService.sendMessageCode(order.getRentalUid(), map,
 									RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 
 							String templateScope = SmsTemplateCode.SCOPE;
@@ -149,7 +148,18 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 					}
 				}else if(order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
 					LOGGER.error("待付款订单:id ["+order.getId()+"] 状态已经是成功预约");
-				}else{
+				}else if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode()) || (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))) {//vip停车的欠费和续费
+					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+						if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())){
+							order.setStatus(SiteBillStatus.COMPLETE.getCode());
+						}
+						else
+							rentalService.renewOrderSuccess(order,order.getRentalCount());
+						rentalProvider.updateRentalBill(order);
+					}else{
+						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+					}
+				} else{
 					LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
 				}
 
@@ -166,10 +176,10 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 	@Override
 	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
-		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
-		order.setStatus(SiteBillStatus.REFUNDED.getCode());
-		rentalProvider.updateRentalBill(order);
+//		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+//		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+//		order.setStatus(SiteBillStatus.REFUNDED.getCode());
+//		rentalProvider.updateRentalBill(order);
 	}
 
 	@Override

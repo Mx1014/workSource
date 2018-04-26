@@ -226,4 +226,15 @@ public interface UserPrivilegeMgr {
      * @param checkCommunityId    @return
      */
     boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long moduleId, Byte actionType, String customTag, Long checkOrgId, Long checkCommunityId);
+
+    /**
+     * 新运营后台-校验用户权限
+     * @param userId
+     * @param currentOrgId
+     * @param privilegeId
+     * @param appId
+     * @param checkOrgId
+     * @param checkCommunityId    @return
+     */
+    boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId);
 }

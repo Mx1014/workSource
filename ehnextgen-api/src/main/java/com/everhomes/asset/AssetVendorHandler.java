@@ -1,9 +1,11 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.util.List;
 
 /**
@@ -28,7 +30,7 @@ public interface AssetVendorHandler {
 
     ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractId);
 
-    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType);
+    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType,Long organizationId);
 
     ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId);
 
@@ -65,4 +67,7 @@ public interface AssetVendorHandler {
     List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+
+    void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 }
+

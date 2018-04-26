@@ -3,12 +3,10 @@ package com.everhomes.energy;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
-import com.everhomes.category.Category;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -18,42 +16,144 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.equipment.EquipmentInspectionStandardGroupMap;
-import com.everhomes.equipment.EquipmentInspectionTasks;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.organization.*;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
+import com.everhomes.organization.OrganizationJobPositionMap;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
-import com.everhomes.rest.energy.*;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.energy.BatchReadEnergyMeterCommand;
+import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
+import com.everhomes.rest.energy.BillStatDTO;
+import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.CreateEnergyTaskCommand;
+import com.everhomes.rest.energy.DayStatDTO;
+import com.everhomes.rest.energy.DelelteEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
+import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
+import com.everhomes.rest.energy.EnergyCategoryDefault;
+import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
+import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
+import com.everhomes.rest.energy.EnergyFormulaType;
+import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
+import com.everhomes.rest.energy.EnergyLocalStringCode;
+import com.everhomes.rest.energy.EnergyMeterAddressDTO;
+import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
+import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
+import com.everhomes.rest.energy.EnergyMeterDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingTemplateDTO;
+import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
+import com.everhomes.rest.energy.EnergyMeterPriceConfigDTO;
+import com.everhomes.rest.energy.EnergyMeterPriceConfigExpressionDTO;
+import com.everhomes.rest.energy.EnergyMeterPriceDTO;
+import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingType;
+import com.everhomes.rest.energy.EnergyMeterStatus;
+import com.everhomes.rest.energy.EnergyMeterTaskDTO;
+import com.everhomes.rest.energy.EnergyMeterType;
+import com.everhomes.rest.energy.EnergyPlanDTO;
+import com.everhomes.rest.energy.EnergyPlanGroupDTO;
+import com.everhomes.rest.energy.EnergyPlanMeterDTO;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
+import com.everhomes.rest.energy.EnergyStatCommand;
+import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.EnergyStatisticType;
+import com.everhomes.rest.energy.EnergyTaskStatus;
+import com.everhomes.rest.energy.ExportEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyMeterByQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyPlanDetailsCommand;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
+import com.everhomes.rest.energy.GetEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.GetEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterDataDTO;
+import com.everhomes.rest.energy.ImportTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.ImportTasksByEnergyPlanDataDTO;
+import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterCategoriesCommand;
+import com.everhomes.rest.energy.ListEnergyMeterChangeLogsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterFormulasCommand;
+import com.everhomes.rest.energy.ListEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.ListEnergyMeterSettingLogsCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersResponse;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksCommand;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksResponse;
+import com.everhomes.rest.energy.MeterStatDTO;
+import com.everhomes.rest.energy.PriceCalculationType;
+import com.everhomes.rest.energy.RangeBoundaryType;
+import com.everhomes.rest.energy.ReadEnergyMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineResponse;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineResultLog;
+import com.everhomes.rest.energy.SearchEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanResponse;
+import com.everhomes.rest.energy.ServiceStatDTO;
+import com.everhomes.rest.energy.SetEnergyPlanMeterOrderCommand;
+import com.everhomes.rest.energy.SyncOfflineDataCommand;
+import com.everhomes.rest.energy.SyncOfflineDataResponse;
+import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.rest.energy.UpdateEnergyPlanCommand;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.pmNotify.PmNotifyMode;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
+import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -70,7 +170,13 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.QRCodeConfig;
+import com.everhomes.util.QRCodeEncoder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
@@ -79,7 +185,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -89,8 +194,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -102,16 +205,22 @@ import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -121,15 +230,40 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERROR_METER_NAME_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERROR_METER_NUMBER_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_CURR_READING_GREATER_THEN_MAX_READING;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_FORMULA_HAS_BEEN_REFERENCE;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_HAS_BEEN_REFERENCE;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST_TASK;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_SETTING_END_TIME_ERROR;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_SETTING_START_TIME_ERROR;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_START_GREATER_THEN_MAX;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_TASK_ALREADY_CLOSE;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_TASK_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_PRICE_CONFIG_HAS_BEEN_REFERENCE;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
@@ -154,6 +288,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return new SimpleDateFormat("yyyyMM");
         }
     };
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -285,54 +421,31 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private PortalService portalService;
 
     private void checkEnergyAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
-        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
-        cmd.setNamespaceId(namespaceId);
-        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
-        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-        Long appId = apps.getServiceModuleApps().get(0).getId();
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-                orgId, privilegeId, appId, null, communityId)) {
-            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
-                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
-            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "check user privilege error");
-        }
+//        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+//        cmd.setNamespaceId(namespaceId);
+//        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
+//        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+//        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+//        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
+//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+//                orgId, privilegeId, appId, null, communityId)) {
+//            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+//                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+//            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+//                    "check user privilege error");
+//        }
+
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENERGY_MODULE, ActionType.OFFICIAL_URL.getCode(), null, orgId, communityId);
     }
 
     @PostConstruct
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
-
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(TASK_EXECUTE, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        String token = getEnergyTaskToken(redisTemplate);
-        if(StringUtils.isEmpty(token)) {
-            //manual cache it to redis
-            redisTemplate.opsForValue().set(TASK_EXECUTE, "executing", 3, TimeUnit.HOURS);
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            LOGGER.info("start energy scheduler.....");
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
                     cronExpression, EnergyTaskScheduleJob.class, null);
-        }
-    }
-
-    private String getEnergyTaskToken(RedisTemplate redisTemplate) {
-        Map<String, String> map = makeEnergyTaskToken(redisTemplate);
-        if(map == null) {
-            return null;
-        }
-        String accessToken = map.get(TASK_EXECUTE);
-        return accessToken;
-    }
-
-    private Map<String, String> makeEnergyTaskToken(RedisTemplate redisTemplate) {
-        Object o = redisTemplate.opsForValue().get(TASK_EXECUTE);
-        if(o != null) {
-            Map<String, String> keys = new HashMap<String, String>();
-            keys.put(TASK_EXECUTE, (String)o);
-            return keys;
-        } else {
-            return null;
         }
     }
 
@@ -805,6 +918,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
+    public SearchEnergyMeterResponse searchSimpleEnergyMeter(SearchEnergyMeterCommand cmd) {
+        validate(cmd);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_LIST, cmd.getOrganizationId(),  cmd.getCommunityId());
+        return meterSearcher.querySimpleEnergyMeters(cmd);
+    }
+
+    @Override
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
@@ -896,7 +1016,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READ);
-        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READ, cmd.getOrganizationId(),  cmd.getCommunityId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
 
         // 读数大于最大量程
@@ -3236,6 +3356,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return null;
     }
 
+    @Deprecated
     @Override
     public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
         if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
@@ -3341,6 +3462,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             energyMeterTaskSearcher.feedDoc(task);
                             readTask = true;
                             read.setTaskId(task.getId());
+                            break;
                         }
                         if(readTask) {
                             readEnergyMeter(read);
@@ -3546,6 +3668,93 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         LOGGER.debug("TrackUserRelatedCost: listUserRelateGroups userId = " + user.getId() + ", elapse=" + (endTime - startTime));
         return groupDtos;
     }
+
+    @Override
+    public ReadTaskMeterOfflineResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+        ReadTaskMeterOfflineResponse response = new ReadTaskMeterOfflineResponse();
+        if(cmd.getMeterReading() != null && cmd.getMeterReading().size() > 0) {
+            List<ReadTaskMeterOfflineResultLog> logs = new ArrayList<>();
+            cmd.getMeterReading().forEach(read -> {
+                ReadTaskMeterOfflineResultLog log = new ReadTaskMeterOfflineResultLog();
+                log.setTaskId(read.getTaskId());
+                EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(read.getTaskId());
+                if (task == null) {
+                    LOGGER.error("EnergyTask not exist, id = {}", read.getTaskId());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"EnergyTask not exist"));
+                    logs.add(log);
+                    return;
+                }
+                if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+                    LOGGER.error("EnergyTask already close, id = {}, expire time: {}", read.getTaskId(), task.getExecutiveExpireTime());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_ALREADY_CLOSE),
+                            UserContext.current().getUser().getLocale(),"EnergyTask already close"));
+                    logs.add(log);
+                    return;
+                }
+
+                EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                    LOGGER.error("EnergyTask meter status is not active, meter = {}", meter);
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"EnergyTask meter status is not active"));
+                    logs.add(log);
+                    return;
+                }
+
+                // 读数大于最大量程
+                if (read.getCurrReading().doubleValue() > meter.getMaxReading().doubleValue()) {
+                    LOGGER.error("Current reading greater then meter max reading, meterId = ", meter.getId());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_CURR_READING_GREATER_THEN_MAX_READING),
+                            UserContext.current().getUser().getLocale(),"Current reading greater then meter max reading"));
+                    logs.add(log);
+                    return;
+                }
+
+                task.setReading(read.getCurrReading());
+                task.setStatus(EnergyTaskStatus.READ.getCode());
+                task.setOperatorUid(UserContext.currentUserId());
+                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                energyMeterTaskProvider.updateEnergyMeterTask(task);
+                energyMeterTaskSearcher.feedDoc(task);
+
+
+                EnergyMeterReadingLog readingLog = new EnergyMeterReadingLog();
+                readingLog.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                readingLog.setTaskId(read.getTaskId());
+                readingLog.setReading(read.getCurrReading());
+                readingLog.setCommunityId(meter.getCommunityId());
+                readingLog.setMeterId(meter.getId());
+                readingLog.setNamespaceId(UserContext.getCurrentNamespaceId(task.getNamespaceId()));
+                readingLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                readingLog.setOperatorId(UserContext.currentUserId());
+                readingLog.setResetMeterFlag(read.getResetMeterFlag() != null ? read.getResetMeterFlag() : TrueOrFalseFlag.FALSE.getCode());
+                dbProvider.execute(r -> {
+                    meterReadingLogProvider.createEnergyMeterReadingLog(readingLog);
+                    meter.setLastReading(readingLog.getReading());
+                    meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
+                    meterProvider.updateEnergyMeter(meter);
+                    return true;
+                });
+                readingLogSearcher.feedDoc(readingLog);
+                meterSearcher.feedDoc(meter);
+
+                log.setErrorCode(ErrorCodes.SUCCESS);
+                logs.add(log);
+            });
+            response.setLogs(logs);
+        }
+        return response;
+    }
+
     @Override
     public void readTaskMeter(ReadTaskMeterCommand cmd) {
         EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(cmd.getTaskId());
@@ -4496,5 +4705,135 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
         });
         return errorDataLogs;
+    }
+
+    private Timestamp dateStrToTimestamp(String str) {
+        if(str != null) {
+            LocalDateTime localDate = LocalDateTime.parse(str,dateSF);
+            Timestamp ts = Timestamp.valueOf(localDate);
+            return ts;
+        }
+        return null;
+    }
+
+    @Override
+    public SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd) {
+        SyncOfflineDataResponse response = new SyncOfflineDataResponse();
+        Timestamp buildingUpdateTime = dateStrToTimestamp(cmd.getBuildingUpdateTime());
+        Timestamp categoryUpdateTime = dateStrToTimestamp(cmd.getCategoryUpdateTime());
+        Timestamp taskUpdateTime = dateStrToTimestamp(cmd.getTaskUpdateTime());
+        List<EnergyMeterCategory> categoryList = new ArrayList<>();
+        categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
+                null, null, cmd.getCommunityId(), categoryUpdateTime);
+        List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+        if(categoryMaps != null && categoryMaps.size() > 0) {
+            List<Long> categoryIds = categoryMaps.stream().map(map -> {
+                return map.getCategoryId();
+            }).collect(Collectors.toList());
+            List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
+            if(categories != null && categories.size() > 0) {
+                categoryList.addAll(categories);
+            }
+        }
+        List<EnergyMeterCategoryDTO> dtos = categoryList.stream().map(category -> {
+            EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
+            if(category.getUpdateTime() == null) {
+                category.setUpdateTime(category.getCreateTime());
+            }
+            dto.setLastTime(category.getUpdateTime().toLocalDateTime().format(dateSF));
+            return dto;
+        }).collect(Collectors.toList());
+        response.setCategoryDTOs(dtos);
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<com.everhomes.community.Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE-1,
+                cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null, buildingUpdateTime);
+        List<BuildingDTO> buildingDTOs = buildings.stream().map((r) -> {
+            BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
+            dto.setBuildingName(dto.getName());
+            dto.setName(org.apache.commons.lang.StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+            if(r.getOperateTime() == null) {
+                r.setOperateTime(r.getCreateTime());
+            }
+            dto.setLastTime(r.getOperateTime().toLocalDateTime().format(dateSF));
+            return dto;
+        }).collect(Collectors.toList());
+        response.setBuildings(buildingDTOs);
+
+        List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+        List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
+        if (maps != null && maps.size() > 0) {
+            List<Long> planIds = maps.stream().map(map -> {
+                return map.getPlanId();
+            }).collect(Collectors.toList());
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
+                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
+
+            if(tasks != null && tasks.size() > 0) {
+                Set<Long> meterIds = new HashSet<>();
+                List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
+                    meterIds.add(task.getMeterId());
+                    EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
+                    if(task.getUpdateTime() == null) {
+                        task.setUpdateTime(task.getCreateTime());
+                    }
+                    dto.setLastTime(task.getUpdateTime().toLocalDateTime().format(dateSF));
+                    EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                    dto.setBillCategoryId(meter.getBillCategoryId());
+                    // 项目
+                    EnergyMeterCategory billCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(task.getNamespaceId()), meter.getBillCategoryId());
+                    dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
+
+                    dto.setMeterName(meter.getName());
+                    dto.setMeterNumber(meter.getMeterNumber());
+                    dto.setMeterType(meter.getMeterType());
+                    dto.setMaxReading(meter.getMaxReading());
+                    dto.setStartReading(meter.getStartReading());
+                    dto.setMeterStatus(meter.getStatus());
+                    // 日读表差
+                    dto.setDayPrompt(this.processDayPrompt(meter, meter.getNamespaceId()));
+                    // 月读表差
+                    dto.setMonthPrompt(this.processMonthPrompt(meter, meter.getNamespaceId()));
+                    List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
+                    if(addressMap != null && addressMap.size() > 0) {
+                        dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
+                        dto.setBuildingId(addressMap.get(0).getBuildingId());
+                        dto.setBuildingName(addressMap.get(0).getBuildingName());
+                        dto.setApartmentName(addressMap.get(0).getApartmentName());
+                    }
+                    return dto;
+                }).collect(Collectors.toList());
+                response.setTaskDTOs(taskDTOs);
+
+                List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterIds(cmd.getNamespaceId(), meterIds);
+                if(logs != null && logs.size() > 0) {
+                    List<EnergyMeterReadingLogDTO> logDTOs = new ArrayList<>();
+                    logs.forEach(log -> {
+                        EnergyMeterReadingLogDTO logDTO = ConvertHelper.convert(log, EnergyMeterReadingLogDTO.class);
+                        EnergyMeter meter = meterProvider.findById(log.getNamespaceId(), log.getMeterId());
+                        if(meter != null) {
+                            logDTO.setMeterType(meter.getMeterType());
+                            logDTO.setMeterNumber(meter.getMeterNumber());
+                            logDTO.setMeterName(meter.getName());
+                            logDTO.setOrganizationId(meter.getOwnerId());
+
+                            List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+                            if(existAddress != null && existAddress.size() > 0) {
+                                logDTO.setMeterAddress(existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+                            }
+
+                        }
+                        User operator = userProvider.findUserById(log.getOperatorId());
+                        if(operator != null) {
+                            logDTO.setOperatorName(operator.getNickName());
+                        }
+                        logDTOs.add(logDTO);
+                    });
+                    response.setLogDTOs(logDTOs);
+                }
+            }
+
+        }
+        return response;
     }
 }

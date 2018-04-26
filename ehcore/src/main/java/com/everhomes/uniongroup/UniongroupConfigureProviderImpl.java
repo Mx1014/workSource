@@ -443,6 +443,33 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 //        return null;
     }
 
+    //获取当前版本
+    @Override
+    public List<UniongroupMemberDetail> listUniongroupMemberDetail(List<Long> groupIds, Integer versionCode) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode == null ? DEFAULT_VERSION_CODE:versionCode))
+                .fetch().map(r -> {
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                });
+        if (list != null && list.size() != 0) {
+            return list;
+        }
+        return null;
+    }
     @Override
     public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType) {
         this.deleteUniongroupMemberDetailsByDetailIds(detailIds, groupType, null);
@@ -834,9 +861,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
 
 
-        List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("detail_id")).orderBy(t1.field("id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
+        List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("id")).orderBy(t1.field("id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
+        LOGGER.debug("listDetailNotInUniongroup 's real sql is :" + step);
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
-
         locator.setAnchor(null);
         if (details.size() >= pageSize) {
             details.remove(details.size() - 1);

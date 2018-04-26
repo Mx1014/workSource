@@ -4,9 +4,9 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.everhomes.rest.salary.SalaryGroupStatus;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroups.class));
 		salaryGroup.setId(id);
 		salaryGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroup.setCreatorUid(UserContext.current().getUser().getId());
+		salaryGroup.setCreatorUid(UserContext.currentUserId());
 //		salaryGroup.setUpdateTime(salaryGroup.getCreateTime());
 //		salaryGroup.setOperatorUid(salaryGroup.getCreatorUid());
 		getReadWriteDao().insert(salaryGroup);
@@ -65,7 +65,37 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
 	}
-	
+
+	@Override
+	public String getMonthByOwnerId(Long ownerId) {
+		Record1<String> record = getReadOnlyContext().select(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.max()).from(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.fetchAny();
+		if (null == record) {
+			return null;
+		}
+		return record.value1();
+	}
+
+	@Override
+	public SalaryGroup findSalaryGroup(Long ownerId, String month) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(month))
+				.fetchAny();
+		if (null == record) {
+			return null;
+		}
+		return ConvertHelper.convert(record, SalaryGroup.class);
+	}
+
+	@Override
+	public void deleteSalaryGroup(Long ownerId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.execute();
+	}
+
 	private EhSalaryGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
@@ -89,65 +119,4 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-
-	@Override
-	public List<SalaryGroup> listSalaryGroup(String ownerType, Long ownerId, String period,
-			List<Byte> status) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
-				.where(Tables.EH_SALARY_GROUPS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(period))
-				.and(Tables.EH_SALARY_GROUPS.STATUS.in(status))
-				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
-	}
-
-	@Override
-	public List<SalaryGroup> listSalaryGroup(Byte status, Timestamp date) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
-				.where(Tables.EH_SALARY_GROUPS.STATUS.eq(status))
-				.and(Tables.EH_SALARY_GROUPS.SEND_TIME.lessOrEqual(date))
-				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
-	}
-
-	@Override
-	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
-		getReadWriteContext().update(Tables.EH_SALARY_GROUPS).set(Tables.EH_SALARY_GROUPS.EMAIL_CONTENT, emailContent)
-				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SALARY_GROUPS.OWNER_TYPE.eq(ownerType)).execute();
-	}
-
-	@Override
-	public void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod) {
-		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS)
-				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(organizationGroupId))
-				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(salaryPeriod)).execute();
-	}
-
-	@Override
-	public SalaryGroup findSalaryGroupByOrgId(Long id, String lastPeriod) {
-		Record result = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
-				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(id))
-				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(lastPeriod))
-				.fetchOne();
-		if(null == result)
-			return null;
-		return ConvertHelper.convert(result, SalaryGroup.class);
-	}
-
-	@Override
-	public List<SalaryGroup> listUnsendSalaryGroup(Long salaryGroupId) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
-				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_GROUPS.STATUS.ne(SalaryGroupStatus.SENDED.getCode()))
-				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
-	}
-
-	@Override
-	public void deleteSalaryGroup(SalaryGroup salaryGroup) {
-		getReadWriteDao().delete(salaryGroup);
-	}
-
 }

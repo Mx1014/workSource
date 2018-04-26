@@ -236,7 +236,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     }
 
     private FlowDTO createFlow(ParkingLot parkingLot) {
-        Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
+        Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, null,null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
         if(flow != null) {
             flowService.disableFlow(flow.getId());
             flowService.deleteFlow(flow.getId());

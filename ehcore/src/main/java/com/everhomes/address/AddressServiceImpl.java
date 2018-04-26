@@ -84,6 +84,7 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -96,6 +97,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -288,7 +290,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<CommunityDTO>> listNearbyCommunities(ListNearbyCommunityCommand cmd) {
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId();
         final List<CommunityDTO> results = new ArrayList<>();
 
         if (cmd.getCityId() == null && cmd.getLatigtue() == null && cmd.getLongitude() == null)
@@ -303,9 +305,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //        CommunityDTO testDto = ConvertHelper.convert(communityProvider.findCommunityById(240111044331051304l), CommunityDTO.class);
 //        results.add(testDto);
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
-        List<Long> communityIds = getAllCommunityIds(pointList);
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(null);
+        List<Community> coms = this.communityProvider.listCommunitiesByKeyWord(locator, 100, null, namespaceId, cmd.getCommunityType());
+        for(Community r : coms) {
+            CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+            if(cmd.getCityId() != null && !cmd.getCityId().equals(community.getCityId())) {
+                continue;
+            }
+            
+            if (null == cmd.getCommunityType()) {
+                results.add(community);
+            } else {
+                if (cmd.getCommunityType().equals(community.getCommunityType())) {
+                    results.add(community);
+                }
+            }
+        }
 
+        /* List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
         //select active community by xiongying 20160516
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null,
                 (DSLContext context, Object reducingContext) -> {
@@ -329,7 +349,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     });
 
                     return true;
-                });
+                }); */
+        
+        for(CommunityDTO result : results) {
+            if(result.getName() != null && result.getName().length() > 1) {
+                result.setFirstLatterOfName(PinYinHelper.getCapitalInitial(PinYinHelper.getPinYin(result.getName().substring(0, 1))));    
+            }
+            
+        }
 
 
         return new Tuple<>(ErrorCodes.SUCCESS, results);
@@ -949,6 +976,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long communityId = family.getIntegralTag2();
         Community community = this.communityProvider.findCommunityById(communityId);
         if (community != null) {
+
             familyDTO.setCommunityId(communityId);
             familyDTO.setCommunityName(community.getName());
             familyDTO.setCityId(community.getCityId());
@@ -974,8 +1002,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
         Address address = null;
 
+        Integer namespaceId = UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId());
         if (null == address) {
-            address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(),
+            address = this.addressProvider.findApartmentAddress(namespaceId, cmd.getCommunityId(),
                     cmd.getBuildingName(), cmd.getApartmentName());
         }
 
@@ -990,7 +1019,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             Tuple<Address, Boolean> result = this.coordinationProvider
                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(() -> {
                         long lqStartTime = System.currentTimeMillis();
-                        Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(),
+                        Address addr = this.addressProvider.findApartmentAddress(namespaceId, cmd.getCommunityId(),
                                 cmd.getBuildingName(), cmd.getApartmentName());
                         long lqEndTime = System.currentTimeMillis();
                         LOGGER.info("find address ,in the lock,elapse=" + (lqEndTime - lqStartTime));
@@ -1008,6 +1037,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             addr.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
                             addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
                             addr.setCreatorUid(userId);
+                            addr.setNamespaceId(namespaceId);
                             this.addressProvider.createAddress(addr);
                         }
                         long lcEndTime = System.currentTimeMillis();
@@ -1141,12 +1171,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return null;
     }
 
+    /**
+     * 搜索小区
+     * @param cmd
+     * @return
+     */
     @Override
     public List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd) {
-        if (cmd.getKeyword() == null) {
+        /*if (cmd.getKeyword() == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid keyword paramter.");
-        }
+        }*/
         int pageNum = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
@@ -1156,6 +1191,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
+        if (userId == 1) //超级管理员
+            return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -1181,7 +1218,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId, buildingName parameter");
 
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        long userId = cmd.getUserId()==null?user.getId():cmd.getUserId();
 
         checkUserPrivilege(userId, cmd.getCommunityId());
 
@@ -1191,9 +1228,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
         ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
-        //修改为整个小区有人住门牌数
+
         int totalCount = this.addressProvider.countApartmentsByBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
-        if (totalCount == 0) return response;
+//        if (totalCount == 0) return response;
 
         List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
                 cmd.getBuildingName(), offset, pageSize);
@@ -1920,10 +1957,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				errorLogs.add(log);
 				continue;
 			}
-			
+
+            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+			if(address != null) {
+                log.setData(data);
+                log.setErrorLog("apartment name is exist in building");
+                log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);
+                errorLogs.add(log);
+                continue;
+            }
+
+            double areaSize = 0;
+            double chargeArea = 0;
+            double rentArea = 0;
+            double shareArea = 0;
+
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
-					Double.parseDouble(data.getAreaSize());
+                    areaSize = Double.parseDouble(data.getAreaSize());
 				} catch (Exception e) {
 					log.setData(data);
 					log.setErrorLog("area size is not number");
@@ -1935,7 +1986,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getChargeArea())) {
                 try {
-                    Double.parseDouble(data.getChargeArea());
+                    chargeArea = Double.parseDouble(data.getChargeArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("charge area is not number");
@@ -1947,7 +1998,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getRentArea())) {
                 try {
-                    Double.parseDouble(data.getRentArea());
+                    rentArea = Double.parseDouble(data.getRentArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("rent area is not number");
@@ -1959,7 +2010,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getSharedArea())) {
                 try {
-                    Double.parseDouble(data.getSharedArea());
+                    shareArea = Double.parseDouble(data.getSharedArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("share area is not number");
@@ -1969,7 +2020,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
             }
 			
-			importApartment(community, data);
+			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
 
         updateCommunityAptCount(community);
@@ -1977,7 +2028,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data) {
+	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double shareArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
         Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
@@ -1993,18 +2044,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
             }
-        }
-
-        double areaSize = 0;
-        double chargeArea = 0;
-        double rentArea = 0;
-        double shareArea = 0;
-        try {
-            areaSize = Double.parseDouble(data.getAreaSize());
-            chargeArea = Double.parseDouble(data.getChargeArea());
-            rentArea = Double.parseDouble(data.getRentArea());
-            shareArea = Double.parseDouble(data.getSharedArea());
-        } catch (Exception e) {
         }
 
         Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());

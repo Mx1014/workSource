@@ -1,7 +1,11 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.portal.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/portal")
@@ -54,6 +60,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createServiceModuleApp")
 	@RestReturn(ServiceModuleAppDTO.class)
 	public RestResponse createServiceModuleApp(CreateServiceModuleAppCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.createServiceModuleApp(cmd));
 	}
 
@@ -64,6 +74,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("batchCreateServiceModuleApp")
 	@RestReturn(value = ServiceModuleAppDTO.class, collection = true)
 	public RestResponse batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.batchCreateServiceModuleApp(cmd));
 	}
 
@@ -74,6 +88,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updateServiceModuleApp")
 	@RestReturn(ServiceModuleAppDTO.class)
 	public RestResponse updateServiceModuleApp(UpdateServiceModuleAppCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.updateServiceModuleApp(cmd));
 	}
 
@@ -84,6 +102,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("setServiceModuleAppInstanceConfig")
 	@RestReturn(String.class)
 	public RestResponse setServiceModuleAppInstanceConfig(SetServiceModuleAppInstanceConfigCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse();
 	}
 
@@ -94,6 +116,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deleteServiceModuleApp")
 	@RestReturn(String.class)
 	public RestResponse deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deleteServiceModuleApp(cmd);
 		return new RestResponse();
 	}
@@ -125,6 +151,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalLayout")
 	@RestReturn(PortalLayoutDTO.class)
 	public RestResponse createPortalLayout(CreatePortalLayoutCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.createPortalLayout(cmd);
 		return new RestResponse();
 	}
@@ -136,6 +166,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updatePortalLayout")
 	@RestReturn(PortalLayoutDTO.class)
 	public RestResponse updatePortalLayout(UpdatePortalLayoutCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.updatePortalLayout(cmd);
 		return new RestResponse();
 	}
@@ -147,6 +181,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deletePortalLayout")
 	@RestReturn(String.class)
 	public RestResponse deletePortalLayout(DeletePortalLayoutCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deletePortalLayout(cmd);
 		return new RestResponse();
 	}
@@ -168,6 +206,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalItemGroup")
 	@RestReturn(PortalItemGroupDTO.class)
 	public RestResponse createPortalItemGroup(CreatePortalItemGroupCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.createPortalItemGroup(cmd));
 	}
 
@@ -178,6 +220,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updatePortalItemGroup")
 	@RestReturn(PortalItemGroupDTO.class)
 	public RestResponse updatePortalItemGroup(UpdatePortalItemGroupCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.updatePortalItemGroup(cmd));
 	}
 
@@ -188,6 +234,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deletePortalItemGroup")
 	@RestReturn(String.class)
 	public RestResponse deletePortalItemGroup(DeletePortalItemGroupCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deletePortalItemGroup(cmd);
 		return new RestResponse();
 	}
@@ -209,6 +259,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalItem")
 	@RestReturn(PortalItemDTO.class)
 	public RestResponse createPortalItem(CreatePortalItemCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.createPortalItem(cmd));
 	}
 
@@ -219,6 +273,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updatePortalItem")
 	@RestReturn(PortalItemDTO.class)
 	public RestResponse updatePortalItem(UpdatePortalItemCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.updatePortalItem(cmd));
 	}
 
@@ -229,6 +287,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deletePortalItem")
 	@RestReturn(String.class)
 	public RestResponse deletePortalItem(DeletePortalItemCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deletePortalItem(cmd);
 		return new RestResponse();
 	}
@@ -240,6 +302,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("setPortalItemStatus")
 	@RestReturn(String.class)
 	public RestResponse setPortalItemStatus(SetPortalItemStatusCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.setPortalItemStatus(cmd);
 		return new RestResponse();
 	}
@@ -251,6 +317,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("setPortalItemActionData")
 	@RestReturn(String.class)
 	public RestResponse setPortalItemActionData(SetPortalItemActionDataCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.setPortalItemActionData(cmd);
 		return new RestResponse();
 	}
@@ -262,6 +332,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("setItemCategoryDefStyle")
 	@RestReturn(String.class)
 	public RestResponse setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.setItemCategoryDefStyle(cmd);
 		return new RestResponse();
 	}
@@ -273,6 +347,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("reorderPortalItem")
 	@RestReturn(String.class)
 	public RestResponse reorderPortalItem(ReorderPortalItemCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.reorderPortalItem(cmd);
 		return new RestResponse();
 	}
@@ -284,6 +362,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("reorderPortalItemGroup")
 	@RestReturn(String.class)
 	public RestResponse reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.reorderPortalItemGroup(cmd);
 		return new RestResponse();
 	}
@@ -336,6 +418,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalItemCategory")
 	@RestReturn(PortalItemCategoryDTO.class)
 	public RestResponse createPortalItemCategory(CreatePortalItemCategoryCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.createPortalItemCategory(cmd));
 	}
 
@@ -346,6 +432,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updatePortalItemCategory")
 	@RestReturn(PortalItemCategoryDTO.class)
 	public RestResponse updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.updatePortalItemCategory(cmd));
 	}
 
@@ -356,6 +446,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deletePortalItemCategory")
 	@RestReturn(String.class)
 	public RestResponse deletePortalItemCategory(DeletePortalItemCategoryCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deletePortalItemCategory(cmd);
 		return new RestResponse();
 	}
@@ -367,6 +461,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("reorderPortalItemCategory")
 	@RestReturn(String.class)
 	public RestResponse reorderPortalItemCategory(ReorderPortalItemCategoryCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.reorderPortalItemCategory(cmd);
 		return new RestResponse();
 	}
@@ -378,6 +476,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("rankPortalItemCategory")
 	@RestReturn(String.class)
 	public RestResponse rankPortalItemCategory(RankPortalItemCategoryCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.rankPortalItemCategory(cmd);
 		return new RestResponse();
 	}
@@ -409,6 +511,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalNavigationBar")
 	@RestReturn(String.class)
 	public RestResponse createPortalNavigationBar(CreatePortalNavigationBarCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.createPortalNavigationBar(cmd));
 	}
 
@@ -419,6 +525,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("updatePortalNavigationBar")
 	@RestReturn(PortalNavigationBarDTO.class)
 	public RestResponse updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.updatePortalNavigationBar(cmd));
 	}
 
@@ -429,6 +539,10 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("deletePortalNavigationBar")
 	@RestReturn(PortalNavigationBarDTO.class)
 	public RestResponse deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.deletePortalNavigationBar(cmd);
 		return new RestResponse();
 	}
@@ -440,6 +554,9 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("publish")
 	@RestReturn(PortalPublishLogDTO.class)
 	public RestResponse publish(PublishCommand cmd){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		return new RestResponse(portalService.publish(cmd));
 	}
 
@@ -484,13 +601,83 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>获取版本</p>
+	 * <b>URL: /portal/listPortalVersions</b>
+	 */
+	@RequestMapping("listPortalVersions")
+	@RestReturn(ListPortalVersionResponse.class)
+	public RestResponse listPortalVersions(ListPortalVersionCommand cmd){
+		ListPortalVersionResponse res = portalService.listPortalVersions(cmd);
+
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <p>服务广场的数据同步到配置表</p>
 	 * <b>URL: /portal/syncLaunchPadData</b>
 	 */
 	@RequestMapping("syncLaunchPadData")
 	@RestReturn(String.class)
-	public RestResponse syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+	public RestResponse syncLaunchPadData(@Valid SyncLaunchPadDataCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		portalService.syncLaunchPadData(cmd);
 		return new RestResponse();
 	}
+
+	/**
+	 * <p>更新预览版本用户</p>
+	 * <b>URL: /portal/updatePortalVersionUser</b>
+	 */
+	@RequestMapping("updatePortalVersionUser")
+	@RestReturn(String.class)
+	public RestResponse updatePortalVersionUser(UpdatePortalVersionUsersCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		portalService.updatePortalVersionUsers(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>获取预览版本用户</p>
+	 * <b>URL: /portal/listPortalVersionUsers</b>
+	 */
+	@RequestMapping("listPortalVersionUsers")
+	@RestReturn(ListPortalVersionUsersResponse.class)
+	public RestResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd){
+		ListPortalVersionUsersResponse res = portalService.listPortalVersionUsers(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>小版本回滚</p>
+	 * <b>URL: /portal/revertVersion</b>
+	 */
+	@RequestMapping("revertVersion")
+	@RestReturn(String.class)
+	public RestResponse revertVersion(RevertVersionCommand cmd){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		portalService.revertVersion(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

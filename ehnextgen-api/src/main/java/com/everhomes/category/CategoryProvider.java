@@ -9,7 +9,7 @@ import com.everhomes.util.Tuple;
 
 @SuppressWarnings("unchecked")
 public interface CategoryProvider {
-    void createCategory(Category category);
+    Long createCategory(Category category);
     void updateCategory(Category category);
     void deleteCategory(Category category);
     void deleteCategoryById(long id);
@@ -25,7 +25,8 @@ public interface CategoryProvider {
     
     List<Category> listBusinessSubCategories(long categoryId, CategoryAdminStatus status, Tuple<String, SortOrder>... orderBy);
     List<Long> getBusinessSubCategories(long categoryId);
-    
-    List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, Long pageAnchor, Integer pageSize);
-	Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName);
+
+    List<Category> listTaskCategories(Integer namespaceId,String ownerType,Long ownerId, Long parentId, String keyword,
+                                      Long pageAnchor, Integer pageSize);
+	Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,Long ownerId, String categoryName);
 }

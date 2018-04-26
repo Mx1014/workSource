@@ -26,6 +26,8 @@ import java.util.List;
  * <li>contractPartyId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
+ * <li>socialSecurityStartMonth: 社保增员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
+ * <li>accumulationFundStartMonth: 公积金增员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
  * </ul>
  */
 public class AddArchivesEmployeeCommand {
@@ -38,13 +40,13 @@ public class AddArchivesEmployeeCommand {
 
     private Byte gender;
 
-    private Date checkInTime;
+    private String checkInTime;
 
     private Byte employeeType;
 
     private Byte employeeStatus;
 
-    private Date employmentTime;
+    private String employmentTime;
 
     @ItemType(Long.class)
     private List<Long> departmentIds;
@@ -66,6 +68,11 @@ public class AddArchivesEmployeeCommand {
     private String regionCode;
 
     private String contactToken;
+
+    //  added by Rong for social security at 01.05-2018
+    private Byte socialSecurityStartMonth;
+
+    private Byte accumulationFundStartMonth;
 
     public AddArchivesEmployeeCommand() {
     }
@@ -94,12 +101,12 @@ public class AddArchivesEmployeeCommand {
         this.gender = gender;
     }
 
-    public Date getCheckInTime() {
+    public String getCheckInTime() {
         return checkInTime;
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = ArchivesUtil.parseDate(checkInTime);
+        this.checkInTime = checkInTime;
     }
 
     public Byte getEmployeeType() {
@@ -118,12 +125,12 @@ public class AddArchivesEmployeeCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public Date getEmploymentTime() {
+    public String getEmploymentTime() {
         return employmentTime;
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
+        this.employmentTime = employmentTime;
     }
 
     public List<Long> getDepartmentIds() {
@@ -204,6 +211,22 @@ public class AddArchivesEmployeeCommand {
 
     public void setContactToken(String contactToken) {
         this.contactToken = contactToken;
+    }
+
+    public Byte getSocialSecurityStartMonth() {
+        return socialSecurityStartMonth;
+    }
+
+    public void setSocialSecurityStartMonth(Byte socialSecurityStartMonth) {
+        this.socialSecurityStartMonth = socialSecurityStartMonth;
+    }
+
+    public Byte getAccumulationFundStartMonth() {
+        return accumulationFundStartMonth;
+    }
+
+    public void setAccumulationFundStartMonth(Byte accumulationFundStartMonth) {
+        this.accumulationFundStartMonth = accumulationFundStartMonth;
     }
 
     @Override

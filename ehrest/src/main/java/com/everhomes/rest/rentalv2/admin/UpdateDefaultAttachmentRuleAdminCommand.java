@@ -24,7 +24,10 @@ public class UpdateDefaultAttachmentRuleAdminCommand {
 	@NotNull
 	private Long ownerId;
 	@NotNull
-	private Long resourceTypeId; 
+	private Long resourceTypeId;
+
+	private String resourceType;
+
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments; 
 
@@ -32,6 +35,14 @@ public class UpdateDefaultAttachmentRuleAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public String getOwnerType() {
 		return ownerType;

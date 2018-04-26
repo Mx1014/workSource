@@ -8,5 +8,7 @@ public interface TaskServiceErrorCode {
     static final int INSUFFICIENT_PRIVILEGES = 10002;  //权限不足
 
     static final int TASK_ALREADY_SUCCESS = 10003;  //任务已执行完成，不可取消
+
+    static final int TASK_CANCEL_FAIL = 10004;  //任务取消失败
 }
 

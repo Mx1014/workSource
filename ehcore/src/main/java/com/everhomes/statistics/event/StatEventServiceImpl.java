@@ -79,7 +79,11 @@ public class StatEventServiceImpl implements StatEventService {
         String versionRealm = context.getVersionRealm();
         deviceLog.setVersionRealm(versionRealm);
         if (versionRealm != null) {
-            String osTypeStr = versionRealm.substring(0, versionRealm.indexOf("_"));
+            int endIndex = versionRealm.indexOf("_");
+            String osTypeStr = versionRealm;
+            if (endIndex > -1) {
+                osTypeStr = versionRealm.substring(0, endIndex);
+            }
             deviceLog.setOsType(OSType.fromString(osTypeStr).getCode());
         }
 

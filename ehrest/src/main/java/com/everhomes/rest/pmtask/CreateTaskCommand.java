@@ -33,6 +33,8 @@ public class CreateTaskCommand {
 	private String address;
 	private String content;
 	private Long organizationId;
+	private String referType;
+	private Long referId;
 
 	
 	private Long taskCategoryId;
@@ -51,6 +53,33 @@ public class CreateTaskCommand {
 	private String organizationName;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getFlowOrganizationId() {
 		return flowOrganizationId;
@@ -158,6 +187,22 @@ public class CreateTaskCommand {
 	}
 	public String getBuildingName() {
 		return buildingName;
+	}
+
+	public String getReferType() {
+		return referType;
+	}
+
+	public void setReferType(String referType) {
+		this.referType = referType;
+	}
+
+	public Long getReferId() {
+		return referId;
+	}
+
+	public void setReferId(Long referId) {
+		this.referId = referId;
 	}
 
 	public void setBuildingName(String buildingName) {

@@ -16,6 +16,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -189,7 +190,7 @@ class PmTaskCommonServiceImpl {
         }
 
         User user = UserContext.current().getUser();
-        Integer namespaceId = user.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         String ownerType = cmd.getOwnerType();
         Long ownerId = cmd.getOwnerId();
         Long taskCategoryId = cmd.getTaskCategoryId();
@@ -213,8 +214,9 @@ class PmTaskCommonServiceImpl {
         task.setCreatorUid(user.getId());
         task.setCreateTime(now);
         //代发，设置创建者为被代发的人（如果是注册用户）userId
-        if (null != cmd.getOrganizationId() && null != requestorUid) {
-            task.setCreatorUid(requestorUid);
+        if (null != cmd.getOrganizationId()) {
+            if (null!=requestorUid)
+              task.setCreatorUid(requestorUid);
             task.setOrganizationUid(user.getId());
         }
         if(null != cmd.getReserveTime())
@@ -227,17 +229,19 @@ class PmTaskCommonServiceImpl {
         task.setRequestorPhone(requestorPhone);
         task.setOrganizationName(cmd.getOrganizationName());
         task.setIfUseFeelist((byte)0);
+        task.setReferType(cmd.getReferType());
+        task.setReferId(cmd.getReferId());
 
         //设置门牌地址,楼栋地址,服务地点
 
-        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
-        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
-            task.setAddress(cmd.getAddress());
-            task.setAddressType(cmd.getAddressType());
-        }
-        else {
+//        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
+//        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
+//            task.setAddress(cmd.getAddress());
+//            task.setAddressType(cmd.getAddressType());
+//        }
+//        else {
             setPmTaskAddressInfo(cmd, task);
-        }
+//        }
         pmTaskProvider.createTask(task);
         //附件
         addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());

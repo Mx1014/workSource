@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>contentType: 附件类型IMAGE("image"): 图片 AUDIO("audio"): 音频 VIDEO("video"): 视频 </li>
  *  <li>contentUri: 附件访问URI</li>
  *  <li>contentUrl: 附件访问URL</li>
+ *  <li>name: 附件名称</li>
  *  <li>creatorUid: 创建人id</li>
  *  <li>createTime: 创建时间</li>
  * </ul>
@@ -28,6 +29,8 @@ public class EquipmentAttachmentDTO {
 	private String contentUri;
 	
 	private String contentUrl;
+
+	private String name;
 	
 	private Long creatorUid;
 	
@@ -79,6 +82,14 @@ public class EquipmentAttachmentDTO {
 
 	public void setContentUrl(String contentUrl) {
 		this.contentUrl = contentUrl;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Long getCreatorUid() {

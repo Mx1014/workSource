@@ -7,11 +7,12 @@ import com.everhomes.util.StringHelper;
  *  <li>0: none</li>
  *  <li>1: qualified</li>
  *  <li>2: unqualified</li>
+ *  <li>3: 未发起</li>
  * </ul>
  * Created by ying.xiong on 2017/5/17.
  */
 public enum ReviewResult {
-    NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2);
+    NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2), UNINITIALIZED((byte)3);
     private byte code;
 
     private ReviewResult(byte code){

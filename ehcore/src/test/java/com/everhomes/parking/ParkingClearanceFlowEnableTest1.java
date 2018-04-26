@@ -126,7 +126,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	String flowName = "车辆放行工作流";
     	Flow flow = flowProvider.findFlowByName(namespaceId, moduleId
-    			, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
+    			, null, null, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
     	if(flow != null) {
     		flowService.disableFlow(flow.getId());
     		flowService.deleteFlow(flow.getId());

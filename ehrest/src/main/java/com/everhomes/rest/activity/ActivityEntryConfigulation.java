@@ -7,26 +7,24 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * 
  * <ul>
- * <li>id: id</li>
- * <li>name: 名称</li>
- * <li>entryId: 实际入口id</li>
- * <li>publishPrivilege: 活动发布模式，参考 {@link com.everhomes.rest.common.ActivityPublishPrivilegeFlag}</li>
- * <li>livePrivilege: 是否支持直播，参考{@link VideoSupportType}</li>
- * <li>listStyle: 活动列表样式，参考{@link com.everhomes.rest.common.ActivityListStyleFlag}</li>
- * <li>scope：活动可见范围，参考{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
- * <li>style: 主题分类项的样式，参考{@link com.everhomes.rest.widget.AssociactionCategoryStyle}</li>
- * <li>categoryFlag: 是否有主题分类 0-无，1-有</li>
- * <li>categoryDTOList: 子分类</li>
+ *     <li>id: id</li>
+ *     <li>name: 名称</li>
+ *     <li>publishPrivilege: 活动发布模式，参考 {@link com.everhomes.rest.common.ActivityPublishPrivilegeFlag}</li>
+ *     <li>livePrivilege: 是否支持直播，参考{@link VideoSupportType}</li>
+ *     <li>listStyle: 活动列表样式，参考{@link com.everhomes.rest.common.ActivityListStyleFlag}</li>
+ *     <li>scope: 活动可见范围，参考{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
+ *     <li>style: 主题分类项的样式，参考{@link com.everhomes.rest.widget.AssociactionCategoryStyle}</li>
+ *     <li>categoryFlag: 是否有主题分类 0-无，1-有</li>
+ *     <li>categoryId: categoryId</li>
+ *     <li>indexFlag: 是否关联到主页签上的活动，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>categoryDTOList: 子分类 {@link com.everhomes.rest.activity.ActivityCategoryDTO}</li>
  * </ul>
  */
 public class ActivityEntryConfigulation {
 
 	private Long id;
 	private String name;
-
-	private Long entryId;
 
 	private Byte publishPrivilege;
 
@@ -40,6 +38,10 @@ public class ActivityEntryConfigulation {
 
 	private Byte categoryFlag;
 
+	private Long categoryId;
+
+	private Byte indexFlag;
+
 	@ItemType(ActivityCategoryDTO.class)
 	private List<ActivityCategoryDTO> categoryDTOList;
 
@@ -49,14 +51,6 @@ public class ActivityEntryConfigulation {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Long getEntryId() {
-		return entryId;
-	}
-
-	public void setEntryId(Long entryId) {
-		this.entryId = entryId;
 	}
 
 	public String getName() {
@@ -121,6 +115,22 @@ public class ActivityEntryConfigulation {
 
 	public void setCategoryDTOList(List<ActivityCategoryDTO> categoryDTOList) {
 		this.categoryDTOList = categoryDTOList;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Byte getIndexFlag() {
+		return indexFlag;
+	}
+
+	public void setIndexFlag(Byte indexFlag) {
+		this.indexFlag = indexFlag;
 	}
 
 	@Override

@@ -16,6 +16,8 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 介绍</li>
  *  <li>posterUri: 标题图</li>
  *  <li>type:类型  </li>
+ *  <li>skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
+ *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
  * </ul>
  */
 public class UpdateServiceAllianceCommand {
@@ -37,6 +39,36 @@ public class UpdateServiceAllianceCommand {
 	private String   posterUri;
 	
 	private Long type;
+
+	private Byte displayMode;
+	
+	private Byte skipType;
+	
+	private Integer namespaceId;
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Byte getDisplayMode() {
+		return displayMode;
+	}
+
+	public void setDisplayMode(Byte displayMode) {
+		this.displayMode = displayMode;
+	}
+
+	public Byte getSkipType() {
+		return skipType;
+	}
+
+	public void setSkipType(Byte skipType) {
+		this.skipType = skipType;
+	}
 
 	public Long getId() {
 		return id;

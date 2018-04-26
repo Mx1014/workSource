@@ -6,7 +6,6 @@ import java.util.Map;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
-import org.springframework.cache.annotation.Cacheable;
 
 public interface FlowService {
 	
@@ -463,6 +462,13 @@ public interface FlowService {
 
     SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
 
+    /**
+     * 获取正在执行的任务列表（子任务 or 父任务）
+     * @param flowCaseId  子任务id或者父任务id
+     * @return  正在执行的任务列表 {@link FlowCaseTree}
+     */
+    FlowCaseTree getProcessingFlowCaseTree(Long flowCaseId);
+
     FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
@@ -490,4 +496,9 @@ public interface FlowService {
     void deleteFlowForm(UpdateFlowFormCommand cmd);
 
     FlowFormDTO getFlowForm(FlowIdCommand cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType,
+                                                 Long userId, String referType, Long referId, boolean needFlowButton);
+
+    GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd);
 }

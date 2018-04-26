@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,20 @@ public class PropMrgOwnerHandler
 	 private static final Logger LOGGER = LoggerFactory.getLogger(PropMrgOwnerHandler.class);
 	 
 	 private static final String[] PRELOAD_CLASSES = new String[]{"org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorkbook"};
-	
+
+	/******* 数字转换(1-A,2-B...) *******/
+	public static String GetExcelLetter(int n) {
+		String s = "";
+		while (n > 0) {
+			int m = n % 26;
+			if (m == 0)
+				m = 26;
+			s = (char) (m + 64) + s;
+			n = (n - m) / 26;
+		}
+		return s;
+	}
+
 	public static ArrayList processorExcel(File file)
 	{
 		ArrayList resultList = new ArrayList();

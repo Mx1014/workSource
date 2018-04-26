@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.community.CommunityProvider;
@@ -255,7 +256,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         BigDecimal amountReceivable = new BigDecimal("0");
         BigDecimal amountOwed = new BigDecimal("0");
@@ -295,7 +296,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountOwed(amount2);
             amountOwed = amountOwed.add(amount2);
             dto.setBillItemName(source.getFiCategory());
-            dto.setAddressName(source.getBuildingRename());
+            dto.setAddressName(source.getBuildingRename()==null?"":source.getBuildingRename());
             list.add(dto);
         }
         response.setShowBillDetailForClientDTOList(list);
@@ -544,6 +545,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return list;
     }
 
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
@@ -556,3 +564,4 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 }
+

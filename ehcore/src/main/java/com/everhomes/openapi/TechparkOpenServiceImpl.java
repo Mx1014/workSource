@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.everhomes.asset.AssetService;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.customer.CustomerType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.formula.functions.Count;
@@ -122,6 +124,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+
+	@Autowired
+	private AssetService assetService;
 	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
@@ -740,7 +745,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 								//改成以下方式，否则es中的数据无法删除
 								DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
 								deleteOrganizationIdCommand.setId(myOrganization.getId());
-								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand,false);
 								deleteContracts(myOrganization);
 							}
 							return true;
@@ -828,6 +833,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
 		organization.setNamespaceOrganizationToken(customerRental.getNumber());
 		organizationProvider.createOrganization(organization);
+		assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
 		return organization;
 	}
 

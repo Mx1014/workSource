@@ -90,4 +90,6 @@ public class ImportFileResponse<T> {
 	public void setFileLog(String fileLog) {
 		this.fileLog = fileLog;
 	}
+
+
 }

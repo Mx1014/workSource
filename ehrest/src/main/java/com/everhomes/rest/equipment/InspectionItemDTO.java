@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>valueType: 巡检项类型0-none、1-two-tuple、2-range</li>
  *  <li>unit: 单位</li>
  *  <li>valueJason: 值，包含参考值referenceValue和偏差范围offsetRange</li>
+ *  <li>defaultOrder: 巡检项的顺序</li>
  * </ul>
  */
 public class InspectionItemDTO {
@@ -24,7 +25,7 @@ public class InspectionItemDTO {
 	
 	@NotNull
 	private String ownerType;
-	
+
 	private String name;
 	
 	private Byte valueType;
@@ -32,6 +33,11 @@ public class InspectionItemDTO {
 	private String unit;
 	
 	private String valueJason;
+
+	//add for offline
+	private  Long standardId;
+
+	private Integer defaultOrder;
 
 	public Long getId() {
 		return id;
@@ -89,9 +95,35 @@ public class InspectionItemDTO {
 		this.valueJason = valueJason;
 	}
 
+	public Long getStandardId() {
+		return standardId;
+	}
+
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
+	}
+
+	public Integer getDefaultOrder() {
+		return defaultOrder;
+	}
+
+	public void setDefaultOrder(Integer defaultOrder) {
+		this.defaultOrder = defaultOrder;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
+	/*@Override
+	public boolean equals(Object obj) {
+		InspectionItemDTO itemDTO = (InspectionItemDTO) obj;
+		return (obj != null) && (obj.getClass() == this.getClass()) && this.getId().equals(itemDTO.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		 return 7*this.getId().intValue();
+	}*/
 }

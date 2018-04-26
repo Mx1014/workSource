@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 public interface SalaryGroupProvider {
@@ -14,19 +13,9 @@ public interface SalaryGroupProvider {
 
 	List<SalaryGroup> listSalaryGroup();
 
-	List<SalaryGroup> listSalaryGroup(String ownerType, Long ownerId, String period,
-			List<Byte> status);
+	String getMonthByOwnerId(Long ownerId);
 
-	List<SalaryGroup> listSalaryGroup(Byte code, Timestamp date);
+	SalaryGroup findSalaryGroup(Long ownerId, String month);
 
-	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
-
-	void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod);
-
-	SalaryGroup findSalaryGroupByOrgId(Long id, String lastPeriod);
-
-
-	List<SalaryGroup>  listUnsendSalaryGroup(Long salaryGroupId);
-
-	void deleteSalaryGroup(SalaryGroup salaryGroup);
+	void deleteSalaryGroup(Long ownerId);
 }

@@ -1,10 +1,6 @@
 package com.everhomes.PmNotify;
 
-import com.everhomes.energy.EnergyConsumptionService;
-import com.everhomes.energy.EnergyMeter;
-import com.everhomes.energy.EnergyMeterProvider;
-import com.everhomes.energy.EnergyMeterTask;
-import com.everhomes.energy.EnergyMeterTaskProvider;
+import com.everhomes.energy.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -27,11 +23,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmNotify.PmNotifyMode;
-import com.everhomes.rest.pmNotify.PmNotifyReceiver;
-import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
-import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
-import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -54,13 +46,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/9/12.
@@ -112,7 +99,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     private EnergyMeterProvider energyMeterProvider;
 
     @Autowired
-    private EquipmentTasksSearcher equipmentTasksSearcher;
+    private EquipmentTasksSearcher equipmentTaskSearchser;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -184,6 +171,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(record.getReceiverJson(), PmNotifyReceiverList.class);
         LOGGER.info("processPmNotifyRecord receiverList:{}", receiverList);
         if(receiverList != null) {
+
             Set<Long> notifyUsers = resolveUserSelection(receiverList.getReceivers(), record.getOwnerType(), record.getOwnerId());
             String taskName = "";
             Timestamp time = null;
@@ -220,9 +208,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
-                    //add at 20180205
-                    equipmentTasksSearcher.feedDoc(task);
+                    equipmentTaskSearchser.feedDoc(task);
                 }
+//                LOGGER.info("processPmNotifyRecord  smsCode={}",smsCode);
             }
 
             if(EntityType.ENERGY_TASK.getCode().equals(record.getOwnerType())) {
@@ -231,6 +219,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
                 taskName = meter.getName();
                 code = EnergyNotificationTemplateCode.ENERGY_TASK_BEFORE_DELAY;
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("starting proccess sending message to notifyUsers.size={}",notifyUsers.size());
             }
             for (Long userId : notifyUsers) {
 //                if (LOGGER.isDebugEnabled()) {
@@ -258,6 +249,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     default:
                         break;
                 }
+//                if (LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
+//                }
                 pmNotifyProvider.createPmNotifyLog(log);
             }
         }

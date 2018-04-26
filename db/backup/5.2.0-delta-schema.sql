@@ -19,3 +19,7 @@ CREATE TABLE `eh_payment_late_fine`(
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
 -- end of script by wentian
+
+-- deng，云打印相关2018.03.19
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_uri VARCHAR(500);
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_url VARCHAR(500);
