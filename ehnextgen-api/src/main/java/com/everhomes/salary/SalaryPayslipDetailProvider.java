@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface SalaryPayslipDetailProvider {
@@ -23,5 +24,9 @@ public interface SalaryPayslipDetailProvider {
 
 	List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
 			Long payslipId, String name, Byte status);
+
+	List<SalaryPayslipDetail> listSalaryPayslipDetailBypayslipId(Long payslipId);
+
+	void deleteSalaryPayslipDetail(SalaryPayslipDetail spd);
 
 }

@@ -15,4 +15,6 @@ public interface SalaryPayslipProvider {
 
 	List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId, String payslipYear, String Name);
 
+	void deleteSalaryPayslip(Long payslipId);
+
 }
