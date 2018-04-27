@@ -115,10 +115,15 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -332,9 +337,14 @@ public interface CustomerService {
 
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
+    void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member);
     List<OrganizationMemberDTO> listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd);
 
+    SearchRequestInfoResponse listCustomerSeviceAllianceAppRecords(ListCustomerSeviceAllianceAppRecordsCommand cmd);
     List<OrganizationMemberDTO> listCommunityRelatedMembers(ListCommnutyRelatedMembersCommand cmd);
 
+    ListRentalBillsCommandResponse listCustomerRentalBills(ListCustomerRentalBillsCommand cmd);
+
+    String syncResultViewed(SyncResultViewedCommand cmd);
     Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd);
 }

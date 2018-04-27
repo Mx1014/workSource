@@ -260,10 +260,12 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                             .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
                                 .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
             );
+
         }
 
         if(locator.getAnchor() != null) {
     	    cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.le(locator.getAnchor()));
+
         }
         cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.ge(0L));
         return cond;

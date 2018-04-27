@@ -133,4 +133,6 @@ public interface ParkingService {
     void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd);
 
     ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response);
+
+    void refreshToken(RefreshTokenCommand cmd);
 }

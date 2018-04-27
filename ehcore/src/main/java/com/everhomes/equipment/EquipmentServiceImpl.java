@@ -21,6 +21,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
@@ -169,6 +170,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
@@ -197,6 +199,8 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -404,6 +408,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -3678,6 +3685,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private boolean checkCurrentUserisAdmin(Long ownerId, Long userId) {
+		Boolean adminAssign = false;
 		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), userId);
 		if (null != resources && 0 != resources.size()) {
 			for (RoleAssignment resource : resources) {
@@ -3685,11 +3693,30 @@ public class EquipmentServiceImpl implements EquipmentService {
 						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
 						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
 						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-					return true;
+//					return true;
+					adminAssign = true;
 				}
 			}
 		}
-		return false;
+		Boolean isAdmin = checkAdmin(ownerId, null, UserContext.getCurrentNamespaceId());
+		return (adminAssign || isAdmin);
+	}
+
+	//用于替换旧的admin验证
+	private Boolean checkAdmin(Long ownerId, String ownerType,Integer namespaceId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+		checkModuleManageCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		checkModuleManageCommand.setOrganizationId(ownerId);
+		checkModuleManageCommand.setOwnerType(ownerType);
+		checkModuleManageCommand.setUserId(UserContext.currentUserId());
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+		}
+		return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
 	}
 
 
@@ -5533,27 +5560,29 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
 
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
-				if (position != null) {
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				if (r.getPositionId() != null && r.getPositionId() != 0) {
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+					if (position != null) {
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+						} else {
+							dto.setGroupName(position.getName());
+						}
 					} else {
-						dto.setGroupName(position.getName());
-					}
-				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
-					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					String positionName = null;
-					if(organization!=null){
-						positionName = organization.getName();
-					}
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + positionName);
-					} else {
-						dto.setGroupName(positionName);
+						Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+						String positionName = null;
+						if (organization != null) {
+							positionName = organization.getName();
+						}
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + positionName);
+						} else {
+							dto.setGroupName(positionName);
+						}
 					}
 				}
 				return dto;

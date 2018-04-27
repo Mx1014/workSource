@@ -5,14 +5,13 @@ import com.everhomes.rest.energy.EnergyMeterStatus;
 
 /**
  * <ul>
- *     <li>INACTIVE((byte) 0): 关闭</li>
- *     <li>WAITING_FOR_APPROVAL((byte) 1): WAITING_FOR_APPROVAL</li>
- *     <li>ACTIVE((byte) 2): 开启</li>
+ *     <li>INACTIVE((byte) 0): 关闭 </li>
+ *     <li>ACTIVE((byte) 1): 开启</li>
  * </ul>
  */
 public enum LaunchAdStatus {
 
-    INACTIVE((byte) 0), WAITING_FOR_APPROVAL((byte) 1), ACTIVE((byte) 2);
+    INACTIVE((byte) 0), ACTIVE((byte) 1);
 
     private Byte code;
 

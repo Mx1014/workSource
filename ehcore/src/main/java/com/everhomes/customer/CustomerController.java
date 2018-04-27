@@ -1490,6 +1490,33 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+    //资源预定和服务联盟
+    /**
+     * <b>URL: /customer/listCustomerSeviceAllianceAppRecords</b>
+     * <p>列出服务联盟信息</p>
+     */
+    @RequestMapping("listCustomerSeviceAllianceAppRecords")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse listCustomerSeviceAllianceAppRecords (@Valid ListCustomerSeviceAllianceAppRecordsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerSeviceAllianceAppRecords(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerRentalBills</b>
+     * <p>列出资源预定信息</p>
+     */
+    @RequestMapping("listCustomerRentalBills")
+    @RestReturn(value = ListRentalBillsCommandResponse.class)
+    public RestResponse listCustomerRentalBills (@Valid ListCustomerRentalBillsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerRentalBills(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /customer/listCommunitySyncResult</b>
      * <p>列出同步信息</p>
@@ -1537,6 +1564,19 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = Byte.class,collection = true)
     public RestResponse checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd) {
         RestResponse response = new RestResponse(customerService.checkCustomerCurrentUserAdmin(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/syncResultViewed</b>
+     * <p>是否看过同步结果</p>
+     */
+    @RequestMapping("syncResultViewed")
+    @RestReturn(value = String.class)
+    public RestResponse syncResultViewed(SyncResultViewedCommand cmd) {
+        RestResponse response = new RestResponse(customerService.syncResultViewed(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

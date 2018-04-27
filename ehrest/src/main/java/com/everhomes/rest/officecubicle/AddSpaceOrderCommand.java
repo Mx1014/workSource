@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>reserveEnterprise: 预订人公司</li> 
  * <li>categoryName: 预定空间名称</li>
  * <li>categoryId: 空间id</li>
+ * <li>employeeNumber: 雇员数量</li>
+ * <li>financingFlag: 是否融资 0否，1是</li>
  * </ul>
  */
 public class AddSpaceOrderCommand {
@@ -32,6 +34,25 @@ public class AddSpaceOrderCommand {
 	private String reserveContactToken;
 	private String categoryName;
 	private Long categoryId;
+
+	private Integer employeeNumber;
+	private Byte financingFlag;
+
+	public Integer getEmployeeNumber() {
+		return employeeNumber;
+	}
+
+	public void setEmployeeNumber(Integer employeeNumber) {
+		this.employeeNumber = employeeNumber;
+	}
+
+	public Byte getFinancingFlag() {
+		return financingFlag;
+	}
+
+	public void setFinancingFlag(Byte financingFlag) {
+		this.financingFlag = financingFlag;
+	}
 
 	public String getCategoryName() {
 		return categoryName;
