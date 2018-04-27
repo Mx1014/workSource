@@ -232,15 +232,15 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             filterBuilders.add(statusFilter);
         }
 
-        if (cmd.getBuildingId() != null) {
-            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
-            filterBuilders.add(buildingIdFilter);
-        }
-
-        if (cmd.getAddressId() != null) {
-            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
-            filterBuilders.add(addressIdFilter);
-        }
+//        if (cmd.getBuildingId() != null) {
+//            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+//            filterBuilders.add(buildingIdFilter);
+//        }
+//
+//        if (cmd.getAddressId() != null) {
+//            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+//            filterBuilders.add(addressIdFilter);
+//        }
 
         if (cmd.getAssignFlag() != null) {
             TermFilterBuilder assignFlagFilter = FilterBuilders.termFilter("assignFlag", cmd.getAssignFlag());
