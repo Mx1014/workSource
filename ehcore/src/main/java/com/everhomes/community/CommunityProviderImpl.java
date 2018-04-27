@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.everhomes.constants.ErrorCodes;
@@ -1787,7 +1788,42 @@ public class CommunityProviderImpl implements CommunityProvider {
 
         return communities;
     }
-	
+
+
+    @Override
+    public List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, ListingLocator locator, int count) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES).getQuery();
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.ne(CommunityAdminStatus.INACTIVE.getCode()));
+        if(communityType != null){
+            query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+        }
+        if(status != null){
+            query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(status));
+        }
+
+        if(null != locator.getAnchor()){
+            query.addConditions(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        }
+
+        if(!StringUtils.isEmpty(keyword)){
+            query.addConditions(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+        }
+
+        if(orgId != null){
+            query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.JOIN, Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+        }
+
+        query.addLimit(count);
+
+        List<Community> map = query.fetch().stream().map(r -> RecordHelper.convert(r, Community.class)).collect(Collectors.toList());
+
+        return map;
+    }
+
 	@Override
     public List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds) {
         List<CommunityGeoPoint> l = new ArrayList<>();

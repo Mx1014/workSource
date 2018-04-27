@@ -122,40 +122,40 @@ public class CommunityServiceImpl implements CommunityService {
 	private ContentServerService contentServerService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
+
 	@Autowired
 	private OrganizationService organizationService;
 
 	@Autowired
 	private GroupProvider groupProvider;
-	
+
 	@Autowired
 	private AddressProvider addressProvider;
-	
+
 	@Autowired
 	private NamespaceResourceProvider namespaceResourceProvider;
-	
+
 	@Autowired
 	private NamespacesProvider namespacesProvider;
-	
+
 	@Autowired
 	private VersionProvider versionProvider;
-	
+
 	@Autowired
     private LocaleTemplateProvider localeTemplateProvider;
-	
+
 	@Autowired
 	private ConfigurationsProvider configurationsProvider;
-	
+
 	@Autowired
 	private CategoryProvider categoryProvider;
-	
+
 	@Autowired
 	private ForumProvider forumProvider;
-	
+
 	@Autowired
 	private AclProvider aclProvider;
-	
+
 	@Autowired
 	private UserWithoutConfAccountSearcher userSearcher;
 
@@ -232,10 +232,10 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunity(UpdateCommunityAdminCommand cmd) {
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid communityId parameter");
 		}
-		
+
 //		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 //					"Invalid geoPointList parameter");
@@ -244,7 +244,7 @@ public class CommunityServiceImpl implements CommunityService {
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 		User user = UserContext.current().getUser();
@@ -256,13 +256,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Region city = regionProvider.findRegionById(cmd.getCityId());
 		if(city == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid cityId parameter,city is not found.");
 		}
 
 		Region area = regionProvider.findRegionById(cmd.getAreaId());
 		if(area == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid areaId parameter,area is not found.");
 		}
 		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
@@ -282,7 +282,7 @@ public class CommunityServiceImpl implements CommunityService {
 			this.communityProvider.updateCommunity(community);
 			communitySearcher.feedDoc(community);
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
-			
+
 			if(geoList != null && geoList.size() > 0){
 
 				List<CommunityGeoPoint> geoPointList = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
@@ -347,31 +347,31 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void approveCommuniy(ApproveCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		
+
 		if(community.getCityId() == null || community.getCityId() == 0L){
 		    LOGGER.error("Community missing infomation,cityId is null.communityId=" + cmd.getCommunityId());
-            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST, 
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST,
                     "Community missing infomation,cityId is null.");
 		}
 		List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
 		if(geoPoints == null || geoPoints.isEmpty()){
 		    LOGGER.error("Community missing infomation,community geopoint is null.communityId=" + cmd.getCommunityId());
-            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_GEOPOIN_NOT_EXIST, 
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_GEOPOIN_NOT_EXIST,
                     "Community missing infomation,community geopoint is null.");
 		}
-		
+
 		community.setOperatorUid(userId);
 		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		this.communityProvider.updateCommunity(community);
@@ -418,7 +418,7 @@ public class CommunityServiceImpl implements CommunityService {
 				messageDto.getMeta().put("meta-object-type", metaObjectType.getCode());
 				messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
 			}
-			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
+			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user",
 					String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 		}
 	}
@@ -426,14 +426,14 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void rejectCommunity(RejectCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 		User user = UserContext.current().getUser();
@@ -473,15 +473,15 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<CommunityDTO> getCommunitiesByNameAndCityId(GetCommunitiesByNameAndCityIdCommand cmd){
 		if(cmd.getCityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid cityId parameter");
 		}
 		Region region = this.regionProvider.findRegionById(cmd.getCityId());
 		if(region == null){
-			throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST,
 					"City is not found");
 		}
-		
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<Community> communities = this.communityProvider.findCommunitiesByNameAndCityId(cmd.getName(),cmd.getCityId(), namespaceId);
 		List<CommunityDTO> result = communities.stream().map((r) ->{
@@ -494,7 +494,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<CommunityDTO> getCommunitiesByIds(GetCommunitiesByIdsCommand cmd){
 		if(cmd.getIds() == null || cmd.getIds().isEmpty()){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid ids parameter");
 		}
 
@@ -509,12 +509,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunityRequestStatus(UpdateCommunityRequestStatusCommand cmd){
 		if(cmd.getId() == null || cmd.getRequestStatus() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id or requestStatus parameter");
 		}
 		Community community = this.communityProvider.findCommunityById(cmd.getId());
 		if(community == null){
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 
@@ -526,13 +526,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<CommunityDTO> getNearbyCommunityById(GetNearbyCommunitiesByIdCommand cmd){
 		if(cmd.getId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter");
 		}
 		Community community = this.communityProvider.findCommunityById(cmd.getId());
 		if(community == null){
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
-					"Community is not found."); 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
 		}
 		List<CommunityDTO> result = this.communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getId()).stream().map((r) ->{
 			return ConvertHelper.convert(r, CommunityDTO.class);
@@ -544,13 +544,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityDTO getCommunityById(GetCommunityByIdCommand cmd) {
 		if(cmd.getId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter");
 		}
 
 		Community community = this.communityProvider.findCommunityById(cmd.getId());
 		if(community == null){
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 		CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
@@ -570,13 +570,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd) {
 		if(cmd.getUuid() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter");
 		}
 
 		Community community = this.communityProvider.findCommunityByUuid(cmd.getUuid());
 		if(community == null){
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 		CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
@@ -596,7 +596,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
 			ListComunitiesByKeywordAdminCommand cmd) {
-		
+
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -624,15 +624,15 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
-		
+
 		Long communityId = cmd.getCommunityId();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
-		
+
 		this.communityProvider.populateBuildingAttachments(buildings);
-        
+
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
@@ -702,13 +702,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
-		
+
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 		if(building != null) {
             if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
-            	
+
         		LOGGER.error("Building already deleted");
-        		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+        		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE,
         				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
 			this.communityProvider.populateBuildingAttachments(building);
@@ -720,7 +720,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return dto;
 		}else {
             LOGGER.error("Building not found");
-            throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+            throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE,
             		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
         }
 	}
@@ -746,8 +746,8 @@ public class CommunityServiceImpl implements CommunityService {
                  }catch(Exception e){
                      LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
                  }
-             } 
-		     
+             }
+
 //			 populateBuildingCreatorInfo(building);
 			 populateBuildingManagerInfo(dto);
 //			 populateBuildingOperatorInfo(building);
@@ -757,13 +757,13 @@ public class CommunityServiceImpl implements CommunityService {
 			 processDetailUrl(dto);
 		 }
 	 }
-	 
-	 
+
+
 	 private void populateBuildingCreatorInfo(BuildingDTO building) {
-		 
+
 		 String creatorNickName = building.getCreatorNickName();
          String creatorAvatar = building.getCreatorAvatar();
-         
+
          User creator = userProvider.findUserById(building.getCreatorUid());
          if(creator != null) {
              if(creatorNickName == null || creatorNickName.trim().length() == 0) {
@@ -778,9 +778,9 @@ public class CommunityServiceImpl implements CommunityService {
              String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
              building.setCreatorAvatarUrl(avatarUrl);
          }
-		 
+
 	 }
-	 
+
 	 private void populateBuildingManagerInfo(BuildingDTO building) {
 
          if(null == building.getManagerUid()){
@@ -799,11 +799,11 @@ public class CommunityServiceImpl implements CommunityService {
 	 }
 
 	 private void populateBuildingOperatorInfo(BuildingDTO building) {
-	 
+
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
          if(building.getOperatorUid() != null) {
-        	 
+
 	         User operator = userProvider.findUserById(building.getOperatorUid());
 	         if(operator != null) {
 	             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
@@ -820,9 +820,9 @@ public class CommunityServiceImpl implements CommunityService {
 	         }
          }
 	 }
-	 
+
 	 private void populateBuildingAttachments(BuildingDTO building, List<BuildingAttachment> attachmentList) {
-	 
+
 		 if(attachmentList == null || attachmentList.size() == 0) {
 	            if(LOGGER.isInfoEnabled()) {
 	                LOGGER.info("The building attachment list is empty, buildingId=" + building.getId());
@@ -833,9 +833,9 @@ public class CommunityServiceImpl implements CommunityService {
 	            }
 		 }
 	 }
-	 
+
 	 private void populateBuildingAttachment(BuildingDTO building, BuildingAttachment attachment) {
-        
+
 		 if(attachment == null) {
 			 if(LOGGER.isInfoEnabled()) {
 				 LOGGER.info("The building attachment is null, buildingId=" + building.getId());
@@ -860,7 +860,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
-		
+
 		Building building = ConvertHelper.convert(cmd, Building.class);
 
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
@@ -914,7 +914,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
-		
+
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
 //		1.若楼栋或楼栋下的门牌关联了合同或其他业务（如车辆、服务等），则
 //		不允许删除；
@@ -955,14 +955,14 @@ public class CommunityServiceImpl implements CommunityService {
 		Boolean isValid = this.communityProvider.verifyBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
 		return isValid;
 	}
-	
+
     private void processBuildingAttachments(Long userId, List<AttachmentDescriptor> attachmentList, Building building) {
 
         this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
-        
+
         if(attachmentList != null) {
 			List<BuildingAttachment> results = new ArrayList<BuildingAttachment>();
-            
+
             BuildingAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
                 attachment = new BuildingAttachment();
@@ -971,7 +971,7 @@ public class CommunityServiceImpl implements CommunityService {
                 attachment.setContentType(descriptor.getContentType());
                 attachment.setContentUri(descriptor.getContentUri());
                 attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                
+
                 // Make sure we can save as many attachments as possible even if any of them failed
                 try {
                 	this.communityProvider.createBuildingAttachment(attachment);
@@ -980,7 +980,7 @@ public class CommunityServiceImpl implements CommunityService {
                     LOGGER.error("Failed to save the attachment, userId={}, attachment={}", userId, attachment, e);
                 }
             }
-            
+
             building.setAttachments(results);
         }
     }
@@ -989,9 +989,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<CommunityManagerDTO> getCommunityManagers(
 			ListCommunityManagersAdminCommand cmd) {
-		
+
 		List<OrganizationMember> member = organizationProvider.listOrganizationMembersByOrgId(cmd.getOrganizationId());
-		
+
 		List<CommunityManagerDTO> managers = member.stream().map(r -> {
 			CommunityManagerDTO dto = new CommunityManagerDTO();
 			dto.setManagerId(r.getTargetId());
@@ -999,7 +999,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setManagerPhone(r.getContactToken());
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		return managers;
 	}
 
@@ -1007,25 +1007,25 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<UserCommunityDTO> getUserCommunities(
 			ListUserCommunitiesCommand cmd) {
-		
+
 		List<OrganizationCommunity> communities = new ArrayList<OrganizationCommunity>();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(cmd.getUserId());
-		
+
 		for(OrganizationMember member : members) {
 			List<OrganizationCommunity> oc = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
 			communities.addAll(oc);
 		}
-		
+
 		List<UserCommunityDTO> usercommunities = communities.stream().map(r -> {
 			UserCommunityDTO dto = new UserCommunityDTO();
 			dto.setCommunityId(r.getCommunityId());
 			dto.setOrganizationId(r.getOrganizationId());
-			
+
 			Community community = communityProvider.findCommunityById(r.getCommunityId());
 			dto.setCommunityName(community.getName());
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		return usercommunities;
 	}
 
@@ -1033,26 +1033,26 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void approveBuilding(VerifyBuildingAdminCommand cmd) {
 		if(cmd.getBuildingId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid buildingId parameter");
 		}
 
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
 		if(building == null){
 			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building is not found.");
 		}
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		
+
 		if(building.getCommunityId() == null || building.getCommunityId().longValue() == 0){
 		    LOGGER.error("Building missing infomation,communityId is null.buildingId=" + cmd.getBuildingId());
-            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_COMMUNITY_NOT_EXIST, 
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_COMMUNITY_NOT_EXIST,
                     "Building missing infomation,communityId is null.");
 		}
-		
-		
+
+
 		building.setOperatorUid(userId);
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		this.communityProvider.updateBuilding(building);
@@ -1061,16 +1061,16 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void rejectBuilding(VerifyBuildingAdminCommand cmd) {
-		
+
 		if(cmd.getBuildingId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid buildingId parameter");
 		}
 
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
 		if(building == null){
 			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building is not found.");
 		}
 		User user = UserContext.current().getUser();
@@ -1177,8 +1177,8 @@ public class CommunityServiceImpl implements CommunityService {
 				list.add(log);
 				continue;
 			}
-			
-			
+
+
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
 			if (building == null) {
 				building = new Building();
@@ -1207,10 +1207,10 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
-				
+
 				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
-				
+
 				communityProvider.createBuilding(userId, building);
 			}else {
 				building.setAliasName(data.getAliasName());
@@ -1229,7 +1229,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				building.setDescription(data.getDescription());
 				building.setTrafficDescription(data.getTrafficDescription());
-				
+
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1243,7 +1243,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
-				
+
 				communityProvider.updateBuilding(building);
 			}
 		}
@@ -1259,35 +1259,35 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("building name cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isEmpty(data.getAddress())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
 			log.setData(data);
 			log.setErrorLog("address cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isEmpty(data.getContactor())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
 			log.setData(data);
 			log.setErrorLog("contactor cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isEmpty(data.getPhone())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_PHONE_EMPTY);
 			log.setData(data);
 			log.setErrorLog("phone cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").replace("、", ",").contains(",")) {
 			log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_LONGITUDE);
 			log.setData(data);
 			log.setErrorLog("latitude longitude error");
 			return log;
 		}
-		
+
 		return null;
 	}
 
@@ -1296,8 +1296,8 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ImportBuildingDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
-			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
-					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) ||
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) ||
 					StringUtils.isNotBlank(r.getI())) {
 				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
 				data.setName(trim(r.getA()));
@@ -1317,14 +1317,14 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return list;
 	}
-	
+
 	private String trim(String string) {
 		if (string != null) {
 			return string.trim();
 		}
 		return "";
 	}
-	
+
 	private Long getCurrentCommunityId(Long userId) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
 		if (org != null) {
@@ -1341,7 +1341,7 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
-			
+
 			if(null == resultList || resultList.isEmpty()){
 				LOGGER.error("File content is empty。userId="+userId);
 				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
@@ -1359,7 +1359,7 @@ public class CommunityServiceImpl implements CommunityService {
 					LOGGER.error(log);
 				}
 			}
-			
+
 			importDataResponse.setTotalCount((long)resultList.size()-1);
 			importDataResponse.setFailCount((long)errorDataLogs.size());
 			importDataResponse.setLogs(errorDataLogs);
@@ -1392,7 +1392,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return result;
 	}
-	
+
 	private List<String> importBuilding(List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 		//userID查orgid
@@ -1415,7 +1415,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setContact(s[3]);
 				building.setAreaSize(Double.valueOf(s[4]));
 				String contactToken = s[6];
-				
+
 				if(ct.get(contactToken) != null) {
 					OrganizationMember om = ct.get(contactToken);
 					building.setManagerUid(om.getTargetId());
@@ -1425,16 +1425,16 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCommunityId(org.getCommunityId());
 				building.setDescription(s[7]);
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
-				
+
 				LOGGER.info("add building");
 				this.communityProvider.createBuilding(userId, building);
 				return null;
 			});
 		}
 		return errorDataLogs;
-		
+
 	}
-	
+
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		// Long communityId = cmd.getCommunityId();
@@ -1450,12 +1450,12 @@ public class CommunityServiceImpl implements CommunityService {
             query.addConditions(c);
             return query;
         });
-		
+
 		List<Long> groupIds = new ArrayList<>();
 		for (Group group : groups) {
 			groupIds.add(group.getId());
 		}
-		
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -1622,19 +1622,19 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd){
 		Long communityId = cmd.getCommunityId();
-		
+
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
 		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
-		
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
             return query;
         });
-		
-		List<Long> groupIds = new ArrayList<Long>(); 
+
+		List<Long> groupIds = new ArrayList<Long>();
 		for (Group group : groups) {
 			groupIds.add(group.getId());
 		}
@@ -1679,7 +1679,7 @@ public class CommunityServiceImpl implements CommunityService {
 //		}
 
 
-		
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -1720,7 +1720,7 @@ public class CommunityServiceImpl implements CommunityService {
 			query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
             return query;
         });
-		
+
 		// 有重复的用户，需要过滤 by lqs 20160831
 		List<Long> userIdList = new ArrayList<Long>();
 		for (GroupMember member : groupMembers) {
@@ -1757,7 +1757,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dtos.add(dto);
 			}
 		}
-		
+
 		res.setDtos(dtos);
 		res.setNextPageAnchor(locator.getAnchor());
 		return res;
@@ -1797,11 +1797,11 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		dto.setAddressDtos(addressDtos);
 	}
-	
+
 	@Override
 	public CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd){
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
-		
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<OrganizationOwner> owners = organizationProvider.listOrganizationOwnerByCommunityId(cmd.getCommunityId(),locator, cmd.getPageSize(),(loc, query) -> {
@@ -1812,7 +1812,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
             return query;
         });
-		
+
 		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
 		for (OrganizationOwner organizationOwner : owners) {
 			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
@@ -1822,7 +1822,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setUserId(userIdentifier.getOwnerUid());
 				dto.setIsAuth(1);
 			}
-			
+
 			dto.setUserName(organizationOwner.getContactName());
 			dto.setNickName(organizationOwner.getContactName());
 			dto.setPhone(organizationOwner.getContactToken());
@@ -1832,12 +1832,12 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setNextPageAnchor(locator.getAnchor());
 		return res;
 	}
-	
+
 	@Override
 	public CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd){
 		CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 		if(null == userIdentifier){
 			List<OrganizationOwner> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(cmd.getContactToken(), namespaceId);
@@ -1887,11 +1887,11 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return dto;
 	}
-	
+
 	@Override
 	public CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd){
 		CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
-		
+
 		User user = userProvider.findUserById(cmd.getUserId());
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
@@ -1917,13 +1917,13 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
-			dto.setOrgDtos(orgDtos); 
+			dto.setOrgDtos(orgDtos);
 			dto.setCreateTime(user.getCreateTime() != null ? user.getCreateTime().getTime() : null);
 			dto.setExecutiveFlag(user.getExecutiveTag());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
 		}
-		
+
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
 		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
 		if(null != memberLogs){
@@ -2021,12 +2021,12 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"organizationId and communityId All are empty");
 		}
-		CommunityUserResponse res = new CommunityUserResponse(); 
-		
+		CommunityUserResponse res = new CommunityUserResponse();
+
 		List<Long> organizationIds = this.getAllOrganizationIds(cmd.getCommunityId(), cmd.getOrganizationId());
-		
+
 		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode());
-		
+
 		if(1 == cmd.getIsAuth()){
 			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		}else if(2 == cmd.getIsAuth()){
@@ -2036,20 +2036,20 @@ public class CommunityServiceImpl implements CommunityService {
 		}else{
 			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		}
-		
+
 		if(StringUtils.isNotBlank(cmd.getKeywords())){
 			Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(cmd.getKeywords());
 			condition = condition.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(cmd.getKeywords()));
 			cond = cond.and(condition);
 		}
-		
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(locator, pageSize, cond, organizationIds);
-		
+
 		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
-		
+
 		for (OrganizationMember organizationMember : members) {
 			CommunityUserDto dto = new CommunityUserDto();
 			dto.setUserId(organizationMember.getTargetId());
@@ -2063,12 +2063,12 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			dtos.add(dto);
 		}
-		
+
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(dtos);
 		return res;
 	}
-	
+
 	private List<Long> getAllOrganizationIds(Long communityId, Long orgId){
 		List<Long> communityIds = new ArrayList<Long>();
 		List<Long> organizationIds = new ArrayList<Long>();
@@ -2081,7 +2081,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}else{
 			communityIds.add(communityId);
 		}
-		
+
 		//查询园区下面的所有公司
 		for (Long commId : communityIds) {
 			List<OrganizationCommunityRequest> organizationCommunityRequests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), commId, 1000000, null);
@@ -2089,12 +2089,12 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationIds.add(organizationCommunityRequest.getMemberId());
 			}
 		}
-		
+
 		//查询所有公司下面所有的子公司
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-		
+
 		List<Long> childOrganizationIds = new ArrayList<Long>();
 		for (Long organizationId : organizationIds) {
 			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + organizationId + "/%", groupTypes);
@@ -2103,7 +2103,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		organizationIds.addAll(childOrganizationIds);
-		
+
 		return organizationIds;
 	}
 
@@ -2120,7 +2120,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
-		
+
 		CommunityUserResponse res = new CommunityUserResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2776,10 +2776,10 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			}
 		}
-		
+
 		return res;
 	}
-	
+
 	@Override
 	public List<CommunityDTO> listUnassignedCommunitiesByNamespaceId() {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -2801,14 +2801,14 @@ public class CommunityServiceImpl implements CommunityService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = cmd.getNamespaceId();
 		checkCreateCommunityParameters(userId, cmd);
-		
+
 		CommunityDTO community = createCommunity(userId, namespaceId, cmd);
-		
+
 		CreateCommunityResponse response = new CreateCommunityResponse();
 		response.setCommunityDTO(community);
 		return response;
 	}
-	
+
 	private CommunityDTO createCommunity(final Long userId, final Integer namespaceId, final CreateCommunityCommand cmd){
 		List<CommunityDTO> communities = new ArrayList<>();
 		List<Community> cs = new ArrayList<>();
@@ -2817,17 +2817,27 @@ public class CommunityServiceImpl implements CommunityService {
 			Long provinceId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName()), 0L);  //创建省
 			Long cityId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
 			Long areaId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
-			
+
 			cmd.setProvinceId(provinceId);
 			cmd.setCityId(cityId);
 			cmd.setAreaId(areaId);
 			Community community = createCommunity(userId, cmd);
 			cs.add(community);
-			
+
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
-			
+
 			createNamespaceResource(namespaceId, community.getId());
-			
+
+			//增加管理公司
+			if(cmd.getPmOrgId() != null){
+				CreateOrganizationCommunityCommand organizationCommunityCmd = new CreateOrganizationCommunityCommand();
+				organizationCommunityCmd.setOrganizationId(cmd.getPmOrgId());
+				List<Long> communityIds = new ArrayList<>();
+				communityIds.add(community.getId());
+				organizationCommunityCmd.setCommunityIds(communityIds);
+				organizationService.createOrganizationCommunity(organizationCommunityCmd);
+			}
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -2836,8 +2846,8 @@ public class CommunityServiceImpl implements CommunityService {
 		});
 		communitySearcher.feedDoc(cs.get(0));
 		return communities.get(0);
-	} 
-	
+	}
+
 	private Long createRegion(Long userId, Integer namespaceId, String path, Long parentId) {
 		Region region = null;
 		//查看此域空间是否存在该区域，若存在，则不添加
@@ -2869,10 +2879,10 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setFeedbackForumId(2L);
 		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		communityProvider.createCommunity(userId, community);
-		
+
 		return community;
 	}
-	
+
 	private CommunityGeoPoint createCommunityGeoPoint(Long communityId, Double latitude, Double longitude){
 		//创建经纬度
 		CommunityGeoPoint point = new CommunityGeoPoint();
@@ -2894,7 +2904,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	private void checkCreateCommunityParameters(final Long userId, final CreateCommunityCommand cmd) {
-		if (cmd.getNamespaceId() == null || StringUtils.isBlank(cmd.getName()) || cmd.getCommunityType() == null 
+		if (cmd.getNamespaceId() == null || StringUtils.isBlank(cmd.getName()) || cmd.getCommunityType() == null
 				|| StringUtils.isBlank(cmd.getProvinceName()) || StringUtils.isBlank(cmd.getCityName())
 				|| StringUtils.isBlank(cmd.getAreaName()) || CommunityType.fromCode(cmd.getCommunityType()) == null) {
 			LOGGER.error(
@@ -2941,7 +2951,7 @@ public class CommunityServiceImpl implements CommunityService {
 			final List<CreateCommunityCommand> list = new ArrayList<>();
 			for (int i = 1, len = resultList.size(); i < len; i++) {
 				RowResult result = resultList.get(i);
-				
+
 				CreateCommunityCommand ccmd = new CreateCommunityCommand();
 				ccmd.setNamespaceId(cmd.getNamespaceId());
 				ccmd.setName(RowResult.trimString(result.getA()));
@@ -2954,7 +2964,7 @@ public class CommunityServiceImpl implements CommunityService {
 				ccmd.setAreaName(RowResult.trimString(result.getH()));
 				ccmd.setLatitude(Double.parseDouble(RowResult.trimString(result.getI())));
 				ccmd.setLongitude(Double.parseDouble(RowResult.trimString(result.getJ())));
-				
+
 				checkCreateCommunityParameters(userId, ccmd);
 				list.add(ccmd);
 			}
@@ -2970,12 +2980,12 @@ public class CommunityServiceImpl implements CommunityService {
 	public ListCommunityByNamespaceIdResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
-		
+
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(pageAnchor);
-		
+
 		List<CommunityDTO> communities = communityProvider.listCommunitiesByNamespaceId(null, cmd.getNamespaceId(), locator, pageSize+1);
-		
+
 		ListCommunityByNamespaceIdResponse response = new ListCommunityByNamespaceIdResponse();
 		if (communities != null && communities.size() > 0) {
 			if (communities.size() > pageSize) {
@@ -2988,7 +2998,7 @@ public class CommunityServiceImpl implements CommunityService {
 			response.setCommunities(communities);
 			response.setNextPageAnchor(pageAnchor);
 		}
-		
+
 		return response;
 	}
 
@@ -3002,7 +3012,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd) {
-		if (StringUtils.isBlank(cmd.getNamespaceName()) || StringUtils.isBlank(cmd.getCommunityType()) 
+		if (StringUtils.isBlank(cmd.getNamespaceName()) || StringUtils.isBlank(cmd.getCommunityType())
 				|| NamespaceCommunityType.fromCode(cmd.getCommunityType())==null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: "+cmd);
@@ -3029,7 +3039,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return namespace.getId();
 	}
-	
+
 	private void createNamespaceDetail(Integer namespaceId, String communityType) {
 		NamespaceDetail namespaceDetail = new NamespaceDetail();
 		namespaceDetail.setNamespaceId(namespaceId);
@@ -3045,7 +3055,7 @@ public class CommunityServiceImpl implements CommunityService {
 		createVersion(namespaceId, androidRealm, versionDescription, versionRange, targetVersion, forceUpgrade);
 		createVersion(namespaceId, iosRealm, versionDescription, versionRange, targetVersion, forceUpgrade);
 	}
-	
+
 	private void createVersion(Integer namespaceId, String realm, String description, String versionRange, String targetVersion, Byte forceUpgrade){
 		if(StringUtils.isBlank(realm)){
 			return ;
@@ -3058,7 +3068,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create version realm success: namespaceId="+namespaceId+", realm="+realm);
 		}
-		
+
 		if(StringUtils.isBlank(versionRange) || StringUtils.isBlank(targetVersion)){
 			return;
 		}
@@ -3154,7 +3164,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd) {
-		if (StringUtils.isBlank(cmd.getOrganizationName()) || StringUtils.isBlank(cmd.getAdminNickname()) 
+		if (StringUtils.isBlank(cmd.getOrganizationName()) || StringUtils.isBlank(cmd.getAdminNickname())
 				|| cmd.getNamespaceId() == null || cmd.getCommunityId() == null || StringUtils.isBlank(cmd.getAdminPhone())
 				|| StringUtils.isBlank(cmd.getGroupName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3225,15 +3235,15 @@ public class CommunityServiceImpl implements CommunityService {
 		group.setVisibleRegionType(VisibleRegionType.REGION.getCode());
 		group.setVisibleRegionId(organization.getId());
 		groupProvider.createGroup(group);
-		
+
 		//更新组织中的groupId
 		organization.setGroupId(group.getId());
 		organizationProvider.updateOrganization(organization);
-		
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create group success: namespaceId="+namespaceId+", groupName="+groupName);
 		}
-		
+
 		return group;
 	}
 
@@ -3249,11 +3259,11 @@ public class CommunityServiceImpl implements CommunityService {
 		forum.setModifySeq(0L);
 		forum.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		forumProvider.createForum(forum);
-		
+
 		//更新group中圈论坛id
 		group.setIntegralTag4(forum.getId());
 		groupProvider.updateGroup(group);
-		
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create forum success: namespaceId="+namespaceId+", groupId="+group.getId());
 		}
@@ -3293,11 +3303,11 @@ public class CommunityServiceImpl implements CommunityService {
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "123456",salt)));
 		user.setSalt(salt);
 		userProvider.createUser(user);
-		
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create user success: namespaceId="+namespaceId+", adminNickname="+adminNickname+", adminPhone="+adminPhone);
 		}
-		
+
 		UserIdentifier userIdentifier = new UserIdentifier();
 		userIdentifier.setOwnerUid(user.getId());
 		userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
@@ -3305,11 +3315,11 @@ public class CommunityServiceImpl implements CommunityService {
 		userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 		userIdentifier.setNamespaceId(namespaceId);
 		userProvider.createIdentifier(userIdentifier);
-		
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create user identifier success: namespaceId="+namespaceId+", userId="+user.getId());
 		}
-		
+
 		return user;
 	}
 
@@ -3455,14 +3465,14 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
+	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
 		if(null == cmd.getUserId() )
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid userid parameter");
 		User user = userProvider.findUserById(cmd.getUserId());
 
 		if(null == user)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid userid parameter: no this user");
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 
@@ -3482,11 +3492,11 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			return null;
 		});
-		
+
 	}
-	
+
 	public void createResourceCategory(CreateResourceCategoryCommand cmd) {
-		
+
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		String name = cmd.getName();
@@ -3502,7 +3512,7 @@ public class CommunityServiceImpl implements CommunityService {
 		ResourceCategory category = null;
 		ResourceCategory parentCategory = null;
 		if(null == parentId || parentId == 0){
-			
+
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name, cmd.getType());
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
@@ -3516,18 +3526,18 @@ public class CommunityServiceImpl implements CommunityService {
 			category.setPath(parentCategory.getPath());
 			category.setParentId(parentId);
 		}
-		
+
 		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		category.setCreatorUid(UserContext.current().getUser().getId());   
+		category.setCreatorUid(UserContext.current().getUser().getId());
 		category.setName(name);
 		category.setNamespaceId(namespaceId);
-		
+
 		category.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
 		category.setOwnerType(ownerType);
 		category.setOwnerId(ownerId);
 		category.setType(ResourceCategoryType.CATEGORY.getCode());
 		communityProvider.createResourceCategory(category);
-		
+
 	}
 
 
@@ -3535,10 +3545,10 @@ public class CommunityServiceImpl implements CommunityService {
 	public void updateResourceCategory(UpdateResourceCategoryCommand cmd) {
 		checkResourceCategoryId(cmd.getId());
 		checkResourceCategoryName(cmd.getName());
-		
+
 		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
 		checkResourceCategoryIsNull(category);
-		
+
 		category.setName(cmd.getName());
 //		String path = category.getPath();
 //		path = path.substring(0, path.lastIndexOf("/"));
@@ -3552,13 +3562,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void deleteResourceCategory(DeleteResourceCategoryCommand cmd) {
 		checkResourceCategoryId(cmd.getId());
-		
+
 		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
 		checkResourceCategoryIsNull(category);
-		
+
 		category.setStatus(ResourceCategoryStatus.INACTIVE.getCode());
 		communityProvider.updateResourceCategory(category);
-		
+
 	}
 
 
@@ -3569,7 +3579,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceId cannot be null.");
         }
-    	
+
     	if(StringUtils.isBlank(cmd.getResourceType())) {
         	LOGGER.error("ResourceType cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3577,7 +3587,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 
 		Integer namespaceId = cmd.getNamespaceId();
-		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
+		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(),
 				namespaceId);
 		if(null != rca) {
 			if(null != cmd.getResourceCategoryId()) {
@@ -3606,7 +3616,7 @@ public class CommunityServiceImpl implements CommunityService {
 			rca.setResourceType(cmd.getResourceType());
 			communityProvider.createResourceCategoryAssignment(rca);
 		}
-		
+
 	}
 
 
@@ -3617,7 +3627,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceId cannot be null.");
         }
-    	
+
     	if(StringUtils.isBlank(cmd.getResourceType())) {
         	LOGGER.error("ResourceType cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3625,13 +3635,13 @@ public class CommunityServiceImpl implements CommunityService {
         }
 
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
+		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(),
 				namespaceId);
 		if(null != rca)
 			communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
-		 
+
 	}
-	
+
 	private void checkResourceCategoryId(Long id) {
 		if(null == id) {
         	LOGGER.error("Id cannot be null.");
@@ -3639,7 +3649,7 @@ public class CommunityServiceImpl implements CommunityService {
     				"Id cannot be null.");
         }
 	}
-	
+
 	private void checkResourceCategoryName(String name) {
 		if(StringUtils.isBlank(name)) {
         	LOGGER.error("Name cannot be null.");
@@ -3647,7 +3657,7 @@ public class CommunityServiceImpl implements CommunityService {
     				"Name cannot be null.");
         }
 	}
-	
+
 	private void checkResourceCategoryIsNull(ResourceCategory category) {
 		if(null == category) {
 			LOGGER.error("ResourceCategory not found.");
@@ -3655,7 +3665,7 @@ public class CommunityServiceImpl implements CommunityService {
 					"ResourceCategory not found.");
 		}
 	}
-	
+
 	private void checkResourceCategoryExsit(ResourceCategory category) {
 		if(null != category) {
 			LOGGER.error("ResourceCategory have been in existing");
@@ -3663,14 +3673,14 @@ public class CommunityServiceImpl implements CommunityService {
 					"ResourceCategory have been in existing");
 		}
 	}
-	
+
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
         	LOGGER.error("OwnerId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"OwnerId cannot be null.");
         }
-    	
+
     	if(StringUtils.isBlank(ownerType)) {
         	LOGGER.error("OwnerType cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3688,7 +3698,7 @@ public class CommunityServiceImpl implements CommunityService {
 				cmd.getCategoryId(), cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
 
 		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
-		
+
 		if(list.size() > 0){
 			List<CommunityDTO> resultList = list.stream().map((c) -> {
 				CommunityDTO dto = ConvertHelper.convert(c, CommunityDTO.class);
@@ -3698,7 +3708,7 @@ public class CommunityServiceImpl implements CommunityService {
 					dto.setCategoryId(category.getId());
 					dto.setCategoryName(category.getName());
 				}
-				
+
 				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);
@@ -3708,7 +3718,7 @@ public class CommunityServiceImpl implements CommunityService {
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
         	}
     	}
-		
+
 		return response;
 	}
 
@@ -3716,17 +3726,17 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		
+
 		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
-				
+
 				return dto;
 			}).collect(Collectors.toList());
-		
+
 		return temp;
 	}
-	
+
 	@Override
 	public List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
 		if(null == cmd.getParentId())
@@ -3735,10 +3745,10 @@ public class CommunityServiceImpl implements CommunityService {
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
 		setResourceDTOs(list, namespaceId);
-		
+
 		return list;
 	}
-	
+
 	private void setResourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
 		if(null != list) {
 			for(ResourceCategoryDTO r: list) {
@@ -3753,20 +3763,20 @@ public class CommunityServiceImpl implements CommunityService {
 				r.setResourceDTOs(resourceDTOs);
 			}
 		}
-		
+
 	}
-	
+
 	private ResourceCategoryDTO getChildCategories(List<ResourceCategoryDTO> list, ResourceCategoryDTO dto){
-		
+
 		List<ResourceCategoryDTO> childrens = new ArrayList<ResourceCategoryDTO>();
-		
+
 		for (ResourceCategoryDTO resourceCategoryDTO : list) {
 			if(dto.getId().equals(resourceCategoryDTO.getParentId())){
 				childrens.add(getChildCategories(list, resourceCategoryDTO));
 			}
 		}
 		dto.setCategoryDTOs(childrens);
-		
+
 		return dto;
 	}
 
@@ -3774,7 +3784,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		
+
 		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
 		String path = null;
 		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
@@ -3783,21 +3793,21 @@ public class CommunityServiceImpl implements CommunityService {
 			checkResourceCategoryIsNull(resourceCategory);
 			path = resourceCategory.getPath();
 		}
-		
+
 		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
-				
+
 				return dto;
 			}).collect(Collectors.toList());
-		
+
 		for(ResourceCategoryDTO s: temp) {
 			getChildCategories(temp, s);
 			if(s.getParentId() == parentId) {
 				result.add(s);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -4035,7 +4045,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
-	
+
 		@Override
 	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
 		if(cmd.getPageAnchor()==null)
@@ -4211,6 +4221,57 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 
 		return null;
+	}
+
+	@Override
+	public ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd) {
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunities(cmd.getNamespaceId(),cmd.getCommunityType(),cmd.getOrgId(),cmd.getKeyword(),cmd.getStatus(),locator, pageSize+1);
+
+		ListCommunitiesResponse response = new ListCommunitiesResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> dtos = new ArrayList<>();
+			for(Community community: list){
+				CommunityDTO dto = ConvertHelper.convert(community, CommunityDTO.class);
+				List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(dto.getId());
+				if(orgcoms != null && orgcoms.size() > 0){
+					Organization org = organizationProvider.findOrganizationById(orgcoms.get(0).getOrganizationId());
+					if(org != null){
+						dto.setPmOrgId(org.getId());
+						dto.setPmOrgName(org.getName());
+					}
+				}
+				dtos.add(dto);
+			}
+
+
+			response.setList(dtos);
+		}
+
+		return response;
+	}
+
+	@Override
+	public CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd) {
+		List<CommunityDTO> dtos = new ArrayList<>();
+
+		for(CreateCommunityCommand cmdOne: cmd.getCommunities()){
+			CreateCommunityResponse community = createCommunity(cmdOne);
+			dtos.add(community.getCommunityDTO());
+		}
+
+		CreateCommunitiesResponse response = new CreateCommunitiesResponse();
+		response.setDtos(dtos);
+		return response;
 	}
 }
 

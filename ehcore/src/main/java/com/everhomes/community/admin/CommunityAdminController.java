@@ -564,10 +564,10 @@ public class CommunityAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("createCommunities")
-    @RestReturn(value = CreateCommunityResponse.class)
-    public RestResponse createCommunities(CreateCommunityCommand cmd) {
-//        CreateCommunityResponse result = communityService.createCommunities(cmd);
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CreateCommunitiesResponse.class)
+    public RestResponse createCommunities(CreateCommunitiesCommand cmd) {
+        CreateCommunitiesResponse result = communityService.createCommunities(cmd);
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
