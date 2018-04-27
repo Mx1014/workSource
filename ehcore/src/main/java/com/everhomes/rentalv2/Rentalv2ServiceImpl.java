@@ -2498,7 +2498,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 					//订单过期,置状态
 					if(orderEndTimeLong <= currTime){
-						order.setStatus(SiteBillStatus.OVERTIME.getCode());
+						order.setStatus(SiteBillStatus.COMPLETE.getCode());
 						rentalv2Provider.updateRentalBill(order);
 					}else if(currTime + 30*60*1000L >= orderReminderTimeLong){
 						//超期未确认的置为超时
