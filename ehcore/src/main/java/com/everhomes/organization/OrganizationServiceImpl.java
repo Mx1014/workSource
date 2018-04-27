@@ -12869,6 +12869,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(cmd.getOrganizationId() != null && cmd.getNamespaceId() != null){
             //根据organizationId和namespaceId进行查询节点信息以及明细
             organizationAndDetailDTO = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(cmd.getOrganizationId(),cmd.getNamespaceId());
+            //根据组织编号organizationId来查询eh_organization_communities表中该公司管理的项目，注意一个公司可以管理多个项目
+            //所以可以是一个集合
+            if(organizationAndDetailDTO.getPmFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                //说明该公司是管理公司，那么我们需要将该管理公司所管理的项目编号全部返回给前端
+                //我们首先查出该公司管理的项目集合
+                List<OrganizationCommunity> organizationCommunityList = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+                //创建一个List<Long>集合，来存放项目编号的集合
+                List<Long> list = Lists.newArrayList();
+                //采用forEach循环遍历管理项目
+                for(OrganizationCommunity organizationCommunity : organizationCommunityList){
+                    //将communityId封装在集合中
+                    list.add(organizationCommunity.getCommunityId());
+                }
+                //将项目编号的集合封装在OrganizationAndDetailDTO对象中返回给前端
+                organizationAndDetailDTO.setCommunityIds(list);
+            }
         }
 
         if(organizationAndDetailDTO.getAdminTargetId() != null){

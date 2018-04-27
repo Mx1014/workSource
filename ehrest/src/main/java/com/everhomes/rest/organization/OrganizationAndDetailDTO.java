@@ -21,6 +21,8 @@ public class OrganizationAndDetailDTO {
     private Long addressId;
     //节点描述
     private String description;
+    //该公司管理的项目的编号集合
+    private List<Long> communityIds;
 
 
     //部门类型
@@ -93,7 +95,7 @@ public class OrganizationAndDetailDTO {
         return organizationId;
     }
 
-    public void setOrganizationId(Long orgId) {
+    public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
 
@@ -389,6 +391,14 @@ public class OrganizationAndDetailDTO {
 
     public void setEntries(String entries) {
         this.entries = entries;
+    }
+
+    public List<Long> getCommunityIds() {
+        return communityIds;
+    }
+
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
     }
 
     @Override
