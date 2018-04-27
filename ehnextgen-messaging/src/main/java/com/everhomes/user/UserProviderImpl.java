@@ -1883,8 +1883,8 @@ public class UserProviderImpl implements UserProvider {
         //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_users和表eh_user_identifiers进行联查
-        SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
-        query.addJoin(Tables.EH_USERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        SelectQuery<Record> query = context.select().from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_IDENTIFIERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
         //添加查询条件
         query.addConditions(Tables.EH_USERS.ID.eq(userId));
         query.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(userId));

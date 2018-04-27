@@ -585,4 +585,38 @@ public interface OrganizationProvider {
 	List<Organization> listPMOrganizations(Integer namespaceId);
 
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
+
+	/**
+	 * 将OrganizationWorkPlaces对象持久化在表eh_Organization_workPlaces表中
+	 * @param organizationWorkPlaces
+	 */
+	void insertIntoOrganizationWorkPlaces(OrganizationWorkPlaces organizationWorkPlaces);
+
+	/**
+	 * 将CommunityAndBuildingRelationes对象中的数据持久化到eh_communityAndBuilding_relationes表中
+	 * @param communityAndBuildingRelationes
+	 */
+	void insertIntoCommunityAndBuildingRelationes(CommunityAndBuildingRelationes communityAndBuildingRelationes);
+
+	/**
+	 * 根据organizationId来查询eh_organization_workPlaces表中对应的项目办公地点（可能存在多个办公地点）集合
+	 * @param organizationId
+	 * @return
+	 */
+	List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgId(Long organizationId);
+
+	/**
+	 * 根据项目Id来查询项目名称
+	 * @param communityId
+	 * @return
+	 */
+	String getCommunityNameByCommunityId(Long communityId);
+
+	/**
+	 * 根据communityId来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes
+	 * 一个项目可能对应多个楼栋和门牌
+	 * @param communityId
+	 * @return
+	 */
+	List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByCommunityId(Long communityId);
 }

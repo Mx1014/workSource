@@ -12,10 +12,6 @@ import com.everhomes.util.StringHelper;
 public class OrganizationSiteApartmentDTO {
     private Long buildingId;
     private Long apartmentId;
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
 
     public Long getApartmentId() {
         return apartmentId;
@@ -31,5 +27,10 @@ public class OrganizationSiteApartmentDTO {
 
     public void setBuildingId(Long buildingId) {
         this.buildingId = buildingId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

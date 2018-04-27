@@ -71,6 +71,7 @@ import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
@@ -140,6 +141,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -148,6 +150,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1326,7 +1329,41 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             }
 
+            //向办公地点表中添加数据
+            if(cmd.getOfficeSites() != null){
+                //说明传过来的所在项目和名称以及其中的楼栋和门牌不为空，那么我们将其进行遍历
+                for(CreateOfficeSiteCommand createOfficeSiteCommand :cmd.getOfficeSites()){
+                    //这样的话拿到的是每一个办公所在地，以及其中的楼栋和门牌
+                    //首先我们将办公地址名称和办公地点id持久化到表eh_organization_workPlaces中
+                    //创建OrganizationWorkPlaces类的对象
+                    OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                    //将数据封装在对象中
+                    organizationWorkPlaces.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationWorkPlaces.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
+                    //将上面的organization对象中的id也封装在对象中
+                    organizationWorkPlaces.setOrganizationId(organization.getId());
+                    //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
+                    organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                    //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+                    //首先进行遍历楼栋集合
+                    if(createOfficeSiteCommand.getSiteDtos() != null){
+                        //说明楼栋和门牌不为空，注意他是一个集合
+                        //遍历
+                        for(OrganizationSiteApartmentDTO organizationSiteApartmentDTO : createOfficeSiteCommand.getSiteDtos()){
+                            //这样的话我们拿到的是每一个楼栋以及对应的门牌
+                            //创建CommunityAndBuildingRelationes对象，并且将数据封装在对象中，然后持久化到数据库
+                            CommunityAndBuildingRelationes communityAndBuildingRelationes = new CommunityAndBuildingRelationes();
+                            communityAndBuildingRelationes.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                            communityAndBuildingRelationes.setAddressId(organizationSiteApartmentDTO.getApartmentId());
+                            communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
+                            //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
+                            organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
+                        }
+                    }
 
+                }
+            }
 
             OrganizationDetail organizationDetail = new OrganizationDetail();
             organizationDetail.setOrganizationId(organization.getId());
@@ -12825,25 +12862,84 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param cmd
      * @return
      */
-    public OrganizationDetail getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd){
+    @Override
+    public OrganizationAndDetailDTO getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd){
         //创建OrganizationAndDetailDTO对象
         OrganizationAndDetailDTO organizationAndDetailDTO = new OrganizationAndDetailDTO();
         if(cmd.getOrganizationId() != null && cmd.getNamespaceId() != null){
             //根据organizationId和namespaceId进行查询节点信息以及明细
             organizationAndDetailDTO = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(cmd.getOrganizationId(),cmd.getNamespaceId());
         }
+
         if(organizationAndDetailDTO.getAdminTargetId() != null){
+            //说明超级管理员不为空，那么我们就将超级管理员查询出来，并且封装在对象OrganizationAndDetailDTO中
             //创建User对象
             UserDTO user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
             if(user != null){
                 organizationAndDetailDTO.setUser(user);
             }
-
-
-
-
         }
-        return null;
+        //接下来我们需要做的是：将该公司所在的办公地点、所属项目名称、以及该项目下面的所有的楼栋和门牌查询出来
+        if(organizationAndDetailDTO.getOrgId() != null){
+            //说明上面查询出来的organizationId是存在的，那么我们根据这个organizationId可以在办公地点表eh_organization_workPlaces中查询出
+            //办公地点id（community_id）可能是一个集合（一个公司存在多个办公地点）
+            List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgId(organizationAndDetailDTO.getOrgId());
+            //非空判断
+            if(!CollectionUtils.isEmpty(organizationWorkPlacesList)){
+                //说明办公地点存在，那么我们将其进行遍历
+                for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+                    //创建一个对象，用于承载办公点名称和项目名称以及里面的楼栋和门牌集合
+                    OfficeSiteDTO officeSiteDTO = new OfficeSiteDTO();
+                    //将办公地点名称封装在对象OfficeSiteDTO中
+                    officeSiteDTO.setSiteName(organizationWorkPlaces.getWorkplaceName());
+                    //根据查询到的community_id来查询表eh_communities然后得到所属项目的名称，并且将其封装在对象OfficeSiteDTO中
+                    String communityName = organizationProvider.getCommunityNameByCommunityId(organizationWorkPlaces.getCommunityId());
+                    officeSiteDTO.setCommunityName(communityName);
+                    //然后根据community_id来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中对应的building_id和
+                    //address_id,(注意一个community_id可能对应多个building_id和address_id)
+                    List<CommunityAndBuildingRelationes> communityAndBuildingRelationesList = organizationProvider.getCommunityAndBuildingRelationesByCommunityId(organizationWorkPlaces.getCommunityId());
+                    //非空校验
+                    if(!CollectionUtils.isEmpty(communityAndBuildingRelationesList)){
+                        //说明集合中存在值，进行遍历
+                        for(CommunityAndBuildingRelationes communityAndBuildingRelationes : communityAndBuildingRelationesList){
+                            //拿到对应的building_id和address_id，然后根据这个分别查询楼栋表eh_buildings和门牌表eh_address表中的信息
+                            //这个是正常的逻辑，但是现在呢？由于eh_buildings表和eh_addresses表中的数据是有些出入，所以呢，现在我们暂时不去
+                            //查询eh_buildings表中的信息，eh_addresses表中也是存在对应的楼栋号信息的，所以我们现在就根据addressId只从eh_addresses表中
+                            //拿数据,buildingId就暂时不用
+                            Address address = addressProvider.findAddressById(communityAndBuildingRelationes.getAddressId());
+                            //创建OrganizationApartDTO对象，用于承载楼栋名称和门牌名称
+                            OrganizationApartDTO organizationApartDTO = new OrganizationApartDTO();
+                            //非空校验
+                            if(address != null){
+                                //说明查询出来的address是存在信息的，那么将楼栋名称和门牌名称封装进去
+                                organizationApartDTO.setBuildingName(address.getBuildingName());
+                                organizationApartDTO.setApartmentName(address.getApartmentName());
+                            }
+                            //接下来我们需要将OrganizationApartDTO对象添加到OfficeSiteDTO对象中的List<OrganizationApartDTO>集合中去
+                            if(CollectionUtils.isEmpty(officeSiteDTO.getOrganizationApartDTOList())){
+                                //如果集合为空，那么久new一个，然后再添加
+                                List<OrganizationApartDTO> organizationApartDTOList = Lists.newArrayList();
+                                organizationApartDTOList.add(organizationApartDTO);
+                                officeSiteDTO.setOrganizationApartDTOList(organizationApartDTOList);
+                            }else{
+                                officeSiteDTO.getOrganizationApartDTOList().add(organizationApartDTO);
+                            }
+                        }
+
+                    }
+                    if(CollectionUtils.isEmpty(organizationAndDetailDTO.getOfficeSiteDTOList())){
+                        List<OfficeSiteDTO> officeSiteDTOList = Lists.newArrayList();
+                        officeSiteDTOList.add(officeSiteDTO);
+                        organizationAndDetailDTO.setOfficeSiteDTOList(officeSiteDTOList);
+                    }else{
+                        //将officeSiteDTO对象添加到OrganizationAndDetailDTO对象中的List<OfficeSiteDTO>集合中
+                        organizationAndDetailDTO.getOfficeSiteDTOList().add(officeSiteDTO);
+
+                    }
+                }
+            }
+        }
+        return organizationAndDetailDTO;
     }
 
 }
