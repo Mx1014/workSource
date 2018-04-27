@@ -3,6 +3,8 @@ package com.everhomes.asset;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -276,6 +278,20 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 				costByHouseListDTO = queryCostByHouseListDTO.getResult();
 				costDTOs.addAll(costByHouseListDTO.getDatas());
 			}
+			//把账单按照账期开始日期进行倒序排序
+			if(costDTOs != null) {
+				Collections.sort(costDTOs, new Comparator<CostDTO>() {
+					public int compare(CostDTO c1, CostDTO c2) {
+						if(c1.getBegintime().compareTo(c2.getBegintime()) > 0) {
+							return -1;
+						}
+						if(c1.getBegintime().compareTo(c2.getBegintime()) < 0) {
+							return 1;
+						}
+						return 0;
+					}
+				});
+			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor queryCostByHouseList() {}", houseid, clientid, onlyws, e);
 		}
@@ -371,7 +387,6 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 				}
 			}
 			String onlyws = "1";//首页只查询未缴费:0：全部费用；1：未收；2：已收
-			//onlyws = "0";//杨崇鑫测试
 			//根据房屋查询费用
 			List<CostDTO> costDTOs = queryCostByHouseList(houseid, clientid, onlyws);
 			if(costDTOs != null) {
@@ -415,7 +430,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		try {
 			//个人直接获取手机号码，企业获取所有企业管理员的手机号码
 			List<String> phoneNumbers = getPhoneNumber(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId());
-			//phoneNumbers.add("15650723221");//杨崇鑫测试
+			//phoneNumbers.add("13810281614");//杨崇鑫测试
 			//根据手机号返回房产
 			List<HouseDTO> houseDTOs = queryHouseByPhoneNumber(phoneNumbers);
 			String houseid = "",clientid = "";
@@ -447,6 +462,20 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 					ListAllBillsForClientDTO listAllBillsForClientDTO = assembleListAllBillsForClientDTO(costDTO, Byte.valueOf("1"));
 					response.add(listAllBillsForClientDTO);
 				}
+			}
+			//把账单按照账期开始日期进行倒序排序
+			if(response != null) {
+				Collections.sort(response, new Comparator<ListAllBillsForClientDTO>() {
+					public int compare(ListAllBillsForClientDTO c1, ListAllBillsForClientDTO c2) {
+						if(c1.getDateStrBegin().compareTo(c2.getDateStrBegin()) > 0) {
+							return -1;
+						}
+						if(c1.getDateStrBegin().compareTo(c2.getDateStrBegin()) < 0) {
+							return 1;
+						}
+						return 0;
+					}
+				});
 			}
 		}catch (Exception e) {
 			LOGGER.error("ZhuZongAssetVendor listAllBillsForClient() cmd={}", cmd, e);
