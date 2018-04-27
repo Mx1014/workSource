@@ -449,13 +449,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
 //        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
         if (results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(result -> {
-                return result.getGroupDisplayName();
-            }).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
     }
