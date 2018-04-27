@@ -6114,8 +6114,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_organizations和表eh_organization_details进行联查
-        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-        query.addJoin(Tables.EH_ORGANIZATIONS,JoinType.JOIN,Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID));
+        SelectQuery<Record> query = context.select().from(Tables.EH_ORGANIZATIONS).getQuery();
+        query.addJoin(Tables.EH_ORGANIZATION_DETAILS,JoinType.JOIN,Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID));
         //添加查询条件
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
         query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -6157,6 +6157,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             organizationAndDetailDTO.setAvatar(r.getValue(Tables.EH_ORGANIZATION_DETAILS.AVATAR));
             organizationAndDetailDTO.setPostUri(r.getValue(Tables.EH_ORGANIZATION_DETAILS.POST_URI));
             organizationAndDetailDTO.setMemberRange(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE));
+            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG));
+            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG));
             return null;
         });
         //将组装的对象进行返回

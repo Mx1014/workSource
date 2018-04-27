@@ -2,8 +2,10 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.rest.user.UserDTO;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrganizationAndDetailDTO {
@@ -58,7 +60,7 @@ public class OrganizationAndDetailDTO {
     private String unifiedSocialCreditCode;
     //
     private Integer order;
-    //管理员标志
+    //管理员id
     private Long adminTargetId;
     //工作平台标志
     private Byte workPlatformFlag;
@@ -79,6 +81,11 @@ public class OrganizationAndDetailDTO {
     private String avatar;
 
     private String postUri;
+
+    //是否是管理公司（1-是，0-否）
+    private Byte pmFlag;
+    //是否是服务商（1-是，0-否）
+    private Byte serviceSupportFlag;
 
     //人员规模
     private String memberRange;
@@ -400,11 +407,31 @@ public class OrganizationAndDetailDTO {
     }
 
     public List<OfficeSiteDTO> getOfficeSiteDTOList() {
-        return officeSiteDTOList;
+        if(CollectionUtils.isEmpty(officeSiteDTOList)){
+            return new ArrayList<OfficeSiteDTO>();
+        }else{
+            return officeSiteDTOList;
+        }
     }
 
     public void setOfficeSiteDTOList(List<OfficeSiteDTO> officeSiteDTOList) {
         this.officeSiteDTOList = officeSiteDTOList;
+    }
+
+    public Byte getPmFlag() {
+        return pmFlag;
+    }
+
+    public void setPmFlag(Byte pmFlag) {
+        this.pmFlag = pmFlag;
+    }
+
+    public Byte getServiceSupportFlag() {
+        return serviceSupportFlag;
+    }
+
+    public void setServiceSupportFlag(Byte serviceSupportFlag) {
+        this.serviceSupportFlag = serviceSupportFlag;
     }
 
     @Override

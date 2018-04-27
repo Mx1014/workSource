@@ -141,6 +141,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -12899,12 +12900,26 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 organizationApartDTO.setApartmentName(address.getApartmentName());
                             }
                             //接下来我们需要将OrganizationApartDTO对象添加到OfficeSiteDTO对象中的List<OrganizationApartDTO>集合中去
-                            officeSiteDTO.getOrganizationApartDTOList().add(organizationApartDTO);
+                            if(CollectionUtils.isEmpty(officeSiteDTO.getOrganizationApartDTOList())){
+                                //如果集合为空，那么久new一个，然后再添加
+                                List<OrganizationApartDTO> organizationApartDTOList = Lists.newArrayList();
+                                organizationApartDTOList.add(organizationApartDTO);
+                                officeSiteDTO.setOrganizationApartDTOList(organizationApartDTOList);
+                            }else{
+                                officeSiteDTO.getOrganizationApartDTOList().add(organizationApartDTO);
+                            }
                         }
 
                     }
-                    //将officeSiteDTO对象添加到OrganizationAndDetailDTO对象中的List<OfficeSiteDTO>集合中
-                    organizationAndDetailDTO.getOfficeSiteDTOList().add(officeSiteDTO);
+                    if(CollectionUtils.isEmpty(organizationAndDetailDTO.getOfficeSiteDTOList())){
+                        List<OfficeSiteDTO> officeSiteDTOList = Lists.newArrayList();
+                        officeSiteDTOList.add(officeSiteDTO);
+                        organizationAndDetailDTO.setOfficeSiteDTOList(officeSiteDTOList);
+                    }else{
+                        //将officeSiteDTO对象添加到OrganizationAndDetailDTO对象中的List<OfficeSiteDTO>集合中
+                        organizationAndDetailDTO.getOfficeSiteDTOList().add(officeSiteDTO);
+
+                    }
                 }
             }
         }

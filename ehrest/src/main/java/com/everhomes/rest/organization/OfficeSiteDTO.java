@@ -1,7 +1,9 @@
 package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
+import org.apache.commons.collections.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +36,9 @@ public class OfficeSiteDTO {
     }
 
     public List<OrganizationApartDTO> getOrganizationApartDTOList() {
+        if(CollectionUtils.isEmpty(organizationApartDTOList)){
+            return new ArrayList<OrganizationApartDTO>();
+        }
         return organizationApartDTOList;
     }
 
