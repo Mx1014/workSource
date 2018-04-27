@@ -6123,22 +6123,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //查询
         query.fetch().map(r -> {
             //将organizationId组装在对象OrganizationAndDetailDTO中
-            organizationAndDetailDTO.setOrgId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
-            //将parentId组装在对象OrganizationAndDetailDTO中
-            organizationAndDetailDTO.setParentId(r.getValue(Tables.EH_ORGANIZATIONS.PARENT_ID));
-            //将organizationType组装在对象OrganizationAndDetailDTO中
-            organizationAndDetailDTO.setOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE));
+            organizationAndDetailDTO.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
             //将节点名称组装在对象OrganizationAndDetailDTO中
             organizationAndDetailDTO.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
             organizationAndDetailDTO.setAddressId(r.getValue(Tables.EH_ORGANIZATIONS.ADDRESS_ID));
             organizationAndDetailDTO.setDescription(r.getValue(Tables.EH_ORGANIZATIONS.DESCRIPTION));
-            organizationAndDetailDTO.setPath(r.getValue(Tables.EH_ORGANIZATIONS.PATH));
-            organizationAndDetailDTO.setLevel(r.getValue(Tables.EH_ORGANIZATIONS.LEVEL));
-            organizationAndDetailDTO.setStatus(r.getValue(Tables.EH_ORGANIZATIONS.STATUS));
             organizationAndDetailDTO.setDepartmentType(r.getValue(Tables.EH_ORGANIZATIONS.DEPARTMENT_TYPE));
-            organizationAndDetailDTO.setGroupType(r.getValue(Tables.EH_ORGANIZATIONS.GROUP_TYPE));
             organizationAndDetailDTO.setDirectlyEnterpriseId(r.getValue(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID));
-            organizationAndDetailDTO.setGroupId(r.getValue(Tables.EH_ORGANIZATIONS.GROUP_ID));
             organizationAndDetailDTO.setShowFlag(r.getValue(Tables.EH_ORGANIZATIONS.SHOW_FLAG));
             organizationAndDetailDTO.setNamespaceOrganizationToken(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN));
             organizationAndDetailDTO.setNamespaceOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE));
@@ -6148,7 +6139,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             organizationAndDetailDTO.setEmailContent(r.getValue(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT));
             organizationAndDetailDTO.setWebsite(r.getValue(Tables.EH_ORGANIZATIONS.WEBSITE));
             organizationAndDetailDTO.setAdminTargetId(r.getValue(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID));
-            organizationAndDetailDTO.setWorkPlatformFlag(r.getValue(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG));
+            organizationAndDetailDTO.setWorkbenchFlag(r.getValue(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG));
             organizationAndDetailDTO.setContact(r.getValue(Tables.EH_ORGANIZATION_DETAILS.CONTACT));
             organizationAndDetailDTO.setAddress(r.getValue(Tables.EH_ORGANIZATION_DETAILS.ADDRESS));
             organizationAndDetailDTO.setDisplayName(r.getValue(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME));

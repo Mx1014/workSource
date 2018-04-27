@@ -17,7 +17,7 @@ public class OfficeSiteDTO {
 
     private String siteName;
     private String communityName;
-    private List<OrganizationApartDTO> organizationApartDTOList;
+    private List<OrganizationApartDTO> siteDtos;
 
     public String getSiteName() {
         return siteName;
@@ -35,15 +35,15 @@ public class OfficeSiteDTO {
         this.communityName = communityName;
     }
 
-    public List<OrganizationApartDTO> getOrganizationApartDTOList() {
-        if(CollectionUtils.isEmpty(organizationApartDTOList)){
+    public List<OrganizationApartDTO> getSiteDtos() {
+        if(CollectionUtils.isEmpty(siteDtos)){
             return new ArrayList<OrganizationApartDTO>();
         }
-        return organizationApartDTOList;
+        return siteDtos;
     }
 
-    public void setOrganizationApartDTOList(List<OrganizationApartDTO> organizationApartDTOList) {
-        this.organizationApartDTOList = organizationApartDTOList;
+    public void setSiteDtos(List<OrganizationApartDTO> siteDtos) {
+        this.siteDtos = siteDtos;
     }
 
     @Override

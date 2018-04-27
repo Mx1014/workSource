@@ -10,7 +10,7 @@ import java.util.List;
 
 public class OrganizationAndDetailDTO {
     //企业编号
-    private Long orgId;
+    private Long organizationId;
     //企业父类编号
     private Long parentId;
     //节点属性
@@ -21,16 +21,11 @@ public class OrganizationAndDetailDTO {
     private Long addressId;
     //节点描述
     private String description;
-    //节点路径
-    private String path;
-    //节点等级
-    private Integer level;
-    //节点状态
-    private Byte status;
+
+
     //部门类型
     private String departmentType;
-    //群组类型
-    private String groupType;
+
     //创建时间
     private Timestamp createTime;
     //更新时间
@@ -39,8 +34,7 @@ public class OrganizationAndDetailDTO {
     private Long directlyEnterpriseId;
     //域空间ID
     private Integer namespaceId;
-    //群组编号
-    private Long groupId;
+
 
     private Byte showFlag;
     private String namespaceOrganizationToken;
@@ -63,7 +57,7 @@ public class OrganizationAndDetailDTO {
     //管理员id
     private Long adminTargetId;
     //工作平台标志
-    private Byte workPlatformFlag;
+    private Byte workbenchFlag;
 
     //企业明细编号
     private Long OrgDetailId;
@@ -73,8 +67,10 @@ public class OrganizationAndDetailDTO {
     private String address;
     //简称
     private String displayName;
-    //手机号的属于者
+    //管理员姓名
     private String contactor;
+    //管理员手机号
+    private String entries;
     //人员数量
     private Long memberCount;
     //logo
@@ -90,16 +86,15 @@ public class OrganizationAndDetailDTO {
     //人员规模
     private String memberRange;
 
-    private UserDTO user;
     //项目以及项目关联的楼栋和门牌
-    private List<OfficeSiteDTO> officeSiteDTOList;
+    private List<OfficeSiteDTO> officeSites;
 
-    public Long getOrgId() {
-        return orgId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
+    public void setOrganizationId(Long orgId) {
+        this.organizationId = organizationId;
     }
 
     public Long getParentId() {
@@ -142,29 +137,6 @@ public class OrganizationAndDetailDTO {
         this.description = description;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
     public String getDepartmentType() {
         return departmentType;
@@ -172,14 +144,6 @@ public class OrganizationAndDetailDTO {
 
     public void setDepartmentType(String departmentType) {
         this.departmentType = departmentType;
-    }
-
-    public String getGroupType() {
-        return groupType;
-    }
-
-    public void setGroupType(String groupType) {
-        this.groupType = groupType;
     }
 
     public Timestamp getCreateTime() {
@@ -212,14 +176,6 @@ public class OrganizationAndDetailDTO {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
     }
 
     public Byte getShowFlag() {
@@ -318,12 +274,12 @@ public class OrganizationAndDetailDTO {
         this.adminTargetId = adminTargetId;
     }
 
-    public Byte getWorkPlatformFlag() {
-        return workPlatformFlag;
+    public Byte getWorkbenchFlag() {
+        return workbenchFlag;
     }
 
-    public void setWorkPlatformFlag(Byte workPlatformFlag) {
-        this.workPlatformFlag = workPlatformFlag;
+    public void setWorkbenchFlag(Byte workbenchFlag) {
+        this.workbenchFlag = workbenchFlag;
     }
 
     public Long getOrgDetailId() {
@@ -398,24 +354,17 @@ public class OrganizationAndDetailDTO {
         this.memberRange = memberRange;
     }
 
-    public UserDTO getUser() {
-        return user;
-    }
 
-    public void setUser(UserDTO user) {
-        this.user = user;
-    }
-
-    public List<OfficeSiteDTO> getOfficeSiteDTOList() {
-        if(CollectionUtils.isEmpty(officeSiteDTOList)){
+    public List<OfficeSiteDTO> getOfficeSites() {
+        if(CollectionUtils.isEmpty(officeSites)){
             return new ArrayList<OfficeSiteDTO>();
         }else{
-            return officeSiteDTOList;
+            return officeSites;
         }
     }
 
-    public void setOfficeSiteDTOList(List<OfficeSiteDTO> officeSiteDTOList) {
-        this.officeSiteDTOList = officeSiteDTOList;
+    public void setOfficeSites(List<OfficeSiteDTO> officeSites) {
+        this.officeSites = officeSites;
     }
 
     public Byte getPmFlag() {
@@ -432,6 +381,14 @@ public class OrganizationAndDetailDTO {
 
     public void setServiceSupportFlag(Byte serviceSupportFlag) {
         this.serviceSupportFlag = serviceSupportFlag;
+    }
+
+    public String getEntries() {
+        return entries;
+    }
+
+    public void setEntries(String entries) {
+        this.entries = entries;
     }
 
     @Override

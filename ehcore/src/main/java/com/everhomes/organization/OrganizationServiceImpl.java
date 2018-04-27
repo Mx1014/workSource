@@ -12860,14 +12860,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             //创建User对象
             UserDTO user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
             if(user != null){
-                organizationAndDetailDTO.setUser(user);
+                organizationAndDetailDTO.setContactor(user.getAccountName());
+                organizationAndDetailDTO.setEntries(user.getIdentifierToken());
             }
         }
         //接下来我们需要做的是：将该公司所在的办公地点、所属项目名称、以及该项目下面的所有的楼栋和门牌查询出来
-        if(organizationAndDetailDTO.getOrgId() != null){
+        if(organizationAndDetailDTO.getOrganizationId() != null){
             //说明上面查询出来的organizationId是存在的，那么我们根据这个organizationId可以在办公地点表eh_organization_workPlaces中查询出
             //办公地点id（community_id）可能是一个集合（一个公司存在多个办公地点）
-            List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgId(organizationAndDetailDTO.getOrgId());
+            List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgId(organizationAndDetailDTO.getOrganizationId());
             //非空判断
             if(!CollectionUtils.isEmpty(organizationWorkPlacesList)){
                 //说明办公地点存在，那么我们将其进行遍历
@@ -12900,24 +12901,24 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 organizationApartDTO.setApartmentName(address.getApartmentName());
                             }
                             //接下来我们需要将OrganizationApartDTO对象添加到OfficeSiteDTO对象中的List<OrganizationApartDTO>集合中去
-                            if(CollectionUtils.isEmpty(officeSiteDTO.getOrganizationApartDTOList())){
+                            if(CollectionUtils.isEmpty(officeSiteDTO.getSiteDtos())){
                                 //如果集合为空，那么久new一个，然后再添加
                                 List<OrganizationApartDTO> organizationApartDTOList = Lists.newArrayList();
                                 organizationApartDTOList.add(organizationApartDTO);
-                                officeSiteDTO.setOrganizationApartDTOList(organizationApartDTOList);
+                                officeSiteDTO.setSiteDtos(organizationApartDTOList);
                             }else{
-                                officeSiteDTO.getOrganizationApartDTOList().add(organizationApartDTO);
+                                officeSiteDTO.getSiteDtos().add(organizationApartDTO);
                             }
                         }
 
                     }
-                    if(CollectionUtils.isEmpty(organizationAndDetailDTO.getOfficeSiteDTOList())){
+                    if(CollectionUtils.isEmpty(organizationAndDetailDTO.getOfficeSites())){
                         List<OfficeSiteDTO> officeSiteDTOList = Lists.newArrayList();
                         officeSiteDTOList.add(officeSiteDTO);
-                        organizationAndDetailDTO.setOfficeSiteDTOList(officeSiteDTOList);
+                        organizationAndDetailDTO.setOfficeSites(officeSiteDTOList);
                     }else{
                         //将officeSiteDTO对象添加到OrganizationAndDetailDTO对象中的List<OfficeSiteDTO>集合中
-                        organizationAndDetailDTO.getOfficeSiteDTOList().add(officeSiteDTO);
+                        organizationAndDetailDTO.getOfficeSites().add(officeSiteDTO);
 
                     }
                 }
