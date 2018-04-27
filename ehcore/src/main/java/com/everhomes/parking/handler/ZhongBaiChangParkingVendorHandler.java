@@ -141,12 +141,17 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("member_name", card.getData().getMemberName());
 			params.put("telephone", card.getData().getTelephone());
 			params.put("start_date", card.getData().getStartTime());
+			long now = System.currentTimeMillis();
+
+			if (Utils.strToLong(card.getData().getStartTime(),Utils.DateStyle.DATE_TIME) < now) {
+				params.put("start_date", Utils.longToString(now,Utils.DateStyle.DATE_TIME));
+			}
 
 			// 根据充值的几个月，重新计算月卡结束日期
 			//这里加一秒钟，原因是自然月只会计算时间到 月末那一天的 23:59:59 秒
 			//下一充值，需要从 月初第一天的 00:00:00 开始计算
 			Timestamp rechargeStartTimestamp = new Timestamp(Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME)+1000);
-			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddNatureMonth(rechargeStartTimestamp.getTime(), order.getMonthCount().intValue());
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThisMonth(rechargeStartTimestamp.getTime(), order.getMonthCount().intValue());
 			String endTime = Utils.dateToStr(rechargeEndTimestamp, Utils.DateStyle.DATE_TIME);
 
 			params.put("end_date", endTime);
