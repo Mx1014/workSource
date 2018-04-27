@@ -4686,7 +4686,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             if (cmd.getAvatar() != null)
                 owner.setAvatar(cmd.getAvatar());
-            if (cmd.getBirthday() != null)
+//            if (cmd.getBirthday() != null)  这里的实现逻辑
                 owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
             if (cmd.getOrgOwnerTypeId() != null)
                 owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
