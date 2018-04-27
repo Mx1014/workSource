@@ -2285,7 +2285,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
-		response.setIfHide(configProvider.getIntValue(namespaceId,"pmtask.hide.represent",0));
+		if(null == cmd.getAppId()) {
+			LOGGER.error("Invalid appId parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid appId parameter.");
+		}
+		String colName = "pmtask.hide.represent.";
+		colName += cmd.getAppId().toString();
+		response.setIfHide(configProvider.getIntValue(namespaceId,colName,0));
 
 		SceneTokenDTO sceneTokenDTO = null;
 		if (null != cmd.getSceneToken()) {
@@ -2856,8 +2863,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Map<Long,Map<Long,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getTaskCategoryId)));
 //		构建响应数据对象
 		List<PmTaskStatSubDTO> dtoList = new ArrayList<>();
-		for (Map.Entry<Long,Map<Long,List<PmTask>>> elem: result.entrySet()
-			 ) {
+		for (Map.Entry<Long,Map<Long,List<PmTask>>> elem: result.entrySet()) {
 			Community community = communityProvider.findCommunityById(elem.getKey());
 			for (Map.Entry<Long,List<PmTask>> elem1:elem.getValue().entrySet()
 				 ) {
@@ -2924,8 +2930,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()),categoryIds);
 		Map<Long,Map<Byte,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getStatus)));
 		List<PmTaskStatDTO> dtolist = new ArrayList<>();
-		for (Map.Entry<Long,Map<Byte,List<PmTask>>> elem : result.entrySet()
-			 ) {
+		for (Map.Entry<Long,Map<Byte,List<PmTask>>> elem : result.entrySet()) {
 			PmTaskStatDTO bean = new PmTaskStatDTO();
 			bean.setOwnerId(elem.getKey());
 			Community community = communityProvider.findCommunityById(elem.getKey());
@@ -2949,7 +2954,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
-		this.checkOwnerIdAndOwnerType(cmd.getOwnerType(),cmd.getOwnerId());
 		List<Long> ownerIds = getOwnerIds(cmd);
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());

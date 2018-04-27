@@ -490,6 +490,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 			condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.between(dateStart,dateEnd));
 		if(null != taskcategoryIds && taskcategoryIds.size() > 0)
 			condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.in(taskcategoryIds));
+		condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.notEqual(0L));
 		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
 	}
 }

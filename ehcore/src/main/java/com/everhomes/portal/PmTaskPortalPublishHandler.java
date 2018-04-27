@@ -46,11 +46,12 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //        }else{
 //            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
 //        }
+        Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
         Byte angetSwitch = pmTaskInstanceConfig.getAgentSwitch();
-        if(9L == pmTaskInstanceConfig.getTaskCategoryId() && 0 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",1);
-        } else if (9L == pmTaskInstanceConfig.getTaskCategoryId() && 1 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent",0);
+        if(0 == angetSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+        } else if (1 == angetSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent" + taskCategoryId.toString(),0);
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
