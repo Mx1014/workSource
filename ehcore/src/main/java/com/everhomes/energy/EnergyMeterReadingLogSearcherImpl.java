@@ -175,7 +175,9 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                    .field("meterNumber", 5.0f)
-                    .field("meterName", 5.0f);
+                    .field("meterName", 5.0f)
+                    .field("taskName.pinyin_prefix", 2.0f)
+                    .field("taskName.pinyin_gram", 1.0f);
         }
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");

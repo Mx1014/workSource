@@ -28,6 +28,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermFilterBuilder;
@@ -202,7 +203,18 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                    .field("meterNumber", 5.0f)
-                    .field("name", 5.0f);
+                    .field("name", 5.0f)
+                    .field("name.pinyin_prefix", 2.0f)
+                    .field("name.pinyin_gram", 1.0f);
+        }
+
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
         }
 
         List<FilterBuilder> filterBuilders = new ArrayList<>();
