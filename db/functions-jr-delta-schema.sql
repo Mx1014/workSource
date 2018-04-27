@@ -28,7 +28,7 @@ UPDATE `eh_service_module_privileges` SET  default_order = 9,`remark`='修改管
 UPDATE `eh_service_module_privileges` SET  default_order = 10,`remark`='删除管理信息'WHERE `module_id`='21110' and  `privilege_id`='21110';
 UPDATE `eh_service_module_privileges` SET  default_order = 11,`remark`='导入管理信息'WHERE `module_id`='21110' and  `privilege_id`='21111';
 UPDATE `eh_service_module_privileges` SET  default_order = 12,`remark`='导出管理信息'WHERE `module_id`='21110' and  `privilege_id`='21112';
-UPDATE `eh_service_module_privileges` SET  default_order = 0,`remark`='查看' WHERE `module_id`='21110' and  `privilege_id`='21113';
+UPDATE `eh_service_module_privileges` SET  default_order = 0,`remark`='查看' WHERE `module_id`='21120' and  `privilege_id`='21113';
 
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21114', '0', '客户管理导出权限', '客户管理 业务模块权限', NULL);
