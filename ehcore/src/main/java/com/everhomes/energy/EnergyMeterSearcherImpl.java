@@ -122,25 +122,17 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             builder.field("createTime", meter.getCreateTime().getTime());
 
             List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-            if (existAddress != null && existAddress.size() > 0) {
-                builder.field("buildingId", existAddress.get(0).getBuildingId());
-                builder.field("addressId", existAddress.get(0).getAddressId());
-                if (existAddress.get(0).getBuildingName() != null) {
-                    builder.field("buildingName", existAddress.get(0).getBuildingName());
-                } else {
-                    builder.field("buildingName", "");
-                }
-
-                if (existAddress.get(0).getApartmentName() != null) {
-                    builder.field("apartmentName", existAddress.get(0).getApartmentName());
-                } else {
-                    builder.field("apartmentName", "");
-                }
-            } else {
-                builder.field("buildingId", 0);
-                builder.field("addressId", 0);
-                builder.field("buildingName", "");
-                builder.field("apartmentName", "");
+            StringBuffer addressString = new StringBuffer();
+            StringBuffer buildingString = new StringBuffer();
+            if(existAddress!=null && existAddress.size()>0){
+                existAddress.forEach((r)->{
+                    addressString.append(r.getAddressId().toString()).append("|");
+                    buildingString.append(r.getBuildingId().toString()).append("|");
+                });
+            }
+            if(existAddress != null && existAddress.size() > 0) {
+                builder.field("buildingId", buildingString);
+                builder.field("addressId", addressString);
             }
 
             EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(meter.getNamespaceId(), meter.getId());
