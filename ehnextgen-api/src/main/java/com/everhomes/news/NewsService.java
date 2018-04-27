@@ -77,8 +77,6 @@ public interface NewsService {
 	
 	Long checkNewsToken(Long userId, String newsToken);
 	
-	public void setRenderUrl(SetNewsLikeFlagBySceneCommand cmd);
-	
 }
 
 

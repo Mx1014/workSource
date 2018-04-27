@@ -51,21 +51,6 @@ public class NewsUiController extends ControllerBase{
 		return response;
 	}
 	
-	
-	@RequestMapping("setNewsRenderUrl")
-	@RequireAuthentication(false)
-	public RestResponse listNewsByScene(SetNewsLikeFlagBySceneCommand cmd) {
-		
-
-		
-
-		newsService.setRenderUrl(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
 	/**
 	 * <b>URL: /ui/news/setNewsLikeFlagByScene</b>
 	 * <p>APP点赞/取消点赞</p>

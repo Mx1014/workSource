@@ -179,8 +179,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		// 检查用户的项目权限是否合法
-		// checkUserProjectLegal(userId, cmd.getCurrentPMId(),
-		// cmd.getCurrentProjectId());
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -1395,24 +1394,6 @@ public class NewsServiceImpl implements NewsService {
 
 		return response;
 
-	}
-
-	@Override
-	public void setRenderUrl(SetNewsLikeFlagBySceneCommand cmd) {
-		String renderUrl = cmd.getNewsToken();
-		String title = cmd.getSceneToken();
-
-		if (null != cmd.getLikeFlag()) {
-			configurationProvider.setIntValue("ui.news.needuseurl", cmd.getLikeFlag());
-		}
-
-		if (null != renderUrl && !"".equals(renderUrl)) {
-			configurationProvider.setValue("ui.news.renderurl", renderUrl);
-		}
-
-		if (null != title && !"".equals(title)) {
-			configurationProvider.setValue("ui.news.title", title);
-		}
 	}
 
 	private SceneTokenDTO getNamespaceFromSceneToken(Long userId, String sceneToken) {
