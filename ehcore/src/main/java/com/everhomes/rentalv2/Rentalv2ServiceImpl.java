@@ -3960,9 +3960,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (compare == 0) {
 					// 总金额为0，直接预订成功状态
 					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-					//发短信
-					RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
-					handler.sendRentalSuccessSms(bill);
 				}else{
 					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 					orderCancelFlag[0] = true;
@@ -3976,6 +3973,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rentalv2Provider.updateRentalBill(bill);
 
 				if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+					//发短信
+					RentalMessageHandler handler2 = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+					handler2.sendRentalSuccessSms(bill);
 					onOrderSuccess(bill);
 				}
 			}

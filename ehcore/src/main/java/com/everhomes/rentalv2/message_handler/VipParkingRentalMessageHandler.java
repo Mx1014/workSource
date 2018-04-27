@@ -48,10 +48,10 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
 
-        RentalResourceType type = rentalv2Provider.findRentalResourceTypeById(rentalBill.getResourceTypeId());
+
 
         Map<String, String> map = new HashMap<>();
-        map.put("resourceTypeName", type.getName());
+        map.put("resourceTypeName", "VIP车位预约");
         String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
                 RentalNotificationTemplateCode.RENTAL_USER_CANCEL_ORDER, RentalNotificationTemplateCode.locale, map, "");
 
