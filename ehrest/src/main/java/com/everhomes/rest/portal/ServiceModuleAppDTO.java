@@ -29,7 +29,7 @@ import java.util.List;
  *     <li>pcUrls: pcUrls</li>
  *     <li>appEntryInfos: 应用entry信息</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
- *     <li>configAppIds: 配置应用id</li>
+ *     <li>dependentAppIds: 配置应用id</li>
  *     <li>supportThirdFlag: 支持第三方对接</li>
  *     <li>defaultFlag: 默认flag</li>
  *     <li>iconUri: iconUri</li>
@@ -61,7 +61,7 @@ public class ServiceModuleAppDTO {
     private List<String> pcUrls;
     private List<AppEntryInfoDTO> appEntryInfos;
     private Byte independentConfigFlag;
-    private List<Long> configAppIds;
+    private List<Long> dependentAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
     private String iconUri;
@@ -244,12 +244,12 @@ public class ServiceModuleAppDTO {
         this.independentConfigFlag = independentConfigFlag;
     }
 
-    public List<Long> getConfigAppIds() {
-        return configAppIds;
+    public List<Long> getDependentAppIds() {
+        return dependentAppIds;
     }
 
-    public void setConfigAppIds(List<Long> configAppIds) {
-        this.configAppIds = configAppIds;
+    public void setDependentAppIds(List<Long> dependentAppIds) {
+        this.dependentAppIds = dependentAppIds;
     }
 
     public Byte getSupportThirdFlag() {

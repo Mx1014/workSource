@@ -17,7 +17,7 @@ import java.util.List;
  *     <li>pcUris: pcUris</li>
  *     <li>appEntryInfos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
- *     <li>configAppIds: 若不支持独立配置，选择同时需要配置的应用，此处Id为originId</li>
+ *     <li>dependentIds: 若不支持独立配置，选择同时需要配置的应用，此处Id为originId</li>
  *     <li>supportThirdFlag: 支持对接硬件和第三方系统</li>
  *     <li>defaultFlag: 新建企业默认安装</li>
  * </ul>
@@ -34,7 +34,7 @@ public class UpdateAppProfileCommand {
     private List<String> pcUris;
     private List<AppEntryInfoDTO> appEntryInfos;
     private Byte independentConfigFlag;
-    private List<Long> configAppIds;
+    private List<Long> dependentAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
 
@@ -115,12 +115,12 @@ public class UpdateAppProfileCommand {
         this.independentConfigFlag = independentConfigFlag;
     }
 
-    public List<Long> getConfigAppIds() {
-        return configAppIds;
+    public List<Long> getDependentAppIds() {
+        return dependentAppIds;
     }
 
-    public void setConfigAppIds(List<Long> configAppIds) {
-        this.configAppIds = configAppIds;
+    public void setDependentAppIds(List<Long> dependentAppIds) {
+        this.dependentAppIds = dependentAppIds;
     }
 
     public Byte getSupportThirdFlag() {

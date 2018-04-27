@@ -2143,6 +2143,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    /**
+     * 标准版里pm or garc可以创建管理关系
+     * @param orgId
+     * @param communityId
+     */
+    @Override
+    public void createOrganizationCommunity(Long orgId, Long communityId) {
+        this.checkOrganization(orgId);
+        this.checkCommunity(communityId);
+        OrganizationCommunity departmentCommunity = new OrganizationCommunity();
+        departmentCommunity.setCommunityId(communityId);
+        departmentCommunity.setOrganizationId(orgId);
+        organizationProvider.createOrganizationCommunity(departmentCommunity);
+
+    }
+
     @Override
     public void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd) {
         Organization organization = this.checkOrganization(cmd.getOrganizationId());

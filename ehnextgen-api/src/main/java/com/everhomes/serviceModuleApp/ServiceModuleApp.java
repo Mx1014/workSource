@@ -20,7 +20,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private String pcUris;
     private String appEntryInfos;
     private Byte independentConfigFlag;
-    private String configAppIds;
+    private String dependentAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
 
@@ -115,12 +115,12 @@ public class ServiceModuleApp extends EhServiceModuleApps {
         this.independentConfigFlag = independentConfigFlag;
     }
 
-    public String getConfigAppIds() {
-        return configAppIds;
+    public String getDependentAppIds() {
+        return dependentAppIds;
     }
 
-    public void setConfigAppIds(String configAppIds) {
-        this.configAppIds = configAppIds;
+    public void setDependentAppIds(String dependentAppIds) {
+        this.dependentAppIds = dependentAppIds;
     }
 
     public Byte getSupportThirdFlag() {
