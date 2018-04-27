@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 分公司id 必填</li>
  * <li>salaryPeriod: 期数:类似201808 必填</li>
  * <li>payslipId: 工资条Id 必填</li>
+ * <li>Name: 姓名 选填</li>
+ * <li>status: 状态 不填-全部  0-已发送 1-已撤回  2-已确认 选填</li>
  * </ul>
  */
 public class ListSendPayslipDetailsCommand {
@@ -21,6 +23,10 @@ public class ListSendPayslipDetailsCommand {
 	private String salaryPeriod;
 
 	private Long payslipId;
+	
+	private String name;
+	
+	private Byte status;
 
 	public ListSendPayslipDetailsCommand() {
 
@@ -69,6 +75,23 @@ public class ListSendPayslipDetailsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+ 
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

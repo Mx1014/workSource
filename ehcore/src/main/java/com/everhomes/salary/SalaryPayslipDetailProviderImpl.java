@@ -36,7 +36,7 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 		salaryPayslipDetail.setId(id);
 		salaryPayslipDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryPayslipDetail.setCreatorUid(UserContext.current().getUser().getId());
-//		salaryPayslipDetail.setUpdateTime(salaryPayslipDetail.getCreateTime());
+		salaryPayslipDetail.setUpdateTime(salaryPayslipDetail.getCreateTime());
 		salaryPayslipDetail.setOperatorUid(salaryPayslipDetail.getCreatorUid());
 		getReadWriteDao().insert(salaryPayslipDetail);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryPayslipDetails.class, null);
@@ -90,6 +90,31 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 
 	@Override
 	public Integer countSend(Long payslipId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer countConfirm(Long payslipId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer countView(Long payslipId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer countRevoke(Long payslipId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
+			Long payslipId, String name, Byte status) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 所属id 总公司id 必填</li>
  * <li>ownerId: 分公司id 必填</li>
  * <li>salaryPeriod: 期数:类似201808 必填</li>
+ * <li>name: 工资表名称 可选</li>
  * </ul>
  */
 public class ListMonthPayslipSummaryCommand {
@@ -18,6 +19,8 @@ public class ListMonthPayslipSummaryCommand {
 	private Long ownerId;
 
 	private String salaryPeriod;
+	
+	private String name;
 
 	public ListMonthPayslipSummaryCommand() {
 
@@ -57,6 +60,14 @@ public class ListMonthPayslipSummaryCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

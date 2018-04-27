@@ -16,6 +16,8 @@ import com.everhomes.util.StringHelper;
 public class ImportPayslipResponse {
 
 	private String salaryPeriod;
+	
+	private String payslipName;
 
 	@ItemType(PayslipDetailDTO.class)
 	private List<PayslipDetailDTO> details;
@@ -24,8 +26,9 @@ public class ImportPayslipResponse {
 
 	}
 
-	public ImportPayslipResponse(String salaryPeriod, List<PayslipDetailDTO> details) {
+	public ImportPayslipResponse(String salaryPeriod, String payslipName, List<PayslipDetailDTO> details) {	
 		super();
+		this.payslipName = payslipName;
 		this.salaryPeriod = salaryPeriod;
 		this.details = details;
 	}
@@ -49,6 +52,14 @@ public class ImportPayslipResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getPayslipName() {
+		return payslipName;
+	}
+
+	public void setPayslipName(String payslipName) {
+		this.payslipName = payslipName;
 	}
 
 }

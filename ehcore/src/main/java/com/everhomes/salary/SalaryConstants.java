@@ -10,6 +10,8 @@ public class SalaryConstants {
 	public static final String SEND_MAIL_SCOPE = "salary.mail";
 	public static final int SEND_MAIL_CODE = 1;
 
+	public static final String SEND_NOTIFICATION_SCOPE = "salary.notification";
+	public static final int SEND_NOTIFICATION_CODE = 1;
 
 	/** 实发 = 98L */
 	public static final Long ENTITY_ID_SHIFA = 98L;

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>revokeCount: 撤回人数</li>
  * <li>operatorUid: 发放者id</li>
  * <li>operatorName: 发放人姓名</li>
- * <li>operateTime: 发放时间</li>
+ * <li>updateTime: 发放时间</li>
  * </ul>
  */
 public class PayslipDTO {
@@ -28,7 +28,7 @@ public class PayslipDTO {
     private Integer revokeCount;
     private Long operatorUid;
     private String operatorName;
-    private Long operateTime;
+    private Long updateTime;
 
 	@Override
 	public String toString() {
@@ -86,15 +86,7 @@ public class PayslipDTO {
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
-	}
-
-	public Long getOperateTime() {
-		return operateTime;
-	}
-
-	public void setOperateTime(Long operateTime) {
-		this.operateTime = operateTime;
-	}
+	} 
 
 	public Long getPayslipId() {
 		return payslipId;
@@ -102,6 +94,14 @@ public class PayslipDTO {
 
 	public void setPayslipId(Long payslipId) {
 		this.payslipId = payslipId;
+	}
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
 	} 
     
     

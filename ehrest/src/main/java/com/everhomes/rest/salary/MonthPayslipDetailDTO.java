@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class MonthPayslipDetailDTO {
+    private String salaryPeriod;
 	private Long updateTime;
 	private Long payslipDetailId;
 
@@ -32,5 +33,13 @@ public class MonthPayslipDetailDTO {
 
 	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getSalaryPeriod() {
+		return salaryPeriod;
+	}
+
+	public void setSalaryPeriod(String salaryPeriod) {
+		this.salaryPeriod = salaryPeriod;
 	}
 }

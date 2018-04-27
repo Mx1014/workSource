@@ -15,4 +15,13 @@ public interface SalaryPayslipDetailProvider {
 
 	Integer countSend(Long payslipId);
 
+	Integer countConfirm(Long payslipId);
+
+	Integer countView(Long payslipId);
+
+	Integer countRevoke(Long payslipId);
+
+	List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
+			Long payslipId, String name, Byte status);
+
 }
