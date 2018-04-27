@@ -246,7 +246,10 @@ public interface OrganizationService {
 	void userJoinOrganization(UserJoinOrganizationCommand cmd);
 	void deleteOrgMember(OrganizationMemberCommand cmd);
 	void updateTopicPrivacy(UpdateTopicPrivacyCommand cmd);
-	void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
+
+    void createOrganizationCommunity(Long orgId, Long communityId);
+
+    void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
 	void createOrganizationByAdmin(CreateOrganizationByAdminCommand cmd);
 	void addOrgAddress(AddOrgAddressCommand cmd);
 	void importOrganization(MultipartFile[] files);

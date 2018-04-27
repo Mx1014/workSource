@@ -60,7 +60,7 @@ CREATE TABLE `eh_service_module_app_profile` (
   `pc_uris` varchar(1024) DEFAULT NULL,
   `app_entry_infos` varchar(2048) DEFAULT NULL,
   `independent_config_flag` tinyint(4) DEFAULT 0,
-  `config_app_ids` varchar(128) DEFAULT NULL,
+  `dependent_app_ids` varchar(128) DEFAULT NULL,
   `support_third_flag` tinyint(4) DEFAULT 0,
   `default_flag` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`)

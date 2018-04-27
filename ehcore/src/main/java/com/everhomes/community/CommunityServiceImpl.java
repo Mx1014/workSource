@@ -2830,12 +2830,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 			//增加管理公司
 			if(cmd.getPmOrgId() != null){
-				CreateOrganizationCommunityCommand organizationCommunityCmd = new CreateOrganizationCommunityCommand();
-				organizationCommunityCmd.setOrganizationId(cmd.getPmOrgId());
-				List<Long> communityIds = new ArrayList<>();
-				communityIds.add(community.getId());
-				organizationCommunityCmd.setCommunityIds(communityIds);
-				organizationService.createOrganizationCommunity(organizationCommunityCmd);
+				organizationService.createOrganizationCommunity(cmd.getPmOrgId(), community.getId());
 			}
 
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
