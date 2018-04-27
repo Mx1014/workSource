@@ -5,54 +5,6 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
-
-import com.everhomes.dynamicExcel.DynamicExcelService;
-import com.everhomes.dynamicExcel.DynamicExcelStrings;
-
-import com.everhomes.organization.*;
-import com.everhomes.organization.pm.CommunityAddressMapping;
-import com.everhomes.organization.pm.PropertyMgrProvider;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rentalv2.Rentalv2Service;
-import com.everhomes.rest.acl.PrivilegeConstants;
-
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.customer.*;
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.openapi.shenzhou.DataType;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.pm.AddressMappingStatus;
-
-
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.user.*;
-
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.user.UserPrivilegeMgr;
-
-import com.everhomes.user.UserProvider;
-
-
-import com.everhomes.varField.*;
-import com.everhomes.yellowPage.YellowPageService;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -86,6 +38,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
+import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
@@ -194,6 +147,8 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.ListCustomerEventsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
 import com.everhomes.rest.customer.ListCustomerTaxesCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
@@ -210,6 +165,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.customer.SyncResultViewedCommand;
 import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
@@ -255,12 +211,15 @@ import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -282,6 +241,7 @@ import com.everhomes.varField.FieldGroup;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -759,9 +719,9 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         if (updateCustomer.getTrackingUid() == null) {
-            updateCustomer.setTrackingUid(-1L);
+            updateCustomer.setTrackingUid(null);
         }
-        if (updateCustomer.getTrackingUid() == -1) {
+        if (updateCustomer.getTrackingUid() == null) {
             updateCustomer.setTrackingName(null);
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
@@ -984,7 +944,7 @@ public class CustomerServiceImpl implements CustomerService {
                     customer.setTrackingName(organizationMembers.get(0).getContactName());
                 }
             } else {
-                customer.setTrackingUid(-1L);
+                customer.setTrackingUid(null);
             }
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
@@ -3123,7 +3083,7 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
         customer.setTrackingUid(cmd.getTrackingUid());
-        if (cmd.getTrackingUid() != -1) {
+        if (cmd.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
@@ -3144,7 +3104,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
                     "enterprise customer do not contains trackingUid or not the same uid");
         }
-        customer.setTrackingUid(-1l);
+        customer.setTrackingUid(null);
         customer.setTrackingName(null);
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
