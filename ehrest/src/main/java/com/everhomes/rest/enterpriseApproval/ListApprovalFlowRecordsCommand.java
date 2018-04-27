@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>startTime: 申请开始时间</li>
  * <li>endTime: 申请结束时间</li>
  * <li>approvalStatus: 审批状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
- * <li>filter: 审批类型过滤 参考{@link com.everhomes.rest.enterpriseApproval.ApprovalTypeFilter}</li>
+ * <li>filter: 审批类型过滤 参考{@link ApprovalFilter}</li>
  * <li>creatorDepartmentId: 申请人部门id</li>
  * <li>creatorName: 申请人</li>
  * <li>approvalNo: 审批编号</li>
@@ -32,7 +32,7 @@ public class ListApprovalFlowRecordsCommand {
 
     private Byte approvalStatus;
 
-    private ApprovalTypeFilter filter;
+    private ApprovalFilter filter;
 
     private Long creatorDepartmentId;
 
@@ -95,11 +95,11 @@ public class ListApprovalFlowRecordsCommand {
         this.approvalStatus = approvalStatus;
     }
 
-    public ApprovalTypeFilter getFilter() {
+    public ApprovalFilter getFilter() {
         return filter;
     }
 
-    public void setFilter(ApprovalTypeFilter filter) {
+    public void setFilter(ApprovalFilter filter) {
         this.filter = filter;
     }
 

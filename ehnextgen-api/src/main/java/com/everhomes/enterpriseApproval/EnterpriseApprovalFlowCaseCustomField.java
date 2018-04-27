@@ -1,4 +1,4 @@
-package com.everhomes.general_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.server.schema.Tables;
@@ -10,7 +10,7 @@ import org.jooq.TableField;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public enum  GeneralApprovalFlowCaseCustomField {
+public enum EnterpriseApprovalFlowCaseCustomField {
     CREATOR_DEPARTMENT("string_tag6", "stringTag6", Tables.EH_FLOW_CASES.STRING_TAG6),
     CREATOR_DEPARTMENT_ID("integral_tag6","integralTag6",Tables.EH_FLOW_CASES.INTEGRAL_TAG6),
     APPROVAL_NO("integral_tag7", "integralTag7", Tables.EH_FLOW_CASES.INTEGRAL_TAG7);
@@ -19,7 +19,7 @@ public enum  GeneralApprovalFlowCaseCustomField {
     private String propertyName;
     private TableField<?, ?> field;
 
-    private GeneralApprovalFlowCaseCustomField(String fieldName, String propertyName, TableField<?, ?> field) {
+    private EnterpriseApprovalFlowCaseCustomField(String fieldName, String propertyName, TableField<?, ?> field) {
         this.fieldName = fieldName;
         this.propertyName = propertyName;
         this.field = field;

@@ -6,13 +6,13 @@ package com.everhomes.rest.enterpriseApproval;
  * <li>sourceType: 过滤类型: APPROVAL-审批 GROUP-审批组</li>
  * </ul>
  */
-public class ApprovalTypeFilter {
+public class ApprovalFilter {
 
     private Long sourceId;
 
     private String sourceType;
 
-    public ApprovalTypeFilter() {
+    public ApprovalFilter() {
     }
 
     public Long getSourceId() {

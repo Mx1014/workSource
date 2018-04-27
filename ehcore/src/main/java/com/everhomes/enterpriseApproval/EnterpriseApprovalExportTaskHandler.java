@@ -1,10 +1,12 @@
-package com.everhomes.general_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.general_approval.ListGeneralApprovalRecordsCommand;
+import com.everhomes.rest.enterpriseApproval.ApprovalFilter;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsCommand;
+import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler {
+public class EnterpriseApprovalExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;
@@ -21,7 +23,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
     private TaskService taskService;
 
     @Autowired
-    private GeneralApprovalService generalApprovalService;
+    private EnterpriseApprovalService enterpriseApprovalService;
 
     @Override
     public void beforeExecute(Map<String, Object> params) {
@@ -46,9 +48,9 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Byte approvalStatus = null;
         if (params.get("approvalStatus") != null)
             approvalStatus = (Byte) params.get("approvalStatus");
-        Long approvalId = null;
-        if (params.get("approvalId") != null)
-            approvalId = (Long) params.get("approvalId");
+        ApprovalFilter filter = null;
+        if (params.get("filter") != null)
+            filter = (ApprovalFilter) StringHelper.fromJsonString((String) params.get("approvalId"), ApprovalFilter.class);
         Long creatorDepartmentId = null;
         if (params.get("creatorDepartmentId") != null)
             creatorDepartmentId = (Long) params.get("creatorDepartmentId");
@@ -58,14 +60,14 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
             approvalNo = (Long) params.get("approvalNo");
         Integer namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
 
-        ListGeneralApprovalRecordsCommand cmd = new ListGeneralApprovalRecordsCommand();
+        ListApprovalFlowRecordsCommand cmd = new ListApprovalFlowRecordsCommand();
         cmd.setNamespaceId(namespaceId);
         cmd.setOrganizationId(organizationId);
         cmd.setModuleId(moduleId);
         cmd.setStartTime(startTime);
         cmd.setEndTime(endTime);
         cmd.setApprovalStatus(approvalStatus);
-        cmd.setApprovalId(approvalId);
+        cmd.setFilter(filter);
         cmd.setCreatorDepartmentId(creatorDepartmentId);
         cmd.setCreatorName(creatorName);
         cmd.setApprovalNo(approvalNo);
@@ -75,8 +77,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         //  get the out put stream before start download
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-//        OutputStream outputStream = null;
-        OutputStream outputStream = generalApprovalService.getGeneralApprovalOutputStream(cmd, taskId);
+        OutputStream outputStream = enterpriseApprovalService.getEnterpriseApprovalOutputStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

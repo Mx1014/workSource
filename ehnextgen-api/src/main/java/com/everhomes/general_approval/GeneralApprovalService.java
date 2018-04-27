@@ -50,7 +50,6 @@ public interface GeneralApprovalService {
 
     GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
 
-
     void enableGeneralApproval(GeneralApprovalIdCommand cmd);
 
     void disableGeneralApproval(GeneralApprovalIdCommand cmd);
@@ -64,14 +63,6 @@ public interface GeneralApprovalService {
     GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute);
 
     ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
-
-    ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
-
-    EnterpriseApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
-
-    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
-
-    OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 

@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
+import com.everhomes.enterpriseApproval.EnterpriseApprovalService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -260,10 +261,6 @@ public class PunchServiceImpl implements PunchService {
     @Autowired
     private UserProvider userProvider;
     @Autowired
-    private ApprovalRangeStatisticProvider approvalRangeStatisticProvider;
-    @Autowired
-    private EnterpriseContactProvider enterpriseContactProvider;
-    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -286,9 +283,6 @@ public class PunchServiceImpl implements PunchService {
 
     @Autowired
     private ApprovalRequestProvider approvalRequestProvider;
-
-    @Autowired
-    private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
 
     @Autowired
     private ApprovalCategoryProvider approvalCategoryProvider;
@@ -322,6 +316,9 @@ public class PunchServiceImpl implements PunchService {
     private PortalService portalService;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private EnterpriseApprovalService enterpriseApprovalService; // add by ryan for enterprise approval instead of general approval.
 
     @Override
     public void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege) {
@@ -5378,7 +5375,7 @@ public class PunchServiceImpl implements PunchService {
                 dto.setApprovalRecords(new ArrayList<>());
                 for (PunchExceptionRequest request : exceptionRequests) {
                     FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
-                    EnterpriseApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+                    EnterpriseApprovalRecordDTO recordDTO = enterpriseApprovalService.convertEnterpriseApprovalRecordDTO(flowCase);
                     dto.getApprovalRecords().add(recordDTO);
                 }
             }
