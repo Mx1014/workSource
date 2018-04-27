@@ -1607,13 +1607,12 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/enterprise/detail</b>
-     * <p>查看单个公司的具体属性</p>
+     * <p>查看单个公司的具体属性(标准版)</p>
      */
     @RequestMapping("/enterprise/detail")
     @RestReturn(value = EnterpriseDTO.class)
     public RestResponse findEnterpriseDetail(@Valid FindEnterpriseDetailCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.getOrganizationDetailByOrgId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

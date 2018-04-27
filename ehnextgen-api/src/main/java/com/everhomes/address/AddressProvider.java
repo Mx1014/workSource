@@ -24,6 +24,12 @@ public interface AddressProvider {
     void updateAddress(Address address);
     void deleteAddress(Address address);
     void deleteAddressById(long id);
+
+    /**
+     * 根据addressId来查询eh_addresses表中对应的楼栋和门牌信息
+     * @param id
+     * @return
+     */
     Address findAddressById(long id);
 
     Address findGroupAddress(Long groupId);

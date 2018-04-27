@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.address.Address;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -6161,5 +6162,92 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //将组装的对象进行返回
         return organizationAndDetailDTO;
     }
+
+    /**
+     * 将OrganizationWorkPlaces对象持久化在表eh_Organization_workPlaces表中
+     * @param organizationWorkPlaces
+     */
+    @Override
+    public void insertIntoOrganizationWorkPlaces(OrganizationWorkPlaces organizationWorkPlaces){
+        //拿到一个最新的主键id
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationWorkplaces.class));
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizationWorkplacesDao dao = new EhOrganizationWorkplacesDao(context.configuration());
+        //将最新的主键id值设置进去
+        organizationWorkPlaces.setId(id);
+        //持久化到数据库
+        dao.insert(organizationWorkPlaces);
+    }
+
+    /**
+     * 将CommunityAndBuildingRelationes对象中的数据持久化到eh_communityAndBuilding_relationes表中
+     * @param communityAndBuildingRelationes
+     */
+    @Override
+    public void insertIntoCommunityAndBuildingRelationes(CommunityAndBuildingRelationes communityAndBuildingRelationes){
+        //拿到一个最新的主键id
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCommunityandbuildingRelationes.class));
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCommunityandbuildingRelationesDao dao = new EhCommunityandbuildingRelationesDao(context.configuration());
+        //将最新的主键id值设置进去
+        communityAndBuildingRelationes.setId(id);
+        //持久化到数据库
+        dao.insert(communityAndBuildingRelationes);
+    }
+
+    /**
+     * 根据organizationId来查询eh_organization_workPlaces表中对应的项目办公地点（可能存在多个办公地点）集合
+     * @param organizationId
+     * @return
+     */
+    @Override
+    public List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+        SelectQuery<EhOrganizationWorkplacesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_WORKPLACES);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId));
+        List<OrganizationWorkPlaces> list = query.fetch().map( r -> ConvertHelper.convert(r, OrganizationWorkPlaces.class));
+        return list;
+    }
+
+    /**
+     * 根据项目Id来查询项目名称
+     * @param communityId
+     * @return
+     */
+    @Override
+    public String getCommunityNameByCommunityId(Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+       String name = context.select(Tables.EH_COMMUNITIES.NAME).from(Tables.EH_COMMUNITIES)
+               .where(Tables.EH_COMMUNITIES.ID.eq(communityId)).fetchAnyInto(String.class);
+        return name;
+    }
+
+    /**
+     * 根据communityId来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes
+     * 一个项目可能对应多个楼栋和门牌
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByCommunityId(Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_COMMUNITYANDBUILDING_RELATIONES
+        SelectQuery<EhCommunityandbuildingRelationesRecord> query = context.selectQuery(Tables.EH_COMMUNITYANDBUILDING_RELATIONES);
+        //添加查询条件
+        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId));
+        //查询
+       List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
+       return list;
+    }
+
+
 
 }

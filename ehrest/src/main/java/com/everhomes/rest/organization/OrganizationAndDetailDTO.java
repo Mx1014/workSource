@@ -4,6 +4,7 @@ import com.everhomes.rest.user.UserDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class OrganizationAndDetailDTO {
     //企业编号
@@ -83,6 +84,8 @@ public class OrganizationAndDetailDTO {
     private String memberRange;
 
     private UserDTO user;
+    //项目以及项目关联的楼栋和门牌
+    private List<OfficeSiteDTO> officeSiteDTOList;
 
     public Long getOrgId() {
         return orgId;
@@ -394,6 +397,14 @@ public class OrganizationAndDetailDTO {
 
     public void setUser(UserDTO user) {
         this.user = user;
+    }
+
+    public List<OfficeSiteDTO> getOfficeSiteDTOList() {
+        return officeSiteDTOList;
+    }
+
+    public void setOfficeSiteDTOList(List<OfficeSiteDTO> officeSiteDTOList) {
+        this.officeSiteDTOList = officeSiteDTOList;
     }
 
     @Override

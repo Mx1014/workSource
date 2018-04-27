@@ -134,6 +134,11 @@ public class AddressProviderImpl implements AddressProvider {
             self.deleteAddress(address);
     }
 
+    /**
+     * 根据addressId来查询eh_addresses表中对应的楼栋和门牌信息
+     * @param id
+     * @return
+     */
     @Cacheable(value="Address", key="#id",unless="#result==null")
     @Override
     public Address findAddressById(long id) {

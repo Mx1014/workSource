@@ -694,4 +694,12 @@ public interface OrganizationService {
 	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
 
 	OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd);
+
+	/**
+	 * 根据organizationId来查询公司详细信息
+	 * 表eh_organizations和表eh_organization_details进行联查
+	 * @param cmd
+	 * @return
+	 */
+	OrganizationAndDetailDTO getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd);
 }
