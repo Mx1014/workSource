@@ -46,6 +46,7 @@ import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesResponse;
@@ -57,6 +58,7 @@ import com.everhomes.rest.asset.ShowBillForClientV2Command;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.asset.zhuzong.CostByHouseListDTO;
 import com.everhomes.rest.asset.zhuzong.CostDTO;
 import com.everhomes.rest.asset.zhuzong.CostDetailDTO;
@@ -217,6 +219,12 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	/**
@@ -510,5 +518,6 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 		}
 		return response;
 	}
+	
     
 }
