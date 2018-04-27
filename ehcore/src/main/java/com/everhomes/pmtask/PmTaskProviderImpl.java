@@ -484,13 +484,14 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
 		SelectJoinStep<Record> query = context.select().from(Tables.EH_PM_TASKS);
 		Condition condition = Tables.EH_PM_TASKS.NAMESPACE_ID.eq(namespaceId);
+
 		if(null != ownerIds)
 			condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.in(ownerIds));
 		if(null != dateStart && null != dateEnd)
 			condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.between(dateStart,dateEnd));
 		if(null != taskcategoryIds && taskcategoryIds.size() > 0)
 			condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.in(taskcategoryIds));
-		condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.notEqual(0L));
+		condition = condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.ne(0L));
 		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
 	}
 }
