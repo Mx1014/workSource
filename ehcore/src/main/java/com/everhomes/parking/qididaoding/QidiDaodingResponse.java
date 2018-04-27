@@ -46,6 +46,6 @@ public class QidiDaodingResponse<T> {
     }
 
     public boolean isTokenOutOfDate() {
-        return errorCode!=null && errorCode==300;
+        return errorCode!=null && (errorCode==300 || errorCode==500);
     }
 }
