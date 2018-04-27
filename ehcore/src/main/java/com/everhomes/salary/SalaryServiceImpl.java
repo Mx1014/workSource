@@ -17,7 +17,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -35,8 +34,6 @@ import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO;
-import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.socialSecurity.SocialSecurityConstants;
 import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.techpark.punch.PunchService;
@@ -47,15 +44,10 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.mysql.fabric.xmlrpc.base.Member;
-
-
 
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
-
-
 
 
 import org.apache.commons.collections.map.HashedMap;
@@ -75,17 +67,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 
-
-
 import javax.servlet.http.HttpServletResponse;
-
-
 
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -190,14 +177,14 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Autowired
     private SalaryPayslipDetailProvider salaryPayslipDetailProvider;
-     
-    
+
+
     @Autowired
     private PunchService punchService;
 
-	@Autowired
+    @Autowired
     private CoordinationProvider coordinationProvider;
-	
+
     @Autowired
     private OrganizationService organizationService;
 
@@ -218,7 +205,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Autowired
     private MessagingService messagingService;
-    
+
     @Autowired
     private UserProvider userProvider;
 
@@ -259,9 +246,9 @@ public class SalaryServiceImpl implements SalaryService {
                         }
                         sb.append(dpt1.getName());
                     }
-                } catch(NumberFormatException e){
-                	//不用处理字符串为""的
-                }catch (Exception e) {
+                } catch (NumberFormatException e) {
+                    //不用处理字符串为""的
+                } catch (Exception e) {
                     LOGGER.error("找部门的路径名称出了错", e);
                 }
             }
@@ -778,8 +765,8 @@ public class SalaryServiceImpl implements SalaryService {
                 if (SalaryEntityType.REDUN != SalaryEntityType.fromCode(groupEntity.getType())) {
                     BigDecimal decimal = new BigDecimal(0);
                     try {
-                    	if(val!=null)
-                    		decimal = new BigDecimal(val);
+                        if (val != null)
+                            decimal = new BigDecimal(val);
                     } catch (Exception e) {
                         LOGGER.error("转化导入数据出错", e);
                     }
@@ -1098,7 +1085,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         NormalFlag isFile = isMonthFile(month);
 //        if (isFile == NormalFlag.NO) {
-    	Long organizationId = punchService.getTopEnterpriseId(ownerId);
+        Long organizationId = punchService.getTopEnterpriseId(ownerId);
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
 //        } else {
 //            groupEntities = salaryEmployeePeriodValProvider.listOpenSalaryGroupEntityByOrgId(ownerId, month);
@@ -1160,7 +1147,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         //  添加在职离职状态
         String employeeStatus = "";
-        switch (EmployeeStatus.fromCode(detail.getEmployeeStatus())){
+        switch (EmployeeStatus.fromCode(detail.getEmployeeStatus())) {
             case DISMISSAL:
                 employeeStatus = "离职";
                 break;
@@ -1295,7 +1282,7 @@ public class SalaryServiceImpl implements SalaryService {
         String sheetName = "sheet1";
         createDepartStatisticsHead(wb, sheet);
         List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listFiledSalaryDepartStatistic(ownerId, month);
-        LOGGER.debug("归档薪酬部门文件的stats:\n"+StringHelper.toJsonString(departmentStats));
+        LOGGER.debug("归档薪酬部门文件的stats:\n" + StringHelper.toJsonString(departmentStats));
         if (null != departmentStats) {
             for (SalaryDepartStatistic stat : departmentStats) {
                 createDepartStatisticsRow(sheet, stat);
@@ -1405,7 +1392,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private XSSFWorkbook getEmployeeSalaryWB(Long ownerId, Long taskId, Integer namespaceId) {
-    	Long organizationId = punchService.getTopEnterpriseId(ownerId);
+        Long organizationId = punchService.getTopEnterpriseId(ownerId);
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
@@ -1678,7 +1665,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void calculateReports(Long ownerId, String month, Long userId) {
         //重新计算每个人的数据
-        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month,SalaryEmployeeStatus.NORMAL);
+        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month, SalaryEmployeeStatus.NORMAL);
 
         if (null != employees) {
             for (SalaryEmployee e : employees) {
@@ -1773,32 +1760,33 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void newSalaryMonth(NewSalaryMonthCommand cmd) {
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.SALARY_NEWMONTH_LOCK.getCode() + cmd.getOwnerId()).enter(() -> {
-	        String month = salaryGroupProvider.getMonthByOwnerId(cmd.getOwnerId());
-	        if (null == month) {
-	            throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_SALARY_GROUP_NO_DATA,
-	                    "本月没有数据不能新建报表");
-	        }
-	        Calendar calendar = Calendar.getInstance();
-	        try {
-	            calendar.setTime(monthSF.get().parse(month));
-	            calendar.add(Calendar.MONTH, 1);
-	            month = monthSF.get().format(calendar.getTime());
-	        } catch (ParseException e) {
-	            LOGGER.error("月份出错了!{} 不是YYYYMM" + month);
-	        }
-	        //重新计算group
-	        salaryGroupProvider.deleteSalaryGroup(cmd.getOwnerId());
-	        createMonthSalaryGroup(cmd.getOwnerId(), month);
-	        //把vals的次月清空数据清零
-	        salaryEmployeeOriginValProvider.setValueBlank(cmd.getOwnerId());
-	        //重新计算employee
-	        calculateEmployees(cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.getCurrentNamespaceId());
-	
-	        //删除未归档的汇总
-	        salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
-	    
-    	return null;});
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SALARY_NEWMONTH_LOCK.getCode() + cmd.getOwnerId()).enter(() -> {
+            String month = salaryGroupProvider.getMonthByOwnerId(cmd.getOwnerId());
+            if (null == month) {
+                throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_SALARY_GROUP_NO_DATA,
+                        "本月没有数据不能新建报表");
+            }
+            Calendar calendar = Calendar.getInstance();
+            try {
+                calendar.setTime(monthSF.get().parse(month));
+                calendar.add(Calendar.MONTH, 1);
+                month = monthSF.get().format(calendar.getTime());
+            } catch (ParseException e) {
+                LOGGER.error("月份出错了!{} 不是YYYYMM" + month);
+            }
+            //重新计算group
+            salaryGroupProvider.deleteSalaryGroup(cmd.getOwnerId());
+            createMonthSalaryGroup(cmd.getOwnerId(), month);
+            //把vals的次月清空数据清零
+            salaryEmployeeOriginValProvider.setValueBlank(cmd.getOwnerId());
+            //重新计算employee
+            calculateEmployees(cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.getCurrentNamespaceId());
+
+            //删除未归档的汇总
+            salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
+
+            return null;
+        });
     }
 
     private void calculateEmployees(Long ownerId, Long organizationId, Integer namespaceId) {
@@ -1942,139 +1930,143 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
-    public String processZLLink2PayslipDetail(Long payslipDetailId , Long updateTime){
-    	return "zl://salary/payslip-detail?payslipDetailId={"+payslipDetailId+"}&updateTime={"+updateTime+"}";
+
+    public String processZLLink2PayslipDetail(Long payslipDetailId, Long updateTime) {
+        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&updateTime={" + updateTime + "}";
     }
-	@Override
-	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
-		List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOwnerId(),cmd.getOrganizationId(),cmd.getPayslipYear(),null);
-		if(null ==results ){
-			return null;
-		}
-		List<MonthPayslipDTO> monthPayslip = new ArrayList<>();
-		Map<String,Integer> payslipMap = new HashMap<>();
-		results.stream().map(r->{
-			if(payslipMap.get(r.getSalaryPeriod())==null){
-				payslipMap.put(r.getSalaryPeriod(),salaryPayslipDetailProvider.countSend(r.getId()));
-			}else{
-				payslipMap.put(r.getSalaryPeriod(),payslipMap.get(r.getSalaryPeriod())+salaryPayslipDetailProvider.countSend(r.getId()));
-			}
-			return null;
-		});
-		for(Entry<String, Integer> entry : payslipMap.entrySet()){
-			MonthPayslipDTO e = new MonthPayslipDTO();
-			e.setSalaryPeriod(entry.getKey());
-			e.setSendCount(entry.getValue());
-			monthPayslip.add(e);
-		}
-		return new ListYearPayslipSummaryResponse(monthPayslip);
-	}
 
-	@Override
-	public ImportPayslipResponse importPayslip(MultipartFile[] files,ImportPayslipCommand cmd) {
-		ArrayList resultList = punchService.processImportExcel2ArrayList(files);
-		List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList,cmd.getOwnerId());
-		return new ImportPayslipResponse(cmd.getSalaryPeriod() ,cmd.getPayslipName(), details);
-	}
+    @Override
+    public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
+        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOwnerId(), cmd.getOrganizationId(), cmd.getPayslipYear(), null);
+        if (null == results) {
+            return null;
+        }
+        List<MonthPayslipDTO> monthPayslip = new ArrayList<>();
+        Map<String, Integer> payslipMap = new HashMap<>();
+        results.stream().map(r -> {
+            if (payslipMap.get(r.getSalaryPeriod()) == null) {
+                payslipMap.put(r.getSalaryPeriod(), salaryPayslipDetailProvider.countSend(r.getId()));
+            } else {
+                payslipMap.put(r.getSalaryPeriod(), payslipMap.get(r.getSalaryPeriod()) + salaryPayslipDetailProvider.countSend(r.getId()));
+            }
+            return null;
+        });
+        for (Entry<String, Integer> entry : payslipMap.entrySet()) {
+            MonthPayslipDTO e = new MonthPayslipDTO();
+            e.setSalaryPeriod(entry.getKey());
+            e.setSendCount(entry.getValue());
+            monthPayslip.add(e);
+        }
+        return new ListYearPayslipSummaryResponse(monthPayslip);
+    }
 
-	private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
-		// TODO Auto-generated method stub
-		List<PayslipDetailDTO> payslipDetailDTOs = new ArrayList<PayslipDetailDTO>();
-		RowResult title = (RowResult) resultList.get(0);
-		String nameCellNumber = "";
-		String contactCellNumber = "";
-		Map<String, String> cellMap = new HashMap<>();
-		for(Entry<String, String> entry : title.getCells().entrySet()){
-			String key = entry.getKey();
-			String value = entry.getValue();
-			if(null != value){
-				value = value.trim();
-				if("姓名".equals(value)){
-					nameCellNumber=key;
-				}else if("手机号码".equals(value)){
-					nameCellNumber=key;
-				}else{
-					cellMap.put(key, value);
-				} 
-			}
-			
-		}
-		
+    @Override
+    public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd) {
+        ArrayList resultList = punchService.processImportExcel2ArrayList(files);
+        List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList, cmd.getOwnerId());
+        return new ImportPayslipResponse(cmd.getSalaryPeriod(), cmd.getPayslipName(), details);
+    }
+
+    private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
+        // TODO Auto-generated method stub
+        List<PayslipDetailDTO> payslipDetailDTOs = new ArrayList<PayslipDetailDTO>();
+        RowResult title = (RowResult) resultList.get(0);
+        String nameCellNumber = "";
+        String contactCellNumber = "";
+        Map<String, String> cellMap = new HashMap<>();
+        for (Entry<String, String> entry : title.getCells().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (null != value) {
+                value = value.trim();
+                if ("姓名".equals(value)) {
+                    nameCellNumber = key;
+                } else if ("手机号码".equals(value)) {
+                    nameCellNumber = key;
+                } else {
+                    cellMap.put(key, value);
+                }
+            }
+
+        }
+
         for (int rowIndex = 1; rowIndex < resultList.size(); rowIndex++) {
             RowResult r = (RowResult) resultList.get(rowIndex);
             PayslipDetailDTO dto = new PayslipDetailDTO();
             // 名字去空格 
             dto.setName(r.getCells().get(nameCellNumber));
             dto.setUserContact(r.getCells().get(contactCellNumber));
-        	OrganizationMemberDetails memebrDetail = null;
+            OrganizationMemberDetails memebrDetail = null;
             // 手机号为空,手机号找不到用户
-            if(null==dto.getUserContact()){
-            	dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
-            }else{
-            	memebrDetail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, dto.getUserContact());
-            	if(null == memebrDetail ){
-            		dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
-            	}else{
-            		dto.setImportResult(PayslipImportResult.SUCESS.getCode());
-            		dto.setUserId(memebrDetail.getTargetId());
-            		dto.setUserDetailId(memebrDetail.getId());
-            	}
+            if (null == dto.getUserContact()) {
+                dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
+            } else {
+                memebrDetail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, dto.getUserContact());
+                if (null == memebrDetail) {
+                    dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
+                } else {
+                    dto.setImportResult(PayslipImportResult.SUCESS.getCode());
+                    dto.setUserId(memebrDetail.getTargetId());
+                    dto.setUserDetailId(memebrDetail.getId());
+                }
             }
-            dto.setPayslipContent(processPayslipContent(r,cellMap));
+            dto.setPayslipContent(processPayslipContent(r, cellMap));
         }
-		return payslipDetailDTOs;
-	}
+        return payslipDetailDTOs;
+    }
 
-	private Map<String, String> processPayslipContent(RowResult r, Map<String, String> cellMap) {
-		Map<String, String> result = new HashMap<>();
+    private Map<String, String> processPayslipContent(RowResult r, Map<String, String> cellMap) {
+        Map<String, String> result = new HashMap<>();
         for (Entry<String, String> entry : cellMap.entrySet()) {
-        	//key 是列号,cellMap取这列的结果是表头,r取这一列的结果是这一行的值
-        	result.put(entry.getValue(),r.getCells().get(entry.getKey()));
-        } 
-		return result;
-	}
-	public String processSalaryPeriodString(String salaryPeriod){
-		 return salaryPeriod.substring(0,3)+"年"+ salaryPeriod.substring(4,5)+"月";
-	}
-	@Override
-	public void sendPayslip(SendPayslipCommand cmd) {
-		String salaryPeriodString = processSalaryPeriodString(cmd.getSalaryPeriod());
-		SalaryPayslip sp = new SalaryPayslip();
-		sp.setName(cmd.getPayslipName());
-		sp.setNamespaceId(UserContext.getCurrentNamespaceId());
-		sp.setOrganizationId(cmd.getOrganizationId());
-		sp.setOwnerId(cmd.getOwnerId());
-		sp.setOwnerType("organization");
-		sp.setSalaryPeriod(cmd.getSalaryPeriod());
-		salaryPayslipProvider.createSalaryPayslip(sp);
-		//存数据 发通知
-		for(PayslipDetailDTO dto : cmd.getDetails()){
-			SalaryPayslipDetail spd = ConvertHelper.convert(dto, SalaryPayslipDetail.class);
-			spd.setName(cmd.getPayslipName());
-			spd.setNamespaceId(UserContext.getCurrentNamespaceId());
-			spd.setOrganizationId(cmd.getOrganizationId());
-			spd.setOwnerId(cmd.getOwnerId());
-			spd.setOwnerType("organization");
-			spd.setSalaryPeriod(cmd.getSalaryPeriod());
-			spd.setStatus(PayslipImportStatus.SENDED.getCode());
-			spd.setViewedFlag(NormalFlag.NO.getCode()); 
-			spd.setPayslipContent(StringHelper.toJsonString(dto.getPayslipContent()));
-			salaryPayslipDetailProvider.createSalaryPayslipDetail(spd);
-			sendPayslipMessage(spd,salaryPeriodString); 
-		}
-		
-	}
+            //key 是列号,cellMap取这列的结果是表头,r取这一列的结果是这一行的值
+            result.put(entry.getValue(), r.getCells().get(entry.getKey()));
+        }
+        return result;
+    }
 
-	private void sendPayslipMessage(SalaryPayslipDetail spd,String salaryPeriodString) { 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("salaryDate", salaryPeriodString);
-		String content = localeTemplateService.getLocaleTemplateString(0, SalaryConstants.SEND_NOTIFICATION_SCOPE, SalaryConstants.SEND_NOTIFICATION_CODE,
-				"zh_CN", map, salaryPeriodString+"工资已发放。");
-		sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getUpdateTime().getTime());
-	}
+    public String processSalaryPeriodString(String salaryPeriod) {
+        return salaryPeriod.substring(0, 3) + "年" + salaryPeriod.substring(4, 5) + "月";
+    }
+
+    @Override
+    public void sendPayslip(SendPayslipCommand cmd) {
+        String salaryPeriodString = processSalaryPeriodString(cmd.getSalaryPeriod());
+        SalaryPayslip sp = new SalaryPayslip();
+        sp.setName(cmd.getPayslipName());
+        sp.setNamespaceId(UserContext.getCurrentNamespaceId());
+        sp.setOrganizationId(cmd.getOrganizationId());
+        sp.setOwnerId(cmd.getOwnerId());
+        sp.setOwnerType("organization");
+        sp.setSalaryPeriod(cmd.getSalaryPeriod());
+        salaryPayslipProvider.createSalaryPayslip(sp);
+        //存数据 发通知
+        for (PayslipDetailDTO dto : cmd.getDetails()) {
+            SalaryPayslipDetail spd = ConvertHelper.convert(dto, SalaryPayslipDetail.class);
+            spd.setName(cmd.getPayslipName());
+            spd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            spd.setOrganizationId(cmd.getOrganizationId());
+            spd.setOwnerId(cmd.getOwnerId());
+            spd.setOwnerType("organization");
+            spd.setSalaryPeriod(cmd.getSalaryPeriod());
+            spd.setStatus(PayslipDetailStatus.SENDED.getCode());
+            spd.setViewedFlag(NormalFlag.NO.getCode());
+            spd.setPayslipContent(StringHelper.toJsonString(dto.getPayslipContent()));
+            salaryPayslipDetailProvider.createSalaryPayslipDetail(spd);
+            sendPayslipMessage(spd, salaryPeriodString);
+        }
+
+    }
+
+    private void sendPayslipMessage(SalaryPayslipDetail spd, String salaryPeriodString) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("salaryDate", salaryPeriodString);
+        String content = localeTemplateService.getLocaleTemplateString(0, SalaryConstants.SEND_NOTIFICATION_SCOPE, SalaryConstants.SEND_NOTIFICATION_CODE,
+                "zh_CN", map, salaryPeriodString + "工资已发放。");
+        sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getUpdateTime().getTime());
+    }
 
     private void sendMessage(
-            String content, String subject, Long receiverId,   Long payslipDetailId , Long updateTime) {
+            String content, String subject, Long receiverId, Long payslipDetailId, Long updateTime) {
 
         //  set the message
         MessageDTO message = new MessageDTO();
@@ -2083,7 +2075,7 @@ public class SalaryServiceImpl implements SalaryService {
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
         //  set the route
-        String url =processZLLink2PayslipDetail(payslipDetailId, updateTime);
+        String url = processZLLink2PayslipDetail(payslipDetailId, updateTime);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
@@ -2103,104 +2095,129 @@ public class SalaryServiceImpl implements SalaryService {
         );
     }
 
-	@Override
-	public ListMonthPayslipSummaryResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd) {
-		List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOrganizationId(),cmd.getOwnerId(),cmd.getSalaryPeriod(),cmd.getName());
-		return new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
-			PayslipDTO dto =  ConvertHelper.convert(r, PayslipDTO.class);
-			dto.setPayslipId(r.getId());
-			dto.setUpdateTime(r.getUpdateTime().getTime());
-			dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
-			dto.setSendCount(salaryPayslipDetailProvider.countSend(r.getId()));
-			dto.setConfirmCount(salaryPayslipDetailProvider.countConfirm(r.getId()));
-			dto.setViewCount(salaryPayslipDetailProvider.countView(r.getId()));
-			dto.setRevokeCount(salaryPayslipDetailProvider.countRevoke(r.getId()));
-			return dto;
-		}).collect(Collectors.toList()));
-	}
+    @Override
+    public ListMonthPayslipSummaryResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd) {
+        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getSalaryPeriod(), cmd.getName());
+        return new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
+            PayslipDTO dto = ConvertHelper.convert(r, PayslipDTO.class);
+            dto.setPayslipId(r.getId());
+            dto.setUpdateTime(r.getUpdateTime().getTime());
+            dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
+            dto.setSendCount(salaryPayslipDetailProvider.countSend(r.getId()));
+            dto.setConfirmCount(salaryPayslipDetailProvider.countConfirm(r.getId()));
+            dto.setViewCount(salaryPayslipDetailProvider.countView(r.getId()));
+            dto.setRevokeCount(salaryPayslipDetailProvider.countRevoke(r.getId()));
+            return dto;
+        }).collect(Collectors.toList()));
+    }
 
-	@Override
-	public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
-		List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(),cmd.getOwnerId(),cmd.getPayslipId(),
-				cmd.getName(),cmd.getStatus());
-		return new ListSendPayslipDetailsResponse(results.stream().map(r -> {
-			PayslipDetailDTO dto =  ConvertHelper.convert(r, PayslipDetailDTO.class); 
-			dto.setPayslipDetailId(r.getId());
-			Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
-			dto.setUpdateTime(r.getUpdateTime().getTime());
-			dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
-			dto.setPayslipContent(content);
-			return dto;
-		}).collect(Collectors.toList()));
-	}
+    @Override
+    public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
+        List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getPayslipId(),
+                cmd.getName(), cmd.getStatus());
+        return new ListSendPayslipDetailsResponse(results.stream().map(r -> {
+            PayslipDetailDTO dto = ConvertHelper.convert(r, PayslipDetailDTO.class);
+            dto.setPayslipDetailId(r.getId());
+            Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
+            dto.setUpdateTime(r.getUpdateTime().getTime());
+            dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
+            dto.setPayslipContent(content);
+            return dto;
+        }).collect(Collectors.toList()));
+    }
 
-	@Override
-	public void resendPayslip(ResendPayslipCommand cmd) {
-		List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(),cmd.getPayslipDetailId());
-		for(SalaryPayslipDetail spd : results){
-			if(null != spd){ 
-				String salaryPeriodString = processSalaryPeriodString(spd.getSalaryPeriod());
-				spd.setStatus(PayslipImportStatus.SENDED.getCode());
-				spd.setViewedFlag(NormalFlag.NO.getCode()); 
-				salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
-				sendPayslipMessage(spd,salaryPeriodString);
-			}
-		}
-	}
+    @Override
+    public void resendPayslip(ResendPayslipCommand cmd) {
+        List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(), cmd.getPayslipDetailId());
+        for (SalaryPayslipDetail spd : results) {
+            if (null != spd) {
+                String salaryPeriodString = processSalaryPeriodString(spd.getSalaryPeriod());
+                spd.setStatus(PayslipDetailStatus.SENDED.getCode());
+                spd.setViewedFlag(NormalFlag.NO.getCode());
+                salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
+                sendPayslipMessage(spd, salaryPeriodString);
+            }
+        }
+    }
 
-	private List<SalaryPayslipDetail> listSalaryPayslipDetail(Long payslipId, Long payslipDetailId) {
-		List<SalaryPayslipDetail> results = new ArrayList<>();
-		if(null!=payslipDetailId){
-			results.add(salaryPayslipDetailProvider.findSalaryPayslipDetailById(payslipDetailId));
-		}
-		else{
-			results.addAll(salaryPayslipDetailProvider.listSalaryPayslipDetailBypayslipId(payslipId));
-		}
-		return results;
-	}
+    private List<SalaryPayslipDetail> listSalaryPayslipDetail(Long payslipId, Long payslipDetailId) {
+        List<SalaryPayslipDetail> results = new ArrayList<>();
+        if (null != payslipDetailId) {
+            results.add(salaryPayslipDetailProvider.findSalaryPayslipDetailById(payslipDetailId));
+        } else {
+            results.addAll(salaryPayslipDetailProvider.listSalaryPayslipDetailBypayslipId(payslipId));
+        }
+        return results;
+    }
 
-	@Override
-	public void revokePayslip(RevokePayslipCommand cmd) {
-		List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(),cmd.getPayslipDetailId());
-		for(SalaryPayslipDetail spd : results){
-			if(null != spd){  
-				spd.setStatus(PayslipImportStatus.REVOKED.getCode());
-				salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
-			}
-		}
+    @Override
+    public void revokePayslip(RevokePayslipCommand cmd) {
+        List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(), cmd.getPayslipDetailId());
+        for (SalaryPayslipDetail spd : results) {
+            if (null != spd) {
+                spd.setStatus(PayslipDetailStatus.REVOKED.getCode());
+                salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
+            }
+        }
 
-	}
+    }
 
-	@Override
-	public void deletePayslip(DeletePayslipCommand cmd) {
-		List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(),cmd.getPayslipDetailId());
-		for(SalaryPayslipDetail spd : results){
-			if(null != spd){  
-				salaryPayslipDetailProvider.deleteSalaryPayslipDetail(spd); 
-			}
-		}
-		if(null != cmd.getPayslipId()){
-			salaryPayslipProvider.deleteSalaryPayslip(cmd.getPayslipId());
-		}
-			
-	}
+    @Override
+    public void deletePayslip(DeletePayslipCommand cmd) {
+        List<SalaryPayslipDetail> results = listSalaryPayslipDetail(cmd.getPayslipId(), cmd.getPayslipDetailId());
+        for (SalaryPayslipDetail spd : results) {
+            if (null != spd) {
+                salaryPayslipDetailProvider.deleteSalaryPayslipDetail(spd);
+            }
+        }
+        if (null != cmd.getPayslipId()) {
+            salaryPayslipProvider.deleteSalaryPayslip(cmd.getPayslipId());
+        }
 
-	@Override
-	public ListUserPayslipsResponse listUserPayslips(ListUserPayslipsCommand cmd) {
-		
-		return new ListUserPayslipsResponse();
-	}
+    }
 
-	@Override
-	public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
-	
-		return new ListPayslipsDetailResponse();
-	}
+    @Override
+    public ListUserPayslipsResponse listUserPayslips(ListUserPayslipsCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        if (null == userId) {
+            return null;
+        }
+        List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listUserSalaryPayslipDetail(userId, cmd.getOrganizationId());
+        if (null == results) {
+            return null;
+        }
+        ListUserPayslipsResponse response = new ListUserPayslipsResponse(new ArrayList<>());
+        Map<String, List<MonthPayslipDetailDTO>> resultMap = new HashedMap();
+        for(SalaryPayslipDetail spd : results){
+            if(null != spd){
+                MonthPayslipDetailDTO dto = new MonthPayslipDetailDTO();
+                dto.setUpdateTime(spd.getUpdateTime().getTime());
+                dto.setPayslipDetailId(spd.getId());
+                dto.setSalaryPeriod(spd.getSalaryPeriod());
+                String year =spd.getSalaryPeriod().substring(0, 3);
+                if (null == resultMap.get(year)) {
+                    resultMap.put(year, new ArrayList<>());
+                }
+                resultMap.get(year).add(dto);
+            }
+        }
+        for (Entry<String, List<MonthPayslipDetailDTO>> entry : resultMap.entrySet()) {
+            PayslipYearDTO yearDTO = new PayslipYearDTO(entry.getKey(), entry.getValue());
+            response.getPayslipYears().add(yearDTO);
+        }
+        return response;
+    }
 
-	@Override
-	public void confirmPayslip(ConfirmPayslipCommand cmd) {
-	
+    @Override
+    public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
 
-	}
+        return new ListPayslipsDetailResponse();
+    }
 
+    @Override
+    public void confirmPayslip(ConfirmPayslipCommand cmd) {
+
+
+    }
+    //TODO 自动确认
 }

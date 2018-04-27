@@ -20,8 +20,12 @@ public class ListUserPayslipsResponse {
 	public ListUserPayslipsResponse() {
 
 	}
- 
 
+
+	public ListUserPayslipsResponse(List<PayslipYearDTO> payslipYears) {
+		super();
+		this.payslipYears = payslipYears;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

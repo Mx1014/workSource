@@ -4,7 +4,12 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.salary.PayslipDetailStatus;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,32 +95,100 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 
 	@Override
 	public Integer countSend(Long payslipId) {
-		// TODO Auto-generated method stub
-		return null;
+		Record1<Integer> record = getReadOnlyContext().select(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.count())
+				.from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(PayslipDetailStatus.SENDED.getCode()))
+				.fetchAny();
+
+		if (null == record) {
+			return 0;
+		}
+		return record.value1();
 	}
 
 	@Override
 	public Integer countConfirm(Long payslipId) {
-		// TODO Auto-generated method stub
-		return null;
+		Record1<Integer> record = getReadOnlyContext().select(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.count())
+				.from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(PayslipDetailStatus.CONFIRMED.getCode()))
+				.fetchAny();
+
+		if (null == record) {
+			return 0;
+		}
+		return record.value1();
 	}
 
 	@Override
 	public Integer countView(Long payslipId) {
-		// TODO Auto-generated method stub
-		return null;
+		Record1<Integer> record = getReadOnlyContext().select(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.count())
+				.from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.VIEWED_FLAG.eq(NormalFlag.YES.getCode()))
+				.fetchAny();
+
+		if (null == record) {
+			return 0;
+		}
+		return record.value1();
 	}
 
 	@Override
 	public Integer countRevoke(Long payslipId) {
-		// TODO Auto-generated method stub
-		return null;
+		Record1<Integer> record = getReadOnlyContext().select(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.count())
+				.from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(PayslipDetailStatus.REVOKED.getCode()))
+				.fetchAny();
+
+		if (null == record) {
+			return 0;
+		}
+		return record.value1();
 	}
 
 	@Override
 	public List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
 			Long payslipId, String name, Byte status) {
-		// TODO Auto-generated method stub
-		return null;
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.OWNER_ID.eq(ownerId));
+		if (null != payslipId) {
+			step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.in(payslipId));
+		}
+		if (null != name) {
+			step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.NAME.in(name));
+		}
+
+		if (null != status) {
+			step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.in(status));
+		}
+
+		return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
+	}
+
+	@Override
+	public List<SalaryPayslipDetail> listSalaryPayslipDetailBypayslipId(Long payslipId) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.in(payslipId));
+		return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
+
+	}
+
+	@Override
+	public void deleteSalaryPayslipDetail(SalaryPayslipDetail spd) {
+		getReadWriteDao().deleteById(spd.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryPayslipDetails.class, spd.getId());
+	}
+
+	@Override
+	public List<SalaryPayslipDetail> listUserSalaryPayslipDetail(Long userId, Long organizationId) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIP_DETAILS)
+				.where(Tables.EH_SALARY_PAYSLIP_DETAILS.USER_ID.in(userId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.ne(PayslipDetailStatus.REVOKED.getCode()));
+		return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
+
 	}
 }

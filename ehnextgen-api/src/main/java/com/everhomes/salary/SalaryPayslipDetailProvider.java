@@ -29,4 +29,5 @@ public interface SalaryPayslipDetailProvider {
 
 	void deleteSalaryPayslipDetail(SalaryPayslipDetail spd);
 
+	List<SalaryPayslipDetail> listUserSalaryPayslipDetail(Long userId, Long organizationId);
 }

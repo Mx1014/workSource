@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>operatorUid: 发放者id</li>
  * <li>operatorName: 发放人姓名</li>
  * <li>updateTime: 发放时间</li>
+ * <li>salaryPeriod: 期数</li>
  * <li>confirmTime: 自动确认时间</li>
  * <li>importResult: 上传结果 0-成功 1-员工不存在 2-手机号为空 </li>
  * </ul>
@@ -27,6 +28,7 @@ public class PayslipDetailDTO {
 	private Long payslipDetailId;
     private Long userId;
     private Long userDetailId;
+	private String salaryPeriod;
     private String name;
     private String userContact;
     private Map<String,String> payslipContent;
@@ -119,7 +121,14 @@ public class PayslipDetailDTO {
 	}
 	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
-	} 
-    
-    
+	}
+
+
+	public String getSalaryPeriod() {
+		return salaryPeriod;
+	}
+
+	public void setSalaryPeriod(String salaryPeriod) {
+		this.salaryPeriod = salaryPeriod;
+	}
 }

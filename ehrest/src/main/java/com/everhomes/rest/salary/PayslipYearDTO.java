@@ -14,10 +14,16 @@ import com.everhomes.util.StringHelper;
 public class PayslipYearDTO {
 	private String year;
 
-    private List<MonthPayslipDetailDTO> monthPayslipDetails; 
+    private List<MonthPayslipDetailDTO> monthPayslipDetails;
 
 	public PayslipYearDTO() {
 
+	}
+
+	public PayslipYearDTO(String year, List<MonthPayslipDetailDTO> monthPayslipDetails) {
+		super();
+		this.year = year;
+		this.monthPayslipDetails = monthPayslipDetails;
 	}
  
 	@Override
