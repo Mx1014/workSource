@@ -90,15 +90,8 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
 
 	@Override
 	public List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId,
-			String payslipYear) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId,
 			String payslipYear, String Name) {
 		// TODO Auto-generated method stub
 		return null;
-	}
+	} 
 }
