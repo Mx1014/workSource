@@ -249,6 +249,7 @@ public class MessagePersistWorker {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        dtos.clear();
                     }
                 }
             }
