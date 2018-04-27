@@ -381,10 +381,10 @@ public class PortalServiceImpl implements PortalService {
 			dto.setMobileUrls(mobileUrls);
 		}
 
-		if(moduleApp.getConfigAppIds() != null){
-			List<Long> configAppIds = GsonUtil.fromJson(moduleApp.getConfigAppIds(), new TypeToken<List<Long>>(){}.getType());
+		if(moduleApp.getDependentAppIds() != null){
+			List<Long> dependentAppIds = GsonUtil.fromJson(moduleApp.getDependentAppIds(), new TypeToken<List<Long>>(){}.getType());
 			//List<Long> configAppIds = (ArrayList<Long>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
-			dto.setConfigAppIds(configAppIds);
+			dto.setDependentAppIds(dependentAppIds);
 		}
 
 		if(moduleApp.getAppEntryInfos() != null){

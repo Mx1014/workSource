@@ -16,7 +16,7 @@ import java.util.List;
  * <li>pc_uri: PC端图片</li>
  * <li>app_entry_infos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
  * <li>independent_config_flag: 允许独立配置</li>
- * <li>config_appIds: 若不支持独立配置，选择同时需要配置的应用</li>
+ * <li>dependent_appIds: 若不支持独立配置，选择同时需要配置的应用</li>
  * <li>support_third_flag: 支持对接硬件和第三方系统</li>
  * <li>default_flag: 新建企业默认安装</li>
  * </ul>
@@ -32,7 +32,7 @@ public class CreateAppProfileCommand {
     private List<String> pc_uri;
     private List<AppEntryInfoDTO> app_entry_infos;
     private Integer independent_config_flag;
-    private List<Long> config_appIds;
+    private List<Long> dependent_appIds;
     private Integer support_third_flag;
     private Integer default_flag;
 
@@ -123,12 +123,12 @@ public class CreateAppProfileCommand {
         this.default_flag = default_flag;
     }
 
-    public List<Long> getConfig_appIds() {
-        return config_appIds;
+    public List<Long> getDependent_appIds() {
+        return dependent_appIds;
     }
 
-    public void setConfig_appIds(List<Long> config_appIds) {
-        this.config_appIds = config_appIds;
+    public void setDependent_appIds(List<Long> dependent_appIds) {
+        this.dependent_appIds = dependent_appIds;
     }
 
     public Long getOriginId() {
