@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2.message_handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.*;
@@ -41,6 +42,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
@@ -150,7 +153,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             smsProvider.addToTupleList(variables, "userPhone", order.getUserPhone());
             smsProvider.addToTupleList(variables, "useDetail", useDetail);
             smsProvider.addToTupleList(variables, "spaceAddress", useInfoDTO.getSpaceAddress());
-            smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+            String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+            smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+order.getId());
 
             int templateId = SmsTemplateCode.PAY_ORDER_SUCCESS;
 
@@ -236,7 +240,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
         smsProvider.addToTupleList(variables, "useDetail", useDetail);
         smsProvider.addToTupleList(variables, "newEndTime", sdf.format(rentalBill.getEndTime()));
-        smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+rentalBill.getId());
 
         int templateId = SmsTemplateCode.RENEW_RENTAL_ORDER_SUCCESS;
 
@@ -364,7 +369,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables2, "userPhone", rentalBill.getUserPhone());
         smsProvider.addToTupleList(variables2, "useDetail", useDetail);
         smsProvider.addToTupleList(variables2, "spaceNo", oldUseInfoDTO.getSpaceNo());
-        smsProvider.addToTupleList(variables2, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+rentalBill.getId());
         int templateId2 = SmsTemplateCode.SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER;
         try {
             smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId2, templateLocale, variables2);
