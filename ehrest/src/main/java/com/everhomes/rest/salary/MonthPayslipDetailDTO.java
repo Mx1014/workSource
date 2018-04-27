@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul> 
+ * <li>salaryPeriod: 期数</li>
  * <li>updateTime: 发放时间</li>
  * <li>payslipDetailId: 详情id</li> 
  * </ul>
