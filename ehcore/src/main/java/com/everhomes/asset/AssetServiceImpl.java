@@ -3012,6 +3012,11 @@ public class AssetServiceImpl implements AssetService {
                 hasContractView = 1;
                 hasPay = 0;
                 break;
+            case 999955:
+            	//住总ELive只是查询账单，没有合同，没有支付按钮
+            	hasContractView = 0;
+                hasPay = 0;
+                break;
             default:
                 break;
         }
