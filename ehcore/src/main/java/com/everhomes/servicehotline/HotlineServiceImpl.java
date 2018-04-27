@@ -407,6 +407,7 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话
 	 * 客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话 
 	 * 客服A与用户C的无聊天记录，不属于会话。
+	 * 注意：锚点的意义
 	 */
 	@Override
 	public GetChatGroupListResponse getChatGroupList(GetChatGroupListCommand cmd) {
@@ -424,9 +425,10 @@ public class HotlineServiceImpl implements HotlineService {
 
 		// 获取页码数据
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+		
+		// 设置锚点
 		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(pageAnchor);
+		locator.setAnchor(cmd.getPageAnchor());
 		
 		//获取所有客服id
 		locator.setEntityId(cmd.getServicerId() == null ? 0 : cmd.getServicerId());
@@ -436,16 +438,16 @@ public class HotlineServiceImpl implements HotlineService {
 			throw RuntimeErrorException.errorWith(HotlineErrorCode.SCOPE,
 					HotlineErrorCode.ERROR_HOTLINE_NOT_FOUND, "hotline list not found");
 		}
-		
-		//获取所有用户
-		String keyword =  cmd.getKeyword();
-		List<TargetDTO> customerDtoList = findUserByTokenOrNickName(keyword, namespaceId);
 
 		//转成客服id列表
 		List<Long> servicerIds = new ArrayList<>(10);
 		hotlines.stream().forEach(r -> {
 			servicerIds.add(r.getUserId());
 		});
+		
+		//获取所有用户
+		String keyword =  cmd.getKeyword();
+		List<TargetDTO> customerDtoList = findUserByTokenOrNickName(keyword, namespaceId);
 			
 		//转成用户id列表
 		List<Long> customerIds = new ArrayList<>(10);
@@ -453,18 +455,13 @@ public class HotlineServiceImpl implements HotlineService {
 			customerDtoList.stream().forEach(r->{ customerIds.add(r.getTargetId());});
 		}
 
-		// 模拟数据
-		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, pageAnchor, servicerIds, customerIds);
+		// 获取消息
+		locator.setEntityId(0);//将之前的设置清零
+		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerIds, customerIds);
 
-		// if (list.size() > pageSize) {
-		// nextPageAnchor += 1;
-		// list.remove(list.size() - 1);
-		// } else {
-		// nextPageAnchor = null;
-		// }
-
+		// 设置返回数据
 		GetChatGroupListResponse rsp = new GetChatGroupListResponse();
-		rsp.setNextPageAnchor(pageAnchor + 1);
+		rsp.setNextPageAnchor(locator.getAnchor());
 		rsp.setChatGroupList(dtoList);
 
 		return rsp;
@@ -488,20 +485,20 @@ public class HotlineServiceImpl implements HotlineService {
 
 		// 获取页码数据
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		
 		// 获取客服和用户
-//		serviceHotlinesProvider.updateServiceHotline(obj);
-//		userProvider.findUserById(cmd.getCustomerId());
 		String servicerName = "servicer-"+cmd.getServicerId();
 		String customerName = "customer-"+cmd.getCustomerId();
 		
-		
-		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, pageAnchor, cmd.getServicerId(),
+		// 获取聊天记录
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, cmd.getServicerId(),
 				cmd.getCustomerId(), servicerName,  customerName);
 
+		//设置返回数据
 		GetChatRecordListResponse rsp = new GetChatRecordListResponse();
-		rsp.setNextPageAnchor(pageAnchor + 1);
+		rsp.setNextPageAnchor(locator.getAnchor());
 		rsp.setChatRecordList(chatRecordList);
 		return rsp;
 	}
@@ -509,12 +506,10 @@ public class HotlineServiceImpl implements HotlineService {
 	/**
 	 * private方法。用于查询会话列表逻辑
 	 */
-	private List<ChatGroupDTO> getChatGroupList(Integer namespaceId, Integer pageSize, Long pageAnchor, List<Long> servicerIds,
+	private List<ChatGroupDTO> getChatGroupList(Integer namespaceId, Integer pageSize, ListingLocator locator, List<Long> servicerIds,
 			List<Long> customerIds) {
 		
 		//获取会话列表
-		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(pageAnchor);
 		List<MessageRecord> msgRecList = messageProvider.listMessageRecords(pageSize, locator, (l,q)->{
 			return buildChatGroupQuery(l,q,pageSize,servicerIds, customerIds);
 		});
@@ -539,29 +534,25 @@ public class HotlineServiceImpl implements HotlineService {
 	/**
 	 * private方法。用于查询某个会话的聊天记录
 	 */
-	private List<ChatRecordDTO> getChatRecordList(Integer pageSize, Long pageAnchor, Long servicerId, Long customerId,
-			String servicerName, String customerName) {
-		
-		//获取会话列表
-		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(pageAnchor);
+	private List<ChatRecordDTO> getChatRecordList(Integer pageSize, ListingLocator locator, Long servicerId,
+			Long customerId, String servicerName, String customerName) {
+
+		// 获取会话列表
 		List<MessageRecord> msgRecList = messageProvider.listMessageRecords(pageSize, locator, (l, q) -> {
 			return buildChatRecordQuery(l, q, pageSize, servicerId, customerId);
 		});
-		
-		
+
 		ChatRecordDTO dto = null;
 		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(pageSize);
 		for (MessageRecord msg : msgRecList) {
 			dto = new ChatRecordDTO();
-			
 			if (msg.getSenderUid().equals(servicerId)) {
 				dto.setSenderName(servicerName);
 			} else {
 				dto.setSenderName(customerName);
 			}
-			
-			//根据类型获取不同格式的内容
+
+			// 根据类型获取不同格式的内容
 			setChatMessage(dto, msg);
 			dto.setSendTime(msg.getCreateTime());
 			chatRecordDtos.add(dto);
@@ -625,10 +616,6 @@ public class HotlineServiceImpl implements HotlineService {
 		// 做分组，排序，分页
 		query.addGroupBy(records.INDEX_ID);
 		query.addOrderBy(records.INDEX_ID.desc());
-		if (null != pageSize && pageSize > 0) {
-			int offset = pageSize * (null == locator.getAnchor() ? 0 : locator.getAnchor().intValue());
-			query.addLimit(offset, pageSize);
-		}
 
 		return query;
 	}
@@ -656,6 +643,7 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 		
 		final String TYPE_USER = "user";
+		
 		// 对当前表取别名
 		EhMessageRecords records = Tables.EH_MESSAGE_RECORDS;
 		
@@ -689,10 +677,6 @@ public class HotlineServiceImpl implements HotlineService {
 				.otherwise(DSL.concat(records.SENDER_UID.toString(), "_", records.DST_CHANNEL_TOKEN.toString())));
 		
 		query.addOrderBy(records.INDEX_ID.desc());
-		if (null != pageSize && pageSize > 0) {
-			int offset = pageSize * (null == locator.getAnchor() ? 0 : locator.getAnchor().intValue());
-			query.addLimit(offset, pageSize);
-		}
 
 		return query;
 	}
@@ -755,28 +739,31 @@ public class HotlineServiceImpl implements HotlineService {
 	
 	private List<HotlineDTO> getHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
 			ListingLocator locator, Byte serviceType) {
+		
+		int maxPageSize = null == pageSize ? Integer.MAX_VALUE - 1 : pageSize;
 
 		// 获取相应热线
-		List<ServiceHotline> serviceHotlines = serviceHotlinesProvider.queryServiceHotlines(locator, Integer.MAX_VALUE - 1,
+		List<ServiceHotline> serviceHotlines = serviceHotlinesProvider.queryServiceHotlines(locator, maxPageSize,
 				(l, query) -> {
 					query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE.eq(ownerType));
 					query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID.eq(ownerId));
 					query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID.eq(namespaceId));
 					query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE.eq(serviceType.intValue()));
-					
+
 					if (0 != l.getEntityId()) {
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.ID.eq(l.getEntityId()));	
-					}
-					
-					if (null != pageSize && pageSize > 0) {
-						int offset = pageSize * (null == l.getAnchor() ? 0 : l.getAnchor().intValue());
-						query.addLimit(offset, pageSize);
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.ID.eq(l.getEntityId()));
 					}
 
 					return query;
 				});
-
+		
+		//未找到返回
 		List<HotlineDTO> hotlines = new ArrayList<HotlineDTO>(16);
+		if (CollectionUtils.isEmpty(serviceHotlines)) {
+			return hotlines;
+		}
+
+		//找到后进行转换
 		serviceHotlines.forEach(r -> {
 			HotlineDTO dto = ConvertHelper.convert(r, HotlineDTO.class);
 			if (null != r.getUserId()) {
@@ -823,15 +810,9 @@ public class HotlineServiceImpl implements HotlineService {
 		return targetList;
 	}
 	
-	
-	/**
-	 * 根据community id获取namespaceId
-	 * @param communityId
-	 * @return
-	 */
-//	private Integer getNamespaceIdByCommunityId(Long communityId) {
-//		Community community = communityProvider.findCommunityById(communityId);
-//		return community == null ? null : community.getNamespaceId();
+//	
+//	private TargetDTO getHotlineInfo() {
+//		
 //	}
 	
 	

@@ -96,13 +96,13 @@ public class MessageProviderImpl implements MessageProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.ge(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (pageSize > 0) {
             query.addLimit(pageSize + 1);
         }
-        query.addOrderBy(t.ID.asc());
+        query.addOrderBy(t.ID.desc());
 
         List<MessageRecord> list = query.fetchInto(MessageRecord.class);
         if (list.size() > pageSize && pageSize > 0) {
