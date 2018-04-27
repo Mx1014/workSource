@@ -547,7 +547,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine t3 = Tables.EH_PAYMENT_LATE_FINE.as("t3");
         //先算第一个offset
         int firstOffset = (pageNum - 1) * pageSize;
-        String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
+        String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID, t.BUILDING_NAME, t.APARTMENT_NAME)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
@@ -565,8 +565,26 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillStatus(r.getValue(t.STATUS));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
-                    dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
-                    dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                    String addrBuildingName = r.getValue(t2.BUILDING_NAME);
+                    String addrAartName = r.getValue(t2.APARTMENT_NAME);
+                    if(addrBuildingName!=null || addrAartName!=null){
+                        dto.setApartmentName(addrAartName);
+                        dto.setBuildingName(addrBuildingName);
+                    }else{
+                        // 使用t.APARTMENT_NAME仍然识别不了
+                        if(r.getValue(11)!=null){
+                            try{
+                                dto.setApartmentName(r.getValue(11).toString());
+                            }catch (Exception e){
+                            }
+                        }
+                        if(r.getValue(10)!=null){
+                            try{
+                                dto.setBuildingName(r.getValue(10).toString());
+                            }catch (Exception e){
+                            }
+                        }
+                    }
                     dtos.add(dto);
                     });
         List<BillDTO> fines = new ArrayList<>();
@@ -940,6 +958,13 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            String apartmentName = null;
+            String buildingName = null;
+            if(list1!=null && list1.size() > 0){
+                BillItemDTO itemDTO = list1.get(0);
+                apartmentName= itemDTO.getApartmentName();
+                buildingName = itemDTO.getBuildingName();
+            }
             //需要billGroup查看生成账单周期
             PaymentBillGroup group = getBillGroupById(billGroupId);
             //根据billGroup获得时间，如需重复使用，则请抽象出来
@@ -1046,10 +1071,10 @@ public class AssetProviderImpl implements AssetProvider {
 
                     exemptionItems.add(exemptionItem);
 
-                    if(amount.compareTo(zero)==-1 || exemptionItemDTO.getIsPlus().byteValue() == (byte)0){
+                    if(amount.compareTo(zero)==-1 || (exemptionItemDTO.getIsPlus() != null && exemptionItemDTO.getIsPlus().byteValue() == (byte)0)){
                         amount = amount.multiply(new BigDecimal("-1"));
                         amountExemption = amountExemption.add(amount);
-                    }else if(amount.compareTo(zero)==1 || exemptionItemDTO.getIsPlus().byteValue() == (byte)1){
+                    }else if(amount.compareTo(zero)==1 || (exemptionItemDTO.getIsPlus() != null && exemptionItemDTO.getIsPlus().byteValue() == (byte)1)){
                         amountSupplement = amountSupplement.add(amount);
                     }
                 }
@@ -1150,12 +1175,12 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setDateStrEnd(dates.get(1));
             newBill.setDateStrDue(dates.get(2));
             newBill.setDueDayDeadline(dates.get(3));
-
+            //新增时只填了一个楼栋门牌，所以也可以放到bill里去 by wentian 2018/4/24
+            newBill.setBuildingName(buildingName);
+            newBill.setApartmentName(apartmentName);
 
             //添加客户的手机号，用来之后定位用户 by wentian.V.Brytania 2018/4/13
             newBill.setCustomerTel(customerTel);
-
-
 
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -2086,6 +2111,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVABLE.sub(amountReceivable))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVED.sub(amountReceived))
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amountOwed))
+                .where(t.ID.eq(billId))
                 .execute();
     }
 
@@ -2113,14 +2139,17 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amount))
+                .where(t.ID.eq(billId))
                 .execute();
         if(amount.compareTo(new BigDecimal("0"))<0){
             context.update(t)
                     .set(t.AMOUNT_EXEMPTION,t.AMOUNT_EXEMPTION.add(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }else{
             context.update(t)
                     .set(t.AMOUNT_SUPPLEMENT,t.AMOUNT_SUPPLEMENT.sub(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }
     }
@@ -2284,6 +2313,47 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
+    public List<AssetPaymentOrder> findAssetOrderByBillId(String billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        return context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.eq(billId))
+                .fetchInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public PaymentBills findPaymentBillById(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list =  context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchInto(PaymentBills.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+
+    }
+
+    @Override
+    public List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_PAYMENT_BILLS.ID);
+        query.addFrom(Tables.EH_PAYMENT_BILLS);
+        query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+        if(ownerType!=null){
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId));
+        }
+        return query.fetch(Tables.EH_PAYMENT_BILLS.ID);
+    }
+
+    @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
         long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
@@ -2395,12 +2465,12 @@ public class AssetProviderImpl implements AssetProvider {
         //更改金钱
         context.update(t)
                 .set(t.AMOUNT_OWED,new BigDecimal("0"))
-                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE)
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
                 .where(t.ID.in(billIds))
                 .execute();
         context.update(t1)
                 .set(t1.AMOUNT_OWED,new BigDecimal("0"))
-                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_RECEIVABLE)
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
 
@@ -3815,8 +3885,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r ->{
-                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                    BigDecimal value = r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT);
+                    if(value != null){
+                        amountOwed[0] = amountOwed[0].add(value);
+                    }
                 });
+        //更改金额，但不更改状态
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED, amountOwed[0])

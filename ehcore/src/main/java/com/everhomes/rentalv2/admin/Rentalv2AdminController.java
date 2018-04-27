@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -482,7 +483,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 */
 	@RequestMapping("listRentalBills")
 	@RestReturn(value = ListRentalBillsCommandResponse.class)
-	public RestResponse listRentalBills(@Valid ListRentalBillsCommand cmd) {
+	public RestResponse listRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse lsitRentalBillsCommandResponse = rentalService
 				.listRentalBills(cmd);
 		RestResponse response = new RestResponse(lsitRentalBillsCommandResponse);
@@ -499,7 +500,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 */
 	@RequestMapping("listActiveRentalBills")
 	@RestReturn(value = ListRentalBillsCommandResponse.class)
-	public RestResponse listActiveRentalBills(@Valid ListRentalBillsCommand cmd) {
+	public RestResponse listActiveRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse lsitRentalBillsCommandResponse = rentalService
 				.listActiveRentalBills(cmd);
 		RestResponse response = new RestResponse(lsitRentalBillsCommandResponse);
@@ -516,7 +517,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportRentalBills")
-	public void exportRentalBills(@Valid ListRentalBillsCommand cmd, HttpServletResponse response) {
+	public void exportRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd, HttpServletResponse response) {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
@@ -817,6 +818,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 
 	/**
 	 * <b>URL: /rental/admin/getRentalOrderById</b>

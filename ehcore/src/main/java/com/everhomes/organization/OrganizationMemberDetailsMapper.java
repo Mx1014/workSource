@@ -24,7 +24,6 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setContactToken(r.getValue((Field<String>) r.field("contact_token")));
         detail.setContactDescription(r.getValue((Field<String>) r.field("contact_description")));
         detail.setEmployeeNo(r.getValue((Field<String>) r.field("employee_no")));
-        detail.setAvatar(r.getValue((Field<String>) r.field("avatar")));
         detail.setGender(r.getValue((Field<Byte>) r.field("gender")));
         detail.setMaritalFlag(r.getValue((Field<Byte>) r.field("marital_flag")));
         detail.setPoliticalFlag(r.getValue((Field<String>) r.field("political_flag")));
@@ -45,7 +44,6 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setSalaryCardNumber(r.getValue((Field<String>) r.field("salary_card_number")));
         detail.setSocialSecurityNumber(r.getValue((Field<String>) r.field("social_security_number")));
         detail.setProvidentFundNumber(r.getValue((Field<String>) r.field("provident_fund_number")));
-        detail.setProfileIntegrity(r.getValue((Field<Integer>) r.field("profile_integrity")));
         detail.setCheckInTime(r.getValue((Field<Date>) r.field("check_in_time")));
 
         return detail;

@@ -8,11 +8,11 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import org.jooq.Condition;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +33,9 @@ public interface ArchivesService {
     ImportFileTaskDTO importArchivesContacts(
             MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
 
-    void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse);
+    void exportArchivesContacts(ExportArchivesContactsCommand cmd);
+
+    OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
@@ -94,7 +96,9 @@ public interface ArchivesService {
 
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 
-    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse);
+    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
+
+    OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId);
 
     void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
 
@@ -102,7 +106,13 @@ public interface ArchivesService {
 
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
+    void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
-    void syncArchivesDismissStatus();
+    void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
+
+    void initArchivesNotification();
+
+    void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
+
+//    void syncArchivesDismissStatus();
 }

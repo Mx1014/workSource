@@ -37,6 +37,7 @@ public class OAuth2ControllerBase extends ControllerBase {
         if(ex instanceof RuntimeErrorException) {
             RuntimeErrorException errorException = (RuntimeErrorException)ex;
             errorResponse.setError(this.oAuth2Service.getOAuth2AuthorizeError(errorException.getErrorCode()));
+            errorResponse.setError_description(errorException.getMessage());
             switch(errorException.getErrorCode()) {
             case OAuth2ServiceErrorCode.ERROR_INVALID_CLIENT :
             case OAuth2ServiceErrorCode.ERROR_UNAUTHORIZED_CLIENT :

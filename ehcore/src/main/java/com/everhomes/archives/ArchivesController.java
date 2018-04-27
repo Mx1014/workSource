@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 
 /**
  * 2017.08.11
@@ -123,8 +124,8 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("exportArchivesContacts")
     @RestReturn(value = String.class)
-    public RestResponse exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse){
-        archivesService.exportArchivesContacts(cmd,httpResponse);
+    public RestResponse exportArchivesContacts(ExportArchivesContactsCommand cmd){
+        archivesService.exportArchivesContacts(cmd);
         return new RestResponse();
     }
 
@@ -357,8 +358,8 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("exportArchivesEmployees")
     @RestReturn(value = String.class)
-    public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse){
-        archivesService.exportArchivesEmployees(cmd,httpResponse);
+    public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd){
+        archivesService.exportArchivesEmployees(cmd);
         return new RestResponse();
     }
 
@@ -387,13 +388,27 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/remindArchivesEmployee</b>
-     * <p>14.为员工做提醒设置</p>
+     * <b>URL: /archives/ArchivesNotification</b>
+     * <p>14.人事档案提醒设置</p>
      */
-    @RequestMapping("remindArchivesEmployee")
+    @RequestMapping("ArchivesNotification")
     @RestReturn(value = String.class)
-    public RestResponse remindArchivesEmployee(RemindArchivesEmployeeCommand cmd){
-        archivesService.remindArchivesEmployee(cmd);
+    public RestResponse ArchivesNotification(ArchivesNotificationCommand cmd){
+        archivesService.ArchivesNotificationConfig(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/updateArchivesEmployeeAvatar</b>
+     * <p>15.更新员工头像</p>
+     */
+    @RequestMapping("updateArchivesEmployeeAvatar")
+    @RestReturn(value = String.class)
+    public RestResponse updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd){
+        archivesService.updateArchivesEmployeeAvatar(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -414,14 +429,24 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /archives/syncArchivesDismissStatus</b>
      * <p>同步员工的离职状态（上线时执行一次）</p>
-     */
+     *//*
     @RequestMapping("syncArchivesDismissStatus")
     @RestReturn(value = String.class)
     public RestResponse syncArchivesDismissStatus(){
         archivesService.syncArchivesDismissStatus();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
+
+    @RequestMapping("testNotification")
+    @RestReturn(value = String.class)
+    public RestResponse testNotification(){
+        archivesService.executeArchivesNotification(6, 9, LocalDateTime.now());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

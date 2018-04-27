@@ -1,0 +1,104 @@
+package com.everhomes.remind;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>ownerType: 默认EhOrganizations</li>
+ * <li>ownerId: 总公司ID，必填</li>
+ * <li>keyWord: 标题关键字，可选项</li>
+ * <li>remindCategoryId: 分类ID</li>
+ * <li>status: 状态，参考{@link com.everhomes.rest.remind.RemindStatus}</li>
+ * <li>pageOffset: 页码，不填或者从1开始，和pageSize两个都不填则不分页</li>
+ * <li>pageSize: 每页大小，和pageOffset两个都不填则不分页</li>
+ * </ul>
+ */
+public class QuerySelfRemindsCondition {
+    private Integer namespaceId;
+    private Long userId;
+    private String ownerType;
+    private Long ownerId;
+    private String keyWord;
+    private Long remindCategoryId;
+    private Byte status;
+    private Integer pageOffset;
+    private Integer pageSize;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getKeyWord() {
+        return keyWord;
+    }
+
+    public void setKeyWord(String keyWord) {
+        this.keyWord = keyWord;
+    }
+
+    public Long getRemindCategoryId() {
+        return remindCategoryId;
+    }
+
+    public void setRemindCategoryId(Long remindCategoryId) {
+        this.remindCategoryId = remindCategoryId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Integer getPageOffset() {
+        return pageOffset;
+    }
+
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

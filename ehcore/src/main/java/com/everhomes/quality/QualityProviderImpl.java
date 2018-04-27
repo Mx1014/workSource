@@ -30,7 +30,6 @@ import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
-import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -96,7 +95,6 @@ import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
@@ -179,13 +177,13 @@ public class QualityProviderImpl implements QualityProvider {
 			});
 		}
 
-		//五分钟后启动通知
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
-		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
-				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
+//		//五分钟后启动通知
+//		Long notifyTime = System.currentTimeMillis() + 300000;
+//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+//		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+//		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+//		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+//				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 
 	}
 
@@ -455,9 +453,18 @@ public class QualityProviderImpl implements QualityProvider {
 			maps.add(ConvertHelper.convert(r, QualityInspectionStandardGroupMap.class));
 			return null;
 		});
-
-
+		List<QualityInspectionStandardGroupMap> personalGroupMap = listPersonalGroupMaps();
+		if (personalGroupMap != null && personalGroupMap.size() > 0) {
+			maps.addAll(personalGroupMap);
+		}
 		return maps;
+	}
+
+	private List<QualityInspectionStandardGroupMap> listPersonalGroupMaps() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.INSPECTOR_UID.eq(UserContext.currentUserId()));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 
 	@Override
@@ -3043,5 +3050,13 @@ public class QualityProviderImpl implements QualityProvider {
 		todayStart.set(Calendar.SECOND, 0);
 		todayStart.set(Calendar.MILLISECOND, 0);
 		return new Timestamp(todayStart.getTime().getTime());
+	}
+
+	@Override
+	public List<QualityInspectionStandardGroupMap> listPlanGroupMapsByPlanId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 }

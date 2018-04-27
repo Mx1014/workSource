@@ -27,7 +27,7 @@ public interface PmTaskService {
 //	void assignTask(AssignTaskCommand cmd);
 
 	ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
-	
+
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
@@ -99,4 +99,13 @@ public interface PmTaskService {
 	void syncTaskStatistics(HttpServletResponse resp);
 
 	void syncCategories();
+
+	Object getThirdAddress(HttpServletRequest req);
+
+	Object createThirdTask(HttpServletRequest req);
+
+	Object listThirdTasks(HttpServletRequest req);
+
+	Object getThirdTaskDetail(HttpServletRequest req);
+
 }
