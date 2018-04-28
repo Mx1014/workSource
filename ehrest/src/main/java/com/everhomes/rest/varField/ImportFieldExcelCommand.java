@@ -5,6 +5,8 @@ package com.everhomes.rest.varField;
  * Created by Wentian Wang on 2017/9/19.
  */
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>customerId:客户id</li>
@@ -12,6 +14,8 @@ package com.everhomes.rest.varField;
  * <li>moduleName：module的name</li>
  * <li>namespaceId：域空间</li>
  * <li>communityId：园区id</li>
+ * <li>orgId：公司id</li>
+ * <li>privilegeCode：1: 客户导入   2： 管理导入  暂时不写枚举了。。</li>
  *</ul>
  */
 public class ImportFieldExcelCommand {
@@ -22,6 +26,7 @@ public class ImportFieldExcelCommand {
     private Integer namespaceId;
     private Long communityId;
     private Long orgId;
+    private Byte privilegeCode;
 
     public Long getCustomerId() {
         return customerId;
@@ -69,5 +74,18 @@ public class ImportFieldExcelCommand {
 
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
+    }
+
+    public Byte getPrivilegeCode() {
+        return privilegeCode;
+    }
+
+    public void setPrivilegeCode(Byte privilegeCode) {
+        this.privilegeCode = privilegeCode;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
