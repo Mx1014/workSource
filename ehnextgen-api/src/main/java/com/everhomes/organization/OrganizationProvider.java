@@ -619,4 +619,35 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByCommunityId(Long communityId);
+
+	/**
+	 * 根据手机号、域空间Id、组织id来查询表eh_organization_members中的id值
+	 * @param contactToken
+	 * @param namespaceId
+	 * @param organizationId
+	 * @return
+	 */
+	Long findOrganizationMembersByTokenAndSoON(String contactToken,Integer namespaceId,Long organizationId);
+
+	/**
+	 * 查询eh_organization_members表中已经从注册的对应的信息
+	 * @param contactToken
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId);
+
+	/**
+	 * 向eh_organization_members表中添加数据
+	 * @param organizationMember
+	 */
+	void insertIntoOrganizationMember(OrganizationMember organizationMember);
+
+	/**
+	 * 查询eh_organization_members表中未注册的对应的信息
+	 * @param contactToken
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberNoSigned(String contactToken,Integer namespaceId);
 }

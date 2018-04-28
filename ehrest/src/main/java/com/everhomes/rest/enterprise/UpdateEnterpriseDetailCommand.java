@@ -20,19 +20,20 @@ import java.util.List;
 public class UpdateEnterpriseDetailCommand {
     private Integer pmFlag;
     private Integer namespaceId;
-    private Integer organizationId;
+    private Long organizationId;
     private String name;
     private String displayName;
     private String memberRange;
     private Integer serviceSupportFlag;
     private List<CreateOfficeSiteCommand> officeSites;
     private List<Long> communityIds;
+    private String entries;
 
-    public Integer getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Integer organizationId) {
+    public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
 
@@ -98,6 +99,14 @@ public class UpdateEnterpriseDetailCommand {
 
     public void setPmFlag(Integer pmFlag) {
         this.pmFlag = pmFlag;
+    }
+
+    public String getEntries() {
+        return entries;
+    }
+
+    public void setEntries(String entries) {
+        this.entries = entries;
     }
 
     @Override

@@ -178,4 +178,12 @@ public interface UserProvider {
      * @return
      */
     UserDTO findUserInfoByUserId(Long userId);
+
+    /**
+     * 查询该手机号是否已经进行注册
+     * @param contactToken
+     * @return
+     */
+    UserIdentifier getUserByToken(String contactToken,Integer namespaceId);
+
 }

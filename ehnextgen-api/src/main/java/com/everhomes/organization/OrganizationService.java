@@ -24,9 +24,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -165,7 +162,6 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -173,14 +169,6 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 public interface OrganizationService {
@@ -705,4 +693,22 @@ public interface OrganizationService {
 	 * @return
 	 */
 	OrganizationAndDetailDTO getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd);
+
+	/**
+	 * 编辑单个公司的信息
+	 * @param cmd
+	 */
+	void updateEnterpriseDetail(UpdateEnterpriseDetailCommand cmd);
+
+	/**
+	 * 更新办公地点以及其中的楼栋和门牌
+	 * @param cmd
+	 */
+	void insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd);
+
+	/**
+	 * 根据用户id来进行更高超级管理员手机号
+	 * @param cmd
+	 */
+	void updateSuperAdmin(UpdateSuperAdminCommand cmd);
 }

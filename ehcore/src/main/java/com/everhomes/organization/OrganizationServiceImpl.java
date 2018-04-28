@@ -1401,6 +1401,105 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDetail.setLongitude(Double.valueOf(cmd.getLongitude()));
             organizationProvider.createOrganizationDetail(organizationDetail);
 
+            //根据传进来的手机号进行校验，判断该手机号是否已经进行注册
+            //非空校验
+            if(cmd.getEntries() != null && !"".equals(cmd.getEntries())){
+                //说明手机号已经传进来了，那么我们根据该手机号去查eh_user_identifiers表中看是否已经注册
+                UserIdentifier userIdentifier = userProvider.getUserByToken(cmd.getEntries(),cmd.getNamespaceId());
+                if(userIdentifier != null){
+                    //说明已经进行注册，eh_user_identifiers表中存在记录，但是eh_organization_members表中不一定存在记录
+                    //那么还需要查询该表
+                    //// TODO: 2018/4/28  
+                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberSigned(cmd.getEntries(),
+                            cmd.getNamespaceId());
+                    if(organizationMember != null){
+                        //说明已经加入了公司，那么我们就将新建的公司的admin_target_id值更改为organizationMember中的id值
+                        //// TODO: 2018/4/28
+                        //创建Organization类的对象
+                        Organization organization1 = new Organization();
+                        //封装信息
+                        organization1.setAdminTargetId(organizationMember.getId());
+                        organization1.setId(organization.getId());
+                        //更新eh_organizations表信息
+                        organizationProvider.updateOrganization(organization1);
+                    }else{
+                        //// TODO: 2018/4/28 说明没有加入公司,但是已经注册了，那么我们就将其加入刚新建的公司中
+                        //创建OrganizationMember类的对象
+                        OrganizationMember organizationMember1 = new OrganizationMember();
+                        //封装信息
+                        organizationMember1.setOrganizationId(organization.getId());
+                        organizationMember1.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                        if(cmd.getContactor() != null && !"".equals(cmd.getContactor())){
+                            //说明管理员的名字不为空，那么封装名字
+                            organizationMember1.setContactName(cmd.getContactor());
+                        }
+                        organizationMember1.setContactToken(cmd.getEntries());
+                        organizationMember1.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                        organizationMember1.setTargetId(userIdentifier.getOwnerUid());
+                        organizationMember1.setGroupType(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationMember1.setCreatorUid(user.getId());
+                        //持久化到数据库中
+                        //// TODO: 2018/4/28
+                        organizationProvider.insertIntoOrganizationMember(organizationMember1);
+                        //更新eh_organizations表中的admin_target_id字段
+                        //创建一个Organization类的对象
+                        Organization organization2 = new Organization();
+                        //封装信息
+                        organization2.setAdminTargetId(organizationMember1.getId());
+                        organization2.setId(organization.getId());
+                        //更新eh_organizations表信息
+                        organizationProvider.updateOrganization(organization2);
+                    }
+
+                }else{
+                    //// TODO: 2018/4/28 说明未进行注册,未进行注册也可以加入企业，所以我们还是需要查eh_organizarion_members表
+                    //// TODO: 2018/4/28
+                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberNoSigned(cmd.getEntries(),cmd.getNamespaceId());
+                    //判断
+                    if(organizationMember != null){
+                        //说明已经加入了公司，但是没有注册信息
+                        //更新eh_organizations表中的admin_target_id字段信息
+                        //创建Organization类的对象
+                        Organization organization3 = new Organization();
+                        //封装数据
+                        organization3.setAdminTargetId(organizationMember.getId());
+                        organization3.setId(organization.getId());
+                        //更新eh_organizations表信息
+                        organizationProvider.updateOrganization(organization3);
+                    }else{
+                        //说明没有注册信息，也没有加入公司，那么我们就帮他加入公司，只要后面注册之后，他就是超级管理员了
+
+                        //创建OrganizationMember类的对象
+                        OrganizationMember organizationMember2 = new OrganizationMember();
+                        //封装信息
+                        organizationMember2.setOrganizationId(organization.getId());
+                        organizationMember2.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                        if(cmd.getContactor() != null && !"".equals(cmd.getContactor())){
+                            //说明管理员的名字不为空，那么封装名字
+                            organizationMember2.setContactName(cmd.getContactor());
+                        }
+                        organizationMember2.setContactToken(cmd.getEntries());
+                        organizationMember2.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                        organizationMember2.setGroupType(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationMember2.setCreatorUid(user.getId());
+                        //持久化到数据库中
+                        //// TODO: 2018/4/28
+                        organizationProvider.insertIntoOrganizationMember(organizationMember2);
+                        //更新eh_organizations表中的admin_target_id字段
+                        //创建一个Organization类的对象
+                        Organization organization4 = new Organization();
+                        //封装信息
+                        organization4.setAdminTargetId(organizationMember2.getId());
+                        organization4.setId(organization.getId());
+                        //更新eh_organizations表信息
+                        organizationProvider.updateOrganization(organization4);
+
+                    }
+                }
+
+            }
+
+
             // 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
             createActiveOrganizationCommunityRequest(user.getId(), organizationDetail.getOrganizationId(), cmd.getCommunityId());
 //			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
@@ -1475,13 +1574,59 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //封装人员规模
                 organizationDetail.setMemberRange(cmd.getMemberRange());
                 //更新到eh_organization_detail表
-                //// TODO: 2018/4/28  
+                organizationProvider.updateOrganizationDetail(organizationDetail);
             }
-
-
             return null;
         });
     }
+
+    /**
+     * 更新办公地点以及其中的楼栋和门牌
+     * @param cmd
+     */
+    public void insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd){
+        //必须在同一个事物中完成
+        dbProvider.execute((TransactionStatus status) -> {
+            //向办公地点表中添加数据
+            if(cmd.getOfficeSites() != null){
+                //说明传过来的所在项目和名称以及其中的楼栋和门牌不为空，那么我们将其进行遍历
+                for(CreateOfficeSiteCommand createOfficeSiteCommand :cmd.getOfficeSites()){
+                    //这样的话拿到的是每一个办公所在地，以及其中的楼栋和门牌
+                    //首先我们将办公地址名称和办公地点id持久化到表eh_organization_workPlaces中
+                    //创建OrganizationWorkPlaces类的对象
+                    OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                    //将数据封装在对象中
+                    organizationWorkPlaces.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationWorkPlaces.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
+                    //将上面的organization对象中的id也封装在对象中
+                    organizationWorkPlaces.setOrganizationId(cmd.getOrganizationId());
+                    //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
+                    organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                    //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+                    //首先进行遍历楼栋集合
+                    if(createOfficeSiteCommand.getSiteDtos() != null){
+                        //说明楼栋和门牌不为空，注意他是一个集合
+                        //遍历
+                        for(OrganizationSiteApartmentDTO organizationSiteApartmentDTO : createOfficeSiteCommand.getSiteDtos()){
+                            //这样的话我们拿到的是每一个楼栋以及对应的门牌
+                            //创建CommunityAndBuildingRelationes对象，并且将数据封装在对象中，然后持久化到数据库
+                            CommunityAndBuildingRelationes communityAndBuildingRelationes = new CommunityAndBuildingRelationes();
+                            communityAndBuildingRelationes.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                            communityAndBuildingRelationes.setAddressId(organizationSiteApartmentDTO.getApartmentId());
+                            communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
+                            //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
+                            organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
+
+
 
     /**
      * 创建企业
@@ -12944,10 +13089,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(organizationAndDetailDTO.getAdminTargetId() != null){
             //说明超级管理员不为空，那么我们就将超级管理员查询出来，并且封装在对象OrganizationAndDetailDTO中
             //创建User对象
-            UserDTO user = userProvider.findUserInfoByUserId(organizationAndDetailDTO.getAdminTargetId());
-            if(user != null){
-                organizationAndDetailDTO.setContactor(user.getAccountName());
-                organizationAndDetailDTO.setEntries(user.getIdentifierToken());
+            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(organizationAndDetailDTO.getAdminTargetId());
+            if(organizationMember != null){
+                organizationAndDetailDTO.setContactor(organizationMember.getContactName());
+                organizationAndDetailDTO.setEntries(organizationMember.getContactToken());
             }
         }
         //接下来我们需要做的是：将该公司所在的办公地点、所属项目名称、以及该项目下面的所有的楼栋和门牌查询出来
@@ -13011,6 +13156,33 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         return organizationAndDetailDTO;
+    }
+
+    /**
+     * 根据用户id来进行更高超级管理员手机号
+     * @param cmd
+     */
+    @Override
+    public void updateSuperAdmin(UpdateSuperAdminCommand cmd){
+        //根据手机号、域空间id、organizationId来查询eh_organization_members表中的信息
+        //判断
+        if(cmd.getEntries() != null && cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
+            //查询表eh_organization_members
+            Long id = organizationProvider.findOrganizationMembersByTokenAndSoON(cmd.getEntries(),cmd.getNamespaceId(),cmd.getOrganizationId());
+            //非空校验
+            if(id != null && !"".equals(id)){
+                //说明有值
+                //然后我们将这个id更新到eh_organizations表中的对应的admin_target_id字段中
+                //创建一个Organization类的对象
+                Organization organization = new Organization();
+                //将数据封装在Organization对象中
+                organization.setId(cmd.getOrganizationId());
+                organization.setAdminTargetId(id);
+                //更新eh_organizations表中的信息
+                organizationProvider.updateOrganization(organization);
+            }
+        }
+
     }
 
 }

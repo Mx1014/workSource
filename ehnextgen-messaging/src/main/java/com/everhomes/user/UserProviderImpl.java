@@ -1896,5 +1896,22 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+    /**
+     * 查询该手机号是否已经进行注册
+     * @param contactToken
+     * @return
+     */
+    @Override
+    public UserIdentifier getUserByToken(String contactToken,Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_user_identifiers表
+        UserIdentifier userIdentifier = context.select().from(Tables.EH_USER_IDENTIFIERS)
+        .where(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(contactToken))
+                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId)).fetchOneInto(UserIdentifier.class);
+        return userIdentifier;
+    }
+
+
     
 }

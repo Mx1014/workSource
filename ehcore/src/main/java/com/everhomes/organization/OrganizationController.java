@@ -2,7 +2,6 @@
 package com.everhomes.organization;
 
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -15,23 +14,18 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1620,12 +1614,44 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/enterprise/edit</b>
-     * <p>编辑单个公司的具体属性</p>
+     * <p>编辑单个公司的具体属性(标准版)</p>
      */
     @RequestMapping("/enterprise/edit")
     @RestReturn(value = EnterpriseDTO.class)
     public RestResponse updateEnterpriseDetail(@Valid UpdateEnterpriseDetailCommand cmd) {
-        //// TODO: 2018/4/28
+        organizationService.updateEnterpriseDetail(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/workplace/edit</b>
+     * <p>编辑办公地点（包括其中的楼栋和门牌）(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/workplace/edit")
+    @RestReturn(value = String.class)
+    public RestResponse insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd){
+        organizationService.insertWorkPlacesAndBuildings(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/superAdmin/edit</b>
+     * <p>更改超级管理员(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/superAdmin/edit")
+    @RestReturn(value = String.class)
+    public RestResponse updateSuperAdminToken(UpdateSuperAdminCommand cmd){
+        organizationService.updateSuperAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
