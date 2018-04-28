@@ -1313,6 +1313,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setWebsite(cmd.getWebsite());
             organization.setEmailDomain(cmd.getEmailDomain());
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+            if(cmd.getWorkbenchFlag() != null){
+                organization.setWorkPlatformFlag(cmd.getWorkbenchFlag().byteValue());
+            }
             organizationProvider.createOrganization(organization);
 
             //根据是否是管理公司来进行添加eh_organization_communities表数据，只有是管理公司才能拥有管理的项目
@@ -1384,6 +1387,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationDetail.setMemberCount(cmd.getMemberCount());
             organizationDetail.setEmailDomain(cmd.getEmailDomain());
             organizationDetail.setServiceUserId(cmd.getServiceUserId());
+            //表明该公司是否是管理公司 1-是 0-否
+            if(cmd.getPmFlag() != null){
+                organizationDetail.setPmFlag(cmd.getPmFlag().byteValue());
+            }
+            //表明该公司是否是服务商，1-服务商 0-否
+            if(cmd.getServiceSupportFlag() != null){
+                organizationDetail.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
+            }
             if (cmd.getLatitude() != null)
                 organizationDetail.setLatitude(Double.valueOf(cmd.getLatitude()));
             if (cmd.getLongitude() != null)
