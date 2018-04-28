@@ -15,7 +15,7 @@ update eh_service_module_apps set  module_control_type='community_control' where
 update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sign_suffix',concat('&ns=',namespace_id,'#/newsList#sign_suffix')) where action_type = 13 and action_data like '%park-news-web%'
 
 -- 停车订单标签 by dengs,2018.04.27
-update eh_parking_lots SET order_tag=SUBSTR(id FROM 3 FOR 5);
+update eh_parking_lots SET order_tag=SUBSTR(CONCAT(id,'') FROM 3 FOR 5);
 
 
 -- for 住总ELive物业查费对接 by 杨崇鑫  start
