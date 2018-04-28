@@ -529,11 +529,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     public String findNameByOwnerAndUser(Long ownerId, Long uid) {
-        if (null == uid) {
-            return null;
-        }
-        Organization organization = organizationProvider.findOrganizationById(ownerId);
-        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(uid, organization.getPath());
+        OrganizationMember member = findMemberByOwnerAndUser( ownerId, uid);
 
         if (null != member) {
             return member.getContactName();
@@ -544,7 +540,15 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
+    public OrganizationMember findMemberByOwnerAndUser(Long ownerId, Long uid) {
+        if (null == uid) {
+            return null;
+        }
+        Organization organization = organizationProvider.findOrganizationById(ownerId);
+        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(uid, organization.getPath());
 
+        return member;
+    }
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
 
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
@@ -1931,8 +1935,8 @@ public class SalaryServiceImpl implements SalaryService {
         return null;
     }
 
-    public String processZLLink2PayslipDetail(Long payslipDetailId, Long updateTime) {
-        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&updateTime={" + updateTime + "}";
+    public String processZLLink2PayslipDetail(Long payslipDetailId, Long createTime) {
+        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&createTime={" + createTime + "}";
     }
 
     @Override
@@ -2101,8 +2105,8 @@ public class SalaryServiceImpl implements SalaryService {
         return new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
             PayslipDTO dto = ConvertHelper.convert(r, PayslipDTO.class);
             dto.setPayslipId(r.getId());
-            dto.setUpdateTime(r.getUpdateTime().getTime());
-            dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
+            dto.setCreateTime(r.getCreateTime().getTime());
+            dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
             dto.setSendCount(salaryPayslipDetailProvider.countSend(r.getId()));
             dto.setConfirmCount(salaryPayslipDetailProvider.countConfirm(r.getId()));
             dto.setViewCount(salaryPayslipDetailProvider.countView(r.getId()));
@@ -2119,8 +2123,8 @@ public class SalaryServiceImpl implements SalaryService {
             PayslipDetailDTO dto = ConvertHelper.convert(r, PayslipDetailDTO.class);
             dto.setPayslipDetailId(r.getId());
             Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
-            dto.setUpdateTime(r.getUpdateTime().getTime());
-            dto.setOperatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getOperatorUid()));
+            dto.setCreateTime(r.getCreateTime().getTime());
+            dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
             dto.setPayslipContent(content);
             return dto;
         }).collect(Collectors.toList()));
@@ -2191,7 +2195,7 @@ public class SalaryServiceImpl implements SalaryService {
         for(SalaryPayslipDetail spd : results){
             if(null != spd){
                 MonthPayslipDetailDTO dto = new MonthPayslipDetailDTO();
-                dto.setUpdateTime(spd.getUpdateTime().getTime());
+                dto.setCreateTime(spd.getCreateTime().getTime());
                 dto.setPayslipDetailId(spd.getId());
                 dto.setSalaryPeriod(spd.getSalaryPeriod());
                 String year =spd.getSalaryPeriod().substring(0, 3);
@@ -2211,6 +2215,12 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
 
+        SalaryPayslipDetail result = salaryPayslipDetailProvider.findSalaryPayslipDetailById(cmd.getPayslipDetailId());
+        if (result.getUserId().equals(UserContext.currentUserId())) {
+            PayslipDetailDTO dto = ConvertHelper.convert(result, PayslipDetailDTO.class);
+            return new ListPayslipsDetailResponse();
+
+        }
         return new ListPayslipsDetailResponse();
     }
 

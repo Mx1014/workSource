@@ -16,9 +16,9 @@ import com.everhomes.util.StringHelper;
  * <li>payslipContent: 导入内容key-value对的map</li>
  * <li>viewedFlag: 已查看0-否 1-是</li>
  * <li>status: 状态0-已发送 1-已撤回  2-已确认</li>
- * <li>operatorUid: 发放者id</li>
- * <li>operatorName: 发放人姓名</li>
- * <li>updateTime: 发放时间</li>
+ * <li>creatorUid: 发放者id</li>
+ * <li>creatorName: 发放人姓名</li>
+ * <li>createTime: 发放时间</li>
  * <li>salaryPeriod: 期数</li>
  * <li>confirmTime: 自动确认时间</li>
  * <li>importResult: 上传结果 0-成功 1-员工不存在 2-手机号为空 </li>
@@ -34,9 +34,9 @@ public class PayslipDetailDTO {
     private Map<String,String> payslipContent;
     private Byte viewedFlag;
     private Byte status;
-    private Long operatorUid;
-    private String operatorName;
-    private Long updateTime;
+    private Long creatorUid;
+    private String creatorName;
+    private Long createTime;
     private Long confirmTime;
     private Byte importResult;
 	public Long getUserId() {
@@ -86,18 +86,6 @@ public class PayslipDetailDTO {
 	public void setPayslipDetailId(Long payslipDetailId) {
 		this.payslipDetailId = payslipDetailId;
 	}
-	public Long getOperatorUid() {
-		return operatorUid;
-	}
-	public void setOperatorUid(Long operatorUid) {
-		this.operatorUid = operatorUid;
-	}
-	public String getOperatorName() {
-		return operatorName;
-	}
-	public void setOperatorName(String operatorName) {
-		this.operatorName = operatorName;
-	} 
 	public Long getConfirmTime() {
 		return confirmTime;
 	}
@@ -116,13 +104,30 @@ public class PayslipDetailDTO {
 	public void setPayslipContent(Map<String,String> payslipContent) {
 		this.payslipContent = payslipContent;
 	}
-	public Long getUpdateTime() {
-		return updateTime;
-	}
-	public void setUpdateTime(Long updateTime) {
-		this.updateTime = updateTime;
+
+	public Long getCreateTime() {
+		return createTime;
 	}
 
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getCreatorName() {
+		return creatorName;
+	}
+
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
 
 	public String getSalaryPeriod() {
 		return salaryPeriod;

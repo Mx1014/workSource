@@ -6,13 +6,13 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul> 
  * <li>salaryPeriod: 期数</li>
- * <li>updateTime: 发放时间</li>
+ * <li>createTime: 发放时间</li>
  * <li>payslipDetailId: 详情id</li> 
  * </ul>
  */
 public class MonthPayslipDetailDTO {
     private String salaryPeriod;
-	private Long updateTime;
+	private Long createTime;
 	private Long payslipDetailId;
 
 	@Override
@@ -28,12 +28,12 @@ public class MonthPayslipDetailDTO {
 		this.payslipDetailId = payslipDetailId;
 	}
 
-	public Long getUpdateTime() {
-		return updateTime;
+	public Long getCreateTime() {
+		return createTime;
 	}
 
-	public void setUpdateTime(Long updateTime) {
-		this.updateTime = updateTime;
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
 	}
 
 	public String getSalaryPeriod() {
