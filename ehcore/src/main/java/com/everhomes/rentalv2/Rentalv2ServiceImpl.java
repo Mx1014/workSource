@@ -1826,6 +1826,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			initiateFlag = true;
 
+			if(rentalBill.getRentalType().equals(RentalType.HOUR.getCode())){//按小时模式 单元格价格等于半小时价格乘单元格长度
+				rentalCell.setPrice(rentalCell.getPrice().multiply(new BigDecimal(rentalCell.getTimeStep())));
+				rentalCell.setApprovingUserPrice(rentalCell.getApprovingUserPrice().multiply(new BigDecimal(rentalCell.getTimeStep())));
+				rentalCell.setOrgMemberPrice(rentalCell.getOrgMemberPrice().multiply(new BigDecimal(rentalCell.getTimeStep())));
+			}
+
 			BigDecimal cellPrice = null == rentalCell.getPrice() ? new BigDecimal(0) : rentalCell.getPrice();
 			if (null != rentalBill.getScene()) {
 				if (SceneType.PM_ADMIN.getCode().equals(rentalBill.getScene())) {
@@ -5047,19 +5053,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
-//						if(anchorTime.equals(0L)){
-//							anchorTime = dto.getBeginTime();
-//						}else{
-//							try {
-//								if(timeSF.get().parse(timeSF.get().format(new java.util.Date(anchorTime))).after(
-//										timeSF.get().parse(timeSF.get().format(new java.util.Date(dto.getBeginTime()))))){
-//									anchorTime = dto.getBeginTime();
-//								}
-//							} catch (Exception e) {
-//								LOGGER.error("anchorTime error  dto = "+ dto );
-//							}
-//
-//						}
+					dto.setPrice(dto.getPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
 				} else if (dto.getRentalType() == RentalType.HALFDAY.getCode() ||
 						dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 					dto.setAmorpm(rsr.getAmorpm());
@@ -5976,7 +5975,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
-					dto.setEndTime(rsr.getEndTime().getTime()); 
+					dto.setEndTime(rsr.getEndTime().getTime());
+					dto.setPrice(dto.getPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
+					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep())));
 					if(response.getAnchorTime().equals(0L)){
 						response.setAnchorTime(dto.getBeginTime());
 					}else{
