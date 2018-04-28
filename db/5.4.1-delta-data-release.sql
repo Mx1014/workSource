@@ -56,3 +56,6 @@ update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
 -- 一键推送的数据范围改成不限园区  add by xq.tian  2018/04/26
 --
 UPDATE eh_service_modules SET module_control_type = 'unlimit_control' WHERE name = '一键推送';
+
+-- 张江高科现在可以展示批量导入导出的按钮了 by wentian 2018/04/28
+delete from eh_service_module_exclude_functions where module_id = 20400 and function_id = 95 and namespace_id = 999971;

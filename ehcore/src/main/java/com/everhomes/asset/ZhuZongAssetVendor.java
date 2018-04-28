@@ -79,7 +79,7 @@ import com.everhomes.util.StringHelper;
  */
 
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"ZZ")
-public class ZhuZongAssetVendor implements AssetVendorHandler{
+public class ZhuZongAssetVendor extends AssetVendorHandler{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuZongAssetVendor.class);
     

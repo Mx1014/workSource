@@ -60,11 +60,11 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType, Long organizationId) {
         if(isZuolinByBillId(billId)){
-            return zuolinAssetVendorHandler.getBillDetailForClient(ownerId, billId, targetType);
+            return zuolinAssetVendorHandler.getBillDetailForClient(ownerId, billId, targetType, organizationId);
         }
-        return zhangJiangGaoKeThirdPartyAssetVendor.getBillDetailForClient(ownerId, billId, targetType);
+        return zhangJiangGaoKeThirdPartyAssetVendor.getBillDetailForClient(ownerId, billId, targetType, organizationId);
     }
 
 
