@@ -41,6 +41,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
 
     @Autowired
+    private EnterpriseApprovalProvider enterpriseApprovalProvider;
+
+    @Autowired
     private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
 
     @Autowired
@@ -138,7 +141,15 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
 
     @Override
     public List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups() {
-        return null;
+        List<EnterpriseApprovalGroupDTO> results = new ArrayList<>();
+        List<EnterpriseApprovalGroup> groups = enterpriseApprovalProvider.listEnterpriseApprovalGroups();
+        if (groups == null || groups.size() == 0)
+            return results;
+        results = groups.stream()
+                .filter(r -> r.getGroupAttribute().equals(EnterpriseApprovalGroupAttribute.CUSTOMIZE.getCode()))
+                .map(r -> ConvertHelper.convert(r, EnterpriseApprovalGroupDTO.class))
+                .collect(Collectors.toList());
+        return results;
     }
 
     @Override

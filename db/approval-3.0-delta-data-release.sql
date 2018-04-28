@@ -1,8 +1,6 @@
-
--- 打卡审批工作流的title，add by wh, 20170502
-SET @id =(SELECT MAX(id) FROM eh_locale_strings); 
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'general_approval.contact.key','0','zh_CN','企业联系人'); 
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'general_approval.contact.key','1','zh_CN','企业'); 
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'general_approval.contact.key','2','zh_CN','楼栋-门牌'); 
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'general_approval.contact.key','3','zh_CN','联系人'); 
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'general_approval.contact.key','4','zh_CN','联系方式');  
+-- 审批分类初始数据
+INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('1', '0', NULL, '0', '出勤休假', '1', 'DEFAULT', '1', '2018-04-28 09:00:00');
+INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('2', '0', NULL, '0', '组织人事', '1', 'DEFAULT', '1', '2018-04-28 09:00:00');
+INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('3', '0', NULL, '0', '行政办公', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
+INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('4', '0', NULL, '0', '市场商务', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
+INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('5', '0', NULL, '0', '其他', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
