@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,4 +31,6 @@ public interface SalaryPayslipDetailProvider {
 	void deleteSalaryPayslipDetail(SalaryPayslipDetail spd);
 
 	List<SalaryPayslipDetail> listUserSalaryPayslipDetail(Long userId, Long organizationId);
+
+	void confirmSalaryPayslipDetailBeforeDate(Timestamp timestamp);
 }

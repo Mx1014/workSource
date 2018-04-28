@@ -34,6 +34,8 @@ import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.socialSecurity.SocialSecurityConstants;
 import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.techpark.punch.PunchService;
@@ -63,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -92,14 +95,27 @@ public class SalaryServiceImpl implements SalaryService {
         }
     };
 
-//	private static List<SalaryDefaultEntity> salaryDefaultEntities = new ArrayList<SalaryDefaultEntity>();
+    //	private static List<SalaryDefaultEntity> salaryDefaultEntities = new ArrayList<SalaryDefaultEntity>();
 //
+    private List<String> invisibleKeys = new ArrayList<>();
 
     private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
 
     public SalaryServiceImpl() {
+
+        super();
+        invisibleKeys.add("姓名");
+        invisibleKeys.add("手机号码");
+        invisibleKeys.add("部门");
+        invisibleKeys.add("岗位");
+        invisibleKeys.add("序号");
+        invisibleKeys.add("所属部门");
+        invisibleKeys.add("所在部门");
+        invisibleKeys.add("职位");
+        invisibleKeys.add("职务");
+        invisibleKeys.add("职称");
 
         templateLoader = new StringTemplateLoader();
         templateConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
@@ -156,6 +172,9 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Autowired
     private SalaryEmployeeOriginValProvider salaryEmployeeOriginValProvider;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Autowired
     private SalaryEmployeePeriodValProvider salaryEmployeePeriodValProvider;
@@ -529,7 +548,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     public String findNameByOwnerAndUser(Long ownerId, Long uid) {
-        OrganizationMember member = findMemberByOwnerAndUser( ownerId, uid);
+        OrganizationMember member = findMemberByOwnerAndUser(ownerId, uid);
 
         if (null != member) {
             return member.getContactName();
@@ -540,6 +559,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return null;
     }
+
     public OrganizationMember findMemberByOwnerAndUser(Long ownerId, Long uid) {
         if (null == uid) {
             return null;
@@ -549,6 +569,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         return member;
     }
+
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
 
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
@@ -2120,14 +2141,19 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getPayslipId(),
                 cmd.getName(), cmd.getStatus());
         return new ListSendPayslipDetailsResponse(results.stream().map(r -> {
-            PayslipDetailDTO dto = ConvertHelper.convert(r, PayslipDetailDTO.class);
-            dto.setPayslipDetailId(r.getId());
-            Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
-            dto.setCreateTime(r.getCreateTime().getTime());
-            dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
-            dto.setPayslipContent(content);
+            PayslipDetailDTO dto = convertPayslipDetailDTO(r);
             return dto;
         }).collect(Collectors.toList()));
+    }
+
+    private PayslipDetailDTO convertPayslipDetailDTO(SalaryPayslipDetail r) {
+        PayslipDetailDTO dto = ConvertHelper.convert(r, PayslipDetailDTO.class);
+        dto.setPayslipDetailId(r.getId());
+        Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
+        dto.setCreateTime(r.getCreateTime().getTime());
+        dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
+        dto.setPayslipContent(content);
+        return dto;
     }
 
     @Override
@@ -2138,6 +2164,8 @@ public class SalaryServiceImpl implements SalaryService {
                 String salaryPeriodString = processSalaryPeriodString(spd.getSalaryPeriod());
                 spd.setStatus(PayslipDetailStatus.SENDED.getCode());
                 spd.setViewedFlag(NormalFlag.NO.getCode());
+                spd.setCreatorUid(UserContext.currentUserId());
+                spd.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
                 sendPayslipMessage(spd, salaryPeriodString);
             }
@@ -2192,13 +2220,13 @@ public class SalaryServiceImpl implements SalaryService {
         }
         ListUserPayslipsResponse response = new ListUserPayslipsResponse(new ArrayList<>());
         Map<String, List<MonthPayslipDetailDTO>> resultMap = new HashedMap();
-        for(SalaryPayslipDetail spd : results){
-            if(null != spd){
+        for (SalaryPayslipDetail spd : results) {
+            if (null != spd) {
                 MonthPayslipDetailDTO dto = new MonthPayslipDetailDTO();
                 dto.setCreateTime(spd.getCreateTime().getTime());
                 dto.setPayslipDetailId(spd.getId());
                 dto.setSalaryPeriod(spd.getSalaryPeriod());
-                String year =spd.getSalaryPeriod().substring(0, 3);
+                String year = spd.getSalaryPeriod().substring(0, 3);
                 if (null == resultMap.get(year)) {
                     resultMap.put(year, new ArrayList<>());
                 }
@@ -2212,13 +2240,34 @@ public class SalaryServiceImpl implements SalaryService {
         return response;
     }
 
+    //7天自动确认
+    private static final Long AUTO_CONFIRM = 7 * 24 * 3600 * 1000L;
+
     @Override
     public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
 
         SalaryPayslipDetail result = salaryPayslipDetailProvider.findSalaryPayslipDetailById(cmd.getPayslipDetailId());
+        if (null == result) {
+            return null;
+        }
+        if (NormalFlag.NO == NormalFlag.fromCode(result.getViewedFlag())) {
+            result.setViewedFlag(NormalFlag.YES.getCode());
+            salaryPayslipDetailProvider.updateSalaryPayslipDetail(result);
+        }
         if (result.getUserId().equals(UserContext.currentUserId())) {
-            PayslipDetailDTO dto = ConvertHelper.convert(result, PayslipDetailDTO.class);
-            return new ListPayslipsDetailResponse();
+            PayslipDetailDTO dto = convertPayslipDetailDTO(result);
+            for (String key : dto.getPayslipContent().keySet()) {
+                //当字段属于不可见的,或者值为空/0 不显示给客户端
+                if (invisibleKeys.contains(key.trim()) ||
+                        dto.getPayslipContent().get(key).equals("0") ||
+                        StringUtils.isBlank(dto.getPayslipContent().get(key))) {
+                    dto.getPayslipContent().remove(key);
+                }
+            }
+            dto.setPayslipContent(dto.getPayslipContent());
+
+            dto.setConfirmTime(dto.getCreateTime() + AUTO_CONFIRM);
+            return new ListPayslipsDetailResponse(dto);
 
         }
         return new ListPayslipsDetailResponse();
@@ -2226,8 +2275,18 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void confirmPayslip(ConfirmPayslipCommand cmd) {
-
-
+        SalaryPayslipDetail spd = salaryPayslipDetailProvider.findSalaryPayslipDetailById(cmd.getPayslipDetailId());
+        spd.setStatus(PayslipDetailStatus.CONFIRMED.getCode());
+        salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
     }
-    //TODO 自动确认
+    /**
+     * 自动确认.每15分钟把发放时间为7天前的都自动确认
+     * */
+    @Scheduled(cron = "1 0/15 * * * ?")
+    public void scheduledSendPushToUsers() {
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            salaryPayslipDetailProvider.confirmSalaryPayslipDetailBeforeDate(new Timestamp(DateHelper.currentGMTTime().getTime()-AUTO_CONFIRM));
+        }
+    }
+
 }
