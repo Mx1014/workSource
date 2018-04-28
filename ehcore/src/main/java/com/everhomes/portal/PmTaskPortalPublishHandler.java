@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         if(0 == angetSwitch.byteValue()){
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
         } else if (1 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent" + taskCategoryId.toString(),0);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
@@ -108,6 +109,16 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
             if(!StringUtils.isEmpty(value)){
                 return value;
             }
+//            else{
+//                String str = json.getString("url");
+//                String[] strs = str.split("&");
+//                for(String elem : strs){
+//                    if(elem.indexOf("taskCategoryId") > -1){
+//                        String[] pair = elem.split("=");
+//                        return pair[1];
+//                    }
+//                }
+//            }
         }
 
         return instanceConfig;
