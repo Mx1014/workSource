@@ -27,6 +27,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -110,6 +112,8 @@ import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.CustomRequestConstants;
@@ -227,6 +231,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+
+	@Autowired
+	private	ServiceModuleAppProvider serviceModuleAppProvider;
+
+	@Autowired
+	private PortalVersionProvider portalVersionProvider;
     
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
@@ -2068,14 +2078,32 @@ public class YellowPageServiceImpl implements YellowPageService {
 			lists.remove(lists.size() - 1);
 			nextPageAnchor = lists.get(lists.size() - 1).getId();
 		}
+		final Map<String,Long> categoryAppIdMap = new HashMap<>();
 		SearchRequestInfoResponse response = new SearchRequestInfoResponse();
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setDtos(lists.stream().map((r)->{
 			RequestInfoDTO requestInfo = ConvertHelper.convert(r, RequestInfoDTO.class);
 			if (requestInfo != null && r.getCreateTime() != null)
 			requestInfo.setCreateTime(r.getCreateTime().toLocalDateTime().format(dateSF));
+			requestInfo.setAppId(getAppIdByCategory(r.getType(),categoryAppIdMap));
 			return requestInfo;
 		}).collect(Collectors.toList()));
 		return response;
+	}
+
+	private Long getAppIdByCategory(Long type, Map<String, Long> categoryAppIdMap) {
+		if(categoryAppIdMap.get(String.valueOf(type))==null) {
+			int ns =UserContext.getCurrentNamespaceId();
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(ns);
+			if(releaseVersion == null){
+				return null;
+			}
+			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(ns, releaseVersion.getId(), 40500L, (byte)33, String.valueOf(type), null);
+			if(serviceModuleApps==null ||serviceModuleApps.size()==0){
+				return null;
+			}
+			categoryAppIdMap.put(String.valueOf(type),serviceModuleApps.get(0).getId());
+		}
+		return categoryAppIdMap.get(String.valueOf(type));
 	}
 }
