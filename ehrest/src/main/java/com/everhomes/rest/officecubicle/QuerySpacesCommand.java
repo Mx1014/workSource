@@ -7,7 +7,8 @@ import com.everhomes.util.StringHelper;
  * 列出工位预定空间的请求参数
  * <li>ownerType : community </li>
  * <li>ownerId : communityId 园区id</li>
- * <li>cityId: 城市id</li>
+ * <li>provinceName: 省名称</li>
+ * <li>cityName: 城市名</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * </ul>
@@ -16,7 +17,8 @@ public class QuerySpacesCommand {
 	
 	private String ownerType;
 	private Long ownerId;
-	private Long cityId;
+	private String provinceName;
+	private String cityName;
 	
 	private Long pageAnchor;
     
@@ -61,6 +63,21 @@ public class QuerySpacesCommand {
 		this.pageSize = pageSize;
 	}
 
+	public String getProvinceName() {
+		return provinceName;
+	}
+
+	public void setProvinceName(String provinceName) {
+		this.provinceName = provinceName;
+	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
 
 	@Override
     public String toString() {
@@ -68,12 +85,4 @@ public class QuerySpacesCommand {
     }
 
 
-	public Long getCityId() {
-		return cityId;
-	}
-
-
-	public void setCityId(Long cityId) {
-		this.cityId = cityId;
-	}
 }

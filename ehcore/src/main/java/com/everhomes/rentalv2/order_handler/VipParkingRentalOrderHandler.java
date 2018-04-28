@@ -158,10 +158,10 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
                 lockOrderResourceStatus(order);
                 handler.autoUpdateOrderSpaceSendMessage(order);
             }else {
-                rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
                 order.setStatus(SiteBillStatus.FAIL.getCode());
                 rentalv2Provider.updateRentalBill(order);
-
+                if (order.getPaidMoney().compareTo(new BigDecimal(0))>0)
+                    rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
                 handler.autoCancelOrderSendMessage(order);
             }
         }else {

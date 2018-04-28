@@ -4,6 +4,7 @@ package com.everhomes.community;
 import com.everhomes.acl.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -39,6 +40,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.BuildingDTO;
@@ -180,6 +182,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private PropertyMgrService propertyMgrService;
+
+	@Autowired
+	private AssetService assetService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1502,14 +1507,14 @@ public class CommunityServiceImpl implements CommunityService {
 
             if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
                 query.addConditions(condition);
             }
             if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
                 String keyword = "%" + cmd.getCommunityKeyword() + "%";
-                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+//                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
                 query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
                 query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
             }
@@ -3183,6 +3188,8 @@ public class CommunityServiceImpl implements CommunityService {
 		organization.setShowFlag((byte) 1);
 		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganization(organization);
+		assetService.linkCustomerToBill(AssetTargetType.ORGANIZATION.getCode(), organization.getId(), organization.getName());
+
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("create organization success: namespaceId="+namespaceId+", organizationId="+organization.getId()+", organizationName"+organizationName);
 		}

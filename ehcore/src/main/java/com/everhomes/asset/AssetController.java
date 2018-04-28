@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -60,13 +61,7 @@ public class AssetController extends ControllerBase {
     @Autowired
     private AssetService assetService;
     @Autowired
-    private ConfigurationProvider configurationProvider;
-    @Autowired
     private PaymentService paymentService;
-    @Autowired
-    private PortalService portalService;
-    @Autowired
-    private UserPrivilegeMgr userPrivilegeMgr;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -1210,4 +1205,57 @@ public class AssetController extends ControllerBase {
 //        restResponse.setErrorDescription("OK");
 //        return restResponse;
 //    }
+
+    /**
+     * <b>URL: /asset/batchImportBills</b>
+     * <p>批量导入账单</p>
+     */
+    @RequestMapping("batchImportBills")
+    @RestReturn(value = BatchImportBillsResponse.class)
+    public RestResponse batchImportBills(MultipartFile attachment,BatchImportBillsCommand cmd){
+        BatchImportBillsResponse  res = assetService.batchImportBills(cmd, attachment);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/exportBillTemplates</b>
+     * <p>导出账单的模板</p>
+     */
+    @RequestMapping("exportBillTemplates")
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response){
+        assetService.exportBillTemplates(cmd, response);
+    }
+
+    //
+    /**
+     * <b>URL: /asset/listBillRelatedTransac</b>
+     * <p>列出账单所属的交易明细</p>
+     */
+    @RequestMapping("listBillRelatedTransac")
+    public RestResponse listBillRelatedTransac(listBillRelatedTransacCommand cmd){
+        ListPaymentBillResp listPaymentBillResp = assetService.listBillRelatedTransac(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/reCalBill</b>
+     * <p>重新计算账单，不改变状态</p>
+     */
+    @RequestMapping("reCalBill")
+    public RestResponse reCalBill(ReCalBillCommand cmd){
+        assetService.reCalBill(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+
 }
+

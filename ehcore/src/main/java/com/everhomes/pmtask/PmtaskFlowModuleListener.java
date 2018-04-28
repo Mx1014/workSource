@@ -102,13 +102,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		FlowCase flowCase = ctx.getFlowCase();
-		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		task.setStatus(FlowCaseStatus.PROCESS.getCode());
-		pmTaskProvider.updateTask(task);
-		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override
@@ -505,7 +498,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setStatus(FlowCaseStatus.FINISHED.getCode());
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}

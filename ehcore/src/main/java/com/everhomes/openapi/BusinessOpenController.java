@@ -1,6 +1,12 @@
+
 package com.everhomes.openapi;
 
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetVendor;
+import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.aclink.DoorAuth;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -61,18 +67,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestDoc(value = "Business open Constroller", site = "core")
 @RestController
@@ -103,6 +114,34 @@ public class BusinessOpenController extends ControllerBase {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private AssetProvider assetProvider;
+
+	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
+        if(null == namespaceId) {
+            LOGGER.error("checkAssetVendor namespaceId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor namespaceId cannot be null.");
+        }
+        AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
+        return assetVendor;
+    }
+
+	private BusinessOpenVendorHandler getBusinessOpenVendorHandler(String vendorName) {
+		BusinessOpenVendorHandler handler = null;
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = BusinessOpenVendorHandler.BUSINESSOPEN_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+        return handler;
+    }
 
     /**
      * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -298,6 +337,32 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+	/**
+	 * <b>URL: /openapi/sendMessageToCustomUser</b>
+	 * <p>提供给深圳湾的定制接口</p>
+	 */
+	@RequestMapping("sendMessageToCustomUser")
+	@RestReturn(value=String.class)
+	public RestResponse sendMessageToCustomUser(BusinessMessageCustomCommand cmd) {
+		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
+
+		AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(),0);
+		String vendorName = assetVendor.getVendorName();
+        BusinessOpenVendorHandler handler = getBusinessOpenVendorHandler(vendorName);
+        List<Long> userIdList = handler.getUserId(cmd.getCustomJson(), cmd.getNamespaceId());
+        for(int i = 0;i <userIdList.size();i++) {
+        	Long userId = userIdList.get(i);
+        	sendMessageToUser(userId, cmd.getContent(), cmd.getMeta());
+        }
+
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
     /**
      * <b>URL: /openapi/getUserServiceAddress</b>
@@ -871,7 +936,8 @@ public class BusinessOpenController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-    
+
+
     @RequestMapping("abdir")
     @RequireAuthentication(false)
     public Object anbangRedirect(AnBangTokenCommand cmd, HttpServletRequest request, HttpServletResponse response) {
@@ -882,7 +948,7 @@ public class BusinessOpenController extends ControllerBase {
                 String location = cmd.getRedirect();
                 LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
                 String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
-                
+
                 Map<String, String[]> paramMap = request.getParameterMap();
                 List<String> params = new ArrayList<String>();
                 for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
@@ -890,24 +956,24 @@ public class BusinessOpenController extends ControllerBase {
                         params.add(entry.getKey() + "=" + StringUtils.join(entry.getValue(), ','));
                         }
                     }
-                
+
                 location = this.userService.makeAnbangRedirectUrl(login.getUserId(), location, paramMap);
-                
+
                 setCookieInResponse("token", tokenString, request, response);
                 httpHeaders.setLocation(new URI(location));
-             
-                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);                
+
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
             }
 
         } catch (URISyntaxException e) {
         }
-        
+
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
         restResponse.setErrorDescription("invalid abtoken or redirect");
         return restResponse;
     }
-    
+
     /**
      * <b>URL: /openapi/listAnbangRelatedScenes</b>
      * <p>根据用户域空间场景获取用户相关的地址列表</p>
@@ -952,5 +1018,31 @@ public class BusinessOpenController extends ControllerBase {
         if (matchedCookies.size() > 0)
             return matchedCookies.get(matchedCookies.size() - 1);
         return null;
+    }
+
+
+    /**
+     * <b>URL: /openapi/redirect</b>
+     * <p>统一跳转到传入的redirectUrl，并在后面加上指定的参数</p>
+     */
+    @RequestMapping(value = "redirect", method = RequestMethod.GET)
+    public Object redirect(RedirectCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        String errorDesc = "";
+
+        OpenApiRedirectHandler handler = PlatformContext.getComponent(OpenApiRedirectHandler.PREFIX + cmd.getHandler());
+        if (handler != null) {
+            try {
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setLocation(new URI(handler.build(cmd.getUrl(), request.getParameterMap())));
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            } catch (URISyntaxException e) {
+                errorDesc = "Invalid handler build " + e.getMessage();
+            }
+        } else {
+            errorDesc = "Can not find handler by " + cmd.getHandler();
+        }
+        RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
+        restResponse.setErrorDescription(errorDesc);
+        return restResponse;
     }
 }

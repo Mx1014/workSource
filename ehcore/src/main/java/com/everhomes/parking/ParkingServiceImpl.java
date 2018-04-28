@@ -38,6 +38,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -88,7 +89,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
-
+	@Autowired
+	private List<ParkingVendorHandler> allListeners;
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -313,6 +315,18 @@ public class ParkingServiceImpl implements ParkingService {
 			checkRequestCondition(cmd, flowId);
 		}
 		ParkingCardRequest parkingCardRequest = buildParkingCardRequest(cmd, Integer.valueOf(requestFlowType));
+		ListCardTypeResponse listCardTypeResponse = handler.listCardType(ConvertHelper.convert(cmd,ListCardTypeCommand.class));
+		if(listCardTypeResponse!=null&&listCardTypeResponse.getCardTypes()!=null){
+			for (ParkingCardType parkingCardType : listCardTypeResponse.getCardTypes()) {
+				if(parkingCardType!=null
+						&&parkingCardRequest!=null
+						&&parkingCardRequest.getCardTypeId()!=null
+						&&parkingCardRequest.getCardTypeId().equals(parkingCardType.getTypeId())){
+					parkingCardRequest.setCardTypeName(parkingCardType.getTypeName());
+					break;
+				}
+			}
+		}
 
 		dbProvider.execute((TransactionStatus status) -> {
 
@@ -900,10 +914,12 @@ public class ParkingServiceImpl implements ParkingService {
 			response.setRequests(list.stream().map(r -> {
 				ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
 
-				ParkingCardType cardType =getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
-						cmd.getParkingLotId(), r.getCardTypeId());
-				if (null != cardType) {
-					dto.setCardTypeName(cardType.getTypeName());
+				if(dto.getCardTypeName()==null) {
+					ParkingCardType cardType = getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
+							cmd.getParkingLotId(), r.getCardTypeId());
+					if (null != cardType && cardType.getTypeName() != null) {
+						dto.setCardTypeName(cardType.getTypeName());
+					}
 				}
 				return dto;
 			}).collect(Collectors.toList()));
@@ -1333,7 +1349,8 @@ public class ParkingServiceImpl implements ParkingService {
 		style.setFont(font);
 
 		Sheet sheet = wb.createSheet("parkingRechargeOrders");
-		sheet.setDefaultColumnWidth(20);
+//		sheet.autoSizeColumn(1);
+//		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("订单号");
@@ -1341,17 +1358,29 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(2).setCellValue("用户名");
 		row.createCell(3).setCellValue("手机号");
 		row.createCell(4).setCellValue("缴费时间");
-		row.createCell(5).setCellValue("缴费月数");
-		row.createCell(6).setCellValue("金额");
-		row.createCell(7).setCellValue("支付方式");
-		row.createCell(8).setCellValue("缴费类型");
+		row.createCell(5).setCellValue("月卡充值起始时间");
+		row.createCell(6).setCellValue("月卡充值结束时间");
+		row.createCell(7).setCellValue("缴费月数");
+		row.createCell(8).setCellValue("临时车进场时间");
+		row.createCell(9).setCellValue("临时车出场时间");
+		row.createCell(10).setCellValue("临时车停车时长(分钟)");
+		row.createCell(11).setCellValue("金额");
+		row.createCell(12).setCellValue("支付方式");
+		row.createCell(13).setCellValue("缴费类型");
+
 
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+		List valueLengths = null;
 		if(handler != null){
 			handler.setCellValues(list,sheet);
+		}
+
+		for (int i = 0; i < 14; i++) {
+			String stringCellValue = sheet.getRow(0).getCell(i).getStringCellValue();
+			sheet.setColumnWidth(i,stringCellValue.length() * 700);
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -2098,7 +2127,10 @@ public class ParkingServiceImpl implements ParkingService {
 			String vendorName = parkingLot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-			ListCardTypeResponse listCardTypeResponse = handler.listCardType(null);
+			ListCardTypeCommand cardTypeCmd = new ListCardTypeCommand(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getParkingLotId());
+			ListCardTypeResponse listCardTypeResponse = handler.listCardType(cardTypeCmd);
+			
 			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
 			if(list==null || list.size()==0){
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,
@@ -2384,7 +2416,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
@@ -2392,7 +2424,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
@@ -2706,5 +2738,24 @@ public class ParkingServiceImpl implements ParkingService {
 	public void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
 		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
 				ParkingSpaceLockOperateType.DOWN);
+	}
+
+	@Override
+	public void refreshToken(RefreshTokenCommand cmd) {
+		if(cmd.getParkingLotId()==null){
+			for (ParkingVendorHandler listener : allListeners) {
+				try {
+					listener.refreshToken();
+				}catch (Exception e){
+					LOGGER.error("listener {}, exception = ", listener.getClass().getSimpleName(),e);
+				}
+			}
+		}else {
+			ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+			handler.refreshToken();
+		}
 	}
 }

@@ -110,9 +110,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			}
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
-			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
 
-			String params = flowNode.getParams();
+
 
 //			if(StringUtils.isBlank(params)) {
 //				LOGGER.error("Invalid flowNode param.");
@@ -122,8 +121,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 //			JSONObject paramJson = JSONObject.parseObject(params);
 //			String nodeType = paramJson.getString("nodeType");
-
-			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
+			task.setStatus(FlowCaseStatus.PROCESS.getCode());
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;

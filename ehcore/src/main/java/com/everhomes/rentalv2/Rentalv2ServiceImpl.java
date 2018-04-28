@@ -45,6 +45,7 @@ import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rentalv2.job.RentalCancelOrderJob;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rentalv2.order_action.CancelUnsuccessRentalOrderAction;
@@ -1664,6 +1665,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//设置当前场景公司id
 		rentalBill.setUserEnterpriseId(orgId);
 		rentalBill.setResourceName(rs.getResourceName());
+		rentalBill.setAddress(null);
 		rentalBill.setNamespaceId(rsType.getNamespaceId());
 		rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
@@ -2162,8 +2164,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
-		bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(bill.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(bill);//更新新的订单号
+		}
 		orderCmd.setOrderNo(bill.getOrderNo());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		orderCmd.setSubject(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
@@ -2181,12 +2186,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return dto;
 	}
 
-	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName) {
+	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName,Integer paymentType) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
-		order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-		rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		//续费 欠费订单重新生成订单号
+		if(order.getStatus()!=SiteBillStatus.PAYINGFINAL.getCode()) {
+			order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+			rentalv2Provider.updateRentalBill(order);//更新新的订单号
+		}
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
 		preOrderCommand.setAmount(amount);
@@ -2194,7 +2202,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-//        preOrderCommand.setExpiration(expiredTime);
+		//公众号支付
+		if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()){
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			paymentParamsDTO.setPayType("no_credit");
+			User user = UserContext.current().getUser();
+			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			//TODO: 临时给越空间解决公众号支付
+			String vspCusid = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"tempVspCusid","");
+			paymentParamsDTO.setVspCusid(vspCusid);
+			preOrderCommand.setPaymentParams(paymentParamsDTO);
+			preOrderCommand.setCommitFlag(1);
+		}
 
 		preOrderCommand.setClientAppName(clientAppName);
 
@@ -2215,7 +2235,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order has been canceled");
 		}
 
-		return buildPreOrderDTO(order, cmd.getClientAppName());
+		return buildPreOrderDTO(order, cmd.getClientAppName(),cmd.getPaymentType());
 	}
 
 	@Override
@@ -3258,6 +3278,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 生成某个资源的单元格
 	 * */
 	private void processCells(RentalResource rs, byte rentalType){
+		Long timeCost = System.currentTimeMillis();
 
 		GetResourceRuleAdminCommand getResourceRuleCmd = new GetResourceRuleAdminCommand();
 		getResourceRuleCmd.setResourceId(rs.getId());
@@ -3292,6 +3313,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for(AddRentalSiteSingleSimpleRule singleCmd: addSingleRules){
 			//在这里统一处理
 			addRentalSiteSingleSimpleRule(singleCmd);
+		}
+
+		if(LOGGER.isDebugEnabled()) {
+			timeCost = System.currentTimeMillis()- timeCost;
+			LOGGER.debug("Rentalv2 process cell resourceId = {} rentalType = {} time cost = {} ",rs.getId(),rentalType,timeCost);
 		}
 
 //		BigDecimal workdayPrice = priceRule.getWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getWorkdayPrice();
@@ -3827,21 +3853,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				Integer namespaceId = UserContext.getCurrentNamespaceId();
 //				preOrderCommand.setClientAppName("wechat_" + namespaceId);
 //			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			//TODO: 临时给越空间解决公众号支付
+			String vspCusid = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"tempVspCusid","");
+			paymentParamsDTO.setVspCusid(vspCusid);
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
 
-		}
 
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		}
+		PreOrderDTO callBack = null;
+		if (amount>0)
+		 callBack = payService.createPreOrder(preOrderCommand);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
 		response.setPreOrderDTO(callBack);
 		response.setFlowCaseUrl(flowCaseUrl);
+		response.setBillId(order.getId());
 
 		return response;
 	}
@@ -3928,6 +3960,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (compare == 0) {
 					// 总金额为0，直接预订成功状态
 					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+					//发短信
+					RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+					handler.sendRentalSuccessSms(bill);
 				}else{
 					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 					orderCancelFlag[0] = true;
@@ -3997,10 +4032,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private void createOrderOverTimeTask(RentalOrder bill) {
 		// n分钟后，取消未成功的订单
-		final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(), String.valueOf(bill.getId()));
-
-		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-				bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME);
+//		final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(), String.valueOf(bill.getId()));
+//
+//		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//				bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME);
+		Map<String, Object> messageMap = new HashMap<>();
+		messageMap.put("orderId",bill.getId());
+		scheduleProvider.scheduleSimpleJob(
+				queueName+bill.getId(),
+				"cancelBill"+bill.getId(),
+				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				RentalCancelOrderJob.class,
+				messageMap
+		);
 	}
 
 	private void createOrderItems(List<SiteItemDTO> rentalItems, RentalOrder bill) {
@@ -4312,6 +4356,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.getRentalBills().add(dto);
 		}
  
+		return response;
+	}
+
+	@Override
+	public ListRentalBillsCommandResponse listRentalBillsByOrdId(ListRentalBillsByOrdIdCommand cmd) {
+		if(cmd.getOrganizationId()==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organizationId not found.");
+		}
+		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		Integer pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<RentalOrder> bills = rentalv2Provider.listRentalBillsByUserOrgId(cmd.getOrganizationId(),locator,pageSize+1);
+		if (bills == null) {
+			return response;
+		}
+		if(bills.size() > pageSize) {
+			bills.remove(bills.size() - 1);
+			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
+		}
+		response.setRentalBills(new ArrayList<>());
+		for (RentalOrder bill : bills) {
+			RentalBillDTO dto = processOrderDTO(bill);
+			response.getRentalBills().add(dto);
+		}
 		return response;
 	}
 
@@ -8053,7 +8126,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd) {
 		RentalOrder bill = actualRenewRentalOrder(cmd);
 
-		return buildPreOrderDTO(bill, cmd.getClientAppName());
+		return buildPreOrderDTO(bill, cmd.getClientAppName(),null);
 	}
 
 	private RentalOrder actualRenewRentalOrder(RenewRentalOrderCommand cmd) {

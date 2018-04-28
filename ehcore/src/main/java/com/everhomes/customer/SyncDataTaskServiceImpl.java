@@ -8,10 +8,7 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.common.SyncDataResultLog;
-import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
-import com.everhomes.rest.customer.SyncDataResult;
-import com.everhomes.rest.customer.SyncDataTaskStatus;
-import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -102,6 +99,15 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     }
 
     @Override
+    public String syncHasViewed(Long communityId, String syncType) {
+        Integer notViewedCount = syncDataTaskProvider.countNotViewedSyncResult(communityId, syncType);
+        if(notViewedCount == 0) {
+            return String.valueOf(SyncResultViewedFlag.VIEWED.getCode());
+        }
+        return String.valueOf(SyncResultViewedFlag.NOT_VIEWED.getCode());
+    }
+
+    @Override
     public ListCommunitySyncResultResponse listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor) {
         Community community = communityProvider.findCommunityById(communityId);
         if(community == null) {
@@ -114,6 +120,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             for (SyncDataTask task : tasks) {
                 SyncDataResult result = new SyncDataResult();
                 result.setStartTime(task.getCreateTime());
+                result.setEndTime(task.getUpdateTime());
                 result.setStatus(task.getStatus());
                 if(SyncDataTaskStatus.FINISH.equals(SyncDataTaskStatus.fromCode(task.getStatus()))
                         || SyncDataTaskStatus.EXCEPTION.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
@@ -123,13 +130,16 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     result.setRateOfProgress(calculateProgress(community, syncType));
                 }
 
-                if(task.getCreatorUid() == 0L) {
+                if(task.getCreatorUid() == null || task.getCreatorUid() == 0L) {
                     result.setManualFlag((byte)0);
                 } else {
                     result.setManualFlag((byte)1);
 
                 }
                 results.add(result);
+
+                task.setViewFlag(SyncResultViewedFlag.VIEWED.getCode());
+                syncDataTaskProvider.updateSyncDataTask(task, false);
             }
 
             if(tasks.size() > pageSize) {

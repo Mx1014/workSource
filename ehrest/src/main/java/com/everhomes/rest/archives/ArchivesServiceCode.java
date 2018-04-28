@@ -1,6 +1,6 @@
 package com.everhomes.rest.archives;
 
-public interface ArchivesServiceErrorCode {
+public interface ArchivesServiceCode {
 
     static final String SCOPE = "archives";
 
@@ -17,5 +17,11 @@ public interface ArchivesServiceErrorCode {
     int ERROR_WORK_EMAIL_WRONG_FORMAT = 100011;  //  邮箱格式错误
     int ERROR_CONTACT_SHORT_TOKEN_WRONG_FORMAT = 100012;  //  短号格式错误
     int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
+
+    String CONTACT_DELETE = "1001";  //  通讯录删除
+    String CONTACT_LIST = "1002";    //  通讯录成员列表
+    String EMPLOYEE_IMPORT_MODULE = "1003";  //  人员档案导入模板
+    String EMPLOYEE_LIST = "1004";   //  人员档案列表
+    String EMPLOYEE_IMPORT_REMARK = "1005";  //  人员档案导入备注
 
 }

@@ -20,6 +20,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -217,6 +218,20 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
+    /**
+     *
+     * @param source
+     * @param month
+     * @return
+     */
+    static Long getTimestampByAddRealMonth(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.MONTH,month);
+
+        return calendar.getTimeInMillis();
+    }
+
     //获取到月底的天数
     static int getDaysToEndOfMonth(Calendar calendar){
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-calendar.get(Calendar.DAY_OF_MONTH);
@@ -236,9 +251,22 @@ public class Utils {
         return ts;
     }
 
+    static Timestamp strToTimeStamp(String str, String style) {
+        return new Timestamp(strToLong(str,style));
+    }
+
     static String dateToStr(Date date, String style) {
         SimpleDateFormat sdf = new SimpleDateFormat(style);
         return sdf.format(date);
+    }
+
+    static Long subtractionTime(Long startTime, String endtimeStamp) {
+        Long enttime = strToLong(endtimeStamp, DateStyle.DATE_TIME);
+        return subtractionTime(startTime,enttime);
+    }
+
+    static Long subtractionTime(long startTime, long endtime) {
+        return (endtime-startTime)/(60*1000);
     }
 
     /**
@@ -251,6 +279,19 @@ public class Utils {
         //设置body json格式
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, param, headers);
+    }
+
+    /**
+     *
+     * @param url
+     * @param param urlencoded
+     * @return
+     */
+    public static String postUrlencoded(String url, Map<String,String> param) {
+        //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_FORM_URLENCODED);
         return post(url, param, headers);
     }
     
@@ -482,6 +523,47 @@ public class Utils {
         }
 
         LOGGER.info("Result from third, url={}, result={}", url, result);
+
+        return result;
+    }
+
+    public static String get(Map<String,Object> map,String url) {
+        String result = null;
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpclient = null;
+        StringBuffer urlparam=new StringBuffer(url).append("?");
+        ArrayList<NameValuePair> list = new ArrayList<NameValuePair>();
+        if(map!=null) {
+            Set set = map.entrySet();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                urlparam.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+            }
+        }
+        String geturl = urlparam.toString().substring(0,urlparam.length()-1);
+        LOGGER.info("The request info, geturl={}", geturl);
+        try {
+            httpclient = HttpClients.createDefault();
+            response = httpclient.execute(new HttpGet(geturl));
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
+
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+
+                if (null != entity) {
+                      result = EntityUtils.toString(entity);
+                }
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("The request error, geturl={}", geturl, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "The request error.");
+        } finally {
+            close(response, httpclient);
+        }
+        LOGGER.info("Result from third, geturl={}, result={}", geturl, result);
 
         return result;
     }

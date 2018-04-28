@@ -3,8 +3,10 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import org.apache.poi.ss.usermodel.Sheet;
 
 public interface ParkingVendorHandler {
@@ -121,4 +123,10 @@ public interface ParkingVendorHandler {
      * @param sheet
      */
     void setCellValues(List<ParkingRechargeOrder> list, Sheet sheet);
+
+    List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r);
+
+    String applyTempCard(ParkingClearanceLog log);
+
+    void refreshToken();
 }

@@ -73,7 +73,7 @@ public interface GeneralApprovalService {
 
     void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
 
-    OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
+    OutputStream getGeneralApprovalExportStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 

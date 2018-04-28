@@ -547,7 +547,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine t3 = Tables.EH_PAYMENT_LATE_FINE.as("t3");
         //先算第一个offset
         int firstOffset = (pageNum - 1) * pageSize;
-        String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
+        String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID, t.BUILDING_NAME, t.APARTMENT_NAME)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
@@ -565,8 +565,26 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillStatus(r.getValue(t.STATUS));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
-                    dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
-                    dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                    String addrBuildingName = r.getValue(t2.BUILDING_NAME);
+                    String addrAartName = r.getValue(t2.APARTMENT_NAME);
+                    if(addrBuildingName!=null || addrAartName!=null){
+                        dto.setApartmentName(addrAartName);
+                        dto.setBuildingName(addrBuildingName);
+                    }else{
+                        // 使用t.APARTMENT_NAME仍然识别不了
+                        if(r.getValue(11)!=null){
+                            try{
+                                dto.setApartmentName(r.getValue(11).toString());
+                            }catch (Exception e){
+                            }
+                        }
+                        if(r.getValue(10)!=null){
+                            try{
+                                dto.setBuildingName(r.getValue(10).toString());
+                            }catch (Exception e){
+                            }
+                        }
+                    }
                     dtos.add(dto);
                     });
         List<BillDTO> fines = new ArrayList<>();
@@ -862,6 +880,13 @@ public class AssetProviderImpl implements AssetProvider {
 
         response.setBillGroupId(billGroupId);
         response.setBillItemDTOList(list);
+        List<String> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+        if(fetch.size() > 0){
+            response.setBillGroupName(fetch.get(0));
+        }
         return response;
     }
 
@@ -909,16 +934,37 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId) {
+    public ListBillsDTO creatPropertyBill( CreateBillCommand cmd) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-
+            //获取所需要的cmd的数据
+            BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
+            String dateStr = cmd.getDateStr();
+            Byte isSettled = cmd.getIsSettled();
+            String noticeTel = cmd.getNoticeTel();
+            Long ownerId = cmd.getOwnerId();
+            String ownerType = cmd.getOwnerType();
+            String targetName = cmd.getTargetName();
+            Long targetId = cmd.getTargetId();
+            String targetType = cmd.getTargetType();
+            String contractNum = cmd.getContractNum();
+            Long contractId = cmd.getContractId();
+            String dateStrBegin = cmd.getDateStrBegin();
+            String dateStrEnd = cmd.getDateStrEnd();
+            Byte isOwed = cmd.getIsOwed();
+            String customerTel = cmd.getCustomerTel();
             //普通信息卸载
-
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            String apartmentName = null;
+            String buildingName = null;
+            if(list1!=null && list1.size() > 0){
+                BillItemDTO itemDTO = list1.get(0);
+                apartmentName= itemDTO.getApartmentName();
+                buildingName = itemDTO.getBuildingName();
+            }
             //需要billGroup查看生成账单周期
             PaymentBillGroup group = getBillGroupById(billGroupId);
             //根据billGroup获得时间，如需重复使用，则请抽象出来
@@ -931,8 +977,13 @@ public class AssetProviderImpl implements AssetProvider {
             Integer billsDay = group.getBillsDay();
             Calendar start = Calendar.getInstance();
             try{
-                start.setTime(yyyyMM.parse(dateStr));
-                start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                // 如果传递了计费开始时间
+                if(dateStrBegin != null){
+                    start.setTime(yyyyMMdd.parse(dateStrBegin));
+                }else{
+                    start.setTime(yyyyMM.parse(dateStr));
+                    start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                }
                 dates.add(yyyyMMdd.format(start.getTime()));
                 int cycle = 0;
                 switch(balanceDateType){
@@ -952,7 +1003,12 @@ public class AssetProviderImpl implements AssetProvider {
                     start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }
                 start.add(Calendar.DAY_OF_MONTH,-1);
-                dates.add(yyyyMMdd.format(start.getTime()));
+                // 如果计费结束时间不是null，那么就应该设置为给定的
+                if(dateStrEnd != null){
+                    dates.add(dateStrEnd);
+                }else{
+                    dates.add(yyyyMMdd.format(start.getTime()));
+                }
                 start.add(Calendar.MONTH,1);
                 start.set(Calendar.DAY_OF_MONTH,billsDay);
                 dates.add(yyyyMMdd.format(start.getTime()));
@@ -1015,10 +1071,10 @@ public class AssetProviderImpl implements AssetProvider {
 
                     exemptionItems.add(exemptionItem);
 
-                    if(amount.compareTo(zero)==-1){
+                    if(amount.compareTo(zero)==-1 || (exemptionItemDTO.getIsPlus() != null && exemptionItemDTO.getIsPlus().byteValue() == (byte)0)){
                         amount = amount.multiply(new BigDecimal("-1"));
                         amountExemption = amountExemption.add(amount);
-                    }else if(amount.compareTo(zero)==1){
+                    }else if(amount.compareTo(zero)==1 || (exemptionItemDTO.getIsPlus() != null && exemptionItemDTO.getIsPlus().byteValue() == (byte)1)){
                         amountSupplement = amountSupplement.add(amount);
                     }
                 }
@@ -1119,11 +1175,12 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setDateStrEnd(dates.get(1));
             newBill.setDateStrDue(dates.get(2));
             newBill.setDueDayDeadline(dates.get(3));
+            //新增时只填了一个楼栋门牌，所以也可以放到bill里去 by wentian 2018/4/24
+            newBill.setBuildingName(buildingName);
+            newBill.setApartmentName(apartmentName);
 
-
-
-
-
+            //添加客户的手机号，用来之后定位用户 by wentian.V.Brytania 2018/4/13
+            newBill.setCustomerTel(customerTel);
 
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -1138,6 +1195,11 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
 
+            if(isOwed == null){
+                newBill.setChargeStatus((byte)0);
+            }else{
+                newBill.setChargeStatus(isOwed);
+            }
             newBill.setSwitch(isSettled);
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
@@ -2049,6 +2111,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVABLE.sub(amountReceivable))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVED.sub(amountReceived))
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amountOwed))
+                .where(t.ID.eq(billId))
                 .execute();
     }
 
@@ -2076,14 +2139,17 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
                 .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amount))
+                .where(t.ID.eq(billId))
                 .execute();
         if(amount.compareTo(new BigDecimal("0"))<0){
             context.update(t)
                     .set(t.AMOUNT_EXEMPTION,t.AMOUNT_EXEMPTION.add(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }else{
             context.update(t)
                     .set(t.AMOUNT_SUPPLEMENT,t.AMOUNT_SUPPLEMENT.sub(amount))
+                    .where(t.ID.eq(billId))
                     .execute();
         }
     }
@@ -2247,6 +2313,47 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
+    public List<AssetPaymentOrder> findAssetOrderByBillId(String billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        return context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.eq(billId))
+                .fetchInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public PaymentBills findPaymentBillById(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list =  context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchInto(PaymentBills.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+
+    }
+
+    @Override
+    public List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_PAYMENT_BILLS.ID);
+        query.addFrom(Tables.EH_PAYMENT_BILLS);
+        query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+        if(ownerType!=null){
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId));
+        }
+        return query.fetch(Tables.EH_PAYMENT_BILLS.ID);
+    }
+
+    @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
         long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
@@ -2358,12 +2465,12 @@ public class AssetProviderImpl implements AssetProvider {
         //更改金钱
         context.update(t)
                 .set(t.AMOUNT_OWED,new BigDecimal("0"))
-                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE)
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
                 .where(t.ID.in(billIds))
                 .execute();
         context.update(t1)
                 .set(t1.AMOUNT_OWED,new BigDecimal("0"))
-                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_RECEIVABLE)
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
 
@@ -3778,8 +3885,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r ->{
-                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                    BigDecimal value = r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT);
+                    if(value != null){
+                        amountOwed[0] = amountOwed[0].add(value);
+                    }
                 });
+        //更改金额，但不更改状态
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED, amountOwed[0])
@@ -3904,6 +4015,58 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return status;
         });
+    }
+
+    @Override
+    public PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName) {
+        DSLContext context = getReadOnlyContext();
+        List<Long> chargingItemIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+        List<Long> chosenId = context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME.eq(projectLevelName))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.in(chargingItemIds))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID);
+        if(chosenId.size() != 1){
+            return null;
+        }
+        return context.selectFrom(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chosenId.get(0)))
+                .fetchOneInto(PaymentChargingItem.class);
+    }
+
+    @Override
+    public String findBillGroupNameById(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+    }
+
+    @Override
+    public void linkIndividualUserToBill(Long ownerUid, String token) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
+                .where(Tables.EH_PAYMENT_BILLS.CUSTOMER_TEL.eq(token))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.USER.getCode()))
+                .execute();
+    }
+
+    @Override
+    public void linkOrganizationToBill(Long ownerUid, String orgName) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
+                .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(orgName))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))
+                .execute();
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

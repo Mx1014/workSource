@@ -21,6 +21,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
@@ -169,6 +170,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
@@ -197,6 +199,8 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -404,6 +408,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -3678,6 +3685,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private boolean checkCurrentUserisAdmin(Long ownerId, Long userId) {
+		Boolean adminAssign = false;
 		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), userId);
 		if (null != resources && 0 != resources.size()) {
 			for (RoleAssignment resource : resources) {
@@ -3685,11 +3693,30 @@ public class EquipmentServiceImpl implements EquipmentService {
 						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
 						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
 						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-					return true;
+//					return true;
+					adminAssign = true;
 				}
 			}
 		}
-		return false;
+		Boolean isAdmin = checkAdmin(ownerId, null, UserContext.getCurrentNamespaceId());
+		return (adminAssign || isAdmin);
+	}
+
+	//用于替换旧的admin验证
+	private Boolean checkAdmin(Long ownerId, String ownerType,Integer namespaceId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+		checkModuleManageCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		checkModuleManageCommand.setOrganizationId(ownerId);
+		checkModuleManageCommand.setOwnerType(ownerType);
+		checkModuleManageCommand.setUserId(UserContext.currentUserId());
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+		}
+		return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
 	}
 
 
@@ -3845,7 +3872,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
 				if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+					//部门岗位
+					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+					departmentGroup.setGroupId(organization.getParentId());
+					departmentGroup.setPositionId(organization.getId());
+					groupDtos.add(departmentGroup);
 
+					//通用岗位
 					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if (LOGGER.isInfoEnabled()) {
 						LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
@@ -3853,22 +3886,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 					if (maps != null && maps.size() > 0) {
 						for (OrganizationJobPositionMap map : maps) {
-							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-							group.setPositionId(map.getJobPositionId());
-							groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
 							String[] path = organization.getPath().split("/");
 							Long organizationId = Long.valueOf(path[1]);
 							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
 							topGroup.setGroupId(organizationId);
 							topGroup.setPositionId(map.getJobPositionId());
 							groupDtos.add(topGroup);
-//							}
-
 						}
 
 					}
@@ -3878,6 +3901,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					group.setPositionId(0L);
 					groupDtos.add(group);
 				}
+
 			}
 		}
 
@@ -5029,15 +5053,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 						}
 					} else if (PmNotifyReceiverType.ORGANIZATION_MEMBER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
 						if (receiver.getReceiverIds() != null) {
-							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
-							if (members != null && members.size() > 0) {
-								List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
-								members.forEach(member -> {
-									ReceiverName receiverName = new ReceiverName();
-									receiverName.setId(member.getId());
-									receiverName.setName(member.getContactName());
-									receiverName.setContactToken(member.getContactToken());
-									dtoReceivers.add(receiverName);
+//							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+							if (receiver.getReceiverIds() != null && receiver.getReceiverIds().size() > 0) {
+								List<ReceiverName> dtoReceivers = new ArrayList<>();
+								receiver.getReceiverIds().forEach(uId -> {
+									List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(uId);
+									if (members != null && members.size() > 0) {
+										ReceiverName receiverName = new ReceiverName();
+										receiverName.setId(members.get(0).getId());
+										receiverName.setName(members.get(0).getContactName());
+										receiverName.setContactToken(members.get(0).getContactToken());
+										dtoReceivers.add(receiverName);
+									}
 								});
 								dto.setReceivers(dtoReceivers);
 							}
@@ -5062,7 +5089,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		String ownerType = null;
+		if (EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))) {
+			ownerType = EntityType.QUALITY_TASK.getCode();
+		} else {
+			ownerType = EntityType.EQUIPMENT_TASK.getCode();
+		}
+		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), ownerType, scopeType, scopeId);
 		if (configuration != null) {
 			configuration.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
 			pmNotifyProvider.updatePmNotifyConfigurations(configuration);
@@ -5077,7 +5110,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		String ownerType = null;
+		if (EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))) {
+			ownerType = EntityType.QUALITY_TASK.getCode();
+		} else {
+			ownerType = EntityType.EQUIPMENT_TASK.getCode();
+		}
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId);
 		if (configurations != null && configurations.size() > 0) {
 			List<PmNotifyParamDTO> params = configurations.stream()
 					.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
@@ -5088,7 +5127,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
-				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId);
 				if (namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
 					List<PmNotifyParamDTO> params = namespaceConfigurations.stream()
 							.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
@@ -5106,7 +5145,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (cmd.getParams() != null && cmd.getParams().size() > 0) {
 			for (PmNotifyParams params : cmd.getParams()) {
 				PmNotifyConfigurations configuration = ConvertHelper.convert(params, PmNotifyConfigurations.class);
-				configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				if(EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))){
+					configuration.setOwnerType(EntityType.QUALITY_TASK.getCode());
+				}else {
+					configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				}
 				if (params.getCommunityId() != null && params.getCommunityId() != 0L) {
 					configuration.setScopeId(params.getCommunityId());
 					configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
@@ -5517,21 +5560,30 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
 
 				if (group != null) {
 					dto.setGroupName(group.getName());
 				}
-				if (position != null) {
-					if (dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				if (r.getPositionId() != null && r.getPositionId() != 0) {
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+					if (position != null) {
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+						} else {
+							dto.setGroupName(position.getName());
+						}
 					} else {
-						dto.setGroupName(position.getName());
+						Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+						String positionName = null;
+						if (organization != null) {
+							positionName = organization.getName();
+						}
+						if (dto.getGroupName() != null) {
+							dto.setGroupName(dto.getGroupName() + "-" + positionName);
+						} else {
+							dto.setGroupName(positionName);
+						}
 					}
-				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
-					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					position = new OrganizationJobPosition();
-					position.setName(organization.getName());
 				}
 				return dto;
 			}).collect(Collectors.toList());
@@ -5552,6 +5604,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
 					} else {
 						dto.setGroupName(position.getName());
+					}
+				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
+					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+					String positionName = null;
+					if (organization != null) {
+						positionName = organization.getName();
+					}
+					if (dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + positionName);
+					} else {
+						dto.setGroupName(positionName);
 					}
 				}
 				return dto;
@@ -6445,7 +6508,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private void setNewEquipmentRepairLogsBookRow(Sheet sheet, EquipmentInspectionTasksLogs dto) {
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getMaintanceType());
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(dto.getEquipmentId());

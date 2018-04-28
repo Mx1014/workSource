@@ -1,3 +1,4 @@
+
 package com.everhomes.asset;
 
 import com.everhomes.address.Address;
@@ -13,6 +14,7 @@ import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PayService;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
@@ -31,6 +33,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -69,7 +73,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     private AddressProvider addressProvider;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private AssetService assetService;
@@ -85,6 +89,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private PayService payService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -417,6 +424,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 //        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
         List<ContractDTO> dtos = listCustomerContracts(cmd.getTargetType(),cmd.getTargetId(),UserContext.getCurrentNamespaceId(),cmd.getCommunityId());
+        if(dtos == null) dtos = new ArrayList<>();
         for(int i = 0; i < dtos.size(); i++){
             FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
             dto.setContractNum(dtos.get(i).getContractNumber());
@@ -443,6 +451,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             res.setAddressNames(areaAndAddressByContract.getAddressNames());
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
             res.setCustomerName(contractDTO.getCustomerName());
+        }else{
+            String targeType = cmd.getTargetType();
+            if(targeType.equals(AssetPaymentConstants.EH_USER)){
+                res.setCustomerName(UserContext.current().getUser().getNickName());
+            }else if(targeType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
+                String organizationNameById = organizationProvider.getOrganizationNameById(cmd.getTargetId());
+                res.setCustomerName(organizationNameById);
+            }
         }
         return res;
     }
@@ -527,16 +543,16 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-        if(!cmd.getOwnerType().equals("community")){
-            throw new RuntimeException("保存账单不在一个园区");
-        }
+//        if(!cmd.getOwnerType().equals("community")){
+//            throw new RuntimeException("保存账单不在一个园区");
+//        }
 //        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
 //        if(targetDto!=null){
 //            cmd.setContractId(targetDto.getContractId());
 //            cmd.setTargetId(targetDto.getTargetId());
 //        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId());
+        return assetProvider.creatPropertyBill(cmd);
     }
 
     @Override
@@ -679,9 +695,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
-//        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setAmount(amountsInCents);
         cmd2pay.setCommunityId(cmd.getCommunityId());
-        cmd2pay.setAmount(1l);
+//        cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(cmd.getNamespaceId());
@@ -848,9 +864,116 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
     }
 
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
+        List<String> headList = new ArrayList<>();
+        List<Integer> mandatoryIndex = new ArrayList<>();
+        Integer cur = -1;
+        headList.add("账期");
+        cur++;
+        mandatoryIndex.add(1);
+        headList.add("账单开始时间");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("账单结束时间");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("客户属性");
+        cur++;
+        mandatoryIndex.add(1);
+        headList.add("客户名称");
+        cur++;
+        mandatoryIndex.add(1);
+        headList.add("合同编号");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("客户手机号(个人客户必填)");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("催缴手机号");
+        cur++;
+        mandatoryIndex.add(1);
+        //可变标题 , 需要后期excel加字段？ not likely    在数据库中能获得这些字段的展示名称吗？ not likely   写死中文？ 导出功能较多时，考虑建立导出设置表统一管理
+        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
+        for(BillItemDTO dto : billItemDTOList){
+            headList.add(dto.getBillItemName()+"(元)");
+            cur++;
+            mandatoryIndex.add(1);
+        }
+        headList.add("楼栋");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("门牌");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("减免金额(元)");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("减免备注");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("增收金额(元)");
+        cur++;
+        mandatoryIndex.add(0);
+        headList.add("增收备注");
+        cur++;
+        mandatoryIndex.add(0);
+        String[] headers = headList.toArray(new String[headList.size()]);
+        String fileName = webPage.getBillGroupName();
+        if(fileName == null) fileName = "";
+        new ExcelUtils(response,"账单导入模板"+fileName+System.currentTimeMillis(),fileName+"模板")
+                    .setNeedMandatoryTitle(true)
+                    .setMandatoryTitle(mandatoryIndex)
+                    .setNeedTitleRemark(true)
+                    .setTitleRemarkColorIndex(HSSFColor.YELLOW.index)
+                    .setHeaderColorIndex(HSSFColor.YELLOW.index)
+                    .setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+                "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+                "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                "4、带有星号（*）的红色字段为必填项。\n" +
+                "5、账单、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
+                "6、企业客户需填写与系统内客户管理一致的准企业名称，个人客户需填写与系统内个人客户资料一致的手机号，否则会导致无法定位客户。\n" +
+                "7、客户属性为个人客户时，手机号为唯一身份识别标识，客户手机号必填。\n" +
+                "8、账期，计费开始和结束时间的格式只能为 2018-01,2018-01-12,2018/01,2018/01/12", (short)13, (short)2500)
+                .setNeedSequenceColumn(false)
+                .setIsCellStylePureString(true)
+                .writeExcel(null, headers, true, null, null);
+    }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        Long billId = cmd.getBillId();
+        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
+        PaymentBills bill = assetProvider.findPaymentBillById(billId);
+        if(bill == null || assetOrders.size() < 1){
+            return new ListPaymentBillResp();
+        }
+        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
+        paycmd.setNamespaceId(bill.getNamespaceId());
+        paycmd.setOrderType("wuyecode");
+        paycmd.setPageAnchor(cmd.getPageAnchor());
+        paycmd.setPageSize(cmd.getPageSize());
+        if(cmd.getCommunityId() == null){
+            paycmd.setCommunityId(bill.getOwnerId());
+        }else{
+            paycmd.setCommunityId(cmd.getCommunityId());
+        }
+        paycmd.setUserType(cmd.getUserType());
+        paycmd.setUserId(cmd.getUserId());
+        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
+        try {
+            return paymentService.listPaymentBill(paycmd);
+        } catch (Exception e) {
+            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
+            return new ListPaymentBillResp();
+        }
+    }
+
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType,Long organizationId) {
         return assetProvider.getBillDetailForClient(Long.parseLong(billId));
     }
 
@@ -935,3 +1058,4 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return contractService.listCustomerContracts(cmd);
     }
 }
+
