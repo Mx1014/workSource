@@ -22,3 +22,8 @@ CREATE TABLE `eh_message_records` (
   `index_id` bigint(20),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- #issue-26471 服务热线V1.5（客服聊天记录保存和导出）  add by 黄明波  2018/04/28
+ALTER TABLE `eh_service_hotlines` ADD COLUMN `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0-deleted 1-active';

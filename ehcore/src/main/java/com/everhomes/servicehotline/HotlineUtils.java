@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import com.everhomes.community.Community;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.servicehotline.HotlineErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 
 public class HotlineUtils {
@@ -26,7 +27,7 @@ public class HotlineUtils {
 	 * @param keyword
 	 * @return
 	 */
-	public static boolean isPhoneNumber(String inputStr) {
+	static boolean isPhoneNumber(String inputStr) {
 		if (null == inputStr || inputStr.length() != PHONE_NUMBER_LENGTH) {
 			return false;
 		}
