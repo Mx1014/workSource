@@ -2083,9 +2083,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setDtos(lists.stream().map((r)->{
 			RequestInfoDTO requestInfo = ConvertHelper.convert(r, RequestInfoDTO.class);
-			if (requestInfo != null && r.getCreateTime() != null)
-			requestInfo.setCreateTime(r.getCreateTime().toLocalDateTime().format(dateSF));
-			requestInfo.setAppId(getAppIdByCategory(r.getType(),categoryAppIdMap));
+			if (requestInfo != null && r.getCreateTime() != null) {
+				requestInfo.setCreateTime(r.getCreateTime().toLocalDateTime().format(dateSF));
+				requestInfo.setAppId(getAppIdByCategory(r.getType(), categoryAppIdMap));
+			}
 			return requestInfo;
 		}).collect(Collectors.toList()));
 		return response;
