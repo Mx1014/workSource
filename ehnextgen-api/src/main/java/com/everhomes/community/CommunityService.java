@@ -151,4 +151,6 @@ public interface CommunityService {
     ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd);
 
 	CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd);
+
+    void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd);
 }

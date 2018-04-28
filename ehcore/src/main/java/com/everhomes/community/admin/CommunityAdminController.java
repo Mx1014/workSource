@@ -118,6 +118,25 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/community/updateCommunityPartial</b>
+     * <p>更新小区部分信息，传了那个字段更新那个字段</p>
+     */
+    @RequestMapping("updateCommunityPartial")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityPartial(@Valid UpdateCommunityPartialAdminCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        this.communityService.updateCommunityPartial(cmd);
+
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/community/getCommunityById</b>

@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *     <li>latitude: 纬度</li>
  *     <li>communityNumber: 编号</li>
  *     <li>pmOrgId: 管理公司id</li>
+ *     <li>status: 参考{@link com.everhomes.rest.address.CommunityAdminStatus}</li>
  * </ul>
  */
 public class CreateCommunityCommand {
@@ -41,6 +42,7 @@ public class CreateCommunityCommand {
     private Double latitude;
     private String communityNumber;
     private Long pmOrgId;
+    private Byte status;
 
     public Long getProvinceId() {
         return provinceId;
@@ -168,6 +170,14 @@ public class CreateCommunityCommand {
 
     public void setPmOrgId(Long pmOrgId) {
         this.pmOrgId = pmOrgId;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

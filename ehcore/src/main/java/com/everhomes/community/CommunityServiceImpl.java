@@ -2833,6 +2833,7 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationService.createOrganizationCommunity(cmd.getPmOrgId(), community.getId());
 			}
 
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -2872,7 +2873,13 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAptCount(0);
 		community.setDefaultForumId(1L);
 		community.setFeedbackForumId(2L);
-		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}else {
+			community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		}
+
 		communityProvider.createCommunity(userId, community);
 
 		return community;
@@ -4267,6 +4274,40 @@ public class CommunityServiceImpl implements CommunityService {
 		CreateCommunitiesResponse response = new CreateCommunitiesResponse();
 		response.setDtos(dtos);
 		return response;
+	}
+
+	@Override
+	public void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid communityId parameter");
+		}
+
+//		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid geoPointList parameter");
+//		}
+
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null){
+			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+
+		if(cmd.getName() != null){
+			community.setName(cmd.getName());
+		}
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}
+
+		community.setOperatorUid(userId);
+		communityProvider.updateCommunity(community);
+
 	}
 }
 
