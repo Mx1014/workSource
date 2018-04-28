@@ -4630,9 +4630,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         row.createCell(++i).setCellValue(dto.getMeterNumber());
         row.createCell(++i).setCellValue(dto.getMeterName());
         if(EnergyMeterType.ELECTRIC.equals(EnergyMeterType.fromCode(dto.getMeterType())))
-            row.createCell(++i).setCellValue("电表");
+            row.createCell(++i).setCellValue("自用电表");
         if(EnergyMeterType.WATER.equals(EnergyMeterType.fromCode(dto.getMeterType())))
-            row.createCell(++i).setCellValue("水表");
+            row.createCell(++i).setCellValue("自用水表");
+        if(EnergyMeterType.COMMON_WATER.equals(EnergyMeterType.fromCode(dto.getMeterType())))
+            row.createCell(++i).setCellValue("公摊水表");
+        if(EnergyMeterType.COMMON_ELECTRIC.equals(EnergyMeterType.fromCode(dto.getMeterType())))
+            row.createCell(++i).setCellValue("公摊电表");
 
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveStartTime()));
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveExpireTime()));
