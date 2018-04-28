@@ -22,6 +22,13 @@ public class BillGroupDTO {
     private List<ExemptionItemDTO> exemptionItemDTOList;
     private String billGroupName;
 
+    public BillGroupDTO(CreateBillCommand cmd) {
+        cmd.setBillGroupDTO(this);
+    }
+
+    public BillGroupDTO() {
+    }
+
     public List<BillItemDTO> getBillItemDTOList() {
         return billItemDTOList;
     }

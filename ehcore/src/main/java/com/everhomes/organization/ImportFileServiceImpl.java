@@ -11,6 +11,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.ExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
@@ -27,9 +28,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sfyan on 2017/4/21.
@@ -113,7 +112,14 @@ public class ImportFileServiceImpl implements ImportFileService{
         if(null != overrideTitleMap){
             titleMap = overrideTitleMap;
         }else if(null != result.getTitle()){
-            titleMap = (Map<String, String>) result.getTitle();
+            try{
+                titleMap = (Map<String, String>) result.getTitle();
+            }catch (Exception e){
+                ArrayList<String> titleList = (ArrayList<String>)result.getTitle();
+                for(int i = 0; i < titleList.size(); i++){
+                    titleMap.put(String.valueOf(i), titleList.get(i));
+                }
+            }
         }
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
@@ -157,7 +163,15 @@ public class ImportFileServiceImpl implements ImportFileService{
                     XSSFRow titleRow = sheet.createRow(rowNum ++);
                     titleRow.setRowStyle(titleStyle);
                     ImportFileResultLog log = logs.get(0);
-                    Map<String, String> data = (Map<String, String>) log.getData();
+                    Map<String, String> data = new LinkedHashMap<>();
+                    try{
+                        data = (Map<String, String>) log.getData();
+                    }catch (Exception e){
+                        ArrayList<String> logList = (ArrayList<String>)log.getData();
+                        for(int i = 0; i < logList.size(); i++){
+                            data.put(String.valueOf(i), logList.get(i));
+                        }
+                    }
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
                             titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
@@ -173,7 +187,15 @@ public class ImportFileServiceImpl implements ImportFileService{
 
                 for (ImportFileResultLog log: logs) {
                     cellNum = 0;
-                    Map<String, String> data = (Map<String, String>) log.getData();
+                    Map<String,String> data = new LinkedHashMap<>();
+                    try{
+                        data = (Map<String, String>) log.getData();
+                    }catch (Exception e){
+                        ArrayList<String> logList = (ArrayList<String>)log.getData();
+                        for(int i = 0; i < logList.size(); i++){
+                            data.put(String.valueOf(i), logList.get(i));
+                        }
+                    }
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     for (Map.Entry<String, String> entry : data.entrySet()) {

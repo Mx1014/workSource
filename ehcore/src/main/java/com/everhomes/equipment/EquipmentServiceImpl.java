@@ -3845,7 +3845,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
 				if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+					//部门岗位
+					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+					departmentGroup.setGroupId(organization.getParentId());
+					departmentGroup.setPositionId(organization.getId());
+					groupDtos.add(departmentGroup);
 
+					//通用岗位
 					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if (LOGGER.isInfoEnabled()) {
 						LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
@@ -3853,22 +3859,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 					if (maps != null && maps.size() > 0) {
 						for (OrganizationJobPositionMap map : maps) {
-							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-							group.setPositionId(map.getJobPositionId());
-							groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
 							String[] path = organization.getPath().split("/");
 							Long organizationId = Long.valueOf(path[1]);
 							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
 							topGroup.setGroupId(organizationId);
 							topGroup.setPositionId(map.getJobPositionId());
 							groupDtos.add(topGroup);
-//							}
-
 						}
 
 					}
@@ -3878,6 +3874,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					group.setPositionId(0L);
 					groupDtos.add(group);
 				}
+
 			}
 		}
 
@@ -5029,15 +5026,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 						}
 					} else if (PmNotifyReceiverType.ORGANIZATION_MEMBER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
 						if (receiver.getReceiverIds() != null) {
-							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
-							if (members != null && members.size() > 0) {
-								List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
-								members.forEach(member -> {
-									ReceiverName receiverName = new ReceiverName();
-									receiverName.setId(member.getId());
-									receiverName.setName(member.getContactName());
-									receiverName.setContactToken(member.getContactToken());
-									dtoReceivers.add(receiverName);
+//							List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+							if (receiver.getReceiverIds() != null && receiver.getReceiverIds().size() > 0) {
+								List<ReceiverName> dtoReceivers = new ArrayList<>();
+								receiver.getReceiverIds().forEach(uId -> {
+									List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(uId);
+									if (members != null) {
+										ReceiverName receiverName = new ReceiverName();
+										receiverName.setId(members.get(0).getId());
+										receiverName.setName(members.get(0).getContactName());
+										receiverName.setContactToken(members.get(0).getContactToken());
+										dtoReceivers.add(receiverName);
+									}
 								});
 								dto.setReceivers(dtoReceivers);
 							}
@@ -5530,8 +5530,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 					}
 				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
 					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
-					position = new OrganizationJobPosition();
-					position.setName(organization.getName());
+					String positionName = null;
+					if(organization!=null){
+						positionName = organization.getName();
+					}
+					if (dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + positionName);
+					} else {
+						dto.setGroupName(positionName);
+					}
 				}
 				return dto;
 			}).collect(Collectors.toList());
@@ -5552,6 +5559,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
 					} else {
 						dto.setGroupName(position.getName());
+					}
+				} else if (r.getPositionId() != null && r.getPositionId() != 0) {
+					Organization organization = organizationProvider.findOrganizationById(r.getPositionId());
+					String positionName = null;
+					if (organization != null) {
+						positionName = organization.getName();
+					}
+					if (dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + positionName);
+					} else {
+						dto.setGroupName(positionName);
 					}
 				}
 				return dto;
