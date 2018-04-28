@@ -1,3 +1,5 @@
+-- #issue-26479 园区快讯V1.8（增加项目导航，支持游客模式）  add by 黄明波  2018/04/28
+
 -- #issue-26479增加园区快讯错误码
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10010', 'zh_CN', '未获取到公司');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10011', 'zh_CN', '未获取到项目');
@@ -12,7 +14,7 @@ UPDATE `eh_service_modules` SET `module_control_type`='community_control' WHERE 
 update eh_service_module_apps set  module_control_type='community_control' where module_id = 10800 and  module_control_type = 'unlimit_control';
 
 -- #issue-26479更新园区快讯WEB跳转地址
-update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sign_suffix',concat('&ns=',namespace_id,'#/newsList#sign_suffix')) where action_type = 13 and action_data like '%park-news-web%'
+update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sign_suffix',concat('&ns=',namespace_id,'#/newsList#sign_suffix')) where action_type = 13 and action_data like '%park-news-web%';
 
 -- 停车订单标签 by dengs,2018.04.27
 update eh_parking_lots SET order_tag=SUBSTR(CONCAT(id,'') FROM 3 FOR 5);
