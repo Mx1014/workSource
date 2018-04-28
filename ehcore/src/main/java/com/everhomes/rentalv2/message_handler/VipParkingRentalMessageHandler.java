@@ -58,12 +58,12 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         //给预约人推送订单取消成功消息
         rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), content,
                 rentalBill.getId(), rentalBill.getResourceType());
-        //当有退款时 才发退款的消息和短信
-        if (rentalBill.getStatus() == SiteBillStatus.REFUNDED.getCode()) {
-            String customJson = rentalBill.getCustomObject();
-            VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+        String customJson = rentalBill.getCustomObject();
+        VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
 
-            String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        //当有退款时 才发退款的消息
+        if (rentalBill.getStatus() == SiteBillStatus.REFUNDED.getCode()) {
             map = new HashMap<>();
             map.put("useDetail", useDetail);
             map.put("totalAmount", String.valueOf(rentalBill.getPayTotalMoney()));
@@ -74,24 +74,25 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
                     rentalBill.getId(), rentalBill.getResourceType());
 
-            //给车主发短信
-            String templateScope = SmsTemplateCode.SCOPE;
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
-            smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
-            smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
-            smsProvider.addToTupleList(variables, "useDetail", useDetail);
-
-            int templateId = SmsTemplateCode.RENTAL_USER_CANCEL_ORDER;
-
-            String templateLocale = RentalNotificationTemplateCode.locale;
-
-            try {
-                smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
-            }catch (RuntimeException e){
-                LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:"+useInfoDTO.getPlateOwnerPhone());
-            }
-
         }
+        //给车主发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
+        smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
+        smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
+        smsProvider.addToTupleList(variables, "useDetail", useDetail);
+
+        int templateId = SmsTemplateCode.RENTAL_USER_CANCEL_ORDER;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:"+useInfoDTO.getPlateOwnerPhone());
+        }
+
+
     }
 
     @Override
