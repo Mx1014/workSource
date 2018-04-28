@@ -79,7 +79,7 @@ import com.everhomes.util.StringHelper;
  */
 
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX+"ZZ")
-public class ZhuZongAssetVendor implements AssetVendorHandler{
+public class ZhuZongAssetVendor extends AssetVendorHandler{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuZongAssetVendor.class);
     
@@ -90,142 +90,7 @@ public class ZhuZongAssetVendor implements AssetVendorHandler{
 	@Autowired
     private RolePrivilegeService rolePrivilegeService;
 
-	@Override
-	public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId,
-			String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime,
-			Long endTime, Long pageAnchor, Integer pageSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId,
-			String targetType, Long templateVersion, Long organizationId, String dateStr, Long tenantId,
-			String tenantType, Long addressId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType,
-			String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId,
-			Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize,
-			String targetName, Byte status, String targetType, ListBillsResponse response) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet,
-			Integer pageSize, Long ownerId, ListBillItemsResponse response) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId,
-			Long billGroupId, Byte isOnlyOwedBill, String contractId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType,
-			String targetType, Long targetId, String dateStr, String contractId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void deleteBill(String l) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void deleteBillItem(BillItemIdCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void deletExemptionItem(ExemptionItemIdCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public ShowCreateBillDTO showCreateBill(Long billGroupId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public ListBillsDTO createBill(CreateBillCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void modifyBillStatus(BillIdCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void exportRentalExcelTemplate(HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void updateBillsToSettled(UpdateBillsToSettled cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 	
 	/**
 	 * 根据手机号返回房产

@@ -290,4 +290,5 @@ public interface Rentalv2Service {
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();
+
 }

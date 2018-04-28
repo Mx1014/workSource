@@ -1,19 +1,17 @@
 //@formatter:off
 package com.everhomes.assetPayment;
 
-import com.everhomes.asset.ZhangjianggaokeAssetVendor;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.rest.asset.ListBillsResponse;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by Wentian Wang on 2017/9/10.
  */
 
 public class GetStuffs extends CoreServerTestCase{
-    @Autowired
-    ZhangjianggaokeAssetVendor zhangjianggaokeAssetVendor;
+//    @Autowired
+//    ZzhangjianggaokeAssetVendor zhangjianggaokeAssetVendor;
     @Test
     public void fun(){
         ListBillsResponse response = new ListBillsResponse();

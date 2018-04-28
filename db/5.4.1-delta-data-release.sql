@@ -1,5 +1,3 @@
--- #issue-26479 园区快讯V1.8（增加项目导航，支持游客模式）  add by 黄明波  2018/04/28
-
 -- #issue-26479增加园区快讯错误码
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10010', 'zh_CN', '未获取到公司');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10011', 'zh_CN', '未获取到项目');
@@ -56,3 +54,8 @@ update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
 -- 一键推送的数据范围改成不限园区  add by xq.tian  2018/04/26
 --
 UPDATE eh_service_modules SET module_control_type = 'unlimit_control' WHERE name = '一键推送';
+
+-- 张江高科现在可以展示批量导入导出的按钮了 by wentian 2018/04/28
+delete from eh_service_module_exclude_functions where module_id = 20400 and function_id = 95 and namespace_id = 999971;
+
+UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您成功预约${useDetail}，请在该时间内前往指定车位（地址：${spaceAddress}），并点击以下链接使用：${orderDetailUrl} 谢谢。' WHERE `scope`='sms.default' and `code`=59;

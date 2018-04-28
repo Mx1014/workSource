@@ -468,7 +468,20 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,  String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType) {
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommand cmd) {
+        //卸货
+        String contractNum = cmd.getContractNum();
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        String targetName = cmd.getTargetName();
+        Byte status = cmd.getStatus();
+        String targetType = cmd.getTargetType();
+        //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -533,6 +546,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setOwnerType(r.getOwnerType());
             dto.setContractNum(r.getContractNum());
             dto.setContractId(String.valueOf(r.getContractId()));
+            // 增加发票编号
+            dto.setInvoiceNum(r.getInvoiceNumber());
             list.add(dto);
             return null;});
         return list;
@@ -954,6 +969,8 @@ public class AssetProviderImpl implements AssetProvider {
             String dateStrEnd = cmd.getDateStrEnd();
             Byte isOwed = cmd.getIsOwed();
             String customerTel = cmd.getCustomerTel();
+            String invoiceNum = cmd.getInvoiceNum();
+
             //普通信息卸载
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
@@ -1182,6 +1199,9 @@ public class AssetProviderImpl implements AssetProvider {
             //添加客户的手机号，用来之后定位用户 by wentian.V.Brytania 2018/4/13
             newBill.setCustomerTel(customerTel);
 
+            newBill.setInvoiceNumber(invoiceNum);
+
+
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
@@ -1230,7 +1250,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
+        , r.INVOICE_NUMBER)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1242,6 +1263,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setTargetName(f.getValue(r.TARGET_NAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
+                    vo.setInvoiceNum(f.getValue(r.INVOICE_NUMBER));
                     //bill can has multiple addresses, thus one single address may confuse user
 //                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
 //                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
@@ -1649,7 +1671,8 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName) {
+    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
+            ,String targetName, String invoiceNum) {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -1733,6 +1756,11 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t2.ID.notIn(includeExemptionIds))
                     .execute();
             reCalBillById(billId);
+            // 更新发票
+            context.update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
             return null;
         });
     }
@@ -3768,7 +3796,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId) {
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status) {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
@@ -3793,6 +3821,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(ownerType != null){
             query.addConditions(bill.OWNER_TYPE.eq(ownerType));
+        }
+        if(status != null){
+            query.addConditions(bill.STATUS.eq(status));
         }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
@@ -4073,6 +4104,27 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(orgName))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))
                 .execute();
+    }
+
+    @Override
+    public void modifySettledBill(Long billId, String invoiceNum) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        // 更新发票
+        dslContext.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .execute();
+    }
+
+    @Override
+    public boolean checkBillExistById(Long billId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> fetch = dslContext.select(Tables.EH_PAYMENT_BILLS.ID)
+                .from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetch(Tables.EH_PAYMENT_BILLS.ID);
+        if(fetch.size() > 0) return true;
+        return false;
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

@@ -73,6 +73,7 @@ import com.google.gson.Gson;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -112,6 +113,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -171,6 +175,9 @@ public class AssetServiceImpl implements AssetService {
     private PaymentService paymentService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private CustomerService customerService;
 
     @Autowired
@@ -181,6 +188,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -223,13 +233,16 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
         //校验查看的权限
-         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
+//        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response, cmd);
+
+        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),response, cmd);
+
         response.setListBillsDTOS(list);
         return response;
     }
@@ -264,7 +277,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         Integer pageOffSet = cmd.getPageAnchor()==null?null:cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize(),cmd.getOwnerId(),response);
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize(),cmd.getOwnerId(),response, cmd.getBillGroupId());
         response.setBillDTOS(billDTOS);
         return response;
     }
@@ -275,7 +288,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
+        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes(), cmd.getBillGroupId());
         if(noticeInfos.size()<1) return;
         NoticeWithTextAndMessage(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBillIdAndTypes(), noticeInfos);
     }
@@ -329,33 +342,33 @@ public class AssetServiceImpl implements AssetService {
             }
         }
 
-            for (int k = 0; k < uids.size(); k++) {
-                try {
-                    MessageDTO messageDto = new MessageDTO();
-                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        for (int k = 0; k < uids.size(); k++) {
+            try {
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
 //                    messageDto.setSenderUid(User.SYSTEM_UID);
-                    messageDto.setSenderUid(2L);
+                messageDto.setSenderUid(2L);
 //                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()),
 //                            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
-                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
-                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
-                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
-                    Map<String, Object> map = new HashMap<>();
-                    User targetUser = userProvider.findUserById(uids.get(k));
-                    map.put("targetName", targetUser.getNickName());
-                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
-                    messageDto.setBody(notifyTextForApplicant);
-                    messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-                    if (!notifyTextForApplicant.trim().equals("")) {
-                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                    }
-                } catch (Exception e) {
-                    LOGGER.error(e.toString());
-                    LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                Map<String, Object> map = new HashMap<>();
+                User targetUser = userProvider.findUserById(uids.get(k));
+                map.put("targetName", targetUser.getNickName());
+                String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                messageDto.setBody(notifyTextForApplicant);
+                messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+                if (!notifyTextForApplicant.trim().equals("")) {
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                            uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
+            } catch (Exception e) {
+                LOGGER.error(e.toString());
+                LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
             }
+        }
         if (UserContext.getCurrentNamespaceId() != 999971) {
             //催缴次数加1
 //            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
@@ -369,10 +382,10 @@ public class AssetServiceImpl implements AssetService {
 
     private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
 //        if(namespaceId == 999971){
-            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-            smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
-            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+        smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+        smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+        smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
+        smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
 //        }else{
 //            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
 //            //模板改了，所以这个也要改
@@ -492,13 +505,12 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId(), cmd.getNamespaceId());
     }
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-    	//AssetVendor assetVendor = checkAssetVendor(999966, 0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType(),cmd.getOrganizationId());
@@ -528,7 +540,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getTargetType().equals("eh_user")) {
             cmd.setTargetId(UserContext.currentUserId());
         }
-        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId());
+        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId(), cmd.getBillGroupId());
     }
 
     @Override
@@ -710,7 +722,7 @@ public class AssetServiceImpl implements AssetService {
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
         int second = c.get(Calendar.SECOND);
-        String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
+        String fileName = "bill"+year+month+date+hour+minute+ second;
 
         List<exportPaymentBillsDetail> dataList = new ArrayList<>();
         //组装datalist来确定propertyNames的值
@@ -721,8 +733,6 @@ public class AssetServiceImpl implements AssetService {
             detail.setAmountOwed(dto.getAmountOwed().toString());
             detail.setAmountReceivable(dto.getAmountReceivable().toString());
             detail.setAmountReceived(dto.getAmountReceived().toString());
-//            detail.setApartmentName(dto.getApartmentName());
-//            detail.setBuildingName(dto.getBuildingName());
             detail.setContractNum(dto.getContractNum());
             detail.setBillGroupName(dto.getBillGroupName());
             detail.setNoticeTel(dto.getNoticeTel());
@@ -734,17 +744,15 @@ public class AssetServiceImpl implements AssetService {
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
             detail.setDateStr(dto.getDateStr());
+            // 增加发票单号 by wentian 2018/4/27
+            detail.setInvoiceNum(dto.getInvoiceNum());
             dataList.add(detail);
         }
-//        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
-        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
-//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
-//        String[] propertyNames = new String[declaredFields.length];
-        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20};
-//        for(int i = 0; i < declaredFields.length; i++){
-//            propertyNames[i] = declaredFields[i].getName();
-//        }
+
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
+                , "发票单号"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -767,7 +775,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName(), cmd.getInvoiceNum());
     }
 
     @Override
@@ -784,7 +792,7 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         String result = "OK";
-        handler.deleteBill(cmd.getBillId());
+        handler.deleteBill(cmd.getBillId(), cmd.getBillGroupId());
         return result;
     }
 
@@ -1043,7 +1051,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
-          LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
+        LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
 //        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
 //        List<RentFree> rentFrees = cmd.getRentFrees();
 //        if(rentAdjusts!=null && rentAdjusts.size()>0){
@@ -1269,7 +1277,7 @@ public class AssetServiceImpl implements AssetService {
 //                        if(map.containsKey(identity)){
 //                            newBill = map.get(identity);
 //                        }else{
-                    //没有在map中找到则新建
+                //没有在map中找到则新建
                 EhPaymentBills newBill = new PaymentBills();
                 Long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                 if(nextBillId == 0){
@@ -1361,37 +1369,37 @@ public class AssetServiceImpl implements AssetService {
 //                    for(){
 //                        //减免项目，用有序列表和时间控制循环次数
 //                    }
-            for(int k = 0 ; k < billItemsList.size(); k ++){
-                EhPaymentBillItems item = billItemsList.get(k);
-                Date dateGeneration = null;
-                Date billCycleEnd = null;
-                Date billCycleStart = null;
-                try{
-                    dateGeneration = sdf_dateStrD.parse(item.getDateStrGeneration());
-                    billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
-                    billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
-                }catch (Exception e){
-                    LOGGER.error("date parsed error for bill item list , e= {}",e);
-                    continue;
+                for(int k = 0 ; k < billItemsList.size(); k ++){
+                    EhPaymentBillItems item = billItemsList.get(k);
+                    Date dateGeneration = null;
+                    Date billCycleEnd = null;
+                    Date billCycleStart = null;
+                    try{
+                        dateGeneration = sdf_dateStrD.parse(item.getDateStrGeneration());
+                        billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
+                        billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
+                    }catch (Exception e){
+                        LOGGER.error("date parsed error for bill item list , e= {}",e);
+                        continue;
+                    }
+                    //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
+                    if(entry.getKey().getBillGroupId().longValue() == item.getBillGroupId() &&
+                            (
+                                    dateGeneration.compareTo(billCycleEnd)!=1 && dateGeneration.compareTo(billCycleStart) != -1
+                            ) &&
+                            item.getBillId()==null )
+                    {
+                        newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
+                        newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
+                        item.setBillId(newBill.getId());
+                    }
                 }
-                //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
-                if(entry.getKey().getBillGroupId().longValue() == item.getBillGroupId() &&
-                        (
-                                dateGeneration.compareTo(billCycleEnd)!=1 && dateGeneration.compareTo(billCycleStart) != -1
-                        ) &&
-                        item.getBillId()==null )
-                {
-                    newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
-                    newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
-                    item.setBillId(newBill.getId());
+                //更新状态
+                if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
+                    newBill.setStatus((byte)1);
                 }
+                billList.add(newBill);
             }
-            //更新状态
-            if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
-                newBill.setStatus((byte)1);
-            }
-            billList.add(newBill);
-        }
 
             //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
             PaymentContractReceiver entity = new PaymentContractReceiver();
@@ -1417,33 +1425,33 @@ public class AssetServiceImpl implements AssetService {
             contractDateList.add(entity);
 
 
-        if(billItemsList.size()<1 || contractDateList.size()<1){
-            upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
-            return;
-        }
+            if(billItemsList.size()<1 || contractDateList.size()<1){
+                upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
+                return;
+            }
 
-        LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
-        if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-            upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
-            return;
-        }
-        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
+                return;
+            }
+            this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
 
-            this.dbProvider.execute((TransactionStatus status) -> {
-                assetProvider.saveBillItems(billItemsList);
-                assetProvider.saveBills(billList);
-                assetProvider.saveContractVariables(contractDateList);
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    assetProvider.saveBillItems(billItemsList);
+                    assetProvider.saveBills(billList);
+                    assetProvider.saveContractVariables(contractDateList);
+                    return null;
+                });
                 return null;
             });
-            return null;
-        });
-        LOGGER.error("插入完成");
-        assetProvider.setInworkFlagInContractReceiverWell(contractId);
-        // 重新计算
-        for(EhPaymentBills bill : billList){
-            assetProvider.reCalBillById(bill.getId());
-        }
-        LOGGER.error("工作flag完成");
+            LOGGER.error("插入完成");
+            assetProvider.setInworkFlagInContractReceiverWell(contractId);
+            // 重新计算
+            for(EhPaymentBills bill : billList){
+                assetProvider.reCalBillById(bill.getId());
+            }
+            LOGGER.error("工作flag完成");
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
             LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
@@ -1519,7 +1527,7 @@ public class AssetServiceImpl implements AssetService {
                 d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemDayOffset());
             }
 
-                //费项d不能超过计价条款的两个边
+            //费项d不能超过计价条款的两个边
             if(d1.compareTo(dateStrBegin)==-1){
                 d1.setTime(dateStrBegin.getTime());
             }
@@ -2941,7 +2949,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        //AssetVendor assetVendor = checkAssetVendor(999966, 0);
+//        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
@@ -2978,7 +2986,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
-    	//AssetVendor vendor = checkAssetVendor(999966, 0);
+        //AssetVendor vendor = checkAssetVendor(999966, 0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
     }
@@ -3008,13 +3016,13 @@ public class AssetServiceImpl implements AssetService {
                 hasPay = 0;
                 break;
             case 999966:
-            	//深圳湾要求可以看合同，只查费不显示支付按钮
+                //深圳湾要求可以看合同，只查费不显示支付按钮
                 hasContractView = 1;
                 hasPay = 0;
                 break;
             case 999955:
-            	//住总ELive只是查询账单，没有合同，没有支付按钮
-            	hasContractView = 0;
+                //住总ELive只是查询账单，没有合同，没有支付按钮
+                hasContractView = 0;
                 hasPay = 0;
                 break;
             default:
@@ -3077,51 +3085,10 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
-        BatchImportBillsResponse response = new BatchImportBillsResponse();
-        ArrayList resultList = null;
-        try{
-            resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
-            if(null == resultList || resultList.isEmpty()){
-                LOGGER.error("bill import: File content is empty, userId");
-                //不恰当的使用了组织架构的scope，潜在可能造成拆分障碍 by wentian
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
-                        "File content is empty");
-            }
-        }catch (IOException exception){
-            LOGGER.error("file resolve failed in batchImportBills", exception);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE
-                    , "file illegal");
-        }
-
-        //准备任务
-        ImportFileTask task = new ImportFileTask();
-        task.setOwnerType(EntityType.COMMUNITY.getCode());
-        task.setOwnerId(cmd.getCommunityId());
-        task.setType(ImportFileTaskType.BUILDING.getCode());
-        task.setCreatorUid(UserContext.currentUserId());
-        ArrayList finalResultList = resultList;
-        task = importFileService.executeTask(() -> {
-            ImportFileResponse importTaskResponse = new ImportFileResponse();
-            Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch());
-            List<CreateBillCommand> createBillCommands = new ArrayList<>();
-            List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
-            for(Map.Entry<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> entry : map.entrySet()){
-                createBillCommands = entry.getKey();
-                datas = entry.getValue();
-            }
-            for(CreateBillCommand command : createBillCommands){
-                createBill(command);
-            }
-            //设置导出报错的结果excel的标
-            importTaskResponse.setTitle(datas.get(0).getData());
-            datas.remove(0);
-            importTaskResponse.setTotalCount((long)(finalResultList.size() - 2));
-            importTaskResponse.setFailCount((long)datas.size());
-            importTaskResponse.setLogs(datas);
-            return importTaskResponse;
-        }, task);
-        response.setId(task.getId());
-        return response;
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.batchImportBills(cmd, file);
     }
 
     /**
@@ -3140,7 +3107,7 @@ public class AssetServiceImpl implements AssetService {
             LOGGER.error("link customer to bill failed, code={}, token = {}", code, token);
         }
     }
-//------WebKitFormBoundaryTHJjpTOenA3N9eNu
+    //------WebKitFormBoundaryTHJjpTOenA3N9eNu
 //    Content-Disposition: form-data; name="namespaceId"
 //
 //            999970
@@ -3177,7 +3144,6 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillRelatedTransac(cmd);
     }
-
     @Override
     public void reCalBill(ReCalBillCommand cmd) {
         List<Long> ids = assetProvider.findbillIdsByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
@@ -3185,495 +3151,12 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.reCalBillById(id);
         }
     }
-
-    private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch) {
-        Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
-        List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
-        List<CreateBillCommand> cmds = new ArrayList<>();
-
-        //假设了第一行为标题
-        RowResult headerRow = (RowResult) resultList.get(1);
-        String[] headers = getOrderedCellValues(headerRow, null);
-        //datas的第一行
-        ImportFileResultLog<List<String>> headLog = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
-        headLog.setData(Arrays.asList(headers));
-        datas.add(headLog);
-        int itemStart = 8;
-        int itemEnd = 0;
-        int buildingIndex = 0;
-        int apartmentIndex = 0;
-        int dateStrIndex = 0;
-        int targetTypeIndex = 0;
-        for (int i = 0; i < headers.length; i++) {
-            if (headers[i].equalsIgnoreCase("*催缴手机号")) itemStart = i + 1;
-            else if (headers[i].equalsIgnoreCase("楼栋")) {
-                itemEnd = i - 1;
-                buildingIndex = i;
-            }
-            else if (headers[i].equalsIgnoreCase("门牌")) apartmentIndex = i;
-            else if (headers[i].contains("客户属性")) targetTypeIndex = i;
-            else if(headers[i].contains("账期")) dateStrIndex = i;
-        }
-        bill:for (int i = 2; i < resultList.size(); i++) {
-            RowResult currentRow = (RowResult) resultList.get(i);
-            String[] data = getOrderedCellValues(currentRow, headers.length);
-            //放置log
-            ImportFileResultLog<List<String>> log = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
-            log.setData(Arrays.asList(data));
-
-
-            CreateBillCommand cmd = new CreateBillCommand();
-            BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
-            List<BillItemDTO> billItemDTOList = new ArrayList<>();
-            List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
-//            RowResult dataRow = (RowResult) resultList.get(i);
-//            String[] data = getOrderedCellValues(dataRow, headers.length);
-            ExemptionItemDTO exemptionItemDTO = null;
-            ExemptionItemDTO increaseItemDTO = null;
-            //账期被依赖
-            String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
-            if(StringUtils.isBlank(dateStr)){
-                log.setErrorLog("日期格式错误,请参考说明进行填写");
-                log.setCode(AssetBillImportErrorCodes.DATE_STR_EMPTY_ERROR);
-                datas.add(log);
-                continue bill;
-            }
-            cmd.setDateStr(dateStr);
-            //楼栋门牌也是
-            String building = data[buildingIndex];
-            String apartment = data[apartmentIndex];
-            //客户属性也是
-            String datum = data[targetTypeIndex];
-            if(datum!=null){
-                datum = datum.trim();
-            }
-            switch (datum){
-                case "企业客户":
-                    cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
-                    break;
-                case "个人客户":
-                    cmd.setTargetType(AssetTargetType.USER.getCode());
-                    break;
-                default:
-                    //构造log然后离开这一行的处理
-                    log.setErrorLog("客户属性错误，只允许填写个人客户或者企业客户");
-                    log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
-                    datas.add(log);
-                    continue bill;
-            }
-            for(int j = 0; j < data.length; j++){
-
-                BillItemDTO item = new BillItemDTO();
-                if(headers[j].contains("客户名称")){
-                    if(StringUtils.isBlank(data[j])){
-                        log.setErrorLog("customer name cannot be empty");
-                        log.setCode(AssetBillImportErrorCodes.CUSTOM_NAME_EMPTY_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                    cmd.setTargetName(data[j]);
-                    if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())){
-                        Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
-                        if(organizationByName != null){
-                            cmd.setTargetId(organizationByName.getId());
-                        }
-                        // 找不到用户也可以导入
-//                        if(organizationProvider.findOrganizationByName(data[j], namespaceId).getId() == null){
-//                            log.setErrorLog("customer Id cannot be found， org name might be wrong");
-//                            log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
-//                            datas.add(log);
-//                            continue bill;
-//                        };
-
-                    }
-                }else if(headers[j].contains("客户手机号")){
-                    if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
-                        if(StringUtils.isBlank(data[j])){
-                            log.setErrorLog("个人客户情况下，客户手机号不能为空");
-                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                            datas.add(log);
-                            continue bill;
-                        }
-
-                        if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                            log.setErrorLog("客户手机号码格式不正确");
-                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                            datas.add(log);
-                            continue bill;
-                        }
-                        UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
-                        if(claimedIdentifierByToken!=null){
-                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
-                        }
-                        cmd.setCustomerTel(data[j]);
-                    }
-                }
-                else if(headers[j].equals("账单开始时间")){
-                    cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("账单结束时间")){
-                    cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("合同编号")){
-                    cmd.setContractNum(data[j]);
-                    List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
-                    if(list.size() != 1){
-                        LOGGER.warn("SimpleFindContractByNumber find more than 1, contract Id is={}", list);
-                    }else{
-                        cmd.setContractId(list.get(0));
-                    }
-                }else if(headers[j].contains("催缴手机号")){
-                    if(StringUtils.isBlank(data[j])){
-                        log.setErrorLog("notice tel cannot be emtpy");
-                        log.setCode(AssetBillImportErrorCodes.NOTICE_TEL_EMPTY_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                        log.setErrorLog("催缴手机号码格式不正确");
-                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                    cmd.setNoticeTel(data[j]);
-                }
-                // 收费项目
-                else if(j >= itemStart && j <= itemEnd){
-                    PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
-                    if(itemPojo == null){
-                        log.setErrorLog("charging Item not found");
-                        log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                    BigDecimal amountReceivable = null;
-                    if(StringUtils.isBlank(data[j])){
-                        log.setErrorLog("收费项目:"+headers[j]+"必填");
-                        log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }try{
-                        amountReceivable = new BigDecimal(data[j]);
-                    }catch (Exception e){
-                        log.setErrorLog("收费项目:" + headers[j] + "数值格式不正确，应该填写保留两位小数的数字");
-                        log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
-                        datas.add(log);
-                        continue bill;
-                    }
-
-                    // id , name, groupRuleId, amount, 楼栋，门牌，addressId
-                    item.setBillItemId(itemPojo.getId());
-                    item.setBillItemName(headers[j]);
-                    item.setAmountReceivable(amountReceivable);
-                    item.setBuildingName(building);
-                    item.setApartmentName(apartment);
-                    billItemDTOList.add(item);
-                }else if(headers[j].contains("减免金额")){
-                    //减免项
-                    try{
-                        if(!StringUtils.isBlank(data[j])){
-                            exemptionItemDTO = new ExemptionItemDTO();
-                            exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
-                            exemptionItemDTO.setIsPlus((byte)0);
-                            exemptionItemDTO.setDateStr(dateStr);
-                            exemptionItemDTOList.add(exemptionItemDTO);
-                        }
-                    }catch(Exception e){
-                        log.setErrorLog("exemption amount error");
-                        log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
-                        datas.add(log);
-                        continue bill;
-                    }
-                }else if(headers[j].contains("减免备注")){
-                    if(exemptionItemDTO != null){
-                        exemptionItemDTO.setRemark(data[j]);
-                    }
-                }else if(headers[j].contains("增收金额")){
-                    try{
-                        if(!StringUtils.isBlank(data[j])){
-                            increaseItemDTO = new ExemptionItemDTO();
-                            increaseItemDTO.setAmount(new BigDecimal(data[j]));
-                            increaseItemDTO.setIsPlus((byte)1);
-                            increaseItemDTO.setDateStr(dateStr);
-                            exemptionItemDTOList.add(increaseItemDTO);
-                        }
-                    }catch(Exception e){
-                        log.setErrorLog("amption amount error");
-                        log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
-                        datas.add(log);
-                        continue bill;
-                    }
-                }else if(headers[j].contains("增收备注")){
-                    if(increaseItemDTO != null){
-                        increaseItemDTO.setRemark(data[j]);
-                    }
-                }
-            }
-            billGroupDTO.setBillGroupId(billGroupId);
-            billGroupDTO.setBillItemDTOList(billItemDTOList);
-            billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
-            billGroupDTO.setBillGroupName(assetProvider.findBillGroupNameById(billGroupId));
-            if(cmd.getTargetId() == null){
-                // 没有找到用户，也可以导入
-            }
-            cmd.setOwnerType("community");
-            cmd.setOwnerId(ownerId);
-            cmd.setIsSettled(billSwitch);
-            cmds.add(cmd);
-        }
-        map.put(cmds, datas);
-        return map;
+    @Override
+    public void modifySettledBill(ModifySettledBillCommand cmd) {
+        assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum());
     }
 
-    private String handlerChargingItemName(String value) {
-        return value.replace("*","")
-                .replace("(","")
-                .replace(")","")
-                .replace("元","");
-    }
 
-    private PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName) {
-        return assetProvider.getBillItemByName(namespaceId,  ownerId,  ownerType, billGroupId, projectLevelName);
-    }
-
-    private String[] getOrderedCellValues(RowResult header, Integer limit) {
-//        // 指定了初始容量的hashmap的遍历并不慢
-//        HashMap<String,String> cellsMap = new HashMap<>(27);
-        int count = 1;
-        int init = header.getCells().size();
-        if(limit != null){
-            init = limit;
-        }else{
-            limit = init;
-        }
-        String[] data = new String[init];
-
-        if(header.getA() == null && count <= limit){
-            header.setA("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getA();
-        count++;
-        if(header.getB() == null&& count <= limit){
-            header.setB("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getB();
-        count++;
-        if(header.getC() == null&& count <= limit){
-            header.setC("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getC();
-        count++;
-        if(header.getD() == null&& count <= limit){
-            header.setD("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getD();
-        count++;
-        if(header.getE() == null&& count <= limit){
-            header.setE("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getE();
-        count++;
-        if(header.getF() == null&& count <= limit){
-            header.setF("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getF();
-        count++;
-        if(header.getG() == null&& count <= limit){
-            header.setG("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getG();
-        count++;
-        if(header.getH() == null&& count <= limit){
-            header.setH("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getH();
-        count++;
-        if(header.getI() == null&& count <= limit){
-            header.setI("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getI();
-        count++;
-        if(header.getJ() == null&& count <= limit){
-            header.setJ("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getJ();
-        count++;
-
-        if(header.getK() == null&& count <= limit){
-            header.setK("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getK();
-        count++;
-
-        if(header.getL() == null&& count <= limit){
-            header.setL("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getL();
-        count++;
-
-        // M
-        if(header.getM() == null&& count <= limit){
-            header.setM("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getM();
-        count++;
-        if(header.getN() == null&& count <= limit){
-            header.setN("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getN();
-        count++;
-        if(header.getO() == null&& count <= limit){
-            header.setO("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getO();
-        count++;
-        if(header.getP() == null&& count <= limit){
-            header.setP("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getP();
-        count++;
-        if(header.getQ() == null&& count <= limit){
-            header.setQ("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getQ();
-        count++;
-        if(header.getR() == null&& count <= limit){
-            header.setR("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getR();
-        count++;
-        if(header.getS() == null&& count <= limit){
-            header.setS("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getS();
-        count++;
-        if(header.getT() == null&& count <= limit){
-            header.setT("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getT();
-        count++;
-        if(header.getU() == null&& count <= limit){
-            header.setU("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getU();
-        count++;
-        if(header.getV() == null&& count <= limit){
-            header.setV("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getV();
-        count++;
-        if(header.getW() == null&& count <= limit){
-            header.setW("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getW();
-        count++;
-        if(header.getX() == null&& count <= limit){
-            header.setX("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getX();
-        count++;
-        if(header.getY() == null&& count <= limit){
-            header.setY("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getY();
-        count++;
-        if(header.getZ() == null&& count <= limit){
-            header.setZ("");
-        }
-        if(count - 1 >= init){
-            return data;
-        }
-        data[count-1] = header.getZ();
-//        count++;
-        return data;
-//         此方法不能支持index
-////        Map<String, String> cells = header.getCells();
-//        cellsMap.putAll(cells);
-////        Iterator<Map.Entry<String, String>> iterator = cellsMap.entrySet().iterator();
-////        // 迭代器删除
-////        while(iterator.hasNext()){
-////            Map.Entry<String, String> next = iterator.next();
-////            if(org.apache.commons.lang.StringUtils.isEmpty(next.getValue())){
-////                cellsMap.remove(next.getKey());
-////            }
-////        }
-//        TreeMap<String, String> treeMap = new TreeMap<>();
-//        treeMap.putAll(cellsMap);
-//        return treeMap.values().toArray(new String[treeMap.size()]);
-    }
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
