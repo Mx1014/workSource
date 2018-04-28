@@ -1441,6 +1441,49 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     /**
+     * 编辑单个公司的属性
+     * @param cmd
+     */
+    public void updateEnterpriseDetail(UpdateEnterpriseDetailCommand cmd){
+        //所有的操作都保持在一个事务当中
+        dbProvider.execute((TransactionStatus status) -> {
+            //1.创建一个Organization类的对象
+            Organization organization = new Organization();
+            //对企业名称进行查重校验
+            checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
+            //将企业名称封装在Organization对象中
+            organization.setName(cmd.getName());
+            //判断传过来的organizationId是否为空，不为空的话，就根据organizationId来进行更新eh_organizations表中
+            //的企业名称
+            if(cmd.getOrganizationId() != null){
+                //说明传过来的organizationId有值，那么就进行更细企业名称
+                organizationProvider.updateOrganization(organization);
+                //开始更新eh_organization_details表中的企业简称、人员规模、是否属于管理公司、是否属于服务商
+                //创建一个OrganizationDetail类的对象
+                OrganizationDetail organizationDetail = new OrganizationDetail();
+                //将企业简称、人员规模、是否属于管理公司、是否属于服务商封装在OrganizationDetail对象中
+                if(cmd.getPmFlag() != null){
+                    //封装是否是管理公司标志
+                    organizationDetail.setPmFlag(cmd.getPmFlag().byteValue());
+                }
+                if(cmd.getServiceSupportFlag() != null){
+                    //封装是否是服务商标志
+                    organizationDetail.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
+                }
+                //封装企业简称
+                organizationDetail.setDisplayName(cmd.getDisplayName());
+                //封装人员规模
+                organizationDetail.setMemberRange(cmd.getMemberRange());
+                //更新到eh_organization_detail表
+                //// TODO: 2018/4/28  
+            }
+
+
+            return null;
+        });
+    }
+
+    /**
      * 创建企业
      * @param cmd
      * @return

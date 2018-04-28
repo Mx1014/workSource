@@ -1625,6 +1625,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("/enterprise/edit")
     @RestReturn(value = EnterpriseDTO.class)
     public RestResponse updateEnterpriseDetail(@Valid UpdateEnterpriseDetailCommand cmd) {
+        //// TODO: 2018/4/28
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

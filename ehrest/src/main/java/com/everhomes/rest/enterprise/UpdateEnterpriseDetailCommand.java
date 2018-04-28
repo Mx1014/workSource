@@ -18,6 +18,8 @@ import java.util.List;
  *
  */
 public class UpdateEnterpriseDetailCommand {
+    private Integer pmFlag;
+    private Integer namespaceId;
     private Integer organizationId;
     private String name;
     private String displayName;
@@ -81,6 +83,23 @@ public class UpdateEnterpriseDetailCommand {
     public void setCommunityIds(List<Long> communityIds) {
         this.communityIds = communityIds;
     }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Integer getPmFlag() {
+        return pmFlag;
+    }
+
+    public void setPmFlag(Integer pmFlag) {
+        this.pmFlag = pmFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
