@@ -43,6 +43,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.portal.PortalService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rentalv2.job.RentalCancelOrderJob;
@@ -69,6 +70,8 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
@@ -222,6 +225,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private PortalService portalService;
 
 	private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
@@ -4381,8 +4386,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
 		}
 		response.setRentalBills(new ArrayList<>());
+		Map<Long,Long> tagAppidMap = new HashMap<>();
 		for (RentalOrder bill : bills) {
 			RentalBillDTO dto = processOrderDTO(bill);
+			if (tagAppidMap.get(bill.getResourceTypeId())==null) {
+				ListServiceModuleAppsCommand cmd2 = new ListServiceModuleAppsCommand();
+				cmd2.setNamespaceId(bill.getNamespaceId());
+				cmd2.setCustomTag(bill.getResourceTypeId().toString());
+				cmd2.setModuleId(Rentalv2Controller.moduleId);
+				ListServiceModuleAppsResponse rsp = portalService.listServiceModuleAppsWithConditon(cmd2);
+				if (rsp!=null && rsp.getServiceModuleApps()!=null) {
+					dto.setAppId(rsp.getServiceModuleApps().get(0).getId());
+					tagAppidMap.put(bill.getResourceTypeId(),rsp.getServiceModuleApps().get(0).getId());
+				}
+			}else
+				dto.setAppId(tagAppidMap.get(bill.getResourceTypeId()));
 			response.getRentalBills().add(dto);
 		}
 		return response;
