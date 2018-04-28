@@ -8,10 +8,12 @@ import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class EnterpriseApprovalProviderImpl implements EnterpriseApprovalProvider{
 
     @Autowired

@@ -148,14 +148,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Autowired
     private WorkReportService workReportService;
 
-    @Autowired
-    private TaskService taskService;
 
     private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     private SimpleDateFormat approvalNoFormat = new SimpleDateFormat("yyyyMMdd");
 

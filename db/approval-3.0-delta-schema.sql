@@ -19,3 +19,6 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `integral_tag3` BIGINT NOT NULL DE
 ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag1` VARCHAR(128) AFTER `integral_tag3`;
 ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag2` VARCHAR(128) AFTER `string_tag1`;
 ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag3` VARCHAR(128) AFTER `string_tag2`;
+
+RENAME TABLE `eh_general_approval_templates` to `eh_enterprise_approval_templates`;
+ALTER TABLE `eh_general_approval_templates` ADD COLUMN `approval_group`;
