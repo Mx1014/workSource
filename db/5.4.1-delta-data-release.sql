@@ -16,3 +16,9 @@ update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sig
 
 -- 停车订单标签 by dengs,2018.04.27
 update eh_parking_lots SET order_tag=SUBSTR(id FROM 3 FOR 5);
+
+-- 品质核查离线包版本更新  by jiarui
+update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
+  info_url = replace(info_url,'1-0-0','1-0-1'),
+  target_version = '1.0.1' where app_name = '品质核查';
+
