@@ -11990,13 +11990,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
             detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
             detail.setContactName(member.getContactName());
+            detail.setGender(member.getGender());
             detail.setContactToken(member.getContactToken());
             detail.setContactDescription(member.getContactDescription());
 /*            detail.setEmployeeNo(member.getEmployeeNo());
             //  changed by ryan, there is a unique avatar for employee's archive
             //  detail.setAvatar(member.getAvatar());
             //  detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
-            detail.setGender(member.getGender());
             detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
             detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
             detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
