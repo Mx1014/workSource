@@ -40,7 +40,6 @@ set @id = ifnull((SELECT MAX(`id`) FROM eh_payment_variables), 0);
 INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@id:=@id+1, NULL, NULL , '比例系数', '0', now(), NULL, now(), 'blxs');
 
 -- 没有生成账单以及账单任务记录时的提示语更改 by wentian 2018/4/28
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10003', 'zh_CN', '生成失败，请返回上一步重新设置进行生成');
 UPDATE `eh_locale_strings` SET `text` = '无数据' WHERE `scope` = 'assetv2' AND `code` = '10003';
 
 
