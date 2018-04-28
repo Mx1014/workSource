@@ -229,7 +229,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
                                     if (isAdmin) {
                                         enterpriseCustomer.setTrackingName(column.getValue());
-                                        List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                        List<User> users = null;
+                                        if (StringUtils.isNotEmpty(column.getValue())) {
+                                            users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                        }
                                         if (users != null && users.size() > 0) {
                                             column.setValue(users.get(0).getId().toString());
                                         } else {
