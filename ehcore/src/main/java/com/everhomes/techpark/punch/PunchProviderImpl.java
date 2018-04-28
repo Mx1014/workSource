@@ -2925,8 +2925,12 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
-		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
-		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		if (null != punchIntervalNo) {
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
+		}
+		if (null != punchType) {
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		}
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
 
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
@@ -2942,6 +2946,29 @@ long id = sequenceProvider.getNextSequence(key);
 		return result.get(0);
 	}
 
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
 	@Override
 	public PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2970,6 +2997,32 @@ long id = sequenceProvider.getNextSequence(key);
 		dao.update(punchLog);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchLogs.class,
 				punchLog.getId());
+
+	}
+
+	@Override
+	public List<PunchLog> listPunchLogs(Long ownerId, List<Long> userIds, Long startDay, Long endDay) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_LOGS);
+		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.greaterOrEqual(new Date(startDay));
+		Condition condition2 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.lessOrEqual(new Date(endDay));
+		Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId);
+		Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode());
+		Condition condition5 = Tables.EH_PUNCH_LOGS.USER_ID.in(userIds);
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		condition = condition.and(condition4);
+		condition = condition.and(condition5);
+		step.where(condition);
+		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchLog.class);
+				});
+		return result;
 
 	}
 }

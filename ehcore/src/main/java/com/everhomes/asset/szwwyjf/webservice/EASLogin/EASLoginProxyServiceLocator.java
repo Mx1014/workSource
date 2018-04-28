@@ -22,7 +22,7 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
     }
 
     // Use to get a proxy class for EASLogin
-    private java.lang.String EASLogin_address = "http://192.168.1.200:6888/ormrpc/services/EASLogin";
+    private java.lang.String EASLogin_address = "http://192.168.1.200:6888/ormrpc/services/EASLogin/已修改为可配置";
 
     public java.lang.String getEASLoginAddress() {
         return EASLogin_address;
@@ -105,7 +105,7 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
     }
 
     public javax.xml.namespace.QName getServiceName() {
-        return new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/EASLogin", "EASLoginProxyService");
+        return new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/EASLogin/经测试无关", "EASLoginProxyService");
     }
 
     private java.util.HashSet ports = null;
@@ -113,7 +113,7 @@ public class EASLoginProxyServiceLocator extends org.apache.axis.client.Service 
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();
-            ports.add(new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/EASLogin", "EASLogin"));
+            ports.add(new javax.xml.namespace.QName("http://192.168.1.200:6888/ormrpc/services/EASLogin/经测试无关", "EASLogin"));
         }
         return ports.iterator();
     }

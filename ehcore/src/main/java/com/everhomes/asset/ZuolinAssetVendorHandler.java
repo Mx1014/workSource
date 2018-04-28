@@ -90,6 +90,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Autowired
     private PayService payService;
 
+    @Autowired
+    private PaymentService paymentService;
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
@@ -692,9 +695,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
-//        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setAmount(amountsInCents);
         cmd2pay.setCommunityId(cmd.getCommunityId());
-        cmd2pay.setAmount(1l);
+//        cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(cmd.getNamespaceId());
@@ -937,6 +940,35 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
+    }
+
+    @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        Long billId = cmd.getBillId();
+        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
+        PaymentBills bill = assetProvider.findPaymentBillById(billId);
+        if(bill == null || assetOrders.size() < 1){
+            return new ListPaymentBillResp();
+        }
+        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
+        paycmd.setNamespaceId(bill.getNamespaceId());
+        paycmd.setOrderType("wuyecode");
+        paycmd.setPageAnchor(cmd.getPageAnchor());
+        paycmd.setPageSize(cmd.getPageSize());
+        if(cmd.getCommunityId() == null){
+            paycmd.setCommunityId(bill.getOwnerId());
+        }else{
+            paycmd.setCommunityId(cmd.getCommunityId());
+        }
+        paycmd.setUserType(cmd.getUserType());
+        paycmd.setUserId(cmd.getUserId());
+        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
+        try {
+            return paymentService.listPaymentBill(paycmd);
+        } catch (Exception e) {
+            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
+            return new ListPaymentBillResp();
+        }
     }
 
 

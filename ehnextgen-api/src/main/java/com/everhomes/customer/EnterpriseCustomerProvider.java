@@ -45,6 +45,7 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerTalent(CustomerTalent talent);
     void deleteCustomerTalent(CustomerTalent talent);
     CustomerTalent findCustomerTalentById(Long id);
+    CustomerTalent findCustomerTalentByPhone(String phone, Long customerId);
     List<CustomerTalent> listCustomerTalentsByCustomerId(Long customerId);
     Map<Long, Long> listCustomerTalentCountByCustomerIds(List<Long> customerIds);
 

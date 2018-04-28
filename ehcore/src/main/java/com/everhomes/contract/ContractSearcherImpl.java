@@ -168,10 +168,16 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 List<Long> addresses = new ArrayList<>();
                 List<Long> buildings = new ArrayList<>();
                 for (ContractBuildingMapping contractApartment : contractApartments) {
-                    addresses.add(contractApartment.getAddressId());
-                    Building building = communityProvider.findBuildingByCommunityIdAndName(contract.getCommunityId(), contractApartment.getBuildingName());
-                    if (building != null) {
-                        buildings.add(building.getId());
+                    try{
+                        addresses.add(contractApartment.getAddressId());
+                        Building building = communityProvider.findBuildingByCommunityIdAndName(contract.getCommunityId(), contractApartment.getBuildingName());
+                        if (building != null) {
+                            buildings.add(building.getId());
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("error occured during sync contract",e);
+                        LOGGER.error("find building failed, contractApartment = {}, contract id ={}", contractApartment, contract.getId());
+                        continue;
                     }
                 }
 

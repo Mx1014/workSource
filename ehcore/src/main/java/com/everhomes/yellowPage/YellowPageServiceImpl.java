@@ -1,40 +1,5 @@
 package com.everhomes.yellowPage;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.math.RandomUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.jooq.Condition;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -55,17 +20,13 @@ import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.parking.bosigao.BosigaoCardInfo;
-import com.everhomes.parking.bosigao.BosigaoJsonEntity;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -73,31 +34,25 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalSupportType;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormRenderType;
-import com.everhomes.rest.general_approval.GeneralFormSourceType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GeneralFormValidatorType;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldTemplateDTO;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
 import com.everhomes.rest.yellowPage.AttachmentDTO;
@@ -123,6 +78,8 @@ import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
 import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.NotifyTargetDTO;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
@@ -153,8 +110,6 @@ import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.CustomRequestConstants;
@@ -166,21 +121,53 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+import org.apache.commons.lang.math.RandomUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageServiceImpl.class);
+
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 	@Autowired
 	private HotlineService hotlineService;
@@ -2064,5 +2051,31 @@ public class YellowPageServiceImpl implements YellowPageService {
                 break;
             }
         }
+	}
+
+	@Override
+	public SearchRequestInfoResponse listSeviceAllianceAppRecordsByEnterpriseId(Long enterpriseId,
+			Long pageAnchor, Integer pageSize) {
+		if(pageAnchor==null){
+			pageAnchor=0L;
+		}
+		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
+		List<ServiceAllianceApplicationRecord> lists = saapplicationRecordProvider.listServiceAllianceApplicationRecordByEnterpriseId(enterpriseId, pageAnchor, pageSize+1);
+		if (null == lists)
+			return null;
+		Long nextPageAnchor = null;
+		if (lists != null && lists.size() > pageSize) {
+			lists.remove(lists.size() - 1);
+			nextPageAnchor = lists.get(lists.size() - 1).getId();
+		}
+		SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setDtos(lists.stream().map((r)->{
+			RequestInfoDTO requestInfo = ConvertHelper.convert(r, RequestInfoDTO.class);
+			if (requestInfo != null && r.getCreateTime() != null)
+			requestInfo.setCreateTime(r.getCreateTime().toLocalDateTime().format(dateSF));
+			return requestInfo;
+		}).collect(Collectors.toList()));
+		return response;
 	}
 }

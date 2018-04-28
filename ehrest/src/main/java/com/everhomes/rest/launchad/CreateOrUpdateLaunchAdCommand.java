@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  *     <li>skipFlag: 是否支持跳过 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
  *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
+ *     <li>resourceName: 文件名称</li>
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
  *     <li>appId: appId</li>
  *     <li>currentOrgId: 物业公司id</li>
@@ -36,6 +37,7 @@ public class CreateOrUpdateLaunchAdCommand {
     @NotNull
     private String targetType;
     private String targetData;
+    private String resourceName;
 
     private Byte status;
 
@@ -144,6 +146,14 @@ public class CreateOrUpdateLaunchAdCommand {
 
     public void setCurrentOrgId(Long currentOrgId) {
         this.currentOrgId = currentOrgId;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 
     @Override
