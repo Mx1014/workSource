@@ -308,15 +308,16 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
     void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
         if(isZuolinByBillGroupId(cmd.getBillGroupId())){
             zuolinAssetVendorHandler.exportBillTemplates(cmd, response);
+            return;
         }
         zhangJiangGaoKeThirdPartyAssetVendor.exportBillTemplates(cmd, response);
     }
 
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
-            if(isZuolinByBillGroupId(cmd.getBillGroupId())){
-                zuolinAssetVendorHandler.batchImportBills(cmd, file);
-            }
+        if(isZuolinByBillGroupId(cmd.getBillGroupId())){
+            return zuolinAssetVendorHandler.batchImportBills(cmd, file);
+        }
         return super.batchImportBills(cmd, file);
     }
 }
