@@ -39,4 +39,7 @@ SET `text`='自用电表' WHERE scope='energy.meter.type' and `code` = 2 ;
 set @id = ifnull((SELECT MAX(`id`) FROM eh_payment_variables), 0);
 INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@id:=@id+1, NULL, NULL , '比例系数', '0', now(), NULL, now(), 'blxs');
 
+-- 没有生成账单以及账单任务记录时的提示语更改 by wentian 2018/4/28
+UPDATE `eh_locale_strings` SET `text` = '无数据' WHERE `scope` = 'assetv2' AND `code` = '10003';
+
 
