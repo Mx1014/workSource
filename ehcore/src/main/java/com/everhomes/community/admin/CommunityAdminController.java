@@ -692,4 +692,19 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /admin/community/changeOrganizationCommunity</b>
+     * <p>更改园区管理公司</p>
+     */
+    @RequestMapping("changeOrganizationCommunity")
+    @RestReturn(String.class)
+    public RestResponse changeOrganizationCommunity(@Valid ChangeOrganizationCommunityCommand cmd){
+        communityService.changeOrganizationCommunity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

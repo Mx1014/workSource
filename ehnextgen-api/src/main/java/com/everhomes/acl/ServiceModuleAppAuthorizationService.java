@@ -11,6 +11,9 @@ public interface ServiceModuleAppAuthorizationService {
     List<ProjectDTO> listCommunityRelationOfOrgId(Integer namespaceId, Long organizationId);
     List<ServiceModuleAppAuthorization> listCommunityRelationOfOwnerIdAndAppId(Integer namespaceId, Long ownerId, Long appId);
     List<ServiceModuleAppAuthorization> listCommunityRelationOfOrgIdAndAppId(Integer namespaceId, Long organizationId, Long appId);
+
+    List<ServiceModuleAppAuthorization> listCommunityRelations(Integer namespaceId, Long organizationId, Long communityId);
+
     List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId);
     void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd);
 
