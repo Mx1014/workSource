@@ -14,7 +14,7 @@ CREATE TABLE `eh_salary_payslips` (
   `update_time` DATETIME COMMENT '记录更新时间',
   `operator_uid` BIGINT COMMENT '记录更新人userId',
   PRIMARY KEY(`id`),
-  KEY `i_eh__owner_period` (`owner_id`,`salary_period`)
+  KEY `i_eh_owner_period` (`owner_id`,`salary_period`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '工资条表';
 
 
@@ -38,6 +38,7 @@ CREATE TABLE `eh_salary_payslip_details` (
   `update_time` DATETIME COMMENT '记录更新时间',
   `operator_uid` BIGINT COMMENT '记录更新人userId',
   PRIMARY KEY(`id`),
-  KEY `i_eh__payslip_id` (`payslip_id`),
-  KEY `i_eh__organization_user` (`user_id`,`organization_id`)
+  KEY `i_eh_payslip_id` (`payslip_id`),
+  KEY `i_eh_organization_user` (`user_id`,`organization_id`),
+  KEY `i_eh_create_time`(`create_time`);
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '工资条详情表';
