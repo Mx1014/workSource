@@ -1378,24 +1378,18 @@ public class ArchivesServiceImpl implements ArchivesService {
         Map<String, Object> map = new LinkedHashMap<>();
         switch (EmployeeStatus.fromCode(employee.getEmployeeStatus())) {
             case PROBATION:
-                map.put("firstDate", format.format(employee.getCheckInTime()));
-                map.put("nextDate", format.format(employee.getEmploymentTime()));
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
+                map.put("nextDate", employee.getEmploymentTime() != null ? format.format(employee.getEmploymentTime()) : "  无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
                 break;
             case DISMISSAL:
-                map.put("firstDate", format.format(employee.getCheckInTime()));
-                if (employee.getDismissTime() != null)
-                    map.put("nextDate", format.format(employee.getDismissTime()));
-                else
-                    map.put("nextDate", "   无");
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
+                map.put("nextDate", employee.getDismissTime() != null ? format.format(employee.getDismissTime()) : "  无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
                 break;
             default:
                 map.put("firstDate", format.format(employee.getCheckInTime()));
-                if (employee.getContractEndTime() != null)
-                    map.put("nextDate", format.format(employee.getContractEndTime()));
-                else
-                    map.put("nextDate", "   无");
+                map.put("nextDate", employee.getContractEndTime() != null ? format.format(employee.getContractEndTime()) : "   无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
                 break;
         }
