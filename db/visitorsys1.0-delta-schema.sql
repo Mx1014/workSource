@@ -5,7 +5,8 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `organization_name` VARCHAR(256)  COMMENT '到访公司名称',
+  `enterprise_id` BIGINT  COMMENT '到访公司Id(园区访客)',
+  `enterprise_name` VARCHAR(256)  COMMENT '到访公司名称(园区访客)',
 -- 以下字段必须出现在展示和搜索中，所以必须提出来作为字段
 	`visitor_name` VARCHAR(256) COMMENT '访客姓名',
 	`visitor_phone` VARCHAR(32) COMMENT '访客电话',
@@ -17,6 +18,7 @@ CREATE TABLE `eh_visitor_sys_visitors` (
 	`inviter_name` VARCHAR(256) COMMENT '邀请者的用户姓名',
 	`planned_visit_time` DATETIME COMMENT '计划到访时间',
 	`visit_time` DATETIME COMMENT '实际到访时间',
+	`confirm_time` DATETIME COMMENT '后台确认到访时间',
 	`visit_status` TINYINT COMMENT '到访状态，0,未到访；1,等待确认;2,已到访;3,已拒绝; 4,已删除',
   `office_location_id` BIGINT COMMENT '办公地点ID',
   `office_location_name` VARCHAR(512) COMMENT '办公地点名称',
