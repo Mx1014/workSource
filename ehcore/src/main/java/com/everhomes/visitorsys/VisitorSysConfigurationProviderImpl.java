@@ -1,0 +1,90 @@
+// @formatter:off
+package com.everhomes.visitorsys;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhVisitorSysConfigurationsDao;
+import com.everhomes.server.schema.tables.pojos.EhVisitorSysConfigurations;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+
+@Component
+public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurationProvider {
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	@Override
+	public void createVisitorSysConfiguration(VisitorSysConfiguration visitorSysConfiguration) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVisitorSysConfigurations.class));
+		visitorSysConfiguration.setId(id);
+		visitorSysConfiguration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		visitorSysConfiguration.setCreatorUid(UserContext.current().getUser().getId());
+		visitorSysConfiguration.setOperateTime(visitorSysConfiguration.getCreateTime());
+		visitorSysConfiguration.setOperatorUid(visitorSysConfiguration.getCreatorUid());
+		getReadWriteDao().insert(visitorSysConfiguration);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhVisitorSysConfigurations.class, null);
+	}
+
+	@Override
+	public void updateVisitorSysConfiguration(VisitorSysConfiguration visitorSysConfiguration) {
+		assert (visitorSysConfiguration.getId() != null);
+		visitorSysConfiguration.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		visitorSysConfiguration.setOperatorUid(UserContext.current().getUser().getId());
+		getReadWriteDao().update(visitorSysConfiguration);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhVisitorSysConfigurations.class, visitorSysConfiguration.getId());
+	}
+
+	@Override
+	public VisitorSysConfiguration findVisitorSysConfigurationById(Long id) {
+		assert (id != null);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), VisitorSysConfiguration.class);
+	}
+	
+	@Override
+	public List<VisitorSysConfiguration> listVisitorSysConfiguration() {
+		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CONFIGURATIONS)
+				.orderBy(Tables.EH_VISITOR_SYS_CONFIGURATIONS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysConfiguration.class));
+	}
+	
+	private EhVisitorSysConfigurationsDao getReadWriteDao() {
+		return getDao(getReadWriteContext());
+	}
+
+	private EhVisitorSysConfigurationsDao getReadOnlyDao() {
+		return getDao(getReadOnlyContext());
+	}
+
+	private EhVisitorSysConfigurationsDao getDao(DSLContext context) {
+		return new EhVisitorSysConfigurationsDao(context.configuration());
+	}
+
+	private DSLContext getReadWriteContext() {
+		return getContext(AccessSpec.readWrite());
+	}
+
+	private DSLContext getReadOnlyContext() {
+		return getContext(AccessSpec.readOnly());
+	}
+
+	private DSLContext getContext(AccessSpec accessSpec) {
+		return dbProvider.getDslContext(accessSpec);
+	}
+}
