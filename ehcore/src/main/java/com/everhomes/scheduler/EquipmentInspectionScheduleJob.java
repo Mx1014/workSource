@@ -87,8 +87,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
                         equipmentProvider.updateEquipmentInspectionPlan(plan);
                     }
 				} catch (Exception e) {
-					LOGGER.error("Equipment schdule erro cause by {}",e);
-					sendErrorMessage(e);
+                    LOGGER.error("Equipment schdule erro cause by {},planId={}", e, plan.getId());
+					sendErrorMessage(e,plan.getId());
 					e.printStackTrace();
 				}
 			}
@@ -126,8 +126,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		equipmentProvider.closeExpiredReviewTasks();
 	}
 
-	private void sendErrorMessage(Exception e) {
-		String xiongying = "rui.jia@zuolin.com";
+    private void sendErrorMessage(Exception e, Long planId) {
+		String targetEmailAddress = "rui.jia@zuolin.com";
 		String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 		MailHandler handler = PlatformContext.getComponent(handlerName);
 		String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
@@ -135,11 +135,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream(); PrintStream stream = new PrintStream(out)) {
 			e.printStackTrace(stream);
 			String message = out.toString("UTF-8");
-			handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
+			handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error,planId:", planId.toString());
 			// out.reset();
 			e.getCause().printStackTrace(stream);
 			message = out.toString("UTF-8");
-			handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
+			handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error.Cause By", message);
 
 		} catch (Exception ignored) {
 			//
