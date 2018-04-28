@@ -1722,11 +1722,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		assert(customer.getId() != null);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
-        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME, "")
-        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
-        	   .execute();
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.update(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
 	}
 
