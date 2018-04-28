@@ -1956,8 +1956,8 @@ public class SalaryServiceImpl implements SalaryService {
         return null;
     }
 
-    public String processZLLink2PayslipDetail(Long payslipDetailId, Long createTime) {
-        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&createTime={" + createTime + "}";
+    public String processZLLink2PayslipDetail(Long payslipDetailId, String salaryPeriod) {
+        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&salaryPeriod={" + salaryPeriod + "}";
     }
 
     @Override
@@ -2087,11 +2087,11 @@ public class SalaryServiceImpl implements SalaryService {
         map.put("salaryDate", salaryPeriodString);
         String content = localeTemplateService.getLocaleTemplateString(0, SalaryConstants.SEND_NOTIFICATION_SCOPE, SalaryConstants.SEND_NOTIFICATION_CODE,
                 "zh_CN", map, salaryPeriodString + "工资已发放。");
-        sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getUpdateTime().getTime());
+        sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getSalaryPeriod());
     }
 
     private void sendMessage(
-            String content, String subject, Long receiverId, Long payslipDetailId, Long updateTime) {
+            String content, String subject, Long receiverId, Long payslipDetailId, String salaryPeriod) {
 
         //  set the message
         MessageDTO message = new MessageDTO();
@@ -2100,7 +2100,7 @@ public class SalaryServiceImpl implements SalaryService {
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
         //  set the route
-        String url = processZLLink2PayslipDetail(payslipDetailId, updateTime);
+        String url = processZLLink2PayslipDetail(payslipDetailId, salaryPeriod);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
@@ -2247,7 +2247,7 @@ public class SalaryServiceImpl implements SalaryService {
     public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
 
         SalaryPayslipDetail result = salaryPayslipDetailProvider.findSalaryPayslipDetailById(cmd.getPayslipDetailId());
-        if (null == result) {
+        if (null == result||PayslipDetailStatus.REVOKED == PayslipDetailStatus.fromCode(result.getStatus())) {
             return null;
         }
         if (NormalFlag.NO == NormalFlag.fromCode(result.getViewedFlag())) {
