@@ -118,6 +118,25 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/community/updateCommunityPartial</b>
+     * <p>更新小区部分信息，传了那个字段更新那个字段</p>
+     */
+    @RequestMapping("updateCommunityPartial")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityPartial(@Valid UpdateCommunityPartialAdminCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        this.communityService.updateCommunityPartial(cmd);
+
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/community/getCommunityById</b>
@@ -669,6 +688,21 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse updateCommunityAuthPopupConfig(@Valid UpdateCommunityAuthPopupConfigCommand cmd){
         CommunityAuthPopupConfigDTO dto = communityService.updateCommunityAuthPopupConfig(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /admin/community/changeOrganizationCommunity</b>
+     * <p>更改园区管理公司</p>
+     */
+    @RequestMapping("changeOrganizationCommunity")
+    @RestReturn(String.class)
+    public RestResponse changeOrganizationCommunity(@Valid ChangeOrganizationCommunityCommand cmd){
+        communityService.changeOrganizationCommunity(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

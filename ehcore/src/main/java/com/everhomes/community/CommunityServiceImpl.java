@@ -186,6 +186,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private FamilyProvider familyProvider;
 
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+    @Autowired
+    private ServiceModuleAppAuthorizationProvider serviceModuleAppAuthorizationProvider;
+
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
 
@@ -2833,6 +2839,7 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationService.createOrganizationCommunity(cmd.getPmOrgId(), community.getId());
 			}
 
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -2872,7 +2879,13 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAptCount(0);
 		community.setDefaultForumId(1L);
 		community.setFeedbackForumId(2L);
-		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}else {
+			community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		}
+
 		communityProvider.createCommunity(userId, community);
 
 		return community;
@@ -4267,6 +4280,82 @@ public class CommunityServiceImpl implements CommunityService {
 		CreateCommunitiesResponse response = new CreateCommunitiesResponse();
 		response.setDtos(dtos);
 		return response;
+	}
+
+	@Override
+	public void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid communityId parameter");
+		}
+
+//		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid geoPointList parameter");
+//		}
+
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null){
+			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+
+		if(cmd.getName() != null){
+			community.setName(cmd.getName());
+		}
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}
+
+		community.setOperatorUid(userId);
+		communityProvider.updateCommunity(community);
+
+	}
+
+	@Override
+	public void changeOrganizationCommunity(ChangeOrganizationCommunityCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid communityId parameter");
+		}
+
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null){
+			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
+		}
+
+
+		OrganizationCommunity orgcom = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getFromOrgId(), cmd.getCommunityId());
+		if(orgcom == null){
+			LOGGER.error("organization_Community is not found.communityId=" + cmd.getCommunityId() + " orgid="  + cmd.getFromOrgId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_ORGANIZATION_COMMUNITY_NOT_EXIST,
+					"organization_Community is not found.");
+		}
+
+		orgcom.setOrganizationId(cmd.getToOrgId());
+		organizationProvider.updateOrganizationCommunity(orgcom);
+
+        //查询原有园区授权记录
+        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelations(community.getNamespaceId(), null, cmd.getCommunityId());
+
+        if(serviceModuleAppAuthorizations != null){
+            for (ServiceModuleAppAuthorization authorization: serviceModuleAppAuthorizations){
+
+                //管理公司自己的应用要迁移，不保留授权的话也要迁移
+                if(authorization.getOrganizationId().equals(cmd.getFromOrgId()) || cmd.getKeepAuthorizationFlag() == null || cmd.getKeepAuthorizationFlag().byteValue() == 0){
+                    authorization.setOrganizationId(cmd.getToOrgId());
+                    authorization.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+                    serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorization(authorization);
+                }
+            }
+        }
+
 	}
 }
 

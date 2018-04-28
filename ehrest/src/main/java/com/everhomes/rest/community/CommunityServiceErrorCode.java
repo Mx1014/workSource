@@ -23,4 +23,6 @@ public interface CommunityServiceErrorCode {
     int ERROR_PHONE_EMPTY = 20004;
     int ERROR_LATITUDE_LONGITUDE = 20005;
 
+    int ERROR_ORGANIZATION_COMMUNITY_NOT_EXIST = 30001; //管理管关系不存在
+
 }

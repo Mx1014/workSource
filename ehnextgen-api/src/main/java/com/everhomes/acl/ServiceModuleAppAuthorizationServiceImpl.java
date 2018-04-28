@@ -113,6 +113,26 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         return authorizations;
     }
 
+
+    @Override
+    public List<ServiceModuleAppAuthorization> listCommunityRelations(Integer namespaceId, Long organizationId, Long communityId) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+                if (organizationId != null){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(organizationId));
+                }
+                if(communityId != null){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.PROJECT_ID.eq(communityId));
+                }
+
+                return query;
+            }
+        });
+        return authorizations;
+    }
+
     @Override
     public List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(
@@ -199,4 +219,6 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             serviceModuleAppProfileProvider.updateServiceModuleAppProfile(profile);
         }
     }
+
+
 }
