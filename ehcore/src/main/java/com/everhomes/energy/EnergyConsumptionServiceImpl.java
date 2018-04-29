@@ -188,7 +188,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
@@ -240,6 +239,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -2922,46 +2922,67 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
             String data = jsonObj.getAsJsonArray("data").get(0).toString();
             return new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
-        } catch (JsonSyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(String.format("meter id = %s,meterNumber = %s, autoReading = %s", meterId, meterNumber, meterReading), e);
         }
     }
 
     private void createMonthAutoPlans(List<EnergyMeter> meters) {
-        //暂时只有FZH 不做域空间区分
         if (meters != null && meters.size() > 0) {
-            EnergyPlan plan = new EnergyPlan();
-            plan.setRepeatSettingId(0L);
-            plan.setName("autoPlans");
-            plan.setNamespaceId(meters.get(0).getNamespaceId());
-            plan.setStatus(CommonStatus.AUTO.getCode());
-            plan.setOwnerId(meters.get(0).getOwnerId());
-            plan.setOwnerType(meters.get(0).getOwnerType());
-            plan.setTargetId(meters.get(0).getCommunityId());
-            RepeatSettings repeatSetting = new RepeatSettings();
-            //调用此的时候已经是每月月底
-            LocalDate localDate = LocalDate.now();
-            repeatSetting.setOwnerId(meters.get(0).getOwnerId());
-            repeatSetting.setOwnerType(meters.get(0).getOwnerType());
-            repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
-            repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).format(autoDateSF)));
-            repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
-            repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
-            repeatSetting.setRepeatInterval(1);
-            String expression = "{\"expression\":[{\"day\":%s}]}";
-            expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
-            repeatSetting.setExpression(expression);
-            repeatService.createRepeatSettings(repeatSetting);
-            plan.setRepeatSettingId(repeatSetting.getId());
-            energyPlanProvider.createEnergyPlan(plan);
-            meters.forEach((meter)->{
-                EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
-                meterMap.setPlanId(plan.getId());
-                meterMap.setMeterId(meter.getId());
-                energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+            Map<Integer, List<EnergyMeter>> namespaceMeterMap = new HashMap<>();
+            namespaceMeterMap = getprocessNamespaceMeterMap(meters);
+            if(namespaceMeterMap!=null && namespaceMeterMap.size()>0){
+                namespaceMeterMap.forEach((k,v)->{
+                    if (v != null && v.size() > 0) {
+                        EnergyPlan plan = new EnergyPlan();
+                        plan.setRepeatSettingId(0L);
+                        plan.setName("autoPlans");
+                        plan.setNamespaceId(k);
+                        plan.setStatus(CommonStatus.AUTO.getCode());
+                        plan.setOwnerId(v.get(0).getOwnerId());
+                        plan.setOwnerType(v.get(0).getOwnerType());
+                        plan.setTargetId(v.get(0).getCommunityId());
+                        RepeatSettings repeatSetting = new RepeatSettings();
+                        //调用此的时候已经是每月月底
+                        LocalDate localDate = LocalDate.now();
+                        repeatSetting.setOwnerId(meters.get(0).getOwnerId());
+                        repeatSetting.setOwnerType(meters.get(0).getOwnerType());
+                        repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
+                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).format(autoDateSF)));
+                        repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
+                        repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
+                        repeatSetting.setRepeatInterval(1);
+                        String expression = "{\"expression\":[{\"day\":%s}]}";
+                        expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
+                        repeatSetting.setExpression(expression);
+                        repeatService.createRepeatSettings(repeatSetting);
+                        plan.setRepeatSettingId(repeatSetting.getId());
+                        energyPlanProvider.createEnergyPlan(plan);
+                        meters.forEach((meter)->{
+                            EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
+                            meterMap.setPlanId(plan.getId());
+                            meterMap.setMeterId(meter.getId());
+                            energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    private Map<Integer, List<EnergyMeter>> getprocessNamespaceMeterMap(List<EnergyMeter> meters) {
+        Map<Integer, List<EnergyMeter>> meterMap = new HashMap<>();
+        if (meters != null && meters.size() > 0) {
+            meters.forEach(meter -> {
+                if (meterMap.get(meter.getNamespaceId()) != null) {
+                    meterMap.get(meter.getNamespaceId()).add(meter);
+                } else {
+                    meterMap.put(meter.getNamespaceId(), new ArrayList<>(Collections.singletonList(meter)));
+                }
             });
         }
+        return meterMap;
     }
 
     private void sendErrorMessage(Exception e) {

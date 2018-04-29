@@ -808,7 +808,7 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
-     * <p>同步离线数据</p>
+     * <p>测试远程读数</p>
      * <b>URL: /energy/testAutoReadMeters</b>
      */
     @RestReturn(String.class)
