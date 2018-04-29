@@ -64,7 +64,7 @@ UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（$
 
 -- 对接 北科建远程抄表  by jiarui 20180416
 SET  @id = (SELECT MAX(id) FROM  eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id:=@id+1), 'energy.meter.thirdparty.server', 'http://122.225.71.66:211/test', 'energy.meter.thirdparty.server', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id:=@id+1), 'energy.meter.thirdparty.server', 'http://139.196.103.205:8787/beikejian', 'energy.meter.thirdparty.server', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id:=@id+1), 'energy.meter.thirdparty.publicKey', 'MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJQeFrVhmHoWYNwPkXFVScpdwsZ/BnVhsUuGGvozfgcyde6Q7nFaTmvNBGuxbSqsSmatQLKEZWkPDDzP/Yv7zPcCAwEAAQ==', 'energy.meter.thirdparty.publicKey', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id:=@id+1), 'energy.meter.thirdparty.client.id', 'joy000001', 'energy.meter.thirdparty.client.id', '0', NULL);
 
