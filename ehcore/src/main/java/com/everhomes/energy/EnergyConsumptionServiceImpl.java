@@ -188,6 +188,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
@@ -2868,10 +2869,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     if (handler != null) {
                         try {
                             String meterReading = handler.readMeterautomatically(meter.getMeterNumber(), serverUrl, publicKey, clientId);
+                            LOGGER.info("energy auto reading meter meterId={},meterNumber={}, Reading={}", meter.getId(), meter.getMeterNumber(), meterReading);
                             //parser
-                            JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
-                            String data = jsonObj.getAsJsonArray("data").get(0).toString();
-                            Map<String, String> result = new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
+                            Map<String, String> result = getRemoteReadingDataMap(meterReading,meter.getId(),meter.getMeterNumber());
                             //log
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
@@ -2902,7 +2902,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             meterSearcher.feedDoc(meter);
                         } catch (Exception e) {
                             LOGGER.error("read energy meter reading  error...", e);
-                            //sendErrorMessage(e);
+                            sendErrorMessage(e);
                             e.printStackTrace();
                         }
                     }
@@ -2914,6 +2914,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.info("starting create  auto  meter plans ...");
             createMonthAutoPlans(meters);
             LOGGER.info("ending create  auto  meter plans ...");
+        }
+    }
+
+    private Map<String, String> getRemoteReadingDataMap(String meterReading, Long meterId, String meterNumber) {
+        try {
+            JsonObject jsonObj = new JsonParser().parse(meterReading).getAsJsonObject();
+            String data = jsonObj.getAsJsonArray("data").get(0).toString();
+            return new Gson().fromJson(data, new TypeToken<Map<String, String>>() {}.getType());
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            throw new RuntimeException(String.format("meter id = %s,meterNumber = %s, autoReading = %s", meterId, meterNumber, meterReading), e);
         }
     }
 
@@ -3064,7 +3075,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             meter.getId(), rateSetting, amountSetting);
                     continue;
                 }
-                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+//                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
 //                String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
                 ScriptEngineManager manager = new ScriptEngineManager();
@@ -3318,7 +3329,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterSettingLog costSetting   = meterSettingLogProvider
                     .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,monthEnd);
 
-            String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+           // String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
             BigDecimal realCost = new BigDecimal(0);
 
