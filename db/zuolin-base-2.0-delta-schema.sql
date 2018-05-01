@@ -30,11 +30,11 @@ ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 
 -- 园区应用配置表（不跟随管理公司时的自定义配置）
-CREATE TABLE `eh_app_community_config` (
+CREATE TABLE `eh_app_community_configs` (
   `id` bigint(20) NOT NULL,
   `organization_app_id` bigint(20) DEFAULT NULL,
   `community_id` bigint(20) DEFAULT NULL,
-  `visibilityFlag` tinyint(4) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
   `display_name` varchar(255) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
@@ -177,4 +177,4 @@ CREATE TABLE `eh_communityAndBuilding_relationes` (
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `icon_uri`  varchar(255) NULL;
 
 -- 标准版里app的配置是否跟随默认配置
-ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL DEFAULT 1;
+ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
