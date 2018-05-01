@@ -4,12 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>INVALID((byte) 0): INVALID</li>
- *     <li>VALID((byte) 2): VALID</li>
+ *     <li>DELETE((byte) 0): 删除的、无效的</li>
+ *     <li>DISABLE((byte) 1): 禁用的</li>
+ *     <li>ENABLE((byte) 2): 启用的</li>
  * </ul>
  */
 public enum OrganizationAppStatus {
-	INVALID((byte) 0), VALID((byte) 2);
+	DELETE((byte) 0), DISABLE((byte) 1), ENABLE((byte) 2);
 	private Byte code;
 
 	private OrganizationAppStatus(Byte code) {

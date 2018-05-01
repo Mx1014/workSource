@@ -13,6 +13,8 @@ public interface AppCommunityConfigProvider {
 
     void deleteAppCommunityConfig(AppCommunityConfig obj);
 
+    void deleteAppCommunityConfigByCommunityId(Long communityId);
+
     AppCommunityConfig getAppCommunityConfigById(Long id);
 
     List<AppCommunityConfig> queryAppCommunityConfigs(ListingLocator locator,

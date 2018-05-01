@@ -1,9 +1,9 @@
 package com.everhomes.serviceModuleApp;
 
-import com.everhomes.server.schema.tables.pojos.EhAppCommunityConfig;
+import com.everhomes.server.schema.tables.pojos.EhAppCommunityConfigs;
 import com.everhomes.util.StringHelper;
 
-public class AppCommunityConfig extends EhAppCommunityConfig {
+public class AppCommunityConfig extends EhAppCommunityConfigs {
     /**
      * 
      */
