@@ -199,6 +199,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -299,6 +300,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Value("${equipment.ip}")
+    private String equipmentIp;
 
     @Autowired
     private EnergyYoyStatisticProvider energyYoyStatisticProvider;
@@ -451,13 +455,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
-        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
-                    cronExpression, EnergyTaskScheduleJob.class, null);
+        String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+        LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+        if (taskServer.equals(equipmentIp)) {
+            if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+                scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
+                        cronExpression, EnergyTaskScheduleJob.class, null);
 
-            String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
-            scheduleProvider.scheduleCronJob(autoReading, autoReading,
-                    "0 10 5 L * ?", EnergyAutoReadingJob.class, null);
+                String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
+                scheduleProvider.scheduleCronJob(autoReading, autoReading,
+                        "0 10 5 L * ?", EnergyAutoReadingJob.class, null);
+            }
         }
     }
 

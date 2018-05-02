@@ -461,21 +461,29 @@ public class QualityServiceImpl implements QualityService {
         	executiveGroup = new ArrayList<>();
     		reviewGroup = new ArrayList<>();
 
-			for(StandardGroupDTO group : groupList) {
+			for (StandardGroupDTO group : groupList) {
 				QualityInspectionStandardGroupMap map = new QualityInspectionStandardGroupMap();
-				 map.setStandardId(standard.getId());
-				 map.setGroupType(group.getGroupType());
-				 map.setGroupId(group.getGroupId());
-				 map.setPositionId(group.getPositionId());
-				 if(group.getInspectorUid() != null)
-					 map.setInspectorUid(group.getInspectorUid());
-				 qualityProvider.createQualityInspectionStandardGroupMap(map);
-				 if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 executiveGroup.add(map);
-				 }
-				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 reviewGroup.add(map);
-				 }
+				map.setStandardId(standard.getId());
+				map.setGroupType(group.getGroupType());
+				map.setGroupId(group.getGroupId());
+				map.setPositionId(group.getPositionId());
+				if (group.getInspectorUid() != null) {
+					map.setInspectorUid(group.getInspectorUid());
+					if (null == map.getGroupId()) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(group.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							map.setGroupId(members.get(0).getGroupId());
+						}
+					}
+
+				}
+				qualityProvider.createQualityInspectionStandardGroupMap(map);
+				if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					executiveGroup.add(map);
+				}
+				if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					reviewGroup.add(map);
+				}
 			}
 
 			standard.setExecutiveGroup(executiveGroup);
