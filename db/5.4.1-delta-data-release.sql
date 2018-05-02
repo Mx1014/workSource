@@ -147,3 +147,8 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 set @id =(select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1) ,'21110', '0', '21114', '导出客户', '5', NOW());
 
+-- by st.zheng
+set @id =(select MAX(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id:=@id+1), 'rental.notification', '23', 'zh_CN', '即将超时', '尊敬的用户，您预约的${useDetail}剩余使用时长：15分钟，如需延时，请前往APP进行操作，否则超时系统将继续计时计费，感谢您的使用。', '0');
+
+

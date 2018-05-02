@@ -256,12 +256,19 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void endReminderSendMessage(RentalOrder rentalBill) {
-        //给车主发短信
+
 
         String customJson = rentalBill.getCustomObject();
         VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
         String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
-
+        //消息推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        String timeupContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_ORDER_TIME_UP, RentalNotificationTemplateCode.locale, map, "");
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), timeupContent,
+                rentalBill.getId(), rentalBill.getResourceType());
+        //给车主发短信
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", useDetail);
 
