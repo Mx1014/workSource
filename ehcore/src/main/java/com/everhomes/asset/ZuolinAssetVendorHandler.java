@@ -854,13 +854,22 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     //组装
                     List<BillForClientV2> list = new ArrayList<>();
                     Set<Long> addressIds = new HashSet<>();
+                    StringBuilder addresses = new StringBuilder();
                     BigDecimal owedMoney = new BigDecimal("0");
                     for (int i = 0; i < enclosedBills.size(); i++) {
                         PaymentBills bill = enclosedBills.get(i);
                         BillForClientV2 v2 = new BillForClientV2();
                         owedMoney = owedMoney.add(enclosedBills.get(i).getAmountOwed());
                         addressIds.addAll(assetProvider.getAddressIdByBillId(bill.getId()));
-
+                        // 从bill相关的billItem种拿楼栋门牌，为了兼容以前的数据
+                        String addressByBillId = assetProvider.getAddressByBillId(bill.getId());
+                        if(!StringUtils.isBlank(addressByBillId)){
+                            if(i == enclosedBills.size() - 1){
+                                addresses.append(addressByBillId);
+                            }else{
+                                addresses.append(addressByBillId + ",");
+                            }
+                        }
                         v2.setAmountOwed(bill.getAmountOwed().toString());
                         v2.setAmountReceivable(bill.getAmountReceivable().toString());
                         v2.setBillDuration(bill.getDateStrBegin() + "至" + bill.getDateStrEnd());
@@ -870,6 +879,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
                     if (dto.getAddressStr().lastIndexOf(",") != -1) {
                         dto.setAddressStr(dto.getAddressStr().substring(0, dto.getAddressStr().length() - 1));
+                    }
+                    //如果没有查到，直接用bill自带的 by wentian
+                    if(StringUtils.isBlank(dto.getAddressStr())){
+                        dto.setAddressStr(addresses.toString());
                     }
                     dto.setBills(list);
                     dto.setOverAllAmountOwed(owedMoney.toString());
