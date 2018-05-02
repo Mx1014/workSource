@@ -1264,9 +1264,10 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setTargetName(f.getValue(r.TARGET_NAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
                     vo.setInvoiceNum(f.getValue(r.INVOICE_NUMBER));
-                    //bill can has multiple addresses, thus one single address may confuse user
-//                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
-//                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
+//                    bill can has multiple addresses, thus one single address may confuse user
+                    // still present addresses
+                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
+                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
@@ -1301,7 +1302,6 @@ public class AssetProviderImpl implements AssetProvider {
                     list2.add(exemDto);
                     return null;
                 });
-
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
         vo.setBillGroupDTO(dto);
