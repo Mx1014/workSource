@@ -665,7 +665,7 @@ public class HotlineServiceImpl implements HotlineService {
 	/**
 	 * 根据条件导出相应聊天记录
 	 */
-	public void exportMultiChatRecordList(GetChatGroupListCommand cmd) {
+	public void exportMultiChatRecordList(GetChatGroupListCommand cmd, HttpServletResponse httpResponse) {
 		// 检查权限
 //		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
 //				cmd.getCurrentProjectId());
