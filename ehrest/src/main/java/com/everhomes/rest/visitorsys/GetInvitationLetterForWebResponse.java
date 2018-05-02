@@ -1,0 +1,88 @@
+// @formatter:off
+package com.everhomes.rest.visitorsys;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ *<ul>
+ *<li>logoUrl : (选填)logo的url地址</li>
+ *<li>logoUri : (选填)logo的uri地址</li>
+ *<li>ipadThemeRgb : (选填)主题色</li>
+ *<li>qrcodeUri : (选填)二维码uri地址</li>
+ *<li>qrcodeUrl : (选填)二维码url地址</li>
+ *<li>visitorInfoDTO : (必填)访客信息， {@link com.everhomes.rest.visitorsys.BaseVisitorInfoDTO}</li>
+ *<li>officeLocationDTO : (必填)地址信息， {@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
+ *</ul>
+ */
+public class GetInvitationLetterForWebResponse {
+    private String logoUrl;
+    private String logoUri;
+    private String ipadThemeRgb;
+    private String qrcodeUri;
+    private String qrcodeUrl;
+
+    private BaseVisitorInfoDTO visitorInfoDTO;
+    private BaseOfficeLocationDTO officeLocationDTO;
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getLogoUri() {
+        return logoUri;
+    }
+
+    public void setLogoUri(String logoUri) {
+        this.logoUri = logoUri;
+    }
+
+    public String getIpadThemeRgb() {
+        return ipadThemeRgb;
+    }
+
+    public void setIpadThemeRgb(String ipadThemeRgb) {
+        this.ipadThemeRgb = ipadThemeRgb;
+    }
+
+    public String getQrcodeUri() {
+        return qrcodeUri;
+    }
+
+    public void setQrcodeUri(String qrcodeUri) {
+        this.qrcodeUri = qrcodeUri;
+    }
+
+    public String getQrcodeUrl() {
+        return qrcodeUrl;
+    }
+
+    public void setQrcodeUrl(String qrcodeUrl) {
+        this.qrcodeUrl = qrcodeUrl;
+    }
+
+    public BaseVisitorInfoDTO getVisitorInfoDTO() {
+        return visitorInfoDTO;
+    }
+
+    public void setVisitorInfoDTO(BaseVisitorInfoDTO visitorInfoDTO) {
+        this.visitorInfoDTO = visitorInfoDTO;
+    }
+
+    public BaseOfficeLocationDTO getOfficeLocationDTO() {
+        return officeLocationDTO;
+    }
+
+    public void setOfficeLocationDTO(BaseOfficeLocationDTO officeLocationDTO) {
+        this.officeLocationDTO = officeLocationDTO;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+}

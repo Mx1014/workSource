@@ -12,16 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestDoc(value = "ListCommunityOrganizationsResponse Controller", site = "core")
+@RestDoc(value = "visitorsys Controller", site = "core")
 @RestController
-@RequestMapping("/ListCommunityOrganizationsResponse")
+@RequestMapping("/visitorsys")
 public class VisitorSysController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listBookedVisitors</b>
+	 * <b>URL: /visitorsys/listBookedVisitors</b>
 	 * <p>
 	 * 1.获取预约访客/访客管理列表-后台管理
 	 * </p>
@@ -38,7 +38,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/getBookedVisitorById</b>
+	 * <b>URL: /visitorsys/getBookedVisitorById</b>
 	 * <p>
 	 * 2.获取预约详情-后台管理
 	 * </p>
@@ -55,7 +55,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listOfficeLocations</b>
+	 * <b>URL: /visitorsys/listOfficeLocations</b>
 	 * <p>
 	 * 3.获取企业办公地点列表-后台管理
 	 * </p>
@@ -72,7 +72,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/ListCommunityOrganizationsResponse/listCommunityOrganizations</b>
+	 * <b>URL: /ui/visitorsys/listCommunityOrganizations</b>
 	 * <p>
 	 * 4.获取园区企业列表(园区访客，此接口否使用接口待定)-后台管理
 	 * </p>
@@ -89,7 +89,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listVisitReasons</b>
+	 * <b>URL: /visitorsys/listVisitReasons</b>
 	 * <p>
 	 * 5.获取访客事由列表-后台管理
 	 * </p>
@@ -107,7 +107,7 @@ public class VisitorSysController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/createOrUpdateVisitor</b>
+	 * <b>URL: /visitorsys/createOrUpdateVisitor</b>
 	 * <p>
 	 * 6.创建临时/预约访客-后台管理
 	 * </p>
@@ -124,7 +124,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/sendVisitorSMS</b>
+	 * <b>URL: /visitorsys/sendVisitorSMS</b>
 	 * <p>
 	 * 7.给访客发送邀请函-后台管理
 	 * </p>
@@ -141,7 +141,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/deleteVisitor</b>
+	 * <b>URL: /visitorsys/deleteVisitor</b>
 	 * <p>
 	 * 8.删除访客邀请-后台管理
 	 * </p>
@@ -158,7 +158,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/confirmVisitor</b>
+	 * <b>URL: /visitorsys/confirmVisitor</b>
 	 * <p>
 	 * 9.访客到访确认接口-后台管理
 	 * </p>
@@ -175,7 +175,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/getStatistics</b>
+	 * <b>URL: /visitorsys/getStatistics</b>
 	 * <p>
 	 * 10.统计接口-后台管理
 	 * </p>
@@ -192,7 +192,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/addDevice</b>
+	 * <b>URL: /visitorsys/addDevice</b>
 	 * <p>
 	 * 11.添加设备(ipad/打印机)接口-后台管理
 	 * </p>
@@ -209,7 +209,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listDevices</b>
+	 * <b>URL: /visitorsys/listDevices</b>
 	 * <p>
 	 * 12.获取设备(ipad/打印机)接口列表-后台管理
 	 * </p>
@@ -226,7 +226,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/deleteDevice</b>
+	 * <b>URL: /visitorsys/deleteDevice</b>
 	 * <p>
 	 * 13.删除设备(ipad/打印机)-后台管理
 	 * </p>
@@ -243,7 +243,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/createOrUpdateOfficeLocation</b>
+	 * <b>URL: /visitorsys/createOrUpdateOfficeLocation</b>
 	 * <p>
 	 * 14.添加/更新企业办公地点-后台管理
 	 * </p>
@@ -260,7 +260,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/deleteOfficeLocation</b>
+	 * <b>URL: /visitorsys/deleteOfficeLocation</b>
 	 * <p>
 	 * 15.删除企业办公地点-后台管理
 	 * </p>
@@ -277,7 +277,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/getConfiguration</b>
+	 * <b>URL: /visitorsys/getConfiguration</b>
 	 * <p>
 	 * 16.获取配置-后台管理
 	 * </p>
@@ -294,15 +294,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/updateConfiguration</b>
+	 * <b>URL: /visitorsys/updateConfiguration</b>
 	 * <p>
 	 * 17.更新配置-后台管理
 	 * </p>
 	 */
 	@RequestMapping("updateConfiguration")
-	@RestReturn(String.class)
+	@RestReturn(GetConfigurationResponse.class)
 	public RestResponse updateConfiguration(UpdateConfigurationCommand cmd) {
-		baseResponse baseResponse = visitorSysService.updateConfiguration(cmd);
+		GetConfigurationResponse baseResponse = visitorSysService.updateConfiguration(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -311,15 +311,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listBlackLists</b>
+	 * <b>URL: /visitorsys/listBlackLists</b>
 	 * <p>
 	 * 18.获取黑名单列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listBlackLists")
 	@RestReturn(ListBlackListsResponse.class)
-	public RestResponse listBlackLists(BaseVisitorsysCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listBlackLists(cmd);
+	public RestResponse listBlackLists(ListBlackListsCommand cmd) {
+		ListBlackListsResponse baseResponse = visitorSysService.listBlackLists(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -328,7 +328,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/deleteBlackList</b>
+	 * <b>URL: /visitorsys/deleteBlackList</b>
 	 * <p>
 	 * 19.删除黑名单-后台管理
 	 * </p>
@@ -336,16 +336,16 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("deleteBlackList")
 	@RestReturn(String.class)
 	public RestResponse deleteBlackList(DeleteBlackListCommand cmd) {
-		baseResponse baseResponse = visitorSysService.deleteBlackList(cmd);
+		visitorSysService.deleteBlackList(cmd);
 
-		RestResponse response = new RestResponse(baseResponse);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/createOrUpdateBlackList</b>
+	 * <b>URL: /visitorsys/createOrUpdateBlackList</b>
 	 * <p>
 	 * 20.添加/更新黑名单-后台管理
 	 * </p>
@@ -353,7 +353,7 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("createOrUpdateBlackList")
 	@RestReturn(CreateOrUpdateBlackListResponse.class)
 	public RestResponse createOrUpdateBlackList(CreateOrUpdateBlackListCommand cmd) {
-		baseResponse baseResponse = visitorSysService.createOrUpdateBlackList(cmd);
+		CreateOrUpdateBlackListResponse baseResponse = visitorSysService.createOrUpdateBlackList(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -363,15 +363,15 @@ public class VisitorSysController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listDoorGuards</b>
+	 * <b>URL: /visitorsys/listDoorGuards</b>
 	 * <p>
 	 * 21.门禁列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listDoorGuards")
 	@RestReturn(ListDoorGuardsResponse.class)
-	public RestResponse listDoorGuards(ListDoorGuardsCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listDoorGuards(cmd);
+	public RestResponse listDoorGuards(BaseVisitorsysCommand cmd) {
+		ListDoorGuardsResponse baseResponse = visitorSysService.listDoorGuards(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -380,15 +380,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/getConfigurationForWeb</b>
+	 * <b>URL: /visitorsys/getConfigurationForWeb</b>
 	 * <p>
 	 * 1.获取配置-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("getConfigurationForWeb")
-	@RestReturn(GetConfigurationForWebResponse.class)
-	public RestResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.getConfigurationForWeb(cmd);
+	@RestReturn(GetConfigurationResponse.class)
+	public RestResponse getConfigurationForWeb(BaseVisitorsysCommand cmd) {
+		GetConfigurationResponse baseResponse = visitorSysService.getConfiguration(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -397,15 +397,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listBookedVisitorsForWeb</b>
+	 * <b>URL: /visitorsys/listBookedVisitorsForWeb</b>
 	 * <p>
 	 * 2.获取预约访客列表-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listBookedVisitorsForWeb")
-	@RestReturn(ListBookedVisitorsForWebResponse.class)
-	public RestResponse listBookedVisitorsForWeb(ListBookedVisitorsForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listBookedVisitorsForWeb(cmd);
+	@RestReturn(ListBookedVisitorsResponse.class)
+	public RestResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd) {
+		ListBookedVisitorsResponse baseResponse = visitorSysService.listBookedVisitors(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -414,15 +414,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/getBookedVisitorByIdForWeb</b>
+	 * <b>URL: /visitorsys/getBookedVisitorByIdForWeb</b>
 	 * <p>
 	 * 3.获取预约详情-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("getBookedVisitorByIdForWeb")
-	@RestReturn(getBookedVisitorByIdForWebResponse.class)
-	public RestResponse getBookedVisitorByIdForWeb(getBookedVisitorByIdForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.getBookedVisitorByIdForWeb(cmd);
+	@RestReturn(GetBookedVisitorByIdResponse.class)
+	public RestResponse getBookedVisitorByIdForWeb(GetBookedVisitorByIdCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorById(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -431,15 +431,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/listVisitReasonsForWeb</b>
+	 * <b>URL: /visitorsys/listVisitReasonsForWeb</b>
 	 * <p>
 	 * 4.获取事由列表（此接口否使用接口待定，可以使用枚举）-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listVisitReasonsForWeb")
-	@RestReturn(ListVisitReasonsForWebResponse.class)
-	public RestResponse listVisitReasonsForWeb(ListVisitReasonsForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listVisitReasonsForWeb(cmd);
+	@RestReturn(ListVisitReasonsResponse.class)
+	public RestResponse listVisitReasonsForWeb(BaseVisitorsysCommand cmd) {
+		ListVisitReasonsResponse baseResponse = visitorSysService.listVisitReasons(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -448,15 +448,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/createOrUpdateVisitorForWeb</b>
+	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
 	 * <p>
 	 * 5.创建临时/预约访客-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateVisitorForWeb")
-	@RestReturn(CreateOrUpdateVisitorForWebResponse.class)
-	public RestResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.createOrUpdateVisitorForWeb(cmd);
+	@RestReturn(GetBookedVisitorByIdResponse.class)
+	public RestResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.createOrUpdateVisitor(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -465,24 +465,24 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ListCommunityOrganizationsResponse/deleteVisitorForWeb</b>
+	 * <b>URL: /visitorsys/deleteVisitorForWeb</b>
 	 * <p>
 	 * 6.删除访客-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("deleteVisitorForWeb")
-	@RestReturn(DeleteVisitorForWebResponse.class)
-	public RestResponse deleteVisitorForWeb(DeleteVisitorForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.deleteVisitorForWeb(cmd);
+	@RestReturn(String.class)
+	public RestResponse deleteVisitorForWeb(GetBookedVisitorByIdCommand cmd) {
+		visitorSysService.deleteVisitor(cmd);
 
-		RestResponse response = new RestResponse(baseResponse);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
 	/**
-	 * <b>URL: /ui/ListCommunityOrganizationsResponse/listOfficeLocationsForWeb</b>
+	 * <b>URL: /ui/visitorsys/listOfficeLocationsForWeb</b>
 	 * <p>
 	 * 7.获取企业办公地点列表(企业访客)-h5（客户端/微信端）
 	 * </p>
@@ -490,7 +490,7 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("listOfficeLocationsForWeb")
 	@RestReturn(ListOfficeLocationsResponse.class)
 	public RestResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listOfficeLocationsForWeb(cmd);
+		ListOfficeLocationsResponse baseResponse = visitorSysService.listOfficeLocations(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -499,7 +499,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/ListCommunityOrganizationsResponse/listCommunityOrganizationsForWeb</b>
+	 * <b>URL: /ui/visitorsys/listCommunityOrganizationsForWeb</b>
 	 * <p>
 	 * 8.获取园区企业列表(园区访客，此接口否使用接口待定)-h5（客户端/微信端）
 	 * </p>
@@ -507,7 +507,7 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("listCommunityOrganizationsForWeb")
 	@RestReturn(ListCommunityOrganizationsResponse.class)
 	public RestResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd) {
-		baseResponse baseResponse = visitorSysService.listCommunityOrganizationsForWeb(cmd);
+		ListCommunityOrganizationsResponse baseResponse = visitorSysService.listCommunityOrganizations(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -516,7 +516,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/ListCommunityOrganizationsResponse/getInvitationLetterForWeb</b>
+	 * <b>URL: /ui/visitorsys/getInvitationLetterForWeb</b>
 	 * <p>
 	 * 9.获取访客邀请函(不登录)-h5（客户端/微信端）
 	 * </p>
@@ -525,7 +525,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(GetInvitationLetterForWebResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse getInvitationLetterForWeb(GetInvitationLetterForWebCommand cmd) {
-		baseResponse baseResponse = visitorSysService.getInvitationLetterForWeb(cmd);
+		GetInvitationLetterForWebResponse baseResponse = visitorSysService.getInvitationLetterForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

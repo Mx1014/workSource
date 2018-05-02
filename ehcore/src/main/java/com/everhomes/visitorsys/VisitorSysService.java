@@ -1,7 +1,11 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.visitorsys.*;
+import com.everhomes.rest.visitorsys.ui.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -39,4 +43,34 @@ public interface VisitorSysService {
     void deleteOfficeLocation(DeleteOfficeLocationCommand cmd);
 
     GetConfigurationResponse getConfiguration(BaseVisitorsysCommand cmd);
+
+    GetConfigurationResponse updateConfiguration(UpdateConfigurationCommand cmd);
+
+    ListBlackListsResponse listBlackLists(ListBlackListsCommand cmd);
+
+    void deleteBlackList(DeleteBlackListCommand cmd);
+
+    CreateOrUpdateBlackListResponse createOrUpdateBlackList(CreateOrUpdateBlackListCommand cmd);
+
+    ListDoorGuardsResponse listDoorGuards(BaseVisitorsysCommand cmd);
+
+    GetInvitationLetterForWebResponse getInvitationLetterForWeb(GetInvitationLetterForWebCommand cmd);
+
+    GetPairingCodeResponse getPairingCode(GetPairingCodeCommand cmd);
+
+    DeferredResult<RestResponse> confirmPairingCode(ConfirmPairingCodeCommand cmd);
+
+    GetConfigurationResponse getUIConfiguration(BaseVisitorsysUICommand cmd);
+
+    CreateOrUpdateVisitorUIResponse createOrUpdateUIVisitor(CreateOrUpdateVisitorUICommand cmd);
+
+    ListOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd);
+
+    ListOfficeLocationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd);
+
+    ListVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd);
+
+    void sendSMSVerificationCode(SendSMSVerificationCodeCommand cmd);
+
+    void confirmVerificationCode(ConfirmVerificationCodeCommand cmd);
 }

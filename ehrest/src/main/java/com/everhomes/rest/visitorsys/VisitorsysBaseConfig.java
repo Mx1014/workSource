@@ -5,19 +5,25 @@ import com.everhomes.util.StringHelper;
 
 /**
   *<ul>
- *<li>selfRegistrationFlag : (必填)有效期是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>selfDefineWelComeFlag : (必填)车牌号码是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>signSecrecyAgreementsFlag : (必填)证件号码是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>photosAllowedFlag : (必填)到访楼层是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>AllowSkippingPhotosFlag : (必填)到访门牌是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>followUpNumbersFlag : (必填)到访门牌是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>doorGuardsFlag : (必填)到访门牌是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
- *<li>doorGuardsValidAfterConfirmedFlag : (选填)到访门牌是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>visitorQrcodeFlag : (必填)访客邀请函是否启用访客二维码，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>visitorInfoFlag : (必填)访客邀请函是否启用访客信息，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>trafficGuidanceFlag : (必填)访客邀请函是否启用交通指引，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>selfRegistrationFlag : (必填)是否启用手机扫码自助登记，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>selfDefineWelComeFlag : (必填)是否启用自定义欢迎页面信息，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>signSecrecyAgreementsFlag : (必填)是否签署保密协议，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>photosAllowedFlag : (必填)是否允许拍摄头像，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>AllowSkippingPhotosFlag : (必填)是否允许跳过拍摄头像，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>followUpNumbersFlag : (必填)是否允许输入随访人员数量，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>doorGuardsFlag : (必填)是否对接门禁授权，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>doorGuardsValidAfterConfirmedFlag : (选填)大堂门禁权限需要被确认到访后生效，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardId : (选填)门禁id</li>
- *<li>doorGuardName : (选填)到访门牌是否必填，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>doorGuardName : (选填)门禁名称</li>
   *</ul>
   */
 public class VisitorsysBaseConfig {
+    private Byte visitorQrcodeFlag=1;
+    private Byte visitorInfoFlag=1;
+    private Byte trafficGuidanceFlag=1;
     private Byte selfRegistrationFlag=1;
     private Byte selfDefineWelComeFlag=1;
     private Byte signSecrecyAgreementsFlag=0;
@@ -25,9 +31,33 @@ public class VisitorsysBaseConfig {
     private Byte AllowSkippingPhotosFlag=1;
     private Byte followUpNumbersFlag=1;
     private Byte doorGuardsFlag=0;
-    private Byte doorGuardsValidAfterConfirmedFlag;
+    private Byte doorGuardsValidAfterConfirmedFlag=0;
     private String doorGuardId;
     private String doorGuardName;
+
+    public Byte getVisitorQrcodeFlag() {
+        return visitorQrcodeFlag;
+    }
+
+    public void setVisitorQrcodeFlag(Byte visitorQrcodeFlag) {
+        this.visitorQrcodeFlag = visitorQrcodeFlag;
+    }
+
+    public Byte getVisitorInfoFlag() {
+        return visitorInfoFlag;
+    }
+
+    public void setVisitorInfoFlag(Byte visitorInfoFlag) {
+        this.visitorInfoFlag = visitorInfoFlag;
+    }
+
+    public Byte getTrafficGuidanceFlag() {
+        return trafficGuidanceFlag;
+    }
+
+    public void setTrafficGuidanceFlag(Byte trafficGuidanceFlag) {
+        this.trafficGuidanceFlag = trafficGuidanceFlag;
+    }
 
     public Byte getSelfRegistrationFlag() {
         return selfRegistrationFlag;

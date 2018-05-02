@@ -8,15 +8,14 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>选填字段不填则不更新相应字段</li>
  * <li>namespaceId: (必填)域空间id</li>
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>configVersion: (必填)配置版本</li>
- * <li>logoUrl: (选填)客户端logourl地址</li>
  * <li>logoUri: (选填)客户端logouri地址</li>
- * <li>ipadThemeRgb: (选填)客户端主题色</li>
  * <li>guideInfo: (选填)指引信息</li>
- * <li>selfRegisterQrcodeUrl: (选填)自助登记二维码url</li>
+ * <li>ipadThemeRgb: (选填)客户端主题色</li>
  * <li>selfRegisterQrcodeUri: (选填)自助登记二维码uri</li>
  * <li>welcomePages: (选填)欢迎富文本</li>
  * <li>secrecyAgreement: (选填)保密协议富文本</li>
@@ -25,18 +24,16 @@ import java.util.List;
  * <li>passCardConfig: (选填)通行证配置，{@link com.everhomes.rest.visitorsys.VisitorsysPassCardConfig}</li>
  * </ul>
  */
-public class GetConfigurationResponse {
+public class UpdateConfigurationCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
 
     private Long configVersion=0L;
-    private String logoUrl;
     private String logoUri;
     private String ipadThemeRgb;
     private String guideInfo;
     private String selfRegisterQrcodeUri;
-    private String selfRegisterQrcodeUrl;
     private String secrecyAgreement;
     private String welcomePages;
 
@@ -76,14 +73,6 @@ public class GetConfigurationResponse {
         this.configVersion = configVersion;
     }
 
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-
     public String getLogoUri() {
         return logoUri;
     }
@@ -114,14 +103,6 @@ public class GetConfigurationResponse {
 
     public void setSelfRegisterQrcodeUri(String selfRegisterQrcodeUri) {
         this.selfRegisterQrcodeUri = selfRegisterQrcodeUri;
-    }
-
-    public String getSelfRegisterQrcodeUrl() {
-        return selfRegisterQrcodeUrl;
-    }
-
-    public void setSelfRegisterQrcodeUrl(String selfRegisterQrcodeUrl) {
-        this.selfRegisterQrcodeUrl = selfRegisterQrcodeUrl;
     }
 
     public String getSecrecyAgreement() {
