@@ -1,8 +1,8 @@
 -- ------------------------------
 -- 工作流动态函数     add by xq.tian  2018/04/24
 -- ------------------------------
--- DROP TABLE `eh_flow_functions` IF EXISTS;
-CREATE TABLE `eh_flow_functions` (
+DROP TABLE IF EXISTS `eh_flow_scripts`;
+  CREATE TABLE `eh_flow_scripts` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INTEGER NOT NULL DEFAULT '0',
 
@@ -12,19 +12,21 @@ CREATE TABLE `eh_flow_functions` (
 	`owner_type` VARCHAR(64),
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 
-	`function_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+	`script_category` VARCHAR(64) NOT NULL COMMENT 'system_script, user_script',
+	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
 
-	`function_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_functions',
-	`function_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'function version',
+	`script_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_scripts',
+	`script_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'script version',
 
-	`description` TEXT DEFAULT NULL COMMENT 'function description',
-	`function` LONGTEXT DEFAULT NULL COMMENT 'function content',
+	`name` VARCHAR(128) DEFAULT NULL COMMENT 'script name',
+	`description` TEXT DEFAULT NULL COMMENT 'script description',
+	`script` LONGTEXT DEFAULT NULL COMMENT 'script content',
 
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
-    `create_time` DATETIME(3),
-    `creator_uid` BIGINT,
-    `update_time` DATETIME(3),
-    `update_uid` BIGINT,
+  `create_time` DATETIME(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
 
 	`string_tag1` VARCHAR(128) DEFAULT NULL,
 	`string_tag2` VARCHAR(128) DEFAULT NULL,
@@ -36,40 +38,41 @@ CREATE TABLE `eh_flow_functions` (
 	`integral_tag3` BIGINT(20) NOT NULL DEFAULT '0',
 	`integral_tag4` BIGINT(20) NOT NULL DEFAULT '0',
 	`integral_tag5` BIGINT(20) NOT NULL DEFAULT '0',
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow functions in dev mode';
+	PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts in dev mode';
 
 -- ------------------------------
 -- 工作流动态函数配置表     add by xq.tian  2018/04/24
 -- ------------------------------
--- DROP TABLE `eh_flow_function_configs` IF EXISTS;
-CREATE TABLE `eh_flow_function_configs` (
+DROP TABLE IF EXISTS `eh_flow_script_configs`;
+CREATE TABLE `eh_flow_script_configs` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INTEGER NOT NULL DEFAULT '0',
 
 	`module_type` VARCHAR(64) NOT NULL,
 	`module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
 
-	`flow_main_id` BIGINT NOT NULL COMMENT 'the module id',
-	`flow_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'flow version',
+	`flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+	`flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'flow version',
 
 	`owner_type` VARCHAR(64),
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 
-	`function_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
 
-	`function_name` VARCHAR(128) NULL DEFAULT NULL COMMENT 'export function name, only for function type of java',
-	`function_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_functions',
-	`function_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'function version',
+	`script_name` VARCHAR(128) NULL DEFAULT NULL COMMENT 'export script name, only for script type of java',
+	`script_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_scripts',
+	`script_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'script version',
 
-	`config_name` VARCHAR(1024) DEFAULT NULL COMMENT 'function config name',
-	`config_desc` TEXT DEFAULT NULL COMMENT 'function config description',
-	`config_value` VARCHAR(1024) DEFAULT NULL COMMENT 'function config value',
+	`field_name` VARCHAR(1024) DEFAULT NULL COMMENT 'field name',
+	`field_desc` TEXT DEFAULT NULL COMMENT 'field description',
+	`field_value` VARCHAR(1024) DEFAULT NULL COMMENT 'field value',
 
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
 	`create_time` DATETIME(3),
-    `creator_uid` BIGINT,
-    `update_time` DATETIME(3),
-    `update_uid` BIGINT,
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
 
 	`string_tag1` VARCHAR(128) DEFAULT NULL,
 	`string_tag2` VARCHAR(128) DEFAULT NULL,
@@ -81,4 +84,5 @@ CREATE TABLE `eh_flow_function_configs` (
 	`integral_tag3` BIGINT(20) NOT NULL DEFAULT '0',
 	`integral_tag4` BIGINT(20) NOT NULL DEFAULT '0',
 	`integral_tag5` BIGINT(20) NOT NULL DEFAULT '0',
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow functions config in dev mode';
+	PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts config in dev mode';

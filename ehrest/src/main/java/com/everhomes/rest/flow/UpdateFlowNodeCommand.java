@@ -2,6 +2,8 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.Valid;
+
 /**
  * <ul>
  *     <li>flowNodeId: 节点 ID</li>
@@ -13,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>params: 节点的额外参数</li>
  *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
  *     <li>needAllProcessorComplete: 节点会签开关</li>
+ *     <li>script: 脚本{@link com.everhomes.rest.flow.FlowNodeScriptCommand}</li>
  * </ul>
  */
 public class UpdateFlowNodeCommand {
@@ -26,6 +29,8 @@ public class UpdateFlowNodeCommand {
     private String params;
     private String gotoProcessButtonName;
     private Byte needAllProcessorComplete;
+
+    private FlowNodeScriptCommand script;
 
     public String getAutoStepType() {
         return autoStepType;
@@ -97,6 +102,14 @@ public class UpdateFlowNodeCommand {
 
     public void setGotoProcessButtonName(String gotoProcessButtonName) {
         this.gotoProcessButtonName = gotoProcessButtonName;
+    }
+
+    public FlowNodeScriptCommand getScript() {
+        return script;
+    }
+
+    public void setScript(FlowNodeScriptCommand script) {
+        this.script = script;
     }
 
     @Override

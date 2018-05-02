@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface FlowListenerManager {
 
-	int getListenerSize();
-
 	/**
 	 * 当 FlowCase 开始运行时
 	 * @param ctx

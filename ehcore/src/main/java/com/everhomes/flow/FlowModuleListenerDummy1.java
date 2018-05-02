@@ -1,14 +1,19 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctionListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy1.class);
 
     @Autowired
     private FlowService flowService;
@@ -35,28 +40,19 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
                     code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
             params = {
                     @FuncParam(
-                            name = @LocaleText(
-                                    value = "vendor",
-                                    scope = FlowServiceErrorCode.SCOPE,
-                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            name = "vendorName",
                             desc = @LocaleText(
                                     value = "Vendor name",
                                     scope = FlowServiceErrorCode.SCOPE,
                                     code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
                     @FuncParam(
-                            name = @LocaleText(
-                                    value = "server url",
-                                    scope = FlowServiceErrorCode.SCOPE,
-                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            name = "vendorURL",
                             desc = @LocaleText(
                                     value = "Vendor server url",
                                     scope = FlowServiceErrorCode.SCOPE,
                                     code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
                     @FuncParam(
-                            name = @LocaleText(
-                                    value = "vendor key",
-                                    scope = FlowServiceErrorCode.SCOPE,
-                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+                            name = "appKey",
                             desc = @LocaleText(
                                     value = "Vendor app key",
                                     scope = FlowServiceErrorCode.SCOPE,
@@ -64,28 +60,8 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
             },
             version = 1
     )
-    public void testExportFlowFunction(
-            FlowCaseState ctx,
-            @FuncParam(
-                    desc = @LocaleText(
-                            value = "Vendor app key",
-                            scope = FlowServiceErrorCode.SCOPE,
-                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
-                    String vendor,
-            @FuncParam(
-                    desc = @LocaleText(
-                            value = "Vendor server url",
-                            scope = FlowServiceErrorCode.SCOPE,
-                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
-                    String vendorServer,
-            @FuncParam(
-                    desc = @LocaleText(
-                            value = "Vendor app key",
-                            scope = FlowServiceErrorCode.SCOPE,
-                            code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
-                    String appKey) {
-
-
+    public void testExportFlowFunction(FlowCaseState ctx, Map<String, String> param) {
+        LOGGER.debug("testExportFlowFunction: param = {}", param);
     }
 
     @Override

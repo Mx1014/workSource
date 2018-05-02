@@ -52,6 +52,8 @@ public class FlowGraphStartEvent extends AbstractFlowGraphEvent {
         ctx.getFlowCase().setCurrentNodeId(startNode.getFlowNode().getId());
         ctx.getFlowCase().setCurrentLaneId(startNode.getFlowNode().getFlowLaneId());
 
+        startNode.stepEnter(ctx, null);
+
         if (FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT) {
             next.stepEnter(ctx, startNode);
             ctx.setNextNode(null);

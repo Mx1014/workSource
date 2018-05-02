@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * @author Kelven Yang
  */
 @Component
+@DependsOn
 public class SmsProviderImpl implements SmsProvider {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);

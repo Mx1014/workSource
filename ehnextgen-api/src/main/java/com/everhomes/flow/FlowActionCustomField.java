@@ -16,6 +16,9 @@ public enum FlowActionCustomField {
     REMINDER_TICK_MINUTE("integral_tag2", "integralTag2", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG2),
     
     SCRIPT_ID("integral_tag1", "integralTag1", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG1),
+    SCRIPT_VERSION("integral_tag2", "integralTag2", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG2),
+    SCRIPT_TYPE("string_tag1", "stringTag1", Tables.EH_FLOW_ACTIONS.STRING_TAG1),
+
     ALLOW_TIMEOUT_ACTION("integral_tag3", "integralTag3", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG3),
     TEMPLATE_ID("integral_tag4", "integralTag4", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG4),
     

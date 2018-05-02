@@ -18,7 +18,7 @@ import java.util.List;
  * <li>flowMainId: flowId</li>
  * <li>flowVersion: 工作流版本</li>
  * <li>namespaceId: 域空间id</li>
- * <li>flowStepType: 动作类型</li>
+ * <li>flowStepType: 动作类型 {@link com.everhomes.rest.flow.FlowStepType}</li>
  * <li>buttonName: 按钮名称</li>
  * <li>needProcessor: 是否需要处理人{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>needSubject: 是否需要填写内容{@link com.everhomes.rest.approval.TrueOrFalseFlag}, needProcessor + needSubject 有任何一个就要跳到下个界面</li>

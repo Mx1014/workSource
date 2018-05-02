@@ -1,7 +1,6 @@
 package com.everhomes.general_approval;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -1225,7 +1224,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  5. the current operator
-        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        FlowCaseProcessorsResolver processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
         if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             String processors = "";
             for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {

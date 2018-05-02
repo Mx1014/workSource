@@ -15,12 +15,17 @@ public @interface FuncParam {
     /**
      * 参数名称
      */
-    LocaleText name() default @LocaleText("");
+    String name() default "";
 
     /**
      * 参数描述
      */
     LocaleText desc() default @LocaleText("");
+
+    /**
+     * 默认值
+     */
+    LocaleText defaultValue() default @LocaleText("");
 
     /**
      * 参数校验器

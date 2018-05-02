@@ -7,6 +7,6 @@ import com.everhomes.util.Tuple;
  */
 public interface FunctionParamValidator {
 
-    Tuple<Boolean, String> validate(FuncParam funcParam, String value);
+    void validate(FuncParam funcParam, String value);
 
 }

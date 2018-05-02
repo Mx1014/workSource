@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class FlowEventLogProviderImpl implements FlowEventLogProvider {
@@ -410,7 +411,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
      *  节点的具体日志跟踪信息
      */
     @Override
-    public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes) {
+    public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, Set<FlowUserType> flowUserTypes) {
     	return this.queryFlowEventLogs(new ListingLocator(), 100, (locator, query) -> {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));

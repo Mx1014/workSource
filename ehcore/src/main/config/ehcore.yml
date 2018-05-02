@@ -49,7 +49,7 @@ endpoint.dump: true
 endpoint.metrics: true
 endpoint.configprops: true
 endpoint.beans: true
-endpoint.trace: true
+endpoint.trace: trueN
 endpoint.mappings: true
             
 management.security.enabled: false

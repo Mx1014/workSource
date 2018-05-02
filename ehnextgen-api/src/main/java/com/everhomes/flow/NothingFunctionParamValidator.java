@@ -8,7 +8,7 @@ import com.everhomes.util.Tuple;
 public class NothingFunctionParamValidator implements FunctionParamValidator {
 
     @Override
-    public Tuple<Boolean, String> validate(FuncParam funcParam, String value) {
-        return new Tuple<>(true, "");
+    public void validate(FuncParam funcParam, String value) {
+
     }
 }
