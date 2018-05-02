@@ -2,6 +2,7 @@ package com.everhomes.servicehotline;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +38,7 @@ import com.everhomes.message.MessageProvider;
 import com.everhomes.message.MessageRecord;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -86,6 +90,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.ExcelUtils;
 
 @Component
 public class HotlineServiceImpl implements HotlineService {
@@ -612,12 +617,13 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 
 		// 获取会话列表
-		List<MessageRecord> msgRecList = messageProvider.listMessageRecords(pageSize, locator, (l, q) -> {
+		int finalPageSize = null == pageSize ? 0 : pageSize;
+		List<MessageRecord> msgRecList = messageProvider.listMessageRecords(finalPageSize, locator, (l, q) -> {
 			return buildChatRecordQuery(l, q, pageSize, servicerDto.getTargetId(), customerDto.getTargetId());
 		});
 
 		ChatRecordDTO dto = null;
-		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(pageSize);
+		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(finalPageSize);
 		for (MessageRecord msg : msgRecList) {
 			dto = new ChatRecordDTO();
 			// 填充查询结果
@@ -631,10 +637,29 @@ public class HotlineServiceImpl implements HotlineService {
 	/**
 	 * 根据客服id与用户id导出聊天记录
 	 */
-	public void exportChatRecordList(GetChatRecordListCommand cmd) {
+	public void exportChatRecordList(GetChatRecordListCommand cmd, HttpServletResponse httpResponse) {
 		// 检查权限
 		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
 				cmd.getCurrentProjectId());
+		
+		TargetDTO servicerDto = new TargetDTO();
+		TargetDTO customerDto = new TargetDTO();
+		
+		servicerDto.setTargetId(249692L);
+		servicerDto.setTargetName("晁倩2");
+		customerDto.setTargetName("科技园官方帐号");
+		customerDto.setTargetId(199919L);
+		
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(null, new ListingLocator(),servicerDto,customerDto);
+		
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, "短信列表a", "短信列表b");
+		List<String> propertyNames = new ArrayList<String>(Arrays.asList("senderName", "message", "messageType", "sendTime"));
+		List<String> titleNames = new ArrayList<String>(Arrays.asList("发送人", "信息", "类型", "发送时间"));
+		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 100, 10, 30));
+
+		excelUtils.setNeedSequenceColumn(true);
+        //  5.处理导出变量的值并导出
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, chatRecordList);
 	}
 
 	/**
@@ -644,10 +669,6 @@ public class HotlineServiceImpl implements HotlineService {
 		// 检查权限
 //		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
 //				cmd.getCurrentProjectId());
-
-		Map<String, Object> params = new HashMap<String, Object>(); 
-		params.put("test", "test info!");
-		taskService.createTask("it_is_my_task_name", TaskType.FILEDOWNLOAD.getCode(), HotlineFileDownloadTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 	
 	}
 
@@ -747,8 +768,8 @@ public class HotlineServiceImpl implements HotlineService {
 		// 做分组，排序，分页
 		query.addGroupBy(DSL.decode()
 				.when(records.SENDER_UID.gt(records.DST_CHANNEL_TOKEN.cast(Long.class)),
-						DSL.concat(records.DST_CHANNEL_TOKEN.toString(), "_", records.SENDER_UID.toString()))
-				.otherwise(DSL.concat(records.SENDER_UID.toString(), "_", records.DST_CHANNEL_TOKEN.toString())));
+						DSL.concat(records.DST_CHANNEL_TOKEN, DSL.field("'_'", String.class), records.SENDER_UID))
+				.otherwise(DSL.concat(records.SENDER_UID, DSL.field("'_'", String.class), records.DST_CHANNEL_TOKEN)));
 
 		query.addOrderBy(records.INDEX_ID.desc());
 
@@ -1113,6 +1134,7 @@ public class HotlineServiceImpl implements HotlineService {
 		if (ServiceType.SERVICE_HOTLINE.getCode().equals(serviceType)) {
 			return null;
 		}
+		
 
 		// 专属客服还需查看被删除数据是否有相同userId，注：这里获取一条即可。如果有多条，也是数据库出错了
 		hotlines = serviceHotlinesProvider.queryServiceHotlines(conditionObject.getNamespaceId(),

@@ -1,5 +1,7 @@
 package com.everhomes.techpark.servicehotline;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.servicehotline.*;
 
 public interface HotlineService {
@@ -36,11 +38,11 @@ public interface HotlineService {
 	/**
 	 * 导出专属客服的单个会话的聊天记录
 	 */
-	public void exportChatRecordList(GetChatRecordListCommand cmd);
+	public void exportChatRecordList(GetChatRecordListCommand cmd, HttpServletResponse httpResponse);
 	
 	/**
 	 * 根据条件导出多个会话聊天记录
 	 */
-	public void exportMultiChatRecordList(GetChatGroupListCommand cmd);
+	public void exportMultiChatRecordList(GetChatGroupListCommand cmd, HttpServletResponse httpResponse);
 
 }

@@ -38,9 +38,9 @@ public class HotlineFileDownloadTaskHandler implements FileDownloadTaskHandler {
 
 		Long taskId = null;
 		
-		GetChatRecordListCommand cmd = new GetChatRecordListCommand();
-		GetChatRecordListResponse rsp = hotlineService.getChatRecordList(cmd);
-		List<ChatRecordDTO> chatRecordList = rsp.getChatRecordList();
+//		GetChatRecordListCommand cmd = new GetChatRecordListCommand();
+//		GetChatRecordListResponse rsp = hotlineService.getChatRecordList(cmd);
+//		List<ChatRecordDTO> chatRecordList = rsp.getChatRecordList();
 		
 		System.out.println("---*----*--*----*--------it is in the hmb_upload Test!!******************************************");
 		System.out.println("params:"+params.get("test"));
@@ -49,10 +49,10 @@ public class HotlineFileDownloadTaskHandler implements FileDownloadTaskHandler {
 		ExcelUtils excelUtils = new ExcelUtils(fileName, "入驻申请企业信息");
 		List<String> propertyNames = new ArrayList<String>(Arrays.asList("senderName", "message", "messageType", "sendTime"));
 		List<String> titleNames = new ArrayList<String>(Arrays.asList("发送人", "信息", "类型", "发送时间"));
-		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 300, 10, 30));
+		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 30, 10, 30));
 
 		excelUtils.setNeedSequenceColumn(true);
-		OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, chatRecordList);
+		OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, null);
 		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
 		taskService.processUpdateTask(taskId, fileLocationDTO);
 	}

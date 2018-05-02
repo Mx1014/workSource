@@ -1,5 +1,6 @@
 package com.everhomes.servicehotline;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.servicehotline.*;
@@ -15,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.archives.ExportArchivesContactsCommand;
 import com.everhomes.rest.archives.VerifyPersonnelByPasswordCommand;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.util.RequireAuthentication;
@@ -212,14 +214,10 @@ public class ServiceHotlineController extends ControllerBase {
 	 */
     @RequestMapping("exportChatRecordList")
     @RestReturn(value = String.class)
-    public RestResponse exportChatRecordList(GetChatRecordListCommand cmd){
-    	hotlineService.exportChatRecordList(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+    public RestResponse exportChatRecordList(GetChatRecordListCommand cmd,  HttpServletResponse httpResponse){
+    	hotlineService.exportChatRecordList(cmd, httpResponse);
+    	 return new RestResponse();
     }
-    
     
 	/**
 	 * <b>URL: /hotline/exportMultiChatRecordList</b>
@@ -227,11 +225,8 @@ public class ServiceHotlineController extends ControllerBase {
 	 */
     @RequestMapping("exportMultiChatRecordList")
     @RestReturn(value = String.class)
-    public RestResponse exportMultiChatRecordList(GetChatGroupListCommand cmd){
-    	hotlineService.exportMultiChatRecordList(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+    public RestResponse exportMultiChatRecordList(GetChatGroupListCommand cmd,  HttpServletResponse httpResponse){
+    	hotlineService.exportMultiChatRecordList(cmd, httpResponse);
+   	 return new RestResponse();
     }
 }
