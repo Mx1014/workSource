@@ -20,6 +20,10 @@ ALTER TABLE `eh_customer_events`
 ALTER TABLE `eh_enterprise_customers`
   MODIFY COLUMN `tracking_uid`  bigint(20) NULL DEFAULT NULL COMMENT 'tracking uid' AFTER `update_time`;
 
+-- 人事2.6 的表字段修改 by ryan
+ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
+ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
+
   -- 资源预约订单统计 By st.zheng
 CREATE TABLE `eh_rentalv2_order_statistics` (
   `id` BIGINT(20) NOT NULL,

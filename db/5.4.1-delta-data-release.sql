@@ -86,11 +86,11 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 增加公摊水电费，水电费改为自用水电费 by wentian
 set @id = IFNULL((select MAX(`id`) from eh_payment_charging_items),0);
-INSERT INTO `ehcore`.`eh_payment_charging_items`
+INSERT INTO `eh_payment_charging_items`
 (`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES
   (@id:=@id+1, '公摊水费', '0', NOW(), NULL, NULL, '1');
-INSERT INTO `ehcore`.`eh_payment_charging_items`
+INSERT INTO `eh_payment_charging_items`
 (`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES
   (@id:=@id+1, '公摊电费', '0', NOW(), NULL, NULL, '1');
@@ -153,9 +153,22 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 -- 资源预定增加统计权限 by st.zheng
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40430', '统计信息', '40400', '/40000/40400/40430', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
-
 set @privilege_id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4040040430, '0', '资源预约 统计管理权限', '资源预约 统计管理权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40430', '0', 4040040430, '统计信息权限', '0', now());
 
 update eh_rentalv2_orders set status = 7 where status = 8;
+/*
+  物业报修 pmtask-3.5 应用配置数据迁移
+*/
+update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d6%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=6%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d9%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=9%';
+/*
+  物业报修 pmtask-3.5 权限配置页面信息迁移
+*/
+update eh_service_modules set name='统计信息' where id = 20190 and parent_id = 20100;
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20140 and privilege_id = 2010020140;
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20190 and privilege_id = 2010020190;
+
