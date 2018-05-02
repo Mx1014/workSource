@@ -472,7 +472,7 @@ public class QualityServiceImpl implements QualityService {
 					if (null == map.getGroupId()) {
 						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(group.getInspectorUid());
 						if (members != null && members.size() > 0) {
-							map.setGroupId(members.get(0).getGroupId());
+							map.setGroupId(members.get(0).getOrganizationId());
 						}
 					}
 
@@ -4825,7 +4825,7 @@ Long nextPageAnchor = null;
 					} else if (executiveGroup.getInspectorUid() != 0) {
 						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(executiveGroup.getInspectorUid());
 						if (members != null && members.size() > 0) {
-							Organization group = organizationProvider.findOrganizationById(members.get(0).getGroupId());
+							Organization group = organizationProvider.findOrganizationById(members.get(0).getOrganizationId());
 							memberList.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 							if (group != null){
 								organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
