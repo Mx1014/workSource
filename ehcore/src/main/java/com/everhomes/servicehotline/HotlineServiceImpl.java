@@ -7,14 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.user.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -26,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
@@ -35,11 +29,37 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.message.MessageProvider;
 import com.everhomes.message.MessageRecord;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.servicehotline.AddHotlineCommand;
+import com.everhomes.rest.servicehotline.ChatGroupDTO;
+import com.everhomes.rest.servicehotline.ChatMessageType;
+import com.everhomes.rest.servicehotline.ChatRecordDTO;
+import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
+import com.everhomes.rest.servicehotline.GetChatGroupListCommand;
+import com.everhomes.rest.servicehotline.GetChatGroupListResponse;
+import com.everhomes.rest.servicehotline.GetChatRecordListCommand;
+import com.everhomes.rest.servicehotline.GetChatRecordListResponse;
+import com.everhomes.rest.servicehotline.GetHotlineListCommand;
+import com.everhomes.rest.servicehotline.GetHotlineListResponse;
+import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
+import com.everhomes.rest.servicehotline.GetHotlineSubjectResponse;
+import com.everhomes.rest.servicehotline.GetUserInfoByIdCommand;
+import com.everhomes.rest.servicehotline.GetUserInfoByIdResponse;
+import com.everhomes.rest.servicehotline.HotlineDTO;
+import com.everhomes.rest.servicehotline.HotlineErrorCode;
+import com.everhomes.rest.servicehotline.HotlineSubject;
+import com.everhomes.rest.servicehotline.LayoutType;
+import com.everhomes.rest.servicehotline.ServiceType;
+import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
+import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
+import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhMessageRecords;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
@@ -50,6 +70,12 @@ import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.techpark.servicehotline.ServiceHotline;
 import com.everhomes.techpark.servicehotline.ServiceHotlinesProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -165,8 +191,8 @@ public class HotlineServiceImpl implements HotlineService {
 		// 设置分页
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<HotlineDTO> hotlines = getHotlineList(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageSize(),
-				locator, cmd.getServiceType(), HotlineStatus.ACTIVE.getCode());
+		List<HotlineDTO> hotlines = getActiveHotlineList(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getPageSize(), locator, cmd.getServiceType());
 
 		// 构造返回
 		GetHotlineListResponse resp = new GetHotlineListResponse();
@@ -192,72 +218,91 @@ public class HotlineServiceImpl implements HotlineService {
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd, ServiceHotline.class);
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
-		// 查询是否有重复的
-		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null, Integer.MAX_VALUE - 1,
-				new ListingQueryBuilderCallback() {
+		
+		//检查参数
 
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE.eq(cmd.getOwnerType()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID.eq(namespaceId));
-						query.addConditions(
-								Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE.eq(cmd.getServiceType().intValue()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT.eq(cmd.getContact()));
-						return query;
-					}
-				});
-		if (tmp != null && tmp.size() > 0)
-			throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
+		// 查询是否有重复的
+		ServiceHotline tmp = getSingleHotlineIfExist(hotline);
+		if (null != tmp) {
+			// 热线直接报错
+			if (ServiceType.SERVICE_HOTLINE.getCode().equals(hotline.getServiceType().byteValue())) {
+				throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
+				return;
+			}
+
+			// 如果激活状态下有相同的手机号，也需要报错
+			if (HotlineStatus.ACTIVE.getCode() == tmp.getStatus()) {
+				throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
+				return;
+			}
+			// 存在有相同userId的客服时，对该记录进行更新
+			//这里不退出，在下面进行判断更新还是添加记录
+			
+		}
 
 		hotline.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		hotline.setCreatorUid(UserContext.current().getUser().getId());
 		hotline.setNamespaceId(namespaceId);
 		hotline.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		this.serviceHotlinesProvider.createServiceHotline(hotline);
+		hotline.setStatus(HotlineStatus.ACTIVE.getCode());
+		
+		if (null != tmp) {//已删除的专属客服重新被添加时，进入此分支
+			hotline.setId(tmp.getId());
+			serviceHotlinesProvider.updateServiceHotline(hotline);
+			return;
+		}
+		
+		serviceHotlinesProvider.createServiceHotline(hotline);
+		return;
 
 	}
 
 	@Override
 	public void deleteHotline(DeleteHotlineCommand cmd) {
-
-		if (null == cmd || null == this.serviceHotlinesProvider.getServiceHotlineById(cmd.getId())) {
+		
+		if (null == cmd) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter id can not be null or hotline can not found");
 		}
-		ServiceHotline hotline = ConvertHelper.convert(cmd, ServiceHotline.class);
-		this.serviceHotlinesProvider.deleteServiceHotline(hotline);
+		
+		ServiceHotline hotline = serviceHotlinesProvider.getServiceHotlineById(cmd.getId());
+		if( null == hotline)  {
+			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_UPDATING_NOT_EXIST);
+		}
+		
+		// 专属客服将状态标识为改为0即可
+		if (ServiceType.ZHUANSHU_SERVICE.getCode().equals(hotline.getServiceType().byteValue())) {
+			hotline.setStatus(HotlineStatus.DELETED.getCode());
+			serviceHotlinesProvider.updateServiceHotline(hotline);
+			return;
+		}
+		
+		//其他直接删除
+		serviceHotlinesProvider.deleteServiceHotline(hotline);
 	}
 
 	@Override
 	public void updateHotline(UpdateHotlineCommand cmd) {
+		
 		if (null == cmd || null == this.serviceHotlinesProvider.getServiceHotlineById(cmd.getId())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter id can not be null or hotline can not found");
+			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_UPDATING_NOT_EXIST);
 		}
+		
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
-		// 查询是否有重复的
-		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null, Integer.MAX_VALUE - 1,
-				new ListingQueryBuilderCallback() {
-
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE.eq(cmd.getOwnerType()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID.eq(namespaceId));
-						query.addConditions(
-								Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE.eq(cmd.getServiceType().intValue()));
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT.eq(cmd.getContact()));
-						return query;
-					}
-				});
-		tmp = tmp.stream().filter(p -> !p.getId().equals(cmd.getId())).collect(Collectors.toList());// 排除自己
-		if (tmp != null && tmp.size() > 0)
-			throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
-
+		
 		ServiceHotline hotline = ConvertHelper.convert(cmd, ServiceHotline.class);
+		
+		// 查询是否有重复的
+		List<ServiceHotline> tmp = getMultiHotlineIfExist(hotline);
+		
+		//排除自己
+		tmp = tmp.stream().filter(p -> !p.getId().equals(cmd.getId())).collect(Collectors.toList());
+		
+		// 仍有记录说明有重复的，需报错
+		if (null != tmp && tmp.size() > 0) {
+			throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
+		}
+
 		hotline.setNamespaceId(namespaceId);
 		hotline.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		this.serviceHotlinesProvider.updateServiceHotline(hotline);
@@ -647,38 +692,45 @@ public class HotlineServiceImpl implements HotlineService {
 
 		return query;
 	}
+	
+	
+	/**
+	 * 获取有效的客服/热线列表
+	 */
+	private List<HotlineDTO> getActiveHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
+			ListingLocator locator, Byte serviceType) {
+		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, null, null, serviceType,
+				HotlineStatus.ACTIVE.getCode());
+	}
+	
+	/**
+	 * 获取表里存在的客服/热线列表，包括已删除的
+	 */
+	private List<HotlineDTO> getExistHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
+			ListingLocator locator, Byte serviceType) {
+		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, null, null, serviceType,
+				null);
+	}
+	
 
+	/**
+	 * 获取热线/客服列表的实现方法
+	 * @return
+	 */
 	private List<HotlineDTO> getHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
-			ListingLocator locator, Byte serviceType, Byte status) {
-
-		int maxPageSize = null == pageSize ? Integer.MAX_VALUE - 1 : pageSize;
+			ListingLocator locator, Long userId, String contact, Byte serviceType, Byte status) {
 
 		// 获取相应热线
-		List<ServiceHotline> serviceHotlines = serviceHotlinesProvider.queryServiceHotlines(locator, maxPageSize,
-				(l, query) -> {
-					query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE.eq(ownerType));
-					query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID.eq(ownerId));
-					query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID.eq(namespaceId));
-					query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE.eq(serviceType.intValue()));
-
-					if (0 != l.getEntityId()) {
-						query.addConditions(Tables.EH_SERVICE_HOTLINES.ID.eq(l.getEntityId()));
-					}
-
-					// if (null != status) {
-					// query.addConditions(Tables.EH_SERVICE_HOTLINES.STATUS.eq(status));
-					// }
-
-					return query;
-				});
+		List<ServiceHotline> serviceHotlines = serviceHotlinesProvider.queryServiceHotlines(namespaceId, ownerType,
+				ownerId, pageSize, locator, userId, contact, serviceType, status);
 
 		// 未找到返回
-		List<HotlineDTO> hotlines = new ArrayList<HotlineDTO>(16);
 		if (CollectionUtils.isEmpty(serviceHotlines)) {
-			return hotlines;
+			return null;
 		}
 
 		// 找到后进行转换
+		List<HotlineDTO> hotlines = new ArrayList<HotlineDTO>(16);
 		serviceHotlines.forEach(r -> {
 			HotlineDTO dto = ConvertHelper.convert(r, HotlineDTO.class);
 			if (null != r.getUserId()) {
@@ -736,7 +788,7 @@ public class HotlineServiceImpl implements HotlineService {
 	 */
 	private List<TargetDTO> getMultiExclusiveServicer(Integer namespaceId, String ownerType, Long ownerId,
 			boolean isIncludeDeleted) {
-		return getHotlineServicer(namespaceId, ownerType, ownerId, null, ServiceType.ZHUANSHU_SERVICE.getCode(), false,
+		return getExclusiveServicer(namespaceId, ownerType, ownerId, null, ServiceType.ZHUANSHU_SERVICE.getCode(), false,
 				isIncludeDeleted);
 	}
 
@@ -755,7 +807,7 @@ public class HotlineServiceImpl implements HotlineService {
 			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_SERVICER_KEY_INVALID);
 		}
 
-		List<TargetDTO> dtos = getHotlineServicer(namespaceId, ownerType, ownerId, servicerId,
+		List<TargetDTO> dtos = getExclusiveServicer(namespaceId, ownerType, ownerId, servicerId,
 				ServiceType.ZHUANSHU_SERVICE.getCode(), true, true);
 		if (CollectionUtils.isEmpty(dtos)) {
 			return null;
@@ -774,7 +826,7 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @param isSingleResult
 	 * @return
 	 */
-	private List<TargetDTO> getHotlineServicer(Integer namespaceId, String ownerType, Long ownerId, Long servicerId,
+	private List<TargetDTO> getExclusiveServicer(Integer namespaceId, String ownerType, Long ownerId, Long servicerId,
 			Byte serviceType, boolean isSingleResult, boolean isIncludeDeleted) {
 
 		// 设置分页条件
@@ -786,19 +838,21 @@ public class HotlineServiceImpl implements HotlineService {
 		// 查询单个是pageSize为1
 		Integer pageSize = isSingleResult ? 1 : null;
 
-		// 如果包含被删除的客服，status条件为空
-		Byte status = isIncludeDeleted ? null : HotlineStatus.ACTIVE.getCode();
-
 		// 获取结果
-		List<HotlineDTO> hotlines = getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceType,
-				status);
-		if (CollectionUtils.isEmpty(hotlines)) {
+		List<HotlineDTO> servicers = null;
+		if (isIncludeDeleted) {
+			servicers = getExistHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceType);
+		} else {
+			servicers = getActiveHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceType);
+		}
+		
+		if (CollectionUtils.isEmpty(servicers)) {
 			return null;
 		}
 
 		// 转成客服target列表
 		List<TargetDTO> dtos = new ArrayList<>(10);
-		hotlines.stream().forEach(r -> {
+		servicers.stream().forEach(r -> {
 			TargetDTO dto = new TargetDTO();
 			dto.setTargetId(r.getUserId());
 			dto.setTargetType("eh_user");
@@ -808,7 +862,6 @@ public class HotlineServiceImpl implements HotlineService {
 		});
 
 		return dtos;
-
 	}
 
 	/**
@@ -949,5 +1002,64 @@ public class HotlineServiceImpl implements HotlineService {
 		throw RuntimeErrorException.errorWith(HotlineErrorCode.SCOPE, hotlineErrorCode.getCode(),
 				hotlineErrorCode.getInfo());
 	}
+	
+	/**
+	 * 检查是否有相同条件的记录，并返回单条符合条件记录
+	 */
+	private List<ServiceHotline> getMultiHotlineIfExist(ServiceHotline conditionObject) {
+		return getHotlineIfExist(conditionObject, null);
+
+	}
+	
+	/**
+	 * 检查是否有相同条件的记录，并返回单条符合条件记录
+	 */
+	private ServiceHotline getSingleHotlineIfExist(ServiceHotline conditionObject) {
+
+		List<ServiceHotline> hotlines = getHotlineIfExist(conditionObject, 1);
+
+		return CollectionUtils.isEmpty(hotlines) ? null : hotlines.get(0);
+
+	}
+
+	/**
+	 * 检查是否有相同条件的记录，并返回入参限制的条数的记录
+	 */
+	private List<ServiceHotline> getHotlineIfExist(ServiceHotline conditionObject, Integer getCount) {
+
+		if (null == conditionObject.getServiceType()) {
+			return null;
+		}
+
+		Byte serviceType = conditionObject.getServiceType().byteValue();
+
+		// 返回一条数据即可
+		List<ServiceHotline> hotlines = null;
+
+		// 热线和专属客服都不能有重复的号码（contact字段），所以先查询正常状态下是否有重复号码
+		hotlines = serviceHotlinesProvider.queryServiceHotlines(conditionObject.getNamespaceId(),
+				conditionObject.getOwnerType(), conditionObject.getOwnerId(), getCount, null, null,
+				conditionObject.getContact(), serviceType, HotlineStatus.ACTIVE.getCode());
+
+		// 如果非空，返回查询出来的数据
+		if (!CollectionUtils.isEmpty(hotlines)) {
+			return hotlines;
+		}
+
+		// 热线查询到此就结束了
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(serviceType)) {
+			return null;
+		}
+
+		// 专属客服还需查看被删除数据是否有相同userId，注：这里获取一条即可。如果有多条，也是数据库出错了
+		hotlines = serviceHotlinesProvider.queryServiceHotlines(conditionObject.getNamespaceId(),
+				conditionObject.getOwnerType(), conditionObject.getOwnerId(), getCount, null,
+				conditionObject.getUserId(), null, serviceType, null);
+
+		return hotlines;
+	}
+	
+	
+	
 
 }

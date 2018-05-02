@@ -5,9 +5,10 @@ package com.everhomes.rest.servicehotline;
  */
 public enum HotlineErrorCode {
 	
-	ERROR_DUPLICATE_PHONE((int)10001, "hotline already exists", "电话号码重复"), 
-	ERROR_HOTLINE_SERVICER_KEY_INVALID((int)10002, "servicer not specify", "查询记录时未指定客服或热线"), 
-	ERROR_HOTLINE_CUSTOMER_KEY_INVALID((int)10003, "customer not specify", "查询记录时未指定用户");
+	ERROR_DUPLICATE_PHONE((int)10001, "hotline or servicer already exists", "相同号码已存在"), 
+	ERROR_HOTLINE_SERVICER_KEY_INVALID(10002, "servicer not specify", "查询记录时未指定客服或热线"), 
+	ERROR_HOTLINE_CUSTOMER_KEY_INVALID(10003, "customer not specify", "查询记录时未指定用户"),
+	ERROR_HOTLINE_UPDATING_NOT_EXIST(10004, "record being updated or deleted not exist", "需要更新/删除的记录不存在");
 	
 	public static String SCOPE = "hotline"; //eh_locale_strings的标识
     

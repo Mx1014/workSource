@@ -8,12 +8,12 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>  
  * <li>serviceType:类型</li>  
  * <li>name: 热线名</li>  
- * <li>contact: 联系电话</li>  
+ * <li>contact: 联系电话，展示给用户的联系号码</li>  
  * <li>userId: 用户id</li>   
  * <li>description: 备注 </li>   
  * <li>defaultOrder: 排序字段</li>   
  * <li>avatar: 头像</li>
- * <li>phone: 手机号</li>
+ * <li>phone: 手机号，在identifier表中的认证手机号</li> 
  * </ul>
  */
 public class HotlineDTO {
