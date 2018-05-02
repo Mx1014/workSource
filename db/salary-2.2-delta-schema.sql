@@ -40,5 +40,5 @@ CREATE TABLE `eh_salary_payslip_details` (
   PRIMARY KEY(`id`),
   KEY `i_eh_payslip_id` (`payslip_id`),
   KEY `i_eh_organization_user` (`user_id`,`organization_id`),
-  KEY `i_eh_create_time`(`create_time`);
+  KEY `i_eh_create_time`(`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '工资条详情表';
