@@ -2040,11 +2040,13 @@ public class SalaryServiceImpl implements SalaryService {
         return payslipDetailDTOs;
     }
 
-    private Map<String, String> processPayslipContent(RowResult r, Map<String, String> cellMap) {
-        Map<String, String> result = new HashMap<>();
+    private List<SalaryPeriodEmployeeEntityDTO> processPayslipContent(RowResult r, Map<String, String> cellMap) {
+        List<SalaryPeriodEmployeeEntityDTO>  result = new ArrayList<>();
         for (Entry<String, String> entry : cellMap.entrySet()) {
             //key 是列号,cellMap取这列的结果是表头,r取这一列的结果是这一行的值
-            result.put(entry.getValue(), r.getCells().get(entry.getKey()));
+            SalaryPeriodEmployeeEntityDTO dto = new SalaryPeriodEmployeeEntityDTO();
+            dto.setGroupEntityName(entry.getValue());
+            dto.setSalaryValue(r.getCells().get(entry.getKey()));
         }
         return result;
     }
@@ -2149,7 +2151,7 @@ public class SalaryServiceImpl implements SalaryService {
     private PayslipDetailDTO convertPayslipDetailDTO(SalaryPayslipDetail r) {
         PayslipDetailDTO dto = ConvertHelper.convert(r, PayslipDetailDTO.class);
         dto.setPayslipDetailId(r.getId());
-        Map<String, String> content = JSON.parseObject(r.getPayslipContent(), HashMap.class);
+        List<SalaryPeriodEmployeeEntityDTO> content = JSON.parseArray(r.getPayslipContent(), SalaryPeriodEmployeeEntityDTO.class);
         dto.setCreateTime(r.getCreateTime().getTime());
         dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
         dto.setPayslipContent(content);
@@ -2256,12 +2258,15 @@ public class SalaryServiceImpl implements SalaryService {
         }
         if (result.getUserId().equals(UserContext.currentUserId())) {
             PayslipDetailDTO dto = convertPayslipDetailDTO(result);
-            for (String key : dto.getPayslipContent().keySet()) {
+            for (SalaryPeriodEmployeeEntityDTO entityDTO : dto.getPayslipContent()) {
                 //当字段属于不可见的,或者值为空/0 不显示给客户端
-                if (invisibleKeys.contains(key.trim()) ||
-                        dto.getPayslipContent().get(key).equals("0") ||
-                        StringUtils.isBlank(dto.getPayslipContent().get(key))) {
-                    dto.getPayslipContent().remove(key);
+                if (invisibleKeys.contains(entityDTO.getGroupEntityName().trim()) ||
+                        "0".equals(entityDTO.getSalaryValue()) ||
+                        StringUtils.isBlank(entityDTO.getSalaryValue())) {
+                   //app不用显示的
+                    dto.getPayslipContent().remove(entityDTO);
+                }else{
+                    //不处理
                 }
             }
             dto.setPayslipContent(dto.getPayslipContent());

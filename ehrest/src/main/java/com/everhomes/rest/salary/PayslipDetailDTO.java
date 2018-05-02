@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>userDetailId: 用户detailId</li>
  * <li>name: 用户姓名</li>
  * <li>userContact: 用户手机</li>
- * <li>payslipContent: 导入内容key-value对的map</li>
+ * <li>payslipContent: 导入内容的list 参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
  * <li>viewedFlag: 已查看0-否 1-是</li>
  * <li>status: 状态0-已发送 1-已撤回  2-已确认</li>
  * <li>creatorUid: 发放者id</li>
@@ -31,7 +31,7 @@ public class PayslipDetailDTO {
 	private String salaryPeriod;
     private String name;
     private String userContact;
-    private Map<String,String> payslipContent;
+    private List<SalaryPeriodEmployeeEntityDTO> payslipContent;
     private Byte viewedFlag;
     private Byte status;
     private Long creatorUid;
@@ -98,12 +98,6 @@ public class PayslipDetailDTO {
 	public void setImportResult(Byte importResult) {
 		this.importResult = importResult;
 	}
-	public Map<String,String> getPayslipContent() {
-		return payslipContent;
-	}
-	public void setPayslipContent(Map<String,String> payslipContent) {
-		this.payslipContent = payslipContent;
-	}
 
 	public Long getCreateTime() {
 		return createTime;
@@ -135,5 +129,13 @@ public class PayslipDetailDTO {
 
 	public void setSalaryPeriod(String salaryPeriod) {
 		this.salaryPeriod = salaryPeriod;
+	}
+
+	public List<SalaryPeriodEmployeeEntityDTO> getPayslipContent() {
+		return payslipContent;
+	}
+
+	public void setPayslipContent(List<SalaryPeriodEmployeeEntityDTO> payslipContent) {
+		this.payslipContent = payslipContent;
 	}
 }
