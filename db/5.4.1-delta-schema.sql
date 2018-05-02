@@ -24,7 +24,7 @@ ALTER TABLE `eh_enterprise_customers`
 ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
 ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
 
-  -- 资源预约订单统计 By st.zheng
+-- 资源预约订单统计 By st.zheng
 CREATE TABLE `eh_rentalv2_order_statistics` (
   `id` BIGINT(20) NOT NULL,
   `order_id` BIGINT(20) NOT NULL,
