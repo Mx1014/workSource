@@ -1479,7 +1479,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             organizationMember2.setContactName(cmd.getContactor());
                         }
                         organizationMember2.setContactToken(cmd.getEntries());
-                        organizationMember2.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                        organizationMember2.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
                         organizationMember2.setGroupType(OrganizationMemberGroupType.MANAGER.getCode());
                         organizationMember2.setCreatorUid(user.getId());
                         //持久化到数据库中
