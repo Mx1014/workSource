@@ -53,6 +53,7 @@ import com.everhomes.rest.servicehotline.GetUserInfoByIdCommand;
 import com.everhomes.rest.servicehotline.GetUserInfoByIdResponse;
 import com.everhomes.rest.servicehotline.HotlineDTO;
 import com.everhomes.rest.servicehotline.HotlineErrorCode;
+import com.everhomes.rest.servicehotline.PrivilegeType;
 import com.everhomes.rest.servicehotline.HotlineSubject;
 import com.everhomes.rest.servicehotline.LayoutType;
 import com.everhomes.rest.servicehotline.ServiceType;
@@ -84,7 +85,7 @@ import com.everhomes.util.RuntimeErrorException;
 public class HotlineServiceImpl implements HotlineService {
 	public static final String HOTLINE_SCOPE = "hotline";
 	public static final String HOTLINE_NOTSHOW_SCOPE = "hotline-notshow";
-
+	
 	@Autowired
 	private ServiceConfigurationsProvider serviceConfigurationsProvider;
 
@@ -181,11 +182,12 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd) {
-		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
-				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					4030040300L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 订单记录权限
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
+			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		} else {
+			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
 		}
+		
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 
 		// 设置分页
@@ -216,6 +218,14 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public void addHotline(AddHotlineCommand cmd) {
+		
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
+			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		} else {
+			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		}
+
+		
 		ServiceHotline hotline = ConvertHelper.convert(cmd, ServiceHotline.class);
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 		
@@ -270,6 +280,13 @@ public class HotlineServiceImpl implements HotlineService {
 			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_UPDATING_NOT_EXIST);
 		}
 		
+		//检查权限
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(hotline.getServiceType().byteValue())) {
+			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		} else {
+			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		}
+		
 		// 专属客服将状态标识为改为0即可
 		if (ServiceType.ZHUANSHU_SERVICE.getCode().equals(hotline.getServiceType().byteValue())) {
 			hotline.setStatus(HotlineStatus.DELETED.getCode());
@@ -284,9 +301,23 @@ public class HotlineServiceImpl implements HotlineService {
 	@Override
 	public void updateHotline(UpdateHotlineCommand cmd) {
 		
-		if (null == cmd || null == this.serviceHotlinesProvider.getServiceHotlineById(cmd.getId())) {
+		if (null == cmd) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter");
+		}
+		
+		ServiceHotline record = serviceHotlinesProvider.getServiceHotlineById(cmd.getId());
+		if (null == record) {
 			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_UPDATING_NOT_EXIST);
 		}
+		
+		//检查权限
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(record.getServiceType().byteValue())) {
+			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		} else {
+			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		}
+		
 		
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 		
@@ -355,6 +386,14 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public void updateHotlineOrder(UpdateHotlinesCommand cmd) {
+		
+		//检查权限
+		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType().byteValue())) {
+			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		} else {
+			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+		}
+		
 		if (cmd.getHotlines() == null)
 			return;
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -394,19 +433,19 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	/*
-	 * 根据条件获取会话列表。 相同的两个人的会话定义为一个会话。 例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话
-	 * 客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话 客服A与用户C的无聊天记录，不属于会话。 注意：锚点的意义
+	 * 根据条件获取会话列表。 相同的两个人的会话定义为一个会话。 
+	 * 例： 
+	 * 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话
+	 * 客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话 
+	 * 客服A与用户C的无聊天记录，不属于会话。 
+	 * 注意：锚点的意义——下次查找时起始id
 	 */
 	@Override
 	public GetChatGroupListResponse getChatGroupList(GetChatGroupListCommand cmd) {
 
 		// 检查权限
-		// if(configProvider.getBooleanValue("privilege.community.checkflag",
-		// true)){
-		// userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(),
-		// cmd.getCurrentPMId(), 4030040300L, cmd.getAppId(),
-		// null,cmd.getCurrentProjectId());//订单记录权限
-		// }
+		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+				cmd.getCurrentProjectId());
 
 		// 获取namespaceId
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
@@ -461,13 +500,11 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 
 	 */
 	public GetChatRecordListResponse getChatRecordList(GetChatRecordListCommand cmd) {
+		
 		// 检查权限
-		// if(configProvider.getBooleanValue("privilege.community.checkflag",
-		// true)){
-		// userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(),
-		// cmd.getCurrentPMId(), 4030040300L, cmd.getAppId(),
-		// null,cmd.getCurrentProjectId());//订单记录权限
-		// }
+		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+				cmd.getCurrentProjectId());
+		
 		// 获取namespaceId
 
 		// 判空
@@ -579,14 +616,18 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 根据客服id与用户id导出聊天记录
 	 */
 	public void exportChatRecordList(GetChatRecordListCommand cmd) {
-
+		// 检查权限
+		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+				cmd.getCurrentProjectId());
 	}
 
 	/**
 	 * 根据条件导出相应聊天记录
 	 */
 	public void exportMultiChatRecordList(GetChatGroupListCommand cmd) {
-
+		// 检查权限
+		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+				cmd.getCurrentProjectId());
 	}
 
 	/**
@@ -1057,6 +1098,23 @@ public class HotlineServiceImpl implements HotlineService {
 				conditionObject.getUserId(), null, serviceType, null);
 
 		return hotlines;
+	}
+	
+	
+	/**
+	 * 校验当前请求是否符合权限
+	 * @param privilegeType
+	 * @param currentOrgId
+	 * @param appId
+	 * @param checkOrgId
+	 * @param checkCommunityId
+	 */
+	private void checkPrivilege(PrivilegeType privilegeType, Long currentOrgId, Long appId,
+			Long checkCommunityId) {
+		if (configProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentOrgId,
+					privilegeType.getCode(), appId, null, checkCommunityId);
+		}
 	}
 	
 	
