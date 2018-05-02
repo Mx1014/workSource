@@ -24,7 +24,7 @@ public class SystemInfoResponse {
     private Long paymentPlatform;
     private String scanForLogonServer;
 
-    private Integer displayFlag;
+    private Integer addressDialogStyle;
 
     @ItemType(String.class)
     private List<String> accessPoints;
@@ -81,12 +81,12 @@ public class SystemInfoResponse {
         this.myPublishFlag = myPublishFlag;
     }
 
-    public Integer getDisplayFlag() {
-        return displayFlag;
+    public Integer getAddressDialogStyle() {
+        return addressDialogStyle;
     }
 
-    public void setDisplayFlag(Integer displayFlag) {
-        this.displayFlag = displayFlag;
+    public void setAddressDialogStyle(Integer addressDialogStyle) {
+        this.addressDialogStyle = addressDialogStyle;
     }
 
     @Override
