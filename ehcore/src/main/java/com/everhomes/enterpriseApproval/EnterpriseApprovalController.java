@@ -5,6 +5,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,6 +61,37 @@ public class EnterpriseApprovalController extends ControllerBase{
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/verifyApprovalTemplates</b>
+     * <p> 判断是否需要创建审批模板 </p>
+     */
+    @RequestMapping("verifyApprovalTemplates")
+    @RestReturn(value=VerifyApprovalTemplatesResponse.class)
+    public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
+        VerifyApprovalTemplatesResponse res = enterpriseApprovalService.verifyApprovalTemplates(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /enterpriseApproval/createApprovalTemplates</b>
+     * <p> 创建审批模板 </p>
+     */
+    @RequestMapping("createApprovalTemplates")
+    @RestReturn(value=String.class)
+    public RestResponse createApprovalTemplates(@Valid CreateApprovalTemplatesCommand cmd) {
+        enterpriseApprovalService.createApprovalTemplates(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
         return response;
     }
 

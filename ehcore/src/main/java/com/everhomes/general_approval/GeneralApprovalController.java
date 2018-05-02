@@ -71,37 +71,6 @@ public class GeneralApprovalController extends ControllerBase {
     }
 
 	/**
-	 * <b>URL: /general_approval/verifyApprovalTemplates</b>
-	 * <p> 判断是否需要创建审批模板 </p>
-	 */
-	@RequestMapping("verifyApprovalTemplates")
-	@RestReturn(value=VerifyApprovalTemplatesResponse.class)
-	public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
-        VerifyApprovalTemplatesResponse res = generalApprovalService.verifyApprovalTemplates(cmd);
-		RestResponse response = new RestResponse(res);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-
-		return response;
-	}
-
-
-	/**
-	 * <b>URL: /general_approval/createApprovalTemplates</b>
-	 * <p> 创建审批模板 </p>
-	 */
-	@RequestMapping("createApprovalTemplates")
-	@RestReturn(value=String.class)
-	public RestResponse createApprovalTemplates(@Valid CreateApprovalTemplatesCommand cmd) {
-		generalApprovalService.createApprovalTemplates(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-
-		return response;
-	}
-
-	/**
 	 * <b>URL: /general_approval/listAvailableGeneralApprovals</b>
 	 * <p> 根据可见范围获取审批列表 </p>
 	 */

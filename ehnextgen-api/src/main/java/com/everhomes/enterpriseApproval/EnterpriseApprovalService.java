@@ -1,11 +1,8 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterpriseApproval.*;
-import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;
 
-import javax.validation.Valid;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -21,7 +18,13 @@ public interface EnterpriseApprovalService {
 
     ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd);
 
+    List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups();
+
     List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups();
+
+    VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
+
+    void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
 
     EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd);
 

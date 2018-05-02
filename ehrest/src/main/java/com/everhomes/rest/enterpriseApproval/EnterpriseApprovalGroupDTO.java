@@ -12,7 +12,7 @@ import java.util.List;
  * <li>ownerType: 对象类型 EhOrganizations</li>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
  * <li>name: 组名称</li>
- * <li>approvals: 审批列表 参考{@link com.everhomes.rest.general_approval.GeneralApprovalDTO}</li>
+ * <li>approvals: 审批列表 参考{@link com.everhomes.rest.enterpriseApproval.EnterpriseApprovalDTO}</li>
  * <li>groupAttribute: 组属性 DEFAULT-系统默认 CUSTOMIZE</li>
  * </ul>
  */
@@ -26,8 +26,8 @@ public class EnterpriseApprovalGroupDTO {
 
     private String name;
 
-    @ItemType(GeneralApprovalDTO.class)
-    private List<GeneralApprovalDTO> approvals;
+    @ItemType(EnterpriseApprovalDTO.class)
+    private List<EnterpriseApprovalDTO> approvals;
 
     private String groupAttribute;
 
@@ -64,6 +64,14 @@ public class EnterpriseApprovalGroupDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<EnterpriseApprovalDTO> getApprovals() {
+        return approvals;
+    }
+
+    public void setApprovals(List<EnterpriseApprovalDTO> approvals) {
+        this.approvals = approvals;
     }
 
     public String getGroupAttribute() {

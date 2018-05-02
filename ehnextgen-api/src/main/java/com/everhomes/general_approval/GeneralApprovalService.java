@@ -1,10 +1,8 @@
 package com.everhomes.general_approval;
 
-import com.everhomes.flow.FlowCase;
-import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.general_approval.*;
 
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +38,8 @@ public interface GeneralApprovalService {
 
     GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
+    void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos);
+
     GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd);
 
     void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
@@ -55,10 +55,6 @@ public interface GeneralApprovalService {
     void disableGeneralApproval(GeneralApprovalIdCommand cmd);
 
     Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
-
-    VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
-
-    void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
 
     GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute);
 

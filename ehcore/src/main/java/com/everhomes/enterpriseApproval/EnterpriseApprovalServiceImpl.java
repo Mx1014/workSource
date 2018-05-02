@@ -1,17 +1,22 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
-import com.everhomes.general_approval.GeneralApprovalFlowCase;
-import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
-import com.everhomes.general_approval.GeneralApprovalServiceImpl;
+import com.everhomes.general_approval.*;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -27,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -47,16 +53,31 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
     private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
 
     @Autowired
+    private GeneralFormService generalFormService;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
+    @Autowired
     private FlowService flowService;
 
     @Autowired
     private FlowCaseProvider flowCaseProvider;
 
     @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
     private TaskService taskService;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
@@ -102,10 +123,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         });
 
         if (details != null && details.size() > 0) {
-            results = details.stream().map(r -> {
-                EnterpriseApprovalRecordDTO dto = convertEnterpriseApprovalRecordDTO(r);
-                return dto;
-            }).collect(Collectors.toList());
+            results = details.stream().map(this::convertEnterpriseApprovalRecordDTO).collect(Collectors.toList());
         }
         res.setRecords(results);
         res.setNextPageAnchor(locator.getAnchor());
@@ -140,15 +158,24 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
     }
 
     @Override
-    public List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups() {
+    public List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups() {
         List<EnterpriseApprovalGroupDTO> results = new ArrayList<>();
         List<EnterpriseApprovalGroup> groups = enterpriseApprovalProvider.listEnterpriseApprovalGroups();
         if (groups == null || groups.size() == 0)
             return results;
         results = groups.stream()
-                .filter(r -> r.getGroupAttribute().equals(EnterpriseApprovalGroupAttribute.CUSTOMIZE.getCode()))
                 .map(r -> ConvertHelper.convert(r, EnterpriseApprovalGroupDTO.class))
                 .collect(Collectors.toList());
+        return results;
+    }
+
+    @Override
+    public List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups() {
+        List<EnterpriseApprovalGroupDTO> results = listEnterpriseApprovalGroups();
+        if (results != null && results.size() == 0)
+            results = results.stream()
+                    .filter(r -> r.getGroupAttribute().equals(EnterpriseApprovalGroupAttribute.CUSTOMIZE.getCode()))
+                    .collect(Collectors.toList());
         return results;
     }
 
@@ -272,13 +299,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         //  2. data from form
         List<FlowCaseEntity> entityLists = getApprovalDetails(data.getFlowCaseId());
         if (entityLists != null && entityLists.size() > 4) {
-            String formLogs = "";
+            StringBuilder formLogs = new StringBuilder();
             for (int i = 4; i < entityLists.size(); i++) {
-                formLogs += entityLists.get(i).getKey() + " : " + entityLists.get(i).getValue() + "\n";
+                formLogs.append(entityLists.get(i).getKey()).append(" : ").append(entityLists.get(i).getValue()).append("\n");
             }
             Cell formCell = dataRow.createCell(4);
             formCell.setCellStyle(wrapStyle);
-            formCell.setCellValue(formLogs);
+            formCell.setCellValue(formLogs.toString());
         }
 
         //  3. approval status
@@ -296,44 +323,133 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         logsCommand.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         List<FlowOperateLogDTO> operateLogLists = flowService.searchFlowOperateLogs(logsCommand).getLogs();
         if (operateLogLists != null && operateLogLists.size() > 0) {
-            String operateLogs = "";
-            for (int i = 0; i < operateLogLists.size(); i++) {
-                operateLogs += operateLogLists.get(i).getFlowUserName() + operateLogLists.get(i).getLogContent() + "\n";
+            StringBuilder operateLogs = new StringBuilder();
+            for (FlowOperateLogDTO operateLog : operateLogLists) {
+                operateLogs.append(operateLog.getFlowUserName()).append(operateLog.getLogContent()).append("\n");
             }
             Cell logCell = dataRow.createCell(6);
             logCell.setCellStyle(wrapStyle);
-            logCell.setCellValue(operateLogs);
+            logCell.setCellValue(operateLogs.toString());
         }
 
         //  5. the current operator
         FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
         if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
-            String processors = "";
+            StringBuilder processors = new StringBuilder();
             for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {
-                processors += processorRes.getProcessorsInfoList().get(i).getNickName() + ",";
+                processors.append(processorRes.getProcessorsInfoList().get(i).getNickName()).append(",");
             }
-            if (!"".equals(processors))
-                processors = processors.substring(0, processors.length() - 1);
-            dataRow.createCell(7).setCellValue(processors);
+            if (!"".equals(processors.toString()))
+                processors = new StringBuilder(processors.substring(0, processors.length() - 1));
+            dataRow.createCell(7).setCellValue(processors.toString());
         }
 
         //  6. the current supervisor
         FlowCase flowCase = flowService.getFlowCaseById(data.getFlowCaseId());
         List<UserInfo> supervisorLists = flowService.getSupervisor(flowCase);
         if (supervisorLists != null && supervisorLists.size() > 0) {
-            String supervisors = "";
-            for (int i = 0; i < supervisorLists.size(); i++) {
-                supervisors += supervisorLists.get(i).getNickName() + ",";
+            StringBuilder supervisors = new StringBuilder();
+            for (UserInfo supervisor : supervisorLists) {
+                supervisors.append(supervisor.getNickName()).append(",");
             }
-            if (!"".equals(supervisors))
-                supervisors = supervisors.substring(0, supervisors.length() - 1);
-            dataRow.createCell(8).setCellValue(supervisors);
+            if (!"".equals(supervisors.toString()))
+                supervisors = new StringBuilder(supervisors.substring(0, supervisors.length() - 1));
+            dataRow.createCell(8).setCellValue(supervisors.toString());
         }
     }
 
     public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+    }
+
+    //  判断是否需要创建模板
+    @Override
+    public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
+        VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        response.setResult(TrueOrFalseFlag.TRUE.getCode());
+        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
+        if (templates == null || templates.size() == 0)
+            LOGGER.error("Approval templates not exist. Please check it.");
+        GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), templates.get(0).getId());
+        if (ga == null)
+            response.setResult(TrueOrFalseFlag.FALSE.getCode());
+        return response;
+    }
+
+    //  创建审批模板的接口
+    @Override
+    public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
+        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
+        //  1.判断审批模板中是否有对应的表单模板
+        //  2.没有则直接创建审批
+        //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
+        if (templates != null || templates.size() > 0) {
+            dbProvider.execute((TransactionStatus status) -> {
+                for (EnterpriseApprovalTemplate template : templates) {
+                    if (template.getFormTemplateId() == 0) {
+                        //  Create Approvals directly.
+                        createGeneralApprovalByTemplate(template, null, cmd);
+                    } else {
+                        //  Create Forms before creating approvals.
+                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
+                        //  Then, start to create approvals.
+                        createGeneralApprovalByTemplate(template, formOriginId, cmd);
+                    }
+                }
+                return null;
+            });
+        }
+    }
+
+    private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), approval.getId());
+        if (ga != null) {
+            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            generalApprovalProvider.updateGeneralApproval(ga);
+        } else {
+            ga = ConvertHelper.convert(approval, GeneralApproval.class);
+            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            generalApprovalProvider.createGeneralApproval(ga);
+        }
+
+        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        if (org != null) {
+            GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
+            dto.setSourceId(cmd.getOwnerId());
+            dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+            dto.setSourceDescription(org.getName());
+            generalApprovalService.updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
+        }
+    }
+
+    private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, EnterpriseApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOwnerId(cmd.getOwnerId());
+        ga.setOwnerType(cmd.getOwnerType());
+        ga.setOrganizationId(cmd.getOrganizationId());
+        ga.setProjectId(cmd.getProjectId());
+        ga.setProjectType(cmd.getProjectType());
+        ga.setApprovalTemplateId(approval.getId());
+        if (formOriginId != null)
+            ga.setFormOriginId(formOriginId);
+        ga.setSupportType(cmd.getSupportType());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
+        return ga;
+    }
+
+    private String getUserRealName(Long userId, Long ownerId) {
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        if (member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回空
+        return null;
     }
 
     @Override
@@ -353,8 +469,26 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
 
     @Override
     public ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
+        ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
+        List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
+        if (groups == null || groups.size() == 0)
+            return res;
+        /*ListGeneralApprovalCommand command = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
+        ListGeneralApprovalResponse response = generalApprovalService.listGeneralApproval(command);
+        if (response.getDtos() == null || response.getDtos().size() == 0)
+            return res;
+        for(EnterpriseApprovalGroupDTO group : groups){
+            group.setApprovals(getCorrespondingApproval(group, response.getDtos()));
+        }*/
         return null;
     }
+/*
+
+    private List<GeneralApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<GeneralApprovalDTO> lists){
+        group.setApprovals(lists.stream().filter(r -> group.getId().equals()));
+    }
+*/
+
 
     @Override
     public ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {

@@ -49,6 +49,7 @@ public class EnterpriseApprovalDTO {
     private Byte modifyFlag;
     private Byte deleteFlag;
     private String approvalAttribute;
+    private Long approvalGroupId;
     private String iconUri;
     private String iconUrl;
     private Long operatorUid;
@@ -169,6 +170,14 @@ public class EnterpriseApprovalDTO {
 
     public void setApprovalAttribute(String approvalAttribute) {
         this.approvalAttribute = approvalAttribute;
+    }
+
+    public Long getApprovalGroupId() {
+        return approvalGroupId;
+    }
+
+    public void setApprovalGroupId(Long approvalGroupId) {
+        this.approvalGroupId = approvalGroupId;
     }
 
     public String getIconUri() {

@@ -607,7 +607,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         generalApprovalProvider.updateGeneralApproval(ga);
     }
 
-    private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
+    @Override
+    public void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
         //  1.set the temporary array to save ids
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
@@ -861,88 +862,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
         return null;
-    }
-
-
-    //  判断是否需要创建模板
-    @Override
-    public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
-        VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        response.setResult(TrueOrFalseFlag.TRUE.getCode());
-        List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
-        if (templates == null || templates.size() == 0)
-            LOGGER.error("Approval templates not exist. Please check it.");
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), templates.get(0).getId());
-        if (ga == null)
-            response.setResult(TrueOrFalseFlag.FALSE.getCode());
-        return response;
-    }
-
-    //  创建审批模板的接口
-    @Override
-    public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
-        List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
-        //  1.判断审批模板中是否有对应的表单模板
-        //  2.没有则直接创建审批
-        //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
-        if (templates != null || templates.size() > 0) {
-            dbProvider.execute((TransactionStatus status) -> {
-                for (GeneralApprovalTemplate template : templates) {
-                    if (template.getFormTemplateId().longValue() == 0) {
-                        //  Create Approvals directly.
-                        createGeneralApprovalByTemplate(template, null, cmd);
-                    } else {
-                        //  Create Forms before creating approvals.
-                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
-                        //  Then, start to create approvals.
-                        createGeneralApprovalByTemplate(template, formOriginId, cmd);
-                    }
-                }
-                return null;
-            });
-        }
-    }
-
-    private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), approval.getId());
-        if (ga != null) {
-            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
-            generalApprovalProvider.updateGeneralApproval(ga);
-        } else {
-            ga = ConvertHelper.convert(approval, GeneralApproval.class);
-            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
-            generalApprovalProvider.createGeneralApproval(ga);
-        }
-
-        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        if (org != null) {
-            GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
-            dto.setSourceId(cmd.getOwnerId());
-            dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
-            dto.setSourceDescription(org.getName());
-            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
-        }
-    }
-
-    private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
-        Long userId = UserContext.currentUserId();
-        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-        ga.setOwnerId(cmd.getOwnerId());
-        ga.setOwnerType(cmd.getOwnerType());
-        ga.setOrganizationId(cmd.getOrganizationId());
-        ga.setProjectId(cmd.getProjectId());
-        ga.setProjectType(cmd.getProjectType());
-        ga.setApprovalTemplateId(approval.getId());
-        if (formOriginId != null)
-            ga.setFormOriginId(formOriginId);
-        ga.setSupportType(cmd.getSupportType());
-        ga.setOperatorUid(userId);
-        ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
-        return ga;
     }
 
     @Override
