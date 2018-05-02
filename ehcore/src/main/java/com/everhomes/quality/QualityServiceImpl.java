@@ -4794,13 +4794,17 @@ Long nextPageAnchor = null;
 			List<QualityInspectionStandardGroupMap> executiveGroups = removeDuplicatedStandardGroups(standards);
 			if (executiveGroups != null && executiveGroups.size() > 0) {
 				executiveGroups.forEach((executiveGroup) -> {
-					if (executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) {
+					if ((executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) && executiveGroup.getInspectorUid() == 0) {
 						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
 						List<String> groupTypes = new ArrayList<>();
 						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+						String groupPath = "";
+						if (group != null) {
+							groupPath = group.getPath();
+						}
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(groupPath + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
 						if (organizations != null) {
 							organizations.forEach((o) -> {
 								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
@@ -4809,6 +4813,15 @@ Long nextPageAnchor = null;
 									memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
 								}
 							});
+						}
+					} else if (executiveGroup.getInspectorUid() != 0) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(executiveGroup.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							Organization group = organizationProvider.findOrganizationById(members.get(0).getGroupId());
+							memberList.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+							if (group != null){
+								organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+							}
 						}
 					} else {
 						//岗位下所有的人
