@@ -3,10 +3,9 @@ package com.everhomes.customer;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -27,7 +26,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -36,6 +34,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -49,9 +48,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -186,11 +183,19 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     @Override
-    public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
+            //app端要只根据跟进人名称搜索
+            if(StringUtils.isNotEmpty(cmd.getTrackingName())){
+                qb = QueryBuilders.multiMatchQuery(cmd.getTrackingName())
+                        .field("trackingName", 5.5f)
+                        .field("trackingName.pinyin_prefix", 2.0f)
+                        .field("trackingName.pinyin_gram", 1.0f);
+            }else {
+                qb = QueryBuilders.matchAllQuery();
+            }
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("name", 1.5f)
@@ -220,13 +225,30 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
         
-        //查询全部客户、我的客户、公共客户
+        /*//查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){
         		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
         	}else if(3 == cmd.getType()){
         		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", -1l));
         	}
+        }*/
+        //增加如果不是admin只能看自己为跟进人
+        if (!isAdmin) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+        }
+        //有无跟进人
+        if(null != cmd.getType()){
+            if(2 == cmd.getType()){
+                fb = FilterBuilders.andFilter(fb ,FilterBuilders.existsFilter("trackingUid"));
+            }else if(3 == cmd.getType()){
+                ExistsFilterBuilder notFilter = FilterBuilders.existsFilter("trackingUid");
+                fb = FilterBuilders.andFilter(fb ,FilterBuilders.notFilter(notFilter));
+            }
+        }
+
+        if(cmd.getTrackingUids()!=null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
         }
         //跟进时间、资产类型、资产面积、资产单价增加筛选
         if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
@@ -348,6 +370,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if(categoryItem != null) {
@@ -433,6 +456,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
         }
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+        if (members != null && members.size()>0) {
+            dto.setTrackingPhone(members.get(0).getContactToken());
+        }
+        if(customer.getLastTrackingTime()!=null){
+             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
+        }
+        dto.setTrackingPeriod(result);
         return dto;
     }
     

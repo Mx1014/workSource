@@ -2,6 +2,8 @@ package com.everhomes.rest.energy;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -11,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>addressId: 门牌id</li>
  *     <li>apartmentName: 门牌名</li>
  *     <li>apartmentFloor: 楼层</li>
+ *     <li>burdenRate: 分摊比例</li>
  * </ul>
  * Created by ying.xiong on 2017/10/16.
  */
@@ -22,6 +25,7 @@ public class EnergyMeterAddressDTO {
     private Long addressId;
     private String apartmentName;
     private String apartmentFloor;
+    private BigDecimal burdenRate;
 
     public Long getAddressId() {
         return addressId;
@@ -77,6 +81,14 @@ public class EnergyMeterAddressDTO {
 
     public void setMeterId(Long meterId) {
         this.meterId = meterId;
+    }
+
+    public BigDecimal getBurdenRate() {
+        return burdenRate;
+    }
+
+    public void setBurdenRate(BigDecimal burdenRate) {
+        this.burdenRate = burdenRate;
     }
 
     @Override

@@ -4,12 +4,27 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.dynamicExcel.*;
+import com.everhomes.dynamicExcel.DynamicColumnDTO;
+import com.everhomes.dynamicExcel.DynamicExcelHandler;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.dynamicExcel.DynamicField;
+import com.everhomes.dynamicExcel.DynamicRowDTO;
+import com.everhomes.dynamicExcel.DynamicSheet;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.customer.*;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
+import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
@@ -18,9 +33,12 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.varField.*;
+import com.everhomes.varField.FieldGroup;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeField;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
@@ -33,12 +51,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -79,6 +98,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private CommunityProvider communityProvider;
 
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+
+    @Autowired
+    private PortalService portalService;
+
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
         FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
@@ -93,6 +122,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
+//            //去除普通人员的跟进人cell
+//            ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+//            fields = fields.stream()
+//                    .filter((r) -> !groupCommand.getIsAdmin() && "trackingUid".equals(r.getFieldName()))
+//                    .collect(Collectors.toList());
             fields.forEach(fieldDTO -> {
                 LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
@@ -191,13 +225,27 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
 
-                                if("trackingUid".equals(column.getFieldName())) {
-                                    enterpriseCustomer.setTrackingName(column.getValue());
-                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
-                                    if(users != null && users.size() > 0) {
-                                        column.setValue(users.get(0).getId().toString());
+                                if ("trackingUid".equals(column.getFieldName())) {
+                                    Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
+                                    if (isAdmin) {
+                                        enterpriseCustomer.setTrackingName(column.getValue());
+                                        List<User> users = null;
+                                        if (StringUtils.isNotEmpty(column.getValue())) {
+                                            users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                        }
+                                        if (users != null && users.size() > 0) {
+                                            column.setValue(users.get(0).getId().toString());
+                                        } else {
+                                            column.setValue(null);
+                                        }
                                     } else {
-                                        column.setValue("-1");
+                                        column.setValue(String.valueOf(UserContext.currentUserId()));
+//                                        enterpriseCustomer.setTrackingUid(UserContext.currentUserId());
+                                        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+                                        if (organizationMembers != null && organizationMembers.size() > 0) {
+                                            enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
+                                        }
+
                                     }
                                 }
                                 try {
@@ -240,7 +288,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
                             //企业客户新增成功,保存客户事件
-                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
 
                             OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
                             enterpriseCustomer.setOrganizationId(organizationDTO.getId());
@@ -718,6 +766,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
             response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
+    }
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
     }
 
     private String setToObj(String fieldName, Object dto,Object value, SimpleDateFormat sdf) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {

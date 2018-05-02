@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.*;
@@ -132,7 +133,7 @@ public interface EnterpriseCustomerProvider {
 	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
-	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	
 	void allotEnterpriseCustomer(EnterpriseCustomer customer);
@@ -152,4 +153,5 @@ public interface EnterpriseCustomerProvider {
 
     String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
+    List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);
 }

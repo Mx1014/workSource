@@ -21,6 +21,15 @@ public class SelectedNoticeCommand {
     private String ownerType;
     private Long ownerId;
     private Long organizationId;
+    private Long billGroupId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

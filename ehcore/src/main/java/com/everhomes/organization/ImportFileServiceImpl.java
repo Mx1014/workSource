@@ -10,7 +10,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.ExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
@@ -27,7 +26,13 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sfyan on 2017/4/21.
@@ -186,9 +191,9 @@ public class ImportFileServiceImpl implements ImportFileService {
 
                 for (ImportFileResultLog log : logs) {
                     cellNum = 0;
-                    Map<String,String> data = new LinkedHashMap<>();
+                    Map<String,Object> data = new LinkedHashMap<>();
                     try{
-                        data = (Map<String, String>) log.getData();
+                        data = (Map<String, Object>) log.getData();
                     }catch (Exception e){
                         ArrayList<String> logList = (ArrayList<String>)log.getData();
                         for(int i = 0; i < logList.size(); i++){
@@ -197,8 +202,15 @@ public class ImportFileServiceImpl implements ImportFileService {
                     }
                     XSSFRow row = sheet.createRow(rowNum++);
                     row.setRowStyle(style);
-                    for (Map.Entry<String, String> entry : data.entrySet()) {
-                        row.createCell(cellNum++).setCellValue(entry.getValue());
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        //modify by rui.jia  20180422
+                        String entryValues = "";
+                        if (entry.getValue() != null && entry.getValue() instanceof Collection) {
+                            entryValues = Arrays.toString(((Collection) entry.getValue()).toArray());
+                        }else {
+                            entryValues = entry.getValue().toString();
+                        }
+                        row.createCell(cellNum++).setCellValue(entryValues);
                     }
                     LOGGER.debug("title size ={} .title:{}", titleMap.size(), StringHelper.toJsonString(titleMap));
                     if (StringUtils.isNotBlank(log.getErrorDescription())) {

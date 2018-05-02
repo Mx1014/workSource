@@ -155,6 +155,8 @@ public class UpdateEnterpriseCustomerCommand {
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
 
+    private Byte deviceType;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -786,6 +788,12 @@ public class UpdateEnterpriseCustomerCommand {
 	public void setContactDuty(String contactDuty) {
 		this.contactDuty = contactDuty;
 	}
-    
-    
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
+    }
 }
