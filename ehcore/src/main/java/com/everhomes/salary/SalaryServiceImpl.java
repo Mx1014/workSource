@@ -2145,10 +2145,10 @@ public class SalaryServiceImpl implements SalaryService {
     public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
         List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getPayslipId(),
                 cmd.getName(), cmd.getStatus());
+        LOGGER.debug("result " + StringHelper.toJsonString(results));
         if (null == results || results.size() == 0) {
             return null;
         }
-        LOGGER.debug("result " + StringHelper.toJsonString(results));
         List<PayslipDetailDTO> detialDTOs = results.stream().map(r -> {
             PayslipDetailDTO dto = convertPayslipDetailDTO(r);
             return dto;

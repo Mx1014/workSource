@@ -155,14 +155,14 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIP_DETAILS)
                 .where(Tables.EH_SALARY_PAYSLIP_DETAILS.OWNER_ID.eq(ownerId));
         if (null != payslipId) {
-            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.in(payslipId));
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId));
         }
         if (null != name) {
-            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.NAME.in(name));
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.NAME.eq(name));
         }
 
         if (null != status) {
-            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.in(status));
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(status));
         }
 
         return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
