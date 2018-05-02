@@ -168,7 +168,6 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
         if (null != status) {
             step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(status));
         }
-        LOGGER.debug("step " + step);
         return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
     }
 

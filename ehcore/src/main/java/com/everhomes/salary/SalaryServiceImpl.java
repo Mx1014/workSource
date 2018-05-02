@@ -967,7 +967,7 @@ public class SalaryServiceImpl implements SalaryService {
             //实发应该是工资+年终-工资税-年终税+税后款
             //工资和年终是减去了扣款而应发没有,所以计算的时候用工资+年终
             realPay = salary.add(bonus).subtract(salaryTax).subtract(bonusTax).add(afterTax);
-            LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}", shouldPay, salary, bonus, salaryTax, bonusTax, realPay);
+//            LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}", shouldPay, salary, bonus, salaryTax, bonusTax, realPay);
         }
         employee.setRegularSalary(regular);
         employee.setShouldPaySalary(shouldPay);
@@ -1001,15 +1001,15 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary) {
-        LOGGER.debug("参数 bonus: {} salary:{}", bonus, salary);
+//        LOGGER.debug("参数 bonus: {} salary:{}", bonus, salary);
         BigDecimal muni = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) < 0) {
             muni = new BigDecimal(3500).subtract(salary);
-            LOGGER.debug("muni = {}", muni);
+//            LOGGER.debug("muni = {}", muni);
         }
 
         BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12), 2, BigDecimal.ROUND_HALF_EVEN);
-        LOGGER.debug("taxBase = {}", taxBase);
+//        LOGGER.debug("taxBase = {}", taxBase);
 
         //这里要加一个3500的基数计算税
         return calculateSalaryTax(taxBase.add(new BigDecimal(3500)));
@@ -1017,13 +1017,13 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public BigDecimal calculateSalaryTax(BigDecimal salary) {
-        LOGGER.debug("计算salary 参数 " + salary);
+//        LOGGER.debug("计算salary 参数 " + salary);
         BigDecimal result = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) <= 0) {
             return result;
         }
         BigDecimal taxBase = salary.subtract(new BigDecimal(3500));
-        LOGGER.debug("taxBase = {}", taxBase);
+//        LOGGER.debug("taxBase = {}", taxBase);
         if (taxBase.compareTo(new BigDecimal(1500)) <= 0) {
             result = taxBase.multiply(new BigDecimal(3)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN);
         } else if (taxBase.compareTo(new BigDecimal(4500)) <= 0) {
@@ -1126,7 +1126,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
                 namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
-        LOGGER.debug("getSalaryDetailsWB detailIds : " + StringHelper.toJsonString(detailIds));
+//        LOGGER.debug("getSalaryDetailsWB detailIds : " + StringHelper.toJsonString(detailIds));
 
         int processNum = 0;
         for (Long detailId : detailIds) {
@@ -1307,7 +1307,7 @@ public class SalaryServiceImpl implements SalaryService {
         String sheetName = "sheet1";
         createDepartStatisticsHead(wb, sheet);
         List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listFiledSalaryDepartStatistic(ownerId, month);
-        LOGGER.debug("归档薪酬部门文件的stats:\n" + StringHelper.toJsonString(departmentStats));
+//        LOGGER.debug("归档薪酬部门文件的stats:\n" + StringHelper.toJsonString(departmentStats));
         if (null != departmentStats) {
             for (SalaryDepartStatistic stat : departmentStats) {
                 createDepartStatisticsRow(sheet, stat);
@@ -1645,7 +1645,7 @@ public class SalaryServiceImpl implements SalaryService {
         ByteArrayOutputStream os = (ByteArrayOutputStream) ops;
         InputStream ins = new ByteArrayInputStream(os.toByteArray());
         UploadCsFileResponse resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
-        LOGGER.debug("上传文件,content serverresponse " + resp);
+//        LOGGER.debug("上传文件,content serverresponse " + resp);
 //        contentServerService.parserUri(token)
         saveSalaryGroupReport(sgf, SalaryReportType.SALARY_DETAIL, resp.getResponse().getUri(), resp.getResponse().getUrl());
         //部门汇总表
@@ -1757,7 +1757,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (null != statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(), 4).multiply(new BigDecimal(100)));
         }
-        LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ", dpt.getName(), StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
+//        LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ", dpt.getName(), StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;
     }
 
@@ -2145,7 +2145,7 @@ public class SalaryServiceImpl implements SalaryService {
     public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
         List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getPayslipId(),
                 cmd.getName(), cmd.getStatus());
-        LOGGER.debug("result " + StringHelper.toJsonString(results));
+//        LOGGER.debug("result " + StringHelper.toJsonString(results));
         if (null == results || results.size() == 0) {
             return null;
         }
@@ -2167,7 +2167,7 @@ public class SalaryServiceImpl implements SalaryService {
         dto.setCreateTime(r.getCreateTime().getTime());
         dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
         dto.setPayslipContent(content);
-        LOGGER.debug("dto:" + dto);
+//        LOGGER.debug("dto:" + dto);
         return dto;
     }
 
