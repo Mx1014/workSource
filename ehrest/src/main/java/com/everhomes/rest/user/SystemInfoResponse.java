@@ -24,6 +24,8 @@ public class SystemInfoResponse {
     private Long paymentPlatform;
     private String scanForLogonServer;
 
+    private Integer displayFlag;
+
     @ItemType(String.class)
     private List<String> accessPoints;
 
@@ -77,6 +79,14 @@ public class SystemInfoResponse {
 
     public void setMyPublishFlag(Byte myPublishFlag) {
         this.myPublishFlag = myPublishFlag;
+    }
+
+    public Integer getDisplayFlag() {
+        return displayFlag;
+    }
+
+    public void setDisplayFlag(Integer displayFlag) {
+        this.displayFlag = displayFlag;
     }
 
     @Override
