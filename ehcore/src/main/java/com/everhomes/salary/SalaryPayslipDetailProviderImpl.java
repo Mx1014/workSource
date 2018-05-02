@@ -3,6 +3,7 @@ package com.everhomes.salary;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.everhomes.rest.salary.PayslipDetailStatus;
 import com.everhomes.rest.techpark.punch.NormalFlag;
@@ -10,6 +11,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,8 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SalaryPayslipDetailProviderImpl.class);
 
     @Override
     public void createSalaryPayslipDetail(SalaryPayslipDetail salaryPayslipDetail) {
@@ -164,7 +168,7 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
         if (null != status) {
             step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(status));
         }
-
+        LOGGER.debug("step " + step);
         return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
     }
 
