@@ -23,9 +23,10 @@ public class ListSendPayslipDetailsResponse {
 
 	}
 
-	public ListSendPayslipDetailsResponse(List<PayslipDetailDTO> details) {
+	public ListSendPayslipDetailsResponse(List<PayslipDetailDTO> details, List<String> titiles) {
 		super();
 		this.details = details;
+		this.titiles = titiles;
 	}
 
 	public List<PayslipDetailDTO> getDetails() {
