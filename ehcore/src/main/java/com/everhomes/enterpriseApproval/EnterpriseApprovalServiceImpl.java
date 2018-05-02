@@ -1,6 +1,7 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
@@ -77,6 +78,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
     private ConfigurationProvider configurationProvider;
 
     @Autowired
+    private ContentServerService contentServerService;
+
+    @Autowired
     private DbProvider dbProvider;
 
     @Override
@@ -132,7 +136,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
 
     @Override
     public EnterpriseApprovalRecordDTO convertEnterpriseApprovalRecordDTO(FlowCase r) {
-        GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
+        EnterpriseApprovalFlowCase flowCase = ConvertHelper.convert(r, EnterpriseApprovalFlowCase.class);
         EnterpriseApprovalRecordDTO dto = new EnterpriseApprovalRecordDTO();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -473,21 +477,44 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
         if (groups == null || groups.size() == 0)
             return res;
-        /*ListGeneralApprovalCommand command = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
+        List<GeneralApproval> results = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
+            //  1-(2)normal operation (nan.rong at 10/16/2017)
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));
+            if (null != cmd.getStatus())
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd.getStatus()));
+            return query;
+        });
+        if(results ==null || results.size() == 0)
+            return res;
+        List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> processEnterpriseApproval(r)).collect(Collectors.toList());
+        for(EnterpriseApprovalGroupDTO group : groups){
+            group.setApprovals(getCorrespondingApproval(group, approvals));
+        }
+                /*ListGeneralApprovalCommand command = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
         ListGeneralApprovalResponse response = generalApprovalService.listGeneralApproval(command);
         if (response.getDtos() == null || response.getDtos().size() == 0)
             return res;
-        for(EnterpriseApprovalGroupDTO group : groups){
-            group.setApprovals(getCorrespondingApproval(group, response.getDtos()));
-        }*/
+        */
         return null;
     }
-/*
 
-    private List<GeneralApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<GeneralApprovalDTO> lists){
-        group.setApprovals(lists.stream().filter(r -> group.getId().equals()));
+    private EnterpriseApprovalDTO processEnterpriseApproval(GeneralApproval r){
+        EnterpriseApproval ea = ConvertHelper.convert(r, EnterpriseApproval.class);
+        EnterpriseApprovalDTO dto = ConvertHelper.convert(ea, EnterpriseApprovalDTO.class);
+        //  approval icon
+        if (dto.getIconUri() != null)
+            dto.setIconUrl(contentServerService.parserUri(dto.getIconUri()));
+        return dto;
     }
-*/
+
+    private List<EnterpriseApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<EnterpriseApprovalDTO> list){
+        list = list.stream().filter(r ->group.getId().equals(r.getApprovalGroupId())).collect(Collectors.toList());
+        return list;
+    }
 
 
     @Override

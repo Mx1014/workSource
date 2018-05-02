@@ -1,9 +1,9 @@
-package com.everhomes.general_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.enterpriseApproval.EnterpriseApprovalFlowCaseCustomField;
 import com.everhomes.flow.FlowCase;
 
-public class GeneralApprovalFlowCase extends FlowCase{
+public class EnterpriseApprovalFlowCase extends FlowCase{
 
     public String getCreatorDepartment() {
         return EnterpriseApprovalFlowCaseCustomField.CREATOR_DEPARTMENT.getStringValue(this);

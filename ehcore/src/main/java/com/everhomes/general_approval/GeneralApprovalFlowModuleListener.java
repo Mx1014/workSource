@@ -5,9 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.enterpriseApproval.EnterpriseApprovalFlowCase;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import com.alibaba.fastjson.JSON;
@@ -274,7 +274,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         }*/
 
         //  approval-1.6 added by R
-        GeneralApprovalFlowCase gf = ConvertHelper.convert(flowCase, GeneralApprovalFlowCase.class);
+        EnterpriseApprovalFlowCase gf = ConvertHelper.convert(flowCase, EnterpriseApprovalFlowCase.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "审批编号"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
