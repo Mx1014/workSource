@@ -287,6 +287,10 @@ public interface Rentalv2Service {
 
 	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
 
+	QueryRentalStatisticsResponse queryRentalStatistics(QueryRentalStatisticsCommand cmd);
+
+	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
+
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();
