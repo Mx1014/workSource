@@ -14,6 +14,22 @@ update eh_service_module_apps set  module_control_type='community_control' where
 -- #issue-26479更新园区快讯WEB跳转地址
 update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sign_suffix',concat('&ns=',namespace_id,'#/newsList#sign_suffix')) where action_type = 13 and action_data like '%park-news-web%';
 
+-- #issue-26479 迁移原新闻从organization属性至community属性
+update  eh_news nu ,
+	(select news.id as news_id,  com.community_id as community_id from eh_news news 
+	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id   
+					from eh_namespace_resources n 
+					where n.resource_type  = 'COMMUNITY'
+					group by n.namespace_id
+					order by n.namespace_id,n.default_order,n.resource_id) 
+					as com 
+	on com.namespace_id = news.namespace_id
+	where news.owner_type = 'organization' and news.owner_id > 0) 
+	as n_c
+set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id 
+where nu.id = n_c.news_id;
+
+
 -- 停车订单标签 by dengs,2018.04.27
 update eh_parking_lots SET order_tag=SUBSTR(CONCAT(id,'') FROM 3 FOR 5);
 
@@ -131,3 +147,21 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 set @id =(select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1) ,'21110', '0', '21114', '导出客户', '5', NOW());
 
+-- by st.zheng
+set @id =(select MAX(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id:=@id+1), 'rental.notification', '23', 'zh_CN', '即将超时', '尊敬的用户，您预约的${useDetail}剩余使用时长：15分钟，如需延时，请前往APP进行操作，否则超时系统将继续计时计费，感谢您的使用。', '0');
+
+
+/*
+  物业报修 pmtask-3.5 应用配置数据迁移
+*/
+update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d6%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=6%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d9%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=9%';
+/*
+  物业报修 pmtask-3.5 权限配置页面信息迁移
+*/
+update eh_service_modules set name='统计信息' where id = 20190 and parent_id = 20100;
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20140 and privilege_id = 2010020140;
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20190 and privilege_id = 2010020190;
