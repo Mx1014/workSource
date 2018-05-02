@@ -153,7 +153,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyEntry.getApplyUserId(), IdentifierType.MOBILE.getCode());
 
             map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
-            map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
+            //map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
 
             map.put("sourceType", defaultIfNull(enterpriseApplyEntryService.getSourceTypeName(applyEntry.getSourceType()), ""));
 

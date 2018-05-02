@@ -936,23 +936,30 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
+        Long userId = UserContext.currentUserId();
         ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
-        List<GeneralApprovalDTO> dtos = new ArrayList<>();
+        List<GeneralApprovalDTO> results = new ArrayList<>();
         cmd.setStatus(GeneralApprovalStatus.RUNNING.getCode());
         if (null == cmd.getModuleType())
             cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
         if (null == cmd.getModuleId())
             cmd.setModuleId(GeneralApprovalController.MODULE_ID);
-        ListGeneralApprovalResponse response = listGeneralApproval(cmd);
-        List<GeneralApprovalDTO> approvals = response.getDtos();
-        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+//        ListGeneralApprovalResponse response = ;
+        List<GeneralApprovalDTO> approvals = listGeneralApproval(cmd).getDtos();
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
+        if(member == null)
+            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         if (approvals != null && approvals.size() > 0) {
-            approvals.forEach(r -> {
+            for(GeneralApprovalDTO approval : approvals){
+                if(checkTheScope(approval.getScopes(), member))
+                    results.add(approval);
+            }
+/*            approvals.forEach(r -> {
                 if (checkTheScope(r.getScopes(), member))
                     dtos.add(r);
-            });
+            });*/
         }
-        res.setDtos(dtos);
+        res.setDtos(results);
         return res;
     }
 

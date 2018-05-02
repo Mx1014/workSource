@@ -48,6 +48,8 @@ import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -75,6 +77,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
@@ -192,8 +197,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
 		//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
 		if(ocr == null){
-			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			Group group = this.groupProvider.findGroupById(flowCase.getApplierOrganizationId());
+			if(group!=null){
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(group.getIntegralTag2());
+			}else{
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			}
 		}else{
 			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
         	request.setOwnerId(ocr.getCommunityId());
@@ -437,9 +448,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 						GeneralFormDataSourceType.USER_NAME.getCode());
-				dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-				entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
-
+				if(val!=null){
+					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+				}
 				//电话
 				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 						GeneralFormDataSourceType.USER_PHONE.getCode());
@@ -449,11 +461,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				}
 
 				//企业
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_COMPANY.getCode());
-				if (val != null) {
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+				OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
+				//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
+				if(ocr != null) {//如果查询出来公司为空，就不显示公司字段
+					val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+							GeneralFormDataSourceType.USER_COMPANY.getCode());
+					if (val != null) {
+						dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+						entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+					}
 				}
 
 				//楼栋门牌

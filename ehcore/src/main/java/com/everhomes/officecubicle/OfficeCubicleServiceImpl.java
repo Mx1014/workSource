@@ -21,11 +21,14 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.alipay.api.domain.CardBinVO;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -33,6 +36,9 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.officecubicle.*;
+import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionScope;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -43,10 +49,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -58,12 +67,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
-import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -77,6 +80,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 /**
  * 工位预定service实现
@@ -101,6 +105,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Autowired
 	private OfficeCubicleProvider officeCubicleProvider;
 	@Autowired
+	private OfficeCubicleCityProvider officeCubicleCityProvider;
+	@Autowired
+	private OfficeCubicleSelectedCityProvider cubicleSelectedCityProvider;
+	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private AttachmentProvider attachmentProvider;
@@ -110,7 +118,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private OfficeCubicleRangeProvider officeCubicleRangeProvider;
 	@Autowired
 	private FlowService flowService;
+
+	@Autowired
+	private RegionProvider regionProvider;
 	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 
@@ -189,12 +203,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});
 		}
 		List<OfficeCubicleCategory> categories = this.officeCubicleProvider.queryCategoriesBySpaceId(dto.getId());
+		dto.setAllPositionNums(0);
 		if (null != categories){
 			dto.setCategories(new ArrayList<OfficeCategoryDTO>());
 			categories.forEach((category) -> {
 				OfficeCategoryDTO categoryDTO = ConvertHelper.convert(category, OfficeCategoryDTO.class);
 				categoryDTO.setSize(category.getSpaceSize());
+				if(category.getPositionNums()!=null){
+					dto.setAllPositionNums(dto.getAllPositionNums()+category.getPositionNums());
+				}
 				dto.getCategories().add(categoryDTO);
+				if(dto.getMinUnitPrice()==null || (category.getUnitPrice()!=null 
+						&& dto.getMinUnitPrice()!=null 
+						&& category.getUnitPrice().doubleValue()<dto.getMinUnitPrice().doubleValue())
+						){
+					dto.setMinUnitPrice(category.getUnitPrice());
+				}
 			});
 			Collections.sort(dto.getCategories(),new Comparator<OfficeCategoryDTO>(){
 				public int compare(OfficeCategoryDTO s1, OfficeCategoryDTO s2) {
@@ -202,9 +226,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            }
 			});	
 		}
+		
 
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
+		
 		return dto;
 	}
 
@@ -219,7 +245,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getCategories())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -266,7 +292,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ID error: null ");
-		if (null == cmd.getCityId() || null == cmd.getCityName())
+		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
 		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
@@ -324,6 +350,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
 		category.setPositionNums(dto.getPositionNums());
+		category.setUnitPrice(dto.getUnitPrice());
 		this.officeCubicleProvider.createCategory(category);
 
 	}
@@ -480,7 +507,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		row.createCell(++i).setCellValue("工位数/面积");
 		row.createCell(++i).setCellValue("预订人");
 		row.createCell(++i).setCellValue("联系电话");
-		row.createCell(++i).setCellValue("公司名称");
+		row.createCell(++i).setCellValue("状态");
 	}
 
 	private void setNewRentalBillsBookRow(Sheet sheet, OfficeOrderDTO dto) {
@@ -509,30 +536,34 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 联系电话
 		row.createCell(++i).setCellValue(dto.getReserveContactToken());
 
-		// 公司名称
-		row.createCell(++i).setCellValue(dto.getReserveEnterprise());
+		// 工作流状态
+		if(dto!=null && dto.getWorkFlowStatus()!=null) {
+			OfficeOrderWorkFlowStatus workFlowStatus = OfficeOrderWorkFlowStatus.fromType(dto.getWorkFlowStatus());
+			row.createCell(++i).setCellValue(workFlowStatus == null ? "" : workFlowStatus.getDescription());
+		}else{
+			row.createCell(++i).setCellValue("");
+		}
 	}
 
 	@Override
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
-		List<CityDTO> resp = new ArrayList<CityDTO>();
-		CityDTO dto = new CityDTO();
-		dto.setCityId(0L);
-		dto.setCityName("全国");
-		resp.add(dto);
-		Set<Long> cityIds = new HashSet<Long>();
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(cmd.getOwnerType(),cmd.getOwnerId(),null, new CrossShardListingLocator(),
-				Integer.MAX_VALUE, getNamespaceId(cmd.getNamespaceId()));
-		if (null != spaces) {
-			spaces.forEach((space) -> {
-				if (!cityIds.contains(space.getCityId())) {
-					cityIds.add(space.getCityId());
-					CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
-					resp.add(cityDTO);
-				}
-			});
-		}
-		return resp;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId);
+		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
+		
+		return cities.stream().map(r->{
+			CityDTO dto = ConvertHelper.convert(r, CityDTO.class);
+			//根据上次用户选中的城市，这里设置当前选中的城市。
+			if(selecetedCity!=null 
+					&& !StringUtils.isEmpty(selecetedCity.getProvinceName())
+					&& !StringUtils.isEmpty(selecetedCity.getCityName())
+					&& selecetedCity.getProvinceName().equals(dto.getProvinceName()) 
+					&& selecetedCity.getCityName().equals(dto.getCityName())){
+				dto.setSelectFlag((byte)1);
+			}
+			return dto;
+		}).collect(Collectors.toList());
 	}
 
 	@Override
@@ -552,8 +583,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Flow flow = flowService.getEnabledFlow(space.getNamespaceId(), OfficeCubicleFlowModuleListener.MODULE_ID,
 				FlowModuleType.NO_MODULE.getCode(),space.getOwnerId(), FlowOwnerType.COMMUNITY.getCode());
 		if(flow==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"unable to get enabled flow ");
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_UNENABLE_FLOW,
+					"提交失败，未启用工作流，请联系管理员");
 		}
 
 		Long flowCaseId = flowService.getNextFlowCaseId();
@@ -655,6 +686,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setCategoryName(cmd.getCategoryName());
 		order.setCategoryId(cmd.getCategoryId());
 		order.setContactPhone(cmd.getReserveContactToken());
+		order.setEmployeeNumber(cmd.getEmployeeNumber());
+		order.setFinancingFlag(cmd.getFinancingFlag());
 		return order;
 	}
 
@@ -711,9 +744,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
-			cmd.setCityId(null);
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCityId(), locator, pageSize + 1,
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityName(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getProvinceName(),cmd.getCityName(), locator, pageSize + 1,
 				getNamespaceId(UserContext.getCurrentNamespaceId()));
 		if (null == spaces)
 			return response;
@@ -731,50 +762,226 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		return response;
 	}
+	
+	@Override
+	public void updateCurrentUserSelectedCity(String provinceName, String cityName) {
+		OfficeCubicleSelectedCity selectedCity = new OfficeCubicleSelectedCity();
+		selectedCity.setCityName(cityName);
+		selectedCity.setProvinceName(provinceName);
+		selectedCity.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cubicleSelectedCityProvider.deleteSelectedCityByCreator(UserContext.current().getUser().getId());
+		cubicleSelectedCityProvider.createOfficeCubicleSelectedCity(selectedCity);
+	}
 
 	@Override
 	public void dataMigration() {
+		List<OfficeCubicleSpace> allspaces =officeCubicleProvider.listAllSpaces(0L,100);
+		if (allspaces==null || allspaces.size()==0) {
+			return;
+		}
 
-		//owner刷入space
-		List<OfficeCubicleSpace> emptyOwnerList = officeCubicleProvider.listEmptyOwnerSpace();
-		if(emptyOwnerList!=null) {
-			for (OfficeCubicleSpace r : emptyOwnerList) {
-				ListingLocator locator = new ListingLocator();
-				locator.setAnchor(0L);
-				List<CommunityDTO> communityDTOS = communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), r.getNamespaceId(), locator, 10);
-				if(communityDTOS!=null && communityDTOS.size()>0){
-					r.setOwnerId(communityDTOS.get(0).getId());
-					r.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
-
-					//owner刷入ranges
-					for (CommunityDTO communityDTO : communityDTOS) {
-						OfficeCubicleRange range = officeCubicleRangeProvider.findOfficeCubicleRangeByOwner(communityDTO.getId(),OfficeSpaceOwner.COMMUNITY.getCode(),r.getId(),r.getNamespaceId());
-						if(range==null) {
-							range = new OfficeCubicleRange();
-							range.setNamespaceId(r.getNamespaceId());
-							range.setOwnerId(communityDTO.getId());
-							range.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
-							range.setSpaceId(r.getId());
-							officeCubicleRangeProvider.createOfficeCubicleRange(range);
-						}
-
-					}
-					officeCubicleProvider.updateSpace(r);
+		boolean continueFlag = true;
+		while(continueFlag) {
+			for (OfficeCubicleSpace allspace : allspaces) {
+				OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(allspace.getProvinceName(), allspace.getCityName(), allspace.getNamespaceId());
+				if (city == null) {
+					city = new OfficeCubicleCity();
+					city.setNamespaceId(allspace.getNamespaceId());
+					city.setProvinceName(allspace.getProvinceName());
+					city.setCityName(allspace.getCityName());
+					officeCubicleCityProvider.createOfficeCubicleCity(city);
 				}
+			}
+			if (allspaces.size() == 100) {
+				allspaces = officeCubicleProvider.listAllSpaces(allspaces.get(99).getId(), 100);
+			} else {
+				continueFlag=false;
 			}
 		}
 
-		List<OfficeCubicleOrder> emptyOwnerOrders = officeCubicleProvider.listEmptyOwnerOrders();
-		if(emptyOwnerOrders!=null){
-			for (OfficeCubicleOrder order : emptyOwnerOrders) {
-				OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
-				if(space==null) {
-					continue;
-				}
-				order.setOwnerType(space.getOwnerType());
-				order.setOwnerId(space.getOwnerId());
-				officeCubicleProvider.updateOrder(order);
-			}
+
+	}
+	//	@Override
+//	public void dataMigration() {
+//
+//		//owner刷入space
+//		List<OfficeCubicleSpace> emptyOwnerList = officeCubicleProvider.listEmptyOwnerSpace();
+//		if(emptyOwnerList!=null) {
+//			for (OfficeCubicleSpace r : emptyOwnerList) {
+//				ListingLocator locator = new ListingLocator();
+//				locator.setAnchor(0L);
+//				List<CommunityDTO> communityDTOS = communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), r.getNamespaceId(), locator, 10);
+//				if(communityDTOS!=null && communityDTOS.size()>0){
+//					r.setOwnerId(communityDTOS.get(0).getId());
+//					r.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
+//
+//					//owner刷入ranges
+//					for (CommunityDTO communityDTO : communityDTOS) {
+//						OfficeCubicleRange range = officeCubicleRangeProvider.findOfficeCubicleRangeByOwner(communityDTO.getId(),OfficeSpaceOwner.COMMUNITY.getCode(),r.getId(),r.getNamespaceId());
+//						if(range==null) {
+//							range = new OfficeCubicleRange();
+//							range.setNamespaceId(r.getNamespaceId());
+//							range.setOwnerId(communityDTO.getId());
+//							range.setOwnerType(OfficeSpaceOwner.COMMUNITY.getCode());
+//							range.setSpaceId(r.getId());
+//							officeCubicleRangeProvider.createOfficeCubicleRange(range);
+//						}
+//
+//					}
+//					officeCubicleProvider.updateSpace(r);
+//				}
+//			}
+//		}
+//
+//		List<OfficeCubicleOrder> emptyOwnerOrders = officeCubicleProvider.listEmptyOwnerOrders();
+//		if(emptyOwnerOrders!=null){
+//			for (OfficeCubicleOrder order : emptyOwnerOrders) {
+//				OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+//				if(space==null) {
+//					continue;
+//				}
+//				order.setOwnerType(space.getOwnerType());
+//				order.setOwnerId(space.getOwnerId());
+//				officeCubicleProvider.updateOrder(order);
+//			}
+//		}
+//	}
+
+	@Override
+	public ListRegionsResponse listRegions(ListRegionsCommand cmd) {
+		List<Region> entityResultList;
+		if(cmd.getParentId()==null) {
+			entityResultList = this.regionProvider.listRegions(0, RegionScope.PROVINCE, RegionAdminStatus.ACTIVE, null);
+		}else{
+			entityResultList = this.regionProvider.listChildRegions(0, cmd.getParentId(),RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+
 		}
+		if(entityResultList==null || entityResultList.size()==0){
+			return null;
+		}
+		ListRegionsResponse response = new ListRegionsResponse();
+		response.setRegions(entityResultList.stream().map(r->ConvertHelper.convert(r,RegionDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public ListCitiesResponse listCities(ListCitiesCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long pageAnchor = cmd.getNextPageAnchor()==null?Long.MAX_VALUE:cmd.getNextPageAnchor();
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId==null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,pageAnchor,pageSize+1);
+
+		if (null == cities || cities.size()==0)
+			return null;
+		Long nextPageAnchor = null;
+		if (cities != null && cities.size() > pageSize) {
+			cities.remove(cities.size() - 1);
+			nextPageAnchor = cities.get(cities.size() - 1).getDefaultOrder();
+		}
+		ListCitiesResponse response = new ListCitiesResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setCities(cities.stream().map(r->ConvertHelper.convert(r,CityDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public void deleteCity(DeleteCityCommand cmd) {
+		Tuple<Boolean, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_CITY_LOCK.getCode()).enter(()->{
+			List<OfficeCubicleCity> list = officeCubicleCityProvider.listOfficeCubicleCity(UserContext.getCurrentNamespaceId());
+			if(list!=null && list.size()<2){
+				return false;
+			}
+			OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+			if(city!=null){
+				officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
+				officeCubicleProvider.updateSpaceByProvinceAndCity(UserContext.getCurrentNamespaceId(),city.getProvinceName(),city.getCityName());
+			}
+			return true;
+		});
+		if(!result.first()){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_DELETE_CITYS,
+					"最后一个城市不能删除");
+		}
+	}
+
+	@Override
+	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
+		checkCityName(cmd.getProvinceName(),cmd.getCityName());
+		if(cmd.getId()!=null){
+			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
+			if(officeCubicleCity==null){
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+						"id未找到");
+			}
+			officeCubicleCity.setCityName(cmd.getCityName());
+			officeCubicleCity.setProvinceName(cmd.getProvinceName());
+			officeCubicleCity.setIconUri(cmd.getIconUri());
+			officeCubicleCity.setStatus((byte)2);
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
+		}else{
+			OfficeCubicleCity oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			if(oldOfficeCubicleCity!=null){
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
+						"城市已存在，不能重复添加");
+			}
+			OfficeCubicleCity officeCubicleCity = ConvertHelper.convert(cmd,OfficeCubicleCity.class);
+			officeCubicleCity.setNamespaceId(UserContext.getCurrentNamespaceId());
+			officeCubicleCityProvider.createOfficeCubicleCity(officeCubicleCity);
+		}
+	}
+
+	private void checkCityName(String provinceName, String cityName) {
+		if(StringUtils.isEmpty(cityName) || StringUtils.isEmpty(cityName)){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EMPTY_CITYS,
+					"城市名称不能为空");
+		}
+	}
+
+	@Override
+	public void reOrderCity(ReOrderCityCommand cmd) {
+		OfficeCubicleCity officeCubicleCity1 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid1());
+
+		if(officeCubicleCity1==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid1未找到");
+		}
+		OfficeCubicleCity officeCubicleCity2 = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityid2());
+		if(officeCubicleCity2==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_CITY_ID,
+					"cityid2未找到");
+		}
+		Long order  = officeCubicleCity1.getDefaultOrder();
+		officeCubicleCity1.setDefaultOrder(officeCubicleCity2.getDefaultOrder());
+		officeCubicleCity2.setDefaultOrder(order);
+
+		dbProvider.execute(r->{
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity1);
+			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity2);
+			return null;
+		});
+
+	}
+
+	@Override
+	public CityDTO getCityById(GetCityByIdCommand cmd) {
+		OfficeCubicleCity city = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getCityId());
+		if(UserContext.getCurrentNamespaceId().intValue()!=city.getNamespaceId()){
+			return null;
+		}
+		return ConvertHelper.convert(city,CityDTO.class);
+	}
+
+	@Override
+	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
+		List<OfficeCubicleCity> list=null;
+		if(cmd.getParentName()==null){
+			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId());
+		}else{
+			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
+		}
+		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}
 }
