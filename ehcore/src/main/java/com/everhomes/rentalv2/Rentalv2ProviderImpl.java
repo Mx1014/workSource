@@ -284,7 +284,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		
 		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
 			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
-			if (rentalTypes.contains(RentalType.HALFDAY) || rentalTypes.contains(RentalType.THREETIMEADAY)) {
+			if (rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
 				if (amorpm != null) {
 					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
@@ -306,7 +306,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
-			if (rentalTypes.contains(RentalType.HOUR)) {
+			if (rentalTypes.contains(RentalType.HOUR.getCode())) {
 				Timestamp[] beginEndTime = calculateHalfDayBeginEndTime(rentalResource, rentalCell);
 				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
