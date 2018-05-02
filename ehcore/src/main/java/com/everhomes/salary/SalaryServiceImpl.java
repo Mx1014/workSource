@@ -2068,6 +2068,9 @@ public class SalaryServiceImpl implements SalaryService {
         salaryPayslipProvider.createSalaryPayslip(sp);
         //存数据 发通知
         for (PayslipDetailDTO dto : cmd.getDetails()) {
+            if (null == dto.getUserId()) {
+                continue;
+            }
             SalaryPayslipDetail spd = ConvertHelper.convert(dto, SalaryPayslipDetail.class);
             spd.setUserId(dto.getUserId());
             spd.setUserDetailId(dto.getUserDetailId());
