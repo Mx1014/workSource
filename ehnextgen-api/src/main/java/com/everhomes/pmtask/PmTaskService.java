@@ -100,6 +100,18 @@ public interface PmTaskService {
 
 	void syncCategories();
 
+	PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
+
+	void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp);
+
 	Object getThirdAddress(HttpServletRequest req);
 
 	Object createThirdTask(HttpServletRequest req);
