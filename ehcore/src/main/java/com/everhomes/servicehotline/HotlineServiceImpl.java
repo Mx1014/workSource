@@ -2,8 +2,11 @@ package com.everhomes.servicehotline;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.incubator.IncubatorApplyExportTaskHandler;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.message.MessageProvider;
@@ -32,6 +37,9 @@ import com.everhomes.message.MessageRecord;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -66,6 +74,7 @@ import com.everhomes.server.schema.tables.EhMessageRecords;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
@@ -114,6 +123,9 @@ public class HotlineServiceImpl implements HotlineService {
 	@Autowired
 	private MessageProvider messageProvider;
 
+	@Autowired
+	private TaskService taskService; //用于文件下载中心
+	
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(GetHotlineSubjectCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
@@ -194,7 +206,7 @@ public class HotlineServiceImpl implements HotlineService {
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<HotlineDTO> hotlines = getActiveHotlineList(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getPageSize(), locator, cmd.getServiceType());
+				cmd.getPageSize(), locator, null, cmd.getServiceType());
 
 		// 构造返回
 		GetHotlineListResponse resp = new GetHotlineListResponse();
@@ -626,8 +638,13 @@ public class HotlineServiceImpl implements HotlineService {
 	 */
 	public void exportMultiChatRecordList(GetChatGroupListCommand cmd) {
 		// 检查权限
-		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
-				cmd.getCurrentProjectId());
+//		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+//				cmd.getCurrentProjectId());
+
+		Map<String, Object> params = new HashMap<String, Object>(); 
+		params.put("test", "test info!");
+		taskService.createTask("it_is_my_task_name", TaskType.FILEDOWNLOAD.getCode(), HotlineFileDownloadTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+	
 	}
 
 	/**
@@ -739,8 +756,8 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 获取有效的客服/热线列表
 	 */
 	private List<HotlineDTO> getActiveHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
-			ListingLocator locator, Byte serviceType) {
-		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, null, null, serviceType,
+			ListingLocator locator, Long servicerUid, Byte serviceType) {
+		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, servicerUid, null, serviceType,
 				HotlineStatus.ACTIVE.getCode());
 	}
 	
@@ -748,8 +765,8 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 获取表里存在的客服/热线列表，包括已删除的
 	 */
 	private List<HotlineDTO> getExistHotlineList(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize,
-			ListingLocator locator, Byte serviceType) {
-		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, null, null, serviceType,
+			ListingLocator locator, Long servicerUid, Byte serviceType) {
+		return getHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, servicerUid, null, serviceType,
 				null);
 	}
 	
@@ -863,18 +880,15 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @param namespaceId
 	 * @param ownerType
 	 * @param ownerId
-	 * @param servicerId
+	 * @param serviceUid 客服用户userId
 	 * @param isSingleResult
 	 * @return
 	 */
-	private List<TargetDTO> getExclusiveServicer(Integer namespaceId, String ownerType, Long ownerId, Long servicerId,
+	private List<TargetDTO> getExclusiveServicer(Integer namespaceId, String ownerType, Long ownerId, Long serviceUid,
 			Byte serviceType, boolean isSingleResult, boolean isIncludeDeleted) {
 
 		// 设置分页条件
 		ListingLocator locator = new ListingLocator();
-
-		// 查询单条记录时，通常会带servicerId
-		locator.setEntityId(servicerId);
 
 		// 查询单个是pageSize为1
 		Integer pageSize = isSingleResult ? 1 : null;
@@ -882,9 +896,9 @@ public class HotlineServiceImpl implements HotlineService {
 		// 获取结果
 		List<HotlineDTO> servicers = null;
 		if (isIncludeDeleted) {
-			servicers = getExistHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceType);
+			servicers = getExistHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceUid,  serviceType);
 		} else {
-			servicers = getActiveHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceType);
+			servicers = getActiveHotlineList(namespaceId, ownerType, ownerId, pageSize, locator, serviceUid, serviceType);
 		}
 		
 		if (CollectionUtils.isEmpty(servicers)) {
