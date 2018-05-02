@@ -70,11 +70,11 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 增加公摊水电费，水电费改为自用水电费 by wentian
 set @id = IFNULL((select MAX(`id`) from eh_payment_charging_items),0);
-INSERT INTO `ehcore`.`eh_payment_charging_items`
+INSERT INTO `eh_payment_charging_items`
 (`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES
   (@id:=@id+1, '公摊水费', '0', NOW(), NULL, NULL, '1');
-INSERT INTO `ehcore`.`eh_payment_charging_items`
+INSERT INTO `eh_payment_charging_items`
 (`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES
   (@id:=@id+1, '公摊电费', '0', NOW(), NULL, NULL, '1');
