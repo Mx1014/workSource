@@ -2069,6 +2069,8 @@ public class SalaryServiceImpl implements SalaryService {
         //存数据 发通知
         for (PayslipDetailDTO dto : cmd.getDetails()) {
             SalaryPayslipDetail spd = ConvertHelper.convert(dto, SalaryPayslipDetail.class);
+            spd.setUserId(dto.getUserId());
+            spd.setUserDetailId(dto.getUserDetailId());
             spd.setPayslipId(sp.getId());
             spd.setName(cmd.getPayslipName());
             spd.setNamespaceId(UserContext.getCurrentNamespaceId());
