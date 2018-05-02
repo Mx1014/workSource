@@ -11282,6 +11282,7 @@ public class PunchServiceImpl implements PunchService {
                     dto2 = convertPunchLog2DTO(pl);
                 }
                 intervalDTO.getPunchLogs().add(dto2);
+                LOGGER.debug("dto1 =" + dto1 + "dto 2 = " + dto2);
                 if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
                         NormalFlag.fromCode(dto2.getSmartAlignment()) == NormalFlag.YES) {
                     intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
