@@ -11392,7 +11392,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
-//		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
+		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
         if (null == ptr) {
             return null;
         }
