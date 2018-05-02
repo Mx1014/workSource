@@ -38,8 +38,6 @@ public interface GeneralApprovalService {
 
     GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
-    void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos);
-
     GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd);
 
     void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);

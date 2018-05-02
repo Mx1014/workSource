@@ -2,6 +2,7 @@ package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -29,6 +30,8 @@ public interface EnterpriseApprovalService {
     EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd);
 
     EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd);
+
+    void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos);
 
     ListEnterpriseApprovalsResponse listEnterpriseApprovalTypes(ListEnterpriseApprovalsCommand cmd);
 

@@ -28,4 +28,47 @@ public class UpdateEnterpriseApprovalCommand {
 
     @ItemType(GeneralApprovalScopeMapDTO.class)
     private List<GeneralApprovalScopeMapDTO> scopes;
+
+    public UpdateEnterpriseApprovalCommand() {
+    }
+
+    public Long getApprovalId() {
+        return approvalId;
+    }
+
+    public void setApprovalId(Long approvalId) {
+        this.approvalId = approvalId;
+    }
+
+    public Long getApprovalGroupId() {
+        return approvalGroupId;
+    }
+
+    public void setApprovalGroupId(Long approvalGroupId) {
+        this.approvalGroupId = approvalGroupId;
+    }
+
+    public String getApprovalName() {
+        return approvalName;
+    }
+
+    public void setApprovalName(String approvalName) {
+        this.approvalName = approvalName;
+    }
+
+    public String getApprovalRemark() {
+        return approvalRemark;
+    }
+
+    public void setApprovalRemark(String approvalRemark) {
+        this.approvalRemark = approvalRemark;
+    }
+
+    public List<GeneralApprovalScopeMapDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<GeneralApprovalScopeMapDTO> scopes) {
+        this.scopes = scopes;
+    }
 }

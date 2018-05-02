@@ -31,6 +31,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -43,7 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
+public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
 
@@ -107,12 +108,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
 
         List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
             //  审批类型
-            if (cmd.getFilter() != null){
-                if(ApprovalFilterType.APPROVAL.getCode().equals(cmd.getFilter()))
+            if (cmd.getFilter() != null) {
+                if (ApprovalFilterType.APPROVAL.getCode().equals(cmd.getFilter()))
                     query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getFilter().getSourceId()));
                 else
                     //todo:获取审批组id
-                    query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.in(1L,2L));
+                    query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.in(1L, 2L));
             }
             //  申请人姓名
             if (cmd.getCreatorName() != null)
@@ -185,7 +186,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
 
     @Override
     public void exportApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
-//  export with te file download center
+        //  export with te file download center
         Map<String, Object> params = new HashMap<>();
 
         //  the value could be null if it is not exist.
@@ -280,7 +281,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         //  3.Set the title of the approval lists
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
-            sheet.setColumnWidth(i, 17 * 256);
+            sheet.setColumnWidth(i, 18 * 256);
             if (i == 4 || i == 6)
                 sheet.setColumnWidth(i, 30 * 256);
             Cell cell = titleRow.createCell(i);
@@ -367,7 +368,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
-    //  判断是否需要创建模板
+    //  Whether the approval template has already been existed, check it.
     @Override
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
@@ -383,7 +384,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         return response;
     }
 
-    //  创建审批模板的接口
+    //  Create enterprise approval templates.
     @Override
     public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
@@ -426,7 +427,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
             dto.setSourceId(cmd.getOwnerId());
             dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
             dto.setSourceDescription(org.getName());
-            generalApprovalService.updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Collections.singletonList(dto));
         }
     }
 
@@ -452,33 +453,142 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
         if (member != null)
             return member.getContactName();
-        //  若没有真实姓名则返回空
         return null;
     }
 
     @Override
     public EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd) {
-        return null;
+        Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        //  1.set the general approval
+        GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
+        EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
+        fieldDTO.setApprovalGroupId(cmd.getApprovalGroupId());
+        BeanUtils.copyProperties(fieldDTO, ga);
+        ga.setIntegralTag1(cmd.getApprovalGroupId());
+        ga.setNamespaceId(namespaceId);
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
+        //  set a default icon
+        ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
+        dbProvider.execute((TransactionStatus status) -> {
+            //  2.create it into the database
+            Long approvalId = generalApprovalProvider.createGeneralApproval(ga);
+            //  3.update the scope
+            updateGeneralApprovalScope(ga.getNamespaceId(), approvalId, cmd.getScopes());
+            return null;
+        });
+
+        EnterpriseApprovalDTO dto = new EnterpriseApprovalDTO();
+        dto.setId(ga.getId());
+        dto.setApprovalName(ga.getApprovalName());
+        return dto;
     }
 
     @Override
     public EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd) {
-        return null;
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if (ga == null)
+            return null;
+        EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
+        fieldDTO.setApprovalGroupId(cmd.getApprovalGroupId());
+        BeanUtils.copyProperties(fieldDTO, ga);
+        ga.setApprovalName(cmd.getApprovalName());
+        ga.setApprovalRemark(cmd.getApprovalRemark());
+
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.update the approval
+            updateGeneralApproval(ga);
+            //  2.update the scope
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), cmd.getScopes());
+            return null;
+        });
+
+        EnterpriseApprovalDTO dto = new EnterpriseApprovalDTO();
+        dto.setId(ga.getId());
+        dto.setApprovalName(ga.getApprovalName());
+        return dto;
     }
+
+    private void updateGeneralApproval(GeneralApproval ga) {
+        Long userId = UserContext.currentUserId();
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
+        generalApprovalProvider.updateGeneralApproval(ga);
+    }
+
+    @Override
+    public void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
+        //  1.set the temporary array to save ids
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> organizationIds = new ArrayList<>();
+
+        if (dtos == null || dtos.size() == 0)
+            return;
+
+        for (GeneralApprovalScopeMapDTO dto : dtos) {
+            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
+                    dto.getSourceId(), dto.getSourceType());
+
+            //  2.save ids under the sourceType condition
+            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                organizationIds.add(dto.getSourceId());
+            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                detailIds.add(dto.getSourceId());
+
+            //  3.create or update the scope
+            if (scope != null) {
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.updateGeneralApprovalScopeMap(scope);
+            } else {
+                scope = new GeneralApprovalScopeMap();
+                scope.setApprovalId(approvalId);
+                scope.setNamespaceId(namespaceId);
+                scope.setSourceId(dto.getSourceId());
+                scope.setSourceType(dto.getSourceType());
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            }
+        }
+
+        //  4.delete the scope which is not in the array
+        if (detailIds.size() == 0)
+            detailIds.add(0L);
+        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+
+        if (organizationIds.size() == 0)
+            organizationIds.add(0L);
+        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+    }
+
+    // todo: delete function
 
     @Override
     public ListEnterpriseApprovalsResponse listEnterpriseApprovalTypes(ListEnterpriseApprovalsCommand cmd) {
-        return null;
-    }
-
-    @Override
-    public ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
         if (groups == null || groups.size() == 0)
             return res;
-        List<GeneralApproval> results = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
-            //  1-(2)normal operation (nan.rong at 10/16/2017)
+        List<GeneralApproval> results = queryEnterpriseApprovlas(cmd);
+        if (results == null || results.size() == 0)
+            return res;
+        List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> {
+            EnterpriseApprovalDTO dto = new EnterpriseApprovalDTO();
+            dto.setId(r.getId());
+            dto.setApprovalName(r.getApprovalName());
+            return dto;
+        }).collect(Collectors.toList());
+        for (EnterpriseApprovalGroupDTO group : groups) {
+            group.setApprovals(getCorrespondingApproval(group, approvals));
+        }
+        res.setGroups(groups);
+        return res;
+    }
+
+    private List<GeneralApproval> queryEnterpriseApprovlas(ListEnterpriseApprovalsCommand cmd) {
+        return generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
             query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
             query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
@@ -488,32 +598,38 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService{
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd.getStatus()));
             return query;
         });
-        if(results ==null || results.size() == 0)
-            return res;
-        List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> processEnterpriseApproval(r)).collect(Collectors.toList());
-        for(EnterpriseApprovalGroupDTO group : groups){
-            group.setApprovals(getCorrespondingApproval(group, approvals));
-        }
-                /*ListGeneralApprovalCommand command = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
-        ListGeneralApprovalResponse response = generalApprovalService.listGeneralApproval(command);
-        if (response.getDtos() == null || response.getDtos().size() == 0)
-            return res;
-        */
-        return null;
     }
 
-    private EnterpriseApprovalDTO processEnterpriseApproval(GeneralApproval r){
+    @Override
+    public ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
+        ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
+        if (groups == null || groups.size() == 0)
+            return res;
+        List<GeneralApproval> results = queryEnterpriseApprovlas(cmd);
+        if (results == null || results.size() == 0)
+            return res;
+        List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> processEnterpriseApproval(namespaceId, r)).collect(Collectors.toList());
+        for (EnterpriseApprovalGroupDTO group : groups) {
+            group.setApprovals(getCorrespondingApproval(group, approvals));
+        }
+        res.setGroups(groups);
+        return res;
+    }
+
+    private EnterpriseApprovalDTO processEnterpriseApproval(Integer namespaceId, GeneralApproval r) {
         EnterpriseApproval ea = ConvertHelper.convert(r, EnterpriseApproval.class);
         EnterpriseApprovalDTO dto = ConvertHelper.convert(ea, EnterpriseApprovalDTO.class);
+        dto.setScopes(generalApprovalService.listGeneralApprovalScopes(namespaceId, dto.getId()));
         //  approval icon
         if (dto.getIconUri() != null)
             dto.setIconUrl(contentServerService.parserUri(dto.getIconUri()));
         return dto;
     }
 
-    private List<EnterpriseApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<EnterpriseApprovalDTO> list){
-        list = list.stream().filter(r ->group.getId().equals(r.getApprovalGroupId())).collect(Collectors.toList());
-        return list;
+    private List<EnterpriseApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<EnterpriseApprovalDTO> list) {
+        return list.stream().filter(r -> group.getId().equals(r.getApprovalGroupId())).collect(Collectors.toList());
     }
 
 
