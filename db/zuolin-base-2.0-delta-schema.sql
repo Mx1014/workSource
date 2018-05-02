@@ -30,22 +30,21 @@ ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 
 -- 园区应用配置表（不跟随管理公司时的自定义配置）
-CREATE TABLE `eh_app_community_config` (
+CREATE TABLE `eh_app_community_configs` (
   `id` bigint(20) NOT NULL,
-  `organization_app_id` bigint(20) DEFAULT NULL,
+  `organization_app_id` bigint(20) DEFAULT NULL COMMENT '安装id，即eh_organization_apps的id',
+  `app_origin_id` bigint(20) DEFAULT NULL COMMENT 'app_origin_id',
   `community_id` bigint(20) DEFAULT NULL,
-  `visibilityFlag` tinyint(4) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
   `display_name` varchar(255) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `operator_uid` bigint(20) DEFAULT NULL,
-  `operator_time` datetime DEFAULT NULL,
-
-  PRIMARY KEY (`id`)
+  `operator_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `organization_app_id` (`organization_app_id`) USING BTREE,
+  KEY `community_id` (`community_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `eh_app_community_config` ADD INDEX `organization_app_id` (`organization_app_id`) ;
-ALTER TABLE `eh_app_community_config` ADD INDEX `community_id` (`community_id`) ;
 
 -- 应用档案表
 CREATE TABLE `eh_service_module_app_profile` (
@@ -176,3 +175,5 @@ CREATE TABLE `eh_communityAndBuilding_relationes` (
 -- 增加 应用icon信息  add by yanjun 20180426
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `icon_uri`  varchar(255) NULL;
 
+-- 标准版里app的配置是否跟随默认配置
+ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;

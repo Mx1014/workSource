@@ -37,4 +37,12 @@ public interface ServiceModuleAppService {
 	ListServiceModuleAppsByOrgIdResponse listServiceModuleAppsByOrgId(ListServiceModuleAppsByOrgIdCommand cmd);
 
     ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd);
+
+    void updateStatus(UpdateStatusCommand cmd);
+
+	void changeCommunityConfigFlag(ChangeCommunityConfigFlagCommand cmd);
+
+	ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd);
+
+	void updateAppCommunityConfig(UpdateAppCommunityConfigCommand cmd);
 }

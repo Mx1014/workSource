@@ -1,7 +1,14 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.acl.ServiceModuleAppAuthorizationService;
+import com.everhomes.acl.ServiceModuleAppProfile;
+import com.everhomes.acl.ServiceModuleAppProfileProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationCommunity;
@@ -39,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sun.rmi.runtime.Log;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -80,6 +88,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private ServiceModuleEntryProvider serviceModuleEntryProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
+
+	@Autowired
+	private AppCommunityConfigProvider appCommunityConfigProvider;
+
+	@Autowired
+	private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -247,7 +264,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapps.setOrgId(cmd.getOrgId());
 		//TODO
 		//orgapps.setAppType();
-		orgapps.setStatus(OrganizationAppStatus.VALID.getCode());
+		orgapps.setStatus(OrganizationAppStatus.ENABLE.getCode());
 		orgapps.setCreatorUid(UserContext.currentUserId());
 		orgapps.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
@@ -265,13 +282,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		OrganizationApp orgapp = organizationAppProvider.getOrganizationAppById(cmd.getOrgAppId());
 
-		if(orgapp == null || OrganizationAppStatus.INVALID == OrganizationAppStatus.fromCode(orgapp.getStatus())){
+		if(orgapp == null || OrganizationAppStatus.DELETE == OrganizationAppStatus.fromCode(orgapp.getStatus())){
 			LOGGER.error("org app not found, orgAppId = {}", cmd.getOrgAppId());
 			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
 					ServiceModuleAppServiceErrorCode.ERROR_ORG_APP_NOT_FOUND, "org app not found, orgAppId = " + cmd.getOrgAppId());
 		}
 
-		orgapp.setStatus(OrganizationAppStatus.INVALID.getCode());
+		orgapp.setStatus(OrganizationAppStatus.DELETE.getCode());
 		orgapp.setOperatorUid(UserContext.currentUserId());
 		orgapp.setOperatorTime(new Timestamp(System.currentTimeMillis()));
 		organizationAppProvider.updateOrganizationApp(orgapp);
@@ -374,5 +391,115 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		ListLaunchPadAppsResponse response = new ListLaunchPadAppsResponse();
 		response.setApps(appDtos);
 		return response;
+	}
+
+	@Override
+	public void updateStatus(UpdateStatusCommand cmd) {
+		OrganizationApp orgapp = organizationAppProvider.getOrganizationAppById(cmd.getOrgAppId());
+		if(orgapp == null){
+			LOGGER.error("OrganizationApp not found, orgappid={}", cmd.getOrgAppId());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_ORG_APP_NOT_FOUND, "org app not found, orgAppId = " + cmd.getOrgAppId());
+		}
+
+		orgapp.setStatus(cmd.getStatus());
+
+		organizationAppProvider.updateOrganizationApp(orgapp);
+	}
+
+	@Override
+	public void changeCommunityConfigFlag(ChangeCommunityConfigFlagCommand cmd) {
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+		if(TrueOrFalseFlag.fromCode(cmd.getSelfConfigFlag()) == TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag())){
+			LOGGER.error("Status exception，from status={}, to status={}", community.getAppSelfConfigFlag(), cmd.getSelfConfigFlag());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_APP_COMMUNITY_STATUS_EXCEPTION, "Status exception，from status=" + community.getAppSelfConfigFlag() + "to status=" + cmd.getSelfConfigFlag());
+
+		}
+
+		community.setAppSelfConfigFlag(cmd.getSelfConfigFlag());
+
+		//清空原有自定义配置
+		appCommunityConfigProvider.deleteAppCommunityConfigByCommunityId(cmd.getCommunityId());
+
+		//查询管理公司
+		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
+
+		if(cmd.getSelfConfigFlag().byteValue() == 1){
+			//管理公司安装的app
+			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationProperty.getOrganizationId()));
+					return query;
+				}
+			});
+
+			//园区自定义的app配置
+			for (OrganizationApp organizationApp: organizationApps){
+				AppCommunityConfig config = new AppCommunityConfig();
+				config.setOrganizationAppId(organizationApp.getId());
+				config.setCommunityId(cmd.getCommunityId());
+				config.setDisplayName(organizationApp.getAliasName());
+				config.setVisibilityFlag(TrueOrFalseFlag.TRUE.getCode());
+				config.setCreatorUid(UserContext.currentUserId());
+				config.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				appCommunityConfigProvider.createAppCommunityConfig(config);
+			}
+		}
+	}
+
+	@Override
+	public ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
+		List<AppCommunityConfig> appCommunityConfigs = appCommunityConfigProvider.queryAppCommunityConfigs(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_APP_COMMUNITY_CONFIGS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+				return query;
+			}
+		});
+
+		List<AppCommunityConfigDTO>  dtos = new ArrayList<>();
+
+		if(appCommunityConfigs != null){
+			for (AppCommunityConfig config: appCommunityConfigs){
+				AppCommunityConfigDTO dto = toDto(config);
+				dtos.add(dto);
+			}
+		}
+
+		ListAppCommunityConfigsResponse response = new ListAppCommunityConfigsResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	private AppCommunityConfigDTO toDto(AppCommunityConfig config){
+		AppCommunityConfigDTO dto = ConvertHelper.convert(config, AppCommunityConfigDTO.class);
+		ServiceModuleApp serviceModuleApp = this.findReleaseServiceModuleAppByOriginId(dto.getAppOriginId());
+
+		if(serviceModuleApp != null){
+			String url = contentServerService.parserUri(serviceModuleApp.getIconUri(), serviceModuleApp.getClass().getSimpleName(), serviceModuleApp.getId());
+			dto.setIconUrl(url);
+			dto.setServiceModuleAppName(serviceModuleApp.getName());
+		}
+
+		ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(dto.getAppOriginId());
+
+		if(profile != null){
+			dto.setAppNo(profile.getAppNo());
+		}
+
+		return dto;
+	}
+
+	@Override
+	public void updateAppCommunityConfig(UpdateAppCommunityConfigCommand cmd) {
+		AppCommunityConfig config = appCommunityConfigProvider.getAppCommunityConfigById(cmd.getId());
+		config.setDisplayName(cmd.getDisplayName());
+		config.setVisibilityFlag(cmd.getVisibilityFlag());
+		config.setOperatorUid(UserContext.currentUserId());
+		config.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+		appCommunityConfigProvider.updateAppCommunityConfig(config);
 	}
 }

@@ -118,7 +118,7 @@ public class OrganizationAppProviderImpl implements OrganizationAppProvider {
 
         query.addConditions(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID.eq(appOriginId));
         query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
-        query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.eq(OrganizationAppStatus.VALID.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.ne(OrganizationAppStatus.DELETE.getCode()));
 
         OrganizationApp organizationApp = query.fetchAnyInto(OrganizationApp.class);
 
