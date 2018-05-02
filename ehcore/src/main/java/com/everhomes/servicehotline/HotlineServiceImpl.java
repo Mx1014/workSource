@@ -1,13 +1,12 @@
 package com.everhomes.servicehotline;
 
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,11 +19,15 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -38,10 +41,7 @@ import com.everhomes.message.MessageProvider;
 import com.everhomes.message.MessageRecord;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.filedownload.TaskRepeatFlag;
-import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -90,10 +90,12 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.util.TextUtils;
 
 @Component
 public class HotlineServiceImpl implements HotlineService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HotlineServiceImpl.class);
+	
 	public static final String HOTLINE_SCOPE = "hotline";
 	public static final String HOTLINE_NOTSHOW_SCOPE = "hotline-notshow";
 	
@@ -127,6 +129,9 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Autowired
 	private TaskService taskService; //用于文件下载中心
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(GetHotlineSubjectCommand cmd) {
@@ -502,7 +507,6 @@ public class HotlineServiceImpl implements HotlineService {
 		
 
 		// 获取消息
-		locator.setEntityId(0);// 将之前的设置清零
 		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDto);
 
 		// 设置返回数据
@@ -638,38 +642,133 @@ public class HotlineServiceImpl implements HotlineService {
 	 * 根据客服id与用户id导出聊天记录
 	 */
 	public void exportChatRecordList(GetChatRecordListCommand cmd, HttpServletResponse httpResponse) {
-		// 检查权限
+		
 		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
 				cmd.getCurrentProjectId());
 		
-		TargetDTO servicerDto = new TargetDTO();
-		TargetDTO customerDto = new TargetDTO();
-		
-		servicerDto.setTargetId(249692L);
-		servicerDto.setTargetName("晁倩2");
-		customerDto.setTargetName("科技园官方帐号");
-		customerDto.setTargetId(199919L);
-		
-		List<ChatRecordDTO> chatRecordList = getChatRecordList(null, new ListingLocator(),servicerDto,customerDto);
-		
-        ExcelUtils excelUtils = new ExcelUtils(httpResponse, "短信列表a", "短信列表b");
-		List<String> propertyNames = new ArrayList<String>(Arrays.asList("senderName", "message", "messageType", "sendTime"));
-		List<String> titleNames = new ArrayList<String>(Arrays.asList("发送人", "信息", "类型", "发送时间"));
-		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 100, 10, 30));
+		//获取记录
+		if (null == cmd.getServicerId()) {
+			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_SERVICER_KEY_INVALID);
+		}
 
-		excelUtils.setNeedSequenceColumn(true);
-        //  5.处理导出变量的值并导出
-        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, chatRecordList);
+		if (null == cmd.getCustomerId()) {
+			throwErrorCode(HotlineErrorCode.ERROR_HOTLINE_CUSTOMER_KEY_INVALID);
+		}
+
+		// 获取页码数据
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		// 获取客服和用户
+		TargetDTO servicerDto = getSingleExclusiveServicer(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getServicerId());
+		if (null == servicerDto) {
+			return;
+		}
+
+		TargetDTO customerDto = findUserNameIdentifierById(cmd.getCustomerId());
+		if (null == customerDto) {
+			return;
+		}
+
+		// 获取聊天记录
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, servicerDto, customerDto);
+		if (CollectionUtils.isEmpty(chatRecordList)) {
+			return;
+		}
+		
+		// 获取拼接内容
+		List<String> dataList = createSingleChatGroupCotent(chatRecordList, servicerDto, customerDto);
+		
+		String fileName = servicerDto.getTargetName()+"与"+customerDto.getTargetName()+"（"+customerDto.getUserIdentifier()+"）的消息记录.txt";
+		
+		// 输出文档
+		exportTxt(httpResponse, dataList, fileName);
+		
+		return;
 	}
 
 	/**
 	 * 根据条件导出相应聊天记录
 	 */
 	public void exportMultiChatRecordList(GetChatGroupListCommand cmd, HttpServletResponse httpResponse) {
+
 		// 检查权限
-//		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
-//				cmd.getCurrentProjectId());
-	
+		checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICE_CHAT_RECORD, cmd.getCurrentPMId(), cmd.getAppId(),
+				cmd.getCurrentProjectId());
+
+		// 获取namespaceId
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+
+		// 获取页码数据
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		// 设置锚点
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		// 获取所有客服id
+		List<TargetDTO> servicerDtos = null;
+		if (cmd.getServicerId() == null) {
+			// 未传客服id时，认为是查询全部客服，包括被删除的客服
+			servicerDtos = getMultiExclusiveServicer(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), true);
+		} else {
+			// 传了客服id，认为是指定客服
+			TargetDTO servicer = getSingleExclusiveServicer(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getServicerId());
+			if (null != servicer) {
+				servicerDtos = new ArrayList<>(1);
+				servicerDtos.add(servicer);
+			}
+		}
+
+		// 未找到相应客服，直接返回
+		if (CollectionUtils.isEmpty(servicerDtos)) {
+			return ;
+		}
+
+		// 根据keywork获得用户
+		TargetDTO customerDto = null;
+		if (!StringUtils.isBlank(cmd.getKeyword())) {
+			customerDto = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
+			if (null == customerDto) {
+				return ;
+			}
+		}
+
+		// 获取消息
+		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDto);
+		if (CollectionUtils.isEmpty(dtoList)) {
+			return ;
+		}
+		
+		List<String> dataList = new ArrayList<String>(1000);
+		for (ChatGroupDTO group : dtoList) {
+			// 获取聊天记录
+			List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, new ListingLocator(), group.getServicer(), group.getCustomer());
+			if (CollectionUtils.isEmpty(chatRecordList)) {
+				continue;
+			}
+			
+			// 获取拼接内容
+			List<String> tmpList = createSingleChatGroupCotent(chatRecordList, group.getServicer(),  group.getCustomer());
+			if (CollectionUtils.isEmpty(chatRecordList)) {
+				continue;
+			}
+			
+			dataList.addAll(tmpList);
+		}
+		
+		
+		//获取文件名
+		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+		String communityName = null == community ? "" : community.getName();
+		String fileName = communityName+"-消息记录.txt";
+		
+		//导出
+		exportTxt(httpResponse, dataList, fileName);
+		return ;
 	}
 
 	/**
@@ -1162,6 +1261,64 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 	
 	
+	/**
+	 * @param chatDtos
+	 * @return
+	 */
+	private List<String> createSingleChatGroupCotent(List<ChatRecordDTO> chatDtos, TargetDTO servicerDto, TargetDTO customerDto) {
+		
+		/*
+		 * 	====================================
+			客服名称:客服A
+			====================================
+			用户姓名:刘亦菲   联系电话：15306070607
+			====================================
+						
+			2018-02-27 14:41:38 客服A（这是客服名称）
+			Hello there!
+			
+			2018-02-27 14:45:32 刘亦菲（这是用户姓名）
+			[图片]
+			
+		 * */
+		List<String> content = new ArrayList<>(1000);
+		content.add("=======================================");
+		content.add("客服名称:"+servicerDto.getTargetName());
+		content.add("=======================================");
+		content.add("用户名称:"+customerDto.getTargetName()+"   联系电话:"+customerDto.getUserIdentifier());
+		content.add("=======================================");
+		content.add("\n");
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for (ChatRecordDTO dto : chatDtos) {
+			content.add(sdf.format(dto.getSendTime()) + " " + dto.getSenderName());
+
+			if (ChatMessageType.IMAGE.getCode().equals(dto.getMessageType())) {
+				content.add("[图片]");
+			}
+			else if (ChatMessageType.AUDIO.getCode().equals(dto.getMessageType())) {
+				content.add("[语音]");
+			}
+			else {
+				content.add(dto.getMessage());
+			}
+			content.add("\n");
+		}
+		
+		return content;
+	}
 	
+	private void exportTxt(HttpServletResponse httpResponse, List<String> dataList, String fileName) {
+
+		try {
+			httpResponse.setContentType("multipart/form-data");
+			httpResponse.setHeader("Content-Disposition",
+					"attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+			TextUtils.exportTxtByOutputStream(httpResponse.getOutputStream(), dataList, null);
+		} catch (IOException e) {
+			LOGGER.info("Export Txt =" + e.getMessage());
+			return;
+		}
+	}
 
 }
