@@ -26,6 +26,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterpriseApproval.EnterpriseApprovalService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowCase;
@@ -58,11 +59,11 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -7837,7 +7838,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
         if (null != dto.getApprovalRecords()) {
             StringBuilder sb = new StringBuilder();
-            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+            for (EnterpriseApprovalRecordDTO record : dto.getApprovalRecords()) {
                 sb.append(record.getApprovalNo());
             }
             row.createCell(++i).setCellValue(sb.toString());
@@ -8251,7 +8252,7 @@ public class PunchServiceImpl implements PunchService {
                     FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
 //<<<<<<< HEAD
                     if(null != flowCase){
-                    	GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+                    	EnterpriseApprovalRecordDTO recordDTO = enterpriseApprovalService.convertEnterpriseApprovalRecordDTO(flowCase);
                     	dto.getApprovalRecords().add(recordDTO);
                     }
 //=======
