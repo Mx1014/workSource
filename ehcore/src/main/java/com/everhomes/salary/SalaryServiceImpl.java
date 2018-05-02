@@ -2148,6 +2148,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (null == results || results.size() == 0) {
             return null;
         }
+        LOGGER.debug("result " + StringHelper.toJsonString(results));
         List<PayslipDetailDTO> detialDTOs = results.stream().map(r -> {
             PayslipDetailDTO dto = convertPayslipDetailDTO(r);
             return dto;
@@ -2166,6 +2167,7 @@ public class SalaryServiceImpl implements SalaryService {
         dto.setCreateTime(r.getCreateTime().getTime());
         dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
         dto.setPayslipContent(content);
+        LOGGER.debug("dto:" + dto);
         return dto;
     }
 
