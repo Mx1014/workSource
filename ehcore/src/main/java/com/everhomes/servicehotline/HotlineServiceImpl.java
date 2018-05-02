@@ -29,7 +29,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.incubator.IncubatorApplyExportTaskHandler;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.message.MessageProvider;
@@ -39,7 +38,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -74,7 +72,6 @@ import com.everhomes.server.schema.tables.EhMessageRecords;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
@@ -490,7 +487,14 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 
 		// 根据keywork获得用户
-		TargetDTO customerDto = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
+		TargetDTO customerDto = null;
+		if (!StringUtils.isBlank(cmd.getKeyword())) {
+			customerDto = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
+			if (null == customerDto) {
+				return new GetChatGroupListResponse();
+			}
+		}
+		
 
 		// 获取消息
 		locator.setEntityId(0);// 将之前的设置清零
@@ -814,11 +818,13 @@ public class HotlineServiceImpl implements HotlineService {
 	 *            必填
 	 * @return
 	 */
-	private TargetDTO findUserByTokenOrNickName(String keyword, int namespaceId) {
+	private TargetDTO findUserByTokenOrNickName(String inputKeyword, int namespaceId) {
 
-		if (StringUtils.isBlank(keyword)) {
+		if (StringUtils.isBlank(inputKeyword)) {
 			return null;
 		}
+		
+		String keyword = inputKeyword.trim();
 
 		// 1.先对手机号进行搜索
 		TargetDTO target = null;
@@ -933,8 +939,10 @@ public class HotlineServiceImpl implements HotlineService {
 		// 1.设置发送者名字，客服名或用户名
 		if (msgRecord.getSenderUid().equals(servicerDto.getTargetId())) {
 			chatRecord.setSenderName(servicerDto.getTargetName());
+			chatRecord.setIsServicer(HotlineFlag.YES.getCode());
 		} else {
 			chatRecord.setSenderName(customerDto.getTargetName());
+			chatRecord.setIsServicer(HotlineFlag.NO.getCode());
 		}
 
 		// 2.设置发送时间
