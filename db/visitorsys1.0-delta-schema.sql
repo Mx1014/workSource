@@ -97,7 +97,7 @@ CREATE TABLE `eh_visitor_sys_configurations` (
 	`config_version` BIGINT COMMENT '配置版本',
   `guide_info` varchar(2048) COMMENT '指引信息',
   `self_register_qrcode_uri` VARCHAR(1024) COMMENT '自助登记二维码uri地址',
-  `ipad_cover_plan_uri` VARCHAR(1024) COMMENT '客户端封面图uri地址',
+  `logo_uri` VARCHAR(1024) COMMENT '客户端封面图uri地址',
   `ipad_theme_rgb` VARCHAR(32) COMMENT '客户端主题rgb',
   `secrecy_agreement` TEXT COMMENT '保密协议',
   `welcome_pages` TEXT COMMENT '欢迎页面',
