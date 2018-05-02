@@ -478,4 +478,20 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
 		return result;
 	}
+
+	@Override
+	public List<PmTask> listTaskByStat(Integer namespaceId, List<Long> ownerIds, Timestamp dateStart,Timestamp dateEnd ,List<Long> taskcategoryIds){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectJoinStep<Record> query = context.select().from(Tables.EH_PM_TASKS);
+		Condition condition = Tables.EH_PM_TASKS.NAMESPACE_ID.eq(namespaceId);
+
+		if(null != ownerIds)
+			condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.in(ownerIds));
+		if(null != dateStart && null != dateEnd)
+			condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.between(dateStart,dateEnd));
+		if(null != taskcategoryIds && taskcategoryIds.size() > 0)
+			condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.in(taskcategoryIds));
+		condition = condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.ne(0L));
+		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
+	}
 }
