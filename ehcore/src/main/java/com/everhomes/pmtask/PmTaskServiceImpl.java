@@ -2297,6 +2297,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SceneTokenDTO sceneTokenDTO = null;
 		if (null != cmd.getSceneToken()) {
 			User user = UserContext.current().getUser();
+
+
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
 		Integer ifAdmain = 1;
