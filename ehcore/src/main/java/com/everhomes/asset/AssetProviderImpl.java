@@ -1469,14 +1469,14 @@ public class AssetProviderImpl implements AssetProvider {
         //BILL
         context.update(bill)
                 .set(bill.STATUS,(byte)1)
-                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_RECEIVABLE)
+                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_OWED)
                 .set(bill.AMOUNT_OWED,new BigDecimal("0"))
                 .where(bill.ID.eq(billId))
                 .execute();
         //bill item
         context.update(item)
                 .set(item.STATUS,(byte)1)
-                .set(item.AMOUNT_RECEIVED,item.AMOUNT_RECEIVABLE)
+                .set(item.AMOUNT_RECEIVED,item.AMOUNT_OWED)
                 .set(item.AMOUNT_OWED,new BigDecimal("0"))
                 .where(item.BILL_ID.eq(billId))
                 .execute();
