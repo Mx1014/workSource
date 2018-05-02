@@ -310,4 +310,6 @@ public interface AssetProvider {
     void modifySettledBill(Long billId, String invoiceNum);
 
     boolean checkBillExistById(Long billId);
+
+    String getAddressByBillId(Long id);
 }
