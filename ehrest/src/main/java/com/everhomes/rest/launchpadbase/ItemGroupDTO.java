@@ -20,7 +20,7 @@ public class ItemGroupDTO {
 
     private String groupName;
     private String widget;
-    private String instanceConfig;
+    private Object instanceConfig;
     private String style;
     private Integer defaultOrder;
     private Integer separatorFlag;
@@ -43,11 +43,11 @@ public class ItemGroupDTO {
         this.widget = widget;
     }
 
-    public String getInstanceConfig() {
+    public Object getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(String instanceConfig) {
+    public void setInstanceConfig(Object instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 
