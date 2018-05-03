@@ -884,6 +884,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     if(StringUtils.isBlank(dto.getAddressStr())){
                         dto.setAddressStr(addresses.toString());
                     }
+                    // list进行排序，按照倒序 #28390 said by 王锦兰 by wentian
+                    list.sort(new Comparator<BillForClientV2>() {
+                        @Override
+                        public int compare(BillForClientV2 o1, BillForClientV2 o2) {
+                            try{
+                                return -o1.getBillDuration().substring(0, o1.getBillDuration().indexOf("至")).compareTo(
+                                        o2.getBillDuration().substring(0, o2.getBillDuration().indexOf("至"))
+                                );
+                            }catch (Exception e){
+                                return 1;
+                            }
+                        }
+                    });
                     dto.setBills(list);
                     dto.setOverAllAmountOwed(owedMoney.toString());
                     tabBills.add(dto);
