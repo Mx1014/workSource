@@ -284,7 +284,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("getConfiguration")
 	@RestReturn(GetConfigurationResponse.class)
-	public RestResponse getConfiguration(BaseVisitorsysCommand cmd) {
+	public RestResponse getConfiguration(GetConfigurationCommand cmd) {
 		GetConfigurationResponse baseResponse = visitorSysService.getConfiguration(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
@@ -388,7 +388,7 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("getConfigurationForWeb")
 	@RestReturn(GetConfigurationResponse.class)
 	@RequireAuthentication(false)
-	public RestResponse getConfigurationForWeb(BaseVisitorsysCommand cmd) {
+	public RestResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd) {
 		GetConfigurationResponse baseResponse = visitorSysService.getConfiguration(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);

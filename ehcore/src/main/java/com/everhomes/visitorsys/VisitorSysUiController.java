@@ -77,7 +77,7 @@ public class VisitorSysUiController extends ControllerBase {
 	 */
 	@RequestMapping("getConfiguration")
 	@RestReturn(GetUIConfigurationResponse.class)
-	public RestResponse getUIConfiguration(BaseVisitorsysUICommand cmd) {
+	public RestResponse getUIConfiguration(GetUIConfigurationCommand cmd) {
 		GetConfigurationResponse baseResponse = visitorSysService.getUIConfiguration(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);

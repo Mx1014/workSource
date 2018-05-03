@@ -8,8 +8,7 @@ import com.everhomes.util.StringHelper;
  *<li>logoUrl : (选填)logo的url地址</li>
  *<li>logoUri : (选填)logo的uri地址</li>
  *<li>ipadThemeRgb : (选填)主题色</li>
- *<li>qrcodeUri : (选填)二维码uri地址</li>
- *<li>qrcodeUrl : (选填)二维码url地址</li>
+ *<li>qrcode : (选填)二维码字符串</li>
  *<li>visitorInfoDTO : (必填)访客信息， {@link com.everhomes.rest.visitorsys.BaseVisitorInfoDTO}</li>
  *<li>officeLocationDTO : (必填)地址信息， {@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
  *</ul>
@@ -18,7 +17,7 @@ public class GetInvitationLetterForWebResponse {
     private String logoUrl;
     private String logoUri;
     private String ipadThemeRgb;
-    private String qrcodeUri;
+    private String qrcode;
     private String qrcodeUrl;
 
     private BaseVisitorInfoDTO visitorInfoDTO;
@@ -48,12 +47,12 @@ public class GetInvitationLetterForWebResponse {
         this.ipadThemeRgb = ipadThemeRgb;
     }
 
-    public String getQrcodeUri() {
-        return qrcodeUri;
+    public String getQrcode() {
+        return qrcode;
     }
 
-    public void setQrcodeUri(String qrcodeUri) {
-        this.qrcodeUri = qrcodeUri;
+    public void setQrcode(String qrcode) {
+        this.qrcode = qrcode;
     }
 
     public String getQrcodeUrl() {

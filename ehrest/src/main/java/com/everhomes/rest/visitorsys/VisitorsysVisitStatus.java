@@ -4,19 +4,19 @@ package com.everhomes.rest.visitorsys;
 /**
  * 
  * <ul>
- * <li>NOT_VISIT((byte)0): 未到访</li>
- * <li>WAIT_CONFIRM_VISIT((byte)1): 等待确认</li>
- * <li>HAS_VISITED((byte)2): 已到访</li>
- * <li>REJECTED_VISIT((byte)3): 已拒绝</li>
- * <li>DELETED((byte)4): 已删除</li>
+ * <li>DELETED((byte)0): 已删除</li>
+ * <li>NOT_VISIT((byte)1): 未到访</li>
+ * <li>WAIT_CONFIRM_VISIT((byte)2): 等待确认</li>
+ * <li>HAS_VISITED((byte)3): 已到访</li>
+ * <li>REJECTED_VISIT((byte)4): 已拒绝</li>
  * </ul>
  */
 public enum VisitorsysVisitStatus {
-	NOT_VISIT((byte)0),
-	WAIT_CONFIRM_VISIT((byte)1),
-	HAS_VISITED((byte)2),
-	REJECTED_VISIT((byte)3),
-	DELETED((byte)4);
+	DELETED((byte)0),
+	NOT_VISIT((byte)1),
+	WAIT_CONFIRM_VISIT((byte)2),
+	HAS_VISITED((byte)3),
+	REJECTED_VISIT((byte)4);
 
 	private byte code;
 
