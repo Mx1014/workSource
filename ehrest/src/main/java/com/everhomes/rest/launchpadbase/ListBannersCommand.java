@@ -13,14 +13,14 @@ import com.everhomes.util.StringHelper;
  */
 public class ListBannersCommand {
 
-    private String instanceConfig;
+    private Object instanceConfig;
     private ContextDTO context;
 
-    public String getInstanceConfig() {
+    public Object getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(String instanceConfig) {
+    public void setInstanceConfig(Object instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 
