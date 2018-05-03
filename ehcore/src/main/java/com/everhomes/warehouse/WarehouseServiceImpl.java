@@ -593,7 +593,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             order.setServiceType(cmd.getServiceType());
             warehouseProvider.insertWarehouseOrder(order);
         }
-        if(cmd.getStocks() == null || cmd.getStocks().size() < 1 || cmd.getRequestId() != null){
+        if(cmd.getStocks() == null || cmd.getStocks().size() < 1){
             //改为从request中获取stocks by wentian 因为不同情况的新增和更新都走了此接口，有新的情况添加时此方法会不太明朗 2018/4/10
             List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
             if(warehouseRequestMaterials.size() > 0){
