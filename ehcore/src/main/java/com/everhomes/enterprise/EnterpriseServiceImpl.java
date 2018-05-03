@@ -9,13 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 
 
-
-
-
-
-
-
-
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.enterprise.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -48,28 +46,6 @@ import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
-import com.everhomes.rest.enterprise.EnterpriseAddressDTO;
-import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.enterprise.EnterpriseContactEntryType;
-import com.everhomes.rest.enterprise.EnterpriseContactStatus;
-import com.everhomes.rest.enterprise.EnterpriseDTO;
-import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
-import com.everhomes.rest.enterprise.GetEnterpriseInfoCommand;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseCommunityResponse;
-import com.everhomes.rest.enterprise.ListEnterpriseResponse;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
-import com.everhomes.rest.enterprise.SetCurrentEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateContactorCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -153,6 +129,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     
     @Override
@@ -1003,5 +982,41 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		Enterprise enterprise = enterpriseProvider.findEnterpriseByAddressId(addressId);
 		return ConvertHelper.convert(enterprise, EnterpriseDTO.class);
 	}
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param cmd
+     * @return
+     */
+    @Override
+	public ListEnterpriseResponse listEnterpriseNoReleaseWithCommunityId(listEnterpriseNoReleaseWithCommunityIdCommand cmd){
+        //创建ListEnterpriseResponse类的对象
+        ListEnterpriseResponse listEnterpriseResponse = new ListEnterpriseResponse();
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        //创建分页的对象
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        //设置第几页
+        locator.setAnchor(cmd.getPageAnchor());
+        //进行非空校验
+        if(cmd.getNamepaceId() != null && cmd.getCommunityId() != null){
+            //说明传进来的参数不为空，那么我们首先需要根据这两个参数进行查询eh_communitys表中
+            //在该域空间下不包含该项目当中的所有项目的编号，注意他会返回一个集合List<Long>
+            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamepaceId());
+            //进行非空校验
+            if(CollectionUtils.isNotEmpty(communityIdList)){
+                //说明集合不为空，那么我们就根据该集合进行查询eh_organization_community_requests表，得到一个公司id的集合
+                List<Integer> organizationIdList = organizationProvider.findOrganizationIdListByCommunityIdList(communityIdList);
+                //进行非空校验
+                if(CollectionUtils.isNotEmpty(organizationIdList)){
+                    //说明集合不为空，那么我们就根据该公司编号的集合在eh_organizations表中查询对应的公司的信息，注意他会返回一个List<Organization>集合
+                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getEnterpriseName(),cmd.getOrganizationId(),locator,pageSize);
+                    if(CollectionUtils.isNotEmpty(organizationList)){
+                        listEnterpriseResponse.setEnterprises(organizationList);
+                    }
+                }
+            }
+        }
+        return listEnterpriseResponse;
+    }
 	
 }

@@ -24,6 +24,7 @@ import com.everhomes.point.PointLog;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
@@ -6322,6 +6323,65 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
         dao.insert(organizationMember);
+    }
+
+    /**
+     * 根据项目id集合来查询对应的公司id集合
+     * @param communityIdList
+     * @return
+     */
+    @Override
+    public List<Integer> findOrganizationIdListByCommunityIdList(List<Long> communityIdList){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Integer> organizationIdList = context.select(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIdList))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .fetchInto(Integer.class);
+        return organizationIdList;
+    }
+
+    /**
+     * 根据公司编号集合查询公司集合
+     * @param organizationIdList
+     * @return
+     */
+    public List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String enterpriseName, Long organizationId,
+                                                            CrossShardListingLocator locator, int pageSize){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
+        //声明一个List<Organization>集合
+        List<EnterpriseDTO> result = new ArrayList<EnterpriseDTO>();
+        //查询表EH_ORGANIZATIONS
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        if(!StringUtils.isEmpty(enterpriseName)){
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(enterpriseName +"%"));
+        }
+        if(organizationId != null){
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
+        }
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseDTO.class));
+            return null;
+        });
+        locator.setAnchor(null);
+
+        if (result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+        return result;
     }
 
 }

@@ -11,10 +11,9 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.*;
-
 import com.everhomes.userOrganization.UserOrganizations;
-
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -650,4 +649,18 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	OrganizationMember findOrganizationMemberNoSigned(String contactToken,Integer namespaceId);
+
+	/**
+	 * 根据项目id集合来查询对应的公司id集合
+	 * @param communityIdList
+	 * @return
+	 */
+	List<Integer> findOrganizationIdListByCommunityIdList(List<Long> communityIdList);
+
+	/**
+	 * 根据公司编号集合查询公司集合
+	 * @param organizationIdList
+	 * @return
+	 */
+	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String enterpriseName, Long organizationId, CrossShardListingLocator locator, int pageSize);
 }

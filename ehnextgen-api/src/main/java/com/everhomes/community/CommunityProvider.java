@@ -150,4 +150,12 @@ public interface CommunityProvider {
     Community findDefaultCommunity(Integer namespaceId);
 
     Community findAnyCommunity(Integer namespaceId);
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param communityId
+     * @param namespaceId
+     * @return
+     */
+    List<Long> findOrganizationIdsByNamespaceId(Long communityId , Integer namespaceId);
 }

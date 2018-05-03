@@ -12,8 +12,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise.listEnterpriseNoReleaseWithCommunityIdCommand;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -1865,5 +1867,24 @@ public class CommunityProviderImpl implements CommunityProvider {
         query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
         return query.fetchAnyInto(Community.class);
     }
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param communityId
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public List<Long> findOrganizationIdsByNamespaceId(Long communityId , Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        List<Long> communityIdList = context.select(Tables.EH_COMMUNITIES.ID).from(Tables.EH_COMMUNITIES).where(
+                Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.ID.ne(communityId))
+                .fetchInto(Long.class);
+        return communityIdList;
+
+    }
+
 
 }
