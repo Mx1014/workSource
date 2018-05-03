@@ -201,11 +201,11 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd) {
-		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
-			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
-		} else {
-			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
-		}
+//		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
+//			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+//		} else {
+//			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
+//		}
 		
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 
