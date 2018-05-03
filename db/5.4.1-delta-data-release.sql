@@ -160,8 +160,16 @@ update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwi
 update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d9%';
 update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=9%';
 /*
+  物业报修 pmtask-3.5 应用配置数据迁移 正中会
+*/
+update eh_service_module_apps set instance_config='{"taskCategoryId":1,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d1%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":1,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=1%';
+/*
   物业报修 pmtask-3.5 权限配置页面信息迁移
 */
 update eh_service_modules set name='统计信息' where id = 20190 and parent_id = 20100;
 update eh_service_module_privileges set remark = '全部权限' where module_id = 20140 and privilege_id = 2010020140;
 update eh_service_module_privileges set remark = '全部权限' where module_id = 20190 and privilege_id = 2010020190;
+
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20150 and privilege_id = 2010020150;
+update eh_service_modules set status = 0 where id = 20150 and parent_id = 20100;
