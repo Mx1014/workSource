@@ -365,7 +365,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
                         .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.OVERTIME.getCode()))
                         .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
 
-                Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.desc()).fetch();
+                Result<Record> result = step.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.desc()).fetch();
 
                 if (result != null && result.isNotEmpty()) {
                     results.addAll(result.map(r -> ConvertHelper.convert(r, PunchExceptionRequest.class)));
