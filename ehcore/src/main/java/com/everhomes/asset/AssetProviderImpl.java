@@ -1251,7 +1251,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER)
+        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1290,7 +1290,7 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-        context.select()
+        context.select(t.AMOUNT,t.ID, t.REMARKS)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
