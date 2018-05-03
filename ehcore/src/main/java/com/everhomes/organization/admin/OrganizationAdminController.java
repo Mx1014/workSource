@@ -417,6 +417,22 @@ public class OrganizationAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/org/createSettledEnterprise</b>
+     * <p>添加入驻企业（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("createSettledEnterprise")
+    @RestReturn(value = String.class)
+    public RestResponse createSettledEnterprise(CreateSettledEnterpriseCommand cmd){
+        organizationService.createSettledEnterprise(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/org/updateEnterprise</b>
      * <p>修改企业</p>
      */

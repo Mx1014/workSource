@@ -30,6 +30,7 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -13183,6 +13184,53 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+    }
+
+    /**
+     * 添加入驻企业（标准版）
+     * @param cmd
+     */
+    @Override
+    public void createSettledEnterprise(CreateSettledEnterpriseCommand cmd){
+        //所有的操作都保持在一个事务中
+        dbProvider.execute((TransactionStatus status) -> {
+            //向办公地点表中添加数据
+            if(cmd.getOfficeSites() != null){
+                //说明传过来的所在项目和名称以及其中的楼栋和门牌不为空，那么我们将其进行遍历
+                for(CreateOfficeSiteCommand createOfficeSiteCommand :cmd.getOfficeSites()){
+                    //这样的话拿到的是每一个办公所在地，以及其中的楼栋和门牌
+                    //首先我们将办公地址名称和办公地点id持久化到表eh_organization_workPlaces中
+                    //创建OrganizationWorkPlaces类的对象
+                    OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                    //将数据封装在对象中
+                    organizationWorkPlaces.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationWorkPlaces.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
+                    //将上面的organization对象中的id也封装在对象中
+                    organizationWorkPlaces.setOrganizationId(cmd.getOrganizationId());
+                    //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
+                    organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                    //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+                    //首先进行遍历楼栋集合
+                    if(createOfficeSiteCommand.getSiteDtos() != null){
+                        //说明楼栋和门牌不为空，注意他是一个集合
+                        //遍历
+                        for(OrganizationSiteApartmentDTO organizationSiteApartmentDTO : createOfficeSiteCommand.getSiteDtos()){
+                            //这样的话我们拿到的是每一个楼栋以及对应的门牌
+                            //创建CommunityAndBuildingRelationes对象，并且将数据封装在对象中，然后持久化到数据库
+                            CommunityAndBuildingRelationes communityAndBuildingRelationes = new CommunityAndBuildingRelationes();
+                            communityAndBuildingRelationes.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                            communityAndBuildingRelationes.setAddressId(organizationSiteApartmentDTO.getApartmentId());
+                            communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
+                            //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
+                            organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
+                        }
+                    }
+
+                }
+            }
+            return null;
+        });
     }
 
 }

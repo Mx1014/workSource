@@ -23,6 +23,7 @@ import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.point.PointLog;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.enterprise.CreateSettledEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.*;
@@ -6383,5 +6384,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
     }
+
+
 
 }

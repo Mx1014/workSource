@@ -711,4 +711,10 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	void updateSuperAdmin(UpdateSuperAdminCommand cmd);
+
+	/**
+	 * 添加入驻企业（标准版）
+	 * @param cmd
+	 */
+	void createSettledEnterprise(CreateSettledEnterpriseCommand cmd);
 }
