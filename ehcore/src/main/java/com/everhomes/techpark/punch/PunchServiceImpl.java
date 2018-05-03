@@ -791,6 +791,7 @@ public class PunchServiceImpl implements PunchService {
         PunchTimeRule timeRule = timeRuleCache.get().get(timeRuleId);
         if (timeRule == null) {
             timeRule = punchProvider.findPunchTimeRuleById(timeRuleId);
+            timeRuleCache.get().put(timeRuleId, timeRule);
         }
         return timeRule;
     }
@@ -1507,10 +1508,10 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private PunchRule findPunchRuleByCache(String ownerType, Long companyId, Long userId) {
-        PunchRule pr = punchRruleCacheByUserId.get().get(companyId + "-" + userId);
+        PunchRule pr = punchRuleCacheByUserId.get().get(companyId + "-" + userId);
         if (null == pr) {
             pr = getPunchRule(ownerType, companyId, userId);
-            punchRruleCacheByUserId.get().put(companyId + "-" + userId, pr);
+            punchRuleCacheByUserId.get().put(companyId + "-" + userId, pr);
         }
         return pr;
     }
@@ -4729,41 +4730,46 @@ public class PunchServiceImpl implements PunchService {
             dto.setExceptionRequestCount(0);
             if (null != exceptionRequests) {
                 for (PunchExceptionRequest request : exceptionRequests) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                    java.sql.Date beginDate;
-                    try {
-                        beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(beginDate);
-                        calendar.add(Calendar.MONTH, 1);
-                        java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
-                        if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getPunchDate().before(beginDate)
-                                && !request.getPunchDate().after(endDate)) {
-                            dto.setExceptionRequestCount(dto.getExceptionRequestCount() + 1);
+                    if(null != request){
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                        java.sql.Date beginDate;
+                        try {
+                            beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(beginDate);
+                            calendar.add(Calendar.MONTH, 1);
+                            java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
+                            if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getPunchDate().before(beginDate)
+                                    && !request.getPunchDate().after(endDate)) {
+                                dto.setExceptionRequestCount(dto.getExceptionRequestCount() + 1);
+                            }
+                        } catch (ParseException e) {
+                            LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                         }
-                    } catch (ParseException e) {
-                        LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                     }
                 }
             }
             dto.setOverTimeSum(0.0);
             if (null != overTimeRequests) {
                 for (PunchExceptionRequest request : overTimeRequests) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                    java.sql.Date beginDate;
-                    try {
-                        beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(beginDate);
-                        calendar.add(Calendar.MONTH, 1);
-                        java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
-                        //请假结束时间在开始时间之后 请假开始时间 在结束时间之前
-                        if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getEndTime().before(beginDate)
-                                && !request.getBeginTime().after(endDate)) {
-                            dto.setOverTimeSum(new BigDecimal(dto.getOverTimeSum()).add(new BigDecimal(request.getDuration())).doubleValue());
+                    if (null != request) {
+
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                        java.sql.Date beginDate;
+                        try {
+                            beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(beginDate);
+                            calendar.add(Calendar.MONTH, 1);
+                            java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
+                            //请假结束时间在开始时间之后 请假开始时间 在结束时间之前
+                            if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getEndTime().before(beginDate)
+                                    && !request.getBeginTime().after(endDate)) {
+                                dto.setOverTimeSum(new BigDecimal(dto.getOverTimeSum()).add(new BigDecimal(request.getDuration())).doubleValue());
+                            }
+                        } catch (ParseException e) {
+                            LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                         }
-                    } catch (ParseException e) {
-                        LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                     }
                 }
             }
@@ -5709,7 +5715,7 @@ public class PunchServiceImpl implements PunchService {
 
                     organizationMemberDetailsCacheDetailId.set(new HashMap<>());
                     timeRuleCache.set(new HashMap<>());
-                    punchRruleCacheByUserId.set(new HashMap<>());
+                    punchRuleCacheByUserId.set(new HashMap<>());
                     //刷新前一天的
                     Calendar punCalendar = Calendar.getInstance();
                     punCalendar.setTime(runDate);
@@ -5802,7 +5808,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                     organizationMemberDetailsCacheDetailId.get().clear();
                     timeRuleCache.get().clear();
-                    punchRruleCacheByUserId.get().clear();
+                    punchRuleCacheByUserId.get().clear();
                     return null;
                 });
     }
@@ -5833,14 +5839,14 @@ public class PunchServiceImpl implements PunchService {
             for (UniongroupMemberDetail member : members) {
                 if (member != null && member.getTargetType() != null && member.getTargetType().equals("USER")) {
                     refreshDayLogAndMonthStat(member.getTargetId(), pr.getOwnerId(), yesterday);
-                    punchRruleCacheByUserId.get().put(pr.getOwnerId() + "-" + member.getTargetId(), pr);
+                    punchRuleCacheByUserId.get().put(pr.getOwnerId() + "-" + member.getTargetId(), pr);
 
                 }
             }
         }
     }
 
-    private ThreadLocal<Map<String, PunchRule>> punchRruleCacheByUserId = new ThreadLocal<Map<String, PunchRule>>() {
+    private ThreadLocal<Map<String, PunchRule>> punchRuleCacheByUserId = new ThreadLocal<Map<String, PunchRule>>() {
         protected Map<String, PunchRule> initialValue() {
             return new HashMap<>();
         }
