@@ -12,4 +12,5 @@ public interface EnterpriseApprovalProvider {
 
     List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId);
 
+    List<Long> listGeneralApprovalIdsByGroupId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long gourpId);
 }

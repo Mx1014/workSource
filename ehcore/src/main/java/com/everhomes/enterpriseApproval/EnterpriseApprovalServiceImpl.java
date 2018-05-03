@@ -89,8 +89,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ListApprovalFlowRecordsResponse res = new ListApprovalFlowRecordsResponse();
         List<EnterpriseApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
-
         command.setStartTime(cmd.getStartTime());
         command.setEndTime(cmd.getEndTime());
         command.setOrganizationId(cmd.getOrganizationId());
@@ -109,11 +109,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
             //  审批类型
             if (cmd.getFilter() != null) {
-                if (ApprovalFilterType.APPROVAL.getCode().equals(cmd.getFilter()))
+                if (ApprovalFilterType.APPROVAL.getCode().equals(cmd.getFilter().getSourceType()))
                     query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getFilter().getSourceId()));
                 else
-                    //todo:获取审批组id
-                    query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.in(1L, 2L));
+                    query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.in(enterpriseApprovalProvider.listGeneralApprovalIdsByGroupId(namespaceId, cmd.getModuleId(), cmd.getOrganizationId(), "EhOrganizations", cmd.getFilter().getSourceId())));
             }
             //  申请人姓名
             if (cmd.getCreatorName() != null)
@@ -363,7 +362,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
     }
 
-    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
+    private List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
@@ -375,8 +374,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
-        if (templates == null || templates.size() == 0)
+        if (templates == null || templates.size() == 0) {
             LOGGER.error("Approval templates not exist. Please check it.");
+            return response;
+        }
         GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), templates.get(0).getId());
         if (ga == null)
@@ -391,7 +392,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         //  1.判断审批模板中是否有对应的表单模板
         //  2.没有则直接创建审批
         //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
-        if (templates != null || templates.size() > 0) {
+        if (templates != null && templates.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
                 for (EnterpriseApprovalTemplate template : templates) {
                     if (template.getFormTemplateId() == 0) {
@@ -493,11 +494,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public void deleteEnterpriseApproval(EnterpriseApprovalIdCommand cmd){
+    public void deleteEnterpriseApproval(EnterpriseApprovalIdCommand cmd) {
         // change the status
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-        dbProvider.execute((TransactionStatus status)->{
+        dbProvider.execute((TransactionStatus status) -> {
             //  1.delete the approval
             updateGeneralApproval(ga);
             //  2.delete the scope
@@ -581,8 +582,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             organizationIds.add(0L);
         generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
     }
-
-    // todo: delete function
 
     @Override
     public ListEnterpriseApprovalsResponse listEnterpriseApprovalTypes(ListEnterpriseApprovalsCommand cmd) {

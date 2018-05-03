@@ -788,9 +788,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                     }
                 });
         ListGeneralFormResponse resp = new ListGeneralFormResponse();
-        resp.setForms(forms.stream().map((r) -> {
-            return processGeneralFormDTO(r);
-        }).collect(Collectors.toList()));
+        resp.setForms(forms.stream().map(this::processGeneralFormDTO).collect(Collectors.toList()));
         return resp;
     }
 
@@ -801,8 +799,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute) {
-        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalByAttribute(UserContext.getCurrentNamespaceId(), ownerId, attribute);
-        return approval;
+        return generalApprovalProvider.getGeneralApprovalByAttribute(UserContext.getCurrentNamespaceId(), ownerId, attribute);
     }
 
     @Override
