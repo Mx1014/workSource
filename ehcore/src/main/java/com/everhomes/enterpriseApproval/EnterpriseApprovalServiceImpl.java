@@ -589,13 +589,15 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
         if (groups == null || groups.size() == 0)
             return res;
-        List<GeneralApproval> results = queryEnterpriseApprovlas(cmd);
+        List<GeneralApproval> results = queryEnterpriseApprovals(cmd);
         if (results == null || results.size() == 0)
             return res;
         List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> {
+            EnterpriseApproval approval = ConvertHelper.convert(r, EnterpriseApproval.class);
             EnterpriseApprovalDTO dto = new EnterpriseApprovalDTO();
             dto.setId(r.getId());
             dto.setApprovalName(r.getApprovalName());
+            dto.setApprovalGroupId(approval.getApprovalGroupId());
             return dto;
         }).collect(Collectors.toList());
         for (EnterpriseApprovalGroupDTO group : groups) {
@@ -605,7 +607,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return res;
     }
 
-    private List<GeneralApproval> queryEnterpriseApprovlas(ListEnterpriseApprovalsCommand cmd) {
+    private List<GeneralApproval> queryEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         return generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
             query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
@@ -625,7 +627,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovalGroups();
         if (groups == null || groups.size() == 0)
             return res;
-        List<GeneralApproval> results = queryEnterpriseApprovlas(cmd);
+        List<GeneralApproval> results = queryEnterpriseApprovals(cmd);
         if (results == null || results.size() == 0)
             return res;
         List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> processEnterpriseApproval(namespaceId, r)).collect(Collectors.toList());
