@@ -896,14 +896,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         Byte status = null;
-        if(cmd.getIsOnlyOwedBill() == null){
-            status = null;
-        }else if(cmd.getIsOnlyOwedBill().byteValue() == (byte)1){
+        if(cmd.getIsOnlyOwedBill().byteValue() == (byte)1){
             status= 0;
-        }else if(cmd.getIsOnlyOwedBill().byteValue() == (byte)0){
-            status = 1;
         }
-        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId(), status);
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId(), status, cmd.getBillGroupId());
     }
 
     @Override

@@ -184,6 +184,7 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
             cmdAllBill.setTargetId(targetId);
             cmdAllBill.setTargetType(targetType);
             cmdAllBill.setIsOnlyOwedBill(isOnlyOwedBill);
+            cmdAllBill.setBillGroupId(billGroupId);
             List<ListAllBillsForClientDTO> listAllBillsForClientDTOS = zuolinAssetVendorHandler.listAllBillsForClient(cmdAllBill);
             return v2BillDTO2v1BillDTO(listAllBillsForClientDTOS);
         }
@@ -207,9 +208,11 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
             overAllAmountOwed = overAllAmountOwed.add(owed);
             dto.setDateStrBegin(target.getDateStrBegin());
             dto.setDateStrEnd(target.getDateStrEnd());
+            dto.setStatus(target.getChargeStatus());
             Calendar beginC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrBegin());
             Calendar endC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrEnd());
             if(beginC != null && endC != null){
+                billPeriodMonth += 1;
                 int period = endC.get(Calendar.MONTH) - beginC.get(Calendar.MONTH);
                 billPeriodMonth += period;
             }

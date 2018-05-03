@@ -3796,7 +3796,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status) {
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId) {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
@@ -3824,6 +3824,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(status != null){
             query.addConditions(bill.STATUS.eq(status));
+        }
+        if(billGroupId != null){
+            query.addConditions(bill.BILL_GROUP_ID.eq(billGroupId));
         }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
