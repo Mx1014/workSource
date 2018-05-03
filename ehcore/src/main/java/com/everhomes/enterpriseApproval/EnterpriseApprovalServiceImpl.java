@@ -411,17 +411,21 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        //  check whether the template has been existed by the template id
         GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), template.getId());
+        //  1.just update it when it exist
         if (ga != null) {
             ga = processApprovalTemplate(ga, template, formOriginId, cmd);
             generalApprovalProvider.updateGeneralApproval(ga);
         } else {
+            //  2.create if it not exist
             ga = ConvertHelper.convert(template, GeneralApproval.class);
             ga = processApprovalTemplate(ga, template, formOriginId, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
         }
 
+        //  3.initialize the approval scope map
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         if (org != null) {
             GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
@@ -607,6 +611,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return res;
     }
 
+    //  find approvals, In order to be reused by other function
     private List<GeneralApproval> queryEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         return generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
@@ -630,6 +635,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<GeneralApproval> results = queryEnterpriseApprovals(cmd);
         if (results == null || results.size() == 0)
             return res;
+        //  convert the result to the EnterpriseApprovalDTO
         List<EnterpriseApprovalDTO> approvals = results.stream().map(r -> processEnterpriseApproval(namespaceId, r)).collect(Collectors.toList());
         for (EnterpriseApprovalGroupDTO group : groups) {
             group.setApprovals(getCorrespondingApproval(group, approvals));
@@ -648,6 +654,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return dto;
     }
 
+    //  get the corresponding approval by the group id
     private List<EnterpriseApprovalDTO> getCorrespondingApproval(EnterpriseApprovalGroupDTO group, List<EnterpriseApprovalDTO> list) {
         return list.stream().filter(r -> group.getId().equals(r.getApprovalGroupId())).collect(Collectors.toList());
     }
@@ -672,6 +679,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return res;
     }
 
+    //  filter function
     private void filterTheApprovalByScope(EnterpriseApprovalGroupDTO group, OrganizationMember member){
         List<EnterpriseApprovalDTO> results = new ArrayList<>();
         if(group.getApprovals() == null || group.getApprovals().size() == 0)
