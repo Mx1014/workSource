@@ -743,14 +743,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         // change the status
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-        dbProvider.execute((TransactionStatus status)->{
-            //  1.delete the approval
-            updateGeneralApproval(ga);
-            //  2.delete the scope
-            generalApprovalProvider.deleteApprovalScopeMapByApprovalId(cmd.getApprovalId());
-            return null;
-        });
-
+        //  delete the approval
+        updateGeneralApproval(ga);
     }
 
     @Override

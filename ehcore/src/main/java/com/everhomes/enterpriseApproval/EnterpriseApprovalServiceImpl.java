@@ -488,6 +488,20 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
+    public void deleteEnterpriseApproval(EnterpriseApprovalIdCommand cmd){
+        // change the status
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
+        dbProvider.execute((TransactionStatus status)->{
+            //  1.delete the approval
+            updateGeneralApproval(ga);
+            //  2.delete the scope
+            generalApprovalProvider.deleteApprovalScopeMapByApprovalId(cmd.getApprovalId());
+            return null;
+        });
+    }
+
+    @Override
     public EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd) {
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null)

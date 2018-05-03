@@ -111,7 +111,7 @@ public class EnterpriseApprovalController extends ControllerBase{
 
     /**
      * <b>URL: /enterpriseApproval/createEnterpriseApproval</b>
-     * <p>OA 新增审批模板</p>
+     * <p>OA 新增审批</p>
      * @return
      */
     @RequestMapping("createEnterpriseApproval")
@@ -125,8 +125,23 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /enterpriseApproval/deleteEnterpriseApproval</b>
+     * <p>OA 删除审批</p>
+     * @return
+     */
+    @RequestMapping("deleteEnterpriseApproval")
+    @RestReturn(value=String.class)
+    public RestResponse deleteEnterpriseApproval(@Valid EnterpriseApprovalIdCommand cmd) {
+        enterpriseApprovalService.deleteEnterpriseApproval(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /enterpriseApproval/updateEnterpriseApproval</b>
-     * <p>OA 编辑审批模板</p>
+     * <p>OA 编辑审批</p>
      * @return
      */
     @RequestMapping("updateEnterpriseApproval")

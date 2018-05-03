@@ -29,6 +29,8 @@ public interface EnterpriseApprovalService {
 
     EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd);
 
+    void deleteEnterpriseApproval(EnterpriseApprovalIdCommand cmd);
+
     EnterpriseApprovalDTO updateEnterpriseApproval(UpdateEnterpriseApprovalCommand cmd);
 
     void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos);
