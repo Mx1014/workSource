@@ -177,7 +177,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     @Override
     public List<EnterpriseApprovalGroupDTO> listAvailableApprovalGroups() {
         List<EnterpriseApprovalGroupDTO> results = listEnterpriseApprovalGroups();
-        if (results != null && results.size() == 0)
+        if (results != null && results.size() > 0)
             results = results.stream()
                     .filter(r -> r.getGroupAttribute().equals(EnterpriseApprovalGroupAttribute.CUSTOMIZE.getCode()))
                     .collect(Collectors.toList());
@@ -409,15 +409,15 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
     }
 
-    private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+    private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), approval.getId());
+                cmd.getOwnerType(), template.getId());
         if (ga != null) {
-            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            ga = processApprovalTemplate(ga, template, formOriginId, cmd);
             generalApprovalProvider.updateGeneralApproval(ga);
         } else {
-            ga = ConvertHelper.convert(approval, GeneralApproval.class);
-            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            ga = ConvertHelper.convert(template, GeneralApproval.class);
+            ga = processApprovalTemplate(ga, template, formOriginId, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
         }
 
@@ -431,7 +431,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
     }
 
-    private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, EnterpriseApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+    private GeneralApproval processApprovalTemplate(GeneralApproval ga, EnterpriseApprovalTemplate template, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         Long userId = UserContext.currentUserId();
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
@@ -440,7 +440,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ga.setOrganizationId(cmd.getOrganizationId());
         ga.setProjectId(cmd.getProjectId());
         ga.setProjectType(cmd.getProjectType());
-        ga.setApprovalTemplateId(approval.getId());
+        //  Group initialize
+        EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
+        fieldDTO.setApprovalGroupId(template.getGroupId());
+        BeanUtils.copyProperties(fieldDTO, ga);
+        //  Template id insert
+        ga.setApprovalTemplateId(template.getId());
         if (formOriginId != null)
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
