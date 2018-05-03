@@ -150,6 +150,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 -- by st.zheng
 set @id =(select MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id:=@id+1), 'rental.notification', '23', 'zh_CN', '即将超时', '尊敬的用户，您预约的${useDetail}剩余使用时长：15分钟，如需延时，请前往APP进行操作，否则超时系统将继续计时计费，感谢您的使用。', '0');
+UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您成功预约${useDetail}，请在该时间内前往指定车位（地址：${spaceAddress}），并点击以下链接使用：${orderDetailUrl} 谢谢。' WHERE `scope`='sms.default' and `code`=59;
+UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您将预约的${useDetail}延时到${newEndTime}，请点击以下链接使用：${orderDetailUrl} ，感谢您的使用。'WHERE (`scope`='sms.default' and `code`=62);
+UPDATE `eh_locale_templates` SET  `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）为您预约的${useDetail}由于前序订单使用超时，系统自动为您更换至${spaceNo}车位，请点击以下链接使用：${orderDetailUrl} ，给您带来的不便我们深感抱歉，感谢您的使用。' WHERE (`scope`='sms.default' and `code`=66);
 
 -- 资源预定增加统计权限 by st.zheng
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40430', '统计信息', '40400', '/40000/40400/40430', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
