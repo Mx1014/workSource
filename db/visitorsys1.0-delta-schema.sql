@@ -23,6 +23,8 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `refuse_time` DATETIME COMMENT '后台拒绝时间',
   `delete_time` DATETIME COMMENT '后台删除时间',
   `visit_status` TINYINT COMMENT '到访状态，0，已删除; 1，未到访;2，等待确认; 3，已到访; 4，已拒绝; ',
+  `send_message_inviter_flag` TINYINT COMMENT '确认到访时是否发送消息给邀请人，0，不发送; 1，发送',
+  `send_sms_Flag` TINYINT COMMENT '是否发送访客邀请函给邀请人，0，不发送; 1，发送',
   `office_location_id` BIGINT COMMENT '办公地点ID',
   `office_location_name` VARCHAR(512) COMMENT '办公地点名称',
   `visit_reason_id` BIGINT COMMENT '到访是由Id',

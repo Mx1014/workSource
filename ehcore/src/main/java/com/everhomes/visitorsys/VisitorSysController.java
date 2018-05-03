@@ -380,6 +380,23 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /visitorsys/exportBookedVisitors</b>
+	 * <p>
+	 * 22.导出预约访客/访客管理列表-后台管理
+	 * </p>
+	 */
+	@RequestMapping("exportBookedVisitors")
+	@RestReturn(String.class)
+	public RestResponse exportBookedVisitors(ListBookedVisitorsCommand cmd) {
+		visitorSysService.listBookedVisitors(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /visitorsys/getConfigurationForWeb</b>
 	 * <p>
 	 * 1.获取配置-h5（客户端/微信端）

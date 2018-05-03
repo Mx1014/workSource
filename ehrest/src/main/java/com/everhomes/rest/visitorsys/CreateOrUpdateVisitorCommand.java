@@ -32,6 +32,8 @@ import java.sql.Timestamp;
  * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
  * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
  * <li>visitorPicUri: (选填)访客头像url</li>
+ * <li>sendMessageInviterFlag: (选填)是否发送消息给邀请者，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>sendSMSFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
@@ -42,6 +44,8 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
     private String visitAddresses;
 
     private String visitorPicUri;
+    private Byte sendMessageInviterFlag;
+    private Byte sendSMSFlag;
 
     public Timestamp getInvalidTime() {
         return invalidTime;
@@ -89,6 +93,22 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setVisitorPicUri(String visitorPicUri) {
         this.visitorPicUri = visitorPicUri;
+    }
+
+    public Byte getSendMessageInviterFlag() {
+        return sendMessageInviterFlag;
+    }
+
+    public void setSendMessageInviterFlag(Byte sendMessageInviterFlag) {
+        this.sendMessageInviterFlag = sendMessageInviterFlag;
+    }
+
+    public Byte getSendSMSFlag() {
+        return sendSMSFlag;
+    }
+
+    public void setSendSMSFlag(Byte sendSMSFlag) {
+        this.sendSMSFlag = sendSMSFlag;
     }
 
     @Override
