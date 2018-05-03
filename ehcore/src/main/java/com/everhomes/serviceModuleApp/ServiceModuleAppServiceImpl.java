@@ -452,21 +452,52 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
-		List<AppCommunityConfig> appCommunityConfigs = appCommunityConfigProvider.queryAppCommunityConfigs(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_APP_COMMUNITY_CONFIGS.COMMUNITY_ID.eq(cmd.getCommunityId()));
-				return query;
-			}
-		});
-
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		List<AppCommunityConfigDTO>  dtos = new ArrayList<>();
+		if(community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
 
-		if(appCommunityConfigs != null){
-			for (AppCommunityConfig config: appCommunityConfigs){
-				AppCommunityConfigDTO dto = toDto(config);
-				dtos.add(dto);
+			//自定义配置的
+			List<AppCommunityConfig> appCommunityConfigs = appCommunityConfigProvider.queryAppCommunityConfigs(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_APP_COMMUNITY_CONFIGS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+					return query;
+				}
+			});
+
+			if(appCommunityConfigs != null){
+				for (AppCommunityConfig config: appCommunityConfigs){
+					AppCommunityConfigDTO dto = toDto(config);
+					dtos.add(dto);
+				}
 			}
+
+		}else {
+
+			//跟随默认方案的
+			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
+
+			//管理公司安装的app
+			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationProperty.getOrganizationId()));
+					return query;
+				}
+			});
+
+			if(organizationApps != null){
+				for (OrganizationApp app: organizationApps){
+					AppCommunityConfig config = new AppCommunityConfig();
+					config.setAppOriginId(app.getAppOriginId());
+					config.setOrganizationAppId(app.getId());
+					config.setDisplayName(app.getAliasName());
+					AppCommunityConfigDTO dto = toDto(config);
+					dtos.add(dto);
+				}
+
+			}
+
 		}
 
 		ListAppCommunityConfigsResponse response = new ListAppCommunityConfigsResponse();

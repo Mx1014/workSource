@@ -111,7 +111,7 @@ public class ServiceModuleAppController extends ControllerBase {
 	 * <p>获取园区自定义app配置信息</p>
 	 * <b>URL: /servicemoduleapp/listAppCommunityConfigs</b>
 	 */
-	@RequestMapping("listAppCommunityConfig")
+	@RequestMapping("listAppCommunityConfigs")
 	@RestReturn(value=ListAppCommunityConfigsResponse.class)
 	public RestResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
 		ListAppCommunityConfigsResponse res = serviceModuleAppService.listAppCommunityConfigs(cmd);

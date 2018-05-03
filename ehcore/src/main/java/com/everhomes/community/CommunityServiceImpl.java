@@ -569,6 +569,15 @@ public class CommunityServiceImpl implements CommunityService {
 			communityDTO.setGeoPointList(getPointDTOs);
 		}
 
+		List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(communityDTO.getId());
+		if(orgcoms != null && orgcoms.size() > 0){
+			Organization org = organizationProvider.findOrganizationById(orgcoms.get(0).getOrganizationId());
+			if(org != null){
+				communityDTO.setPmOrgId(org.getId());
+				communityDTO.setPmOrgName(org.getName());
+			}
+		}
+
 		return communityDTO;
 	}
 
