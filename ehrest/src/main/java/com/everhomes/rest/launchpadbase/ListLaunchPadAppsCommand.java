@@ -17,7 +17,7 @@ public class ListLaunchPadAppsCommand {
 
     private Long layoutId;
     private String widget;
-    private String instanceConfig;
+    private Object instanceConfig;
     private ContextDTO context;
 
     public Long getLayoutId() {
@@ -36,11 +36,11 @@ public class ListLaunchPadAppsCommand {
         this.widget = widget;
     }
 
-    public String getInstanceConfig() {
+    public Object getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(String instanceConfig) {
+    public void setInstanceConfig(Object instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 
