@@ -6140,18 +6140,18 @@ public class UserServiceImpl implements UserService {
 					dto.setType(AddressUserType.ORGANIZATION.getCode());
 					dto.setName(org.getName());
 					dto.setAliasName(org.getName());
-					dto.setStatus(org.getStatus());
+					dto.setStatus(member.getStatus());
 					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
 					String pinyin = PinYinHelper.getPinYin(dto.getName());
 					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
 					//办公地点（公司加入的园区）
-					List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
+					List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(org.getId());
 					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
-					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
-						for (OrganizationCommunity orgcom: organizationCommunitys){
-							Community community = communityProvider.findCommunityById(orgcom.getCommunityId());
+					if(requests != null && requests.size() > 0){
+						for (OrganizationCommunityRequest request: requests){
+							Community community = communityProvider.findCommunityById(request.getCommunityId());
 							CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
 							communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
 							communityUserDtos.add(communityInfoDTO);
