@@ -6523,12 +6523,15 @@ public class PunchServiceImpl implements PunchService {
             for (PunchTimeRuleDTO rule : timeRules) {
                 ruleSB.append(rule.getName());
                 ruleSB.append("(");
-                for (int i = 0; i < rule.getPunchTimeIntervals().size(); i++) {
-                    if (i > 0)
-                        ruleSB.append(" ");
-                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getArriveTime()));
-                    ruleSB.append("-");
-                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getLeaveTime()));
+                if (rule.getPunchTimeIntervals() != null) {
+                    for (int i = 0; i < rule.getPunchTimeIntervals().size(); i++) {
+                        if (i > 0) {
+                            ruleSB.append(" ");
+                        }
+                        ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getArriveTime()));
+                        ruleSB.append("-");
+                        ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getLeaveTime()));
+                    }
                 }
                 ruleSB.append(");");
             }
