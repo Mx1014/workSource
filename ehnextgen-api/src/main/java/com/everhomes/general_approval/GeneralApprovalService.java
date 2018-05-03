@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.general_approval.*;
 
@@ -66,5 +67,5 @@ public interface GeneralApprovalService {
 
     ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
 
-    void initializeGeneralApprovalScope();
+    boolean checkTheApprovalScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member);
 }

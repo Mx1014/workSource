@@ -653,6 +653,31 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
-        return null;
+        ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
+        Long userId = UserContext.currentUserId();
+        List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovals(cmd).getGroups();
+        if(groups == null || groups.size() == 0)
+            return res;
+
+        //  get the user's info
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
+        if(member == null)
+            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
+        //  check the approval by scope and filter it
+        for(EnterpriseApprovalGroupDTO group : groups)
+            filterTheApprovalByScope(group, member);
+        res.setGroups(groups);
+        return res;
+    }
+
+    private void filterTheApprovalByScope(EnterpriseApprovalGroupDTO group, OrganizationMember member){
+        List<EnterpriseApprovalDTO> results = new ArrayList<>();
+        if(group.getApprovals() == null || group.getApprovals().size() == 0)
+            return;
+        for(EnterpriseApprovalDTO approval : group.getApprovals()){
+            if(generalApprovalService.checkTheApprovalScope(approval.getScopes(), member))
+                results.add(approval);
+        }
+        group.setApprovals(results);
     }
 }

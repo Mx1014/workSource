@@ -838,7 +838,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
 
-    @Override
+    /*@Override
     public void initializeGeneralApprovalScope() {
         Integer count = Integer.MAX_VALUE - 1;
         List<GeneralApproval> approvals = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), count, ((locator, query) -> {
@@ -864,7 +864,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 generalApprovalProvider.createGeneralApprovalScopeMap(scope);
             }
         }
-    }
+    }*/
 
     @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
@@ -883,19 +883,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         if (approvals != null && approvals.size() > 0) {
             for(GeneralApprovalDTO approval : approvals){
-                if(checkTheScope(approval.getScopes(), member))
+                if(checkTheApprovalScope(approval.getScopes(), member))
                     results.add(approval);
             }
-/*            approvals.forEach(r -> {
-                if (checkTheScope(r.getScopes(), member))
-                    dtos.add(r);
-            });*/
         }
         res.setDtos(results);
         return res;
     }
 
-    private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
+    @Override
+    public boolean checkTheApprovalScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
         if (member == null || scopes == null || scopes.size() == 0)
             return false;
         List<Long> scopeUserIds = scopes.stream()
