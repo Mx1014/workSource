@@ -62,6 +62,7 @@ import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
 import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
 import com.everhomes.rest.energy.EnergyAutoReadingFlag;
 import com.everhomes.rest.energy.EnergyCategoryDefault;
+import com.everhomes.rest.energy.EnergyCategoryType;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
 import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
@@ -1673,23 +1674,28 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getBillCategory());
             if (category == null) {
-                LOGGER.error("energy meter bill category is not exist, data = {}", str);
-                log.setData(str);
-                log.setErrorLog("energy meter bill category is not exist");
-                log.setCode(EnergyConsumptionServiceErrorCode.ERR_BILL_CATEGORY_NOT_EXIST);
-                errorDataLogs.add(log);
-                return;
+                //历史问题  只校验了community下的类型 没有去搜所有下面的应用范围
+                if (!validateAllScopeCategory(cmd.getCommunityId(), str.getBillCategory())) {
+                    LOGGER.error("energy meter bill category is not exist, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("energy meter bill category is not exist");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_BILL_CATEGORY_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                }
             }
             meter.setBillCategoryId(category.getId());
 
             category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getServiceCategory());
             if (category == null) {
-                LOGGER.error("energy meter service category is not exist, data = {}", str);
-                log.setData(str);
-                log.setErrorLog("energy meter service category is not exist");
-                log.setCode(EnergyConsumptionServiceErrorCode.ERR_SERVICE_CATEGORY_NOT_EXIST);
-                errorDataLogs.add(log);
-                return;
+                if (!validateAllScopeCategory(cmd.getCommunityId(), str.getBillCategory())) {
+                    LOGGER.error("energy meter service category is not exist, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("energy meter service category is not exist");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_SERVICE_CATEGORY_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                }
             }
             meter.setServiceCategoryId(category.getId());
 
@@ -1778,6 +1784,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             });
         });
         return errorDataLogs;
+    }
+
+    private boolean validateAllScopeCategory(Long communityId, String categoryName) {
+        List<EnergyMeterCategoryMap> meterCategoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(communityId);
+        List<Long> categoryIds = new ArrayList<>();
+        if (meterCategoryMaps != null && meterCategoryMaps.size() > 0) {
+            categoryIds = meterCategoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
+        }
+        List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, EnergyCategoryType.BILL.getCode());
+        if (categories != null && categories.size() > 0) {
+            List<String> categoryNames = new ArrayList<>();
+            categoryNames = categories.stream().map(EnergyMeterCategory::getName).collect(Collectors.toList());
+            if (categoryNames.contains(categoryName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean validateBurdenRateWithOneAddress(List<String> address, List<String> burdenRate) {
