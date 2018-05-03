@@ -103,4 +103,23 @@ public interface GroupProvider {
     List<IndustryType> listIndustryTypes(Integer namespaceId);
 
     List<GuildApply> listGuildApplies(Integer namespaceId, Long groupId, Long applicantUid);
+
+    /**
+     * 根据门牌地址Id集合addressIds查询对应的家庭信息
+     * @param addressIds
+     * @return
+     */
+    List<Group> findGroupsByAddressIds(List<Long> addressIds);
+
+    /**
+     * 根据eh_groups表中的id集合来进行批量的删除家庭信息
+     * @param groupIds
+     */
+    void deleteGroupByGroupIds(List<Long> groupIds);
+
+    /**
+     * 根据group_id的集合来进行批量的删除家庭成员信息
+     * @param groupIds
+     */
+    void deleteGroupMembersByGroupIds(List<Long> groupIds);
 }

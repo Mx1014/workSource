@@ -692,4 +692,15 @@ public class AddressProviderImpl implements AddressProvider {
 
         return result.get(0).getVersion();
     }
+
+    /**
+     * 根据门牌地址集合addressIds进行批量删除门牌地址
+     * @param addressIds
+     */
+    @Override
+    public void betchDisclaimAddress(List<Long> addressIds){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ID.in(addressIds)).execute();
+    }
 }

@@ -84,4 +84,10 @@ public interface AddressProvider {
     List<AddressAttachment> listAddressAttachments(Long addressId);
 
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
+
+    /**
+     * 根据门牌地址Id集合addressIds进行批量删除门牌地址
+     * @param addressIds
+     */
+    void betchDisclaimAddress(List<Long> addressIds);
 }

@@ -85,8 +85,10 @@ import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -2580,5 +2582,45 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
         return dtos;
+    }
+
+    /**
+     * 根据门牌地址id集合 批量删除门牌地址（标准版）
+     * @param cmd
+     */
+    @Override
+    public void betchDisclaimAddress(BetchDisclaimAddressCommand cmd){
+        //首先需要进行非空校验
+        if(CollectionUtils.isNotEmpty(cmd.getAddressIds())){
+            //说明传过来的addresIds不为空，那么我们就进行批量删除门牌地址，以及该门牌地址中关联的家庭(表eh_groups)，以及家庭中的成员（表eh_group_members）
+            //// TODO: 2018/5/2
+            //所有的操作都保证在同一个事物当中
+            dbProvider.execute((TransactionStatus status) -> {
+                //调用AddressProvider接口中的betchDisclaimAddress(List<Long> addressIds);方法进行批量删除门牌地址
+                addressProvider.betchDisclaimAddress(cmd.getAddressIds());
+                //由于门牌地址中关联了家庭（表eh_groups）,然后每一个家庭中又关联了成员（表eh_group_members）
+                //所以我们需要同时将家庭和家庭成员也删除掉
+                //首先我们需要根据关联的addressId来查询到对应的家庭（一一对应）
+                //// TODO: 2018/5/2
+                List<Group> groupList = groupProvider.findGroupsByAddressIds(cmd.getAddressIds());
+                //进行非空校验
+                if(CollectionUtils.isNotEmpty(groupList)){
+                    //说明查询出来的家庭信息是存在的，那么我们就进行批量的删除该家庭信息
+                    //首先需要创建一个List<Long>来进行封装我们查出来的家庭的编号（eh_groups表的主键id，目的是为了关联家庭成员表然后删除家庭成员信息）
+                    List<Long> groupIdList = Lists.newArrayList();
+                    //采用forEach循环遍历List<Group>集合
+                    for(Group group : groupList){
+                        //将每一条Group中的id拿出来封装在List<Long>中
+                        groupIdList.add(group.getId());
+                    }
+                    //然后我们进行批量删除家庭信息
+                    groupProvider.deleteGroupByGroupIds(groupIdList);
+                    //接下来我们进行删除关联在该家庭中的家庭成员（删除eh_group_members表中的信息，他和eh_groups表是通过group_id进行关联的）
+                    //// TODO: 2018/5/3
+                    groupProvider.deleteGroupMembersByGroupIds(groupIdList);
+                }
+                return null;
+            });
+        }
     }
 }

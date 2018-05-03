@@ -159,6 +159,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
     
     /**
      * <b>URL: /address/disclaimAddress</b>
@@ -174,6 +175,25 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     *
+     * <b>URL: /address/betchDisclaimAddress</b>
+     * <p>批量删除门牌地址（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/betchDisclaimAddress")
+    @RestReturn(value = String.class)
+    public RestResponse betchDisclaimAddress(BetchDisclaimAddressCommand cmd){
+        //批量删除门牌地址
+        addressService.betchDisclaimAddress(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /address/searchCommunities</b>
