@@ -142,17 +142,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     @Override
-    public ListOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd) {
+    public ListUIOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd) {
         return null;
     }
 
     @Override
-    public ListOfficeLocationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd) {
+    public ListUICommunityOrganizationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd) {
         return null;
     }
 
     @Override
-    public ListVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd) {
+    public ListUIVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd) {
         return null;
     }
 
@@ -164,5 +164,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void confirmVerificationCode(ConfirmVerificationCodeCommand cmd) {
 
+    }
+
+    @Override
+    public GetHomePageConfigurationResponse getHomePageConfiguration() {
+        return null;
+    }
+
+    @Override
+    public GetEnterpriseFormResponse getEnterpriseForm(GetEnterpriseFormCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GetEnterpriseFormForWebResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd) {
+        return null;
     }
 }

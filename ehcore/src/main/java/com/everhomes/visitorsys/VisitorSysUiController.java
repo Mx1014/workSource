@@ -6,7 +6,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.util.RequireAuthentication;
@@ -25,9 +24,26 @@ public class VisitorSysUiController extends ControllerBase {
 	private VisitorSysService visitorSysService;
 
 	/**
+	 * <b>URL: /ui/visitorsys/getHomePageConfiguration</b>
+	 * <p>
+	 * 1.获取首页配置-原生客户端
+	 * </p>
+	 */
+	@RequestMapping("getHomePageConfiguration")
+	@RestReturn(GetHomePageConfigurationResponse.class)
+	public RestResponse getHomePageConfiguration() {
+		GetHomePageConfigurationResponse baseResponse = visitorSysService.getHomePageConfiguration();
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /ui/visitorsys/getPairingCode</b>
 	 * <p>
-	 * 1.获取配对码-原生客户端
+	 * 2.获取配对码-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("getPairingCode")
@@ -44,7 +60,7 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/confirmPairingCode</b>
 	 * <p>
-	 * 2.验证配对码是否配对成功(延迟接口)-原生客户端
+	 * 3.验证配对码是否配对成功(延迟接口)-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("confirmPairingCode")
@@ -56,11 +72,11 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/getConfiguration</b>
 	 * <p>
-	 * 3.获取配置-原生客户端
+	 * 4.获取配置-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("getConfiguration")
-	@RestReturn(GetConfigurationResponse.class)
+	@RestReturn(GetUIConfigurationResponse.class)
 	public RestResponse getUIConfiguration(BaseVisitorsysUICommand cmd) {
 		GetConfigurationResponse baseResponse = visitorSysService.getUIConfiguration(cmd);
 
@@ -71,9 +87,26 @@ public class VisitorSysUiController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /ui/visitorsys/getEnterpriseForm</b>
+	 * <p>
+	 * 5.根据选择的公司获取表单配置(园区访客用)-原生客户端
+	 * </p>
+	 */
+	@RequestMapping("getEnterpriseConfiguration")
+	@RestReturn(GetEnterpriseFormResponse.class)
+	public RestResponse getEnterpriseForm(GetEnterpriseFormCommand cmd) {
+		GetEnterpriseFormResponse baseResponse = visitorSysService.getEnterpriseForm(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /ui/visitorsys/createOrUpdateVisitor</b>
 	 * <p>
-	 * 4.创建临时/预约访客-原生客户端
+	 * 6.创建临时/预约访客-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateVisitor")
@@ -90,13 +123,13 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/listOfficeLocations</b>
 	 * <p>
-	 * 5.获取企业办公地点列表(企业访客)-原生客户端
+	 * 7.获取企业办公地点列表(企业访客)-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("listOfficeLocations")
-	@RestReturn(ListOfficeLocationsResponse.class)
-	public RestResponse listOfficeLocations(BaseVisitorsysUICommand cmd) {
-		ListOfficeLocationsResponse baseResponse = visitorSysService.listUIOfficeLocations(cmd);
+	@RestReturn(ListUIOfficeLocationsResponse.class)
+	public RestResponse listOfficeLocations(ListUIOfficeLocationsCommand cmd) {
+		ListUIOfficeLocationsResponse baseResponse = visitorSysService.listUIOfficeLocations(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -107,13 +140,13 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/listCommunityOrganizations</b>
 	 * <p>
-	 * 6.获取园区企业列表(园区访客，此接口否使用接口待定)-原生客户端
+	 * 8.获取园区企业列表(园区访客)-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("listCommunityOrganizations")
-	@RestReturn(ListCommunityOrganizationsResponse.class)
-	public RestResponse listCommunityOrganizations(BaseVisitorsysUICommand cmd) {
-		ListOfficeLocationsResponse baseResponse  = visitorSysService.listUICommunityOrganizations(cmd);
+	@RestReturn(ListUICommunityOrganizationsResponse.class)
+	public RestResponse listCommunityOrganizations(ListUICommunityOrganizationsCommand cmd) {
+		ListUICommunityOrganizationsResponse baseResponse  = visitorSysService.listUICommunityOrganizations(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -124,13 +157,13 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/listVisitReasons</b>
 	 * <p>
-	 * 7.获取事由列表（此接口否使用接口待定，可以使用枚举）-原生客户端
+	 * 9.获取事由列表（此接口否使用接口待定，可以使用枚举）-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("listVisitReasons")
-	@RestReturn(ListVisitReasonsResponse.class)
+	@RestReturn(ListUIVisitReasonsResponse.class)
 	public RestResponse listVisitReasons(BaseVisitorsysUICommand cmd) {
-		ListVisitReasonsResponse createNewsResponse = visitorSysService.listUIVisitReasons(cmd);
+		ListUIVisitReasonsResponse createNewsResponse = visitorSysService.listUIVisitReasons(cmd);
 
 		RestResponse response = new RestResponse(createNewsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -141,7 +174,7 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/sendSMSVerificationCode</b>
 	 * <p>
-	 * 8.发送短信验证码-原生客户端
+	 * 10.发送短信验证码-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("sendSMSVerificationCode")
@@ -159,7 +192,7 @@ public class VisitorSysUiController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/confirmVerificationCode</b>
 	 * <p>
-	 * 9.验证短信验证码(并返回预约列表)-原生客户端
+	 * 11.验证短信验证码(并返回预约列表)-原生客户端
 	 * </p>
 	 */
 	@RequestMapping("confirmVerificationCode")

@@ -387,6 +387,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("getConfigurationForWeb")
 	@RestReturn(GetConfigurationResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse getConfigurationForWeb(BaseVisitorsysCommand cmd) {
 		GetConfigurationResponse baseResponse = visitorSysService.getConfiguration(cmd);
 
@@ -397,13 +398,32 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /visitorsys/getEnterpriseFormForWeb</b>
+	 * <p>
+	 * 2.根据选择的公司获取公司配置(园区访客用)-h5（客户端/微信端）
+	 * </p>
+	 */
+	@RequestMapping("getEnterpriseFormForWeb")
+	@RestReturn(GetEnterpriseFormForWebResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd) {
+		GetEnterpriseFormForWebResponse baseResponse = visitorSysService.getEnterpriseFormForWeb(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /visitorsys/listBookedVisitorsForWeb</b>
 	 * <p>
-	 * 2.获取预约访客列表-h5（客户端/微信端）
+	 * 3.获取预约访客列表-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listBookedVisitorsForWeb")
 	@RestReturn(ListBookedVisitorsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd) {
 		ListBookedVisitorsResponse baseResponse = visitorSysService.listBookedVisitors(cmd);
 
@@ -416,11 +436,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/getBookedVisitorByIdForWeb</b>
 	 * <p>
-	 * 3.获取预约详情-h5（客户端/微信端）
+	 * 4.获取预约详情-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("getBookedVisitorByIdForWeb")
 	@RestReturn(GetBookedVisitorByIdResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse getBookedVisitorByIdForWeb(GetBookedVisitorByIdCommand cmd) {
 		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorById(cmd);
 
@@ -433,11 +454,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listVisitReasonsForWeb</b>
 	 * <p>
-	 * 4.获取事由列表（此接口否使用接口待定，可以使用枚举）-h5（客户端/微信端）
+	 * 5.获取事由列表（此接口否使用接口待定，可以使用枚举）-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listVisitReasonsForWeb")
 	@RestReturn(ListVisitReasonsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listVisitReasonsForWeb(BaseVisitorsysCommand cmd) {
 		ListVisitReasonsResponse baseResponse = visitorSysService.listVisitReasons(cmd);
 
@@ -450,11 +472,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
 	 * <p>
-	 * 5.创建临时/预约访客-h5（客户端/微信端）
+	 * 6.创建临时/预约访客-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateVisitorForWeb")
 	@RestReturn(GetBookedVisitorByIdResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
 		GetBookedVisitorByIdResponse baseResponse = visitorSysService.createOrUpdateVisitor(cmd);
 
@@ -467,11 +490,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteVisitorForWeb</b>
 	 * <p>
-	 * 6.删除访客-h5（客户端/微信端）
+	 * 7.删除访客-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("deleteVisitorForWeb")
 	@RestReturn(String.class)
+	@RequireAuthentication(false)
 	public RestResponse deleteVisitorForWeb(GetBookedVisitorByIdCommand cmd) {
 		visitorSysService.deleteVisitor(cmd);
 
@@ -484,11 +508,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/listOfficeLocationsForWeb</b>
 	 * <p>
-	 * 7.获取企业办公地点列表(企业访客)-h5（客户端/微信端）
+	 * 8.获取企业办公地点列表(企业访客)-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listOfficeLocationsForWeb")
 	@RestReturn(ListOfficeLocationsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd) {
 		ListOfficeLocationsResponse baseResponse = visitorSysService.listOfficeLocations(cmd);
 
@@ -501,11 +526,12 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/listCommunityOrganizationsForWeb</b>
 	 * <p>
-	 * 8.获取园区企业列表(园区访客，此接口否使用接口待定)-h5（客户端/微信端）
+	 * 9.获取园区企业列表-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("listCommunityOrganizationsForWeb")
 	@RestReturn(ListCommunityOrganizationsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd) {
 		ListCommunityOrganizationsResponse baseResponse = visitorSysService.listCommunityOrganizations(cmd);
 
@@ -518,7 +544,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /ui/visitorsys/getInvitationLetterForWeb</b>
 	 * <p>
-	 * 9.获取访客邀请函(不登录)-h5（客户端/微信端）
+	 * 10.获取访客邀请函(不登录)-h5（客户端/微信端）
 	 * </p>
 	 */
 	@RequestMapping("getInvitationLetterForWeb")

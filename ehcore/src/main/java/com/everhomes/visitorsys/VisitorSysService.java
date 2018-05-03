@@ -2,7 +2,6 @@
 package com.everhomes.visitorsys;
 
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -64,13 +63,19 @@ public interface VisitorSysService {
 
     CreateOrUpdateVisitorUIResponse createOrUpdateUIVisitor(CreateOrUpdateVisitorUICommand cmd);
 
-    ListOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd);
+    ListUIOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd);
 
-    ListOfficeLocationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd);
+    ListUICommunityOrganizationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd);
 
-    ListVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd);
+    ListUIVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd);
 
     void sendSMSVerificationCode(SendSMSVerificationCodeCommand cmd);
 
     void confirmVerificationCode(ConfirmVerificationCodeCommand cmd);
+
+    GetHomePageConfigurationResponse getHomePageConfiguration();
+
+    GetEnterpriseFormResponse getEnterpriseForm(GetEnterpriseFormCommand cmd);
+
+    GetEnterpriseFormForWebResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd);
 }

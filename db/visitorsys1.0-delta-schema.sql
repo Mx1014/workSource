@@ -20,6 +20,8 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `planned_visit_time` DATETIME COMMENT '计划到访时间',
   `visit_time` DATETIME COMMENT '实际到访时间',
   `confirm_time` DATETIME COMMENT '后台确认到访时间',
+  `refuse_time` DATETIME COMMENT '后台拒绝时间',
+  `delete_time` DATETIME COMMENT '后台删除时间',
   `visit_status` TINYINT COMMENT '到访状态，0,未到访；1,等待确认;2,已到访;3,已拒绝; 4,已删除',
   `office_location_id` BIGINT COMMENT '办公地点ID',
   `office_location_name` VARCHAR(512) COMMENT '办公地点名称',
@@ -43,6 +45,24 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理访客表 ';
 
+-- 访客管理预约编码表 , add by dengs, 20180425
+-- DROP TABLE IF EXISTS `eh_visitor_sys_coding`;
+CREATE TABLE `eh_visitor_sys_coding` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
+	`random_code` VARCHAR(16) NOT NULL UNIQUE COMMENT '随机码',
+	`serial_code` INTEGER NOT NULL DEFAULT 0 COMMENT '流水码',
+  `status` TINYINT  DEFAULT 2 COMMENT '0:未使用状态,2:使用状态',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME COMMENT '更新时间，每天更新',
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
+
 -- 访客管理设备表(ipad,printer) , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_devices`;
 CREATE TABLE `eh_visitor_sys_devices` (
@@ -64,9 +84,9 @@ CREATE TABLE `eh_visitor_sys_devices` (
   `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理设备表 ';
 
--- 访客管理企业办公地点表 , add by dengs, 20180425
+-- 访客管理办公地点表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_office_locations`;
 CREATE TABLE `eh_visitor_sys_office_locations` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -86,7 +106,7 @@ CREATE TABLE `eh_visitor_sys_office_locations` (
   `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理办公地点表 ';
 
 -- 访客管理配置表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_configurations`;
@@ -111,7 +131,7 @@ CREATE TABLE `eh_visitor_sys_configurations` (
   `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理配置表 ';
 
 -- 访客管理黑名单表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_black_list`;
@@ -130,7 +150,7 @@ CREATE TABLE `eh_visitor_sys_black_list` (
   `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理黑名单表 ';
 
 -- 访客管理到访是由表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_visit_reason`;
@@ -147,4 +167,4 @@ CREATE TABLE `eh_visitor_sys_visit_reason` (
   `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理到访是由表 ';
