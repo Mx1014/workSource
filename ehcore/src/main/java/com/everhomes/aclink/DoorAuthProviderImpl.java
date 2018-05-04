@@ -40,6 +40,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -988,4 +989,15 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
 
+    @Override
+    public List<DoorAuth> listValidDoorAuthByUser(long userId, String driver) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
+        query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+        if (null != driver){
+            query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+        }
+        query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+        return query.fetch().stream().map(r -> ConvertHelper.convert(r,DoorAuth.class)).collect(Collectors.toList());
+    }
 }

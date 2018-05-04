@@ -2269,7 +2269,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(boolean generate) {
         User user = UserContext.current().getUser();
-        
+
         ListingLocator locator = new ListingLocator();
         //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), null, 60));
@@ -4345,5 +4345,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             doorAuthLevelProvider.updateDoorAuthLevel(lvl);
         }
     }
-    
+
+
+    @Override
+    public DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd) {
+
+        User user = UserContext.current().getUser();
+
+        ListingLocator locator = new ListingLocator();
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
+
+        return null;
+    }
 }

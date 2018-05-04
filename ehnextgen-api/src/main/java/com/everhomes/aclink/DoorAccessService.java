@@ -150,4 +150,6 @@ public interface DoorAccessService {
             HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
+
+    DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd);
 }
