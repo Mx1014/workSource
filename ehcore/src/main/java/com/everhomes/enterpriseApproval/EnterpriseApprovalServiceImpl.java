@@ -681,7 +681,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return res;
     }
 
-    //  filter function
+    //  filter function, take the address of the variable 'group' to assign a new value
     private void filterTheApprovalByScope(EnterpriseApprovalGroupDTO group, OrganizationMember member){
         List<EnterpriseApprovalDTO> results = new ArrayList<>();
         if(group.getApprovals() == null || group.getApprovals().size() == 0)
