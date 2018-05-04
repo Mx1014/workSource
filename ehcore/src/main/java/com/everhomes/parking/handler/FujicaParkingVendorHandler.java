@@ -10,6 +10,7 @@ import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.fujica.Base64;
 import com.everhomes.parking.fujica.FujicaJsonParam;
 import com.everhomes.parking.fujica.FujicaResponse;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -21,15 +22,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "FU_JI_CA")
 public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
@@ -37,6 +37,8 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
 
     private static final String PARKING_GET_PAY_INFO = "/Park/GetParkInfoByCarNo";//查询临时车缴费信息接口
     private static final String PARKING_PAY_PARKING = "/CalculationCost/ApiThirdPartyTemporaryCardPay";//临时车缴费接口
+
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Autowired
     ConfigurationProvider configProvider;
     @Override
@@ -51,7 +53,32 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        return null;
+        if(order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())){
+            return payTempCardFee(order);
+        }
+
+        return false;
+    }
+
+    boolean payTempCardFee(ParkingRechargeOrder order){
+        JSONObject jo = new JSONObject();
+        jo.put("CarNo",order.getPlateNumber());
+        jo.put("DealNo",order.getOrderNo().toString());
+        jo.put("Amount",order.getPrice());
+        jo.put("ActualAmount",order.getPrice());
+        jo.put("DeductionAmount",new BigDecimal(0));
+        jo.put("PayStyle",VendorType.WEI_XIN.getCode().equals(order.getPaidType())?"微信":"支付宝");
+        String parkingCode = configProvider.getValue("parking.fujica.parkingCode","17000104590501");
+        jo.put("ParkingCode",parkingCode);
+        jo.put("PayCostMachineOrderId","");
+
+        String result = doJsonPost(PARKING_PAY_PARKING,jo.toJSONString());
+        FujicaResponse<FujicaJsonParam> entity = JSONObject.parseObject(result, new TypeReference<FujicaResponse<FujicaJsonParam>>() {});
+        ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+        if(entity != null  && entity.isSuccess() ) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -76,10 +103,19 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         if(entity != null  && entity.isSuccess() && entity.getDataType() == 3) {//3是临时车
             FujicaJsonParam param = entity.getJsonParam();
             dto.setPlateNumber(param.getCarNo());
-            
+            dto.setEntryTime(getTimestamp(param.getBeginTime()));
+            long now = System.currentTimeMillis();
+            dto.setPayTime(now);
+            Long parkingTime = getTimestamp(param.getChargeableTime())-dto.getEntryTime();
+            dto.setParkingTime((int)(parkingTime /1000/60));
+            dto.setDelayTime(param.getOverTime());
+            dto.setPrice(param.getActualAmount());
+            dto.setOriginalPrice(param.getParkingFee());
         }
-        return super.getParkingTempFee(parkingLot, plateNumber);
+        return dto;
     }
+
+
 
     public static void main (String[] args){
         String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
@@ -238,7 +274,19 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         return result;
     }
 
-    public static String getTimestamp() {
+    private static Long getTimestamp(String dayTime){
+        try {
+            Date date = format.parse(dayTime);
+            return date.getTime();
+        }catch (Exception e){
+            LOGGER.error("parse time error ",e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "parse time error.");
+        }
+
+    }
+
+    private static String getTimestamp() {
         String time = "";
         long timestamp = System.currentTimeMillis();
         time = String.valueOf(timestamp);
@@ -246,7 +294,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         return time;
     }
 
-    public static String signWithoutMD5(SortedMap<String, String> params) {
+    private static String signWithoutMD5(SortedMap<String, String> params) {
         String restul = "";
         if (params == null) {
             return restul;
@@ -274,7 +322,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final String SIGN_ALGORITHMS = "SHA1WithRSA";
 
     private static final String DEFAULT_CHARSET = "UTF-8";
-    public static String sign(String content, String privateKey) {
+    private static String sign(String content, String privateKey) {
         try {
             PKCS8EncodedKeySpec priPKCS8 = new PKCS8EncodedKeySpec(Base64.decode(privateKey));
             KeyFactory keyf = KeyFactory.getInstance(ALGORITHM);
