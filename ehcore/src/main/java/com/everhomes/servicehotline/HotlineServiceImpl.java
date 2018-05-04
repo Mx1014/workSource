@@ -981,7 +981,7 @@ public class HotlineServiceImpl implements HotlineService {
 
 		// 2.如果不是手机号，或者手机号未找到。都需要通过nickName搜索。
 		// 因为有人可能把昵称设置成数字号码了
-		return findUserByNickName(keyword);
+		return findUserByNickName(keyword, namespaceId);
 	}
 	
 	
@@ -1218,9 +1218,9 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @param userId
 	 * @return
 	 */
-	private List<TargetDTO> findUserByNickName(String nickName) {
+	private List<TargetDTO> findUserByNickName(String nickName, Integer namespaceId) {
 		
-		if (StringUtils.isBlank(nickName)) {
+		if (StringUtils.isBlank(nickName) || null == namespaceId) {
 			return null;
 		}
 
@@ -1230,7 +1230,8 @@ public class HotlineServiceImpl implements HotlineService {
 
 		List<TargetDTO> dtoList = new ArrayList<>(10);
 		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
-				.on(token.OWNER_UID.eq(user.ID)).where(user.NICK_NAME.eq(nickName)).fetch().map(r -> {
+				.on(token.OWNER_UID.eq(user.ID))
+				.where(user.NICK_NAME.eq(nickName).and(user.NAMESPACE_ID.eq(namespaceId))).fetch().map(r -> {
 					TargetDTO dto = new TargetDTO();
 					dto.setTargetName(r.getValue(user.NICK_NAME));
 					dto.setTargetType("eh_user");
@@ -1239,7 +1240,7 @@ public class HotlineServiceImpl implements HotlineService {
 					dtoList.add(dto);
 					return null;
 				});
-		
+
 		return dtoList;
 	}
 
