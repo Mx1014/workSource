@@ -102,7 +102,7 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
         Record1<Integer> record = getReadOnlyContext().select(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.count())
                 .from(Tables.EH_SALARY_PAYSLIP_DETAILS)
                 .where(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId))
-                .and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(PayslipDetailStatus.SENDED.getCode()))
+                .and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.ne(PayslipDetailStatus.REVOKED.getCode()))
                 .fetchAny();
 
         if (null == record) {
