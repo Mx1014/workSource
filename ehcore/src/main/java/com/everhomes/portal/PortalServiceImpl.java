@@ -1675,7 +1675,7 @@ public class PortalServiceImpl implements PortalService {
 
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
-		Integer versionCode =  releaseVersion.getDateVersion() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
+		Long versionCode =  releaseVersion.getDateVersion().longValue() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 
 
 		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
@@ -1967,7 +1967,7 @@ public class PortalServiceImpl implements PortalService {
 
 			if(routerFlag){
 				PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
-				Integer versionCode =  releaseVersion.getDateVersion() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
+				Long versionCode =  releaseVersion.getDateVersion().longValue() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 				item.setActionType(ActionType.ROUTER.getCode());
 				AssociationActionData associationActionData = new AssociationActionData();
 				String url = "zl://association/main?layoutName=" + layout.getName() +
