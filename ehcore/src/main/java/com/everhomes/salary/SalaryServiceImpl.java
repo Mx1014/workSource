@@ -48,8 +48,10 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+
 
 
 import org.apache.commons.collections.map.HashedMap;
@@ -70,7 +72,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 import java.io.*;
@@ -1967,16 +1971,18 @@ public class SalaryServiceImpl implements SalaryService {
             return null;
         }
         List<MonthPayslipDTO> monthPayslip = new ArrayList<>();
-        Map<String, Integer> payslipMap = new HashMap<>();
-        results.stream().map(r -> {
+        SortedMap<String, Integer> payslipMap = processYearMonthMap(cmd.getPayslipYear());
+        for(SalaryPayslip r : results){
             if (payslipMap.get(r.getSalaryPeriod()) == null) {
                 payslipMap.put(r.getSalaryPeriod(), salaryPayslipDetailProvider.countSend(r.getId()));
             } else {
                 payslipMap.put(r.getSalaryPeriod(), payslipMap.get(r.getSalaryPeriod()) + salaryPayslipDetailProvider.countSend(r.getId()));
             }
-            return null;
-        });
-        for (Entry<String, Integer> entry : payslipMap.entrySet()) {
+        }
+        Iterator i = payslipMap.entrySet().iterator();
+        // Display elements
+        while(i.hasNext()) {
+        	Map.Entry<String, Integer> entry = (Map.Entry)i.next();
             MonthPayslipDTO e = new MonthPayslipDTO();
             e.setSalaryPeriod(entry.getKey());
             e.setSendCount(entry.getValue());
@@ -1985,7 +1991,22 @@ public class SalaryServiceImpl implements SalaryService {
         return new ListYearPayslipSummaryResponse(monthPayslip);
     }
 
-    @Override
+    private SortedMap<String, Integer> processYearMonthMap(String payslipYear) {
+    	SortedMap<String, Integer> result = new TreeMap<>();
+    	try{
+    		Calendar calendar = Calendar.getInstance();
+    		calendar.setTime(monthSF.get().parse(payslipYear+"12"));
+    		for(int i =1;i<=12;i++){
+    			result.put(monthSF.get().format(calendar.getTime()), 0);
+    			calendar.add(Calendar.MONTH, -1);
+    		}
+    	}catch(Exception e){
+    		LOGGER.error("processYearMonthMap 出错了",e);
+    	}
+		return result;
+	}
+
+	@Override
     public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd) {
         ArrayList resultList = punchService.processImportExcel2ArrayList(files);
         List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList, cmd.getOwnerId());
