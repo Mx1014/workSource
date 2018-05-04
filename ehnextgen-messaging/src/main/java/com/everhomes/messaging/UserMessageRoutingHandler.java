@@ -99,13 +99,14 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         //把消息添加到队列里
         MessageRecordDto record = new MessageRecordDto();
         record.setAppId(appId);
-        record.setNamespaceId(UserContext.getCurrentNamespaceId());
+        record.setNamespaceId(senderLogin.getNamespaceId());
         record.setMessageSeq(0L);
         record.setSenderUid(senderLogin.getUserId());
         record.setSenderTag(MessageRecordSenderTag.ROUTE_MESSAGE.getCode());
-        record.setDstChannelType(dstChannelType);
-        record.setDstChannelToken(dstChannelToken);
-        record.setChannelsInfo(message.getChannels().toString());
+        MessageChannel messageChannel = message.getChannels().get(0);
+        record.setDstChannelType(messageChannel.getChannelType());
+        record.setDstChannelToken(messageChannel.getChannelToken());
+        record.setChannelsInfo(messageChannel.toString());
         record.setBodyType(message.getBodyType());
         record.setBody(message.getBody());
         record.setDeliveryOption(deliveryOption);
@@ -250,13 +251,13 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         //把消息添加到队列里
         MessageRecordDto record = new MessageRecordDto();
         record.setAppId(appId);
-        record.setNamespaceId(UserContext.getCurrentNamespaceId());
+        record.setNamespaceId(senderLogin.getNamespaceId());
         record.setMessageSeq(message.getStoreSequence());
         record.setSenderUid(senderLogin.getUserId());
         record.setSenderTag(MessageRecordSenderTag.ROUTE_STORE_MESSAGE.getCode());
-        record.setDstChannelType(destChannelType);
-        record.setDstChannelToken(destChannelToken);
-        record.setChannelsInfo(message.getChannels().toString());
+        record.setDstChannelType(mainChannel.getChannelType());
+        record.setDstChannelToken(mainChannel.getChannelToken());
+        record.setChannelsInfo(mainChannel.toString());
         record.setBodyType(message.getBodyType());
         record.setBody(message.getBody());
         record.setDeliveryOption(deliveryOption);
@@ -316,13 +317,13 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     //把消息添加到队列里
                     MessageRecordDto record = new MessageRecordDto();
                     record.setAppId(appId);
-                    record.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    record.setNamespaceId(senderLogin.getNamespaceId());
                     record.setMessageSeq(0L);
                     record.setSenderUid(senderLogin.getUserId());
                     record.setSenderTag(MessageRecordSenderTag.ROUTE_REALTIME_MESSAGE.getCode());
-                    record.setDstChannelType(destChannelType);
-                    record.setDstChannelToken(destChannelToken);
-                    record.setChannelsInfo(message.getChannels().toString());
+                    record.setDstChannelType(mainChannel.getChannelType());
+                    record.setDstChannelToken(mainChannel.getChannelToken());
+                    record.setChannelsInfo(mainChannel.toString());
                     record.setBodyType(message.getBodyType());
                     record.setBody(message.getBody());
                     record.setDeliveryOption(deliveryOption);
