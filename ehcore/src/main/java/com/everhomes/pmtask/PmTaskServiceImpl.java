@@ -2833,6 +2833,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
 		List<Long> ownerIds = getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r);
+			});
+		}
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
 		List<Long> categoryIds = categories.stream().map(r ->{return r.getId();}).collect(Collectors.toList());
@@ -2857,6 +2863,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
 		List<Long> ownerIds = getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r);
+			});
+		}
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
 		List<Long> categoryIds = categories.stream().map(r ->{return r.getId();}).collect(Collectors.toList());
@@ -2885,6 +2897,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
 		List<Long> ownerIds = getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r);
+			});
+		}
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
 		List<Long> categoryIds = categories.stream().map(r ->{return r.getId();}).collect(Collectors.toList());
@@ -2926,6 +2944,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
 		List<Long> ownerIds = getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r);
+			});
+		}
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
 		List<Long> categoryIds = categories.stream().map(r ->{return r.getId();}).collect(Collectors.toList());
@@ -2957,6 +2981,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
 		this.checkNamespaceId(cmd.getNamespaceId());
 		List<Long> ownerIds = getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r);
+			});
+		}
 //		查询数据
 		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
 		List<Long> categoryIds = categories.stream().map(r ->{return r.getId();}).collect(Collectors.toList());
@@ -3158,4 +3188,5 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		return ownerIds;
 	}
+
 }

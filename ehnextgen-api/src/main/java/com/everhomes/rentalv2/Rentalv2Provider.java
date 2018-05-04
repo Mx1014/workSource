@@ -69,7 +69,7 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
 
-	List<RentalOrder> listSuccessRentalBills();
+	List<RentalOrder> listTargetRentalBills(Byte status);
 	
 	List<RentalResource> findRentalSites(Long resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);

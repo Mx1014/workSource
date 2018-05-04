@@ -1388,13 +1388,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return null;
 	}
 	@Override
-	public List<RentalOrder> listSuccessRentalBills() {
+	public List<RentalOrder> listTargetRentalBills(Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ORDERS);
 		//TODO：
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
-				.eq(SiteBillStatus.SUCCESS.getCode());
+				.eq(status);
 		step.where(condition);
 		List<RentalOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
