@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.visitorsys;
+package com.everhomes.visitorsys;
 
 import com.everhomes.util.StringHelper;
 
@@ -11,7 +11,6 @@ import java.util.List;
  * <li>namespaceId: (必填)域空间id</li>
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
- * <li>appId: (必填)应用Id</li>
  * <li>keyWords: (选填)访客信息,访客姓名手机号码模糊搜索</li>
  * <li>visitorType: (选填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
  * <li>visitStatusList: (选填)到访状态列表，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
@@ -26,8 +25,11 @@ import java.util.List;
  * <li>pageSize: (选填)每页的数量</li>
  * </ul>
  */
-public class ListBookedVisitorsCommand extends BaseVisitorsysCommand{
+public class ListBookedVisitorParams{
     private Byte searchFlag;
+    private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
     private String keyWords;
     private Byte visitorType;
     private List<Byte> visitStatusList;
@@ -47,6 +49,30 @@ public class ListBookedVisitorsCommand extends BaseVisitorsysCommand{
 
     public void setSearchFlag(Byte searchFlag) {
         this.searchFlag = searchFlag;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getKeyWords() {

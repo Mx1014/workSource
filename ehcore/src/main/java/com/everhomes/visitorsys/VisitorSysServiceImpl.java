@@ -1,19 +1,54 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
+import com.everhomes.search.VisitorsysSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
  * @Date 2018/4/27 15:18
  */
+@Component
 public class VisitorSysServiceImpl implements VisitorSysService{
+    @Autowired
+    public VisitorSysVisitorProvider visitorSysVisitorProvider;
+    @Autowired
+    public ConfigurationProvider configurationProvider;
+    @Autowired
+    public CommunityProvider communityProvider;
+    @Autowired
+    public OrganizationProvider organizationProvider;
+    @Autowired
+    public VisitorsysSearcher visitorsysSearcher;
+
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
-        return null;
+        checkOwnerType(cmd.getOwnerType());
+
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+        ListBookedVisitorParams params = ConvertHelper.convert(cmd, ListBookedVisitorParams.class);
+        params.setPageSize(pageSize);
+        params.setPageAnchor(pageAnchor);
+
+        return visitorsysSearcher.searchVisitors(params);
     }
 
     @Override
@@ -179,5 +214,35 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetEnterpriseFormForWebResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd) {
         return null;
+    }
+
+    private void checkOwner(String ownerType, Long ownerId) {
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
+        switch (visitorsysOwnerType){
+            case COMMUNITY:
+                Community community = communityProvider.findCommunityById(ownerId);
+                if(community==null){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "unknown ownerId "+ownerId);
+                }
+                break;
+            case ENTERPRISE:
+                Organization organization = organizationProvider.findOrganizationById(ownerId);
+                if(organization==null){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "unknown ownerId "+ownerId);
+                }
+                break;
+        }
+
+    }
+
+    private VisitorsysOwnerType checkOwnerType(String ownerType) {
+        VisitorsysOwnerType visitorsysOwnerType = VisitorsysOwnerType.fromCode(ownerType);
+        if(visitorsysOwnerType==null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "unknown ownerType "+ownerType);
+        }
+        return visitorsysOwnerType;
     }
 }

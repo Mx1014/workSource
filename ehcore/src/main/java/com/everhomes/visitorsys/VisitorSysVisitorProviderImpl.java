@@ -2,9 +2,17 @@
 package com.everhomes.visitorsys;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.everhomes.rest.visitorsys.VisitorsysOwnerType;
+import com.everhomes.rest.visitorsys.VisitorsysSearchFlagType;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.SortField;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +71,92 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 				.orderBy(Tables.EH_VISITOR_SYS_VISITORS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
 	}
-	
+
+	@Override
+	public List<VisitorSysVisitor> listVisitorSysVisitor(ListBookedVisitorParams params) {
+		com.everhomes.server.schema.tables.EhVisitorSysVisitors community = Tables.EH_VISITOR_SYS_VISITORS.as("community");
+		com.everhomes.server.schema.tables.EhVisitorSysVisitors enterprise = Tables.EH_VISITOR_SYS_VISITORS.as("enterprise");
+		Condition condition = DSL.trueCondition();
+		if(params.getNamespaceId()!=null) {
+			condition = community.NAMESPACE_ID.eq(params.getNamespaceId());
+		}
+		if(params.getOwnerType()!=null) {
+			condition = condition.and(community.OWNER_TYPE.eq(params.getOwnerType()));
+		}
+		if(params.getOwnerId()!=null) {
+			condition = condition.and(community.OWNER_ID.eq(params.getOwnerId()));
+		}
+		if(params.getVisitorType()!=null){
+			condition=condition.and(community.VISITOR_TYPE.eq(params.getVisitorType()));
+		}
+		if(params.getVisitStatusList()!=null){
+			condition=condition.and(community.VISIT_STATUS.in(params.getVisitStatusList()));
+		}
+		if(params.getOfficeLocationId()!=null){
+			condition=condition.and(community.OFFICE_LOCATION_ID.in(params.getOfficeLocationId()));
+		}
+		if(params.getVisitReasonId()!=null){
+			condition = condition.and(community.VISIT_REASON_ID.lt(params.getVisitReasonId()));
+		}
+
+		SortField sortField = null;
+		VisitorsysSearchFlagType visitorsysSearchFlagType = VisitorsysSearchFlagType.fromCode(params.getSearchFlag());
+		if(visitorsysSearchFlagType == VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
+			if (params.getStartPlannedVisitTime() != null) {
+				condition = condition.and(community.PLANNED_VISIT_TIME.gt(new Timestamp(params.getStartPlannedVisitTime())));
+			}
+			if (params.getEndPlannedVisitTime() != null) {
+				condition = condition.and(community.PLANNED_VISIT_TIME.lt(new Timestamp(params.getEndPlannedVisitTime())));
+			}
+			sortField = Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.desc();
+			if(params.getPageAnchor()!=null) {
+				condition = condition.and(community.PLANNED_VISIT_TIME.gt(new Timestamp(params.getPageAnchor())));
+			}
+		}else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
+			if (params.getStartVisitTime() != null) {
+				condition = condition.and(community.VISIT_TIME.gt(new Timestamp(params.getStartVisitTime())));
+			}
+			if (params.getEndVisitTime() != null) {
+				condition = condition.and(community.VISIT_TIME.lt(new Timestamp(params.getEndVisitTime())));
+			}
+			sortField = Tables.EH_VISITOR_SYS_VISITORS.VISIT_TIME.asc();
+			if(params.getPageAnchor()!=null) {
+				condition = condition.and(community.VISIT_TIME.lt(new Timestamp(params.getPageAnchor())));
+			}
+		}else {
+			sortField = Tables.EH_VISITOR_SYS_VISITORS.ID.asc();
+			if(params.getPageAnchor()!=null) {
+				condition = condition.and(community.ID.gt(params.getPageAnchor()));
+			}
+		}
+
+		//todo
+
+		if(params.getEnterpriseId()!=null){
+			condition=condition.and(enterprise.OWNER_ID.in(params.getEnterpriseId()));
+			condition=condition.and(enterprise.OWNER_TYPE.in(VisitorsysOwnerType.ENTERPRISE.getCode()));
+			List fields = new ArrayList(Arrays.asList(community.fields()));
+			fields.add(enterprise.OWNER_ID.as("enterpriseId"));
+			fields.add(enterprise.ENTERPRISE_NAME.as("enterpriseName"));
+			getReadOnlyContext().select(fields).from(community)
+					.leftOuterJoin(enterprise)
+					.on(community.ID.eq(enterprise.PARENT_ID))
+					.where(condition)
+					.orderBy(sortField)
+					.limit(params.getPageSize())
+					.fetch().map(r->{
+						return ConvertHelper.convert(r.intoMap(),VisitorSysVisitor.class);
+					});
+		}
+
+		return getReadOnlyContext().select().from(community)
+				.where(condition)
+				.orderBy(sortField)
+				.limit(params.getPageSize())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
+
+	}
+
 	private EhVisitorSysVisitorsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

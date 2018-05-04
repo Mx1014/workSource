@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.rest.visitorsys.BaseVisitorDTO;
+
 import java.util.List;
 
 public interface VisitorSysVisitorProvider {
@@ -13,4 +15,5 @@ public interface VisitorSysVisitorProvider {
 
 	List<VisitorSysVisitor> listVisitorSysVisitor();
 
+	List<VisitorSysVisitor> listVisitorSysVisitor(ListBookedVisitorParams params);
 }

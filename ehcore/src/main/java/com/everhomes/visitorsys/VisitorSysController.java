@@ -72,7 +72,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/visitorsys/listCommunityOrganizations</b>
+	 * <b>URL: /visitorsys/listCommunityOrganizations</b>
 	 * <p>
 	 * 4.获取园区企业列表(园区访客，此接口否使用接口待定)-后台管理
 	 * </p>
