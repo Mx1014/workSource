@@ -2,7 +2,7 @@ package com.everhomes.rest.enterpriseApproval;
 
 public enum ApprovalFilterType {
 
-    APPROVAL("approval"), GROUP("group");
+    APPROVAL("APPROVAL"), GROUP("GROUP");
 
     private String code;
     private ApprovalFilterType(String code) {

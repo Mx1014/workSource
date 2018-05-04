@@ -157,11 +157,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd) {
-        return null;
-    }
-
-    @Override
     public List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups() {
         List<EnterpriseApprovalGroupDTO> results = new ArrayList<>();
         List<EnterpriseApprovalGroup> groups = enterpriseApprovalProvider.listEnterpriseApprovalGroups();
@@ -365,6 +360,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     private List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+    }
+
+    @Override
+    public ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd) {
+        return null;
     }
 
     //  Whether the approval template has already been existed, check it.
