@@ -701,34 +701,61 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
-                                if("addressId".equals(column.getFieldName()) ) {
-                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
-                                    if(address != null) {
-                                        column.setValue(address.getId().toString());
-                                    }
-                                }
-                                if("buildingId".equals(column.getFieldName()) ) {
+                                //这里改成楼栋门牌'/'分隔  多个楼栋门牌使用逗号分开  buildingId就当成楼栋门牌这个字段了。。
+//                                if("addressId".equals(column.getFieldName()) ) {
+//                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+//                                    if(address != null) {
+//                                        column.setValue(address.getId().toString());
+//                                    }
+//                                }
+                                if ("buildingId".equals(column.getFieldName())) {
                                     buildingName = column.getValue();
-                                    Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
-                                    if(building != null) {
-                                        column.setValue(building.getId().toString());
+                                    if (StringUtils.isNotEmpty(buildingName)) {
+                                        String[] addressNames = column.getValue().split("/");
+                                        for (String addressName : addressNames) {
+                                            String buildingName1 = addressName.split(",")[0];
+                                            String apartmentName = addressName.split(",")[1];
+                                            Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, buildingName1);
+                                            if (building != null) {
+                                                column.setValue(building.getId().toString());
+                                            }
+                                            Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName1, apartmentName);
+                                            if (address != null) {
+                                                column.setValue(address.getId().toString());
+                                            }
+                                            try {
+                                                setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
+                                            } catch (Exception e) {
+                                                LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
+                                                failedNumber++;
+                                                flag = false;
+                                                break;
+                                            }
+                                            if (flag) {
+                                                customerProvider.createCustomerEntryInfo(entryInfo);
+                                            }
+                                        }
                                     }
+
                                 }
-                                try {
-                                    setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
-                                } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
-                                    failedNumber ++;
-                                    flag = false;
-                                    break;
-                                }
+//                                try {
+//                                    setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
+//                                } catch(Exception e){
+//                                    LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
+//                                    failedNumber ++;
+//                                    flag = false;
+//                                    break;
+//                                }
+//                                if(flag) {
+//                                    customerProvider.createCustomerEntryInfo(entryInfo);
+//                                }
 
                                 continue;
                             }
                         }
-                        if(flag) {
-                            customerProvider.createCustomerEntryInfo(entryInfo);
-                        }
+//                        if(flag) {
+//                            customerProvider.createCustomerEntryInfo(entryInfo);
+//                        }
                         break;
                     case CUSTOMER_DEPARTURE_INFO:
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
