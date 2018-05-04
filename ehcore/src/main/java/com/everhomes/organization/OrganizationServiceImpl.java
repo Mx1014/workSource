@@ -31,6 +31,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -309,6 +311,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
+    private EnterpriseProvider enterpriseProvider;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -1349,6 +1354,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationWorkPlaces.setOrganizationId(organization.getId());
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                    //现在的情况是这样的，我们还需要进行维护一张表eh_enterprise_community_map的信息，这张表其实在标准版中是不适用的
+                    //后面的话会逐步的进行淘汰，但是现在当给eh_organization_workPlaces表中添加一调数据的同时，还需要向eh_enterprise_community_map
+                    //中添加同样的数据
+                    //// TODO: 2018/5/4
+                    //创建EnterpriseCommunityMap类的对象
+                    EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+                    //将数据封装在对象EnterpriseCommunityMap中
+                    enterpriseCommunityMap.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    enterpriseCommunityMap.setMemberId(organization.getId());
+                    enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
+                    //表eh_enterprise_community_map中
+                    enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
@@ -1605,6 +1624,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationWorkPlaces.setOrganizationId(cmd.getOrganizationId());
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                    //现在的情况是这样的，我们还需要进行维护一张表eh_enterprise_community_map的信息，这张表其实在标准版中是不适用的
+                    //后面的话会逐步的进行淘汰，但是现在当给eh_organization_workPlaces表中添加一调数据的同时，还需要向eh_enterprise_community_map
+                    //中添加同样的数据
+                    //// TODO: 2018/5/4
+                    //创建EnterpriseCommunityMap类的对象
+                    EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+                    //将数据封装在对象EnterpriseCommunityMap中
+                    enterpriseCommunityMap.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    enterpriseCommunityMap.setMemberId(cmd.getOrganizationId());
+                    enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
+                    //表eh_enterprise_community_map中
+                    enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
@@ -1626,7 +1659,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         });
     }
-
 
 
 

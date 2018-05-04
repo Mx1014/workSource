@@ -10,8 +10,7 @@ import java.util.List;
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每页容量</li>
  *     <li>namepaceId: 域空间ID</li>
- *     <li>enterpriseName: 企业名称</li>
- *     <li>organizationId: 企业编号</li>
+ *     <li>keyword: 关键字</li>
  *     <li>officeSites: 办公地点以及对应在其中的楼栋门牌</li>
  * </ul>
  */
@@ -23,10 +22,8 @@ public class listEnterpriseNoReleaseWithCommunityIdCommand {
 
     //域空间ID
     private Integer namepaceId;
-    //企业名称
-    private String enterpriseName;
-    //企业编号
-    private Long organizationId;
+    //企业名称或者企业编号
+    private String keyword;
     //项目编号
     private Long communityId;
     //办公地点以及对应在其中的楼栋门牌
@@ -40,20 +37,12 @@ public class listEnterpriseNoReleaseWithCommunityIdCommand {
         this.namepaceId = namepaceId;
     }
 
-    public String getEnterpriseName() {
-        return enterpriseName;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     public Long getCommunityId() {

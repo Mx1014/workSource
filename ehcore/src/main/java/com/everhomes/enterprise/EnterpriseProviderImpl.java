@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.server.schema.tables.daos.*;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -38,12 +40,6 @@ import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
@@ -713,6 +709,21 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 		}
 		return null;
 	}
-	
+
+    /**
+     * 向eh_enterprise_community_map表中持久化数据
+     * @param enterpriseCommunityMap
+     */
+	public void insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //获取一个最大的id值
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCommunityMap.class));
+        enterpriseCommunityMap.setId(id);
+        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseCommunityMap.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
+        dao.insert(enterpriseCommunityMap);
+    }
 	
 }

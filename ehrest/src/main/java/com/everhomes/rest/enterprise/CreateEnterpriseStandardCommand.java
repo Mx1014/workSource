@@ -27,6 +27,7 @@ import java.util.List;
  *
  */
 public class CreateEnterpriseStandardCommand {
+
     private java.lang.String name;
     private java.lang.String avatar;
     private java.lang.String displayName;
@@ -336,4 +337,5 @@ public class CreateEnterpriseStandardCommand {
     public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
         this.unifiedSocialCreditCode = unifiedSocialCreditCode;
     }
+
 }

@@ -662,5 +662,5 @@ public interface OrganizationProvider {
 	 * @param organizationIdList
 	 * @return
 	 */
-	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String enterpriseName, Long organizationId, CrossShardListingLocator locator, int pageSize);
+	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword, CrossShardListingLocator locator, int pageSize);
 }

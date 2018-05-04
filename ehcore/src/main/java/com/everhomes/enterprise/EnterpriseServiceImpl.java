@@ -1009,7 +1009,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                 //进行非空校验
                 if(CollectionUtils.isNotEmpty(organizationIdList)){
                     //说明集合不为空，那么我们就根据该公司编号的集合在eh_organizations表中查询对应的公司的信息，注意他会返回一个List<Organization>集合
-                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getEnterpriseName(),cmd.getOrganizationId(),locator,pageSize);
+                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
                     if(CollectionUtils.isNotEmpty(organizationList)){
                         listEnterpriseResponse.setEnterprises(organizationList);
                     }

@@ -6348,7 +6348,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * @param organizationIdList
      * @return
      */
-    public List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String enterpriseName, Long organizationId,
+    @Override
+    public List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword,
                                                             CrossShardListingLocator locator, int pageSize){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -6361,12 +6362,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-        if(!StringUtils.isEmpty(enterpriseName)){
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(enterpriseName +"%"));
+        if(!StringUtils.isEmpty(keyword)){
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword +"%"));
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(Long.valueOf(keyword)));
         }
-        if(organizationId != null){
-            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
-        }
+
         if (null != locator.getAnchor()) {
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
         }

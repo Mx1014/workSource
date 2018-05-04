@@ -61,4 +61,10 @@ public interface EnterpriseProvider {
     
     EnterpriseDetail findEnterpriseDetailByEnterpriseId(Long enterpriseId);
 	public EnterpriseAddress findEnterpriseAddressByEnterpriseIdAndAddressId(Long enterpriseId, Long addressId);
+
+    /**
+     * 向eh_enterprise_community_map表中持久化数据
+     * @param enterpriseCommunityMap
+     */
+    void insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap);
 }
