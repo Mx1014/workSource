@@ -289,7 +289,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             qb = qb.must(rb);
         }
         if(null != cmd.getStartDate()){
-            rb = QueryBuilders.rangeQuery("createTime").gt(cmd.getPageAnchor());
+            rb = QueryBuilders.rangeQuery("createTime").gt(cmd.getStartDate());
         }
         if(null != cmd.getEndDate()){
             if(null == rb)
