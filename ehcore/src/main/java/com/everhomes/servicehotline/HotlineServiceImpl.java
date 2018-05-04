@@ -518,17 +518,17 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 
 		// 根据keywork获得用户
-		TargetDTO customerDto = null;
+		List<TargetDTO> customerDtos = null;
 		if (!StringUtils.isBlank(cmd.getKeyword())) {
-			customerDto = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
-			if (null == customerDto) {
+			customerDtos = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
+			if (CollectionUtils.isEmpty(customerDtos)) {
 				return new GetChatGroupListResponse();
 			}
 		}
 		
 
 		// 获取消息
-		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDto);
+		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDtos);
 
 		// 设置返回数据
 		GetChatGroupListResponse rsp = new GetChatGroupListResponse();
@@ -593,7 +593,7 @@ public class HotlineServiceImpl implements HotlineService {
 	 * private方法。用于查询会话列表逻辑
 	 */
 	private List<ChatGroupDTO> getChatGroupList(Integer namespaceId, Integer pageSize, ListingLocator locator,
-			List<TargetDTO> servicerDtos, TargetDTO customerDto) {
+			List<TargetDTO> servicerDtos, List<TargetDTO> customerDtos) {
 
 		// 1.必须有客服做筛选条件
 		if (CollectionUtils.isEmpty(servicerDtos)) {
@@ -609,9 +609,11 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 
 		// 2.2将用户转成id列表
-		List<Long> customerIds = new ArrayList<>(1);
-		if (null != customerDto) {
-			customerIds.add(customerDto.getTargetId());
+		List<Long> customerIds = new ArrayList<>(10);
+		if (!CollectionUtils.isEmpty(customerDtos)) {
+			customerDtos.forEach(r -> {
+				customerIds.add(r.getTargetId());
+			});
 		}
 
 		// 3.获取会话列表
@@ -623,7 +625,7 @@ public class HotlineServiceImpl implements HotlineService {
 		ChatGroupDTO chatGroup = null;
 		for (MessageRecord msg : msgRecList) {
 			chatGroup = new ChatGroupDTO();
-			setChatGroup(chatGroup, msg, servicerDtos, customerDto);
+			setChatGroup(chatGroup, msg, servicerDtos, customerDtos);
 			dtoList.add(chatGroup);
 		}
 
@@ -750,16 +752,16 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 
 		// 根据keywork获得用户
-		TargetDTO customerDto = null;
+		List<TargetDTO> customerDtos = null;
 		if (!StringUtils.isBlank(cmd.getKeyword())) {
-			customerDto = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
-			if (null == customerDto) {
+			customerDtos = findUserByTokenOrNickName(cmd.getKeyword(), namespaceId);
+			if (CollectionUtils.isEmpty(customerDtos)) {
 				return ;
 			}
 		}
 
 		// 获取消息
-		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDto);
+		List<ChatGroupDTO> dtoList = getChatGroupList(namespaceId, pageSize, locator, servicerDtos, customerDtos);
 		if (CollectionUtils.isEmpty(dtoList)) {
 			return ;
 		}
@@ -959,7 +961,7 @@ public class HotlineServiceImpl implements HotlineService {
 	 *            必填
 	 * @return
 	 */
-	private TargetDTO findUserByTokenOrNickName(String inputKeyword, int namespaceId) {
+	private List<TargetDTO> findUserByTokenOrNickName(String inputKeyword, int namespaceId) {
 
 		if (StringUtils.isBlank(inputKeyword)) {
 			return null;
@@ -968,19 +970,22 @@ public class HotlineServiceImpl implements HotlineService {
 		String keyword = inputKeyword.trim();
 
 		// 1.先对手机号进行搜索
-		TargetDTO target = null;
 		if (HotlineUtils.isPhoneNumber(keyword)) {
-			target = userProvider.findUserByToken(keyword, namespaceId);
-
+			TargetDTO target = userProvider.findUserByToken(keyword, namespaceId);
 			if (null != target) {
-				return target;
+				List<TargetDTO> targetList = new ArrayList<TargetDTO>(1);
+				targetList.add(target);
+				return targetList;
 			}
 		}
 
 		// 2.如果不是手机号，或者手机号未找到。都需要通过nickName搜索。
 		// 因为有人可能把昵称设置成数字号码了
-		return userProvider.findUserByTokenAndName(null, keyword);
+		return findUserByNickName(keyword);
 	}
+	
+	
+	
 
 	/**
 	 * 获取多个专属客服 以下参数均为必传
@@ -1132,28 +1137,14 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @param msgRecord 数据库中的消息记录
 	 */
 	private final void setChatGroup(ChatGroupDTO chatGroup, MessageRecord msgRecord, List<TargetDTO> servicerDtos,
-			TargetDTO customerDto) {
+			List<TargetDTO> customerDtos) {
 
 		// 1.获取发送方和接收方id
 		Long senderUid = msgRecord.getSenderUid();
 		Long acceptUid = Long.parseLong(msgRecord.getDstChannelToken());
 
-		// 2.指定客户时
-		if (null != customerDto) {
-			chatGroup.setCustomer(customerDto);
 
-			Long servicerId = senderUid.equals(customerDto.getTargetId()) ? acceptUid : senderUid;
-			for (int i = 0; i < servicerDtos.size(); i++) {
-				if (servicerId.equals(servicerDtos.get(i).getTargetId())) {
-					chatGroup.setServicer(servicerDtos.get(i));
-					return;
-				}
-			}
-
-			return;
-		}
-
-		// 3.未指定客户时
+		// 2.未指定客户
 		Long customerId = null;
 		for (int i = 0; i < servicerDtos.size(); i++) {
 			if (senderUid.equals(servicerDtos.get(i).getTargetId())) {
@@ -1168,11 +1159,25 @@ public class HotlineServiceImpl implements HotlineService {
 				break;
 			}
 		}
+		
+		// 3.做异常判断，通常不会到这一步
+		if (null == customerId) {
+			return;
+		}
 
-		// 3.1查询客户
+		// 4.根据入参获得客户
+		if (null != customerDtos) {
+			for (TargetDTO dto : customerDtos) {
+				if (customerId.equals(dto.getTargetId())) {
+					chatGroup.setCustomer(dto);
+					return;
+				}
+			}
+		}
+		
+		// 5.如果无入参，则直接从数据库获取
 		TargetDTO targetDto = findUserNameIdentifierById(customerId);
 		chatGroup.setCustomer(targetDto);
-
 		return;
 	}
 
@@ -1184,6 +1189,10 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @return
 	 */
 	private TargetDTO findUserNameIdentifierById(Long userId) {
+		
+		if (null == userId) {
+			return null;
+		}
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
@@ -1201,6 +1210,40 @@ public class HotlineServiceImpl implements HotlineService {
 
 		return dto;
 	}
+	
+	/**
+	 * 根据用户id获取到姓名和电话号码
+	 * 姓名从eh_users的nick_name获取。
+	 * 号码从eh_user_identifiers中identifier_token获取
+	 * @param userId
+	 * @return
+	 */
+	private List<TargetDTO> findUserByNickName(String nickName) {
+		
+		if (StringUtils.isBlank(nickName)) {
+			return null;
+		}
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
+		EhUsers user = Tables.EH_USERS.as("user");
+
+		List<TargetDTO> dtoList = new ArrayList<>(10);
+		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
+				.on(token.OWNER_UID.eq(user.ID)).where(user.NICK_NAME.eq(nickName)).fetch().map(r -> {
+					TargetDTO dto = new TargetDTO();
+					dto.setTargetName(r.getValue(user.NICK_NAME));
+					dto.setTargetType("eh_user");
+					dto.setTargetId(r.getValue(user.ID));
+					dto.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
+					dtoList.add(dto);
+					return null;
+				});
+		
+		return dtoList;
+	}
+
+	
 
 	private final void throwErrorCode(HotlineErrorCode hotlineErrorCode) {
 		throw RuntimeErrorException.errorWith(HotlineErrorCode.SCOPE, hotlineErrorCode.getCode(),
@@ -1337,7 +1380,7 @@ public class HotlineServiceImpl implements HotlineService {
 					"attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
 			TextUtils.exportTxtByOutputStream(httpResponse.getOutputStream(), dataList, null);
 		} catch (IOException e) {
-			LOGGER.info("Export Txt =" + e.getMessage());
+			LOGGER.error("Export Txt =" + e.getMessage());
 			return;
 		}
 	}
