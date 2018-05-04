@@ -161,6 +161,7 @@ public class CreateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+    private Byte  deviceType;
 
     private String unifiedSocialCreditCode;
 
@@ -826,5 +827,13 @@ public class CreateEnterpriseCustomerCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
     }
 }

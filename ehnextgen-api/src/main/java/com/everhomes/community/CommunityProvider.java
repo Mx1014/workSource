@@ -15,7 +15,7 @@ public interface CommunityProvider {
     void updateCommunity(Community community);
     void deleteCommunity(Community community);
     void deleteCommunityById(long id);
-    Community findCommunityById(long id);
+    Community findCommunityById(Long id);
     List<CommunityGeoPoint> listCommunityGeoPoints(long id);
     
     void createCommunityGeoPoint(CommunityGeoPoint geoPoint);

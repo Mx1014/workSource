@@ -7001,6 +7001,7 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
             query.addConditions(Tables.EH_FORUM_POSTS.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            query.addConditions(Tables.EH_FORUM_POSTS.MODULE_TYPE.eq(ForumModuleType.FORUM.getCode()));
             return query;
         });
 

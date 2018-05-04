@@ -1,9 +1,11 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -29,7 +31,8 @@ public class EnergyMeterReadingLogDTO {
     private String meterName;
     private Byte meterType;
     private String meterNumber;
-    private String meterAddress;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> meterAddress;
     private BigDecimal reading;
     private BigDecimal oldReading;
     private String operatorName;
@@ -69,11 +72,11 @@ public class EnergyMeterReadingLogDTO {
         this.organizationId = organizationId;
     }
 
-    public String getMeterAddress() {
+    public List<EnergyMeterAddressDTO> getMeterAddress() {
         return meterAddress;
     }
 
-    public void setMeterAddress(String meterAddress) {
+    public void setMeterAddress(List<EnergyMeterAddressDTO> meterAddress) {
         this.meterAddress = meterAddress;
     }
 

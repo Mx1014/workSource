@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -20,11 +21,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
-import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
@@ -38,10 +39,14 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
@@ -182,6 +187,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.YearQuarter;
+import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
@@ -191,15 +197,23 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
@@ -247,6 +261,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -254,6 +269,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+es.rest.contract.ContractStatus;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -298,22 +315,19 @@ public class CustomerServiceImpl implements CustomerService {
     private ContractProvider contractProvider;
 
     @Autowired
-    private RolePrivilegeService rolePrivilegeService;
-    
-    @Autowired
     private UserService userService;
-    
-	@Autowired
-	private OrganizationProvider organizationProvider;
-	
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	
-	@Autowired
-	private ConfigurationProvider configurationProvider;
-	
-	@Autowired
-	private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Autowired
     private AddressProvider addressProvider;
@@ -321,9 +335,15 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private DbProvider dbProvider;
 
-    private static final  String queueDelay = "trackingPlanTaskDelays";
-    private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
-    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
+    private static final String queueDelay = "trackingPlanTaskDelays";
+    private static final String queueNoDelay = "trackingPlanTaskNoDelays";
+
     @Autowired
     private MessagingService messagingService;
 
@@ -373,7 +393,7 @@ public class CustomerServiceImpl implements CustomerService {
 //            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
 //                    "check user privilege error");
 //        }
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,communityId);
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
 
     private void checkPrivilege(Integer ns) {
@@ -387,12 +407,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
-        if(StringUtils.isNotBlank(customerNumber)) {
+        if (StringUtils.isNotBlank(customerNumber)) {
             List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, customerNumber);
-            if(customers != null && customers.size() > 0) {
-                if(id != null) {
-                    for(EnterpriseCustomer customer : customers) {
-                        if(id.equals(customer.getId())) {
+            if (customers != null && customers.size() > 0) {
+                if (id != null) {
+                    for (EnterpriseCustomer customer : customers) {
+                        if (id.equals(customer.getId())) {
                             return;
                         }
                     }
@@ -402,12 +422,12 @@ public class CustomerServiceImpl implements CustomerService {
                         "contractNumber is already exist");
             }
         }
-        if(StringUtils.isNotBlank(customerName)) {
+        if (StringUtils.isNotBlank(customerName)) {
             List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customerName);
-            if(customers != null && customers.size() > 0) {
-                if(id != null) {
-                    for(EnterpriseCustomer customer : customers) {
-                        if(id.equals(customer.getId())) {
+            if (customers != null && customers.size() > 0) {
+                if (id != null) {
+                    for (EnterpriseCustomer customer : customers) {
+                        if (id.equals(customer.getId())) {
                             return;
                         }
                     }
@@ -423,7 +443,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
-        return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd);
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+    }
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
     }
 
     @Override
@@ -440,13 +477,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
 //        command.setIncludedGroupIds("10,11,12");
-        List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
-        if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(result -> {
-                return result.getGroupDisplayName();
-            }).collect(Collectors.toList());
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
     }
@@ -456,6 +492,8 @@ public class CustomerServiceImpl implements CustomerService {
         List<String> sheetNames = new ArrayList<>();
         sheetNames.add("客户信息");
         String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        cmd.setIsAdmin(isAdmin);
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
     }
 
@@ -466,31 +504,34 @@ public class CustomerServiceImpl implements CustomerService {
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
-        if(cmd.getCorpEntryDate() != null) {
+        if (cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
-        if(cmd.getFoundingTime() != null) {
+        if (cmd.getFoundingTime() != null) {
             customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         customer.setCreatorUid(UserContext.currentUserId());
-        if(null != customer.getLongitude() && null != customer.getLatitude()){
-        	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
-        	customer.setGeohash(geohash);
+        if (null != customer.getLongitude() && null != customer.getLatitude()) {
+            String geohash = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
+            customer.setGeohash(geohash);
         }
-        if(customer.getTrackingUid() == null) {
-            customer.setTrackingUid(-1L);
-        }
-        if(null != customer  && customer.getTrackingUid() != -1){
-	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
-	    	if(null != detail && null != detail.getContactName()){
-	    		customer.setTrackingName(detail.getContactName());
-	    	}
+//        if (customer.getTrackingUid() == null) {
+//            customer.setTrackingUid(-1L);
+//        }
+        if (customer.getTrackingUid() != null) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
+            if (null != detail && null != detail.getContactName()) {
+                customer.setTrackingName(detail.getContactName());
+            }else {
+                User user = userProvider.findUserById(customer.getTrackingUid());
+                if(user!=null)
+                customer.setTrackingName(user.getNickName());
+            }
         }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
-        
-        //企业客户新增成功,保存客户事件
-        saveCustomerEvent( 1  ,customer ,null);
 
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
         // 同步到企业管理中   v3.2
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
@@ -505,88 +546,92 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
-        if(categoryItem != null) {
+        if (categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-        if(levelItem != null) {
+        if (levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
         }
-        if(null != dto.getCorpIndustryItemId()){
-        	ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
-        	if(null != corpIndustryItem){
-        		dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
-        	}
+        if (null != dto.getCorpIndustryItemId()) {
+            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
+            if (null != corpIndustryItem) {
+                dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+            }
         }
-        if(null != dto.getContactGenderItemId()){
-        	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
-        	if(null != contactGenderItem){
-        		dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
-        	}
+        if (null != dto.getContactGenderItemId()) {
+            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
+            if (null != contactGenderItem) {
+                dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+            }
         }
-        if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
-        	dto.setTrackingName(dto.getTrackingName());
+        if (dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+            dto.setTrackingName(dto.getTrackingName());
         }
-        if(null != dto.getPropertyType()){
-        	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
-        	if(null != propertyTypeItem){
-        		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
-        	}
+        if (null != dto.getPropertyType()) {
+            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
+            if (null != propertyTypeItem) {
+                dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+            }
         }
 
-        if(null != dto.getRegistrationTypeId()){
-            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
-            if(null != registrationTypeItem){
+        if (null != dto.getRegistrationTypeId()) {
+            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
+            if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getTechnicalFieldId()){
-            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
-            if(null != technicalFieldItem){
+        if (null != dto.getTechnicalFieldId()) {
+            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
+            if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getTaxpayerTypeId()){
-            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
-            if(null != taxpayerTypeItem){
+        if (null != dto.getTaxpayerTypeId()) {
+            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
+            if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getRelationWillingId()){
-            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
-            if(null != relationWillingItem){
+        if (null != dto.getRelationWillingId()) {
+            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
+            if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getHighAndNewTechId()){
-            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
-            if(null != highAndNewTechItem){
+        if (null != dto.getHighAndNewTechId()) {
+            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
+            if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getEntrepreneurialCharacteristicsId()){
-            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
-            if(null != entrepreneurialCharacteristicsItem){
+        if (null != dto.getEntrepreneurialCharacteristicsId()) {
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
             }
         }
 
-        if(null != dto.getSerialEntrepreneurId()){
-            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
-            if(null != serialEntrepreneurItem){
+        if (null != dto.getSerialEntrepreneurId()) {
+            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
             }
         }
 
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
-        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+        if (!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
+        }
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+        if (members != null && members.size()>0) {
+            dto.setTrackingPhone(members.get(0).getContactToken());
         }
         return dto;
     }
@@ -594,12 +639,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public OrganizationDTO createOrganization(EnterpriseCustomer customer) {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
-        if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
+        if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
             org.setWebsite(customer.getCorpWebsite());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
-            if(detail != null) {
+            if (detail != null) {
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
@@ -633,10 +678,10 @@ public class CustomerServiceImpl implements CustomerService {
 //        command.setContactsPhone(customer.getContactPhone());
 //        command.setEntries(customer.getContactMobile());
             command.setAddress(customer.getContactAddress());
-            if(customer.getLatitude() != null) {
+            if (customer.getLatitude() != null) {
                 command.setLatitude(customer.getLatitude().toString());
             }
-            if(customer.getLongitude() != null) {
+            if (customer.getLongitude() != null) {
                 command.setLongitude(customer.getLongitude().toString());
             }
             command.setWebsite(customer.getCorpWebsite());
@@ -675,9 +720,9 @@ public class CustomerServiceImpl implements CustomerService {
         checkPrivilege(customer.getNamespaceId());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         //产品功能 #20796 同步过来的客户名称不可改
-        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
-                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
-            if(!customer.getName().equals(cmd.getName())) {
+        if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
+            if (!customer.getName().equals(cmd.getName())) {
                 LOGGER.error("Insufficient privilege");
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                         "Insufficient privilege");
@@ -693,30 +738,30 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setNamespaceCustomerToken(customer.getNamespaceCustomerToken());
         updateCustomer.setNamespaceCustomerType(customer.getNamespaceCustomerType());
 
-        if(cmd.getCorpEntryDate() != null) {
+        if (cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
 
-        if(cmd.getFoundingTime() != null) {
+        if (cmd.getFoundingTime() != null) {
             updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
-        if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
-        	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
-        	updateCustomer.setGeohash(geohash);
+        if (null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()) {
+            String geohash = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
+            updateCustomer.setGeohash(geohash);
         }
-        if(null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != -1){
-	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
-	    	if(null != detail && null != detail.getContactName()){
-	    		updateCustomer.setTrackingName(detail.getContactName());
-	    	}
+        if (null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != -1) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
+            if (null != detail && null != detail.getContactName()) {
+                updateCustomer.setTrackingName(detail.getContactName());
+            }
         }
-        if(updateCustomer.getTrackingUid() == null) {
-            updateCustomer.setTrackingUid(-1L);
+        if (updateCustomer.getTrackingUid() == null) {
+            updateCustomer.setTrackingUid(null);
         }
-        if(updateCustomer.getTrackingUid() == -1){
-        	updateCustomer.setTrackingName(null);
+        if (updateCustomer.getTrackingUid() == null) {
+            updateCustomer.setTrackingName(null);
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
@@ -724,9 +769,9 @@ public class CustomerServiceImpl implements CustomerService {
         //保存之后重查一遍 因为数据类型导致 fix 22978
         updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
-        saveCustomerEvent( 3  ,updateCustomer ,customer);
+        saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
 
-        if(customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
             command.setId(updateCustomer.getOrganizationId());
             command.setName(updateCustomer.getName());
@@ -748,10 +793,10 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         //修改了客户名称则要同步修改合同里面的客户名称
-        if(!customer.getName().equals(cmd.getName())) {
+        if (!customer.getName().equals(cmd.getName())) {
             List<Contract> contracts = contractProvider.listContractByCustomerId(updateCustomer.getCommunityId(), updateCustomer.getId(), CustomerType.ENTERPRISE.getCode());
-            if(contracts != null && contracts.size() > 0) {
-                for(Contract contract : contracts) {
+            if (contracts != null && contracts.size() > 0) {
+                for (Contract contract : contracts) {
                     contract.setCustomerName(updateCustomer.getName());
                     contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
@@ -763,22 +808,22 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
-        if(checkAuth) {
+        if (checkAuth) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         }
 
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
-        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
-                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+        if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
             LOGGER.error("Insufficient privilege");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
-        List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(),customer.getId(),CustomerType.ENTERPRISE.getCode());
-        for(Contract contract : contracts) {
-            if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+        List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(), customer.getId(), CustomerType.ENTERPRISE.getCode());
+        for (Contract contract : contracts) {
+            if (contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
                     || contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
                     || contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
                 LOGGER.error("enterprise customer has contract. customer: {}", customer);
@@ -789,11 +834,11 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
-        
-        //企业客户新增成功,保存客户事件
-        saveCustomerEvent( 2  ,customer ,null);
 
-        if(customer.getOrganizationId() != null) {
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent(2, customer, null,cmd.getDeviceType());
+
+        if (customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
             command.setId(customer.getOrganizationId());
             organizationService.deleteEnterpriseById(command, false);
@@ -815,51 +860,48 @@ public class CustomerServiceImpl implements CustomerService {
             //解析excel
             List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
 
-            if(null == resultList || resultList.isEmpty()){
-                LOGGER.error("File content is empty。userId="+userId);
+            if (null == resultList || resultList.isEmpty()) {
+                LOGGER.error("File content is empty。userId=" + userId);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
                         localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
                                 String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
-                                UserContext.current().getUser().getLocale(),"File content is empty"));
+                                UserContext.current().getUser().getLocale(), "File content is empty"));
             }
             task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             task.setOwnerId(cmd.getOwnerId());
             task.setType(ImportFileTaskType.ENTERPRISE_CUSTOMER.getCode());
             task.setCreatorUid(userId);
-            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
-                @Override
-                public ImportFileResponse importFile() {
-                    ImportFileResponse response = new ImportFileResponse();
-                    List<ImportEnterpriseCustomerDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
-                    if(datas.size() > 0){
-                        //设置导出报错的结果excel的标题
-                        response.setTitle(datas.get(0));
-                        datas.remove(0);
-                    }
-                    List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
-                    response.setTotalCount((long)datas.size());
-                    response.setFailCount((long)results.size());
-                    response.setLogs(results);
-                    return response;
+            task = importFileService.executeTask(() -> {
+                ImportFileResponse response = new ImportFileResponse();
+                List<ImportEnterpriseCustomerDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
+                if (datas.size() > 0) {
+                    //设置导出报错的结果excel的标题
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
                 }
+                List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
+                response.setTotalCount((long) datas.size());
+                response.setFailCount((long) results.size());
+                response.setLogs(results);
+                return response;
             }, task);
 
         } catch (IOException e) {
             LOGGER.error("File can not be resolved...");
             e.printStackTrace();
         }
-        LOGGER.info("task: {}",  task);
+        LOGGER.info("task: {}", task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
-    private List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, List<ImportEnterpriseCustomerDataDTO> list, Long userId){
+    private List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, List<ImportEnterpriseCustomerDataDTO> list, Long userId) {
         List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> errorDataLogs = new ArrayList<>();
-
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
         for (ImportEnterpriseCustomerDataDTO str : list) {
             ImportFileResultLog<ImportEnterpriseCustomerDataDTO> log = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
             EnterpriseCustomer customer = new EnterpriseCustomer();
 
-            if(StringUtils.isBlank(str.getName())){
+            if (StringUtils.isBlank(str.getName())) {
                 LOGGER.error("enterpirse customer name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer name is null");
@@ -868,7 +910,7 @@ public class CustomerServiceImpl implements CustomerService {
                 continue;
             }
             List<EnterpriseCustomer> enterpriseCustomers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd.getNamespaceId(), str.getName());
-            if(enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
+            if (enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
                 LOGGER.error("enterpirse customer name is already exist, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer name is already exist");
@@ -878,7 +920,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
             customer.setName(str.getName());
 
-            if(StringUtils.isBlank(str.getContactName())){
+            if (StringUtils.isBlank(str.getContactName())) {
                 LOGGER.error("enterpirse customer contact name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer contact name is null");
@@ -888,7 +930,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
             customer.setContactName(str.getContactName());
 
-            if(StringUtils.isBlank(str.getContactMobile())){
+            if (StringUtils.isBlank(str.getContactMobile())) {
                 LOGGER.error("enterpirse customer contact mobile is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer contact mobile is null");
@@ -899,10 +941,10 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactMobile(str.getContactMobile());
             customer.setContactPhone(str.getContactPhone());
             customer.setContactAddress(str.getContactAddress());
-    //产品期望改为不存在的导入失败 by xiongying20170904
+            //产品期望改为不存在的导入失败 by xiongying20170904
 //            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
             ScopeFieldItem scopeCategoryFieldItem = fieldService.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
-            if(scopeCategoryFieldItem == null) {
+            if (scopeCategoryFieldItem == null) {
                 LOGGER.error("enterpirse customer category is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer category is null");
@@ -913,7 +955,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
 //            ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
             ScopeFieldItem scopeLevelFieldItem = fieldService.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
-            if(scopeLevelFieldItem == null) {
+            if (scopeLevelFieldItem == null) {
                 LOGGER.error("enterpirse customer level is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("enterpirse customer level is null");
@@ -934,7 +976,15 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCommunityId(cmd.getCommunityId());
             customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
-            customer.setTrackingUid(-1L);
+            if (!isAdmin) {
+                customer.setTrackingUid(UserContext.currentUserId());
+                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(userId);
+                if (organizationMembers != null && organizationMembers.size() > 0) {
+                    customer.setTrackingName(organizationMembers.get(0).getContactName());
+                }
+            } else {
+                customer.setTrackingUid(null);
+            }
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
             OrganizationDTO organizationDTO = createOrganization(customer);
@@ -963,13 +1013,13 @@ public class CustomerServiceImpl implements CustomerService {
         return errorDataLogs;
     }
 
-    private List<ImportEnterpriseCustomerDataDTO> handleImportEnterpriseCustomerData(List list){
+    private List<ImportEnterpriseCustomerDataDTO> handleImportEnterpriseCustomerData(List list) {
         List<ImportEnterpriseCustomerDataDTO> result = new ArrayList<>();
         int row = 1;
 //        int i = 1;
         for (Object o : list) {
-            if(row < 2){
-                row ++;
+            if (row < 2) {
+                row++;
                 continue;
             }
 
@@ -978,58 +1028,58 @@ public class CustomerServiceImpl implements CustomerService {
 //            }
 //            i++;
 
-            RowResult r = (RowResult)o;
+            RowResult r = (RowResult) o;
             ImportEnterpriseCustomerDataDTO data = null;
-            if(StringUtils.isNotBlank(r.getA())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getA())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setName(r.getA().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getB())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getB())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setCategoryItemName(r.getB().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getC())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getC())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setLevelItemName(r.getC().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getD())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getD())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setContactName(r.getD().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getE())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getE())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setContactMobile(r.getE().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getF())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getF())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setContactPhone(r.getF().trim());
             }
 
-            if(StringUtils.isNotBlank(r.getG())) {
-                if(data == null) {
+            if (StringUtils.isNotBlank(r.getG())) {
+                if (data == null) {
                     data = new ImportEnterpriseCustomerDataDTO();
                 }
                 data.setContactAddress(r.getG().trim());
             }
 
-            if(data != null) {
+            if (data != null) {
                 result.add(data);
             }
         }
@@ -1047,11 +1097,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void popularCustomerUrl(EnterpriseCustomerDTO dto) {
-        if(dto.getContactAvatarUri() != null) {
+        if (dto.getContactAvatarUri() != null) {
             String contentUrl = contentServerService.parserUri(dto.getContactAvatarUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId());
             dto.setContactAvatarUrl(contentUrl);
         }
-        if(dto.getCorpLogoUri() != null) {
+        if (dto.getCorpLogoUri() != null) {
             String contentUrl = contentServerService.parserUri(dto.getCorpLogoUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId());
             dto.setCorpLogoUrl(contentUrl);
         }
@@ -1059,10 +1109,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     private EnterpriseCustomer checkEnterpriseCustomer(Long id) {
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(id);
-        if(customer == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(customer.getStatus()))) {
+        if (customer == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(customer.getStatus()))) {
             LOGGER.error("enterprise customer is not exist or active. id: {}, customer: {}", id, customer);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
-                        "customer is not exist or active");
+                    "customer is not exist or active");
         }
         return customer;
     }
@@ -1110,7 +1160,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerAccount checkCustomerAccount(Long id, Long customerId) {
         CustomerAccount account = enterpriseCustomerProvider.findCustomerAccountById(id);
-        if(account == null || !account.getCustomerId().equals(customerId)
+        if (account == null || !account.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(account.getStatus()))) {
             LOGGER.error("enterprise customer account is not exist or active. id: {}, account: {}", id, account);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ACCOUNT_NOT_EXIST,
@@ -1121,7 +1171,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTax checkCustomerTax(Long id, Long customerId) {
         CustomerTax tax = enterpriseCustomerProvider.findCustomerTaxById(id);
-        if(tax == null || !tax.getCustomerId().equals(customerId)
+        if (tax == null || !tax.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tax.getStatus()))) {
             LOGGER.error("enterprise customer tax is not exist or active. id: {}, tax: {}", id, tax);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TAX_NOT_EXIST,
@@ -1133,23 +1183,23 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerAccountDTO convertCustomerAccountDTO(CustomerAccount account, Long communityId) {
         CustomerAccountDTO dto = ConvertHelper.convert(account, CustomerAccountDTO.class);
 
-        if(dto.getAccountTypeId() != null) {
+        if (dto.getAccountTypeId() != null) {
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountTypeId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setAccountTypeName(scopeFieldItem.getItemDisplayName());
             }
         }
 
-        if(dto.getAccountNumberTypeId() != null) {
+        if (dto.getAccountNumberTypeId() != null) {
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountNumberTypeId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setAccountNumberTypeName(scopeFieldItem.getItemDisplayName());
             }
         }
 
-        if(dto.getContractId() != null) {
+        if (dto.getContractId() != null) {
             Contract contract = contractProvider.findContractById(dto.getContractId());
-            if(contract != null) {
+            if (contract != null) {
                 dto.setContractName(contract.getName());
             }
         }
@@ -1160,9 +1210,9 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerTaxDTO convertCustomerTaxDTO(CustomerTax tax, Long communityId) {
         CustomerTaxDTO dto = ConvertHelper.convert(tax, CustomerTaxDTO.class);
 
-        if(dto.getTaxPayerTypeId() != null) {
+        if (dto.getTaxPayerTypeId() != null) {
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(tax.getNamespaceId(), communityId, dto.getTaxPayerTypeId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setTaxPayerTypeName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -1174,7 +1224,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerAccount> accounts = enterpriseCustomerProvider.listCustomerAccountsByCustomerId(cmd.getCustomerId());
-        if(accounts != null && accounts.size() > 0) {
+        if (accounts != null && accounts.size() > 0) {
             return accounts.stream().map(account -> {
                 return convertCustomerAccountDTO(account, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1186,7 +1236,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerTaxDTO> listCustomerTaxes(ListCustomerTaxesCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTax> taxes = enterpriseCustomerProvider.listCustomerTaxesByCustomerId(cmd.getCustomerId());
-        if(taxes != null && taxes.size() > 0) {
+        if (taxes != null && taxes.size() > 0) {
             return taxes.stream().map(tax -> {
                 return convertCustomerTaxDTO(tax, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1237,52 +1287,52 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTalentDTO convertCustomerTalentDTO(CustomerTalent talent, Long communityId) {
         CustomerTalentDTO dto = ConvertHelper.convert(talent, CustomerTalentDTO.class);
-        if(dto.getGender() != null) {
+        if (dto.getGender() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getGender());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getGender());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setGenderName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getReturneeFlag() != null) {
+        if (dto.getReturneeFlag() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getReturneeFlag());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getReturneeFlag());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setReturneeFlagName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getAbroadItemId() != null) {
+        if (dto.getAbroadItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getAbroadItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setAbroadItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getDegreeItemId() != null) {
+        if (dto.getDegreeItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getDegreeItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getDegreeItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setDegreeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getNationalityItemId() != null) {
+        if (dto.getNationalityItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getNationalityItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getNationalityItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setNationalityItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getIndividualEvaluationItemId() != null) {
+        if (dto.getIndividualEvaluationItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getIndividualEvaluationItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getIndividualEvaluationItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setIndividualEvaluationItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getTechnicalTitleItemId() != null) {
+        if (dto.getTechnicalTitleItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTechnicalTitleItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getTechnicalTitleItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setTechnicalTitleItemName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -1293,7 +1343,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
-        if(talents != null && talents.size() > 0) {
+        if (talents != null && talents.size() > 0) {
             return talents.stream().map(talent -> {
                 return convertCustomerTalentDTO(talent, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1303,7 +1353,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTalent checkCustomerTalent(Long id, Long customerId) {
         CustomerTalent talent = enterpriseCustomerProvider.findCustomerTalentById(id);
-        if(talent == null || !talent.getCustomerId().equals(customerId)
+        if (talent == null || !talent.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(talent.getStatus()))) {
             LOGGER.error("enterprise customer talent is not exist or active. id: {}, talent: {}", id, talent);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TALENT_NOT_EXIST,
@@ -1327,10 +1377,10 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerApplyProject(CreateCustomerApplyProjectCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
-        if(cmd.getProjectCompleteDate() != null) {
+        if (cmd.getProjectCompleteDate() != null) {
             project.setProjectCompleteDate(new Timestamp(cmd.getProjectCompleteDate()));
         }
-        if(cmd.getProjectEstablishDate() != null) {
+        if (cmd.getProjectEstablishDate() != null) {
             project.setProjectEstablishDate(new Timestamp(cmd.getProjectEstablishDate()));
         }
         enterpriseCustomerProvider.createCustomerApplyProject(project);
@@ -1340,31 +1390,31 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerCommercial(CreateCustomerCommercialCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
-        if(cmd.getCancelDate() != null) {
+        if (cmd.getCancelDate() != null) {
             commercial.setCancelDate(new Timestamp(cmd.getCancelDate()));
         }
-        if(cmd.getChangeDate() != null) {
+        if (cmd.getChangeDate() != null) {
             commercial.setChangeDate(new Timestamp(cmd.getChangeDate()));
         }
-        if(cmd.getFoundationDate() != null) {
+        if (cmd.getFoundationDate() != null) {
             commercial.setFoundationDate(new Timestamp(cmd.getFoundationDate()));
         }
-        if(cmd.getBusinessLicenceDate() != null) {
+        if (cmd.getBusinessLicenceDate() != null) {
             commercial.setBusinessLicenceDate(new Timestamp(cmd.getBusinessLicenceDate()));
         }
-        if(cmd.getTaxRegistrationDate() != null) {
+        if (cmd.getTaxRegistrationDate() != null) {
             commercial.setTaxRegistrationDate(new Timestamp(cmd.getTaxRegistrationDate()));
         }
-        if(cmd.getValidityBeginDate() != null) {
+        if (cmd.getValidityBeginDate() != null) {
             commercial.setValidityBeginDate(new Timestamp(cmd.getValidityBeginDate()));
         }
-        if(cmd.getValidityEndDate() != null) {
+        if (cmd.getValidityEndDate() != null) {
             commercial.setValidityEndDate(new Timestamp(cmd.getValidityEndDate()));
         }
-        if(cmd.getLiquidationCommitteeRecoredDate() != null) {
+        if (cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
         }
-        if(cmd.getBranchRegisteredDate() != null) {
+        if (cmd.getBranchRegisteredDate() != null) {
             commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
         }
 
@@ -1375,7 +1425,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerPatent(CreateCustomerPatentCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             patent.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         enterpriseCustomerProvider.createCustomerPatent(patent);
@@ -1385,7 +1435,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerTrademark(CreateCustomerTrademarkCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             trademark.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         enterpriseCustomerProvider.createCustomerTrademark(trademark);
@@ -1400,7 +1450,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
         CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
-        if(project == null || !project.getCustomerId().equals(customerId)
+        if (project == null || !project.getCustomerId().equals(customerId)
                 || CommonStatus.INACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
             LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
@@ -1418,7 +1468,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerCommercial checkCustomerCommercial(Long id, Long customerId) {
         CustomerCommercial commercial = enterpriseCustomerProvider.findCustomerCommercialById(id);
-        if(commercial == null || !commercial.getCustomerId().equals(customerId)
+        if (commercial == null || !commercial.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(commercial.getStatus()))) {
             LOGGER.error("enterprise customer commercial is not exist or active. id: {}, commercial: {}", id, commercial);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_COMMERCIAL_NOT_EXIST,
@@ -1436,7 +1486,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerPatent checkCustomerPatent(Long id, Long customerId) {
         CustomerPatent patent = enterpriseCustomerProvider.findCustomerPatentById(id);
-        if(patent == null || !patent.getCustomerId().equals(customerId)
+        if (patent == null || !patent.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(patent.getStatus()))) {
             LOGGER.error("enterprise customer patent is not exist or active. id: {}, patent: {}", id, patent);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PATENT_NOT_EXIST,
@@ -1454,7 +1504,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTrademark checkCustomerTrademark(Long id, Long customerId) {
         CustomerTrademark trademark = enterpriseCustomerProvider.findCustomerTrademarkById(id);
-        if(trademark == null || !trademark.getCustomerId().equals(customerId)
+        if (trademark == null || !trademark.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(trademark.getStatus()))) {
             LOGGER.error("enterprise customer patent is not exist or active. id: {}, trademark: {}", id, trademark);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRADEMARK_NOT_EXIST,
@@ -1471,23 +1521,23 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project, Long communityId) {
         CustomerApplyProjectDTO dto = ConvertHelper.convert(project, CustomerApplyProjectDTO.class);
-        if(dto.getStatus() != null) {
+        if (dto.getStatus() != null) {
             CustomerApplyProjectStatus status = CustomerApplyProjectStatus.fromStatus(dto.getStatus());
-            if(status != null) {
+            if (status != null) {
                 dto.setStatusName(status.getName());
             }
         }
         //PROJECTGSOURCE不是必填项目，这里没有判断 为空字符串
-        if(dto.getProjectSource() != null) {
+        if (dto.getProjectSource() != null) {
             String[] ids = dto.getProjectSource().split(",");
             LOGGER.info("project source: {}", ids);
             StringBuilder sb = new StringBuilder();
-            for(String id : ids) {
+            for (String id : ids) {
 //                ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(project.getNamespaceId(), Long.valueOf(id));
                 ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(project.getNamespaceId(), communityId, Long.valueOf(id));
                 LOGGER.info("project source scopeFieldItem: {}", scopeFieldItem);
-                if(scopeFieldItem != null) {
-                    if(sb.length() == 0) {
+                if (scopeFieldItem != null) {
+                    if (sb.length() == 0) {
                         sb.append(scopeFieldItem.getItemDisplayName());
                     } else {
                         sb.append(",");
@@ -1510,24 +1560,24 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerCommercialDTO convertCustomerCommercialDTO(CustomerCommercial commercial, Long communityId) {
         CustomerCommercialDTO dto = ConvertHelper.convert(commercial, CustomerCommercialDTO.class);
 
-        if(dto.getEnterpriseTypeItemId() != null) {
+        if (dto.getEnterpriseTypeItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getEnterpriseTypeItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getEnterpriseTypeItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setEnterpriseTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getShareTypeItemId() != null) {
+        if (dto.getShareTypeItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getShareTypeItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getShareTypeItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setShareTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getPropertyType() != null) {
+        if (dto.getPropertyType() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getPropertyType());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getPropertyType());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setPropertyTypeName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -1543,17 +1593,17 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerPatentDTO convertCustomerPatentDTO(CustomerPatent patent, Long communityId) {
         CustomerPatentDTO dto = ConvertHelper.convert(patent, CustomerPatentDTO.class);
 
-        if(dto.getPatentStatusItemId() != null) {
+        if (dto.getPatentStatusItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentStatusItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), communityId, dto.getPatentStatusItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setPatentStatusItemName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getPatentTypeItemId() != null) {
+        if (dto.getPatentTypeItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentTypeItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), communityId, dto.getPatentTypeItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setPatentTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -1569,10 +1619,10 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerTrademarkDTO convertCustomerTrademarkDTO(CustomerTrademark trademark, Long communityId) {
         CustomerTrademarkDTO dto = ConvertHelper.convert(trademark, CustomerTrademarkDTO.class);
 
-        if(dto.getTrademarkTypeItemId() != null) {
+        if (dto.getTrademarkTypeItemId() != null) {
 //            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), dto.getTrademarkTypeItemId());
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), communityId, dto.getTrademarkTypeItemId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setTrademarkTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -1583,7 +1633,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerApplyProjectDTO> listCustomerApplyProjects(ListCustomerApplyProjectsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerApplyProject> projects = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerId(cmd.getCustomerId());
-        if(projects != null && projects.size() > 0) {
+        if (projects != null && projects.size() > 0) {
             return projects.stream().map(project -> {
                 return convertCustomerApplyProjectDTO(project, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1595,7 +1645,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerCommercialDTO> listCustomerCommercials(ListCustomerCommercialsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerCommercial> commercials = enterpriseCustomerProvider.listCustomerCommercialsByCustomerId(cmd.getCustomerId());
-        if(commercials != null && commercials.size() > 0) {
+        if (commercials != null && commercials.size() > 0) {
             return commercials.stream().map(commercial -> {
                 return convertCustomerCommercialDTO(commercial, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1607,7 +1657,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerPatentDTO> listCustomerPatents(ListCustomerPatentsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerPatent> patents = enterpriseCustomerProvider.listCustomerPatentsByCustomerId(cmd.getCustomerId());
-        if(patents != null && patents.size() > 0) {
+        if (patents != null && patents.size() > 0) {
             return patents.stream().map(patent -> {
                 return convertCustomerPatentDTO(patent, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1619,7 +1669,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerTrademarkDTO> listCustomerTrademarks(ListCustomerTrademarksCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTrademark> trademarks = enterpriseCustomerProvider.listCustomerTrademarksByCustomerId(cmd.getCustomerId());
-        if(trademarks != null && trademarks.size() > 0) {
+        if (trademarks != null && trademarks.size() > 0) {
             return trademarks.stream().map(trademark -> {
                 return convertCustomerTrademarkDTO(trademark, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -1632,10 +1682,10 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerApplyProject exist = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
-        if(cmd.getProjectCompleteDate() != null) {
+        if (cmd.getProjectCompleteDate() != null) {
             project.setProjectCompleteDate(new Timestamp(cmd.getProjectCompleteDate()));
         }
-        if(cmd.getProjectEstablishDate() != null) {
+        if (cmd.getProjectEstablishDate() != null) {
             project.setProjectEstablishDate(new Timestamp(cmd.getProjectEstablishDate()));
         }
         project.setCreateTime(exist.getCreateTime());
@@ -1649,31 +1699,31 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerCommercial exist = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
 
-        if(cmd.getCancelDate() != null) {
+        if (cmd.getCancelDate() != null) {
             commercial.setCancelDate(new Timestamp(cmd.getCancelDate()));
         }
-        if(cmd.getChangeDate() != null) {
+        if (cmd.getChangeDate() != null) {
             commercial.setChangeDate(new Timestamp(cmd.getChangeDate()));
         }
-        if(cmd.getFoundationDate() != null) {
+        if (cmd.getFoundationDate() != null) {
             commercial.setFoundationDate(new Timestamp(cmd.getFoundationDate()));
         }
-        if(cmd.getBusinessLicenceDate() != null) {
+        if (cmd.getBusinessLicenceDate() != null) {
             commercial.setBusinessLicenceDate(new Timestamp(cmd.getBusinessLicenceDate()));
         }
-        if(cmd.getTaxRegistrationDate() != null) {
+        if (cmd.getTaxRegistrationDate() != null) {
             commercial.setTaxRegistrationDate(new Timestamp(cmd.getTaxRegistrationDate()));
         }
-        if(cmd.getValidityBeginDate() != null) {
+        if (cmd.getValidityBeginDate() != null) {
             commercial.setValidityBeginDate(new Timestamp(cmd.getValidityBeginDate()));
         }
-        if(cmd.getValidityEndDate() != null) {
+        if (cmd.getValidityEndDate() != null) {
             commercial.setValidityEndDate(new Timestamp(cmd.getValidityEndDate()));
         }
-        if(cmd.getLiquidationCommitteeRecoredDate() != null) {
+        if (cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
         }
-        if(cmd.getBranchRegisteredDate() != null) {
+        if (cmd.getBranchRegisteredDate() != null) {
             commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
         }
         commercial.setCreateTime(exist.getCreateTime());
@@ -1687,7 +1737,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerPatent exist = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             patent.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         patent.setCreateTime(exist.getCreateTime());
@@ -1701,7 +1751,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTrademark exist = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             trademark.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         trademark.setCreateTime(exist.getCreateTime());
@@ -1714,15 +1764,15 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
-        if(cmd.getMonth() != null) {
+        if (cmd.getMonth() != null) {
             indicator.setMonth(new Timestamp(cmd.getMonth()));
         }
         enterpriseCustomerProvider.createCustomerEconomicIndicator(indicator);
 
         //年月不为null 则填到年月所属对应的年度统计表里
-        if(cmd.getMonth() != null) {
+        if (cmd.getMonth() != null) {
             CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
-            if(statistic == null) {
+            if (statistic == null) {
                 statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(new Timestamp(cmd.getMonth()));
@@ -1744,7 +1794,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
-        if(cmd.getInvestmentTime() != null) {
+        if (cmd.getInvestmentTime() != null) {
             investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
         }
         enterpriseCustomerProvider.createCustomerInvestment(investment);
@@ -1756,25 +1806,25 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEconomicIndicator(indicator);
 
-        if(indicator.getMonth() != null) {
+        if (indicator.getMonth() != null) {
             CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
-            if(statistic != null) {
-                if(statistic.getTaxPayment() != null && indicator.getTaxPayment() != null) {
-                    if(statistic.getTaxPayment().compareTo(indicator.getTaxPayment()) > 0) {
+            if (statistic != null) {
+                if (statistic.getTaxPayment() != null && indicator.getTaxPayment() != null) {
+                    if (statistic.getTaxPayment().compareTo(indicator.getTaxPayment()) > 0) {
                         statistic.setTaxPayment(statistic.getTaxPayment().subtract(indicator.getTaxPayment()));
                     } else {
                         statistic.setTaxPayment(BigDecimal.ZERO);
                     }
                 }
-                if(statistic.getTurnover() != null && indicator.getTurnover() != null) {
-                    if(statistic.getTurnover().compareTo(indicator.getTurnover()) > 0) {
+                if (statistic.getTurnover() != null && indicator.getTurnover() != null) {
+                    if (statistic.getTurnover().compareTo(indicator.getTurnover()) > 0) {
                         statistic.setTurnover(statistic.getTurnover().subtract(indicator.getTurnover()));
                     } else {
                         statistic.setTurnover(BigDecimal.ZERO);
                     }
                 }
 
-                if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) == 0
+                if (statistic.getTaxPayment().compareTo(BigDecimal.ZERO) == 0
                         && statistic.getTurnover().compareTo(BigDecimal.ZERO) == 0) {
                     enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
                 } else {
@@ -1787,7 +1837,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerEconomicIndicator checkCustomerEconomicIndicator(Long id, Long customerId) {
         CustomerEconomicIndicator indicator = enterpriseCustomerProvider.findCustomerEconomicIndicatorById(id);
-        if(indicator == null || !indicator.getCustomerId().equals(customerId)
+        if (indicator == null || !indicator.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(indicator.getStatus()))) {
             LOGGER.error("enterprise customer economic indicator is not exist or active. id: {}, indicator: {}", id, indicator);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ECONOMIC_INDICATOR_NOT_EXIST,
@@ -1805,7 +1855,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerInvestment checkCustomerInvestment(Long id, Long customerId) {
         CustomerInvestment investment = enterpriseCustomerProvider.findCustomerInvestmentById(id);
-        if(investment == null || !investment.getCustomerId().equals(customerId)
+        if (investment == null || !investment.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(investment.getStatus()))) {
             LOGGER.error("enterprise customer investment is not exist or active. id: {}, investment: {}", id, investment);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_INVESTMENT_NOT_EXIST,
@@ -1830,7 +1880,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEconomicIndicator> indicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId());
-        if(indicators != null && indicators.size() > 0) {
+        if (indicators != null && indicators.size() > 0) {
             return indicators.stream().map(indicator -> {
                 return ConvertHelper.convert(indicator, CustomerEconomicIndicatorDTO.class);
             }).collect(Collectors.toList());
@@ -1842,7 +1892,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerInvestmentDTO> listCustomerInvestments(ListCustomerInvestmentsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerInvestment> investments = enterpriseCustomerProvider.listCustomerInvestmentsByCustomerId(cmd.getCustomerId());
-        if(investments != null && investments.size() > 0) {
+        if (investments != null && investments.size() > 0) {
             return investments.stream().map(investment -> {
                 return ConvertHelper.convert(investment, CustomerInvestmentDTO.class);
             }).collect(Collectors.toList());
@@ -1855,7 +1905,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEconomicIndicator exist = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
-        if(cmd.getMonth() != null) {
+        if (cmd.getMonth() != null) {
             indicator.setMonth(new Timestamp(cmd.getMonth()));
         }
         indicator.setCreateTime(exist.getCreateTime());
@@ -1863,10 +1913,10 @@ public class CustomerServiceImpl implements CustomerService {
         indicator.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
 
-        if(isSameYear(indicator.getMonth(), exist.getMonth())) {
-            if(indicator.getMonth() != null) {
+        if (isSameYear(indicator.getMonth(), exist.getMonth())) {
+            if (indicator.getMonth() != null) {
                 CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
-                if(statistic == null) {
+                if (statistic == null) {
                     statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(new Timestamp(cmd.getMonth()));
@@ -1878,7 +1928,7 @@ public class CustomerServiceImpl implements CustomerService {
                     statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()).subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()).subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                    if (statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
                             && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
                         enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
                     } else {
@@ -1887,23 +1937,23 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             }
         } else {
-            if(indicator.getMonth() == null) {
+            if (indicator.getMonth() == null) {
                 CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
-                if(statistic != null) {
+                if (statistic != null) {
                     BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
                     statistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                    if (statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
                             && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
                         enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
                     } else {
                         enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
                     }
                 }
-            } else if(exist.getMonth() == null) {
+            } else if (exist.getMonth() == null) {
                 CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
-                if(statistic == null) {
+                if (statistic == null) {
                     statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(new Timestamp(cmd.getMonth()));
@@ -1919,12 +1969,12 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             } else {
                 CustomerEconomicIndicatorStatistic existStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
-                if(existStatistic != null) {
+                if (existStatistic != null) {
                     BigDecimal tax = existStatistic.getTaxPayment() == null ? BigDecimal.ZERO : existStatistic.getTaxPayment();
                     existStatistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = existStatistic.getTurnover() == null ? BigDecimal.ZERO : existStatistic.getTurnover();
                     existStatistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    if(existStatistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                    if (existStatistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
                             && existStatistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
                         enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(existStatistic);
                     } else {
@@ -1932,7 +1982,7 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 }
                 CustomerEconomicIndicatorStatistic newStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
-                if(newStatistic == null) {
+                if (newStatistic == null) {
                     newStatistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(new Timestamp(cmd.getMonth()));
@@ -1956,7 +2006,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
-        if(cmd.getInvestmentTime() != null) {
+        if (cmd.getInvestmentTime() != null) {
             investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
         }
         investment.setCreateTime(exist.getCreateTime());
@@ -1969,7 +2019,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerCertificate(CreateCustomerCertificateCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             certificate.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         enterpriseCustomerProvider.createCustomerCertificate(certificate);
@@ -1984,7 +2034,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerCertificate checkCustomerCertificate(Long id, Long customerId) {
         CustomerCertificate certificate = enterpriseCustomerProvider.findCustomerCertificateById(id);
-        if(certificate == null || !certificate.getCustomerId().equals(customerId)
+        if (certificate == null || !certificate.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(certificate.getStatus()))) {
             LOGGER.error("enterprise customer certificate is not exist or active. id: {}, certificate: {}", id, certificate);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
@@ -2003,7 +2053,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerCertificateDTO> listCustomerCertificates(ListCustomerCertificatesCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerCertificate> certificates = enterpriseCustomerProvider.listCustomerCertificatesByCustomerId(cmd.getCustomerId());
-        if(certificates != null && certificates.size() > 0) {
+        if (certificates != null && certificates.size() > 0) {
             return certificates.stream().map(certificate -> {
                 return ConvertHelper.convert(certificate, CustomerCertificateDTO.class);
             }).collect(Collectors.toList());
@@ -2016,7 +2066,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCertificate exist = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
         CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
-        if(cmd.getRegisteDate() != null) {
+        if (cmd.getRegisteDate() != null) {
             certificate.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
         }
         certificate.setCreateTime(exist.getCreateTime());
@@ -2029,7 +2079,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
-        if(cmd.getReviewTime() != null) {
+        if (cmd.getReviewTime() != null) {
             departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
         }
         enterpriseCustomerProvider.createCustomerDepartureInfo(departureInfo);
@@ -2039,18 +2089,18 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
-        if(cmd.getContractEndDate() != null) {
+        if (cmd.getContractEndDate() != null) {
             entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
         }
-        if(cmd.getContractStartDate() != null) {
+        if (cmd.getContractStartDate() != null) {
             entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
         }
         enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
 
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
-            if(organization != null) {
+            if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
@@ -2060,12 +2110,12 @@ public class CustomerServiceImpl implements CustomerService {
     private void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         Long userId = UserContext.currentUserId();
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
-        if(address != null) {
+        if (address != null) {
             return;
         }
         address = new OrganizationAddress();
         Address addr = this.addressProvider.findAddressById(addressId);
-        if(addr != null) {
+        if (addr != null) {
             address.setBuildingName(addr.getBuildingName());
         }
         address.setOrganizationId(orgId);
@@ -2082,7 +2132,7 @@ public class CustomerServiceImpl implements CustomerService {
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
     private void deleteOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
-        if(address != null) {
+        if (address != null) {
             organizationProvider.deleteOrganizationAddress(address);
         }
     }
@@ -2102,9 +2152,9 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
 
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
-            if(organization != null) {
+            if (organization != null) {
                 deleteOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
@@ -2112,7 +2162,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {
         CustomerEntryInfo entryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(id);
-        if(entryInfo == null || !entryInfo.getCustomerId().equals(customerId)
+        if (entryInfo == null || !entryInfo.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(entryInfo.getStatus()))) {
             LOGGER.error("enterprise customer entryInfo is not exist or active. id: {}, certificate: {}", id, entryInfo);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
@@ -2123,7 +2173,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerDepartureInfo checkCustomerDepartureInfo(Long id, Long customerId) {
         CustomerDepartureInfo departureInfo = enterpriseCustomerProvider.findCustomerDepartureInfoById(id);
-        if(departureInfo == null || !departureInfo.getCustomerId().equals(customerId)
+        if (departureInfo == null || !departureInfo.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(departureInfo.getStatus()))) {
             LOGGER.error("enterprise customer departureInfo is not exist or active. id: {}, departureInfo: {}", id, departureInfo);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
@@ -2141,7 +2191,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd) {
         CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
-        if(entryInfo.getAddressId() != null) {
+        if (entryInfo.getAddressId() != null) {
 
         }
         return convertCustomerEntryInfoDTO(entryInfo);
@@ -2151,7 +2201,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerDepartureInfo> departureInfos = enterpriseCustomerProvider.listCustomerDepartureInfos(cmd.getCustomerId());
-        if(departureInfos != null && departureInfos.size() > 0) {
+        if (departureInfos != null && departureInfos.size() > 0) {
             return departureInfos.stream().map(departureInfo -> {
                 return convertCustomerDepartureInfoDTO(departureInfo, cmd.getCommunityId());
             }).collect(Collectors.toList());
@@ -2162,15 +2212,15 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerDepartureInfoDTO convertCustomerDepartureInfoDTO(CustomerDepartureInfo departureInfo, Long communityId) {
         CustomerDepartureInfoDTO dto = ConvertHelper.convert(departureInfo, CustomerDepartureInfoDTO.class);
 
-        if(dto.getDepartureDirectionId() != null) {
+        if (dto.getDepartureDirectionId() != null) {
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureDirectionId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setDepartureDirectionName(scopeFieldItem.getItemDisplayName());
             }
         }
-        if(dto.getDepartureNatureId() != null) {
+        if (dto.getDepartureNatureId() != null) {
             ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureNatureId());
-            if(scopeFieldItem != null) {
+            if (scopeFieldItem != null) {
                 dto.setDepartureNatureName(scopeFieldItem.getItemDisplayName());
             }
         }
@@ -2180,9 +2230,9 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerEntryInfoDTO convertCustomerEntryInfoDTO(CustomerEntryInfo entryInfo) {
         CustomerEntryInfoDTO dto = ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
 
-        if(dto.getAddressId() != null) {
+        if (dto.getAddressId() != null) {
             Address address = addressProvider.findAddressById(dto.getAddressId());
-            if(address != null) {
+            if (address != null) {
                 dto.setAddressName(address.getAddress());
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddressId(address.getId());
@@ -2190,11 +2240,10 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
                 if (address.getLivingStatus() == null) {
-                    CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
-                    if(mapping != null){
+                    CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+                    if (mapping != null) {
                         address.setLivingStatus(mapping.getLivingStatus());
-                    }
-                    else{
+                    } else {
                         address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
                     }
                 }
@@ -2209,7 +2258,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
-        if(entryInfos != null && entryInfos.size() > 0) {
+        if (entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
                 return convertCustomerEntryInfoDTO(entryInfo);
             }).collect(Collectors.toList());
@@ -2220,7 +2269,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
-        if(entryInfos != null && entryInfos.size() > 0) {
+        if (entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
                 return convertCustomerEntryInfoDTO(entryInfo);
             }).collect(Collectors.toList());
@@ -2233,7 +2282,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo exist = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
         CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
-        if(cmd.getReviewTime() != null) {
+        if (cmd.getReviewTime() != null) {
             departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
         }
         departureInfo.setCreateTime(exist.getCreateTime());
@@ -2247,10 +2296,10 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo exist = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
         CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
-        if(cmd.getContractEndDate() != null) {
+        if (cmd.getContractEndDate() != null) {
             entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
         }
-        if(cmd.getContractStartDate() != null) {
+        if (cmd.getContractStartDate() != null) {
             entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
         }
         entryInfo.setCreateTime(exist.getCreateTime());
@@ -2259,9 +2308,9 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
 
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
-            if(organization != null) {
+            if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
@@ -2280,7 +2329,7 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setCustomerCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
             ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
+            if (item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
             dtos.add(dto);
@@ -2326,7 +2375,7 @@ public class CustomerServiceImpl implements CustomerService {
         response.setPropertyTotalCount(0L);
         List<CustomerIntellectualPropertyStatisticsDTO> dtos = new ArrayList<>();
         Long trademarks = enterpriseCustomerProvider.countTrademarksByCustomerIds(customerIds);
-        if(trademarks != null && trademarks != 0) {
+        if (trademarks != null && trademarks != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + trademarks);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
@@ -2336,7 +2385,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         Long certificates = enterpriseCustomerProvider.countCertificatesByCustomerIds(customerIds);
-        if(certificates != null && certificates != 0) {
+        if (certificates != null && certificates != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + certificates);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
@@ -2377,7 +2426,7 @@ public class CustomerServiceImpl implements CustomerService {
         response.setProjectTotalCount(0L);
 
         Map<Long, CustomerProjectStatisticsDTO> statistics = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerIds(customerIds);
-        if(LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("listCustomerProjectStatistics customer ids : {}, statistics: {}", customerIds, StringHelper.toJsonString(statistics));
         }
 
@@ -2385,7 +2434,7 @@ public class CustomerServiceImpl implements CustomerService {
             CustomerProjectStatisticsDTO dto = statistic;
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
             ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), itemId);
-            if(item != null) {
+            if (item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
             dtos.add(dto);
@@ -2409,7 +2458,7 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setCustomerCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
             ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
+            if (item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
             dtos.add(dto);
@@ -2438,7 +2487,7 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setCustomerMemberCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
             ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
+            if (item != null) {
                 dto.setCategoryName(item.getItemDisplayName());
             }
             dtos.add(dto);
@@ -2463,7 +2512,7 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setCustomerMemberCount(dto.getCustomerMemberCount() + members);
         });
 
-        List<CustomerEconomicIndicator> indicators =enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerIds(customerIds);
+        List<CustomerEconomicIndicator> indicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerIds(customerIds);
         dto.setTotalTurnover(BigDecimal.ZERO);
         dto.setTotalTaxAmount(BigDecimal.ZERO);
         indicators.forEach(indicator -> {
@@ -2482,7 +2531,7 @@ public class CustomerServiceImpl implements CustomerService {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        if(cmd.getPageAnchor() != null) {
+        if (cmd.getPageAnchor() != null) {
             locator.setAnchor(cmd.getPageAnchor());
         }
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2494,22 +2543,23 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private Boolean isSameYear(Timestamp newMonth, Timestamp oldMonth) {
-        if(newMonth == null && oldMonth == null) {
+        if (newMonth == null && oldMonth == null) {
             return true;
         } else {
-            if(newMonth != null && oldMonth != null) {
+            if (newMonth != null && oldMonth != null) {
                 Calendar newCal = Calendar.getInstance();
                 newCal.setTime(newMonth);
 
                 Calendar oldCal = Calendar.getInstance();
                 oldCal.setTime(oldMonth);
-                if(newCal.get(Calendar.YEAR) == oldCal.get(Calendar.YEAR)) {
+                if (newCal.get(Calendar.YEAR) == oldCal.get(Calendar.YEAR)) {
                     return true;
                 }
             }
         }
         return false;
     }
+
     private Timestamp getDayBegin(Calendar cal) {
         cal.set(Calendar.MONTH, 0);
         cal.set(Calendar.DATE, 1);
@@ -2540,16 +2590,17 @@ public class CustomerServiceImpl implements CustomerService {
         cal.set(Calendar.MILLISECOND, 001);
         return new Timestamp(cal.getTimeInMillis());
     }
+
     @Override
     public ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd) {
         ListCustomerAnnualDetailsResponse response = new ListCustomerAnnualDetailsResponse();
         List<CustomerEconomicIndicator> economicIndicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId(), new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime()));
-        if(economicIndicators != null && economicIndicators.size() > 0) {
+        if (economicIndicators != null && economicIndicators.size() > 0) {
             Map<Timestamp, MonthStatistics> monthStatisticsMap = new HashMap<>();
             economicIndicators.forEach(economicIndicator -> {
                 Timestamp month = getMonth(economicIndicator.getMonth());
                 MonthStatistics statistic = monthStatisticsMap.get(month);
-                if(statistic == null) {
+                if (statistic == null) {
                     statistic = new MonthStatistics();
                     statistic.setMonth(month.getTime());
                     statistic.setTaxPayment(economicIndicator.getTaxPayment());
@@ -2575,18 +2626,18 @@ public class CustomerServiceImpl implements CustomerService {
                 cal.setTime(timestamp);
                 int month = cal.get(Calendar.MONTH);
                 int quarter = 0;
-                if(month <= 3) {
+                if (month <= 3) {
                     quarter = YearQuarter.THE_FIRST_QUARTER.getCode();
-                } else if(month > 3 && month <= 6) {
+                } else if (month > 3 && month <= 6) {
                     quarter = YearQuarter.THE_SECOND_QUARTER.getCode();
-                } else if(month > 6 && month <= 9) {
+                } else if (month > 6 && month <= 9) {
                     quarter = YearQuarter.THE_THIRD_QUARTER.getCode();
-                } else if(month > 9 && month <= 12) {
+                } else if (month > 9 && month <= 12) {
                     quarter = YearQuarter.THE_FOURTH_QUARTER.getCode();
                 }
 
                 QuarterStatistics qs = quarterStatisticsMap.get(quarter);
-                if(qs == null) {
+                if (qs == null) {
                     qs = new QuarterStatistics();
                     qs.setQuarter(quarter);
                     qs.setTaxPayment(statistic.getTaxPayment());
@@ -2612,12 +2663,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     /**
      * 每天早上2点20,自动客户合同信息
-     * */
+     */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
         List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-        if(communities != null) {
-            for(Community community : communities) {
+        if (communities != null) {
+            for (Community community : communities) {
                 SyncCustomersCommand command = new SyncCustomersCommand();
                 command.setNamespaceId(community.getNamespaceId());
                 command.setCommunityId(community.getId());
@@ -2630,16 +2681,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String syncEnterpriseCustomers(SyncCustomersCommand cmd, Boolean authFlag) {
-        if(authFlag) {
+        if (authFlag) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         }
 
-        if(cmd.getNamespaceId() == 999971) {
+        if (cmd.getNamespaceId() == 999971) {
 
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-            if(community != null) {
+            if (community != null) {
                 int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
-                if(syncCount > 0) {
+                if (syncCount > 0) {
                     return "1";
                 }
 
@@ -2656,16 +2707,16 @@ public class CustomerServiceImpl implements CustomerService {
             }
         } else {
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-            if(community == null) {
+            if (community == null) {
                 return "0";
             }
             int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
-            if(syncCount > 0) {
+            if (syncCount > 0) {
                 return "1";
             }
             String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
             CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
-            if(customerHandle != null) {
+            if (customerHandle != null) {
                 SyncDataTask task = new SyncDataTask();
                 task.setOwnerType(EntityType.COMMUNITY.getCode());
                 task.setOwnerId(community.getId());
@@ -2754,9 +2805,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String syncIndividualCustomers(SyncCustomersCommand cmd) {
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-        if(community != null) {
+        if (community != null) {
             int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
-            if(syncCount > 0) {
+            if (syncCount > 0) {
                 return "1";
             }
 
@@ -2805,89 +2856,87 @@ public class CustomerServiceImpl implements CustomerService {
 //        }
     }
 
-    
-	@Override
-	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
+
+    @Override
+    public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
-        if(trackings != null && trackings.size() > 0) {
-            return trackings.stream().map(tracking -> {
-                return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
-            }).collect(Collectors.toList());
+        List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
+        if (trackings != null && trackings.size() > 0) {
+            return trackings.stream().map(tracking -> convertCustomerTrackingDTO(tracking, cmd.getCommunityId())).collect(Collectors.toList());
         }
         return null;
-	}
+    }
 
-	@Override
-	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
+    @Override
+    public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+        CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
-	}
+    }
 
-	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
-		CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
-        if(dto.getTrackingType() != null) {
+    private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
+        CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
+        if (dto.getTrackingType() != null) {
 //        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 
             FieldGroup group = fieldProvider.findGroupByGroupLogicName("com.everhomes.customer.CustomerTracking");
-            if(group != null) {
+            if (group != null) {
                 Field field = fieldProvider.findField(ModuleName.ENTERPRISE_CUSTOMER.getName(), "trackingType", group.getPath());
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(),communityId,ModuleName.ENTERPRISE_CUSTOMER.getName(),field.getId(),dto.getTrackingType().byteValue());
-                if(item != null) {
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getTrackingType().byteValue());
+                if (item != null) {
                     dto.setTrackingTypeName(item.getItemDisplayName());
                 }
             }
 
         }
-        if(dto.getTrackingUid() != null) {
-        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
-        	if(null != detail && null != detail.getContactName()){
-        		dto.setTrackingUidName(detail.getContactName());
-        	}else{
-        		UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
-        		if(userInfo != null){
-            		dto.setTrackingUidName(userInfo.getNickName());
-            	}
-        	}
+        if (dto.getTrackingUid() != null) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+            if (null != detail && null != detail.getContactName()) {
+                dto.setTrackingUidName(detail.getContactName());
+            } else {
+                UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
+                if (userInfo != null) {
+                    dto.setTrackingUidName(userInfo.getNickName());
+                }
+            }
         }
-        if(dto.getIntentionGrade() != null) {
+        if (dto.getIntentionGrade() != null) {
             Field field = fieldProvider.findField(19L, "intentionGrade");
-            if(field != null) {
+            if (field != null) {
                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getIntentionGrade().byteValue());
-                if(item != null) {
+                if (item != null) {
                     dto.setIntentionGradeName(item.getItemDisplayName());
                 }
             }
         }
         List<String> urlList = new ArrayList<>();
         List<String> uriList = new ArrayList<>();
-        if(StringUtils.isNotEmpty(tracking.getContentImgUri())){
-        	String[] uriArray = tracking.getContentImgUri().split(",");
-        	for(String  uri : uriArray){
-        		uriList.add(uri);
-        		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
-        		urlList.add(contentUrl);
-        	}
+        if (StringUtils.isNotEmpty(tracking.getContentImgUri())) {
+            String[] uriArray = tracking.getContentImgUri().split(",");
+            for (String uri : uriArray) {
+                uriList.add(uri);
+                String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
+                urlList.add(contentUrl);
+            }
         }
         dto.setContentImgUriList(uriList);
         dto.setContentImgUrlList(urlList);
         return dto;
-	}
+    }
 
-	@Override
-	public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+    @Override
+    public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
-		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
-		if(cmd.getTrackingTime() != null){
-			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
-		}
-		tracking.setCreateTime(exist.getCreateTime());
-		tracking.setCreatorUid(exist.getCreatorUid());
-		if(null != cmd.getContentImgUri()){
-			tracking.setContentImgUri(cmd.getContentImgUri());
-		}
+        CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+        CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+        if (cmd.getTrackingTime() != null) {
+            tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+        }
+        tracking.setCreateTime(exist.getCreateTime());
+        tracking.setCreatorUid(exist.getCreatorUid());
+        if (null != cmd.getContentImgUri()) {
+            tracking.setContentImgUri(cmd.getContentImgUri());
+        }
         enterpriseCustomerProvider.updateCustomerTracking(tracking);
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         customer.setLastTrackingTime(tracking.getTrackingTime());
@@ -2895,157 +2944,155 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
-	}
+    }
 
-	@Override
-	public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
+    @Override
+    public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
-	    enterpriseCustomerProvider.deleteCustomerTracking(tracking);
-	}
+        CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+    }
 
-	@Override
-	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
+    @Override
+    public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
-		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
-		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
-		if(cmd.getTrackingTime() != null){
-			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
-		}
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+        if (cmd.getTrackingTime() != null) {
+            tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+        }
         enterpriseCustomerProvider.createCustomerTracking(tracking);
         customer.setLastTrackingTime(tracking.getTrackingTime());
         //更细客户表的最后跟进时间
         enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
-	}
-	
-	 private CustomerTracking checkCustomerTracking(Long id, Long customerId) {
-		CustomerTracking tracking = enterpriseCustomerProvider.findCustomerTrackingById(id);
-        if(tracking == null || !tracking.getCustomerId().equals(customerId)
+    }
+
+    private CustomerTracking checkCustomerTracking(Long id, Long customerId) {
+        CustomerTracking tracking = enterpriseCustomerProvider.findCustomerTrackingById(id);
+        if (tracking == null || !tracking.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tracking.getStatus()))) {
             LOGGER.error("enterprise customer tracking is not exist or inactive. id: {}, tracking: {}", id, tracking);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
                     "customer tracking is not exist or inactive");
         }
         return tracking;
-	}
+    }
 
-	@Override
-	public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
+    @Override
+    public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
-        if(plans != null && plans.size() > 0) {
+        List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
+        if (plans != null && plans.size() > 0) {
             return plans.stream().map(plan -> {
                 return convertCustomerTrackingPlanDTO(plan);
             }).collect(Collectors.toList());
         }
         return null;
-	}
+    }
 
-	@Override
-	public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
+    @Override
+    public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
-        CustomerTrackingPlanDTO  customerTrackingPlanDTO = convertCustomerTrackingPlanDTO(plan);
+        CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+        CustomerTrackingPlanDTO customerTrackingPlanDTO = convertCustomerTrackingPlanDTO(plan);
         //更新状态为已读
         enterpriseCustomerProvider.updateTrackingPlanReadStatus(cmd.getId());
         return customerTrackingPlanDTO;
-	}
+    }
 
-	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
-		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
-        if(dto.getTrackingType() != null) {
-        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+    private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
+        CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
+        if (dto.getTrackingType() != null) {
+            String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()), UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 //        	String trackingTypeName = fieldProvider.findScopeFieldItemByBusinessValue(plan.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), , plan.getTrackingType());
-        	dto.setTrackingTypeName(trackingTypeName);
+            dto.setTrackingTypeName(trackingTypeName);
         }
         return dto;
-	}
+    }
 
-	@Override
-	public CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
+    @Override
+    public CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
-		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
-		if(cmd.getTrackingTime() != null){
-			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
-		}
-		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
-		if(cmd.getNotifyTime() != null){
-			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
-			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
-		}
-		plan.setCreateTime(exist.getCreateTime());
-		plan.setCreatorUid(exist.getCreatorUid());
+        CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+        CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+        if (cmd.getTrackingTime() != null) {
+            plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+        }
+        plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+        if (cmd.getNotifyTime() != null) {
+            plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+        }
+        plan.setCreateTime(exist.getCreateTime());
+        plan.setCreatorUid(exist.getCreatorUid());
         enterpriseCustomerProvider.updateCustomerTrackingPlan(plan);
         return ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
-	}
+    }
 
-	@Override
-	public void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd) {
+    @Override
+    public void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
-	    enterpriseCustomerProvider.deleteCustomerTrackingPlan(plan);
-	}
-	
-	 private CustomerTrackingPlan checkCustomerTrackingPlan(Long id, Long customerId) {
-		CustomerTrackingPlan plan = enterpriseCustomerProvider.findCustomerTrackingPlanById(id);
-        if(plan == null || !plan.getCustomerId().equals(customerId)
+        CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTrackingPlan(plan);
+    }
+
+    private CustomerTrackingPlan checkCustomerTrackingPlan(Long id, Long customerId) {
+        CustomerTrackingPlan plan = enterpriseCustomerProvider.findCustomerTrackingPlanById(id);
+        if (plan == null || !plan.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
             LOGGER.error("enterprise customer tracking plan is not exist or inactive. id: {}, plan: {}", id, plan);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
                     "customer tracking plan is not exist or inactive");
         }
         return plan;
-	}
-
-	@Override
-	public void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
-		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
-		if(cmd.getTrackingTime() != null){
-			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
-		}
-		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
-		if(cmd.getNotifyTime() != null ){
-			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
-			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
-		}
-		plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
-        enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
-	}
+    }
 
     @Override
-	public void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
-		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
-	}
-	
-	@Override
-	public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
-		List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
-        if(events != null && events.size() > 0) {
-            return events.stream().map(event -> {
-                return convertCustomerEventDTO(event);
-            }).collect(Collectors.toList());
+    public void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+        if (cmd.getTrackingTime() != null) {
+            plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+        }
+        plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+        if (cmd.getNotifyTime() != null) {
+            plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+        }
+        plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
+        enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
+    }
+
+    @Override
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
+        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist,deviceType);
+    }
+
+    @Override
+    public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
+        List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
+        if (events != null && events.size() > 0) {
+            return events.stream().map(this::convertCustomerEventDTO).collect(Collectors.toList());
         }
         return null;
-	}
+    }
 
-	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
-		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
-        if(dto.getCreatorUid() != null) {
+    private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
+        CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
+        if (dto.getCreatorUid() != null) {
             //用户可能不在组织架构中 所以用nickname
 //        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
 //            if(null != detail && null != detail.getContactName()){
 //        		dto.setCreatorName(detail.getContactName());
 //        	}
             User user = userProvider.findUserById(dto.getCreatorUid());
-            if(user != null) {
+            if (user != null) {
                 dto.setCreatorName(user.getNickName());
             }
         }
         return dto;
-	}
+    }
 
     @Override
     public void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member) {
@@ -3070,38 +3117,41 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
-		//checkPrivilege();
+    public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
+        //checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
         customer.setTrackingUid(cmd.getTrackingUid());
-        if(cmd.getTrackingUid() != -1){
-	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
-	    	if(null != detail && null != detail.getContactName()){
-	    		customer.setTrackingName(detail.getContactName());
-	    	}
+        if (cmd.getTrackingUid() != null) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
+            if (null != detail && null != detail.getContactName()) {
+                customer.setTrackingName(detail.getContactName());
+            }
         }
+        //保存事件
+        saveCustomerEvent(3, customer, exist,cmd.getDeviceType());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
-	}
+    }
 
-	@Override
-	public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
-		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-		//查看当前用户是否和跟进人一致
-		if(null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId()== null ? "" : UserContext.currentUserId().toString())){
-			LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer,UserContext.currentUserId());
+    @Override
+    public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        //查看当前用户是否和跟进人一致
+        if (null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId() == null ? "" : UserContext.currentUserId().toString())) {
+            LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer, UserContext.currentUserId());
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
-                        "enterprise customer do not contains trackingUid or not the same uid");
-		}
-		customer.setTrackingUid(-1l);
-		customer.setTrackingName(null);
+                    "enterprise customer do not contains trackingUid or not the same uid");
+        }
+        customer.setTrackingUid(null);
+        customer.setTrackingName(null);
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
-	}
+    }
 
-	@Override
-	public ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd) {
-		ListNearbyEnterpriseCustomersCommandResponse resp = new ListNearbyEnterpriseCustomersCommandResponse();
+    @Override
+    public ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd) {
+        ListNearbyEnterpriseCustomersCommandResponse resp = new ListNearbyEnterpriseCustomersCommandResponse();
         List<EnterpriseCustomerDTO> results = new ArrayList<EnterpriseCustomerDTO>();
 
         if (cmd.getLatitude() == null || cmd.getLongitude() == null)
@@ -3116,48 +3166,48 @@ public class CustomerServiceImpl implements CustomerService {
         ListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        List<EnterpriseCustomerDTO> customers = this.enterpriseCustomerProvider.findEnterpriseCustomersByDistance(cmd, locator, pageSize +1);
+        List<EnterpriseCustomerDTO> customers = this.enterpriseCustomerProvider.findEnterpriseCustomersByDistance(cmd, locator, pageSize + 1);
         if (customers != null) {
-        	for(EnterpriseCustomerDTO customer : customers){
-        		results.add(customer);
-        	}
+            for (EnterpriseCustomerDTO customer : customers) {
+                results.add(customer);
+            }
         }
         if (results != null && results.size() > pageSize) {
-        	resp.setNextPageAnchor(results.get(results.size() - 1).getId());
-        	results.remove(results.size() - 1);
+            resp.setNextPageAnchor(results.get(results.size() - 1).getId());
+            results.remove(results.size() - 1);
         }
         if (results != null) {
             resp.setDtos(results);
         }
         return resp;
-	}
+    }
 
-	
-	//每15分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划 
-	@Scheduled(cron="0 0/15 * * * ?")
-	@Override
-	public void trackingPlanWarningSchedule() {
-		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-			LOGGER.info("trackingPlanWarningSchedule is running...");
-			//使用tryEnter方法可以防止分布式部署时重复执行
-			coordinationProvider.getNamedLock(CoordinationLocks.TRACKING_PLAN_WARNING_SCHEDULE.getCode()).tryEnter(() -> {
-				Date now = DateHelper.currentGMTTime();
-				Timestamp queryStartTime = new Timestamp(now.getTime());
-				Timestamp queryEndTime = new Timestamp(now.getTime() + 900 * 1000);
-				List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
-				if(null != plans && plans.size() > 0){
-					plans.forEach(plan ->{
-						pushPlanIntoEnqueue(plan);
-					});
-				}
-			});
-		}
-	}
 
-	private void pushPlanIntoEnqueue(CustomerTrackingPlan plan) {
-		 Map<String, Object> map = new HashMap<>();
-         map.put("trackingPlanId", plan.getId());
-		if (plan.getNotifyTime().getTime() > (DateHelper.currentGMTTime().getTime() + 10L)) {
+    //每15分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划
+    @Scheduled(cron = "0 0/15 * * * ?")
+    @Override
+    public void trackingPlanWarningSchedule() {
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            LOGGER.info("trackingPlanWarningSchedule is running...");
+            //使用tryEnter方法可以防止分布式部署时重复执行
+            coordinationProvider.getNamedLock(CoordinationLocks.TRACKING_PLAN_WARNING_SCHEDULE.getCode()).tryEnter(() -> {
+                Date now = DateHelper.currentGMTTime();
+                Timestamp queryStartTime = new Timestamp(now.getTime());
+                Timestamp queryEndTime = new Timestamp(now.getTime() + 900 * 1000);
+                List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime, queryEndTime);
+                if (null != plans && plans.size() > 0) {
+                    plans.forEach(plan -> {
+                        pushPlanIntoEnqueue(plan);
+                    });
+                }
+            });
+        }
+    }
+
+    private void pushPlanIntoEnqueue(CustomerTrackingPlan plan) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("trackingPlanId", plan.getId());
+        if (plan.getNotifyTime().getTime() > (DateHelper.currentGMTTime().getTime() + 10L)) {
             scheduleProvider.scheduleSimpleJob(
                     queueDelay + plan.getId(),
                     queueDelay + plan.getId(),
@@ -3181,13 +3231,13 @@ public class CustomerServiceImpl implements CustomerService {
                     map
             );
         }
-	}
+    }
 
-	@Override
-	public void processTrackingPlanNotify(CustomerTrackingPlan plan) {
-		Long userId = plan.getCreatorUid();
-		LOGGER.info("processTrackingPlanNotify userId:{}", userId);
-        if(userId != null && null != plan.getTrackingTime()) {
+    @Override
+    public void processTrackingPlanNotify(CustomerTrackingPlan plan) {
+        Long userId = plan.getCreatorUid();
+        LOGGER.info("processTrackingPlanNotify userId:{}", userId);
+        if (userId != null && null != plan.getTrackingTime()) {
             String taskName = plan.getTitle() == null ? "" : plan.getTitle();
             Timestamp time = plan.getTrackingTime();
             String customerName = plan.getCustomerName();
@@ -3201,28 +3251,28 @@ public class CustomerServiceImpl implements CustomerService {
             log.setCustomerType(plan.getCustomerType());
             log.setCustomerId(plan.getCustomerId());
             log.setReceiverId(userId);
-            String notifyTextForApplicant = getMessage(customerName,taskName, time, scope, locale, code);
+            String notifyTextForApplicant = getMessage(customerName, taskName, time, scope, locale, code);
             sendMessageToUser(userId, notifyTextForApplicant);
             log.setNotifyText(notifyTextForApplicant);
             enterpriseCustomerProvider.createTrackingNotifyLog(log);
         }
-	}
+    }
 
-	private String getMessage(String  customerName , String taskName, Timestamp time, String scope, String locale, int code) {
-		Map<String, Object> notifyMap = new HashMap<String, Object>();
+    private String getMessage(String customerName, String taskName, Timestamp time, String scope, String locale, int code) {
+        Map<String, Object> notifyMap = new HashMap<String, Object>();
         notifyMap.put("taskName", taskName);
         notifyMap.put("time", timeToStr(time));
         notifyMap.put("customerName", customerName);
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
         return notifyTextForApplicant;
-	}
-	
-	 private String timeToStr(Timestamp time) {
+    }
+
+    private String timeToStr(Timestamp time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(time);
-	 }
-	 
-	 private void sendMessageToUser(Long userId, String content) {
+    }
+
+    private void sendMessageToUser(Long userId, String content) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
@@ -3233,80 +3283,189 @@ public class CustomerServiceImpl implements CustomerService {
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-	 }
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
 
-	@Override
-	public List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
-		List<List<CustomerTrackingPlanDTO>> planList = new ArrayList<>();
-		List<CustomerTrackingPlanDTO> todayPlan = new ArrayList<>();
-		List<CustomerTrackingPlanDTO> tomorrowPlan = new ArrayList<>();
-		List<CustomerTrackingPlanDTO> passOrFuturePlan = new ArrayList<>();
-		List<CustomerTrackingPlan> plans = null;
-		Long todayFirst = getTodayFirstTimestamp();
-		Long todayLast = getTodayLastTimestamp();
-		Long tomorrowLast = getTomorrowLastTimestamp();
-		//历史记录
-		if(StringUtils.isNotEmpty(cmd.getGetHistory()) && "1".equals(cmd.getGetHistory())){
-			plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd,todayFirst);
-			plans.forEach(plan -> {
-				passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
-			});
-			Collections.sort(passOrFuturePlan);
-			planList.add(passOrFuturePlan);
-			return planList;
-		}
-		//今天 & 明天  & 以后
-		plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd , new Timestamp(todayFirst));
-		plans.forEach(plan -> {
-			if(null != plan.getTrackingTime()){
-				Long trackingTime = plan.getTrackingTime().getTime();
-				if(trackingTime <= todayLast && trackingTime >= todayFirst){
-					todayPlan.add(convertCustomerTrackingPlanDTO(plan));
-				}else if(trackingTime > tomorrowLast){
-					passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
-				}else{
-					tomorrowPlan.add(convertCustomerTrackingPlanDTO(plan));
-				}
-			}
-		});
-		Collections.sort(todayPlan);
-		Collections.sort(tomorrowPlan);
-		Collections.sort(passOrFuturePlan);
-		planList.add(todayPlan);
-		planList.add(tomorrowPlan);
-		planList.add(passOrFuturePlan);
-		return planList;
-	}
+    @Override
+    public List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
+        List<List<CustomerTrackingPlanDTO>> planList = new ArrayList<>();
+        List<CustomerTrackingPlanDTO> todayPlan = new ArrayList<>();
+        List<CustomerTrackingPlanDTO> tomorrowPlan = new ArrayList<>();
+        List<CustomerTrackingPlanDTO> passOrFuturePlan = new ArrayList<>();
+        List<CustomerTrackingPlan> plans = null;
+        Long todayFirst = getTodayFirstTimestamp();
+        Long todayLast = getTodayLastTimestamp();
+        Long tomorrowLast = getTomorrowLastTimestamp();
+        //历史记录
+        if (StringUtils.isNotEmpty(cmd.getGetHistory()) && "1".equals(cmd.getGetHistory())) {
+            plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd, todayFirst);
+            plans.forEach(plan -> {
+                passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
+            });
+            Collections.sort(passOrFuturePlan);
+            planList.add(passOrFuturePlan);
+            return planList;
+        }
+        //今天 & 明天  & 以后
+        plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd, new Timestamp(todayFirst));
+        plans.forEach(plan -> {
+            if (null != plan.getTrackingTime()) {
+                Long trackingTime = plan.getTrackingTime().getTime();
+                if (trackingTime <= todayLast && trackingTime >= todayFirst) {
+                    todayPlan.add(convertCustomerTrackingPlanDTO(plan));
+                } else if (trackingTime > tomorrowLast) {
+                    passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
+                } else {
+                    tomorrowPlan.add(convertCustomerTrackingPlanDTO(plan));
+                }
+            }
+        });
+        Collections.sort(todayPlan);
+        Collections.sort(tomorrowPlan);
+        Collections.sort(passOrFuturePlan);
+        planList.add(todayPlan);
+        planList.add(tomorrowPlan);
+        planList.add(passOrFuturePlan);
+        return planList;
+    }
 
-	private Long getTodayFirstTimestamp() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-	    calendar.set(Calendar.HOUR_OF_DAY, 0);
-	    calendar.set(Calendar.MINUTE, 0);
-	    calendar.set(Calendar.SECOND, 0);
-	    calendar.set(Calendar.MILLISECOND, 0);
-		return calendar.getTime().getTime();
-	}
+    private Long getTodayFirstTimestamp() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime();
+    }
 
-	private Long getTodayLastTimestamp() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-	    calendar.set(Calendar.HOUR_OF_DAY, 23);
-	    calendar.set(Calendar.MINUTE, 59);
-	    calendar.set(Calendar.SECOND, 59);
-	    calendar.set(Calendar.MILLISECOND, 0);
-		return calendar.getTime().getTime();
-	}
-	
-	private Long getTomorrowLastTimestamp() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		calendar.add(Calendar.DAY_OF_MONTH, +1);
-	    calendar.set(Calendar.HOUR_OF_DAY, 23);
-	    calendar.set(Calendar.MINUTE, 59);
-	    calendar.set(Calendar.SECOND, 59);
-	    calendar.set(Calendar.MILLISECOND, 0);
-		return calendar.getTime().getTime();
-	}
+    private Long getTodayLastTimestamp() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime();
+    }
+
+    private Long getTomorrowLastTimestamp() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, +1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime();
+    }
+
+    @Override
+    public List<OrganizationMemberDTO> listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        List<OrganizationMemberDTO> members = new ArrayList<>();
+        if (customers != null && customers.size() > 0) {
+            customers.forEach((customer) -> {
+                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+                if (organizationMembers != null && organizationMembers.size() > 0) {
+                    members.add(ConvertHelper.convert(organizationMembers.get(0), OrganizationMemberDTO.class));
+                }
+            });
+        }
+        Map<Long, OrganizationMemberDTO> memberDTOMap = new HashMap<>();
+        if(members!=null && members.size()>0){
+            members.forEach((r)->{
+                memberDTOMap.putIfAbsent(r.getTargetId(), r);
+            });
+        }
+        List<OrganizationMemberDTO> result = new ArrayList<>();
+        result = new ArrayList<>(memberDTOMap.values());
+        return result;
+    }
+
+    @Override
+    public List<OrganizationMemberDTO> listCommunityRelatedMembers(ListCommnutyRelatedMembersCommand cmd) {
+
+        List<OrganizationMemberDTO> relatedMembers = new ArrayList<>();
+        List<AuthorizationRelation> authorizationRelations = enterpriseCustomerProvider
+                .listAuthorizationRelations(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId(), cmd.getAppId(), cmd.getCommunityId());
+
+        authorizationRelations.forEach((r) -> {
+            String targetJson = r.getTargetJson();
+            // String privilegeJson = r.getPrivilegeJson();
+            AssignmentTarget[] targetArr = (AssignmentTarget[]) StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
+            List<AssignmentTarget> targets = Arrays.asList(targetArr);
+            targets.forEach((p) -> {
+                //按用户分配的模块权限
+                if (EntityType.USER == EntityType.fromCode(p.getTargetType())) {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(p.getTargetId());
+                    if (members != null && members.size() > 0)
+                        relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+
+                } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
+                    if (members != null && members.size() > 0) {
+                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                    }
+                }
+            });
+        });
+        //获取超级管理员和应用管理员
+        ListServiceModuleAdministratorsCommand administratorsCommand = new ListServiceModuleAdministratorsCommand();
+        administratorsCommand.setModuleId(cmd.getModuleId());
+        administratorsCommand.setActivationFlag(ActivationFlag.YES.getCode());
+        administratorsCommand.setOrganizationId(cmd.getOwnerId());
+        administratorsCommand.setOwnerId(cmd.getOwnerId());
+        administratorsCommand.setOwnerType(cmd.getOwnerType());
+        ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
+        List<OrganizationContactDTO> superAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(administratorsCommand);
+        List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
+        if(adminUserId!=null && adminUserId.size()>0){
+            adminUserId.forEach((r)->{
+                relatedMembers.add(ConvertHelper.convert(organizationProvider.listOrganizationMembersByUId(r), OrganizationMemberDTO.class));
+            });
+        }
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach((r) ->{
+                Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
+                if(organization!=null){
+                    r.setDepartmentName(organization.getName());
+                }else {
+                    r.setDepartmentName("");
+                }
+            });
+        }
+        return relatedMembers;
+    }
+
+    private List<Long> getAdminUserIds(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
+        List<Long> userIds = new ArrayList<>();
+        if (superAdmins != null && superAdmins.size() > 0) {
+            superAdmins.forEach(s -> userIds.add(s.getTargetId()));
+        }
+        List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+        if (moduleAdmins != null && moduleAdmins.size() > 0) {
+            moduleAdmins.forEach((r) -> {
+                //这里权限那边并不会返回null  getCommunityControlIds
+                List<Long> communityControlIds = new ArrayList<>();
+                if (r.getCommunityControlApps() != null) {
+                    communityControlIds = r.getCommunityControlApps().getCommunityControlIds();
+                }
+                if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || (communityControlIds != null && communityControlIds.contains(communityId))) {
+                    userIds.add(r.getTargetId());
+                }
+            });
+        }
+        return userIds;
+    }
+
+    @Override
+    public Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd) {
+        Boolean result = checkCustomerAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        if (result) {
+            return (byte) 1;
+        } else {
+            return (byte) 0;
+        }
+    }
 }

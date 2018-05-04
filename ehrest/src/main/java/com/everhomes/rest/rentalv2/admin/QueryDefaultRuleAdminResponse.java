@@ -96,8 +96,8 @@ public class QueryDefaultRuleAdminResponse {
 	private Long endDate;
 	private Byte holidayOpenFlag;
 	private Byte holidayType;
-//	private Double dayOpenTime;
-//	private Double dayCloseTime;
+	@ItemType(RentalOpenTimeDTO.class)
+	private List<RentalOpenTimeDTO> openTimes;
 	@ItemType(Integer.class)
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
@@ -400,5 +400,13 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setOvertimeStrategy(Byte overtimeStrategy) {
 		this.overtimeStrategy = overtimeStrategy;
+	}
+
+	public List<RentalOpenTimeDTO> getOpenTimes() {
+		return openTimes;
+	}
+
+	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+		this.openTimes = openTimes;
 	}
 }
