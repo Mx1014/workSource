@@ -20,7 +20,8 @@ CREATE TABLE `eh_enterprise_customer_attachments` (
 CREATE TABLE `eh_enterprise_customer_admins` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `customer_id` bigint(20) NOT NULL DEFAULT '0',
-  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `contact_name` varchar(256) DEFAULT NULL,
+  `contact_token` varchar(256) DEFAULT NULL,
   `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)

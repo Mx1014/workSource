@@ -3472,6 +3472,7 @@ public class CustomerServiceImpl implements CustomerService {
             rolePrivilegeService.createOrganizationAdmin(cmd);
         }else {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(),cmd.getContactName(),cmd.getContactToken());
 
         }
     }
