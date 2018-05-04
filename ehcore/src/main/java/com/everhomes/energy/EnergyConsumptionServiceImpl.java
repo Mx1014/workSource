@@ -62,6 +62,7 @@ import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
 import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
 import com.everhomes.rest.energy.EnergyAutoReadingFlag;
 import com.everhomes.rest.energy.EnergyCategoryDefault;
+import com.everhomes.rest.energy.EnergyCategoryType;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
 import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
@@ -1673,23 +1674,35 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getBillCategory());
             if (category == null) {
-                LOGGER.error("energy meter bill category is not exist, data = {}", str);
-                log.setData(str);
-                log.setErrorLog("energy meter bill category is not exist");
-                log.setCode(EnergyConsumptionServiceErrorCode.ERR_BILL_CATEGORY_NOT_EXIST);
-                errorDataLogs.add(log);
-                return;
+                //历史问题  只校验了community下的类型 没有去搜所有下面的应用范围
+                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(), EnergyCategoryType.BILL.getCode());
+                if (categoryMap.get(str.getBillCategory()) == null) {
+                    LOGGER.error("energy meter bill category is not exist, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("energy meter bill category is not exist");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_BILL_CATEGORY_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                } else {
+                    category = categoryMap.get(str.getBillCategory());
+                }
             }
             meter.setBillCategoryId(category.getId());
 
             category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getServiceCategory());
             if (category == null) {
-                LOGGER.error("energy meter service category is not exist, data = {}", str);
-                log.setData(str);
-                log.setErrorLog("energy meter service category is not exist");
-                log.setCode(EnergyConsumptionServiceErrorCode.ERR_SERVICE_CATEGORY_NOT_EXIST);
-                errorDataLogs.add(log);
-                return;
+                //历史问题  只校验了community下的类型 没有去搜所有下面的应用范围
+                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(), EnergyCategoryType.SERVICE.getCode());
+                if (categoryMap.get(str.getServiceCategory()) == null) {
+                    LOGGER.error("energy meter service category is not exist, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("energy meter service category is not exist");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_SERVICE_CATEGORY_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                } else {
+                    category = categoryMap.get(str.getServiceCategory());
+                }
             }
             meter.setServiceCategoryId(category.getId());
 
@@ -1778,6 +1791,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             });
         });
         return errorDataLogs;
+    }
+
+    private  Map<String, EnergyMeterCategory> getAllScopeCategories(Long communityId, Byte categoryType) {
+        List<EnergyMeterCategoryMap> meterCategoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(communityId);
+        List<Long> categoryIds = new ArrayList<>();
+        if (meterCategoryMaps != null && meterCategoryMaps.size() > 0) {
+            categoryIds = meterCategoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
+        }
+        List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, categoryType);
+        Map<String, EnergyMeterCategory> categoryMap = new HashMap<>();
+        if (categories != null && categories.size() > 0) {
+            categories.forEach((map)-> categoryMap.put(map.getName(), map));
+        }
+        return categoryMap;
     }
 
     private boolean validateBurdenRateWithOneAddress(List<String> address, List<String> burdenRate) {

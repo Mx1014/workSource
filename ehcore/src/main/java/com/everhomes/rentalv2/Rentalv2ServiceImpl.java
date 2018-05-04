@@ -45,6 +45,7 @@ import com.everhomes.pay.order.PaymentType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rentalv2.job.RentalAutoCompleteJob;
 import com.everhomes.rentalv2.job.RentalCancelOrderJob;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
@@ -2464,10 +2465,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Scheduled(cron = "50 0/30 * * * ?")
 	@Override
 	public void rentalSchedule(){
-		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+		Boolean [] flag = {false};
+		Long currTime = DateHelper.currentGMTTime().getTime();
+		coordinationProvider.getNamedLock("Rental_schedule_flag" ) //集群运行时只有一台执行定时任务
+				.tryEnter(() -> {
+					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
+					Long timeFlag = currTime / 600000;
+					if (!temp.equals(timeFlag)){
+						configurationProvider.setLongValue(0,"rental.shcedule.flag",timeFlag);
+						flag[0] = true;
+					}
+				});
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE  && flag[0]){
 			//把所有状态为success-已预约的捞出来 
-			Long currTime = DateHelper.currentGMTTime().getTime();
-			List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
+
+			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
 			for(RentalOrder order : orders ){
 				if (order.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
 					Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0L;
@@ -2561,6 +2573,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								messageMap
 						);
 
+					}
+
+				}
+			}
+			orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
+			for(RentalOrder order : orders ){
+				if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+					if (currTime + 30*60*1000L >= order.getEndTime().getTime()){
+						Map<String, Object> messageMap = new HashMap<>();
+						messageMap.put("orderId",order.getId());
+						scheduleProvider.scheduleSimpleJob(
+								queueName,
+								queueName,
+								new java.util.Date(order.getEndTime().getTime()-30*1000),
+								RentalAutoCompleteJob.class,
+								messageMap
+						);
 					}
 				}
 			}

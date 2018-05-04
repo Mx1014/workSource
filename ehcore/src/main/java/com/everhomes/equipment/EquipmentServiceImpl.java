@@ -4802,6 +4802,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.MILLISECOND, 001);
 		return new Timestamp(cal.getTimeInMillis());*/
+		todayStart.add(Calendar.DATE, period);
 		todayStart.set(Calendar.HOUR_OF_DAY, 0);
 		todayStart.set(Calendar.MINUTE, 0);
 		todayStart.set(Calendar.SECOND, 0);
@@ -4816,6 +4817,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
 		return new Timestamp(cal.getTimeInMillis());*/
+		todayEnd.add(Calendar.DATE, period);
 		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
 		todayEnd.set(Calendar.MINUTE, 59);
 		todayEnd.set(Calendar.SECOND, 59);

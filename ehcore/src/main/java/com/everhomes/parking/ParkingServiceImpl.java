@@ -2160,8 +2160,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
 			if(list==null || list.size()==0){
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,
-						"未查询到月卡类型信息");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,
+						ParkingErrorCode.ERROR_PARKING_TYPE_NOT_FOUND, "未查询到月卡类型信息");
 			}
 
 			dtos = list.stream().map(r ->{
