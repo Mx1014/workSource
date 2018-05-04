@@ -201,12 +201,32 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd) {
-//		if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
-//			checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
-//		} else {
-//			checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
-//		}
-		
+		return getHotlineList(cmd, false);
+	}
+	
+	/**
+	 * 后台获取热线/客服列表
+	 * @param cmd
+	 * @return
+	 */
+	@Override
+	public GetHotlineListResponse getHotlineListAdmin(GetHotlineListCommand cmd) {
+		return getHotlineList(cmd, true);
+	}
+	
+	private GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd, boolean needCheckPrivilege) {
+
+		//需要鉴权时
+		if (needCheckPrivilege) {
+			if (ServiceType.SERVICE_HOTLINE.getCode().equals(cmd.getServiceType())) {
+				checkPrivilege(PrivilegeType.PUBLIC_HOTLINE, cmd.getCurrentPMId(), cmd.getAppId(),
+						cmd.getCurrentProjectId());
+			} else {
+				checkPrivilege(PrivilegeType.EXCLUSIVE_SERVICER_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(),
+						cmd.getCurrentProjectId());
+			}
+		}
+
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 
 		// 设置分页
@@ -220,6 +240,7 @@ public class HotlineServiceImpl implements HotlineService {
 		resp.setHotlines(hotlines);
 		return resp;
 	}
+	
 
 	private String populateUserAvatar(User user, String avatarUri) {
 		if (avatarUri == null || avatarUri.trim().length() == 0) {

@@ -8,7 +8,11 @@ public interface HotlineService {
 
 	GetHotlineSubjectResponse getHotlineSubject(GetHotlineSubjectCommand cmd);
 
+	// 前端或者app使用
 	GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd);
+	
+	//后台使用
+	GetHotlineListResponse getHotlineListAdmin(GetHotlineListCommand cmd);
 
 	void addHotline(AddHotlineCommand cmd);
 

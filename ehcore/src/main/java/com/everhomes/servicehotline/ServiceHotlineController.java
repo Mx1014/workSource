@@ -68,6 +68,23 @@ public class ServiceHotlineController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	
+	/**
+	 * <b>URL: /hotline/getHotlineListAdmin</b>
+	 * <p>
+	 * 获取热线列表(后台)
+	 * </p>
+	 */
+	@RequestMapping("getHotlineListAdmin")
+	@RestReturn(value = GetHotlineListResponse.class)
+	public RestResponse getHotlineListAdmin(@Valid GetHotlineListCommand cmd) {
+		GetHotlineListResponse res =hotlineService.getHotlineListAdmin(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /hotline/addHotline</b>
