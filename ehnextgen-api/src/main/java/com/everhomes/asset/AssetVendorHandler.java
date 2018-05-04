@@ -17,7 +17,7 @@ import java.util.List;
  */
 public abstract class AssetVendorHandler {
     static final String ASSET_VENDOR_PREFIX = "AssetVendor-";
-    private static final Logger LOGGER = LoggerFactory.getLogger(AssetVendorHandler.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(AssetVendorHandler.class);
 
     ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId,
         Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize){
