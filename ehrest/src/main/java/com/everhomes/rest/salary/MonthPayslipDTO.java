@@ -1,7 +1,13 @@
 package com.everhomes.rest.salary;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * <ul> 
+ * <li>salaryPeriod: 期数</li>
+ * <li>sendCount: 发放数</li>
+ * </ul>
+ */
 public class MonthPayslipDTO {
 	private String salaryPeriod;
 
