@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -184,6 +185,7 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
             cmdAllBill.setTargetId(targetId);
             cmdAllBill.setTargetType(targetType);
             cmdAllBill.setIsOnlyOwedBill(isOnlyOwedBill);
+            cmdAllBill.setBillGroupId(billGroupId);
             List<ListAllBillsForClientDTO> listAllBillsForClientDTOS = zuolinAssetVendorHandler.listAllBillsForClient(cmdAllBill);
             return v2BillDTO2v1BillDTO(listAllBillsForClientDTOS);
         }
@@ -207,11 +209,38 @@ public class ZhangJiangGaoKeAssetVendor extends AssetVendorHandler{
             overAllAmountOwed = overAllAmountOwed.add(owed);
             dto.setDateStrBegin(target.getDateStrBegin());
             dto.setDateStrEnd(target.getDateStrEnd());
+            dto.setStatus(target.getChargeStatus());
             Calendar beginC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrBegin());
             Calendar endC = DateUtils.guessDateTimeFormatAndParse(target.getDateStrEnd());
             if(beginC != null && endC != null){
-                int period = endC.get(Calendar.MONTH) - beginC.get(Calendar.MONTH);
-                billPeriodMonth += period;
+                long endL = endC.getTime().getTime();
+                long beginL = beginC.getTime().getTime();
+                Long betweenDays = (endL-beginL)/(1000*3600*24);
+                Long betweenMonths = betweenDays / 30;
+                // 建议用正则判断是否小数后有值，写到正则工具类中
+                String s = betweenMonths.toString();
+                if(s.contains(".") && betweenMonths.longValue() != 0l){
+                    try{
+                        for(char c : s.substring(s.indexOf(".") + 1).toCharArray()){
+                            if(c != '0'){
+                                billPeriodMonth += 1;
+                                break;
+                            }
+                        }
+                    }catch (Exception e){
+                        billPeriodMonth += 1;
+                        LOGGER.error("zhangjianggaokeassetvendor 232: ", e);
+                    }
+                }else if(betweenMonths.longValue() == 0l){
+                    billPeriodMonth += 1;
+                }
+                billPeriodMonth += betweenMonths.intValue();
+//                int yearGap = endC.get(Calendar.YEAR) - beginC.get(Calendar.YEAR);
+//                if(yearGap > 0){
+//                    billPeriodMonth += yearGap * 12;
+//                }
+//                int period = endC.get(Calendar.MONTH) - beginC.get(Calendar.MONTH);
+//                billPeriodMonth += period;
             }
             dto.setDateStr(target.getDateStr());
             billDetailDTOList.add(dto);

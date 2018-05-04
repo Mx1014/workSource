@@ -1251,7 +1251,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER)
+        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1264,9 +1264,10 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setTargetName(f.getValue(r.TARGET_NAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
                     vo.setInvoiceNum(f.getValue(r.INVOICE_NUMBER));
-                    //bill can has multiple addresses, thus one single address may confuse user
-//                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
-//                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
+//                    bill can has multiple addresses, thus one single address may confuse user
+                    // still present addresses
+                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
+                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
@@ -1289,7 +1290,7 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-        context.select()
+        context.select(t.AMOUNT,t.ID, t.REMARKS)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -1301,7 +1302,6 @@ public class AssetProviderImpl implements AssetProvider {
                     list2.add(exemDto);
                     return null;
                 });
-
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
         vo.setBillGroupDTO(dto);
@@ -1469,14 +1469,14 @@ public class AssetProviderImpl implements AssetProvider {
         //BILL
         context.update(bill)
                 .set(bill.STATUS,(byte)1)
-                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_RECEIVABLE)
+                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_OWED)
                 .set(bill.AMOUNT_OWED,new BigDecimal("0"))
                 .where(bill.ID.eq(billId))
                 .execute();
         //bill item
         context.update(item)
                 .set(item.STATUS,(byte)1)
-                .set(item.AMOUNT_RECEIVED,item.AMOUNT_RECEIVABLE)
+                .set(item.AMOUNT_RECEIVED,item.AMOUNT_OWED)
                 .set(item.AMOUNT_OWED,new BigDecimal("0"))
                 .where(item.BILL_ID.eq(billId))
                 .execute();
@@ -3796,7 +3796,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status) {
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId) {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
@@ -3824,6 +3824,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(status != null){
             query.addConditions(bill.STATUS.eq(status));
+        }
+        if(billGroupId != null){
+            query.addConditions(bill.BILL_GROUP_ID.eq(billGroupId));
         }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
@@ -4125,6 +4128,23 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch(Tables.EH_PAYMENT_BILLS.ID);
         if(fetch.size() > 0) return true;
         return false;
+    }
+
+    @Override
+    public String getAddressByBillId(Long id) {
+        final String[] ret = {""};
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.select(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME, Tables.EH_PAYMENT_BILL_ITEMS.BUILDING_NAME)
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(id))
+                .fetch()
+                .forEach(r -> {
+                    String apartment = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME);
+                    String building = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.BUILDING_NAME);
+                    ret[0] = building + apartment;
+                    return;
+                });
+        return ret[0];
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
