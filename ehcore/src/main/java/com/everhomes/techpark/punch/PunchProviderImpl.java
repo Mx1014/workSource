@@ -2755,13 +2755,15 @@ public class PunchProviderImpl implements PunchProvider {
         SelectJoinStep<Record> step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
                 .from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
         Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
-        condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
-                .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
-                .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
-                .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd)
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
-        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+        if(null != dayStart && null != dayEnd)
+	        condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
+	                .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
+	                .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
+	                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
+	                .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd)
+	                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
+        if(null != userId)
+        	condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
         condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
 
         List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
@@ -2797,6 +2799,26 @@ public class PunchProviderImpl implements PunchProvider {
         return result;
     }
 
+    @Override
+    public List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date startDate ,Date endDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+        Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate, endDate));
+        if(null != userId)
+        	condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+
+        List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+                .map(new EhPunchExceptionRequestMapper());
+
+        List<PunchExceptionRequest> result = resultRecord.stream().map(r -> ConvertHelper.convert(r, PunchExceptionRequest.class)).collect(Collectors.toList());
+
+        if (result == null || result.size() == 0) {
+            return null;
+        }
+        return result;
+    }
     @Override
     public Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
