@@ -5309,7 +5309,7 @@ public class PunchServiceImpl implements PunchService {
 
     public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r, Map<Long, Organization> cacheOrganizationMap, Map<Long, PunchTimeRule> cachePunchTimeRuleMap, List<PunchExceptionRequest> exceptionRequests) {
         PunchDayDetailDTO dto = ConvertHelper.convert(r, PunchDayDetailDTO.class);
-        PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
+        PunchRule pr = findPunchRuleByCache(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
         dto.setPunchOrgName(null);
         if (null != pr) {
             Organization org = getOrganizationFromLocalCache(cacheOrganizationMap, pr.getPunchOrganizationId());
