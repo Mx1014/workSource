@@ -781,7 +781,7 @@ public class PunchServiceImpl implements PunchService {
         return newPunchDayLog;
     }
 
-    private ThreadLocal<Map<Long, PunchTimeRule>> timeRuleCache = new ThreadLocal<Map<Long, PunchTimeRule>>(){
+    private ThreadLocal<Map<Long, PunchTimeRule>> timeRuleCache = new ThreadLocal<Map<Long, PunchTimeRule>>() {
         protected Map<Long, PunchTimeRule> initialValue() {
             return new HashMap<>();
         }
@@ -3199,12 +3199,15 @@ public class PunchServiceImpl implements PunchService {
         cmd1.setOwnerType(cmd.getOwnerType());
         ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
         taskService.updateTaskProcess(taskId, 50);
-        createPunchDetailsBookSheet(resp1.getPunchDayDetails(), cmd1, taskId, wb);
+        Integer minusPer = 30;
+        createPunchDetailsBookSheet(resp1.getPunchDayDetails(), cmd1, taskId, wb, minusPer);
         List<Long> userIds = new ArrayList<>();
         for (PunchCountDTO dto : resp.getPunchCountList()) {
             userIds.add(dto.getUserId());
         }
         List<PunchLog> logs = punchProvider.listPunchLogs(getTopEnterpriseId(cmd.getOwnerId()), userIds, cmd.getStartDay(), cmd.getEndDay());
+        taskService.updateTaskProcess(taskId, 80);
+
         createPunchLogsSheet(logs, cmd, taskId, wb, userDeptMap);
         return wb;
     }
@@ -3250,8 +3253,12 @@ public class PunchServiceImpl implements PunchService {
         if (null == logs || logs.size() == 0)
             return;
         Map<Long, String> ruleMap = new HashMap<>();
+        int i = 0;
         for (PunchLog log : logs) {
             setNewPunchLogsBookRow(sheet, log, userDeptMap, ruleMap);
+            if (taskId != null && ++i > logs.size() / 2) {
+                taskService.updateTaskProcess(taskId, 90);
+            }
         }
 
     }
@@ -4730,7 +4737,7 @@ public class PunchServiceImpl implements PunchService {
             dto.setExceptionRequestCount(0);
             if (null != exceptionRequests) {
                 for (PunchExceptionRequest request : exceptionRequests) {
-                    if(null != request){
+                    if (null != request) {
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                         java.sql.Date beginDate;
                         try {
@@ -4887,11 +4894,11 @@ public class PunchServiceImpl implements PunchService {
     private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId) {
 
         XSSFWorkbook wb = new XSSFWorkbook();
-        createPunchDetailsBookSheet(dtos, cmd, taskId, wb);
+        createPunchDetailsBookSheet(dtos, cmd, taskId, wb, 0);
         return wb;
     }
 
-    private void createPunchDetailsBookSheet(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId, XSSFWorkbook wb) {
+    private void createPunchDetailsBookSheet(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId, XSSFWorkbook wb, int minusPer) {
 
         XSSFSheet sheet = wb.createSheet("每日统计");
 
@@ -4928,7 +4935,7 @@ public class PunchServiceImpl implements PunchService {
         rowReminder.createCell(0).setCellValue("统计时间:" + dateSF.get().format(new Date(cmd.getStartDay())) + "~"
                 + dateSF.get().format(new Date(cmd.getEndDay())) + ", 报表生成时间: " + datetimeSF.get().format(DateHelper.currentGMTTime()));
         rowReminder.setRowStyle(titleStyle1);
-        taskService.updateTaskProcess(taskId, 55);
+        taskService.updateTaskProcess(taskId, 55 - minusPer);
         this.createPunchDetailsBookSheetHead(sheet);
         int num = 0;
         if (null == dtos || dtos.size() == 0)
@@ -4936,7 +4943,7 @@ public class PunchServiceImpl implements PunchService {
         for (PunchDayDetailDTO dto : dtos) {
             this.setNewPunchDetailsBookRow(sheet, dto);
             if (++num % 100 == 0) {
-                taskService.updateTaskProcess(taskId, 55 + (int) (num / (Double.valueOf(dtos.size()) / 45.00)));
+                taskService.updateTaskProcess(taskId, 55 + (int) (num / (Double.valueOf(dtos.size()) / 45.00)) - minusPer);
             }
         }
     }
