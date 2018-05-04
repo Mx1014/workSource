@@ -3473,13 +3473,15 @@ public class CustomerServiceImpl implements CustomerService {
         }else {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(),cmd.getContactName(),cmd.getContactToken());
-
         }
     }
 
     @Override
     public void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_DELETE, cmd.getOwnerId(), cmd.getCommunityId());
+        //删除客户管理中的管理员记录
+        enterpriseCustomerProvider.deleteEnterpriseCustomerAdminRecord(cmd.getCustomerId(),cmd.getContactToken());
+        //删除企业管理中的管理员权限
         rolePrivilegeService.deleteOrganizationAdministrators(cmd);
     }
 

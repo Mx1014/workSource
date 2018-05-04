@@ -157,4 +157,8 @@ public interface EnterpriseCustomerProvider {
     List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);
 
     void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
+
+    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken);
+
+    void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 }

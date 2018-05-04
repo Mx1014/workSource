@@ -44,6 +44,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
@@ -63,6 +64,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAdmins;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
@@ -1952,7 +1954,32 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     private void deleteCustomerBannerUriByCustomerId(Long customerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
-                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId));
+                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId))
+                .execute();
     }
 
+    @Override
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        CustomerAdminRecord record = new CustomerAdminRecord();
+        record.setContactName(contactName);
+        record.setContactToken(contactToken);
+        record.setCustomerId(customerId);
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
+        record.setId(id);
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        record.setCustomerId(UserContext.currentUserId());
+        EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+        dao.insert(record);
+    }
+
+    @Override
+    public void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken)
+                        .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
+                .execute();
+
+    }
 }
