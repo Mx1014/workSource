@@ -5,6 +5,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
@@ -1582,6 +1585,47 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse syncResultViewed(SyncResultViewedCommand cmd) {
         RestResponse response = new RestResponse(customerService.syncResultViewed(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/createOrganizationAdmin</b>
+     * <p>创建Enterprise customer管理员</p>
+     */
+    @RequestMapping("createOrganizationAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse createOrganizationAdmin(CreateOrganizationAdminCommand cmd) {
+        customerService.createOrganizationAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteOrganizationAdmin</b>
+     * <p>删除Enterprise customer管理员</p>
+     */
+    @RequestMapping("deleteOrganizationAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
+        customerService.deleteOrganizationAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /customer/listOrganizationAdmin</b>
+     * <p>列出Enterprise customer管理员</p>
+     */
+    @RequestMapping("listOrganizationAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd) {
+        customerService.listOrganizationAdmin(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -1,5 +1,9 @@
 package com.everhomes.customer;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
@@ -87,6 +91,8 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.ListCustomerEventsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
 import com.everhomes.rest.customer.ListCustomerTaxesCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
@@ -99,6 +105,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.SyncResultViewedCommand;
 import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
 import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
@@ -115,13 +122,10 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -347,4 +351,10 @@ public interface CustomerService {
 
     String syncResultViewed(SyncResultViewedCommand cmd);
     Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd);
+
+    void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+
+    void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
+
+    void listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
 }

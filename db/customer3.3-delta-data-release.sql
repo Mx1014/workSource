@@ -8,6 +8,13 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21117', '0', '修改管理员', '企业客户管理 修改管理员', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21118', '0', '删除管理员', '企业客户管理 删除管理员', NULL);
 
+SET  @id = (SELECT  max(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21115', '查看管理员', '14', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21116', '查看管理员', '15', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21117', '查看管理员', '16', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21118', '查看管理员', '17', now());
+
+
 -- 企业客户类型由必选更改成非必选 合并动态表单多个字段   by jiarui
 UPDATE eh_var_fields SET mandatory_flag = 0 WHERE name = 'categoryItemId' AND module_name = 'enterprise_customer';
 UPDATE eh_var_fields SET display_name = '联系电话' WHERE name = 'contactPhone' AND module_name = 'enterprise_customer';
@@ -30,6 +37,6 @@ WHERE contact_phone IS NOT NULL AND contact_mobile IS NULL;
 
 SET  @id = (SELECT MAX(id) FROM eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'unifiedSocialCreditCode', '统一社会信用代码', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'postUri', '标题图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 32}');
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'banner', 'banner图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'postUri', '标题图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 1}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'banner', 'banner图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 9}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'hotline', '咨询电话', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');

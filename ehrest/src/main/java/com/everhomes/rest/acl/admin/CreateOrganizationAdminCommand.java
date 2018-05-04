@@ -8,6 +8,10 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 机构id</li>
  * <li>contactToken: 手机号</li>
  * <li>contactName:  用户姓名</li>
+ * <li>customerId:  customer organization之间的映射关系</li>
+ * <li>ownerId:  当前操作的公司id  用于权限校验</li>
+ * <li>communityId:  当前操作的小区id  用于权限校验</li>
+ * <li>namespaceId:  namespaceId</li>
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
@@ -21,6 +25,12 @@ public class CreateOrganizationAdminCommand {
 	private String contactToken;
 	
 	private String contactName;
+
+	private Long customerId;
+
+	private Long communityId;
+
+	private Integer namespaceId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -60,6 +70,30 @@ public class CreateOrganizationAdminCommand {
 
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

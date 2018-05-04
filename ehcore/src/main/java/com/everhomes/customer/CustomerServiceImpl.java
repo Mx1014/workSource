@@ -44,6 +44,8 @@ import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ActivationFlag;
@@ -3458,5 +3460,28 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             return (byte) 0;
         }
+    }
+
+    @Override
+    public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNGER_CREATE, cmd.getOwnerId(), cmd.getCommunityId());
+        //用customerId 找到企业管理中的organizationId
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if (customer != null) {
+            cmd.setOrganizationId(customer.getOrganizationId());
+        }
+        rolePrivilegeService.createOrganizationAdmin(cmd);
+    }
+
+    @Override
+    public void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_DELETE, cmd.getOwnerId(), cmd.getCommunityId());
+        rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+    }
+
+    @Override
+    public void listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_LIST, cmd.getOwnerId(), cmd.getCommunityId());
+        rolePrivilegeService.listOrganizationAdministrators(cmd);
     }
 }

@@ -15,6 +15,8 @@ import javax.validation.constraints.NotNull;
  * <li>activationFlag: 是否激活，参考{@link com.everhomes.rest.common.ActivationFlag}</li>
  * <li>pageAnchor:分页锚点</li>
  * <li>pageSize: 页数</li>
+ * <li>communityid: 小区id</li>
+ * <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class ListServiceModuleAdministratorsCommand {
@@ -37,6 +39,10 @@ public class ListServiceModuleAdministratorsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
+
+    private Long communityId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -86,11 +92,6 @@ public class ListServiceModuleAdministratorsCommand {
         this.activationFlag = activationFlag;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public Long getPageAnchor() {
         return pageAnchor;
     }
@@ -105,5 +106,26 @@ public class ListServiceModuleAdministratorsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
