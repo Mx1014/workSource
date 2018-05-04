@@ -1,5 +1,247 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.dynamicExcel.DynamicExcelService;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ZJGKOpenServiceImpl;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationAttachment;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.SyncDataResponse;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CreateCustomerAccountCommand;
+import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
+import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
+import com.everhomes.rest.customer.CreateCustomerDepartureInfoCommand;
+import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.CreateCustomerEntryInfoCommand;
+import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.CreateCustomerPatentCommand;
+import com.everhomes.rest.customer.CreateCustomerTalentCommand;
+import com.everhomes.rest.customer.CreateCustomerTaxCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CustomerAccountDTO;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerApplyProjectStatus;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
+import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
+import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTaxDTO;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.DeleteCustomerAccountCommand;
+import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
+import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
+import com.everhomes.rest.customer.DeleteCustomerDepartureInfoCommand;
+import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.DeleteCustomerEntryInfoCommand;
+import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
+import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTaxCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
+import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GetCustomerAccountCommand;
+import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.GetCustomerCertificateCommand;
+import com.everhomes.rest.customer.GetCustomerCommercialCommand;
+import com.everhomes.rest.customer.GetCustomerDepartureInfoCommand;
+import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.GetCustomerEntryInfoCommand;
+import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
+import com.everhomes.rest.customer.GetCustomerPatentCommand;
+import com.everhomes.rest.customer.GetCustomerTalentCommand;
+import com.everhomes.rest.customer.GetCustomerTaxCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
+import com.everhomes.rest.customer.ListCommunitySyncResultCommand;
+import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
+import com.everhomes.rest.customer.ListCustomerAccountsCommand;
+import com.everhomes.rest.customer.ListCustomerAnnualDetailsCommand;
+import com.everhomes.rest.customer.ListCustomerAnnualDetailsResponse;
+import com.everhomes.rest.customer.ListCustomerAnnualStatisticsCommand;
+import com.everhomes.rest.customer.ListCustomerAnnualStatisticsResponse;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEventsCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTaxesCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
+import com.everhomes.rest.customer.MonthStatistics;
+import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.QuarterStatistics;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.customer.SyncResultViewedCommand;
+import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
+import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
+import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
+import com.everhomes.rest.customer.UpdateCustomerDepartureInfoCommand;
+import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.UpdateCustomerEntryInfoCommand;
+import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTaxCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.YearQuarter;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.openapi.shenzhou.DataType;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.Field;
+import com.everhomes.varField.FieldGroup;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
+import com.everhomes.yellowPage.YellowPageService;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -12,102 +254,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
-
-import com.everhomes.dynamicExcel.DynamicExcelService;
-import com.everhomes.dynamicExcel.DynamicExcelStrings;
-
-import com.everhomes.organization.*;
-import com.everhomes.organization.pm.CommunityAddressMapping;
-import com.everhomes.organization.pm.PropertyMgrProvider;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rentalv2.Rentalv2Service;
-import com.everhomes.rest.acl.PrivilegeConstants;
-
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.customer.*;
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.openapi.shenzhou.DataType;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.pm.AddressMappingStatus;
-
-
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.user.*;
-
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.user.UserPrivilegeMgr;
-
-import com.everhomes.user.UserProvider;
-
-
-import com.everhomes.varField.*;
-import com.everhomes.yellowPage.YellowPageService;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.openapi.ZJGKOpenServiceImpl;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.search.ContractSearcher;
-import com.everhomes.search.EnterpriseCustomerSearcher;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -171,7 +317,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private AddressProvider addressProvider;
-	
+
+    @Autowired
+    private DbProvider dbProvider;
+
     private static final  String queueDelay = "trackingPlanTaskDelays";
     private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
     
@@ -341,7 +490,8 @@ public class CustomerServiceImpl implements CustomerService {
         
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null);
-        
+
+        // 同步到企业管理中   v3.2
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
 
@@ -454,6 +604,8 @@ public class CustomerServiceImpl implements CustomerService {
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
                 detail.setLongitude(customer.getLongitude());
+                detail.setPostUri(customer.setPostUri());
+                detail.setContact(customer.getHotline());
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
@@ -465,28 +617,56 @@ public class CustomerServiceImpl implements CustomerService {
                 detail.setCreateTime(org.getCreateTime());
                 organizationProvider.createOrganizationDetail(detail);
             }
+            addAttachments(org.getId(),customer.getBanner(),UserContext.currentUserId());
             return ConvertHelper.convert(org, OrganizationDTO.class);
-        }
-        CreateEnterpriseCommand command = new CreateEnterpriseCommand();
-        command.setName(customer.getName());
+        }else {
+            // 企业管理中无该organization  则新建一个
+            CreateEnterpriseCommand command = new CreateEnterpriseCommand();
+            command.setName(customer.getName());
 //        command.setDisplayName(customer.getNickName());
-        command.setNamespaceId(customer.getNamespaceId());
-        command.setAvatar(customer.getCorpLogoUri());
+            command.setNamespaceId(customer.getNamespaceId());
+            command.setAvatar(customer.getCorpLogoUri());
 //        command.setDescription(customer.getCorpDescription());
-        command.setCommunityId(customer.getCommunityId());
+            command.setCommunityId(customer.getCommunityId());
 //        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
 //        command.setContactor(customer.getContactName());
 //        command.setContactsPhone(customer.getContactPhone());
 //        command.setEntries(customer.getContactMobile());
-        command.setAddress(customer.getContactAddress());
-        if(customer.getLatitude() != null) {
-            command.setLatitude(customer.getLatitude().toString());
+            command.setAddress(customer.getContactAddress());
+            if(customer.getLatitude() != null) {
+                command.setLatitude(customer.getLatitude().toString());
+            }
+            if(customer.getLongitude() != null) {
+                command.setLongitude(customer.getLongitude().toString());
+            }
+            command.setWebsite(customer.getCorpWebsite());
+            command.setContactsPhone(customer.getHotline());
+            OrganizationDTO dto =  organizationService.createEnterprise(command);
+            addAttachments(dto.getId(),customer.getBanner(),UserContext.currentUserId());
+            return dto;
         }
-        if(customer.getLongitude() != null) {
-            command.setLongitude(customer.getLongitude().toString());
-        }
-        command.setWebsite(customer.getCorpWebsite());
-        return organizationService.createEnterprise(command);
+    }
+
+    /**
+     * 添加banner图片
+     *
+     * @param id
+     * @param attachments
+     */
+    private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
+        dbProvider.execute((TransactionStatus status) -> {
+            this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
+            if (attachments != null && attachments.size() > 0) {
+                for (AttachmentDescriptor attachmentDescriptor : attachments) {
+                    OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+                    attachment.setCreatorUid(userId);
+                    attachment.setOrganizationId(id);
+                    attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    this.organizationProvider.createOrganizationAttachment(attachment);
+                }
+            }
+            return null;
+        });
     }
 
     @Override
