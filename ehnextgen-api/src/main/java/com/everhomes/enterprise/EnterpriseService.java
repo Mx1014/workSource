@@ -69,5 +69,11 @@ public interface EnterpriseService {
      */
     ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd);
 
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param cmd
+     */
+    void deleteEnterpriseByOrgIdAndCommunityId(DeleteEnterpriseCommand cmd);
+
 
 }

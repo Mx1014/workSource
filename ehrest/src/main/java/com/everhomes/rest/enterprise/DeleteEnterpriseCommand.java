@@ -1,5 +1,7 @@
 package com.everhomes.rest.enterprise;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *  <li>enterpriseId: 企业id</li>
@@ -28,6 +30,10 @@ public class DeleteEnterpriseCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

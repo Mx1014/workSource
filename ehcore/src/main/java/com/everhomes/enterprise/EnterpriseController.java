@@ -88,6 +88,23 @@ public class EnterpriseController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+
+    /**
+     *
+     * <b>URL: /enterprise/deleteEnterpriseByOrgIdAndCommunityId</b>
+     * <p>根据组织ID和项目Id来删除该项目下面的公司</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("deleteEnterpriseByOrgIdAndCommunityId")
+    @RestReturn(value = String.class)
+    public RestResponse deleteEnterpriseByOrgIdAndCommunityId(DeleteEnterpriseCommand cmd){
+        RestResponse res = new RestResponse();
+        enterpriseService.deleteEnterpriseByOrgIdAndCommunityId(cmd);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
     
     /**
      * <b>URL: /enterprise/syncOwnerIndex</b>

@@ -1018,6 +1018,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	public ListEnterpriseResponse listEnterpriseNoReleaseWithCommunityId(listEnterpriseNoReleaseWithCommunityIdCommand cmd){
         //创建ListEnterpriseResponse类的对象
         ListEnterpriseResponse listEnterpriseResponse = new ListEnterpriseResponse();
+        listEnterpriseResponse.setEnterprises(null);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         //创建分页的对象
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1038,11 +1039,46 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
                     if(CollectionUtils.isNotEmpty(organizationList)){
                         listEnterpriseResponse.setEnterprises(organizationList);
+                        return listEnterpriseResponse;
                     }
                 }
             }
         }
         return listEnterpriseResponse;
+    }
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param cmd
+     */
+    @Override
+    public void deleteEnterpriseByOrgIdAndCommunityId(DeleteEnterpriseCommand cmd){
+        //首先进行非空校验
+        if(cmd.getEnterpriseId() != null && cmd.getCommunityId() != null){
+            //说明传过来的参数不为空，那么我们就根据这两个参数来删除表eh_organization_workplaces中的对应的数据，同时删除表eh_enterprise_community_map
+            //中的数据
+            //这两个操作必须保持在同一个事务中进行
+            dbProvider.execute((TransactionStatus status) -> {
+                //创建一个OrganizationWorkPlaces类的对象
+                OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                //将数据封装在对象OrganizationWorkPlaces中
+                organizationWorkPlaces.setCommunityId(cmd.getCommunityId());
+                organizationWorkPlaces.setCommunityId(cmd.getCommunityId());
+                //调用enterpriseProvider接口中的deleteEnterpriseByOrgIdAndCommunityId(OrganizationWorkPlaces organizationWorkPlaces)方法，
+                //将表eh_organization_workPlaces中的数据进行删除
+                enterpriseProvider.deleteEnterpriseByOrgIdAndCommunityId(organizationWorkPlaces);
+                //接下来我们来删除表eh_enterprise_community_map表中的对应的数据
+                //创建EnterpriseCommunityMap类的对象
+                EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+                //将数据封装在EnterpriseCommunityMap对象中
+                enterpriseCommunityMap.setMemberId(cmd.getEnterpriseId());
+                enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
+                //调用enterpriseProvider中的deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(EnterpriseCommunityMap enterpriseCommunityMap)
+                //方法来删除表eh_enterprise_community_map中的数据
+                enterpriseProvider.deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(enterpriseCommunityMap);
+                return null;
+            });
+        }
     }
 	
 }

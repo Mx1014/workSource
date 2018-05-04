@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.organization.OrganizationWorkPlaces;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.server.schema.tables.daos.*;
 import org.jooq.DSLContext;
@@ -714,6 +715,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
      * 向eh_enterprise_community_map表中持久化数据
      * @param enterpriseCommunityMap
      */
+    @Override
 	public void insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -724,6 +726,30 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         enterpriseCommunityMap.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
         dao.insert(enterpriseCommunityMap);
+    }
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param organizationWorkPlaces
+     */
+    @Override
+    public void deleteEnterpriseByOrgIdAndCommunityId(OrganizationWorkPlaces organizationWorkPlaces){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_ORGANIZATION_WORKPLACES).where(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(organizationWorkPlaces.getCommunityId()))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationWorkPlaces.getOrganizationId())).execute();
+    }
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param enterpriseCommunityMap
+     */
+    @Override
+    public void deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(EnterpriseCommunityMap enterpriseCommunityMap){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_ENTERPRISE_COMMUNITY_MAP).where(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(enterpriseCommunityMap.getCommunityId()))
+                .and(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseCommunityMap.getMemberId())).execute();
     }
 	
 }
