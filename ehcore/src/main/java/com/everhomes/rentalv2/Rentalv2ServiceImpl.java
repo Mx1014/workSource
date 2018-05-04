@@ -2470,7 +2470,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		coordinationProvider.getNamedLock("Rental_schedule_flag" ) //集群运行时只有一台执行定时任务
 				.tryEnter(() -> {
 					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
-					Long timeFlag = currTime / 60000;
+					Long timeFlag = currTime / 600000;
 					if (!temp.equals(timeFlag)){
 						configurationProvider.setLongValue(0,"rental.shcedule.flag",timeFlag);
 						flag[0] = true;
