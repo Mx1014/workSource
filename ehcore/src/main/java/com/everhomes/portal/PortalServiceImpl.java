@@ -1381,6 +1381,12 @@ public class PortalServiceImpl implements PortalService {
 
 							//更新正式版本标志
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
+						}else {
+
+							//增加预览版本次数，用于生成版本本号
+							PortalVersion releaseVersion = findReleaseVersion(namespaceId);
+							releaseVersion.setPreviewCount(releaseVersion.getPreviewCount() + 1);
+							portalVersionProvider.updatePortalVersion(releaseVersion);
 						}
 
 						//发布应用
@@ -1520,6 +1526,9 @@ public class PortalServiceImpl implements PortalService {
 			publishVersion.setBigVersion(1);
 		}
 		publishVersion.setMinorVersion(0);
+
+		//新版本preview count 为0
+		publishVersion.setPreviewCount(0);
 
 		portalVersionProvider.updatePortalVersion(publishVersion);
 	}
@@ -1666,7 +1675,7 @@ public class PortalServiceImpl implements PortalService {
 
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
-		Integer versionCode =  releaseVersion.getDateVersion() * 100 + releaseVersion.getBigVersion();
+		Integer versionCode =  releaseVersion.getDateVersion() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 
 
 		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
@@ -1958,7 +1967,7 @@ public class PortalServiceImpl implements PortalService {
 
 			if(routerFlag){
 				PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
-				Integer versionCode =  releaseVersion.getDateVersion() * 100 + releaseVersion.getBigVersion();
+				Integer versionCode =  releaseVersion.getDateVersion() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 				item.setActionType(ActionType.ROUTER.getCode());
 				AssociationActionData associationActionData = new AssociationActionData();
 				String url = "zl://association/main?layoutName=" + layout.getName() +
@@ -2281,6 +2290,7 @@ public class PortalServiceImpl implements PortalService {
 		newVersion.setParentId(versionId);
 		newVersion.setBigVersion(oldVersion.getBigVersion());
 		newVersion.setMinorVersion(1);
+		newVersion.setPreviewCount(0);
 		newVersion.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
 
