@@ -4,6 +4,7 @@ import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -154,4 +155,6 @@ public interface EnterpriseCustomerProvider {
     String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
     List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);
+
+    void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
 }

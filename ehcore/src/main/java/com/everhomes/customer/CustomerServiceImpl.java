@@ -513,9 +513,6 @@ public class CustomerServiceImpl implements CustomerService {
             String geohash = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
             customer.setGeohash(geohash);
         }
-//        if (customer.getTrackingUid() == null) {
-//            customer.setTrackingUid(-1L);
-//        }
         if (customer.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
@@ -527,6 +524,8 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+        //创建或更新customer的bannerUri
+        enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
@@ -638,7 +637,7 @@ public class CustomerServiceImpl implements CustomerService {
     public OrganizationDTO createOrganization(EnterpriseCustomer customer) {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
-            //已存在则更新 地址、官网地址、企业logo
+            //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
             org.setWebsite(customer.getCorpWebsite());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
@@ -666,15 +665,9 @@ public class CustomerServiceImpl implements CustomerService {
             // 企业管理中无该organization  则新建一个
             CreateEnterpriseCommand command = new CreateEnterpriseCommand();
             command.setName(customer.getName());
-//        command.setDisplayName(customer.getNickName());
             command.setNamespaceId(customer.getNamespaceId());
             command.setAvatar(customer.getCorpLogoUri());
-//        command.setDescription(customer.getCorpDescription());
             command.setCommunityId(customer.getCommunityId());
-//        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
-//        command.setContactor(customer.getContactName());
-//        command.setContactsPhone(customer.getContactPhone());
-//        command.setEntries(customer.getContactMobile());
             command.setAddress(customer.getContactAddress());
             if (customer.getLatitude() != null) {
                 command.setLatitude(customer.getLatitude().toString());

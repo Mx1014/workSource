@@ -23,6 +23,7 @@ import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
@@ -43,6 +44,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
@@ -61,6 +63,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
@@ -1925,6 +1928,31 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.ALL_PROJECT_FLAG.eq(AllFlag.ALL.getCode())
                 .or(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%")));
         return query.fetchInto(AuthorizationRelation.class);
+    }
+
+    @Override
+    public void updateEnterpriseBannerUri(Long customerId, List<AttachmentDescriptor> banners) {
+        deleteCustomerBannerUriByCustomerId(customerId);
+        if (banners != null && banners.size() > 0) {
+            banners.forEach(this::createCustomerBannerUri);
+        }
+    }
+
+    private void createCustomerBannerUri(AttachmentDescriptor banner) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAttachments.class));
+        CustomerAttachements attachement = new CustomerAttachements();
+        attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
+        attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachement.setId(id);
+        EhEnterpriseCustomerAttachmentsDao dao = new EhEnterpriseCustomerAttachmentsDao(context.configuration());
+        dao.insert(attachement);
+    }
+
+    private void deleteCustomerBannerUriByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId));
     }
 
 }
