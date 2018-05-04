@@ -270,8 +270,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-es.rest.contract.ContractStatus;
-
 /**
  * Created by ying.xiong on 2017/8/15.
  */
