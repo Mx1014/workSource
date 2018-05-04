@@ -1,14 +1,17 @@
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.fujica.Base64;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.parking.fujica.FujicaJsonParam;
+import com.everhomes.parking.fujica.FujicaResponse;
+import com.everhomes.rest.parking.*;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,9 @@ import java.util.TreeMap;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "FU_JI_CA")
 public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(FujicaParkingVendorHandler.class);
+
+    private static final String PARKING_GET_PAY_INFO = "/Park/GetParkInfoByCarNo";//查询临时车缴费信息接口
+    private static final String PARKING_PAY_PARKING = "/CalculationCost/ApiThirdPartyTemporaryCardPay";//临时车缴费接口
     @Autowired
     ConfigurationProvider configProvider;
     @Override
@@ -58,34 +64,54 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
 
     }
 
-    private  String doJsonPost(String urlPath, String Json) {
+    @Override
+    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+        JSONObject jo = new JSONObject();
+        jo.put("CarNo",plateNumber);
+        String parkingCode = configProvider.getValue("parking.fujica.parkingCode","17000104590501");
+        jo.put("ParkingCode",parkingCode);
+        String result = doJsonPost(PARKING_GET_PAY_INFO,jo.toJSONString());
+        FujicaResponse<FujicaJsonParam> entity = JSONObject.parseObject(result, new TypeReference<FujicaResponse<FujicaJsonParam>>() {});
+        ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+        if(entity != null  && entity.isSuccess() && entity.getDataType() == 3) {//3是临时车
+            FujicaJsonParam param = entity.getJsonParam();
+            dto.setPlateNumber(param.getCarNo());
+            
+        }
+        return super.getParkingTempFee(parkingLot, plateNumber);
+    }
+
+    public static void main (String[] args){
+        String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
+        JSONObject jo = new JSONObject();
+        jo.put("ParkingCode","17000104590501");
+        jo.put("CarNo","湘A4XNF6");
+        String json = jo.toJSONString();
         String result = "";
         BufferedReader reader = null;
-        String appid = configProvider.getValue("parking.fujica.appid","fujica_dacfe36d3f15ae51");
-        String appSecret = configProvider.getValue("parking.fujica.appSecret","69416bc8b9e44d56b7672d18b1106668");
-        String privateKey = configProvider.getValue(
-                "parking.fujica.privateKey","MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALATu5WNNx+XcrAS" +
-                "NJieGRsY7VryQjcs+pABXGh4BOCqAW3FgAAc21aIG0uxvYHdQUw1I7J80RiQJ506" +
-                "aIktGTmZKJTjez7JNF7GO4ieGmLMI3ds8iXyJrfUMp/1U3Cq6vja8vuRIKYVQCxZ" +
-                "e8un98Nr03F7oMlKpBydJQKVdlAHAgMBAAECgYBPcqfqhAyCWbCrF5vZ3URQwL+g" +
-                "kL0l7kqknaiXjsgMo0j/weTOqDaj5cgDMJDkvvPOsg+IYt9qKOlm/Urb0piVb9v9" +
-                "iAnp6gIppcyHrPUesgYRSbqR/HhdGtnzn/4f45YpkXA6URMfc04xBrIUCw5Dmnqo" +
-                "nJZJkjd6jjXiL65rYQJBAN8eg99yFH45D2cdlPBTN0LVWXgqy3N22byYh0j6kgo2" +
-                "5WOPMcuIZPM/XdSoTfhYeHixvEwrmCAkCmSkf524prECQQDKBnzZRj3eCij1z2SZ" +
-                "JCRZhRQUhFmK0AYYTXw9R0DfEaZNrEAe8PEypS94lYROvNV3TnSnK2FHKeH8YhHX" +
-                "EoA3AkBRHzMrRrsUuYJUJ3lDd74b2p5RBp46OPgpjfuCGTiH5jW44RNlwQ2TM3LW" +
-                "IutWZDRJDbY8q40AApqUxQpxOfXBAkA8bB5RGZoNW7qOcj3jM5UPlSbBUCg7xSXd" +
-                "hOdAqJv1W6ECoB75YhSxkggVp5pPtlid+0AWc3n/v74QLwCo86aXAkEAlxY3hoxQ" +
-                "jJiCjD2PbL0GLkMKNBqJgLcDWqeoHcal+iY2Fpr3U/iCJZNoBuovC2Qvc5J1y61P" +
-                "ojrvFNyFMEkWTQ==");
+        String appid = "fujica_dacfe36d3f15ae51";
+        String appSecret = "69416bc8b9e44d56b7672d18b1106668";
+        String privateKey = "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALATu5WNNx+XcrAS" +
+                        "NJieGRsY7VryQjcs+pABXGh4BOCqAW3FgAAc21aIG0uxvYHdQUw1I7J80RiQJ506" +
+                        "aIktGTmZKJTjez7JNF7GO4ieGmLMI3ds8iXyJrfUMp/1U3Cq6vja8vuRIKYVQCxZ" +
+                        "e8un98Nr03F7oMlKpBydJQKVdlAHAgMBAAECgYBPcqfqhAyCWbCrF5vZ3URQwL+g" +
+                        "kL0l7kqknaiXjsgMo0j/weTOqDaj5cgDMJDkvvPOsg+IYt9qKOlm/Urb0piVb9v9" +
+                        "iAnp6gIppcyHrPUesgYRSbqR/HhdGtnzn/4f45YpkXA6URMfc04xBrIUCw5Dmnqo" +
+                        "nJZJkjd6jjXiL65rYQJBAN8eg99yFH45D2cdlPBTN0LVWXgqy3N22byYh0j6kgo2" +
+                        "5WOPMcuIZPM/XdSoTfhYeHixvEwrmCAkCmSkf524prECQQDKBnzZRj3eCij1z2SZ" +
+                        "JCRZhRQUhFmK0AYYTXw9R0DfEaZNrEAe8PEypS94lYROvNV3TnSnK2FHKeH8YhHX" +
+                        "EoA3AkBRHzMrRrsUuYJUJ3lDd74b2p5RBp46OPgpjfuCGTiH5jW44RNlwQ2TM3LW" +
+                        "IutWZDRJDbY8q40AApqUxQpxOfXBAkA8bB5RGZoNW7qOcj3jM5UPlSbBUCg7xSXd" +
+                        "hOdAqJv1W6ECoB75YhSxkggVp5pPtlid+0AWc3n/v74QLwCo86aXAkEAlxY3hoxQ" +
+                        "jJiCjD2PbL0GLkMKNBqJgLcDWqeoHcal+iY2Fpr3U/iCJZNoBuovC2Qvc5J1y61P" +
+                        "ojrvFNyFMEkWTQ==";
         String time = getTimestamp();
         TreeMap<String, String> map = new TreeMap();
-        map.put("param", Json);
+        map.put("param", json);
         map.put("secret", appSecret);
         map.put("timestamp", time);
         String sign = signWithoutMD5(map);
         sign = sign(sign, privateKey);
-
         try {
             URL url = new URL(urlPath);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -105,12 +131,12 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             conn.setRequestProperty("accept", "*/*");// 此处为暴力方法设置接受所有类型，以此来防范返回415;
             conn.setRequestProperty("accept", "application/json");
             // 往服务器里面发送数据
-            if (Json != null && !("").equals(Json)) {
-                byte[] writebytes = Json.getBytes();
+            if (json != null && !("").equals(json)) {
+                byte[] writebytes = json.getBytes();
                 // 设置文件长度
                 conn.setRequestProperty("Content-Length", String.valueOf(writebytes.length));
                 OutputStream outwritestream = (OutputStream) conn.getOutputStream();
-                outwritestream.write(Json.getBytes());
+                outwritestream.write(json.getBytes());
                 outwritestream.flush();
                 outwritestream.close();
 
@@ -121,6 +147,84 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println(result);
+    }
+
+    private  String doJsonPost(String urlPath, String json) {
+        String result = "";
+        BufferedReader reader = null;
+        String appid = configProvider.getValue("parking.fujica.appid","fujica_dacfe36d3f15ae51");
+        String appSecret = configProvider.getValue("parking.fujica.appSecret","69416bc8b9e44d56b7672d18b1106668");
+        String privateKey = configProvider.getValue(
+                "parking.fujica.privateKey","MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALATu5WNNx+XcrAS" +
+                "NJieGRsY7VryQjcs+pABXGh4BOCqAW3FgAAc21aIG0uxvYHdQUw1I7J80RiQJ506" +
+                "aIktGTmZKJTjez7JNF7GO4ieGmLMI3ds8iXyJrfUMp/1U3Cq6vja8vuRIKYVQCxZ" +
+                "e8un98Nr03F7oMlKpBydJQKVdlAHAgMBAAECgYBPcqfqhAyCWbCrF5vZ3URQwL+g" +
+                "kL0l7kqknaiXjsgMo0j/weTOqDaj5cgDMJDkvvPOsg+IYt9qKOlm/Urb0piVb9v9" +
+                "iAnp6gIppcyHrPUesgYRSbqR/HhdGtnzn/4f45YpkXA6URMfc04xBrIUCw5Dmnqo" +
+                "nJZJkjd6jjXiL65rYQJBAN8eg99yFH45D2cdlPBTN0LVWXgqy3N22byYh0j6kgo2" +
+                "5WOPMcuIZPM/XdSoTfhYeHixvEwrmCAkCmSkf524prECQQDKBnzZRj3eCij1z2SZ" +
+                "JCRZhRQUhFmK0AYYTXw9R0DfEaZNrEAe8PEypS94lYROvNV3TnSnK2FHKeH8YhHX" +
+                "EoA3AkBRHzMrRrsUuYJUJ3lDd74b2p5RBp46OPgpjfuCGTiH5jW44RNlwQ2TM3LW" +
+                "IutWZDRJDbY8q40AApqUxQpxOfXBAkA8bB5RGZoNW7qOcj3jM5UPlSbBUCg7xSXd" +
+                "hOdAqJv1W6ECoB75YhSxkggVp5pPtlid+0AWc3n/v74QLwCo86aXAkEAlxY3hoxQ" +
+                "jJiCjD2PbL0GLkMKNBqJgLcDWqeoHcal+iY2Fpr3U/iCJZNoBuovC2Qvc5J1y61P" +
+                "ojrvFNyFMEkWTQ==");
+        urlPath = configProvider.getValue("parking.fujica.url","http://mops-test.fujica.com.cn:8021/Api/Park")+urlPath;
+        String time = getTimestamp();
+        TreeMap<String, String> map = new TreeMap();
+        map.put("param", json);
+        map.put("secret", appSecret);
+        map.put("timestamp", time);
+        String sign = signWithoutMD5(map);
+        sign = sign(sign, privateKey);
+        LOGGER.info("The request info, url={}, param={}", urlPath, json);
+        try {
+            URL url = new URL(urlPath);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Charset", "UTF-8");
+            conn.setRequestProperty("appid", appid);
+            conn.setRequestProperty("appSecret", appSecret);
+            conn.setRequestProperty("sign", sign);
+            conn.setRequestProperty("timestamp", time);
+            // 设置文件类型:
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            // 设置接收类型否则返回415错误
+            conn.setRequestProperty("accept", "*/*");// 此处为暴力方法设置接受所有类型，以此来防范返回415;
+            conn.setRequestProperty("accept", "application/json");
+            // 往服务器里面发送数据
+            if (json != null && !("").equals(json)) {
+                byte[] writebytes = json.getBytes();
+                // 设置文件长度
+                conn.setRequestProperty("Content-Length", String.valueOf(writebytes.length));
+                OutputStream outwritestream = (OutputStream) conn.getOutputStream();
+                outwritestream.write(json.getBytes());
+                outwritestream.flush();
+                outwritestream.close();
+
+            }
+            if (conn.getResponseCode() == 200) {
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                result = reader.readLine();
+            }
+        } catch (Exception e) {
+            LOGGER.error("The request error, param={}", json, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "The request error.");
         } finally {
             if (reader != null) {
                 try {
@@ -130,6 +234,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
                 }
             }
         }
+        LOGGER.info("SendResult from third, url={}, result={}", urlPath, result);
         return result;
     }
 
