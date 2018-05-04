@@ -140,21 +140,20 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("car_no", card.getData().getCarNo());
 			params.put("member_name", card.getData().getMemberName());
 			params.put("telephone", card.getData().getTelephone());
-			params.put("start_date", card.getData().getStartTime());
+			params.put("start_date", card.getData().getEndTime());
+			long newStartTime = Utils.strToLong(card.getData().getEndTime(),Utils.DateStyle.DATE_TIME);
 			long now = System.currentTimeMillis();
-
-			if (Utils.strToLong(card.getData().getStartTime(),Utils.DateStyle.DATE_TIME) < now) {
-				params.put("start_date", Utils.longToString(now,Utils.DateStyle.DATE_TIME));
+			if (newStartTime < now) {
+				newStartTime = now;
 			}
 
 			// 根据充值的几个月，重新计算月卡结束日期
 			//这里加一秒钟，原因是自然月只会计算时间到 月末那一天的 23:59:59 秒
 			//下一充值，需要从 月初第一天的 00:00:00 开始计算
-			Timestamp rechargeStartTimestamp = new Timestamp(Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME)+1000);
-			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThisMonth(rechargeStartTimestamp.getTime(), order.getMonthCount().intValue());
-			String endTime = Utils.dateToStr(rechargeEndTimestamp, Utils.DateStyle.DATE_TIME);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThisMonth(newStartTime, order.getMonthCount().intValue());
+			String endTimestr = Utils.dateToStr(rechargeEndTimestamp, Utils.DateStyle.DATE_TIME);
 
-			params.put("end_date", endTime);
+			params.put("end_date", endTimestr);
 			params.put("remark", null);
 			params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
 			String result = null;
@@ -167,20 +166,14 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			}
 			//将充值信息存入订单
 			order.setErrorDescriptionJson(result);
-			order.setStartPeriod(rechargeStartTimestamp);
+			order.setStartPeriod(new Timestamp(newStartTime));
 			order.setEndPeriod(rechargeEndTimestamp);
 			
 			ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 					new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
 					});
 			order.setErrorDescription(entity!=null?entity.getErrorMsg():null);
-			if(entity != null && entity.isSuccess()){//存在返回为success，但是没有更新结束日期失败的情况，所以重新查询
-				ZhongBaiChangCardInfo<ZhongBaiChangData> rechangedcard = getCardInfo(order.getPlateNumber());
-				long rechangeEndTime = Utils.strToLong(rechangedcard.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
-				if(rechangeEndTime == rechargeEndTimestamp.getTime()){
-					return true;
-				}
-			}
+			return  entity != null && entity.isSuccess();
 		}
 		return false;
 	}

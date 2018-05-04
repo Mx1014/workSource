@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.techpark.punch.PunchExceptionRequest;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -40,9 +41,7 @@ import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ListUtils;
-import com.hp.hpl.sparta.xpath.Step;
 
-import javax.persistence.criteria.CriteriaBuilder;
 
 @Component
 public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
@@ -344,6 +343,43 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
     public void deleteApprovalRequest(ApprovalRequest approvalRequest) {
         getReadWriteDao().delete(approvalRequest);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhApprovalRequests.class, null);
+    }
+
+    @Override
+    public List<PunchExceptionRequest> listOvertimeDurationByOwnerAndMonth(String ownerType, Long organizationId, List<String> months) {
+        List<PunchExceptionRequest> results = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        Timestamp beginDate;
+        for (String punchMonth : months) {
+            try {
+                beginDate = new Timestamp(dateFormat.parse(punchMonth + "01").getTime());
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(beginDate);
+                calendar.add(Calendar.MONTH, 1);
+                Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
+                SelectConditionStep<Record> step = getReadOnlyContext()
+                        .select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+                        .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(organizationId))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.OVERTIME.getCode()))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+
+                Result<Record> result = step.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.desc()).fetch();
+
+                if (result != null && result.isNotEmpty()) {
+                    results.addAll(result.map(r -> ConvertHelper.convert(r, PunchExceptionRequest.class)));
+                }
+
+            } catch (ParseException e) {
+                // TODO Auto-generated catch block
+                LOGGER.error("countOvertimeDurationByUserAndMonth error : \n", e);
+            }
+        }
+        if (results.size() == 0) {
+            results = null;
+        }
+        return results;
     }
 
     @Override
