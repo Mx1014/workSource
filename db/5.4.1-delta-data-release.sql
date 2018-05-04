@@ -61,10 +61,18 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- for 住总ELive物业查费对接 by 杨崇鑫  end
 
--- 品质核查离线包版本更新  by jiarui
+-- 品质核查 能耗  巡检 离线包版本更新  by jiarui
 update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
   info_url = replace(info_url,'1-0-0','1-0-1'),
   target_version = '1.0.1' where app_name = '品质核查';
+
+update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
+	info_url = replace(info_url,'1-0-0','1-0-1'),
+	target_version = '1.0.1' where app_name = '物业巡检';
+
+update eh_version_urls set download_url = replace(download_url,'1-0-0','1-0-1'),
+	info_url = replace(info_url,'1-0-0','1-0-1'),
+	target_version = '1.0.1' where realm_id = (select id from eh_version_realm where realm = 'energyManagement');
 
 --
 -- 一键推送的数据范围改成不限园区  add by xq.tian  2018/04/26
