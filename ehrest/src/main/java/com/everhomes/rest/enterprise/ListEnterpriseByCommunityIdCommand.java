@@ -21,6 +21,8 @@ public class ListEnterpriseByCommunityIdCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private String keyword;
+    private String enterpriseName;
+
 
     public String getKeyword() {
         return keyword;
@@ -60,6 +62,14 @@ public class ListEnterpriseByCommunityIdCommand {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
     }
 
     @Override

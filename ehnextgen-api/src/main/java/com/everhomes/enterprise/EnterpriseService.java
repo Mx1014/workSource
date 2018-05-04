@@ -68,4 +68,6 @@ public interface EnterpriseService {
      * @return
      */
     ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd);
+
+
 }
