@@ -6365,8 +6365,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         if(!StringUtils.isEmpty(keyword)){
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword +"%"));
-            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(Long.valueOf(keyword)));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword +"%")
+                    .or(Tables.EH_ORGANIZATIONS.ID.eq(Long.valueOf(keyword))));
         }
 
         if (null != locator.getAnchor()) {
