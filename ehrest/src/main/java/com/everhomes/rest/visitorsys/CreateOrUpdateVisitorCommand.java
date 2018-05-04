@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.visitorsys.ui.BaseFormDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -34,6 +37,8 @@ import java.sql.Timestamp;
  * <li>visitorPicUri: (选填)访客头像url</li>
  * <li>sendMessageInviterFlag: (选填)是否发送消息给邀请者，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  * <li>sendSMSFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>formJsonValue: (选填)表单提交json值</li>
+ * <li>enterpriseFormList: (选填)企业自定义字段值，{@link com.everhomes.rest.visitorsys.ui.BaseFormDTO}</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
@@ -46,6 +51,10 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
     private String visitorPicUri;
     private Byte sendMessageInviterFlag;
     private Byte sendSMSFlag;
+
+    private String formJsonValue;
+    @ItemType(BaseFormDTO.class)
+    private List<BaseFormDTO> enterpriseFormList;
 
     public Timestamp getInvalidTime() {
         return invalidTime;
@@ -109,6 +118,22 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setSendSMSFlag(Byte sendSMSFlag) {
         this.sendSMSFlag = sendSMSFlag;
+    }
+
+    public String getFormJsonValue() {
+        return formJsonValue;
+    }
+
+    public void setFormJsonValue(String formJsonValue) {
+        this.formJsonValue = formJsonValue;
+    }
+
+    public List<BaseFormDTO> getEnterpriseFormList() {
+        return enterpriseFormList;
+    }
+
+    public void setEnterpriseFormList(List<BaseFormDTO> enterpriseFormList) {
+        this.enterpriseFormList = enterpriseFormList;
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class VisitorSysOfficeLocation extends EhVisitorSysOfficeLocations {
 	
-	private static final long serialVersionUID = 6250963362551176157L;
+	private static final long serialVersionUID = 640785830563682254L;
 	
 	@Override
 	public String toString() {

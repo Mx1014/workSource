@@ -1,9 +1,11 @@
 package com.everhomes.rest.visitorsys.ui;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.visitorsys.BaseVisitorDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -31,6 +33,8 @@ import java.sql.Timestamp;
  * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
  * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
  * <li>visitorPicUri: (选填)访客头像url</li>
+ * <li>formJsonValue: (选填)表单提交json值</li>
+ * <li>enterpriseFormList: (选填)企业自定义字段值，{@link com.everhomes.rest.visitorsys.ui.BaseFormDTO}</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
@@ -43,6 +47,9 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
     private String visitAddresses;
 
     private String visitorPicUri;
+    private String formJsonValue;
+    @ItemType(BaseFormDTO.class)
+    private List<BaseFormDTO> enterpriseFormList;
 
     public String getDeviceType() {
         return deviceType;
@@ -106,6 +113,22 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
 
     public void setVisitorPicUri(String visitorPicUri) {
         this.visitorPicUri = visitorPicUri;
+    }
+
+    public String getFormJsonValue() {
+        return formJsonValue;
+    }
+
+    public void setFormJsonValue(String formJsonValue) {
+        this.formJsonValue = formJsonValue;
+    }
+
+    public List<BaseFormDTO> getEnterpriseFormList() {
+        return enterpriseFormList;
+    }
+
+    public void setEnterpriseFormList(List<BaseFormDTO> enterpriseFormList) {
+        this.enterpriseFormList = enterpriseFormList;
     }
 
     @Override

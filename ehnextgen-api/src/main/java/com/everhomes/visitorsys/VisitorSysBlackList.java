@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class VisitorSysBlackList extends EhVisitorSysBlackList {
 	
-	private static final long serialVersionUID = 2395424642925160981L;
+	private static final long serialVersionUID = 2879409821840886537L;
 	
 	@Override
 	public String toString() {
