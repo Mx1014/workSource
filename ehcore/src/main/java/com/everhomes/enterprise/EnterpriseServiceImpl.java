@@ -1025,10 +1025,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         //设置第几页
         locator.setAnchor(cmd.getPageAnchor());
         //进行非空校验
-        if(cmd.getNamepaceId() != null && cmd.getCommunityId() != null){
+        if(cmd.getNamespaceId() != null && cmd.getCommunityId() != null){
             //说明传进来的参数不为空，那么我们首先需要根据这两个参数进行查询eh_communitys表中
             //在该域空间下不包含该项目当中的所有项目的编号，注意他会返回一个集合List<Long>
-            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamepaceId());
+            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId());
             //进行非空校验
             if(CollectionUtils.isNotEmpty(communityIdList)){
                 //说明集合不为空，那么我们就根据该集合进行查询eh_organization_community_requests表，得到一个公司id的集合

@@ -21,7 +21,7 @@ public class listEnterpriseNoReleaseWithCommunityIdCommand {
     private Integer pageSize;
 
     //域空间ID
-    private Integer namepaceId;
+    private Integer namespaceId;
     //企业名称或者企业编号
     private String keyword;
     //项目编号
@@ -29,12 +29,12 @@ public class listEnterpriseNoReleaseWithCommunityIdCommand {
     //办公地点以及对应在其中的楼栋门牌
     List<CreateOfficeSiteCommand> officeSites;
 
-    public Integer getNamepaceId() {
-        return namepaceId;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setNamepaceId(Integer namepaceId) {
-        this.namepaceId = namepaceId;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getKeyword() {
