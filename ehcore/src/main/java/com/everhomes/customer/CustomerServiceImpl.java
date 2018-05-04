@@ -3469,8 +3469,11 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
         if (customer != null) {
             cmd.setOrganizationId(customer.getOrganizationId());
+            rolePrivilegeService.createOrganizationAdmin(cmd);
+        }else {
+            //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
+
         }
-        rolePrivilegeService.createOrganizationAdmin(cmd);
     }
 
     @Override
