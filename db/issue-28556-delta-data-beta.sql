@@ -1,16 +1,3 @@
--- 1：执行接口之前 curl -XDELETE http://localhost:9200/everhomesv3/energyMeterReadingLog/_mapping
--- 同步下 /energy/syncEnergyMeterReadingLogIndex
-
-
--- 2：
--- 执行接口之前  curl -XDELETE http://localhost:9200/everhomesv3/energyMeter/_mapping
--- 同步下 /energy/syncEnergyMeterIndex
-
-
-
--- 3： 同步下/customer/syncEnterpriseCustomer
-
--- 注：只能在beta上执行
 --  issue-28556 add by huangmingbo 
 SET @kexin_xiaomao_park_lot_id = 10131;
 SET @kexin_zzh_community_id = 240111044332060208;

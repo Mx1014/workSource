@@ -33,9 +33,12 @@ public interface ParkingErrorCode {
     int NOT_SUPPORT_APP_RECHARGE = 10020;  //不支持APP缴费
 
     int ERROR_PLATE_REPEAT_ADD = 10021;  //车牌不可重复添加！
+    
 
     int RECHARE_TIME_OUT = 10031;  //获取充值结果超时
 
+    int ERROR_PARKING_TYPE_NOT_FOUND = 10032;  //未查询到月卡类型信息
+    
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败
