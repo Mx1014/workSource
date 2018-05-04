@@ -202,8 +202,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public OutputStream getEnterpriseApprovalOutputStream(ListApprovalFlowRecordsCommand cmd, Long taskId) {
-        cmd.setPageAnchor(null);
-        cmd.setPageSize(Integer.MAX_VALUE - 1);
         ListApprovalFlowRecordsResponse response = listApprovalFlowRecords(cmd);
         taskService.updateTaskProcess(taskId, 10);
         //  1. Set the main title of the sheet
@@ -659,7 +657,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return list.stream().filter(r -> group.getId().equals(r.getApprovalGroupId())).collect(Collectors.toList());
     }
 
-
     @Override
     public ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
@@ -670,11 +667,16 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
         //  get the user's info
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
-        if(member == null)
+        if (member == null)
             member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         //  check the approval by scope and filter it
-        for(EnterpriseApprovalGroupDTO group : groups)
+        for (int i = groups.size() - 1; i >= 0; i--) {
+            EnterpriseApprovalGroupDTO group = groups.get(i);
             filterTheApprovalByScope(group, member);
+            if (group.getApprovals() == null || group.getApprovals().size() == 0)
+                //  remove the group which approval list size is zero
+                groups.remove(group);
+        }
         res.setGroups(groups);
         return res;
     }

@@ -5,7 +5,7 @@ public enum ApprovalFilterType {
     APPROVAL("APPROVAL"), GROUP("GROUP");
 
     private String code;
-    private ApprovalFilterType(String code) {
+     ApprovalFilterType(String code) {
         this.code = code;
     }
 
