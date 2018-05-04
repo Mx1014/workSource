@@ -38,6 +38,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserOrganizations;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
@@ -6396,7 +6397,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhOrganizationsRecord> query = context.selectFrom(Tables.EH_ORGANIZATIONS).getQuery();
+        SelectQuery<Record> query = context.select().from(Tables.EH_ORGANIZATIONS).getQuery();
         query.addJoin(Tables.EH_ORGANIZATION_WORKPLACES, JoinType.RIGHT_OUTER_JOIN,
                 Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
         query.setDistinct(true);
