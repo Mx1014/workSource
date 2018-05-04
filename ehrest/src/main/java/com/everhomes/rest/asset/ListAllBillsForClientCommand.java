@@ -12,6 +12,15 @@ public class ListAllBillsForClientCommand {
     private String targetType;
     private Long targetId;
     private Byte isOnlyOwedBill;
+    private Long billGroupId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     public Byte getIsOnlyOwedBill() {
         return isOnlyOwedBill;

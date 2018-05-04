@@ -1251,7 +1251,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER)
+        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1290,7 +1290,7 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-        context.select()
+        context.select(t.AMOUNT,t.ID, t.REMARKS)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -3796,7 +3796,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status) {
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId) {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
@@ -3824,6 +3824,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(status != null){
             query.addConditions(bill.STATUS.eq(status));
+        }
+        if(billGroupId != null){
+            query.addConditions(bill.BILL_GROUP_ID.eq(billGroupId));
         }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
