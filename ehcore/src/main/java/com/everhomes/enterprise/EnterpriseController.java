@@ -67,11 +67,12 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("listEnterpriseByCommunityId")
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse listEnterpriseByCommunityId(@Valid ListEnterpriseByCommunityIdCommand cmd) {
-        RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(cmd));
+        RestResponse res = new RestResponse(enterpriseService.listEnterprisesByCommunityId(cmd));
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
     }
+
 
     /**
      * <b>URL: /enterprise/listEnterpriseNoReleaseWithCommunityId</b>

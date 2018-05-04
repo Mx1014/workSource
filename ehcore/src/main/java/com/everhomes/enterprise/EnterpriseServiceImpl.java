@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationWorkPlaces;
 import com.everhomes.rest.enterprise.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.collect.Lists;
@@ -210,6 +211,31 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         resp.setEnterprises(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+    /**
+     * 根据项目编号communityId来查询在该项目下的所有公司
+     * @param cmd
+     * @return
+     */
+    @Override
+    public ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd){
+        //创建ListEnterprisesResponse类的对象
+        ListEnterprisesResponse response = new ListEnterprisesResponse();
+        //创建List<EnterprisePropertyDTO>集合对象
+        List<EnterprisePropertyDTO> enterprisePropertyDTOS = Lists.newArrayList();
+        //首先需要进行非空校验
+        if(cmd.getCommunityId() != null){
+            //说明项目编号不为空，那么我们就根据该communityId进行查询eh_organization_workPlaces表中对应的所有的公司的id
+            //创建ListingLocator类的对象
+            ListingLocator locator = new ListingLocator();
+            //设置pageAnchor
+            locator.setAnchor(cmd.getPageAnchor());
+            int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+            enterprisePropertyDTOS = organizationProvider.findEnterpriseListByCommunityId(locator,cmd.getCommunityId(),pageSize,cmd.getKeyword());
+        }
+        response.setEnterprises(enterprisePropertyDTOS);
+        return response;
     }
     
     @Override

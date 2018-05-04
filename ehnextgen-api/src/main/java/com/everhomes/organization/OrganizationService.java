@@ -717,4 +717,11 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	void createSettledEnterprise(CreateSettledEnterpriseCommand cmd);
+
+	/**
+	 * 根据项目编号communityId来查询在该项目下的所有公司
+	 * @param cmd
+	 * @return
+	 */
+	ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd);
 }

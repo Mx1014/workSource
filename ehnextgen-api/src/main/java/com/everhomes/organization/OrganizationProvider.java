@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
@@ -663,4 +664,11 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword, CrossShardListingLocator locator, int pageSize);
+
+	/**
+	 * 根据项目编号communityId查询eh_organization_workPlaces表中的信息
+	 * @param communityId
+	 * @return
+	 */
+	List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword);
 }

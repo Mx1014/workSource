@@ -26,6 +26,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.CreateSettledEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
@@ -47,6 +48,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -6383,6 +6385,48 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
         return result;
+    }
+
+    /**
+     * 根据项目编号communityId查询eh_organization_workPlaces表和eh_organizations表（联查）中的信息
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectFrom(Tables.EH_ORGANIZATIONS).getQuery();
+        query.addJoin(Tables.EH_ORGANIZATION_WORKPLACES, JoinType.RIGHT_OUTER_JOIN,
+                Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+        query.setDistinct(true);
+
+        if (locator.getAnchor() != null)
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
+        if (!StringUtils.isEmpty(keyword)) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword + "%")
+            .or(Tables.EH_ORGANIZATIONS.ID.eq(Long.valueOf(keyword))));
+        }
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
+        }
+        if(pageSize != null){
+            query.addLimit(pageSize);
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+
+        List<EnterprisePropertyDTO> records = query.fetch().map(r -> {
+            EnterprisePropertyDTO dto = new EnterprisePropertyDTO();
+            dto.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            dto.setSiteName(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME));
+            dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
+            return dto;
+        });
+
+        if (records.size() > pageSize) {
+            locator.setAnchor(records.get(records.size() - 1).getOrganizationId());
+        }
+        return records;
     }
 
 
