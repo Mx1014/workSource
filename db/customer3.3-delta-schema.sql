@@ -1,4 +1,4 @@
--- 客户管理增加企业管理字段
+-- 客户管理增加企业管理字段 hotline  post_uri refer to  organization_detail    unified_social_credit_code  refer to organization
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `hotline` varchar(256) DEFAULT NULL;
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `post_uri` varchar(128) DEFAULT NULL;
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `unified_social_credit_code` varchar(256) DEFAULT NULL;

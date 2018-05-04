@@ -604,7 +604,7 @@ public class CustomerServiceImpl implements CustomerService {
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
                 detail.setLongitude(customer.getLongitude());
-                detail.setPostUri(customer.setPostUri());
+                detail.setPostUri(customer.getPostUri());
                 detail.setContact(customer.getHotline());
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
@@ -650,8 +650,8 @@ public class CustomerServiceImpl implements CustomerService {
     /**
      * 添加banner图片
      *
-     * @param id
-     * @param attachments
+     * @param id organizationId
+     * @param attachments   附件
      */
     private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
         dbProvider.execute((TransactionStatus status) -> {
