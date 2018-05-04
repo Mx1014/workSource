@@ -16,6 +16,7 @@ public class EnterprisePropertyDTO {
     private Long organizationId;
     //办公地点名称
     private String siteName;
+    private Long id;
 
     public String getName() {
         return name;
@@ -39,6 +40,14 @@ public class EnterprisePropertyDTO {
 
     public void setSiteName(String siteName) {
         this.siteName = siteName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

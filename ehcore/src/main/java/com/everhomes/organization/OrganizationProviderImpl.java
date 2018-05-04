@@ -6417,6 +6417,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         List<EnterprisePropertyDTO> records = query.fetch().map(r -> {
             EnterprisePropertyDTO dto = new EnterprisePropertyDTO();
+            dto.setId(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.ID));
             dto.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
             dto.setSiteName(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME));
             dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
@@ -6424,7 +6425,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         });
 
         if (records.size() > pageSize) {
-            locator.setAnchor(records.get(records.size() - 1).getOrganizationId());
+            locator.setAnchor(records.get(records.size() - 1).getId());
         }
         return records;
     }
