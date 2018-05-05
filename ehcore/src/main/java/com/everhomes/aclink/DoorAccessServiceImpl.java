@@ -4352,12 +4352,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         User user = UserContext.current().getUser();
 
-        ListingLocator locator = new ListingLocator();
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
 
         DoorAccessGroupResp resp = new DoorAccessGroupResp();
 
         List<DoorAccessGroupDTO> groups = new ArrayList<>();
+        resp.setGroups(groups);
 
         for(DoorAuth auth : auths){
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
@@ -4365,6 +4365,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(null != access){
                 group.setId(access.getId());
                 group.setGroupName(access.getName());
+//                group.setKeyU(auth.getKeyU());
+                List<DoorAccess> devices = doorAccessProvider.listDoorAccessByGroupId(access.getId(),999);
+                group.setDevices(devices.stream().map(r -> {return ConvertHelper.convert(r,DoorAccessDTO.class);}).collect(Collectors.toList()));
             }
 
         }
