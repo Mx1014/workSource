@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- * <li>namespace: 域空间</li>
+ * <li>namespaceId: 域空间</li>
  * <li>ownerId: 项目ID</li>
  * <li>ownerType: 项目类型</li>
  * </ul>
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 public class ListDoorAccessByUserCommand {
 
     @NotNull
-    private Long namespace;
+    private Integer namespaceId;
 
     @NotNull
     private Long ownerId;
@@ -22,12 +22,12 @@ public class ListDoorAccessByUserCommand {
     @NotNull
     private String ownerType;
 
-    public Long getNamespace() {
-        return namespace;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setNamespace(Long namespace) {
-        this.namespace = namespace;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOwnerId() {

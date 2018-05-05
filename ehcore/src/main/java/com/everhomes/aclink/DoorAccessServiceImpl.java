@@ -4355,6 +4355,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListingLocator locator = new ListingLocator();
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
 
+        DoorAccessGroupResp resp = new DoorAccessGroupResp();
+
+        List<DoorAccessGroupDTO> groups = new ArrayList<>();
+
+        for(DoorAuth auth : auths){
+            DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+            DoorAccessGroupDTO group = new DoorAccessGroupDTO();
+            if(null != access){
+                group.setId(access.getId());
+                group.setGroupName(access.getName());
+            }
+
+        }
+
         return null;
     }
 }
