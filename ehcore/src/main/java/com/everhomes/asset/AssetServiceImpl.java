@@ -1473,8 +1473,15 @@ public class AssetServiceImpl implements AssetService {
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
-        //todo 这里存储催缴的对象和模板使用信息
-//        assetProvider.autoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getConfigDays());
+        //这里存储催缴的对象和模板使用信息
+        PaymentNoticeConfig noticeConfig = new PaymentNoticeConfig();
+        long nextPaymentNoticeId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentNoticeConfig.class));
+        noticeConfig.setId(nextPaymentNoticeId);
+        noticeConfig.setOwnerType(cmd.getOwnerType());
+        noticeConfig.setOwnerId(cmd.getOwnerId());
+        noticeConfig.setNamespaceId(cmd.getNamespaceId());
+        noticeConfig.setnotice
+        assetProvider.autoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getConfigDays());
     }
 
     private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope) {
