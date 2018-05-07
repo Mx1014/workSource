@@ -13280,7 +13280,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(cmd.getOrganizationId() != null){
             //说明前端传过来的参数不为空，那么我们需要根据该organization_id来删除eh_communityAndBuilding_relationes
             //表中的关系，就表示的是将该项目下的该公司的办公地点删除了
-            organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId(),cmd.getWorkPlaceName(),cmd.getCommunityId());
+            organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId(),cmd.getSiteName(),cmd.getCommunityId());
         }else{
             LOGGER.info("organizationId can not be null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "organizationId can not be null");

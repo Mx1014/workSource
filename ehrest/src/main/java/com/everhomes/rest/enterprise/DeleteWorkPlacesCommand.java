@@ -13,7 +13,7 @@ public class DeleteWorkPlacesCommand {
 
     private Long organizationId;
 
-    private String workPlaceName;
+    private String siteName;
 
     private Long communityId;
 
@@ -25,12 +25,12 @@ public class DeleteWorkPlacesCommand {
         this.organizationId = organizationId;
     }
 
-    public String getWorkPlaceName() {
-        return workPlaceName;
+    public String getSiteName() {
+        return siteName;
     }
 
-    public void setWorkPlaceName(String workPlaceName) {
-        this.workPlaceName = workPlaceName;
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
     }
 
     public Long getCommunityId() {
