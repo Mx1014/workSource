@@ -17,6 +17,7 @@ public class OfficeSiteDTO {
 
     private String siteName;
     private String communityName;
+    private Long communityId;
     private List<OrganizationApartDTO> siteDtos;
 
     public String getSiteName() {
@@ -33,6 +34,14 @@ public class OfficeSiteDTO {
 
     public void setCommunityName(String communityName) {
         this.communityName = communityName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public List<OrganizationApartDTO> getSiteDtos() {
