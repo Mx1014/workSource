@@ -3595,7 +3595,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays) {
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
         DSLContext writeContext = getReadWriteContext();
         EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
         EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
@@ -3605,17 +3605,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(noticeConfig.OWNER_TYPE.eq(ownerType))
                     .and(noticeConfig.OWNER_ID.eq(ownerId))
                     .execute();
-            if(configDays != null){
-                for(int i = 0; i < configDays.size(); i++){
-                    PaymentNoticeConfig config = new PaymentNoticeConfig();
-                    config.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig.class)));
-                    config.setNamespaceId(namespaceId);
-                    config.setOwnerId(ownerId);
-                    config.setOwnerType(ownerType);
-                    config.setNoticeDayBefore(configDays.get(i));
-                    noticeConfigDao.insert(config);
-                }
-            }
+            noticeConfigDao.insert(toSaveConfigs);
             return null;
         });
     }

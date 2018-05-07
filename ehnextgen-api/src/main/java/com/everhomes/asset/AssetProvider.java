@@ -237,7 +237,7 @@ public interface AssetProvider {
 
     List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
 
-    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays);
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
 
     AssetPaymentOrder getOrderById(Long orderId);
 
