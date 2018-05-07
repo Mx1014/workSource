@@ -287,7 +287,7 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
             map.put("parkingId", parkingId);
             map.put("plateNo", order.getPlateNumber());
             map.put("typeId", cardInfo.getData().getTypeId());
-            map.put("typeCount", String.valueOf(order.getMonthCount().intValue()));
+            map.put("typeCount", "1");//类型数量	typeCount	是	蓝	类型月数 * 类型数量=月卡月数
             map.put("receivable", String.valueOf(order.getPrice().multiply(new BigDecimal("100"))));//单位分
             map.put("paymentMode", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "121001" : "120901");
             Timestamp rechargeStartTimestamp = new Timestamp(Utils.strToLong(cardInfo.getData().getExpireDate(), Utils.DateStyle.DATE_TIME));

@@ -3044,6 +3044,7 @@ CREATE TABLE `eh_customer_events` (
   `customer_name` VARCHAR(128) COMMENT '客户名称',
   `contact_name` VARCHAR(64),
   `content` TEXT,
+  `device_type` TINYINT NOT NULL DEFAULT 0,
   `creator_uid` BIGINT COMMENT '创建人uid',
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -3620,6 +3621,7 @@ CREATE TABLE `eh_energy_meter_addresses` (
   `apartment_name` VARCHAR(128),
   `apartment_floor` VARCHAR(16),
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `burden_rate` DECIMAL(10,2),
   `creator_uid` BIGINT COMMENT 'record creator user id',
   `create_time` DATETIME,
   `operator_uid` BIGINT COMMENT 'redundant auditing info',
@@ -3922,6 +3924,7 @@ CREATE TABLE `eh_energy_meters` (
   `last_read_time` DATETIME,
   `last_reading` DECIMAL(10,1),
   `status` TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `auto_flag` TINYINT NOT NULL DEFAULT 0,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_uid` BIGINT,
@@ -4334,7 +4337,7 @@ CREATE TABLE `eh_enterprise_customers` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  `tracking_uid` BIGINT DEFAULT '-1' COMMENT '跟进人uid',
+  `tracking_uid` BIGINT COMMENT 'tracking uid',
   `tracking_name` VARCHAR(32) COMMENT '跟进人姓名',
   `property_area` DOUBLE COMMENT '资产面积',
   `property_unit_price` DOUBLE COMMENT '资产单价',
@@ -8616,8 +8619,8 @@ CREATE TABLE `eh_organization_member_details` (
   `salary_card_number` VARCHAR(128) COMMENT '工资卡号',
   `social_security_number` VARCHAR(128) COMMENT '社保号',
   `provident_fund_number` VARCHAR(128) COMMENT '公积金号',
-  `check_in_time` date NOT NULL COMMENT '入职日期',
-  `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT 'only month&day like 0304',
+  `check_in_time` DATE COMMENT '入职日期',
+  `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段',
   `region_code` VARCHAR(64) COMMENT '手机区号',
   `procreative` VARCHAR(64) COMMENT '生育状况',
   `ethnicity` VARCHAR(128) COMMENT '民族',
@@ -9527,6 +9530,8 @@ CREATE TABLE `eh_parking_lots` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `recharge_json` VARCHAR(1024),
   `config_json` VARCHAR(1024),
+  `order_tag` VARCHAR(3) NOT NULL COMMENT '停车场订单生成标识，固定3位',
+  `order_code` BIGINT NOT NULL DEFAULT 0 COMMENT '停车场订单生成码,从0开始，最多8位',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9884,6 +9889,7 @@ CREATE TABLE `eh_payment_bills` (
   `real_paid_time` DATETIME COMMENT '实际付款时间',
   `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是',
   `customer_tel` VARCHAR(32) COMMENT '客户的手机号，用于存储个人客户的信息',
+  `invoice_number` VARCHAR(128) COMMENT '发票编号',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='账单表';
 
@@ -12970,6 +12976,18 @@ CREATE TABLE `eh_rentalv2_config_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_rentalv2_dayopen_time`;
+
+CREATE TABLE `eh_rentalv2_dayopen_time` (
+  `id` BIGINT NOT NULL,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255),
+  `open_time` DOUBLE,
+  `close_time` DOUBLE,
+  `rental_type` TINYINT,
+  `resource_type` VARCHAR(64),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 保存一个公司的一个场所图标的默认设置
@@ -13122,6 +13140,28 @@ CREATE TABLE `eh_rentalv2_order_rules` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_rentalv2_order_statistics`;
+
+
+CREATE TABLE `eh_rentalv2_order_statistics` (
+  `id` BIGINT NOT NULL,
+  `order_id` BIGINT NOT NULL,
+  `rental_resource_id` BIGINT NOT NULL,
+  `rental_uid` BIGINT,
+  `rental_date` DATE,
+  `start_time` DATETIME,
+  `end_time` DATETIME,
+  `reserve_time` DATETIME,
+  `valid_time_long` BIGINT,
+  `community_id` BIGINT,
+  `namespace_id` INTEGER,
+  `user_enterprise_id` BIGINT,
+  `rental_type` TINYINT,
+  `resource_type` VARCHAR(64),
+  `resource_type_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

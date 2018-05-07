@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceOrganization：服务机构名</li>
  *  <li>templateType : 模板类型</li>
  *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>appId: 所属应用id</li>
  *  <li>secondCategoryId: 服务联盟小类id</li>
  *  <li>secondCategoryName: 服务联盟小类名称</li>
  *  <li>workflowStatus: 工作流状态，{@link com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus}</li>
@@ -38,13 +39,22 @@ public class RequestInfoDTO {
 	private Long jumpType;
 	
 	private Long flowCaseId;
-	
+
+	private Long appId;
+
 	private Long secondCategoryId;
 	
 	private String secondCategoryName;
 	
 	private Byte workflowStatus;
 
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getSecondCategoryId() {
 		return secondCategoryId;

@@ -26,6 +26,7 @@ public interface AssetPaymentConstants {
     public static final String CHARGING_ITEM_NAME_WATER = "水费";
     public static final String CHARGING_ITEM_NAME_ELECTRICITY = "电费";
     public static final String VARIABLE_YJ = "用量";
+    public static final String VARIABLE_BLXS = "比例系数";
     public static final String LATE_FINE_NAME = "滞纳金";
     //收费想固定id
     public static final long LATE_FINE_ID = 6;

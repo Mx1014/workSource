@@ -48,6 +48,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class Utils {
 
+
     public static class MimeType {
         public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
         public static final String APPLICATION_JSON = "application/json";
@@ -219,6 +220,22 @@ public class Utils {
     }
 
     /**
+     * 中百畅停车场，要求月卡时间计算为当月时间
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThisMonth(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.MONTH,month);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    /**
      *
      * @param source
      * @param month
@@ -258,6 +275,9 @@ public class Utils {
     static String dateToStr(Date date, String style) {
         SimpleDateFormat sdf = new SimpleDateFormat(style);
         return sdf.format(date);
+    }
+    public static String longToString(long time, String style) {
+        return dateToStr(new Date(time),style);
     }
 
     static Long subtractionTime(Long startTime, String endtimeStamp) {
