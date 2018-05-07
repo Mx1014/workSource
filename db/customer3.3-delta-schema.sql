@@ -2,6 +2,7 @@
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `hotline` varchar(256) DEFAULT NULL;
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `post_uri` varchar(128) DEFAULT NULL;
 ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `unified_social_credit_code` varchar(256) DEFAULT NULL;
+ALTER  TABLE  eh_enterprise_customers  ADD  COLUMN  `admin_flag` TINYINT(4) NOT NULL DEFAULT 0;
 
 
 

@@ -25,6 +25,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldDTO;
@@ -33,6 +34,7 @@ import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -816,10 +818,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
         List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
         if (StringUtils.isNotEmpty(customerAdminString)) {
-            String[] adminStrings = customerAdminString.split("，");
+            String[] adminStrings = customerAdminString.split(",");
             if (adminStrings.length > 0) {
                 for (int i = 0; i < adminStrings.length; i++) {
-                    String[] adminInfo = adminStrings[i].split("（");
+                    String[] adminInfo = adminStrings[i].split("(");
                     String contactName = adminInfo[0];
                     String contactToken = adminInfo[1];
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
@@ -834,7 +836,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             cmds.forEach((c) -> {
                 rolePrivilegeService.createOrganizationAdmin(c);
                 //增加record
-                customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), c.getContactToken());
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
+                String contactType = null;
+                if (null != userIdentifier) {
+                    contactType = OrganizationMemberTargetType.USER.getCode();
+                } else {
+                    contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+                }
+                customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
             });
         }
     }
