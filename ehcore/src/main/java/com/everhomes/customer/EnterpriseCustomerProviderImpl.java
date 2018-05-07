@@ -1674,21 +1674,21 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
-                        if("trackingUid".equals(field.getFieldName())) {
-                            if("-1".equals(oldData)) {
+                        if ("trackingUid".equals(field.getFieldName())) {
+                            if (oldData == null) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if("-1".equals(newData)) {
+                            if (newData == null) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
                             }
 
                         }
-						Map<String,Object> map = new HashMap<String,Object>();
+                        Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);

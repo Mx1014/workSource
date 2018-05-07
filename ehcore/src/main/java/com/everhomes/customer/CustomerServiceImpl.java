@@ -3383,7 +3383,10 @@ public class CustomerServiceImpl implements CustomerService {
         List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
         if(adminUserId!=null && adminUserId.size()>0){
             adminUserId.forEach((r)->{
-                relatedMembers.add(ConvertHelper.convert(organizationProvider.listOrganizationMembersByUId(r), OrganizationMemberDTO.class));
+                List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(r);
+                if(members!=null && members.size()>0){
+                    relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+                }
             });
         }
         if (relatedMembers != null && relatedMembers.size() > 0) {
