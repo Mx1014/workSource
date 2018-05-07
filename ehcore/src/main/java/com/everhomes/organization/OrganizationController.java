@@ -1643,6 +1643,22 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/deleteWorkPlaces/edit</b>
+     * <p>根据组织ID删除办公地点的方法(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/deleteWorkPlaces/edit")
+    @RestReturn(value = String.class)
+    public RestResponse deleteWorkPlacesByOrganizationId(UpdateWorkPlaceCommand cmd){
+        RestResponse response = new RestResponse();
+        organizationService.deleteWorkPlacesByOrgId(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/superAdmin/edit</b>
      * <p>更改超级管理员(标准版)</p>
      * @param cmd

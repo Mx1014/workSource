@@ -719,4 +719,10 @@ public interface OrganizationService {
 	void createSettledEnterprise(CreateSettledEnterpriseCommand cmd);
 
 
+	/**
+	 * 根据组织ID来删除办公地点
+	 * @param cmd
+	 */
+	void deleteWorkPlacesByOrgId(UpdateWorkPlaceCommand cmd);
+
 }

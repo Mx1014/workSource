@@ -677,4 +677,10 @@ public interface OrganizationProvider {
 	 * @param organization
 	 */
 	void updateOrganizationSuperAdmin(Organization organization);
+
+	/**
+	 * 根据组织ID来删除该项目下的办公地点
+	 * @param organizationId
+	 */
+	void deleteWorkPlacesByOrgId(Long organizationId);
 }

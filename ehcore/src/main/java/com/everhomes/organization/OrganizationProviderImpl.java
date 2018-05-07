@@ -6460,5 +6460,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
+    /**
+     * 根据组织ID来删除该项目下的办公地点
+     * @param organizationId
+     */
+    @Override
+    public void deleteWorkPlacesByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_COMMUNITYANDBUILDING_RELATIONES)
+                .where(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(organizationId))
+                .execute();
+    }
 
 }
