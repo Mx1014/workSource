@@ -1585,10 +1585,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if(cmd.getPmFlag() != null){
                     //封装是否是管理公司标志
                     organizationDetail.setPmFlag(cmd.getPmFlag().byteValue());
+                }else{
+                    organizationDetail.setPmFlag(OrganizationStatus.UNTREATED.getCode());
                 }
                 if(cmd.getServiceSupportFlag() != null){
                     //封装是否是服务商标志
                     organizationDetail.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
+                }else{
+                    organizationDetail.setServiceSupportFlag(OrganizationStatus.UNTREATED.getCode());
                 }
                 //封装企业简称
                 organizationDetail.setDisplayName(cmd.getDisplayName());

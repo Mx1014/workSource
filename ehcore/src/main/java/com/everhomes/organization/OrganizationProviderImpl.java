@@ -2698,8 +2698,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public void updateOrganizationDetail(OrganizationDetail organizationDetail) {
         // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getCommunityId()));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
-        dao.update(organizationDetail);
+        /*EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
+        dao.update(organizationDetail);*/
+        context.update(Tables.EH_ORGANIZATION_DETAILS).set(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG ,organizationDetail.getPmFlag())
+                .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())
+                .set(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME,organizationDetail.getDisplayName())
+                .set(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE,organizationDetail.getMemberRange())
+                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationDetail.getOrganizationId()));
     }
 
     @Override
