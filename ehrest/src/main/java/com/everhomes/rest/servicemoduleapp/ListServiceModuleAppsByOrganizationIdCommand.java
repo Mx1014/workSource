@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
- *     <li>orgId: orgId</li>
+ *     <li>organizationId: organizationId</li>
  *     <li>appType: 应用类型，0-oa, 1-园区, 2-服务 参考{@link ServiceModuleAppType}</li>
  *     <li>installFlag: 是否已安装，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>keyword: 搜索字段</li>
@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
 public class ListServiceModuleAppsByOrganizationIdCommand {
 
 	private Integer namespaceId;
-	private Long orgId;
+	private Long organizationId;
 	private Byte appType;
 	private Byte installFlag;
 	private String keyword;
@@ -29,12 +29,12 @@ public class ListServiceModuleAppsByOrganizationIdCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getOrgId() {
-		return orgId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setOrgId(Long orgId) {
-		this.orgId = orgId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Byte getAppType() {

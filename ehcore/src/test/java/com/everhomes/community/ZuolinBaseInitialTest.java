@@ -241,7 +241,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
         installAppsCmd.setInstallFlag(TrueOrFalseFlag.TRUE.getCode());
         installAppsCmd.setNamespaceId(namespaceId);
-        installAppsCmd.setOrgId(organizationId);
+        installAppsCmd.setOrganizationId(organizationId);
         ListServiceModuleAppsByOrganizationIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         if(installAppsResp.getServiceModuleApps().size() > 0) {
             for(ServiceModuleAppDTO appDTO: installAppsResp.getServiceModuleApps()) {
@@ -358,7 +358,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
         installAppsCmd.setInstallFlag(TrueOrFalseFlag.TRUE.getCode());
         installAppsCmd.setNamespaceId(namespaceId);
-        installAppsCmd.setOrgId(anotherOrgId);
+        installAppsCmd.setOrganizationId(anotherOrgId);
         ListServiceModuleAppsByOrganizationIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         if(installAppsResp.getServiceModuleApps().size() > 0) {
             for(ServiceModuleAppDTO appDTO: installAppsResp.getServiceModuleApps()) {
