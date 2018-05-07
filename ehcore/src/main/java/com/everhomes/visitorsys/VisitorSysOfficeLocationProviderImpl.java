@@ -63,7 +63,19 @@ public class VisitorSysOfficeLocationProviderImpl implements VisitorSysOfficeLoc
 				.orderBy(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOfficeLocation.class));
 	}
-	
+
+	@Override
+	public List<VisitorSysOfficeLocation> listVisitorSysOfficeLocation(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize, Long pageAnchor) {
+		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS)
+				.where(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.lt(pageAnchor))
+				.orderBy(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.desc())
+				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOfficeLocation.class));
+	}
+
 	private EhVisitorSysOfficeLocationsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

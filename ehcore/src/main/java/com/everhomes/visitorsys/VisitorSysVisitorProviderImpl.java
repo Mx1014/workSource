@@ -12,7 +12,6 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +59,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 	}
 
 	@Override
-	public VisitorSysVisitor findVisitorSysVisitorById(Long id) {
+	public VisitorSysVisitor findVisitorSysVisitorById(Integer namespaceId, Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), VisitorSysVisitor.class);
 	}
@@ -155,6 +154,18 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 				.limit(params.getPageSize())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
 
+	}
+
+	@Override
+	public VisitorSysVisitor findVisitorSysVisitorByParentId(Integer namespaceId, Long parentId) {
+		List<VisitorSysVisitor> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISITORS)
+				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.PARENT_ID.eq(parentId))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
+		if(list==null || list.size()==0){
+			return null;
+		}
+		return list.get(0);
 	}
 
 	private EhVisitorSysVisitorsDao getReadWriteDao() {

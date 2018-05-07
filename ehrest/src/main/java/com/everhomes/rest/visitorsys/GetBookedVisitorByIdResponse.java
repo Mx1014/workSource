@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.visitorsys.ui.BaseFormDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -32,6 +35,13 @@ import java.sql.Timestamp;
  * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
  * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
  * <li>visitorPicUrl: (选填)访客头像url</li>
+ * <li>visitorPicUri: (选填)访客头像uri</li>
+ * <li>sendMessageInviterFlag: (选填)是否发送消息给邀请者，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>sendSMSFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>formJsonValue: (选填)表单提交json值</li>
+ * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
+ * <li>visitorSignCharacter: (选填)访客签名字符串</li>
+ * <li>enterpriseFormList: (选填)企业自定义字段值，{@link com.everhomes.rest.visitorsys.ui.BaseFormDTO}</li>
  * </ul>
  */
 public class GetBookedVisitorByIdResponse extends BaseVisitorDTO{
@@ -42,6 +52,17 @@ public class GetBookedVisitorByIdResponse extends BaseVisitorDTO{
     private String visitAddresses;
 
     private String visitorPicUrl;
+    private String visitorPicUri;
+
+    private Byte sendMessageInviterFlag;
+    private Byte sendSMSFlag;
+
+    private String formJsonValue;
+    private String visitorSignUri;
+    private String visitorSignUrl;
+    private String visitorSignCharacter;
+    @ItemType(BaseFormDTO.class)
+    private List<BaseFormDTO> enterpriseFormList;
 
     public Timestamp getInvalidTime() {
         return invalidTime;
@@ -89,6 +110,70 @@ public class GetBookedVisitorByIdResponse extends BaseVisitorDTO{
 
     public void setVisitorPicUrl(String visitorPicUrl) {
         this.visitorPicUrl = visitorPicUrl;
+    }
+
+    public String getVisitorPicUri() {
+        return visitorPicUri;
+    }
+
+    public void setVisitorPicUri(String visitorPicUri) {
+        this.visitorPicUri = visitorPicUri;
+    }
+
+    public Byte getSendMessageInviterFlag() {
+        return sendMessageInviterFlag;
+    }
+
+    public void setSendMessageInviterFlag(Byte sendMessageInviterFlag) {
+        this.sendMessageInviterFlag = sendMessageInviterFlag;
+    }
+
+    public Byte getSendSMSFlag() {
+        return sendSMSFlag;
+    }
+
+    public void setSendSMSFlag(Byte sendSMSFlag) {
+        this.sendSMSFlag = sendSMSFlag;
+    }
+
+    public String getFormJsonValue() {
+        return formJsonValue;
+    }
+
+    public void setFormJsonValue(String formJsonValue) {
+        this.formJsonValue = formJsonValue;
+    }
+
+    public String getVisitorSignUri() {
+        return visitorSignUri;
+    }
+
+    public void setVisitorSignUri(String visitorSignUri) {
+        this.visitorSignUri = visitorSignUri;
+    }
+
+    public String getVisitorSignUrl() {
+        return visitorSignUrl;
+    }
+
+    public void setVisitorSignUrl(String visitorSignUrl) {
+        this.visitorSignUrl = visitorSignUrl;
+    }
+
+    public String getVisitorSignCharacter() {
+        return visitorSignCharacter;
+    }
+
+    public void setVisitorSignCharacter(String visitorSignCharacter) {
+        this.visitorSignCharacter = visitorSignCharacter;
+    }
+
+    public List<BaseFormDTO> getEnterpriseFormList() {
+        return enterpriseFormList;
+    }
+
+    public void setEnterpriseFormList(List<BaseFormDTO> enterpriseFormList) {
+        this.enterpriseFormList = enterpriseFormList;
     }
 
     @Override

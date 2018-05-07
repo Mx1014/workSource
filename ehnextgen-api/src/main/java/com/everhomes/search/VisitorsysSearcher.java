@@ -22,13 +22,13 @@ public interface VisitorsysSearcher {
 
     /**
      * 同步预约/访客至es
-     * @param baseVisitorDTO
+     * @param object
      */
-    void feedDoc(BaseVisitorDTO baseVisitorDTO);
+    void feedDoc(Object object);
 
     /**
      *  搜索预约
-     * @param cmd
+     * @param params
      * @return
      */
     ListBookedVisitorsResponse searchVisitors(ListBookedVisitorParams params);
@@ -37,4 +37,16 @@ public interface VisitorsysSearcher {
      * 重新同步es预约
      */
     void syncVisitorsFromDb(Integer namespaceId);
+
+    /**
+     * 同步到es
+     * @param visitorId
+     */
+    void syncVisitor(Integer namespaceId,Long visitorId);
+
+    /**
+     * 同步到es
+     * @param visitor
+     */
+    void syncVisitor(Object visitor);
 }

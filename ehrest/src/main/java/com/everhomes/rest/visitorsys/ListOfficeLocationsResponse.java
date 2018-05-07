@@ -9,13 +9,21 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: (选填)下一页锚点</li>
- * <li>visitorDtoList: (必填)访客/预约列表，{@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
+ * <li>officeLocationList: (必填)访客/预约列表，{@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
  * </ul>
  */
 public class ListOfficeLocationsResponse {
     private Long nextPageAnchor;
     @ItemType(BaseOfficeLocationDTO.class)
     private List<BaseOfficeLocationDTO> officeLocationList;
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
+    }
 
     public List<BaseOfficeLocationDTO> getOfficeLocationList() {
         return officeLocationList;

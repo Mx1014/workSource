@@ -34,6 +34,8 @@ import java.util.List;
  * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
  * <li>visitorPicUri: (选填)访客头像url</li>
  * <li>formJsonValue: (选填)表单提交json值</li>
+ * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
+ * <li>visitorSignCharacter: (选填)访客签名字符串</li>
  * <li>enterpriseFormList: (选填)企业自定义字段值，{@link com.everhomes.rest.visitorsys.ui.BaseFormDTO}</li>
  * </ul>
  */
@@ -48,6 +50,8 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
 
     private String visitorPicUri;
     private String formJsonValue;
+    private String visitorSignUri;
+    private String visitorSignCharacter;
     @ItemType(BaseFormDTO.class)
     private List<BaseFormDTO> enterpriseFormList;
 
@@ -121,6 +125,22 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
 
     public void setFormJsonValue(String formJsonValue) {
         this.formJsonValue = formJsonValue;
+    }
+
+    public String getVisitorSignUri() {
+        return visitorSignUri;
+    }
+
+    public void setVisitorSignUri(String visitorSignUri) {
+        this.visitorSignUri = visitorSignUri;
+    }
+
+    public String getVisitorSignCharacter() {
+        return visitorSignCharacter;
+    }
+
+    public void setVisitorSignCharacter(String visitorSignCharacter) {
+        this.visitorSignCharacter = visitorSignCharacter;
     }
 
     public List<BaseFormDTO> getEnterpriseFormList() {

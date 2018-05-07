@@ -24,8 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import scala.Int;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,11 @@ import java.util.Map;
 public class VisitorsysSearcherImpl extends AbstractElasticSearch implements VisitorsysSearcher{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VisitorsysSearcherImpl.class);
+
+    private static final String[] syncFields = {"namespaceId","ownerType","ownerId","id",
+            "visitorName","followUpNumbers","visitorPhone","visitReasonId","visitReason",
+            "inviterId","inviterName","plannedVisitTime","visitTime","visitStatus",
+            "visitorType","enterpriseId","enterpriseName","officeLocationId","officeLocationName"};
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
 
@@ -52,34 +59,61 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         this.deleteById(String.valueOf(visitorId));
     }
 
+//    private void feedDoc(BaseVisitorDTO baseVisitorDTO) {
+//        try {
+//            XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+//            b.field("namespaceId",baseVisitorDTO.getNamespaceId());
+//            b.field("ownerType",baseVisitorDTO.getOwnerType());
+//            b.field("ownerId",baseVisitorDTO.getOwnerId());
+//            b.field("id",baseVisitorDTO.getId());
+//            b.field("visitorName",baseVisitorDTO.getVisitorName());
+//            b.field("followUpNumbers",baseVisitorDTO.getFollowUpNumbers());
+//            b.field("visitorPhone",baseVisitorDTO.getVisitorPhone());
+//            b.field("visitReasonId",baseVisitorDTO.getVisitReasonId());
+//            b.field("visitReason",baseVisitorDTO.getVisitReason());
+//            b.field("inviterId",baseVisitorDTO.getInviterId());
+//            b.field("inviterName",baseVisitorDTO.getInviterName());
+//            b.field("plannedVisitTime",baseVisitorDTO.getPlannedVisitTime());
+//            b.field("visitTime",baseVisitorDTO.getVisitTime());
+//            b.field("visitStatus",baseVisitorDTO.getVisitStatus());
+//            b.field("visitorType",baseVisitorDTO.getVisitorType());
+//            b.field("enterpriseId",baseVisitorDTO.getEnterpriseId());
+//            b.field("enterpriseName",baseVisitorDTO.getEnterpriseName());
+//            b.field("officeLocationId",baseVisitorDTO.getOfficeLocationId());
+//            b.field("officeLocationName",baseVisitorDTO.getOfficeLocationName());
+//            LOGGER.info(b.toString());
+//            feedDoc(String.valueOf(baseVisitorDTO.getId()), b);
+//        } catch (IOException ex) {
+//            LOGGER.error("Create visitorsys {} error",baseVisitorDTO.getId(),ex);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    "es Create visitorsys {} error",baseVisitorDTO.getId());
+//        }
+//    }
+
     @Override
-    public void feedDoc(BaseVisitorDTO baseVisitorDTO) {
+    public void feedDoc(Object object) {
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("namespaceId",baseVisitorDTO.getNamespaceId());
-            b.field("ownerType",baseVisitorDTO.getOwnerType());
-            b.field("ownerId",baseVisitorDTO.getOwnerId());
-            b.field("id",baseVisitorDTO.getId());
-            b.field("visitorName",baseVisitorDTO.getVisitorName());
-            b.field("followUpNumbers",baseVisitorDTO.getFollowUpNumbers());
-            b.field("visitorPhone",baseVisitorDTO.getVisitorPhone());
-            b.field("visitReasonId",baseVisitorDTO.getVisitReasonId());
-            b.field("visitReason",baseVisitorDTO.getVisitReason());
-            b.field("inviterId",baseVisitorDTO.getInviterId());
-            b.field("inviterName",baseVisitorDTO.getInviterName());
-            b.field("plannedVisitTime",baseVisitorDTO.getPlannedVisitTime());
-            b.field("visitTime",baseVisitorDTO.getVisitTime());
-            b.field("visitStatus",baseVisitorDTO.getVisitStatus());
-            b.field("visitorType",baseVisitorDTO.getVisitorType());
-            b.field("enterpriseId",baseVisitorDTO.getEnterpriseId());
-            b.field("enterpriseName",baseVisitorDTO.getEnterpriseName());
-            b.field("officeLocationId",baseVisitorDTO.getOfficeLocationId());
-            b.field("officeLocationName",baseVisitorDTO.getOfficeLocationName());
-            feedDoc(String.valueOf(baseVisitorDTO.getId()), b);
-        } catch (IOException ex) {
-            LOGGER.error("Create visitorsys {} error",baseVisitorDTO.getId(),ex);
+            String idstring = null;
+            for (String syncField : syncFields) {
+                String methodName = "get"+ syncField.substring(0,1).toUpperCase()+syncField.substring(1,syncField.length());
+                Method method = object.getClass().getMethod(methodName);
+                Object result = method.invoke(object);
+                if(result instanceof Timestamp){
+                    b.field(syncField,((Timestamp)result).getTime());
+                }else {
+                    b.field(syncField, result);
+                }
+                if(syncField.equals("id")){
+                    idstring=result.toString();
+                }
+            }
+            LOGGER.info(b.toString());
+            feedDoc(String.valueOf(idstring), b);
+        } catch (Exception ex) {
+            LOGGER.error("Create visitorsys {} error",object.toString(),ex);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "es Create visitorsys {} error",baseVisitorDTO.getId());
+                    "es Create visitorsys "+object+" error");
         }
     }
 
@@ -273,5 +307,16 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }
             params.setPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         }
+    }
+
+    @Override
+    public void syncVisitor(Integer namespaceId,Long visitorId) {
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(namespaceId, visitorId);
+        feedDoc(visitor);
+    }
+
+    @Override
+    public void syncVisitor(Object visitor) {
+        feedDoc(visitor);
     }
 }

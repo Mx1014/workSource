@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -58,10 +59,21 @@ public class VisitorSysVisitReasonProviderImpl implements VisitorSysVisitReasonP
 	}
 	
 	@Override
-	public List<VisitorSysVisitReason> listVisitorSysVisitReason() {
-		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
+	@Cacheable(value="listVisitorSysVisitReason", key="#namespaceId")
+	public List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId) {
+		List<VisitorSysVisitReason> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
+				.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_VISIT_REASON.STATUS.eq((byte)2))
 				.orderBy(Tables.EH_VISITOR_SYS_VISIT_REASON.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitReason.class));
+		if(list==null || list.size()==0){
+			return  getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
+					.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(0))
+					.and(Tables.EH_VISITOR_SYS_VISIT_REASON.STATUS.eq((byte)2))
+					.orderBy(Tables.EH_VISITOR_SYS_VISIT_REASON.ID.asc())
+					.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitReason.class));
+		}
+		return list;
 	}
 	
 	private EhVisitorSysVisitReasonDao getReadWriteDao() {

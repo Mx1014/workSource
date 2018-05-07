@@ -13,4 +13,5 @@ public interface VisitorSysConfigurationProvider {
 
 	List<VisitorSysConfiguration> listVisitorSysConfiguration();
 
+	VisitorSysConfiguration findVisitorSysConfigurationByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

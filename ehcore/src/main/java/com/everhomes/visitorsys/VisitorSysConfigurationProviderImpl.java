@@ -63,7 +63,21 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 				.orderBy(Tables.EH_VISITOR_SYS_CONFIGURATIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysConfiguration.class));
 	}
-	
+
+	@Override
+	public VisitorSysConfiguration findVisitorSysConfigurationByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		List<VisitorSysConfiguration> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CONFIGURATIONS)
+				.where(Tables.EH_VISITOR_SYS_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_CONFIGURATIONS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_CONFIGURATIONS.OWNER_ID.eq(ownerId))
+				.orderBy(Tables.EH_VISITOR_SYS_CONFIGURATIONS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysConfiguration.class));
+		if(list==null||list.size()==0){
+			return new VisitorSysConfiguration();
+		}
+		return list.get(0);
+	}
+
 	private EhVisitorSysConfigurationsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
