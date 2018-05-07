@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
@@ -16,6 +17,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.customer.CustomerDynamicSheetClass;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
@@ -104,9 +106,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private OrganizationProvider organizationProvider;
 
-
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -169,6 +173,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
                 }
             });
+            //增加管理员设置
+            if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
+                DynamicField df = new DynamicField();
+                df.setFieldName("customerAdmin");
+                df.setDisplayName("企业管理员");
+                dynamicFields.add(df);
+            }
         }
 
         ds.setDynamicFields(dynamicFields);
@@ -206,6 +217,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         enterpriseCustomer.setNamespaceId(namespaceId);
                         enterpriseCustomer.setCommunityId(communityId);
                         enterpriseCustomer.setCreatorUid(uid);
+                        String customerAdminString = "";
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -249,7 +261,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
+                                    if(!"customerAdmin".equals(column.getFieldName())){
+                                        setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
+                                    }else {
+                                        customerAdminString = column.getValue();
+                                    }
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
                                     failedNumber ++;
@@ -295,6 +311,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
                             customerSearcher.feedDoc(enterpriseCustomer);
+                            //这里还需要增加企业管理员的record和role 呵
+                            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
                         }
                         break;
                     case CUSTOMER_TAX:
@@ -792,6 +810,32 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
             response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
+        }
+    }
+
+    private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
+        List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
+        if (StringUtils.isNotEmpty(customerAdminString)) {
+            String[] adminStrings = customerAdminString.split("，");
+            if (adminStrings.length > 0) {
+                for (int i = 0; i < adminStrings.length; i++) {
+                    String[] adminInfo = adminStrings[i].split("（");
+                    String contactName = adminInfo[0];
+                    String contactToken = adminInfo[1];
+                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+                    createOrganizationAdminCommand.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                    createOrganizationAdminCommand.setContactName(contactName);
+                    createOrganizationAdminCommand.setContactToken(contactToken);
+                    cmds.add(createOrganizationAdminCommand);
+                }
+            }
+        }
+        if (cmds.size() > 0) {
+            cmds.forEach((c) -> {
+                rolePrivilegeService.createOrganizationAdmin(c);
+                //增加record
+                customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), c.getContactToken());
+            });
         }
     }
 
