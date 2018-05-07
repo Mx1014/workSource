@@ -13,7 +13,7 @@ import java.util.List;
  * <li>serviceModuleApps: 模块应用列表，参考{@link ServiceModuleAppDTO}</li>
  * </ul>
  */
-public class ListServiceModuleAppsByOrgIdResponse {
+public class ListServiceModuleAppsByOrganizationIdResponse {
 
 	@ItemType(ServiceModuleAppDTO.class)
 	private List<ServiceModuleAppDTO> serviceModuleApps;

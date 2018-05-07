@@ -80,12 +80,12 @@ public class ServiceModuleAppController extends ControllerBase {
 
 	/**
 	 * <p>查询公司应用，按照类型、是否安装等条件查询</p>
-	 * <b>URL: /servicemoduleapp/listServiceModuleApps</b>
+	 * <b>URL: /servicemoduleapp/listServiceModuleAppsByOrganizationId</b>
 	 */
-	@RequestMapping("listServiceModuleApps")
-	@RestReturn(value=ListServiceModuleAppsByOrgIdResponse.class)
-	public RestResponse listServiceModuleAppsByOrganization(ListServiceModuleAppsByOrgIdCommand cmd) {
-		ListServiceModuleAppsByOrgIdResponse res = serviceModuleAppService.listServiceModuleAppsByOrgId(cmd);
+	@RequestMapping("listServiceModuleAppsByOrganizationId")
+	@RestReturn(value=ListServiceModuleAppsByOrganizationIdResponse.class)
+	public RestResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd) {
+		ListServiceModuleAppsByOrganizationIdResponse res = serviceModuleAppService.listServiceModuleAppsByOrganizationId(cmd);
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

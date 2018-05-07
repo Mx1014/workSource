@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>keyword: 搜索字段</li>
  * </ul>
  */
-public class ListServiceModuleAppsByOrgIdCommand {
+public class ListServiceModuleAppsByOrganizationIdCommand {
 
 	private Integer namespaceId;
 	private Long orgId;

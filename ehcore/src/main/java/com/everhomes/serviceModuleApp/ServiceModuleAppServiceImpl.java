@@ -296,7 +296,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public ListServiceModuleAppsByOrgIdResponse listServiceModuleAppsByOrgId(ListServiceModuleAppsByOrgIdCommand cmd) {
+	public ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd) {
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
 
@@ -328,7 +328,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 		}
 
-		ListServiceModuleAppsByOrgIdResponse response = new  ListServiceModuleAppsByOrgIdResponse();
+		ListServiceModuleAppsByOrganizationIdResponse response = new  ListServiceModuleAppsByOrganizationIdResponse();
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
