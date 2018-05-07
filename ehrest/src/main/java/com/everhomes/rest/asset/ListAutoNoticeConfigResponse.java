@@ -10,18 +10,18 @@ import java.util.List;
  */
 /**
  *<ul>
- * <li>noticeDays:数字列表，催缴的设置</li>
+ * <li>configs:催缴的设置列表,参考{@link com.everhomes.rest.asset.NoticeConfig}</li>
  *</ul>
  */
 public class ListAutoNoticeConfigResponse {
-    @ItemType(Integer.class)
-    private List<Integer> noticeDays;
+    @ItemType(NoticeConfig.class)
+    private List<NoticeConfig> configs;
 
-    public List<Integer> getNoticeDays() {
-        return noticeDays;
+    public List<NoticeConfig> getConfigs() {
+        return configs;
     }
 
-    public void setNoticeDays(List<Integer> noticeDays) {
-        this.noticeDays = noticeDays;
+    public void setConfigs(List<NoticeConfig> configs) {
+        this.configs = configs;
     }
 }

@@ -4,6 +4,9 @@ package com.everhomes.rest.asset;
 /**
  * Created by Wentian Wang on 2018/5/7.
  */
+
+import java.util.List;
+
 /**
  *<ul>
  * <li>dayRespectToDueDay: 距离欠费日期的天数</li>
@@ -19,23 +22,15 @@ public class NoticeConfig {
     private String dayRespectToDueDay;
     private Long appNoticeTemplateId;
     private Long msgNoticeTemplateId;
-    private Byte noticeObjType;
-    private Long noticeObjId;
+    private List<NoticeObj> noticeObjs;
 
-    public Byte getNoticeObjType() {
-        return noticeObjType;
+
+    public List<NoticeObj> getNoticeObjs() {
+        return noticeObjs;
     }
 
-    public void setNoticeObjType(Byte noticeObjType) {
-        this.noticeObjType = noticeObjType;
-    }
-
-    public Long getNoticeObjId() {
-        return noticeObjId;
-    }
-
-    public void setNoticeObjId(Long noticeObjId) {
-        this.noticeObjId = noticeObjId;
+    public void setNoticeObjs(List<NoticeObj> noticeObjs) {
+        this.noticeObjs = noticeObjs;
     }
 
     public Byte getDayType() {
