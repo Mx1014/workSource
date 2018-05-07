@@ -1573,6 +1573,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listPMOrganizations")
     @RestReturn(value = ListPMOrganizationsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
         RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
