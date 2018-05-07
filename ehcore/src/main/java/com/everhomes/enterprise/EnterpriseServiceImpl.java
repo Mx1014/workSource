@@ -1062,7 +1062,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                 //创建一个OrganizationWorkPlaces类的对象
                 OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
                 //将数据封装在对象OrganizationWorkPlaces中
-                organizationWorkPlaces.setCommunityId(cmd.getCommunityId());
+                organizationWorkPlaces.setOrganizationId(cmd.getEnterpriseId());
                 organizationWorkPlaces.setCommunityId(cmd.getCommunityId());
                 //调用enterpriseProvider接口中的deleteEnterpriseByOrgIdAndCommunityId(OrganizationWorkPlaces organizationWorkPlaces)方法，
                 //将表eh_organization_workPlaces中的数据进行删除
