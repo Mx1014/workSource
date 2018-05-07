@@ -13217,7 +13217,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organization.setId(cmd.getOrganizationId());
                 organization.setAdminTargetId(id);
                 //更新eh_organizations表中的信息
-                organizationProvider.updateOrganization(organization);
+                organizationProvider.updateOrganizationSuperAdmin(organization);
             }
         }
 

@@ -120,6 +120,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
     }
 
+    /**
+     * 根据organizationId来更改超级管理员
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationSuperAdmin(Organization organization){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID,organization.getAdminTargetId())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
+    }
+
     @Override
     public void updateUserOrganization(UserOrganizations userOrganization) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2704,7 +2716,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())
                 .set(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME,organizationDetail.getDisplayName())
                 .set(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE,organizationDetail.getMemberRange())
-                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationDetail.getOrganizationId()));
+                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationDetail.getOrganizationId())).execute();
     }
 
     @Override

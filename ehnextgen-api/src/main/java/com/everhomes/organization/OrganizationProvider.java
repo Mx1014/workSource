@@ -671,4 +671,10 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword);
+
+	/**
+	 * 根据organizationId来更改超级管理员
+	 * @param organization
+	 */
+	void updateOrganizationSuperAdmin(Organization organization);
 }
