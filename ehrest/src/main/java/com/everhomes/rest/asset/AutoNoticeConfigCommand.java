@@ -13,17 +13,10 @@ public class AutoNoticeConfigCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    @ItemType(Integer.class)
-    private List<Integer> configDays;
+//    @ItemType(Integer.class)
+//    private List<Integer> configDays;
     private Long organizationId;
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
+    private List<NoticeConfig> configs;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -49,11 +42,19 @@ public class AutoNoticeConfigCommand {
         this.ownerId = ownerId;
     }
 
-    public List<Integer> getConfigDays() {
-        return configDays;
+    public List<NoticeConfig> getConfigs() {
+        return configs;
     }
 
-    public void setConfigDays(List<Integer> configDays) {
-        this.configDays = configDays;
+    public void setConfigs(List<NoticeConfig> configs) {
+        this.configs = configs;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
