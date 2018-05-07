@@ -531,13 +531,14 @@ public class CustomerServiceImpl implements CustomerService {
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
-        // 同步到企业管理中   v3.2
-        OrganizationDTO organizationDTO = createOrganization(customer);
-        customer.setOrganizationId(organizationDTO.getId());
-
-        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        // 同步到企业管理中   v3.2  現在改成已成交客户才同步  入口： 合同 、 入驻信息、excel
+        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+        if (levelItem != null && "已成交客户".equals(levelItem.getItemDisplayName())) {
+            OrganizationDTO organizationDTO = createOrganization(customer);
+            customer.setOrganizationId(organizationDTO.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        }
         enterpriseCustomerSearcher.feedDoc(customer);
-
         return convertToDTO(customer);
     }
 
@@ -2095,6 +2096,13 @@ public class CustomerServiceImpl implements CustomerService {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }else {
+                //这里增加入驻信息后自动同步到企业管理
+                OrganizationDTO organizationDTO = createOrganization(customer);
+                customer.setOrganizationId(organizationDTO.getId());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+                updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
     }
@@ -3464,7 +3472,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNGER_CREATE, cmd.getOwnerId(), cmd.getCommunityId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_SET, cmd.getOwnerId(), cmd.getCommunityId());
         //用customerId 找到企业管理中的organizationId
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
@@ -3479,7 +3487,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_DELETE, cmd.getOwnerId(), cmd.getCommunityId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_SET, cmd.getOwnerId(), cmd.getCommunityId());
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         //删除客户管理中的管理员记录
         enterpriseCustomerProvider.deleteEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactToken());
@@ -3491,7 +3499,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_LIST, cmd.getOwnerId(), cmd.getCommunityId());
+//        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_LIST, cmd.getOwnerId(), cmd.getCommunityId());
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         List<OrganizationContactDTO> result = new ArrayList<>();
         // 旧版模式导致存在customer 和organization record不一致的问题

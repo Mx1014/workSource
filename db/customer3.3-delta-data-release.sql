@@ -3,16 +3,10 @@ DELETE FROM eh_service_modules WHERE id = 33000;
 DELETE  FROM  eh_service_module_apps WHERE  module_id = 33000;
 
 -- 企业客户管理增加的权限 将企业管理中的管理员作为权限项  by jiarui
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21115', '0', '查看管理员', '企业客户管理 查看管理员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21116', '0', '新增管理员', '企业客户管理 新增管理员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21117', '0', '修改管理员', '企业客户管理 修改管理员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21118', '0', '删除管理员', '企业客户管理 删除管理员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21115', '0', '设置管理员', '企业客户管理 设置管理员', NULL);
 
 SET  @id = (SELECT  max(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21115', '查看管理员', '14', now());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21116', '查看管理员', '15', now());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21117', '查看管理员', '16', now());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21118', '查看管理员', '17', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21110', '0', '21115', '设置管理员', '14', now());
 
 
 -- 企业客户类型由必选更改成非必选 合并动态表单多个字段   by jiarui
