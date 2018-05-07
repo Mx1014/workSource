@@ -73,7 +73,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         jo.put("PayCostMachineOrderId","");
 
         String result = doJsonPost(PARKING_PAY_PARKING,jo.toJSONString());
-        FujicaResponse<FujicaJsonParam> entity = JSONObject.parseObject(result, new TypeReference<FujicaResponse<FujicaJsonParam>>() {});
+        FujicaResponse entity = JSONObject.parseObject(result, FujicaResponse.class);
         ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
         if(entity != null  && entity.isSuccess() ) {
             return true;
@@ -98,10 +98,10 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         String parkingCode = configProvider.getValue("parking.fujica.parkingCode","17000104590501");
         jo.put("ParkingCode",parkingCode);
         String result = doJsonPost(PARKING_GET_PAY_INFO,jo.toJSONString());
-        FujicaResponse<FujicaJsonParam> entity = JSONObject.parseObject(result, new TypeReference<FujicaResponse<FujicaJsonParam>>() {});
+        FujicaResponse entity = JSONObject.parseObject(result, FujicaResponse.class);
         ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
         if(entity != null  && entity.isSuccess() && entity.getDataType() == 3) {//3是临时车
-            FujicaJsonParam param = entity.getJsonParam();
+            FujicaJsonParam param = JSONObject.parseObject(entity.getJsonParam(),FujicaJsonParam.class);
             dto.setPlateNumber(param.getCarNo());
             dto.setEntryTime(getTimestamp(param.getBeginTime()));
             long now = System.currentTimeMillis();
@@ -118,10 +118,11 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
 
 
     public static void main (String[] args){
+
         String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
         JSONObject jo = new JSONObject();
         jo.put("ParkingCode","17000104590501");
-        jo.put("CarNo","湘A4XNF6");
+        jo.put("CarNo","湘A4XNF5");
         String json = jo.toJSONString();
         String result = "";
         BufferedReader reader = null;
@@ -193,6 +194,9 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             }
         }
         System.out.println(result);
+        FujicaResponse response = JSONObject.parseObject(result, FujicaResponse.class);
+        FujicaJsonParam param = JSONObject.parseObject(response.getJsonParam(),FujicaJsonParam.class);
+        System.out.println(param.getCarNo());
     }
 
     private  String doJsonPost(String urlPath, String json) {
@@ -215,7 +219,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
                 "hOdAqJv1W6ECoB75YhSxkggVp5pPtlid+0AWc3n/v74QLwCo86aXAkEAlxY3hoxQ" +
                 "jJiCjD2PbL0GLkMKNBqJgLcDWqeoHcal+iY2Fpr3U/iCJZNoBuovC2Qvc5J1y61P" +
                 "ojrvFNyFMEkWTQ==");
-        urlPath = configProvider.getValue("parking.fujica.url","http://mops-test.fujica.com.cn:8021/Api/Park")+urlPath;
+        urlPath = configProvider.getValue("parking.fujica.url","http://mops-test.fujica.com.cn:8021/Api")+urlPath;
         String time = getTimestamp();
         TreeMap<String, String> map = new TreeMap();
         map.put("param", json);

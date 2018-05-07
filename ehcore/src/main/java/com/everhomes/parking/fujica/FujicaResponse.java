@@ -2,8 +2,8 @@ package com.everhomes.parking.fujica;
 
 import com.everhomes.util.StringHelper;
 
-public class FujicaResponse<T> {
-    private T JsonParam;
+public class FujicaResponse {
+    private String JsonParam;
     private Byte DataType;
     private Boolean IsSuccess;
     private Integer MessageCode;
@@ -16,11 +16,11 @@ public class FujicaResponse<T> {
         return false;
     }
 
-    public T getJsonParam() {
+    public String getJsonParam() {
         return JsonParam;
     }
 
-    public void setJsonParam(T jsonParam) {
+    public void setJsonParam(String jsonParam) {
         JsonParam = jsonParam;
     }
 
