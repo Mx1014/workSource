@@ -1473,6 +1473,7 @@ public class AssetServiceImpl implements AssetService {
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
+        //todo 这里存储催缴的对象和模板使用信息
         assetProvider.autoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getConfigDays());
     }
 
@@ -2838,6 +2839,7 @@ public class AssetServiceImpl implements AssetService {
      * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
+    //todo +更改为有催缴新设置的才进行催缴，+催缴设置自带了模板的id
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
