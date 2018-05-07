@@ -32,12 +32,12 @@ public class FujicaResponse {
         DataType = dataType;
     }
 
-    public Boolean getSuccess() {
+    public Boolean getIsSuccess() {
         return IsSuccess;
     }
 
-    public void setSuccess(Boolean success) {
-        IsSuccess = success;
+    public void setIsSuccess(Boolean IsSuccess) {
+        IsSuccess = IsSuccess;
     }
 
     public Integer getMessageCode() {
