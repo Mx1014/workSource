@@ -123,6 +123,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
@@ -356,5 +357,5 @@ public interface CustomerService {
 
     void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
 
-    void listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
+    List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
 }

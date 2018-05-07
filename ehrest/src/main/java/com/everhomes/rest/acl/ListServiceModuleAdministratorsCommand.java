@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
  * <li>pageSize: 页数</li>
  * <li>communityid: 小区id</li>
  * <li>namespaceId: namespaceId</li>
+ * <li>customerId: 企业客户管理id</li>
  * </ul>
  */
 public class ListServiceModuleAdministratorsCommand {
@@ -43,6 +44,8 @@ public class ListServiceModuleAdministratorsCommand {
     private Integer namespaceId;
 
     private Long communityId;
+
+    private Long customerId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -122,6 +125,14 @@ public class ListServiceModuleAdministratorsCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     @Override

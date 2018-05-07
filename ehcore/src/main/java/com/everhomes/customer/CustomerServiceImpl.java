@@ -3466,28 +3466,47 @@ public class CustomerServiceImpl implements CustomerService {
     public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNGER_CREATE, cmd.getOwnerId(), cmd.getCommunityId());
         //用customerId 找到企业管理中的organizationId
-        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if (customer != null) {
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             rolePrivilegeService.createOrganizationAdmin(cmd);
-        }else {
+        } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(),cmd.getContactName(),cmd.getContactToken());
+            // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), cmd.getContactToken());
         }
     }
 
     @Override
     public void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_DELETE, cmd.getOwnerId(), cmd.getCommunityId());
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         //删除客户管理中的管理员记录
-        enterpriseCustomerProvider.deleteEnterpriseCustomerAdminRecord(cmd.getCustomerId(),cmd.getContactToken());
-        //删除企业管理中的管理员权限
-        rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+        enterpriseCustomerProvider.deleteEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactToken());
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
+            //删除企业管理中的管理员权限
+            rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+        }
     }
 
     @Override
-    public void listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd) {
+    public List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_LIST, cmd.getOwnerId(), cmd.getCommunityId());
-        rolePrivilegeService.listOrganizationAdministrators(cmd);
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        List<OrganizationContactDTO> result = new ArrayList<>();
+        // 旧版模式导致存在customer 和organization record不一致的问题
+        List<OrganizationContactDTO> customerAdminContacts = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId());
+        //reflect map
+        if (null == customerAdminContacts || customerAdminContacts.size() == 0) {
+            cmd.setOrganizationId(customer.getOrganizationId());
+            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
+            //复制organization管理员到企业客户管理中来
+            if (result != null && result.size() > 0) {
+                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(),admin.getContactName(),admin.getContactToken()));
+            }
+        }else {
+            result = customerAdminContacts;
+        }
+        return result;
     }
 }

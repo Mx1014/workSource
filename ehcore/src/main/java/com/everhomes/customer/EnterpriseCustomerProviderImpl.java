@@ -1961,11 +1961,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     @Override
     public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         CustomerAdminRecord record = new CustomerAdminRecord();
         record.setContactName(contactName);
         record.setContactToken(contactToken);
         record.setCustomerId(customerId);
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         record.setCustomerId(UserContext.currentUserId());
@@ -1980,6 +1980,5 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken)
                         .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
                 .execute();
-
     }
 }

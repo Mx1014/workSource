@@ -3,7 +3,12 @@ package com.everhomes.customer;
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 
 import java.math.BigDecimal;
@@ -161,4 +166,6 @@ public interface EnterpriseCustomerProvider {
     void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken);
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
+
+    List<OrganizationContactDTO> listEnterpriseCustomerAdminRecords(Long customerId);
 }
