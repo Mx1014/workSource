@@ -37,7 +37,7 @@ public class FujicaResponse {
     }
 
     public void setIsSuccess(Boolean IsSuccess) {
-        IsSuccess = IsSuccess;
+        this.IsSuccess = IsSuccess;
     }
 
     public Integer getMessageCode() {
