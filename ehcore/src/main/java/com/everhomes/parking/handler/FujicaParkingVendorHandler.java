@@ -111,6 +111,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setDelayTime(param.getOverTime());
             dto.setPrice(param.getActualAmount());
             dto.setOriginalPrice(param.getParkingFee());
+            dto.setOrderToken(" ");
         }
         return dto;
     }
@@ -196,7 +197,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
         System.out.println(result);
         FujicaResponse response = JSONObject.parseObject(result, FujicaResponse.class);
         FujicaJsonParam param = JSONObject.parseObject(response.getJsonParam(),FujicaJsonParam.class);
-        System.out.println(param.getCarNo());
+        System.out.println(response.toString());
     }
 
     private  String doJsonPost(String urlPath, String json) {
