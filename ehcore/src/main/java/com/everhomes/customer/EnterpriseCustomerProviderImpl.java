@@ -1,25 +1,6 @@
 package com.everhomes.customer;
 
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.*;
-
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.customer.*;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.varField.FieldParams;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -30,11 +11,76 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEntryInfosDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
+import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicatorStatistics;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
+import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerDepartureInfosRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEntryInfosRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -42,9 +88,34 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -1413,6 +1484,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
+        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.CREATE_TIME.desc());
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
@@ -1486,7 +1558,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
 	@Override
-	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
+	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
 		CustomerEvent event = new CustomerEvent(); 
 		event.setId(id);
@@ -1495,7 +1567,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		event.setCustomerId(customer.getId());
 		event.setCustomerName(customer.getName());
 		event.setContactName(customer.getContactName());
-		String content = null;
+        event.setDeviceType(deviceType);
+        String content = null;
 		switch(i){
 		case 1 : 
 			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
@@ -1649,11 +1722,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		assert(customer.getId() != null);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
-        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME, "")
-        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
-        	   .execute();
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.update(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
 	}
 
@@ -1841,4 +1911,20 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
         return result.get(0).getVersion();
     }
+
+    @Override
+    public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhAuthorizationRelationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATION_RELATIONS);
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+        if (appId != null) {
+            query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.APP_ID.eq(appId));
+        }
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.ALL_PROJECT_FLAG.eq(AllFlag.ALL.getCode())
+                .or(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%")));
+        return query.fetchInto(AuthorizationRelation.class);
+    }
+
 }

@@ -1,0 +1,1 @@
+update eh_parking_lots SET order_tag=SUBSTR(id FROM 3 FOR 5);

@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType: 所属者type</li>
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
- * <li>pageAnchor: 下页锚点</li>
  * <li>dateStrBegin: 账期开始</li>
  * <li>dateStrEnd: 账期结束</li>
  * <li>targetName: 客户名称</li>

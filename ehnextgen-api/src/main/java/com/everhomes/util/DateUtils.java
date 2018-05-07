@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -168,6 +169,66 @@ public class DateUtils {
 			}
 			formatted = request.format(q);
 			return formatted;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * 将不明格式的日期转给指定格式的日期，如果所提供日期不是有效输入，返回null by wentian 2018/3/29
+	 * @param dateStr 不明格式的日期
+	 */
+	public static Calendar guessDateTimeFormatAndParse(String dateStr) {
+		if(StringUtils.isEmpty(dateStr)) return null;
+		// excel的写入和获取没有考虑日期格式问题，以恶心代码来应对恶心代码
+		SimpleDateFormat yyyyMMddDash = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy/MM/dd");
+		SimpleDateFormat yyyyMMDash = new SimpleDateFormat("yyyy-MM");
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy/MM");
+		SimpleDateFormat mdyy = new SimpleDateFormat("M/d/yy");
+		SimpleDateFormat myy = new SimpleDateFormat("M/yy");
+
+
+		String yyyyMMddDash_ = "^\\d{4}-\\d{2}-\\d{2}$";				 // 2018-02-12
+		String yyyyMMdd_ = "^\\d{4}/\\d{2}/\\d{2}$";                // 2018/12/31
+		String yyyyMMDash_ = "^\\d{4}-\\d{2}$";                      // 2018-02
+		String yyyyMM_ = "^\\d{4}/\\d{2}$";                   // 2018/12
+		String mdyy_ = "^\\d{1,2}/\\d{1,2}/\\d{2}$";            // 3/1/18
+		String myy_ = "^\\d{1,2}/\\d{2}$";            // 3/18
+		Pattern pattern1 = Pattern.compile(yyyyMMddDash_);
+		Pattern pattern2 = Pattern.compile(yyyyMMdd_);
+		Pattern pattern3 = Pattern.compile(yyyyMMDash_);
+		Pattern pattern4 = Pattern.compile(yyyyMM_);
+		Pattern pattern5 = Pattern.compile(mdyy_);
+		Pattern pattern6 = Pattern.compile(myy_);
+		Calendar calendar = Calendar.getInstance();
+		Date q = null;
+		String formatted = dateStr;
+		try{
+			if(pattern1.matcher(dateStr).matches()){
+				q = yyyyMMddDash.parse(dateStr);
+			}
+			else if(pattern2.matcher(dateStr).matches()){
+				q =yyyyMMdd.parse(dateStr);
+			}
+			else if(pattern3.matcher(dateStr).matches()){
+				q = yyyyMMDash.parse(dateStr);
+			}
+			else if(pattern4.matcher(dateStr).matches()){
+				q = yyyyMM.parse(dateStr);
+			}
+			else if(pattern5.matcher(dateStr).matches()){
+				q = mdyy.parse(dateStr);
+			}
+			else if(pattern6.matcher(dateStr).matches()){
+				q = myy.parse(dateStr);
+			}
+			else{
+				return null;
+			}
+			calendar.setTime(q);
+			return calendar;
 		}catch (Exception e){
 			e.printStackTrace();
 		}

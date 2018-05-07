@@ -73,9 +73,20 @@ public class OpenApiRedirectCiticbuyHandler implements OpenApiRedirectHandler {
             LOGGER.error("Encrypt data error", e);
         }
 
-        return UriComponentsBuilder.fromHttpUrl(redirectUrl)
-                .queryParam("param", encrypt)
-                .build().toUriString();
+        Map<String, Object> uriParams = new HashMap<>();
+        uriParams.put("param", encrypt);
+
+        return buildURLParams(redirectUrl, uriParams);
+    }
+
+    private String buildURLParams(String url, Map<String, Object> uriParams) {
+        StringBuilder urlSb = new StringBuilder(url).append("?");
+        uriParams.forEach((k, v) -> {
+            if (k != null && v != null) {
+                urlSb.append(k).append("=").append(String.valueOf(v)).append("&");
+            }
+        });
+        return urlSb.substring(0, urlSb.length() - 1);
     }
 
     private void initKey() {
