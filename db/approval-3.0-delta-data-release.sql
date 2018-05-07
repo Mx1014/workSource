@@ -1,6 +1,6 @@
 -- 审批3.0初始数据, 需先执行schema后执行此sql start.
 INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('1', '0', NULL, '0', '出勤休假', '1', 'DEFAULT', '1', '2018-04-28 09:00:00');
-INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('2', '0', NULL, '0', '组织人事', '1', 'DEFAULT', '1', '2018-04-28 09:00:00');
+-- INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('2', '0', NULL, '0', '组织人事', '1', 'DEFAULT', '1', '2018-04-28 09:00:00');
 INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('3', '0', NULL, '0', '行政办公', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
 INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('4', '0', NULL, '0', '市场商务', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
 INSERT INTO `eh_enterprise_approval_groups` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `status`, `group_attribute`, `operator_uid`, `operator_time`) VALUES ('5', '0', NULL, '0', '其他', '1', 'CUSTOMIZE', '1', '2018-04-28 09:00:00');
@@ -19,10 +19,10 @@ INSERT INTO `eh_enterprise_approval_templates` (`id`, `namespace_id`, `owner_id`
 INSERT INTO `eh_enterprise_approval_templates` (`id`, `namespace_id`, `owner_id`, `owner_type`, `organization_id`, `module_id`, `module_type`, `project_id`, `project_type`, `form_template_id`, `support_type`, `approval_name`, `group_id`, `modify_flag`, `delete_flag`, `icon_uri`, `update_time`, `create_time`, `approval_attribute`) VALUES ('12', '0', '0', 'EhOrganizations', '0', '52000', 'any-module', '0', NULL, '0', '0', '备用金申请', '4', '1', '1', '', '2018-04-17 21:11:45', '2018-04-17 21:11:43', 'CUSTOMIZE');
 
 UPDATE `eh_general_approvals` SET `integral_tag1`='5' WHERE `module_id`='52000';
-UPDATE `eh_general_approvals` SET `integral_tag1`='1' WHERE `approval_attribute`='ASK_FOR_LEAVE';
-UPDATE `eh_general_approvals` SET `integral_tag1`='1' WHERE `approval_attribute`='OVERTIME';
-UPDATE `eh_general_approvals` SET `integral_tag1`='1' WHERE `approval_attribute`='BUSINESS_TRIP';
-UPDATE `eh_general_approvals` SET `integral_tag1`='1' WHERE `approval_attribute`='GO_OUT';
-UPDATE `eh_general_approvals` SET `integral_tag1`='1' WHERE `approval_attribute`='ABNORMAL_PUNCH';
+UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '请假申请' WHERE `approval_attribute`='ASK_FOR_LEAVE';
+UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '加班申请' WHERE `approval_attribute`='OVERTIME';
+UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '出差申请' WHERE `approval_attribute`='BUSINESS_TRIP';
+UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '外出申请' WHERE `approval_attribute`='GO_OUT';
+UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '异常申请' WHERE `approval_attribute`='ABNORMAL_PUNCH';
 
 -- 审批3.0 end.

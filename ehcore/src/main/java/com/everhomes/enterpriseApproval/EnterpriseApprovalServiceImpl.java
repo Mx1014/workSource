@@ -662,7 +662,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
         Long userId = UserContext.currentUserId();
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovals(cmd).getGroups();
-        if(groups == null || groups.size() == 0)
+        if (groups == null || groups.size() == 0)
             return res;
 
         //  get the user's info
@@ -682,12 +682,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     //  filter function, take the address of the variable 'group' to assign a new value
-    private void filterTheApprovalByScope(EnterpriseApprovalGroupDTO group, OrganizationMember member){
+    private void filterTheApprovalByScope(EnterpriseApprovalGroupDTO group, OrganizationMember member) {
         List<EnterpriseApprovalDTO> results = new ArrayList<>();
-        if(group.getApprovals() == null || group.getApprovals().size() == 0)
+        if (group.getApprovals() == null || group.getApprovals().size() == 0)
             return;
-        for(EnterpriseApprovalDTO approval : group.getApprovals()){
-            if(generalApprovalService.checkTheApprovalScope(approval.getScopes(), member))
+        for (EnterpriseApprovalDTO approval : group.getApprovals()) {
+            if (generalApprovalService.checkTheApprovalScope(approval.getScopes(), member))
                 results.add(approval);
         }
         group.setApprovals(results);
