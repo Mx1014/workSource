@@ -1650,7 +1650,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("/deleteWorkPlaces/edit")
     @RestReturn(value = String.class)
-    public RestResponse deleteWorkPlacesByOrganizationId(UpdateWorkPlaceCommand cmd){
+    public RestResponse deleteWorkPlacesByOrganizationId(DeleteWorkPlacesCommand cmd){
         RestResponse response = new RestResponse();
         organizationService.deleteWorkPlacesByOrgId(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);

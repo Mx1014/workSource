@@ -723,6 +723,6 @@ public interface OrganizationService {
 	 * 根据组织ID来删除办公地点
 	 * @param cmd
 	 */
-	void deleteWorkPlacesByOrgId(UpdateWorkPlaceCommand cmd);
+	void deleteWorkPlacesByOrgId(DeleteWorkPlacesCommand cmd);
 
 }

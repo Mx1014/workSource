@@ -682,5 +682,5 @@ public interface OrganizationProvider {
 	 * 根据组织ID来删除该项目下的办公地点
 	 * @param organizationId
 	 */
-	void deleteWorkPlacesByOrgId(Long organizationId);
+	void deleteWorkPlacesByOrgId(Long organizationId,String workPlaceName,Long communityId);
 }

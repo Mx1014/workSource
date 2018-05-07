@@ -13275,12 +13275,12 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param cmd
      */
     @Override
-    public void deleteWorkPlacesByOrgId(UpdateWorkPlaceCommand cmd){
+    public void deleteWorkPlacesByOrgId(DeleteWorkPlacesCommand cmd){
         //1.首先需要对参数进行非空校验
         if(cmd.getOrganizationId() != null){
             //说明前端传过来的参数不为空，那么我们需要根据该organization_id来删除eh_communityAndBuilding_relationes
             //表中的关系，就表示的是将该项目下的该公司的办公地点删除了
-            organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId());
+            organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId(),cmd.getWorkPlaceName(),cmd.getCommunityId());
         }else{
             LOGGER.info("organizationId can not be null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "organizationId can not be null");
