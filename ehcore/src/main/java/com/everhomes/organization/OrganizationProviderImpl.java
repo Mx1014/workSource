@@ -60,6 +60,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -6365,9 +6366,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-        if(!StringUtils.isEmpty(keyword)){
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword +"%")
-                    .or(Tables.EH_ORGANIZATIONS.ID.eq(Long.parseLong(keyword))));
+        try {
+            Long aLong = Long.valueOf(keyword);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keyword)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
+            }
         }
 
         if (null != locator.getAnchor()) {
@@ -6404,10 +6409,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         if (locator.getAnchor() != null)
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
-        if (!StringUtils.isEmpty(keyword)) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword + "%")
-            .or(Tables.EH_ORGANIZATIONS.ID.eq(Long.valueOf(keyword))));
+
+        try {
+            Long aLong = Long.valueOf(keyword);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keyword)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
+            }
         }
+
         if (communityId != null) {
             query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
         }
