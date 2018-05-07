@@ -52,8 +52,8 @@ import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.InstallAppCommand;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrgIdCommand;
-import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrgIdResponse;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdResponse;
 import com.everhomes.rest.servicemoduleapp.UninstallAppCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -237,12 +237,12 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         }
         
         //remove all install apps
-        ListServiceModuleAppsByOrgIdCommand installAppsCmd = new ListServiceModuleAppsByOrgIdCommand();
+        ListServiceModuleAppsByOrganizationIdCommand installAppsCmd = new ListServiceModuleAppsByOrganizationIdCommand();
         installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
         installAppsCmd.setInstallFlag(TrueOrFalseFlag.TRUE.getCode());
         installAppsCmd.setNamespaceId(namespaceId);
-        installAppsCmd.setOrgId(organizationId);
-        ListServiceModuleAppsByOrgIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsCmd.setOrganizationId(organizationId);
+        ListServiceModuleAppsByOrganizationIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         if(installAppsResp.getServiceModuleApps().size() > 0) {
             for(ServiceModuleAppDTO appDTO: installAppsResp.getServiceModuleApps()) {
                 UninstallAppCommand uninstallCmd = new UninstallAppCommand();
@@ -250,7 +250,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
                 serviceModuleAppService.uninstallApp(uninstallCmd);       
             }
         }
-        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == 0);
         
         List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
@@ -270,7 +270,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             installCmd.setOrgId(organizationId);
             serviceModuleAppService.installApp(installCmd);
         }
-        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == communityOriginAppIds.size());
         
         CommunityType cType = CommunityType.COMMERCIAL;
@@ -354,12 +354,12 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         }
         
         //remove all install apps
-        ListServiceModuleAppsByOrgIdCommand installAppsCmd = new ListServiceModuleAppsByOrgIdCommand();
+        ListServiceModuleAppsByOrganizationIdCommand installAppsCmd = new ListServiceModuleAppsByOrganizationIdCommand();
         installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
         installAppsCmd.setInstallFlag(TrueOrFalseFlag.TRUE.getCode());
         installAppsCmd.setNamespaceId(namespaceId);
-        installAppsCmd.setOrgId(anotherOrgId);
-        ListServiceModuleAppsByOrgIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsCmd.setOrganizationId(anotherOrgId);
+        ListServiceModuleAppsByOrganizationIdResponse installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         if(installAppsResp.getServiceModuleApps().size() > 0) {
             for(ServiceModuleAppDTO appDTO: installAppsResp.getServiceModuleApps()) {
                 UninstallAppCommand uninstallCmd = new UninstallAppCommand();
@@ -367,7 +367,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
                 serviceModuleAppService.uninstallApp(uninstallCmd);       
             }
         }
-        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == 0);
         
         List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
@@ -387,7 +387,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             installCmd.setOrgId(anotherOrgId);
             serviceModuleAppService.installApp(installCmd);
         }
-        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrgId(installAppsCmd);
+        installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == communityOriginAppIds.size());
         
         List<Long> projectIds = new ArrayList<Long>();

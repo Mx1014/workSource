@@ -296,7 +296,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public ListServiceModuleAppsByOrgIdResponse listServiceModuleAppsByOrgId(ListServiceModuleAppsByOrgIdCommand cmd) {
+	public ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd) {
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
 
@@ -308,7 +308,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
-			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrgId());
+			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrganizationId());
 
 			ServiceModuleAppDTO dto = null;
 			//已安装的、未安装的、全部
@@ -328,7 +328,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 		}
 
-		ListServiceModuleAppsByOrgIdResponse response = new  ListServiceModuleAppsByOrgIdResponse();
+		ListServiceModuleAppsByOrganizationIdResponse response = new  ListServiceModuleAppsByOrganizationIdResponse();
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
