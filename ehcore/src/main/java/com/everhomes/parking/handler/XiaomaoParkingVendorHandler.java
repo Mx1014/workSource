@@ -2,9 +2,11 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.parking.*;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
+import com.everhomes.parking.yinxingzhijiexiaomao.YinxingzhijieXiaomaoTempCard;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
@@ -30,6 +32,9 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final String GET_CARD = "/park/getMonthCard";
     //办理月卡，续费
     private static final String OPEN_CARD = "/park/openMonthCard";
+    
+    //临时车
+    private static final String CHARGING = "/park/charging";
 
     private static final int SUCCESS = 1;
 
@@ -328,4 +333,32 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
         return dto;
     }
+    
+    @Override
+    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+        JSONObject param = new JSONObject();
+        param.put("plateNo",plateNumber);
+        String result = post(param, CHARGING);
+        YinxingzhijieXiaomaoTempCard tempCard = JSONObject.parseObject(result, new TypeReference<YinxingzhijieXiaomaoTempCard>() {});
+        ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+        if(tempCard != null  && tempCard.isSuccess()) {
+            dto.setPlateNumber(plateNumber);
+            dto.setEntryTime(Utils.strToLong(tempCard.getStartTime(),Utils.DateStyle.DATE_TIME));
+            long now = System.currentTimeMillis();
+            dto.setPayTime(now);
+            dto.setParkingTime(Integer.valueOf(String.valueOf((now-dto.getEntryTime())/60000L)));
+            dto.setDelayTime(15);
+            dto.setPrice(new BigDecimal(tempCard.getShouldPay()));
+            boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+            if(flag) {
+                dto.setPrice(new BigDecimal(0.01));
+            }
+            //feestate	缴费状态	int	0=无数据;2=免缴费;3=已缴费未超时;4=已缴费需续费;5=需要缴费
+            //这里需要干嘛，缴费完成，回调的时候，读取这个token，向停车场缴费需要这个参数。参考 payTempCardFee()
+            dto.setOrderToken(tempCard.getOrderId());
+            dto.setRemainingTime(tempCard.getTimeOut());
+        }
+        return dto;
+
+    }    
 }
