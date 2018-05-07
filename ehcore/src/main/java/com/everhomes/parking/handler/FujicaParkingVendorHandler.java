@@ -111,7 +111,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setDelayTime(param.getOverTime());
             dto.setPrice(param.getActualAmount());
             dto.setOriginalPrice(param.getParkingFee());
-            dto.setOrderToken(param.getCarNo());
+            dto.setOrderToken(param.getParkingCode());
         }
         return dto;
     }
