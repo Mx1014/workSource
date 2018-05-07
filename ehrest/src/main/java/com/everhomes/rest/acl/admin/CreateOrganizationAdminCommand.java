@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>organizationId: 机构id</li>
+ * <li>organizationId: 机构id(从customer中的organizationId拿)</li>
  * <li>contactToken: 手机号</li>
  * <li>contactName:  用户姓名</li>
  * <li>customerId:  customer organization之间的映射关系</li>

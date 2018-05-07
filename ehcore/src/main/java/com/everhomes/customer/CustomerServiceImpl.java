@@ -212,6 +212,7 @@ import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -232,6 +233,7 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
@@ -3475,13 +3477,21 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANNAGER_SET, cmd.getOwnerId(), cmd.getCommunityId());
         //用customerId 找到企业管理中的organizationId
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getContactToken());
+        String contactType = null;
+        if (null != userIdentifier) {
+            contactType = OrganizationMemberTargetType.USER.getCode();
+        } else {
+            contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+        }
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             rolePrivilegeService.createOrganizationAdmin(cmd);
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
         } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), cmd.getContactToken());
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
         }
     }
 
@@ -3503,18 +3513,41 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         List<OrganizationContactDTO> result = new ArrayList<>();
         // 旧版模式导致存在customer 和organization record不一致的问题
-        List<OrganizationContactDTO> customerAdminContacts = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId());
+        String contactType = null;
+        if (ActivationFlag.YES == ActivationFlag.fromCode(cmd.getActivationFlag())) {
+            contactType = OrganizationMemberTargetType.USER.getCode();
+        } else if (ActivationFlag.NO == ActivationFlag.fromCode(cmd.getActivationFlag())) {
+            contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+        }
+        List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), contactType);
         //reflect map
+        List<OrganizationContactDTO> customerAdminContacts = new ArrayList<>();
+        if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
+            customerAdminContacts = processOrganizationMembers(customerAdminRecords);
+        }
         if (null == customerAdminContacts || customerAdminContacts.size() == 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(),admin.getContactName(),admin.getContactToken()));
+                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken()));
             }
-        }else {
+        } else {
             result = customerAdminContacts;
         }
         return result;
+    }
+
+    private List<OrganizationContactDTO> processOrganizationMembers(List<CustomerAdminRecord> customerAdminRecords) {
+        List<OrganizationContactDTO> dtos = new ArrayList<>();
+        if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
+            customerAdminRecords.forEach((r) -> {
+                OrganizationContactDTO dto = new OrganizationContactDTO();
+                dto.setContactName(r.getContactName());
+                dto.setContactToken(r.getContactToken());
+                dtos.add(dto);
+            });
+        }
+        return dtos;
     }
 }

@@ -8,7 +8,6 @@ import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 
 import java.math.BigDecimal;
@@ -163,9 +162,9 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
 
-    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken);
+    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken);
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 
-    List<OrganizationContactDTO> listEnterpriseCustomerAdminRecords(Long customerId);
+    List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
 }

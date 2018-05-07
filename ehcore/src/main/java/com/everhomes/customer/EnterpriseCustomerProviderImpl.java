@@ -11,6 +11,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
@@ -22,6 +23,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.openapi.techpark.AllFlag;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.varField.FieldDTO;
@@ -1959,13 +1961,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName, String contactToken) {
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         CustomerAdminRecord record = new CustomerAdminRecord();
         record.setContactName(contactName);
         record.setContactToken(contactToken);
         record.setCustomerId(customerId);
+        record.setContactType(contactType);
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         record.setCustomerId(UserContext.currentUserId());
@@ -1977,8 +1980,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
-                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken)
-                        .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken).and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
                 .execute();
+    }
+
+    @Override
+    public List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId, String contactType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return  context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
+                .fetchInto(CustomerAdminRecord.class);
     }
 }
