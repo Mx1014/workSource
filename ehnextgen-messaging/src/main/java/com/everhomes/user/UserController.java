@@ -658,12 +658,12 @@ public class UserController extends ControllerBase {
 		long senderBoxSequence = this.userService.getNextStoreSequence(UserContext.current().getLogin(),
 				UserContext.current().getLogin().getNamespaceId(), message.getAppId());
 
-		cmd.getChannels().forEach((channel) -> {
+		// cmd.getChannels().forEach((channel) -> {
 			messagingService.routeMessage(UserContext.current().getLogin(),
 					cmd.getAppId() != null ? cmd.getAppId() : App.APPID_MESSAGING,
-							channel.getChannelType(), channel.getChannelToken(), message,
+							mainChannel.getChannelType(), mainChannel.getChannelToken(), message,
 							cmd.getDeliveryOption() != null ? cmd.getDeliveryOption() : 0);
-		});
+		// });
 
 		return new RestResponse(senderBoxSequence);
 	}
