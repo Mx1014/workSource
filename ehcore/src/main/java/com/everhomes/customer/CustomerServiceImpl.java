@@ -15,6 +15,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -1101,6 +1102,12 @@ public class CustomerServiceImpl implements CustomerService {
         if (dto.getCorpLogoUri() != null) {
             String contentUrl = contentServerService.parserUri(dto.getCorpLogoUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId());
             dto.setCorpLogoUrl(contentUrl);
+        }
+        List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(dto.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<String> postUris = new ArrayList<>();
+            attachments.forEach(a -> postUris.add(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId())));
+            dto.setPostUri(postUris);
         }
     }
 
@@ -3494,9 +3501,11 @@ public class CustomerServiceImpl implements CustomerService {
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
         }
-        customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        if (customer != null) {
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }
     }
 
     @Override
@@ -3508,6 +3517,12 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             //删除企业管理中的管理员权限
             rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+            List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
+            if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+            }
         }
     }
 

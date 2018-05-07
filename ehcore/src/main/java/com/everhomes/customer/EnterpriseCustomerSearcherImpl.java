@@ -134,7 +134,18 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
-           
+            builder.field("adminFlag" , customer.getAdminFlag());
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            if (entryInfos != null && entryInfos.size() > 0) {
+                List<String> buildings = new ArrayList<>();
+                List<String> apartments = new ArrayList<>();
+                entryInfos.forEach((e) -> {
+                    buildings.add(e.getBuildingId().toString());
+                    apartments.add(e.getAddressId().toString());
+                });
+                builder.field("building", StringUtils.join(buildings, "|"));
+                builder.field("apartment", StringUtils.join(apartments, "|"));
+            }
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -289,7 +300,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }

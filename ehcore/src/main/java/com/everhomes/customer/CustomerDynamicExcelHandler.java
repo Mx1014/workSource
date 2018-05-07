@@ -180,6 +180,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 DynamicField df = new DynamicField();
                 df.setFieldName("customerAdmin");
                 df.setDisplayName("企业管理员");
+                DynamicField df1 = new DynamicField();
+                df1.setFieldName("addressString");
+                df1.setDisplayName("楼栋门牌");
                 dynamicFields.add(df);
             }
         }
@@ -220,6 +223,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         enterpriseCustomer.setCommunityId(communityId);
                         enterpriseCustomer.setCreatorUid(uid);
                         String customerAdminString = "";
+                        String customerAddressString = "";
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -263,10 +267,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    if(!"customerAdmin".equals(column.getFieldName())){
+                                    if(!"customerAdmin".equals(column.getFieldName())&&!"addressString".equals(column.getFieldName())){
                                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
                                     }else {
-                                        customerAdminString = column.getValue();
+                                        if("customerAdmin".equals(column.getFieldName()))
+                                           customerAdminString = column.getValue();
+                                        if("addressString".equals(column.getFieldName()))
+                                            customerAddressString = column.getValue();
                                     }
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
@@ -313,8 +320,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
                             customerSearcher.feedDoc(enterpriseCustomer);
-                            //这里还需要增加企业管理员的record和role 呵
+                            //这里还需要增加企业管理员的record和role  & address buildings 呵
                             createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
+                            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
                         }
                         break;
                     case CUSTOMER_TAX:
@@ -721,61 +729,34 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
-                                //这里改成楼栋门牌'/'分隔  多个楼栋门牌使用逗号分开  buildingId就当成楼栋门牌这个字段了。。
-//                                if("addressId".equals(column.getFieldName()) ) {
-//                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
-//                                    if(address != null) {
-//                                        column.setValue(address.getId().toString());
-//                                    }
-//                                }
-                                if ("buildingId".equals(column.getFieldName())) {
-                                    buildingName = column.getValue();
-                                    if (StringUtils.isNotEmpty(buildingName)) {
-                                        String[] addressNames = column.getValue().split("/");
-                                        for (String addressName : addressNames) {
-                                            String buildingName1 = addressName.split(",")[0];
-                                            String apartmentName = addressName.split(",")[1];
-                                            Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, buildingName1);
-                                            if (building != null) {
-                                                column.setValue(building.getId().toString());
-                                            }
-                                            Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName1, apartmentName);
-                                            if (address != null) {
-                                                column.setValue(address.getId().toString());
-                                            }
-                                            try {
-                                                setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
-                                            } catch (Exception e) {
-                                                LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
-                                                failedNumber++;
-                                                flag = false;
-                                                break;
-                                            }
-                                            if (flag) {
-                                                customerProvider.createCustomerEntryInfo(entryInfo);
-                                            }
-                                        }
+                                if("addressId".equals(column.getFieldName()) ) {
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+                                    if(address != null) {
+                                        column.setValue(address.getId().toString());
                                     }
-
                                 }
-//                                try {
-//                                    setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
-//                                } catch(Exception e){
-//                                    LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
-//                                    failedNumber ++;
-//                                    flag = false;
-//                                    break;
-//                                }
-//                                if(flag) {
-//                                    customerProvider.createCustomerEntryInfo(entryInfo);
-//                                }
+                                if("buildingId".equals(column.getFieldName()) ) {
+                                    buildingName = column.getValue();
+                                    Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
+                                    if(building != null) {
+                                        column.setValue(building.getId().toString());
+                                    }
+                                }
+                                try {
+                                    setToObj(column.getFieldName(), entryInfo, column.getValue(), null);
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
+                                    failedNumber ++;
+                                    flag = false;
+                                    break;
+                                }
 
                                 continue;
                             }
                         }
-//                        if(flag) {
-//                            customerProvider.createCustomerEntryInfo(entryInfo);
-//                        }
+                        if(flag) {
+                            customerProvider.createCustomerEntryInfo(entryInfo);
+                        }
                         break;
                     case CUSTOMER_DEPARTURE_INFO:
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
@@ -815,13 +796,37 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
+    private void createEnterpriseCustomerEntryInfo(EnterpriseCustomer enterpriseCustomer, String customerAddressString) {
+        if (StringUtils.isEmpty(customerAddressString)) {
+            return;
+        }
+        String buildingNames[] = customerAddressString.split(",");
+        if(buildingNames.length>0){
+            for (String buildingNameString : buildingNames) {
+                String buildingName = buildingNameString.split("/")[0];
+                String apartmentName = buildingNameString.split("/")[1];
+                Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
+                CustomerEntryInfo entryInfo = new CustomerEntryInfo();
+                entryInfo.setAddress(address.getAddress());
+                entryInfo.setAddressId(address.getId());
+                entryInfo.setArea(address.getAreaName());
+                entryInfo.setAreaSize(new BigDecimal(address.getAreaSize()));
+                entryInfo.setBuildingId(building.getId());
+                entryInfo.setCustomerId(enterpriseCustomer.getId());
+                entryInfo.setCustomerName(enterpriseCustomer.getName());
+                customerProvider.createCustomerEntryInfo(entryInfo);
+            }
+        }
+    }
+
     private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
         List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
         if (StringUtils.isNotEmpty(customerAdminString)) {
             String[] adminStrings = customerAdminString.split(",");
             if (adminStrings.length > 0) {
                 for (int i = 0; i < adminStrings.length; i++) {
-                    String[] adminInfo = adminStrings[i].split("(");
+                    String[] adminInfo = adminStrings[i].split("（");
                     String contactName = adminInfo[0];
                     String contactToken = adminInfo[1];
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();

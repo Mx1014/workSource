@@ -2,6 +2,7 @@ package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -173,7 +174,11 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     private String trackingPhone;
     private String deviceType;
+    private String hotline;
+    private String unifiedSocialCreditCode;
+    private List<String> postUri;
     private Integer trackingPeriod;
+
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -901,6 +906,30 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setTrackingPeriod(Integer trackingPeriod) {
         this.trackingPeriod = trackingPeriod;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public List<String> getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(List<String> postUri) {
+        this.postUri = postUri;
     }
 
     @Override

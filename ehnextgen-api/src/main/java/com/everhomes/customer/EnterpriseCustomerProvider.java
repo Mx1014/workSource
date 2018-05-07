@@ -1,6 +1,7 @@
 package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
@@ -167,4 +168,6 @@ public interface EnterpriseCustomerProvider {
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
+
+    List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long id);
 }

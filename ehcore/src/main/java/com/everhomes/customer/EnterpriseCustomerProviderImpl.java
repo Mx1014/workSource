@@ -5,13 +5,13 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
@@ -23,7 +23,6 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.varField.FieldDTO;
@@ -87,6 +86,7 @@ import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomerAdminsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
@@ -1987,8 +1987,19 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     @Override
     public List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId, String contactType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        return  context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
-                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
-                .fetchInto(CustomerAdminRecord.class);
+        SelectQuery<EhEnterpriseCustomerAdminsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId));
+        if (contactType != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(contactType));
+        }
+        return query.fetchInto(CustomerAdminRecord.class);
+    }
+
+    @Override
+    public List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId))
+                .fetchInto(EnterpriseAttachment.class);
     }
 }
