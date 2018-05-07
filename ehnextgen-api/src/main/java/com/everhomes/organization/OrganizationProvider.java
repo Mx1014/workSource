@@ -683,4 +683,10 @@ public interface OrganizationProvider {
 	 * @param organizationId
 	 */
 	void deleteWorkPlacesByOrgId(Long organizationId,String siteName,Long communityId);
+
+	/**
+	 * 更新企业信息的方法
+	 * @param organization
+	 */
+	void updateOrganizationProperty(Organization organization);
 }

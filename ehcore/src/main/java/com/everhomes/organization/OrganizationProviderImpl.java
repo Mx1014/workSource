@@ -121,6 +121,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     /**
+     * 更新企业信息的方法
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationProperty(Organization organization){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.NAME,organization.getName())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
+    }
+
+    /**
      * 根据organizationId来更改超级管理员
      * @param organization
      */
