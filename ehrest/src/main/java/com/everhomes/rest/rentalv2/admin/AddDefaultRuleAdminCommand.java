@@ -91,6 +91,8 @@ public class AddDefaultRuleAdminCommand {
 
 	private Double dayOpenTime;
 	private Double dayCloseTime;
+	private Byte holidayOpenFlag;
+	private Byte holidayType;
 
 	@ItemType(Byte.class)
 	private List<Byte> rentalTypes;
@@ -379,5 +381,21 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setSiteItems(List<SiteItemDTO> siteItems) {
 		this.siteItems = siteItems;
+	}
+
+	public Byte getHolidayOpenFlag() {
+		return holidayOpenFlag;
+	}
+
+	public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+		this.holidayOpenFlag = holidayOpenFlag;
+	}
+
+	public Byte getHolidayType() {
+		return holidayType;
+	}
+
+	public void setHolidayType(Byte holidayType) {
+		this.holidayType = holidayType;
 	}
 }

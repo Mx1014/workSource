@@ -45,6 +45,7 @@ import com.everhomes.pay.order.PaymentType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rentalv2.job.RentalAutoCompleteJob;
 import com.everhomes.rentalv2.job.RentalCancelOrderJob;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
@@ -2458,16 +2459,48 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return result;
 	}
 
+	@Scheduled(cron = "30 29,59 * * * ? ")
+	public void autoCompleteBills(){
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
+			Long currTime = DateHelper.currentGMTTime().getTime();
+			for(RentalOrder order : orders ){
+				if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+					if (currTime + 60*1000L >= order.getEndTime().getTime()){
+						VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+						ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
+						if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
+							CompleteRentalOrderCommand cmd = new CompleteRentalOrderCommand();
+							cmd.setRentalBillId(order.getId());
+							this.completeRentalOrder(cmd);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * 每半小时的50秒钟时候开始执行
 	 * */
 	@Scheduled(cron = "50 0/30 * * * ?")
 	@Override
 	public void rentalSchedule(){
-		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+		Boolean [] flag = {false};
+		Long currTime = DateHelper.currentGMTTime().getTime();
+		coordinationProvider.getNamedLock("Rental_schedule_flag" ) //集群运行时只有一台执行定时任务
+				.tryEnter(() -> {
+					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
+					Long timeFlag = currTime / 600000;
+					if (!temp.equals(timeFlag)){
+						configurationProvider.setLongValue(0,"rental.shcedule.flag",timeFlag);
+						flag[0] = true;
+					}
+				});
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE  && flag[0]){
 			//把所有状态为success-已预约的捞出来 
-			Long currTime = DateHelper.currentGMTTime().getTime();
-			List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
+
+			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
 			for(RentalOrder order : orders ){
 				if (order.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
 					Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0L;
@@ -2562,6 +2595,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						);
 
 					}
+
 				}
 			}
 		}

@@ -158,6 +158,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 -- by st.zheng
 set @id =(select MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id:=@id+1), 'rental.notification', '23', 'zh_CN', '即将超时', '尊敬的用户，您预约的${useDetail}剩余使用时长：15分钟，如需延时，请前往APP进行操作，否则超时系统将继续计时计费，感谢您的使用。', '0');
+UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您成功预约${useDetail}，请在该时间内前往指定车位（地址：${spaceAddress}），并点击以下链接使用：${orderDetailUrl} 谢谢。' WHERE `scope`='sms.default' and `code`=59;
+UPDATE `eh_locale_templates` SET `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您将预约的${useDetail}延时到${newEndTime}，请点击以下链接使用：${orderDetailUrl} ，感谢您的使用。'WHERE (`scope`='sms.default' and `code`=62);
+UPDATE `eh_locale_templates` SET  `text`='尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）为您预约的${useDetail}由于前序订单使用超时，系统自动为您更换至${spaceNo}车位，请点击以下链接使用：${orderDetailUrl} ，给您带来的不便我们深感抱歉，感谢您的使用。' WHERE (`scope`='sms.default' and `code`=66);
 
 -- 资源预定增加统计权限 by st.zheng
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40430', '统计信息', '40400', '/40000/40400/40430', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
@@ -174,9 +177,31 @@ update eh_service_module_apps set instance_config='{"taskCategoryId":6,"agentSwi
 update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d9%';
 update eh_service_module_apps set instance_config='{"taskCategoryId":9,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=9%';
 /*
+  物业报修 pmtask-3.5 应用配置数据迁移 正中会
+*/
+update eh_service_module_apps set instance_config='{"taskCategoryId":1,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId_u003d1%';
+update eh_service_module_apps set instance_config='{"taskCategoryId":1,"agentSwitch":1}' where module_id='20100' and instance_config like '%taskCategoryId=1%';
+/*
   物业报修 pmtask-3.5 权限配置页面信息迁移
 */
 update eh_service_modules set name='统计信息' where id = 20190 and parent_id = 20100;
 update eh_service_module_privileges set remark = '全部权限' where module_id = 20140 and privilege_id = 2010020140;
 update eh_service_module_privileges set remark = '全部权限' where module_id = 20190 and privilege_id = 2010020190;
+update eh_service_module_privileges set remark = '全部权限' where module_id = 20150 and privilege_id = 2010020150;
+update eh_service_modules set status = 0 where id = 20150 and parent_id = 20100;
+
+--  issue-28556 add by huangmingbo 
+SET @kexin_xiaomao_park_lot_id = 10031;
+SET @kexin_zzh_community_id = 240111044332060208;
+SET @kexin_namespace_id = 999983;
+
+-- issue-28556 add by huangmingbo 2018-05-03
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10032', 'zh_CN', '未查询到月卡类型信息');
+
+-- issue-28556 add by huangmingbo 2018-05-03
+SET @car_type_id = (SELECT IFNULL(MAX(id),0) FROM eh_parking_card_types);
+INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES (@car_type_id:=@car_type_id+1, @kexin_namespace_id, 'community', @kexin_zzh_community_id, @kexin_xiaomao_park_lot_id, '4', '普通客户', 2, 1, '2018-05-03 10:49:48', NULL, NULL);
+INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES (@car_type_id:=@car_type_id+1, @kexin_namespace_id, 'community', @kexin_zzh_community_id, @kexin_xiaomao_park_lot_id, '10', '平安月卡', 2, 1, '2018-05-03 10:49:48', NULL, NULL);
+
+
 

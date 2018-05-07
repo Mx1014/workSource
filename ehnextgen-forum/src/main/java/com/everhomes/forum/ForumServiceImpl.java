@@ -6986,15 +6986,25 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public ListTopicsByForumEntryIdResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd) {
 
-        if(cmd.getPageSize() == null){
+        if(cmd.getPageSize() == null) {
             cmd.setPageSize(20L);
         }
+
         FindDefaultForumCommand defaultForumCommand = new FindDefaultForumCommand();
         defaultForumCommand.setNamespaceId(cmd.getNamespaceId());
         FindDefaultForumResponse defaultForum = findDefaultForum(defaultForumCommand);
-        
-        CrossShardListingLocator locator = new CrossShardListingLocator();
 
+        if (cmd.getInstanceConfig() != null) {
+            try {
+                Map<String, String> insMap = (Map<String, String>) StringHelper.fromJsonString(cmd.getInstanceConfig(), Map.class);
+                cmd.setTag(insMap.get("tag"));
+                cmd.setForumEntryId(Long.valueOf(insMap.get("forumEntryId")));
+            } catch (Exception e) {
+                LOGGER.error("Instance config decode error, instanceConfig = " + cmd.getInstanceConfig(), e);
+            }
+        }
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
         List<Post> posts = this.forumProvider.queryPosts(locator, cmd.getPageSize().intValue() + 1, (loc, query) -> {
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(defaultForum.getDefaultForum().getId()));
@@ -7002,6 +7012,9 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             query.addConditions(Tables.EH_FORUM_POSTS.MODULE_TYPE.eq(ForumModuleType.FORUM.getCode()));
+            if (cmd.getTag() != null) {
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             return query;
         });
 

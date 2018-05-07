@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 @RestDoc(value="Aclink Admin controller", site="core")
 @RestController
@@ -441,12 +442,19 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("authVisitorStatistic")
     @RestReturn(value=AuthVisitorStasticResponse.class)
     public RestResponse authVisitorStatistic(@Valid AuthVisitorStatisticCommand cmd) {
-        if(cmd.getStart() == null) {
+    	//---by liuyilin 20180417  查不到当天的数据,前端传过来的时分秒默认是当前时间,startTime改为0时0分,endTime改为第二天0点. by liuyilin 20180417
+    	if(cmd.getStart() == null) {
             cmd.setStart(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
+        }else{
+        	
+        	cmd.setStart(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStart()),"yyyy-MM-dd").getTime());
         }
         if(cmd.getEnd() == null) {
-            cmd.setEnd(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime());
+            cmd.setEnd(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
+        }else{
+        	cmd.setEnd(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEnd()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
         }
+        //---
         AuthVisitorStasticResponse obj = doorAuthProvider.authVistorStatistic(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
