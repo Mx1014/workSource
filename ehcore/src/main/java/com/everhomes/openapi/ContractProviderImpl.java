@@ -346,8 +346,12 @@ public class ContractProviderImpl implements ContractProvider {
 				ContractStatus.ACTIVE.getCode(), ContractStatus.EXPIRING.getCode(), ContractStatus.APPROVE_QUALITIED.getCode()));
 
 		Map<Long, List<Contract>> result = new HashMap<>();
-		query.fetch().map((r) -> {
-			List<Contract> contracts = result.get(r.getCommunityId());
+		query.fetch().forEach((r) -> {
+            Long communityId = r.getCommunityId();
+            if(communityId == null){
+                return;
+            }
+            List<Contract> contracts = result.get(communityId);
 			if(contracts == null) {
 				contracts = new ArrayList<>();
 				contracts.add(ConvertHelper.convert(r, Contract.class));
@@ -356,7 +360,6 @@ public class ContractProviderImpl implements ContractProvider {
 				contracts.add(ConvertHelper.convert(r, Contract.class));
 				result.put(r.getCommunityId(), contracts);
 			}
-			return null;
 		});
 
 		return result;

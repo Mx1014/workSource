@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>contractId:合同id</li>
  * <li>billGroupId:账单组id</li>
  * <li>isOnlyOwedBill:是否只显示待缴账单1:是;0：不是</li>
+ * <li>namespaceId:</li>
  *</ul>
  */
 public class ClientIdentityCommand {
@@ -23,6 +24,15 @@ public class ClientIdentityCommand {
     private String contractId;
     private Long billGroupId;
     private Byte isOnlyOwedBill;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     @Override
     public String toString() {

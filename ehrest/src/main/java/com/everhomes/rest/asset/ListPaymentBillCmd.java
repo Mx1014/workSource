@@ -20,6 +20,16 @@ public class ListPaymentBillCmd {
     private Long communityId;
     private Long organizationId;
 
+    private List<Long> orderIds;
+
+    public List<Long> getOrderIds() {
+        return orderIds;
+    }
+
+    public void setOrderIds(List<Long> orderIds) {
+        this.orderIds = orderIds;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }

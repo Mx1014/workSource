@@ -1,69 +1,6 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.app.App;
-import com.everhomes.app.AppProvider;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.parking.handler.DefaultParkingVendorHandler;
-import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
-import com.everhomes.rentalv2.*;
-import com.everhomes.rentalv2.utils.RentalUtils;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.*;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.rentalv2.*;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.SortField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -74,11 +11,88 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.order.PayService;
+import com.everhomes.parking.handler.DefaultParkingVendorHandler;
+import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.rentalv2.*;
+import com.everhomes.rentalv2.utils.RentalUtils;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.parking.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.rentalv2.*;
+
+import com.everhomes.server.schema.Tables;
+import com.everhomes.util.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.SortField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.order.OrderEmbeddedHandler;
+import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.VendorType;
+
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import org.springframework.web.context.request.async.DeferredResult;
+
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
-
+	@Autowired
+	private List<ParkingVendorHandler> allListeners;
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -117,6 +131,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -205,12 +221,12 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 
 		return parkingRechargeRateList.stream().filter(r -> r.getPrice().compareTo(new BigDecimal(0)) == 1).collect(Collectors.toList());
-    }
-    
-    private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
-        ParkingVendorHandler handler = null;
-        
-        if(vendorName != null && vendorName.length() > 0) {
+	}
+
+	private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
+		ParkingVendorHandler handler = null;
+
+		if(vendorName != null && vendorName.length() > 0) {
 			String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
 			handler = PlatformContext.getComponent(handlerPrefix + vendorName);
 		}
@@ -606,7 +622,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 
-		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
+		parkingRechargeOrder.setOrderNo(createOrderNo(parkingLot));
 		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
@@ -1234,7 +1250,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	}
 
-    private ParkingLot checkParkingLot(String ownerType, Long ownerId, Long parkingLotId){
+	private ParkingLot checkParkingLot(String ownerType, Long ownerId, Long parkingLotId){
 		if(null == ownerId) {
 			LOGGER.error("OwnerId cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1357,23 +1373,7 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(13).setCellValue("缴费类型");
 
 
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for(int i=0, size = list.size();i<size;i++) {
-            Row tempRow = sheet.createRow(i + 1);
-            ParkingRechargeOrder order = list.get(i);
-            tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
-            tempRow.createCell(1).setCellValue(order.getPlateNumber());
-            tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
-            tempRow.createCell(3).setCellValue(order.getPayerPhone());
-            tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
-            tempRow.createCell(5).setCellValue(null == order.getMonthCount() ? "" : order.getMonthCount().toString());
-            tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
-            VendorType type = VendorType.fromCode(order.getPaidType());
-            tempRow.createCell(7).setCellValue(null == type ? "" : type.getDescribe());
-            tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
-        }
-
-        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
@@ -1413,12 +1413,34 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
-	private Long createOrderNo(Long time) {
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-//		String prefix = sdf.format(new Date());
-		String suffix = String.valueOf(generateRandomNumber(3));
+	private Long createOrderNo(ParkingLot lot) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String prefix = sdf.format(new Date());
 
-		return Long.valueOf(String.valueOf(time) + suffix);
+		Tuple<Long, Boolean> enter = this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_GENERATE_ORDER_NO.getCode() + lot.getId()).enter(() -> {
+			ParkingLot parkingLot = checkParkingLot(lot.getOwnerType(), lot.getOwnerId(), lot.getId());
+			String orderCode = (lot.getOrderCode()+1)+"";
+			int ordercodelength = configProvider.getIntValue("parking.ordercode.length", 8);
+			while (orderCode.length()<ordercodelength){
+				orderCode="0"+orderCode;
+			}
+			while (orderCode.length()>ordercodelength){
+				orderCode=orderCode.substring(1,orderCode.length());
+			}
+			int ordertaglength = configProvider.getIntValue("parking.ordertag.length", 3);
+			if(lot.getOrderTag()==null || lot.getOrderTag().length()!=ordertaglength){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO,	"生成订单编号失败,ordertaglength!={}",ordertaglength);
+			}
+
+			Long orderNo = Long.valueOf(String.valueOf(prefix) + lot.getOrderTag() + orderCode);
+			parkingLot.setOrderCode(Long.valueOf(orderCode));
+			parkingProvider.updateParkingLot(parkingLot);
+			return orderNo;
+		});
+		if(!enter.second()){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO,	"生成订单编号失败");
+		}
+		return enter.first();
 	}
 
 	/**
@@ -1453,7 +1475,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != dto && null != dto.getPrice() && dto.getPrice().compareTo(new BigDecimal(0)) == 0) {
 
-    		int delayTime = dto.getDelayTime();
+			int delayTime = dto.getDelayTime();
 			long now = System.currentTimeMillis();
 
 			long entryTime = dto.getEntryTime();
@@ -1906,9 +1928,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void refundParkingOrder(RefundParkingOrderCommand cmd){
-		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
-		long startTime = System.currentTimeMillis();
+//		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+//
+//		long startTime = System.currentTimeMillis();
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 
 		//只有需要支付并已经支付的才需要退款
@@ -1927,8 +1949,9 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
+		Long refoundOrderNo = createOrderNo(parkingLot);
 
 		BigDecimal price = order.getPrice();
 
@@ -2137,8 +2160,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 			List<ParkingCardType> list = listCardTypeResponse.getCardTypes();
 			if(list==null || list.size()==0){
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,10022,
-						"未查询到月卡类型信息");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,
+						ParkingErrorCode.ERROR_PARKING_TYPE_NOT_FOUND, "未查询到月卡类型信息");
 			}
 
 			dtos = list.stream().map(r ->{
@@ -2420,7 +2443,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
@@ -2428,7 +2451,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
 
-		if (null != parkingSpace) {
+		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
@@ -2742,5 +2765,24 @@ public class ParkingServiceImpl implements ParkingService {
 	public void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
 		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
 				ParkingSpaceLockOperateType.DOWN);
+	}
+
+	@Override
+	public void refreshToken(RefreshTokenCommand cmd) {
+		if(cmd.getParkingLotId()==null){
+			for (ParkingVendorHandler listener : allListeners) {
+				try {
+					listener.refreshToken();
+				}catch (Exception e){
+					LOGGER.error("listener {}, exception = ", listener.getClass().getSimpleName(),e);
+				}
+			}
+		}else {
+			ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+			handler.refreshToken();
+		}
 	}
 }

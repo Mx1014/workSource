@@ -1265,6 +1265,8 @@ public class ContractServiceImpl implements ContractService {
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
+//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}else {
@@ -1294,7 +1296,8 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
-
+//			//todo 将此合同关联的关联的未出账单删除，但账单记录着不用
+//			assetService.deleteUnsettledBillsOnContractId(contract.getId());
 			//作废合同关联资产释放
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {

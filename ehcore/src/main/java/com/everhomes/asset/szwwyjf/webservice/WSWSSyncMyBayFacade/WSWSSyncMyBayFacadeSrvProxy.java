@@ -10,4 +10,5 @@ package com.everhomes.asset.szwwyjf.webservice.WSWSSyncMyBayFacade;
 public interface WSWSSyncMyBayFacadeSrvProxy extends java.rmi.Remote {
     public java.lang.String sync_TenancyContractDetailed(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException;
     public java.lang.String sync_TenancyContractData(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException;
+    public java.lang.String sync_TenancyContractInfo(java.lang.String params) throws java.rmi.RemoteException, com.everhomes.asset.szwwyjf.webservice.wssyncmybayfacade.client.WSInvokeException;
 }

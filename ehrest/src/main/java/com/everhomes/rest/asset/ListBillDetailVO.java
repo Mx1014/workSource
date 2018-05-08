@@ -22,6 +22,15 @@ public class ListBillDetailVO {
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private String contractNum;
+    private String invoiceNum;
+
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     public String getDateStr() {
         return dateStr;

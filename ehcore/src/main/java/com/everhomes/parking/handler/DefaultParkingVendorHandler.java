@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.organization.VendorType;
@@ -381,4 +382,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         return null;
     }
 
+    @Override
+    public void refreshToken() {
+
+    }
 }

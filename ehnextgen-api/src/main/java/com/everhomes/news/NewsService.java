@@ -76,4 +76,8 @@ public interface NewsService {
 	void syncNewsWhenDelete(Long id);
 	
 	Long checkNewsToken(Long userId, String newsToken);
+	
 }
+
+
+
