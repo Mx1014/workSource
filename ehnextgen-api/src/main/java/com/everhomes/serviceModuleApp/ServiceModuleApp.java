@@ -23,6 +23,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private String dependentAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
+    private String iconUri;
 
 
     @Override
@@ -145,5 +146,13 @@ public class ServiceModuleApp extends EhServiceModuleApps {
 
     public void setDisplayVersion(String displayVersion) {
         this.displayVersion = displayVersion;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
 }

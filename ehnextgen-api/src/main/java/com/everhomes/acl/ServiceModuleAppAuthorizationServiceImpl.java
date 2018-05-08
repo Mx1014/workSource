@@ -206,6 +206,10 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             profile.setDependentAppIds(StringHelper.toJsonString(cmd.getDependentAppIds()));
         }
 
+        if(cmd.getIconUri() != null){
+            profile.setIconUri(cmd.getIconUri());
+        }
+
         ServiceModuleAppProfile oldProfile = null;
         if(cmd.getOriginId() != null){
             oldProfile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());

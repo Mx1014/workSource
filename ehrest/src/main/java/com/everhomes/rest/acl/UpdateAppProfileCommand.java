@@ -17,9 +17,10 @@ import java.util.List;
  *     <li>pcUris: pcUris</li>
  *     <li>appEntryInfos: 应用入口信息, 参考{@link AppEntryInfoDTO}</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
- *     <li>dependentIds: 若不支持独立配置，选择同时需要配置的应用，此处Id为originId</li>
+ *     <li>dependentAppIds: dependentAppIds</li>
  *     <li>supportThirdFlag: 支持对接硬件和第三方系统</li>
  *     <li>defaultFlag: 新建企业默认安装</li>
+ *     <li>iconUri: iconUri</li>
  * </ul>
  */
 public class UpdateAppProfileCommand {
@@ -37,6 +38,7 @@ public class UpdateAppProfileCommand {
     private List<Long> dependentAppIds;
     private Byte supportThirdFlag;
     private Byte defaultFlag;
+    private String iconUri;
 
     @Override
     public String toString() {
@@ -153,5 +155,13 @@ public class UpdateAppProfileCommand {
 
     public void setDisplayVersion(String displayVersion) {
         this.displayVersion = displayVersion;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
 }

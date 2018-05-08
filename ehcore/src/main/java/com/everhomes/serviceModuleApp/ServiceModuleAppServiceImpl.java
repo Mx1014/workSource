@@ -315,6 +315,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			if(profile != null){
 				dto.setAppNo(profile.getAppNo());
 				dto.setDisplayVersion(profile.getDisplayVersion());
+				String url = contentServerService.parserUri(profile.getIconUri(), dto.getClass().getSimpleName(), dto.getId());
+				dto.setIconUrl(url);
 			}
 
 			if (orgapp != null){
