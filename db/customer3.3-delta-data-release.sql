@@ -28,7 +28,7 @@ SET contact_phone = CONCAT('[',contact_phone,']')
 WHERE contact_phone IS NOT NULL AND contact_mobile IS NULL;
 
 -- 迁移企业管理的是否设置管理员
-UPDATE  eh_enterprise_customers SET admin_flag = IFNULL((SELECT admin_flag FROM eh_organizations WHERE id = eh_enterprise_customers.organization_id) ,0);
+UPDATE  eh_enterprise_customers SET admin_flag = IFNULL((SELECT set_admin_flag FROM eh_organizations WHERE id = eh_enterprise_customers.organization_id) ,0);
 
 -- 增加企业管理中的动态字段  by jiarui
 
@@ -37,3 +37,7 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'postUri', '标题图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 1}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'banner', 'banner图', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"image\", \"length\": 9}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'hotline', '咨询电话', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
+
+-- 企业简介改成richText
+UPDATE `eh_var_fields` SET `field_param`='{\"fieldParamType\": \"richText\", \"length\": 204800}' WHERE `name`='corpDescription' and `module_name`='enterprise_customer';
