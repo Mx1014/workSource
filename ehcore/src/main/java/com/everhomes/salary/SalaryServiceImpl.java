@@ -2012,31 +2012,47 @@ public class SalaryServiceImpl implements SalaryService {
         List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList, cmd.getOwnerId());
         return new ImportPayslipResponse(cmd.getSalaryPeriod(), cmd.getPayslipName(), details);
     }
-
+	public static boolean isContain(String s1, String s2) {
+		if(s1==null)
+			return false;
+        return s1.contains(s2);  
+    }
     private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
         // TODO Auto-generated method stub
         List<PayslipDetailDTO> payslipDetailDTOs = new ArrayList<PayslipDetailDTO>();
-        RowResult title = (RowResult) resultList.get(0);
-        String nameCellNumber = "";
-        String contactCellNumber = "";
+       
+        String nameCellNumber = null;
+        String contactCellNumber = null;
         Map<String, String> cellMap = new HashMap<>();
-        for (Entry<String, String> entry : title.getCells().entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (null != value) {
-                value = value.trim();
-                if ("姓名".equals(value)) {
-                    nameCellNumber = key;
-                } else if ("手机号码".equals(value)) {
-                    nameCellNumber = key;
-                } else {
-                    cellMap.put(key, value);
-                }
-            }
-
+        RowResult title = null;
+        while(true){
+        	title = (RowResult) resultList.remove(0);
+	        for (Entry<String, String> entry : title.getCells().entrySet()) {
+	            String key = entry.getKey();
+	            String value = entry.getValue();
+	            if (null != value) {
+	                value = value.trim();
+	                if (isContain(value,"姓名")) {
+	                    nameCellNumber = key;
+	                } else if (isContain(value,"手机号码")) {
+	                	contactCellNumber = key;
+	                } else if (!"序号".equals(value)){
+	                    cellMap.put(key, value);
+	                }
+	            }
+	        }
+	        if(StringUtils.isNotBlank(nameCellNumber)&&StringUtils.isNotBlank(contactCellNumber)){
+	        	break;
+	        }
+	        //没找到姓名和手机号说明不是标题, 清空map 
+	        cellMap.clear();
+	        if(resultList.size()==0){
+	        	throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_EXCEL_TITILE,
+                        "标题错误,找不到姓名手机号"); 
+	        }
         }
 
-        for (int rowIndex = 1; rowIndex < resultList.size(); rowIndex++) {
+        for (int rowIndex = 0; rowIndex < resultList.size(); rowIndex++) {
             RowResult r = (RowResult) resultList.get(rowIndex);
             PayslipDetailDTO dto = new PayslipDetailDTO();
             // 名字去空格 
