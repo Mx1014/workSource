@@ -141,6 +141,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.NAME,organization.getName())
+                .set(Tables.EH_ORGANIZATIONS.PM_FLAG,organization.getPmFlag())
+                .set(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG,organization.getServiceSupportFlag())
                 .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
     }
 
@@ -2762,8 +2764,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         /*EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
         dao.update(organizationDetail);*/
-        context.update(Tables.EH_ORGANIZATION_DETAILS).set(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG ,organizationDetail.getPmFlag())
-                .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())
+        context.update(Tables.EH_ORGANIZATION_DETAILS)/*.set(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG ,organizationDetail.getPmFlag())
+                .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())*/
                 .set(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME,organizationDetail.getDisplayName())
                 .set(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE,organizationDetail.getMemberRange())
                 .set(Tables.EH_ORGANIZATION_DETAILS.AVATAR,organizationDetail.getAvatar())
@@ -6224,8 +6226,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             organizationAndDetailDTO.setAvatar(r.getValue(Tables.EH_ORGANIZATION_DETAILS.AVATAR));
             organizationAndDetailDTO.setPostUri(r.getValue(Tables.EH_ORGANIZATION_DETAILS.POST_URI));
             organizationAndDetailDTO.setMemberRange(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE));
-            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG));
-            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG));
+//            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG));
+//            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG));
+            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATIONS.PM_FLAG));
+            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG));
             return null;
         });
         //将组装的对象进行返回

@@ -1319,6 +1319,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setWebsite(cmd.getWebsite());
             organization.setEmailDomain(cmd.getEmailDomain());
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+            //表明该公司是否是管理公司 1-是 0-否
+            if(cmd.getPmFlag() != null){
+                organization.setPmFlag(cmd.getPmFlag().byteValue());
+            }
+            //表明该公司是否是服务商，1-服务商 0-否
+            if(cmd.getServiceSupportFlag() != null){
+                organization.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
+            }
             if(cmd.getWorkbenchFlag() != null){
                 organization.setWorkPlatformFlag(cmd.getWorkbenchFlag().byteValue());
             }
@@ -1407,14 +1415,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationDetail.setMemberCount(cmd.getMemberCount());
             organizationDetail.setEmailDomain(cmd.getEmailDomain());
             organizationDetail.setServiceUserId(cmd.getServiceUserId());
-            //表明该公司是否是管理公司 1-是 0-否
-            if(cmd.getPmFlag() != null){
-                organizationDetail.setPmFlag(cmd.getPmFlag().byteValue());
-            }
-            //表明该公司是否是服务商，1-服务商 0-否
-            if(cmd.getServiceSupportFlag() != null){
-                organizationDetail.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
-            }
+
             if (cmd.getLatitude() != null)
                 organizationDetail.setLatitude(Double.valueOf(cmd.getLatitude()));
             if (cmd.getLongitude() != null)
@@ -1581,6 +1582,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //将企业名称封装在Organization对象中
                 organization.setName(cmd.getName());
             }
+
+            //将企业简称、人员规模、是否属于管理公司、是否属于服务商封装在OrganizationDetail对象中
+            if(cmd.getPmFlag() != null){
+                //封装是否是管理公司标志
+                organization.setPmFlag(cmd.getPmFlag().byteValue());
+            }else{
+                organization.setPmFlag(OrganizationStatus.UNTREATED.getCode());
+            }
+            if(cmd.getServiceSupportFlag() != null){
+                //封装是否是服务商标志
+                organization.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
+            }else{
+                organization.setServiceSupportFlag(OrganizationStatus.UNTREATED.getCode());
+            }
+
             organization.setId(cmd.getOrganizationId());
             //判断传过来的organizationId是否为空，不为空的话，就根据organizationId来进行更新eh_organizations表中
             //的企业名称
@@ -1590,8 +1606,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //开始更新eh_organization_details表中的企业简称、人员规模、是否属于管理公司、是否属于服务商
                 //创建一个OrganizationDetail类的对象
                 OrganizationDetail organizationDetail = new OrganizationDetail();
+                //// TODO: 2018/5/8
                 //将企业简称、人员规模、是否属于管理公司、是否属于服务商封装在OrganizationDetail对象中
-                if(cmd.getPmFlag() != null){
+/*                if(cmd.getPmFlag() != null){
                     //封装是否是管理公司标志
                     organizationDetail.setPmFlag(cmd.getPmFlag().byteValue());
                 }else{
@@ -1602,7 +1619,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationDetail.setServiceSupportFlag(cmd.getServiceSupportFlag().byteValue());
                 }else{
                     organizationDetail.setServiceSupportFlag(OrganizationStatus.UNTREATED.getCode());
-                }
+                }*/
                 //封装企业logo
                 organizationDetail.setAvatar(cmd.getAvatar());
                 //封装企业简称
