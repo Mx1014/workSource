@@ -28,7 +28,7 @@ public class ServiceHotLineResetIdentifierListener implements ApplicationListene
     @Override
     public void onApplicationEvent(ResetUserIdentifierEvent event) {
         UserResetIdentifierVo vo = (UserResetIdentifierVo) event.getSource();
-        List<ServiceHotline> list = serviceHotlinesProvider.queryServiceHotlines(new ListingLocator(), 10, (locator, query) -> {
+        List<ServiceHotline> list = serviceHotlinesProvider.queryServiceHotlines(10, new ListingLocator(), (locator, query) -> {
             query.addConditions(Tables.EH_SERVICE_HOTLINES.USER_ID.eq(vo.getUid()));
             query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT.eq(vo.getOldIdentifier()));
             return query;
