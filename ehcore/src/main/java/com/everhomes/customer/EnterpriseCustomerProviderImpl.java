@@ -1948,6 +1948,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         CustomerAttachements attachement = new CustomerAttachements();
         attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
         attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachement.setCreatorUid(UserContext.currentUserId());
         attachement.setId(id);
         EhEnterpriseCustomerAttachmentsDao dao = new EhEnterpriseCustomerAttachmentsDao(context.configuration());
         dao.insert(attachement);
@@ -1971,7 +1972,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         record.setContactType(contactType);
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        record.setCustomerId(UserContext.currentUserId());
+        record.setCreatorUid(UserContext.currentUserId());
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
         dao.insert(record);
     }
