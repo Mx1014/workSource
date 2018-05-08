@@ -6518,8 +6518,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public void deleteWorkPlacesByOrgId(Long organizationId,String siteName,Long communityId){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.delete(Tables.EH_COMMUNITYANDBUILDING_RELATIONES)
-                .where(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(organizationId))
+        context.delete(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
                 .execute();
