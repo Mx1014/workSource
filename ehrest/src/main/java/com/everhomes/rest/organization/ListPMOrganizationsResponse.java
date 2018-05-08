@@ -15,12 +15,22 @@ public class ListPMOrganizationsResponse {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> dtos;
 
+    private Long anchor;
+
     public List<OrganizationDTO> getDtos() {
         return dtos;
     }
 
     public void setDtos(List<OrganizationDTO> dtos) {
         this.dtos = dtos;
+    }
+
+    public Long getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(Long anchor) {
+        this.anchor = anchor;
     }
 
     @Override
