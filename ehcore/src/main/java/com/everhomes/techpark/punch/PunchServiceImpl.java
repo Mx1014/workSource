@@ -9734,7 +9734,10 @@ public class PunchServiceImpl implements PunchService {
             resultList = PropMrgOwnerHandler.processorExcel(in);
         } catch (IOException e) {
             LOGGER.error("executeImportOrganization-parse file fail.message=" + e.getMessage());
-        } 
+        } finally{
+            File file = new File(filePath);
+            file.delete();
+        }
         return resultList;
     }
     @Override
