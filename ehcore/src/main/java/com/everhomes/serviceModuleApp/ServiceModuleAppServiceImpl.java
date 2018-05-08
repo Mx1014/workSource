@@ -309,21 +309,24 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
 			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrganizationId());
+			ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 
-			ServiceModuleAppDTO dto = null;
+			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			if(profile != null){
+				dto.setAppNo(profile.getAppNo());
+				dto.setDisplayVersion(profile.getDisplayVersion());
+			}
+
+			if (orgapp != null){
+				dto.setOrgAppId(orgapp.getId());
+			}
+
 			//已安装的、未安装的、全部
 			if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.TRUE && orgapp != null){
-				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-				dto.setOrgAppId(orgapp.getId());
 				dtos.add(dto);
 			}else if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.FALSE && orgapp == null) {
-				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
 				dtos.add(dto);
 			}else if(cmd.getInstallFlag() == null){
-				dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-				if (orgapp != null){
-					dto.setOrgAppId(orgapp.getId());
-				}
 				dtos.add(dto);
 			}
 		}
