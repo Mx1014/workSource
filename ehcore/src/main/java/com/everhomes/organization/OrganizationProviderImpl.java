@@ -2766,6 +2766,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())
                 .set(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME,organizationDetail.getDisplayName())
                 .set(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE,organizationDetail.getMemberRange())
+                .set(Tables.EH_ORGANIZATION_DETAILS.AVATAR,organizationDetail.getAvatar())
                 .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationDetail.getOrganizationId())).execute();
     }
 
@@ -6517,9 +6518,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public void deleteWorkPlacesByOrgId(Long organizationId,String siteName,Long communityId){
         //获取上下文
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ORGANIZATION_WORKPLACES)
-                .where(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(organizationId))
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
                 .execute();

@@ -1603,6 +1603,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }else{
                     organizationDetail.setServiceSupportFlag(OrganizationStatus.UNTREATED.getCode());
                 }
+                //封装企业logo
+                organizationDetail.setAvatar(cmd.getAvatar());
                 //封装企业简称
                 organizationDetail.setDisplayName(cmd.getDisplayName());
                 //封装人员规模
