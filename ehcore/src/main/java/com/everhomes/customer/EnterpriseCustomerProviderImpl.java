@@ -2001,7 +2001,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long customerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
-                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId))
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
                 .fetchInto(EnterpriseAttachment.class);
     }
 }
