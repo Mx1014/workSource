@@ -695,4 +695,13 @@ public interface OrganizationProvider {
 	 * @param organization
 	 */
 	void updateOrganizationByOrgId(Organization organization);
+
+
+	/**
+	 * 根据组织Id和手机号来查询Eh_organization_members表中的信息，来判断该用户是否已经加入到该公司
+	 * @param organizationId
+	 * @param contactToken
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken);
 }

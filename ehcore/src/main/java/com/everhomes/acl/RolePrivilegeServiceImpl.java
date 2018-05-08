@@ -1778,11 +1778,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//现在可以说明的是已经注册了，那么就将isSigned状态置为1
 			response.setIsSigned(TrueOrFalseFlag.TRUE.getCode());
 
-			//还需要判断该客户是否已经加入到当前企业，根据传过来的organizationId在organizations表中查，如果有记录说明已经加入公司
+			//还需要判断该客户是否已经加入到当前企业，根据传过来的organizationId在eh_organization_members表中查，如果有记录说明已经加入公司
 			//否则就没有加入
-			Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByContactTokenAndOrgId(cmd.getOrganizationId(),cmd.getContactToken());
 			//判断
-			if(organization != null){
+			if(organizationMember != null){
 				//说明之前已经加入了公司
 				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
 			}else{

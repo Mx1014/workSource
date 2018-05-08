@@ -212,6 +212,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(dao.findById(id), Organization.class);
     }
 
+    /**
+     * 根据组织Id和手机号来查询Eh_organization_members表中的信息，来判断该用户是否已经加入到该公司
+     * @param organizationId
+     * @param contactToken
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+         OrganizationMember organizationMember =  context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
     @Override
     public List<Organization> listOrganizationsByIds(Set<Long> ids) {
         return listOrganizationsByIds(ids.toArray(new Long[ids.size()]));
