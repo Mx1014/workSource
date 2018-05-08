@@ -173,7 +173,7 @@ CREATE TABLE `eh_communityAndBuilding_relationes` (
 
 
 -- 增加 应用icon信息  add by yanjun 20180426
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `icon_uri`  varchar(255) NULL;
+ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `icon_uri`  varchar(255) NULL;
 
 -- 标准版里app的配置是否跟随默认配置
 ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
