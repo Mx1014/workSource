@@ -9,6 +9,7 @@ CREATE TABLE `eh_enterprise_approval_groups` (
 	`name` VARCHAR(64) NOT NULL COMMENT 'name of the approval group',
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0. inactive, 1.active',
 	`group_attribute` VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT, CUSTOMIZE',
+	`approval_icon` VARCHAR(1024) COMMENT 'the default icon of the group',
 	`operator_uid` BIGINT,
 	`operator_time` DATETIME,
 	PRIMARY KEY (`id`)
