@@ -6,13 +6,17 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -80,6 +84,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Override
     public String getIndexType() {
@@ -475,6 +482,18 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
              result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
         }
         dto.setTrackingPeriod(result);
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        //楼栋门牌
+        ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
+        command1.setCommunityId(customer.getCommunityId());
+        List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
+        dto.setEntryInfos(entryInfos);
         return dto;
     }
     

@@ -1,5 +1,8 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -172,13 +175,18 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private BigDecimal riskInvestmentAmount;
     private Boolean thirdPartFlag = false;
 
-    private String trackingPhone;
+    private Integer trackingPeriod;
     private String deviceType;
+    private String trackingPhone;
     private String hotline;
     private String unifiedSocialCreditCode;
-    private List<String> postUri;
-    private Integer trackingPeriod;
-
+    @ItemType(String.class)
+    private List<String> bannerUri;
+    private String postUri;
+    @ItemType(OrganizationContactDTO.class)
+    private List<OrganizationContactDTO> enterpriseAdmins;
+    @ItemType(CustomerEntryInfoDTO.class)
+    private  List<CustomerEntryInfoDTO> entryInfos;
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -924,12 +932,36 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.unifiedSocialCreditCode = unifiedSocialCreditCode;
     }
 
-    public List<String> getPostUri() {
+    public List<String> getBannerUri() {
+        return bannerUri;
+    }
+
+    public void setBannerUri(List<String> bannerUri) {
+        this.bannerUri = bannerUri;
+    }
+
+    public String getPostUri() {
         return postUri;
     }
 
-    public void setPostUri(List<String> postUri) {
+    public void setPostUri(String postUri) {
         this.postUri = postUri;
+    }
+
+    public List<OrganizationContactDTO> getEnterpriseAdmins() {
+        return enterpriseAdmins;
+    }
+
+    public void setEnterpriseAdmins(List<OrganizationContactDTO> enterpriseAdmins) {
+        this.enterpriseAdmins = enterpriseAdmins;
+    }
+
+    public List<CustomerEntryInfoDTO> getEntryInfos() {
+        return entryInfos;
+    }
+
+    public void setEntryInfos(List<CustomerEntryInfoDTO> entryInfos) {
+        this.entryInfos = entryInfos;
     }
 
     @Override

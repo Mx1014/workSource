@@ -637,6 +637,18 @@ public class CustomerServiceImpl implements CustomerService {
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        List<OrganizationContactDTO> admins = listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        //楼栋门牌
+        ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
+        command1.setCommunityId(customer.getCommunityId());
+        List<CustomerEntryInfoDTO> entryInfos = listCustomerEntryInfosWithoutAuth(command1);
+        dto.setEntryInfos(entryInfos);
         return dto;
     }
 
@@ -1105,9 +1117,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(dto.getId());
         if (attachments != null && attachments.size() > 0) {
-            List<String> postUris = new ArrayList<>();
-            attachments.forEach(a -> postUris.add(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId())));
-            dto.setPostUri(postUris);
+            List<String> bannerUris = new ArrayList<>();
+            attachments.forEach(a -> bannerUris.add(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId())));
+            dto.setBannerUri(bannerUris);
         }
     }
 
@@ -3545,7 +3557,7 @@ public class CustomerServiceImpl implements CustomerService {
             customerAdminContacts = processOrganizationMembers(customerAdminRecords);
         }
         if (null == customerAdminContacts || customerAdminContacts.size() == 0) {
-            cmd.setOrganizationId(customer.getOrganizationId());
+            cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
             result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
