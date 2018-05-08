@@ -1,4 +1,4 @@
--- 删除管理员设置界面的module
+-- 删除管理员设置界面的企业管理module
 DELETE FROM eh_service_modules WHERE id = 33000;
 DELETE  FROM  eh_service_module_apps WHERE  module_id = 33000;
 
@@ -26,6 +26,9 @@ WHERE contact_phone IS NULL AND contact_mobile IS NOT NULL;
 UPDATE eh_enterprise_customers
 SET contact_phone = CONCAT('[',contact_phone,']')
 WHERE contact_phone IS NOT NULL AND contact_mobile IS NULL;
+
+-- 迁移企业管理的是否设置管理员
+UPDATE  eh_enterprise_customers SET admin_flag = IFNULL((SELECT admin_flag FROM eh_organizations WHERE id = eh_enterprise_customers.organization_id) ,0);
 
 -- 增加企业管理中的动态字段  by jiarui
 
