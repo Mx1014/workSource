@@ -37,6 +37,10 @@ public interface EnterpriseApprovalService {
 
     ListEnterpriseApprovalsResponse listEnterpriseApprovalTypes(ListEnterpriseApprovalsCommand cmd);
 
+    void enableEnterpriseApproval(EnterpriseApprovalIdCommand cmd);
+
+    void disableEnterpriseApproval(EnterpriseApprovalIdCommand cmd);
+
     ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
     ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);

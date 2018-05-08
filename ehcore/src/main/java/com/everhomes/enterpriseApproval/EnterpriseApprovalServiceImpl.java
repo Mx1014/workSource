@@ -24,6 +24,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -468,23 +469,30 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     public EnterpriseApprovalDTO createEnterpriseApproval(CreateEnterpriseApprovalCommand cmd) {
         Long userId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        EnterpriseApprovalGroup group = enterpriseApprovalProvider.findEnterpriseApprovalGroup(cmd.getApprovalGroupId());
+        if(group == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_GROUP_NOT_EXIST,
+                    "The approval group not exist.");
+        GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(namespaceId, cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
+        if(oldApproval != null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DUPLICATE_NAME,
+                    "Duplicate approval name.");
 
-        //  1.set the general approval
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
         EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
         fieldDTO.setApprovalGroupId(cmd.getApprovalGroupId());
         BeanUtils.copyProperties(fieldDTO, ga);
-        ga.setIntegralTag1(cmd.getApprovalGroupId());
         ga.setNamespaceId(namespaceId);
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
         ga.setOperatorUid(userId);
         ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         //  set a default icon
-        ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
+        if (group.getApprovalIcon() != null)
+            ga.setIconUri(group.getApprovalIcon());
         dbProvider.execute((TransactionStatus status) -> {
-            //  2.create it into the database
+            //  create it into the database
             Long approvalId = generalApprovalProvider.createGeneralApproval(ga);
-            //  3.update the scope
+            //  update the scope
             updateGeneralApprovalScope(ga.getNamespaceId(), approvalId, cmd.getScopes());
             return null;
         });
@@ -514,6 +522,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null)
             return null;
+        //  duplicate name checked
+        GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(ga.getNamespaceId(), ga.getModuleId(), ga.getOwnerId(), ga.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
+        if (oldApproval != null)
+            if (oldApproval.getId().longValue() != ga.getId().longValue())
+                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DUPLICATE_NAME,
+                        "Duplicate approval name.");
         EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
         fieldDTO.setApprovalGroupId(cmd.getApprovalGroupId());
         BeanUtils.copyProperties(fieldDTO, ga);
@@ -607,6 +621,16 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
         res.setGroups(groups);
         return res;
+    }
+
+    @Override
+    public void enableEnterpriseApproval(EnterpriseApprovalIdCommand cmd) {
+
+    }
+
+    @Override
+    public void disableEnterpriseApproval(EnterpriseApprovalIdCommand cmd) {
+
     }
 
     //  find approvals, In order to be reused by other function

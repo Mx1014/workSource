@@ -6,11 +6,15 @@ import java.util.List;
 
 public interface EnterpriseApprovalProvider {
 
+    EnterpriseApprovalGroup findEnterpriseApprovalGroup(Long id);
+
     List<EnterpriseApprovalGroup> listEnterpriseApprovalGroups();
 
     GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
     List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId);
 
-    List<Long> listGeneralApprovalIdsByGroupId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long gourpId);
+    List<Long> listGeneralApprovalIdsByGroupId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long groupId);
+
+    GeneralApproval findEnterpriseApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String name, Long groupId);
 }

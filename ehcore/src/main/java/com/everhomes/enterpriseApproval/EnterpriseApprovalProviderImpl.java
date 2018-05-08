@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseApprovalGroupsDao;
 import com.everhomes.server.schema.tables.records.EhEnterpriseApprovalGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseApprovalTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
@@ -25,6 +26,13 @@ public class EnterpriseApprovalProviderImpl implements EnterpriseApprovalProvide
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Override
+    public EnterpriseApprovalGroup findEnterpriseApprovalGroup(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhEnterpriseApprovalGroupsDao dao = new EhEnterpriseApprovalGroupsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), EnterpriseApprovalGroup.class);
+    }
 
     @Override
     public List<EnterpriseApprovalGroup> listEnterpriseApprovalGroups() {
@@ -82,5 +90,19 @@ public class EnterpriseApprovalProviderImpl implements EnterpriseApprovalProvide
             return results;
 
         return Collections.singletonList(0L);
+    }
+
+    @Override
+    public GeneralApproval findEnterpriseApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String name, Long groupId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_NAME.eq(name));
+        query.addConditions(EnterpriseApprovalCustomField.APPROVAL_GROUP_ID.getField().eq(groupId));
+        return ConvertHelper.convert(query.fetchAny(), GeneralApproval.class);
     }
 }

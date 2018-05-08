@@ -170,6 +170,36 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /enterpriseApproval/enableEnterpriseApproval</b>
+     * <p>OA 启用审批</p>
+     * @return
+     */
+    @RequestMapping("enableEnterpriseApproval")
+    @RestReturn(value=String.class)
+    public RestResponse enableEnterpriseApproval(@Valid EnterpriseApprovalIdCommand cmd) {
+        enterpriseApprovalService.enableEnterpriseApproval(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/disableEnterpriseApproval</b>
+     * <p>OA 禁用审批</p>
+     * @return
+     */
+    @RequestMapping("disableEnterpriseApproval")
+    @RestReturn(value=String.class)
+    public RestResponse disableEnterpriseApproval(@Valid EnterpriseApprovalIdCommand cmd) {
+        enterpriseApprovalService.disableEnterpriseApproval(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovals</b>
      * <p>OA 审批列表</p>
      */
