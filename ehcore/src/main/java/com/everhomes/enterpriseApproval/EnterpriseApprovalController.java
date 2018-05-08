@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/enterpriseApproval")
 public class EnterpriseApprovalController extends ControllerBase{
+    public static final Long MODULE_ID = 52000L;
 
     @Autowired
     private EnterpriseApprovalService enterpriseApprovalService;

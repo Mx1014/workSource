@@ -453,6 +453,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (formOriginId != null)
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
+        ga.setIconUri(template.getIconUri());
         ga.setOperatorUid(userId);
         ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
         return ga;
@@ -685,6 +686,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     public ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd) {
         ListEnterpriseApprovalsResponse res = new ListEnterpriseApprovalsResponse();
         Long userId = UserContext.currentUserId();
+        cmd.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        if (null == cmd.getModuleType())
+            cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+        if (null == cmd.getModuleId())
+            cmd.setModuleId(EnterpriseApprovalController.MODULE_ID);
         List<EnterpriseApprovalGroupDTO> groups = listEnterpriseApprovals(cmd).getGroups();
         if (groups == null || groups.size() == 0)
             return res;
