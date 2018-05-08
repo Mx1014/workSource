@@ -2,6 +2,7 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -180,8 +181,8 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String trackingPhone;
     private String hotline;
     private String unifiedSocialCreditCode;
-    @ItemType(String.class)
-    private List<String> bannerUrl;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> bannerUrl;
     private String postUri;
     private String postUrl;
     @ItemType(OrganizationContactDTO.class)
@@ -933,11 +934,11 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.unifiedSocialCreditCode = unifiedSocialCreditCode;
     }
 
-    public List<String> getBannerUrl() {
+    public List<AttachmentDescriptor> getBannerUrl() {
         return bannerUrl;
     }
 
-    public void setBannerUri(List<String> bannerUrl) {
+    public void setBannerUrl(List<AttachmentDescriptor> bannerUrl) {
         this.bannerUrl = bannerUrl;
     }
 
@@ -963,10 +964,6 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setEntryInfos(List<CustomerEntryInfoDTO> entryInfos) {
         this.entryInfos = entryInfos;
-    }
-
-    public void setBannerUrl(List<String> bannerUrl) {
-        this.bannerUrl = bannerUrl;
     }
 
     public String getPostUrl() {
