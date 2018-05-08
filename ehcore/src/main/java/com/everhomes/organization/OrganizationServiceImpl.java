@@ -1441,7 +1441,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organization1.setAdminTargetId(organizationMember.getId());
                         organization1.setId(organization.getId());
                         //更新eh_organizations表信息
-                        organizationProvider.updateOrganization(organization1);
+                        organizationProvider.updateOrganizationByOrgId(organization1);
                     }else{
                         //// TODO: 2018/4/28 说明没有加入公司,但是已经注册了，那么我们就将其加入刚新建的公司中
                         //创建OrganizationMember类的对象
@@ -1468,7 +1468,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organization2.setAdminTargetId(organizationMember1.getId());
                         organization2.setId(organization.getId());
                         //更新eh_organizations表信息
-                        organizationProvider.updateOrganization(organization2);
+                        organizationProvider.updateOrganizationByOrgId(organization2);
                     }
 
                 }else{
@@ -1485,7 +1485,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organization3.setAdminTargetId(organizationMember.getId());
                         organization3.setId(organization.getId());
                         //更新eh_organizations表信息
-                        organizationProvider.updateOrganization(organization3);
+                        organizationProvider.updateOrganizationByOrgId(organization3);
                     }else{
                         //说明没有注册信息，也没有加入公司，那么我们就帮他加入公司，只要后面注册之后，他就是超级管理员了
 
@@ -1513,7 +1513,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organization4.setAdminTargetId(organizationMember2.getId());
                         organization4.setId(organization.getId());
                         //更新eh_organizations表信息
-                        organizationProvider.updateOrganization(organization4);
+                        organizationProvider.updateOrganizationByOrgId(organization4);
 
                     }
                 }

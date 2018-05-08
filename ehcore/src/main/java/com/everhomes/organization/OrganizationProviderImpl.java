@@ -118,6 +118,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(department);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
+
+    }
+
+    /**
+     * 根据企业编号来更新企业信息
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationByOrgId(Organization organization){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID,organization.getAdminTargetId())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
     }
 
     /**

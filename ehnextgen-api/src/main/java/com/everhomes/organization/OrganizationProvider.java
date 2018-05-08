@@ -689,4 +689,10 @@ public interface OrganizationProvider {
 	 * @param organization
 	 */
 	void updateOrganizationProperty(Organization organization);
+
+	/**
+	 * 根据企业编号来更新企业信息
+	 * @param organization
+	 */
+	void updateOrganizationByOrgId(Organization organization);
 }
