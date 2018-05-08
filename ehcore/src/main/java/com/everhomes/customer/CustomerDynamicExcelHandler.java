@@ -178,11 +178,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             //增加管理员设置
             if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
                 DynamicField df = new DynamicField();
-                df.setFieldName("customerAdmin");
+                df.setFieldName("enterpriseAdmins");
                 df.setDisplayName("企业管理员");
+                df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
                 DynamicField df1 = new DynamicField();
-                df1.setFieldName("addressString");
+                df1.setFieldName("entryInfos");
                 df1.setDisplayName("楼栋门牌");
+                df1.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
                 dynamicFields.add(df);
                 dynamicFields.add(df1);
             }
@@ -268,12 +270,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
                                 try {
-                                    if(!"customerAdmin".equals(column.getFieldName())&&!"addressString".equals(column.getFieldName())){
+                                    if(!"enterpriseAdmins".equals(column.getFieldName())&&!"entryInfos".equals(column.getFieldName())){
                                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
                                     }else {
-                                        if("customerAdmin".equals(column.getFieldName()))
+                                        if("enterpriseAdmins".equals(column.getFieldName()))
                                            customerAdminString = column.getValue();
-                                        if("addressString".equals(column.getFieldName()))
+                                        if("entryInfos".equals(column.getFieldName()))
                                             customerAddressString = column.getValue();
                                     }
                                 } catch(Exception e){

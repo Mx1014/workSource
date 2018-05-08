@@ -56,6 +56,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -1098,6 +1099,25 @@ public class FieldServiceImpl implements FieldService {
         }
         if(invoke==null){
             return "";
+        }
+        //增加管理员和楼栋门牌特殊情况
+        if ("enterpriseAdmins".equals(fieldName)) {
+            if(invoke instanceof  ArrayList){
+                List<OrganizationContactDTO> contacts =  (ArrayList<OrganizationContactDTO>) invoke;
+                if(contacts.size()>0){
+                    List<String> admin = new ArrayList<>();
+                    contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
+                    return String.join(",", admin);
+                }
+            }
+        }
+        if("entryInfos".equals(fieldName)){
+            List<CustomerEntryInfoDTO> entryInfos = (ArrayList<CustomerEntryInfoDTO>) invoke;
+            if(entryInfos.size()>0){
+                List<String> entryInfo = new ArrayList<>();
+                entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
+                return String.join(",", entryInfo);
+            }
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
