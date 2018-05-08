@@ -41,6 +41,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
@@ -145,13 +146,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
-                List<String> apartments = new ArrayList<>();
+                List<String> addressIds = new ArrayList<>();
                 entryInfos.forEach((e) -> {
                     buildings.add(e.getBuildingId().toString());
-                    apartments.add(e.getAddressId().toString());
+                    addressIds.add(e.getAddressId().toString());
                 });
-                builder.field("building", StringUtils.join(buildings, "|"));
-                builder.field("apartment", StringUtils.join(apartments, "|"));
+                builder.field("buildingId", StringUtils.join(buildings, "|"));
+                builder.field("addressId", StringUtils.join(addressIds, "|"));
             }
             builder.endObject();
             return builder;
@@ -233,6 +234,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+        }
 
         if(cmd.getCustomerCategoryId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));

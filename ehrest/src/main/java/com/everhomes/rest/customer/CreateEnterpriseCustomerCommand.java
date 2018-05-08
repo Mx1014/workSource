@@ -164,12 +164,9 @@ public class CreateEnterpriseCustomerCommand {
     private Byte  deviceType;
 
     private String unifiedSocialCreditCode;
-
     private String postUri;
-
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
-
     private String hotline;
 
 
