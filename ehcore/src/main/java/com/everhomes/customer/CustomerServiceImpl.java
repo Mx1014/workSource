@@ -1126,7 +1126,7 @@ public class CustomerServiceImpl implements CustomerService {
                 bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
                 bannerUrls.add(bannerUrl);
             });
-            dto.setBannerUrl(bannerUrls);
+            dto.setBanner(bannerUrls);
         }
         dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
     }

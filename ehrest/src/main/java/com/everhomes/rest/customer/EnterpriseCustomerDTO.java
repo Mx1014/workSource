@@ -182,7 +182,7 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String hotline;
     private String unifiedSocialCreditCode;
     @ItemType(AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> bannerUrl;
+    private List<AttachmentDescriptor> banner;
     private String postUri;
     private String postUrl;
     @ItemType(OrganizationContactDTO.class)
@@ -934,12 +934,12 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.unifiedSocialCreditCode = unifiedSocialCreditCode;
     }
 
-    public List<AttachmentDescriptor> getBannerUrl() {
-        return bannerUrl;
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
     }
 
-    public void setBannerUrl(List<AttachmentDescriptor> bannerUrl) {
-        this.bannerUrl = bannerUrl;
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
     }
 
     public String getPostUri() {
