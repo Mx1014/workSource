@@ -14,6 +14,7 @@ import java.util.List;
  * <li>officeLocation: 关联的办公地点id</li>
  * <li>communityIds: 关联的管理项目 </li>
  * <li>serviceSupportFlag: 是否是服务商 </li>
+ * <li>avatar: logo</li>
  * </ul>
  *
  */
@@ -28,6 +29,7 @@ public class UpdateEnterpriseDetailCommand {
     private List<CreateOfficeSiteCommand> officeSites;
     private List<Long> communityIds;
     private String entries;
+    private String avatar;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -107,6 +109,14 @@ public class UpdateEnterpriseDetailCommand {
 
     public void setEntries(String entries) {
         this.entries = entries;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     @Override
