@@ -2073,6 +2073,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
             }
             dto.setPayslipContent(processPayslipContent(r, cellMap));
+            payslipDetailDTOs.add(dto);
         }
         return payslipDetailDTOs;
     }
