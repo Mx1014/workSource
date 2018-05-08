@@ -128,7 +128,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         ListVisitReasonsResponse response = new ListVisitReasonsResponse();
         response.setVisitorReasonList(visitorSysVisitReasons.stream().map(r->{
             BaseVisitorReasonDTO convert = new BaseVisitorReasonDTO();
-            convert.setVisitReason(r.getVisitorReason());
+            convert.setVisitReason(r.getVisitReason());
             convert.setVisitReasonId(r.getId());
             return convert;
         }).collect(Collectors.toList()));
