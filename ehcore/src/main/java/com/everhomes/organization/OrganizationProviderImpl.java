@@ -408,7 +408,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         if (!StringUtils.isEmpty(keywords)) {
             //添加关键字查询条件
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+ keywords + "%"));
         }
         //添加查询条件为有效的，active表示的是有效的数据
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
