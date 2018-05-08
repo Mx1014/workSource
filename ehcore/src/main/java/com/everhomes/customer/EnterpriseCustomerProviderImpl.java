@@ -1938,14 +1938,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void updateEnterpriseBannerUri(Long customerId, List<AttachmentDescriptor> banners) {
         deleteCustomerBannerUriByCustomerId(customerId);
         if (banners != null && banners.size() > 0) {
-            banners.forEach(this::createCustomerBannerUri);
+            banners.forEach((b) -> createCustomerBannerUri(customerId, b));
         }
     }
 
-    private void createCustomerBannerUri(AttachmentDescriptor banner) {
+    private void createCustomerBannerUri(Long customerId, AttachmentDescriptor banner) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAttachments.class));
         CustomerAttachements attachement = new CustomerAttachements();
+        attachement.setCustomerId(customerId);
         attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
         attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         attachement.setCreatorUid(UserContext.currentUserId());

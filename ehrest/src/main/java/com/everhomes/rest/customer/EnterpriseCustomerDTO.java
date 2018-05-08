@@ -181,8 +181,9 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String hotline;
     private String unifiedSocialCreditCode;
     @ItemType(String.class)
-    private List<String> bannerUri;
+    private List<String> bannerUrl;
     private String postUri;
+    private String postUrl;
     @ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> enterpriseAdmins;
     @ItemType(CustomerEntryInfoDTO.class)
@@ -932,12 +933,12 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.unifiedSocialCreditCode = unifiedSocialCreditCode;
     }
 
-    public List<String> getBannerUri() {
-        return bannerUri;
+    public List<String> getBannerUrl() {
+        return bannerUrl;
     }
 
-    public void setBannerUri(List<String> bannerUri) {
-        this.bannerUri = bannerUri;
+    public void setBannerUri(List<String> bannerUrl) {
+        this.bannerUrl = bannerUrl;
     }
 
     public String getPostUri() {
@@ -962,6 +963,18 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setEntryInfos(List<CustomerEntryInfoDTO> entryInfos) {
         this.entryInfos = entryInfos;
+    }
+
+    public void setBannerUrl(List<String> bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
+
+    public String getPostUrl() {
+        return postUrl;
+    }
+
+    public void setPostUrl(String postUrl) {
+        this.postUrl = postUrl;
     }
 
     @Override

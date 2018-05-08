@@ -1118,10 +1118,11 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(dto.getId());
         if (attachments != null && attachments.size() > 0) {
-            List<String> bannerUris = new ArrayList<>();
-            attachments.forEach(a -> bannerUris.add(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId())));
-            dto.setBannerUri(bannerUris);
+            List<String> bannerUrls = new ArrayList<>();
+            attachments.forEach(a -> bannerUrls.add(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId())));
+            dto.setBannerUrl(bannerUrls);
         }
+        dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
     }
 
     private EnterpriseCustomer checkEnterpriseCustomer(Long id) {
