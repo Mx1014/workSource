@@ -184,6 +184,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 df1.setFieldName("addressString");
                 df1.setDisplayName("楼栋门牌");
                 dynamicFields.add(df);
+                dynamicFields.add(df1);
             }
         }
 

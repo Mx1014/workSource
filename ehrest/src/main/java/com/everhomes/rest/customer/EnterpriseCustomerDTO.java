@@ -81,6 +81,7 @@ import java.util.List;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty: 联系人职务</li>
+ *     <li>signedUpCount: 注册人数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -181,6 +182,7 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String trackingPhone;
     private String hotline;
     private String unifiedSocialCreditCode;
+    private Integer signedUpCount;
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
     private String postUri;
@@ -972,6 +974,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setPostUrl(String postUrl) {
         this.postUrl = postUrl;
+    }
+
+    public Integer getSignedUpCount() {
+        return signedUpCount;
+    }
+
+    public void setSignedUpCount(Integer signedUpCount) {
+        this.signedUpCount = signedUpCount;
     }
 
     @Override

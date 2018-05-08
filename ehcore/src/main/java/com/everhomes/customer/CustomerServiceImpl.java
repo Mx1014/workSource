@@ -650,6 +650,10 @@ public class CustomerServiceImpl implements CustomerService {
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = listCustomerEntryInfosWithoutAuth(command1);
         dto.setEntryInfos(entryInfos);
+        //增加注册人数he !
+        if(customer.getOrganizationId()!=null && customer.getOrganizationId()!=0L){
+            dto.setSignedUpCount(organizationProvider.getSignupCount(customer.getOrganizationId()));
+        }
         return dto;
     }
 
