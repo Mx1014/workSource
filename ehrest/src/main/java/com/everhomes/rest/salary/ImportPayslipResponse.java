@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>salaryPeriod: 期数:类似201808</li>
- * <li>details: 导入工资条详情</li>
+ * <li>details: 导入工资条详情 {@link com.everhomes.rest.salary.PayslipDetailDTO}}</li>
  * </ul>
  */
 public class ImportPayslipResponse {
