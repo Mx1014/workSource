@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
+ * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字</li>
  * <li>fieldDisplayName: 字段展示名字</li>
  * <li>fieldValue: 提交的数据
@@ -16,9 +16,9 @@ import com.everhomes.util.StringHelper;
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue}
  * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormSubformValue}
- * <li>fieldAttribute: 字段属性 比如：系统字段 {@link GeneralFormFieldAttribute}</li>
+ * <li>fieldAttribute: 字段属性 比如：系统字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttribute}</li>
  * </li>
- * <ul>
+ * </ul>
  * @author janson
  *
  */

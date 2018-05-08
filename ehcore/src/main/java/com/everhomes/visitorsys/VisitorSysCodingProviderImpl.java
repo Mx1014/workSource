@@ -45,7 +45,8 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 	@Override
 	public void updateVisitorSysCoding(VisitorSysCoding visitorSysCoding) {
 		assert (visitorSysCoding.getId() != null);
-		visitorSysCoding.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		//更新时间需要在调用此方法时候设置
+//		visitorSysCoding.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysCoding.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(visitorSysCoding);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhVisitorSysCoding.class, visitorSysCoding.getId());
@@ -70,6 +71,19 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 				.where(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_CODING.STATUS.eq((byte)2))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
+		if(list==null||list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
+	@Override
+	public VisitorSysCoding findVisitorSysCodingByRandomCode(String randomCode) {
+		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
+				.where(Tables.EH_VISITOR_SYS_CODING.RANDOM_CODE.eq(randomCode))
+				.and(Tables.EH_VISITOR_SYS_CODING.STATUS.eq((byte)2))
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
 		if(list==null||list.size()==0){
 			return null;
