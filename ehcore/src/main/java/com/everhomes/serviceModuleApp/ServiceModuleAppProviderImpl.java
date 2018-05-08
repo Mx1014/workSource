@@ -284,8 +284,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
-		if(null != keywords)
-			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.NAME.like("%"+ keywords + "%"));
+		if(null != keywords){
+			Condition keywordcond = Tables.EH_SERVICE_MODULE_APPS.NAME.like("%"+ keywords + "%").or(Tables.EH_SERVICE_MODULE_APP_PROFILE.APP_NO.like("%"+ keywords + "%"));
+			cond = cond.and(keywordcond);
+		}
 		if(null != developerIds)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APP_PROFILE.DEVELOP_ID.in(developerIds));
 		if(null != appType)
