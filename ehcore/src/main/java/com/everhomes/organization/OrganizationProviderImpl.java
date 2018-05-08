@@ -406,10 +406,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             //添加命名空间查询条件
             query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
         }
-        if (!StringUtils.isEmpty(keywords)) {
-            //添加关键字查询条件
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+ keywords + "%"));
+
+        //添加查询条件，首先我们先将关键字转换为Long的，如果转换成功的话，那么就说明=该关键字是企业编号，那么就根据关键字搜索，否则我们就认为他是企业
+        //名称，那么我们就根据企业名称进行搜索
+        try {
+            Long aLong = Long.valueOf(keywords);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keywords)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%"));
+            }
         }
+
+
         //添加查询条件为有效的，active表示的是有效的数据
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
