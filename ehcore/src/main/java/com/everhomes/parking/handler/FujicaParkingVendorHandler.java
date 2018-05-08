@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.fujica.Base64;
@@ -41,6 +42,8 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Autowired
     ConfigurationProvider configProvider;
+    @Autowired
+    ParkingProvider parkingProvider;
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         return null;
@@ -112,8 +115,19 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setPrice(param.getActualAmount());
             dto.setOriginalPrice(param.getParkingFee());
             dto.setOrderToken(param.getParkingCode());
-            if (param.getChargeableTime()!=null && getTimestamp(param.getChargeableTime())<now){
-                dto.setRemainingTime((int)(now-getTimestamp(param.getChargeableTime()))/1000/60);
+            if (param.getActualAmount().compareTo(new BigDecimal(0))==0){
+                if (parkingTime/1000/60 < param.getFreeTime())
+                     dto.setRemainingTime((int)(param.getFreeTime() - parkingTime/1000/60));
+                else{
+                    List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(parkingLot.getOwnerType(),parkingLot.getOwnerId(),parkingLot.getId(),
+                            plateNumber,null,null,null,null,null,null,
+                            null,ParkingRechargeOrderStatus.PAID.getCode(),null,null);
+                    if (list!=null && list.size()>0){
+                        Long lastPaidTime = now - list.get(0).getPaidTime().getTime();
+                        if (lastPaidTime/1000/60 < param.getOverTime())
+                            dto.setRemainingTime((int)(param.getOverTime() - lastPaidTime/1000/60));
+                    }
+                }
             }
 
         }
@@ -125,10 +139,10 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     public static void main (String[] args){
 
         String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
-        //String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
+       // String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
         JSONObject jo = new JSONObject();
         jo.put("ParkingCode","17000104590501");
-        jo.put("CarNo","湘A4YMTW");
+        jo.put("CarNo","湘A4YXPP");
 
 //        jo.put("DealNo","sssasdasfaxcasdqwrx");
 //        jo.put("Amount",new BigDecimal(1));
