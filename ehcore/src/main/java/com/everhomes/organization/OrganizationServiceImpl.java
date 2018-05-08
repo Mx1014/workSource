@@ -1570,9 +1570,17 @@ public class OrganizationServiceImpl implements OrganizationService {
             //1.创建一个Organization类的对象
             Organization organization = new Organization();
             //对企业名称进行查重校验
-            checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
-            //将企业名称封装在Organization对象中
-            organization.setName(cmd.getName());
+//            checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
+            Organization org = organizationProvider.findOrganizationByName(cmd.getName(), cmd.getNamespaceId());
+            if(org != null){
+                //说明eh_organizations表中存在改公司，那么我们在判断一下该公司的名称是不是和传进来的公司的名称一致，如果是一致的话，那么就不能对其进行修改，否则
+                //就可以进行修改
+                organization.setName(org.getName());
+            }else{
+                //说明传进来的公司的名称和之前的名称不一致，那么我们就将传进来的名称改为现在公司的名称
+                //将企业名称封装在Organization对象中
+                organization.setName(cmd.getName());
+            }
             organization.setId(cmd.getOrganizationId());
             //判断传过来的organizationId是否为空，不为空的话，就根据organizationId来进行更新eh_organizations表中
             //的企业名称
