@@ -29,3 +29,6 @@ CREATE TABLE `eh_message_records` (
 
 -- issue-26471 服务热线V1.5（客服聊天记录保存和导出) by huangmingbo 2018.5.8
 ALTER TABLE `eh_service_hotlines` ADD COLUMN `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0-deleted 1-active';
+
+-- by zheng
+ALTER TABLE `eh_configurations` modify `value` varchar(1024);
