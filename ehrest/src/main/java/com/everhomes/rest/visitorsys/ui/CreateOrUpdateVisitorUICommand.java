@@ -1,6 +1,7 @@
 package com.everhomes.rest.visitorsys.ui;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.visitorsys.BaseVisitorDTO;
 import com.everhomes.util.StringHelper;
 
@@ -9,6 +10,10 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>appkey: (必填)appkey</li>
+ * <li>signature: (必填)签名</li>
+ * <li>nonce: (必填)3位随机数</li>
+ * <li>timestamp: (必填)当前时间戳</li>
  * <li>deviceType: (必填)设备类型，{@link com.everhomes.rest.visitorsys.VisitorsysDeviceType}</li>
  * <li>deviceId: (必填)设备唯一标识</li>
  * <li>id: (选填)访客/预约ID,更新必填</li>
@@ -27,33 +32,25 @@ import java.util.List;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
- * <li>invalidTime: (根据配置选填/必填)有效期</li>
- * <li>plateNo: (根据配置选填/必填)车牌号</li>
- * <li>idNumber: (根据配置选填/必填)证件号码</li>
- * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
- * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
+ * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * <li>visitorPicUri: (选填)访客头像url</li>
  * <li>formJsonValue: (选填)表单提交json值</li>
  * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
  * <li>visitorSignCharacter: (选填)访客签名字符串</li>
- * <li>enterpriseFormList: (选填)企业自定义字段值，{@link com.everhomes.rest.visitorsys.ui.BaseFormDTO}</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
     private String deviceType;
     private String deviceId;
-    private Timestamp invalidTime;
-    private String plateNo;
-    private String idNumber;
-    private String visitFloor;
-    private String visitAddresses;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> communityFormValues;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> enterpriseFormValues;
 
     private String visitorPicUri;
-    private String formJsonValue;
     private String visitorSignUri;
     private String visitorSignCharacter;
-    @ItemType(BaseFormDTO.class)
-    private List<BaseFormDTO> enterpriseFormList;
 
     public String getDeviceType() {
         return deviceType;
@@ -71,44 +68,20 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
         this.deviceId = deviceId;
     }
 
-    public Timestamp getInvalidTime() {
-        return invalidTime;
+    public List<PostApprovalFormItem> getCommunityFormValues() {
+        return communityFormValues;
     }
 
-    public void setInvalidTime(Timestamp invalidTime) {
-        this.invalidTime = invalidTime;
+    public void setCommunityFormValues(List<PostApprovalFormItem> communityFormValues) {
+        this.communityFormValues = communityFormValues;
     }
 
-    public String getPlateNo() {
-        return plateNo;
+    public List<PostApprovalFormItem> getEnterpriseFormValues() {
+        return enterpriseFormValues;
     }
 
-    public void setPlateNo(String plateNo) {
-        this.plateNo = plateNo;
-    }
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public String getVisitFloor() {
-        return visitFloor;
-    }
-
-    public void setVisitFloor(String visitFloor) {
-        this.visitFloor = visitFloor;
-    }
-
-    public String getVisitAddresses() {
-        return visitAddresses;
-    }
-
-    public void setVisitAddresses(String visitAddresses) {
-        this.visitAddresses = visitAddresses;
+    public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
+        this.enterpriseFormValues = enterpriseFormValues;
     }
 
     public String getVisitorPicUri() {
@@ -117,14 +90,6 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
 
     public void setVisitorPicUri(String visitorPicUri) {
         this.visitorPicUri = visitorPicUri;
-    }
-
-    public String getFormJsonValue() {
-        return formJsonValue;
-    }
-
-    public void setFormJsonValue(String formJsonValue) {
-        this.formJsonValue = formJsonValue;
     }
 
     public String getVisitorSignUri() {
@@ -141,14 +106,6 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
 
     public void setVisitorSignCharacter(String visitorSignCharacter) {
         this.visitorSignCharacter = visitorSignCharacter;
-    }
-
-    public List<BaseFormDTO> getEnterpriseFormList() {
-        return enterpriseFormList;
-    }
-
-    public void setEnterpriseFormList(List<BaseFormDTO> enterpriseFormList) {
-        this.enterpriseFormList = enterpriseFormList;
     }
 
     @Override

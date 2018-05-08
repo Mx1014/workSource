@@ -80,6 +80,8 @@ CREATE TABLE `eh_visitor_sys_devices` (
   `device_name` VARCHAR(128) COMMENT '设备名称',
   `app_version` VARCHAR(128) COMMENT 'app版本',
   `device_pic_uri` VARCHAR(1024) COMMENT '设备图片uri',
+  `app_key` VARCHAR(256) COMMENT '设备后台请求接口appkey',
+  `secret_key` VARCHAR(256) COMMENT '设备后台请求接口secretkey',
   `status` TINYINT  DEFAULT 2 COMMENT '0:被删除状态,2:正常状态',
   `creator_uid` BIGINT,
   `create_time` DATETIME,

@@ -18,7 +18,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController
 @RequestMapping("/ui/visitorsys")
 @RequireAuthentication(false)
-public class VisitorSysUiController extends ControllerBase {
+public class VisitorSysUIController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
@@ -64,7 +64,7 @@ public class VisitorSysUiController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("confirmPairingCode")
-	@RestReturn(String.class)
+	@RestReturn(ConfirmPairingCodeResponse.class)
 	public DeferredResult<RestResponse> confirmPairingCode(ConfirmPairingCodeCommand cmd) {
 		return visitorSysService.confirmPairingCode(cmd);
 	}

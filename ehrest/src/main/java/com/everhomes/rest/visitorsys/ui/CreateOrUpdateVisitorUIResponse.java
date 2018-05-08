@@ -1,9 +1,12 @@
 package com.everhomes.rest.visitorsys.ui;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.visitorsys.BaseVisitorDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -25,24 +28,40 @@ import java.sql.Timestamp;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
- * <li>invalidTime: (根据配置选填/必填)有效期</li>
- * <li>plateNo: (根据配置选填/必填)车牌号</li>
- * <li>idNumber: (根据配置选填/必填)证件号码</li>
- * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
- * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
- * <li>visitorPicUri: (选填)访客头像url</li>
+ * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>visitorPicUrl: (选填)访客头像url</li>
+ * <li>visitorPicUri: (选填)访客头像uri</li>
+ * <li>sendMessageInviterFlag: (选填)是否发送消息给邀请者，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>sendSmsFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
+ * <li>visitorSignCharacter: (选填)访客签名字符串</li>
+ * <li>createTime: (必填)预约创建时间</li>
+ * <li>invitationNo: (必填)邀请码</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorUIResponse extends BaseVisitorDTO {
     private String deviceType;
     private String deviceId;
-    private Timestamp invalidTime;
-    private String plateNo;
-    private String idNumber;
-    private String visitFloor;
-    private String visitAddresses;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> communityFormValues;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> enterpriseFormValues;
 
+    private String visitorPicUrl;
     private String visitorPicUri;
+
+    private Byte sendMessageInviterFlag;
+    private Byte sendSmsFlag;
+
+    private String visitorSignUri;
+    private String visitorSignUrl;
+    private String visitorSignCharacter;
+    @ItemType(BaseFormDTO.class)
+    private List<BaseFormDTO> enterpriseFormList;
+    private Timestamp createTime;
+    private String invitationNo;
+
 
     public String getDeviceType() {
         return deviceType;
@@ -60,44 +79,28 @@ public class CreateOrUpdateVisitorUIResponse extends BaseVisitorDTO {
         this.deviceId = deviceId;
     }
 
-    public Timestamp getInvalidTime() {
-        return invalidTime;
+    public List<PostApprovalFormItem> getCommunityFormValues() {
+        return communityFormValues;
     }
 
-    public void setInvalidTime(Timestamp invalidTime) {
-        this.invalidTime = invalidTime;
+    public void setCommunityFormValues(List<PostApprovalFormItem> communityFormValues) {
+        this.communityFormValues = communityFormValues;
     }
 
-    public String getPlateNo() {
-        return plateNo;
+    public List<PostApprovalFormItem> getEnterpriseFormValues() {
+        return enterpriseFormValues;
     }
 
-    public void setPlateNo(String plateNo) {
-        this.plateNo = plateNo;
+    public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
+        this.enterpriseFormValues = enterpriseFormValues;
     }
 
-    public String getIdNumber() {
-        return idNumber;
+    public String getVisitorPicUrl() {
+        return visitorPicUrl;
     }
 
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public String getVisitFloor() {
-        return visitFloor;
-    }
-
-    public void setVisitFloor(String visitFloor) {
-        this.visitFloor = visitFloor;
-    }
-
-    public String getVisitAddresses() {
-        return visitAddresses;
-    }
-
-    public void setVisitAddresses(String visitAddresses) {
-        this.visitAddresses = visitAddresses;
+    public void setVisitorPicUrl(String visitorPicUrl) {
+        this.visitorPicUrl = visitorPicUrl;
     }
 
     public String getVisitorPicUri() {
@@ -106,6 +109,70 @@ public class CreateOrUpdateVisitorUIResponse extends BaseVisitorDTO {
 
     public void setVisitorPicUri(String visitorPicUri) {
         this.visitorPicUri = visitorPicUri;
+    }
+
+    public Byte getSendMessageInviterFlag() {
+        return sendMessageInviterFlag;
+    }
+
+    public void setSendMessageInviterFlag(Byte sendMessageInviterFlag) {
+        this.sendMessageInviterFlag = sendMessageInviterFlag;
+    }
+
+    public Byte getSendSmsFlag() {
+        return sendSmsFlag;
+    }
+
+    public void setSendSmsFlag(Byte sendSmsFlag) {
+        this.sendSmsFlag = sendSmsFlag;
+    }
+
+    public String getVisitorSignUri() {
+        return visitorSignUri;
+    }
+
+    public void setVisitorSignUri(String visitorSignUri) {
+        this.visitorSignUri = visitorSignUri;
+    }
+
+    public String getVisitorSignUrl() {
+        return visitorSignUrl;
+    }
+
+    public void setVisitorSignUrl(String visitorSignUrl) {
+        this.visitorSignUrl = visitorSignUrl;
+    }
+
+    public String getVisitorSignCharacter() {
+        return visitorSignCharacter;
+    }
+
+    public void setVisitorSignCharacter(String visitorSignCharacter) {
+        this.visitorSignCharacter = visitorSignCharacter;
+    }
+
+    public List<BaseFormDTO> getEnterpriseFormList() {
+        return enterpriseFormList;
+    }
+
+    public void setEnterpriseFormList(List<BaseFormDTO> enterpriseFormList) {
+        this.enterpriseFormList = enterpriseFormList;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getInvitationNo() {
+        return invitationNo;
+    }
+
+    public void setInvitationNo(String invitationNo) {
+        this.invitationNo = invitationNo;
     }
 
     @Override

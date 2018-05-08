@@ -13,4 +13,5 @@ public interface VisitorSysCodingProvider {
 
 	List<VisitorSysCoding> listVisitorSysCoding();
 
+	VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

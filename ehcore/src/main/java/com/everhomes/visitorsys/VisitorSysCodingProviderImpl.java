@@ -63,7 +63,20 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 				.orderBy(Tables.EH_VISITOR_SYS_CODING.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
 	}
-	
+
+	@Override
+	public VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
+				.where(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_ID.eq(ownerId))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
+		if(list==null||list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
 	private EhVisitorSysCodingDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

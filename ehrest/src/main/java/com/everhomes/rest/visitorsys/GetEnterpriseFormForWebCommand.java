@@ -6,12 +6,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>deviceType: (必填)设备类型，{@link VisitorsysDeviceType}</li>
- * <li>deviceId: (必填)设备唯一标识</li>
+ * <li>namespaceId: (必填)域空间id</li>
+ * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
+ * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
+ * <li>appId: (必填)应用Id</li>
  * <li>enterpriseId: (必填)公司id</li>
  * </ul>
  */
-public class GetEnterpriseFormForWebCommand extends BaseVisitorsysUICommand {
+public class GetEnterpriseFormForWebCommand extends BaseVisitorsysCommand {
     private Integer enterpriseId;
 
     public Integer getEnterpriseId() {
