@@ -629,8 +629,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         int length = 4;
         String randomCode = "";
         while(randomCode.length()<length){
-            char i = (char) ((Math.random() * 26 + 65));
-            randomCode+=i;
+            int i = (int) ((Math.random() * 36 + 65));
+            System.out.print(i+" ");
+            if(i<91){
+                randomCode+=(char)i;
+            }else{
+                randomCode+=i-91;
+            }
         }
         return randomCode;
     }
@@ -649,7 +654,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         return serialCode;
     }
-
+//
 //    public static void main(String[] args) {
 //        for (int i = 0; i <10000; i++) {
 //            System.out.println(new VisitorSysServiceImpl().generateRandomCode());
