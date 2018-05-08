@@ -501,6 +501,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         //楼栋门牌
         ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
         command1.setCommunityId(customer.getCommunityId());
+        command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
         dto.setEntryInfos(entryInfos);
         return dto;

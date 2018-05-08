@@ -1957,7 +1957,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     private void deleteCustomerBannerUriByCustomerId(Long customerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
-                .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(customerId))
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
                 .execute();
     }
 
