@@ -1,16 +1,19 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  * <li>namespaceId: (必填)域空间id</li>
- * <li>ownerType: (必填)归属的类型，{@link  com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
+ * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
- * <li>id: (必填)访客/预约ID</li>
+ * <li>id: (选填)访客/预约ID,更新必填</li>
  * <li>visitorName: (必填)访客姓名</li>
  * <li>followUpNumbers: (选填)随访人数</li>
  * <li>visitorPhone: (必填)访客电话</li>
@@ -26,242 +29,111 @@ import java.sql.Timestamp;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
- * <li>invalidTime: (根据配置选填/必填)有效期</li>
- * <li>plateNo: (根据配置选填/必填)车牌号</li>
- * <li>idNumber: (根据配置选填/必填)证件号码</li>
- * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
- * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
- * <li>createTime: 创建时间</li>
- * <li>invitationNo: 预约编号</li>
+ * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>visitorPicUri: (选填)访客头像uri</li>
+ * <li>visitorPicUrl: (选填)访客头像url</li>
+ * <li>sendMessageInviterFlag: (选填)是否发送消息给邀请者，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>sendSmsFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ * <li>visitorSignUri: (选填)签名图片或者pdf的uri</li>
+ * <li>visitorSignUrl: (选填)签名图片或者pdf的url</li>
+ * <li>visitorSignCharacter: (选填)访客签名字符串</li>
+ * <li>createTime: (必填)预约创建时间</li>
+ * <li>invitationNo: (必填)邀请码</li>
+ * <li>visitorActionList: (选填)事件列表, {@link com.everhomes.rest.visitorsys.BaseVisitorActionDTO}</li>
  * </ul>
  */
 public class BaseVisitorInfoDTO extends BaseVisitorDTO{
-    private Integer namespaceId;
-    private String ownerType;
-    private Long ownerId;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> communityFormValues;
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> enterpriseFormValues;
 
-    private Long id;
-    private String visitorName;
-    private Long followUpNumbers;
-    private String visitorPhone;
+    private String visitorPicUrl;
+    private String visitorPicUri;
 
-    private Long visitReasonId;
-    private String visitReason;
+    private Byte sendMessageInviterFlag;
+    private Byte sendSmsFlag;
 
-    private Long inviterId;
-    private String inviterName;
-
-    private Timestamp plannedVisitTime;
-    private Timestamp visitTime;
-
-    private Byte visitStatus;
-    private Byte visitorType;
-
-    private Long enterpriseId;
-    private String enterpriseName;
-
-    private Long officeLocationId;
-    private String officeLocationName;
-
-    private Timestamp invalidTime;
-    private String plateNo;
-    private String idNumber;
-    private String visitFloor;
-    private String visitAddresses;
-
+    private String visitorSignUri;
+    private String visitorSignUrl;
+    private String visitorSignCharacter;
     private Timestamp createTime;
     private String invitationNo;
 
-    public Long getId() {
-        return id;
+    @ItemType(BaseVisitorActionDTO.class)
+    private List<BaseVisitorActionDTO> visitorActionList;
+
+    public List<PostApprovalFormItem> getCommunityFormValues() {
+        return communityFormValues;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCommunityFormValues(List<PostApprovalFormItem> communityFormValues) {
+        this.communityFormValues = communityFormValues;
     }
 
-    public Integer getNamespaceId() {
-        return namespaceId;
+    public List<PostApprovalFormItem> getEnterpriseFormValues() {
+        return enterpriseFormValues;
     }
 
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
+    public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
+        this.enterpriseFormValues = enterpriseFormValues;
     }
 
-    public String getOwnerType() {
-        return ownerType;
+    public String getVisitorPicUri() {
+        return visitorPicUri;
     }
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
+    public void setVisitorPicUri(String visitorPicUri) {
+        this.visitorPicUri = visitorPicUri;
     }
 
-    public Long getOwnerId() {
-        return ownerId;
+    public String getVisitorPicUrl() {
+        return visitorPicUrl;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
+    public void setVisitorPicUrl(String visitorPicUrl) {
+        this.visitorPicUrl = visitorPicUrl;
     }
 
-    public String getVisitorName() {
-        return visitorName;
+    public Byte getSendMessageInviterFlag() {
+        return sendMessageInviterFlag;
     }
 
-    public void setVisitorName(String visitorName) {
-        this.visitorName = visitorName;
+    public void setSendMessageInviterFlag(Byte sendMessageInviterFlag) {
+        this.sendMessageInviterFlag = sendMessageInviterFlag;
     }
 
-    public Long getFollowUpNumbers() {
-        return followUpNumbers;
+    public Byte getSendSmsFlag() {
+        return sendSmsFlag;
     }
 
-    public void setFollowUpNumbers(Long followUpNumbers) {
-        this.followUpNumbers = followUpNumbers;
+    public void setSendSmsFlag(Byte sendSmsFlag) {
+        this.sendSmsFlag = sendSmsFlag;
     }
 
-    public String getVisitorPhone() {
-        return visitorPhone;
+    public String getVisitorSignUri() {
+        return visitorSignUri;
     }
 
-    public void setVisitorPhone(String visitorPhone) {
-        this.visitorPhone = visitorPhone;
+    public void setVisitorSignUri(String visitorSignUri) {
+        this.visitorSignUri = visitorSignUri;
     }
 
-    public Long getVisitReasonId() {
-        return visitReasonId;
+    public String getVisitorSignUrl() {
+        return visitorSignUrl;
     }
 
-    public void setVisitReasonId(Long visitReasonId) {
-        this.visitReasonId = visitReasonId;
+    public void setVisitorSignUrl(String visitorSignUrl) {
+        this.visitorSignUrl = visitorSignUrl;
     }
 
-    public String getVisitReason() {
-        return visitReason;
+    public String getVisitorSignCharacter() {
+        return visitorSignCharacter;
     }
 
-    public void setVisitReason(String visitReason) {
-        this.visitReason = visitReason;
-    }
-
-    public Long getInviterId() {
-        return inviterId;
-    }
-
-    public void setInviterId(Long inviterId) {
-        this.inviterId = inviterId;
-    }
-
-    public String getInviterName() {
-        return inviterName;
-    }
-
-    public void setInviterName(String inviterName) {
-        this.inviterName = inviterName;
-    }
-
-    public Timestamp getPlannedVisitTime() {
-        return plannedVisitTime;
-    }
-
-    public void setPlannedVisitTime(Timestamp plannedVisitTime) {
-        this.plannedVisitTime = plannedVisitTime;
-    }
-
-    public Timestamp getVisitTime() {
-        return visitTime;
-    }
-
-    public void setVisitTime(Timestamp visitTime) {
-        this.visitTime = visitTime;
-    }
-
-    public Byte getVisitStatus() {
-        return visitStatus;
-    }
-
-    public void setVisitStatus(Byte visitStatus) {
-        this.visitStatus = visitStatus;
-    }
-
-    public Byte getVisitorType() {
-        return visitorType;
-    }
-
-    public void setVisitorType(Byte visitorType) {
-        this.visitorType = visitorType;
-    }
-
-    public Long getEnterpriseId() {
-        return enterpriseId;
-    }
-
-    public void setEnterpriseId(Long enterpriseId) {
-        this.enterpriseId = enterpriseId;
-    }
-
-    public String getEnterpriseName() {
-        return enterpriseName;
-    }
-
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
-    }
-
-    public Long getOfficeLocationId() {
-        return officeLocationId;
-    }
-
-    public void setOfficeLocationId(Long officeLocationId) {
-        this.officeLocationId = officeLocationId;
-    }
-
-    public String getOfficeLocationName() {
-        return officeLocationName;
-    }
-
-    public void setOfficeLocationName(String officeLocationName) {
-        this.officeLocationName = officeLocationName;
-    }
-
-    public Timestamp getInvalidTime() {
-        return invalidTime;
-    }
-
-    public void setInvalidTime(Timestamp invalidTime) {
-        this.invalidTime = invalidTime;
-    }
-
-    public String getPlateNo() {
-        return plateNo;
-    }
-
-    public void setPlateNo(String plateNo) {
-        this.plateNo = plateNo;
-    }
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public String getVisitFloor() {
-        return visitFloor;
-    }
-
-    public void setVisitFloor(String visitFloor) {
-        this.visitFloor = visitFloor;
-    }
-
-    public String getVisitAddresses() {
-        return visitAddresses;
-    }
-
-    public void setVisitAddresses(String visitAddresses) {
-        this.visitAddresses = visitAddresses;
+    public void setVisitorSignCharacter(String visitorSignCharacter) {
+        this.visitorSignCharacter = visitorSignCharacter;
     }
 
     public Timestamp getCreateTime() {
@@ -278,6 +150,14 @@ public class BaseVisitorInfoDTO extends BaseVisitorDTO{
 
     public void setInvitationNo(String invitationNo) {
         this.invitationNo = invitationNo;
+    }
+
+    public List<BaseVisitorActionDTO> getVisitorActionList() {
+        return visitorActionList;
+    }
+
+    public void setVisitorActionList(List<BaseVisitorActionDTO> visitorActionList) {
+        this.visitorActionList = visitorActionList;
     }
 
     @Override

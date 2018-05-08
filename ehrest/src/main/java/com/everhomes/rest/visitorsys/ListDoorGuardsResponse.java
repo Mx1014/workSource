@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>deviceList: (必填)门禁列表，{@link com.everhomes.rest.visitorsys.BaseDoorGuardDTO}</li>
+ * <li>doorGuardList: (必填)门禁列表，{@link com.everhomes.rest.visitorsys.BaseDoorGuardDTO}</li>
  * </ul>
  */
 public class ListDoorGuardsResponse {

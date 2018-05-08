@@ -9,13 +9,13 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: (选填)下一页锚点</li>
- * <li>visitorEnterpriseList: (必填)公司+办公地点列表，{@link com.everhomes.rest.visitorsys.BaseEnterpriseAndLocationDTO}</li>
+ * <li>visitorEnterpriseList: (必填)公司列表，{@link com.everhomes.rest.visitorsys.BaseVisitorEnterpriseDTO}</li>
  * </ul>
  */
 public class ListCommunityOrganizationsResponse {
     private Long nextPageAnchor;
-    @ItemType(BaseEnterpriseAndLocationDTO.class)
-    private List<BaseEnterpriseAndLocationDTO> enterpriseAndLocationList;
+    @ItemType(BaseVisitorEnterpriseDTO.class)
+    private List<BaseVisitorEnterpriseDTO> visitorEnterpriseList;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -25,12 +25,12 @@ public class ListCommunityOrganizationsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<BaseEnterpriseAndLocationDTO> getEnterpriseAndLocationList() {
-        return enterpriseAndLocationList;
+    public List<BaseVisitorEnterpriseDTO> getVisitorEnterpriseList() {
+        return visitorEnterpriseList;
     }
 
-    public void setEnterpriseAndLocationList(List<BaseEnterpriseAndLocationDTO> enterpriseAndLocationList) {
-        this.enterpriseAndLocationList = enterpriseAndLocationList;
+    public void setVisitorEnterpriseList(List<BaseVisitorEnterpriseDTO> visitorEnterpriseList) {
+        this.visitorEnterpriseList = visitorEnterpriseList;
     }
 
     @Override

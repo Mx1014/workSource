@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: (选填)下一页锚点</li>
- * <li>officeLocationList: (必填)访客/预约列表，{@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
+ * <li>officeLocationList: (必填)办公地点列表，{@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
  * </ul>
  */
 public class ListOfficeLocationsResponse {

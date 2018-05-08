@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: (选填)下一页锚点</li>
- * <li>visitorDtoList: (必填)黑名单列表，{@link com.everhomes.rest.visitorsys.BaseBlackListDTO}</li>
+ * <li>blackListList: (必填)黑名单列表，{@link com.everhomes.rest.visitorsys.BaseBlackListDTO}</li>
  * </ul>
  */
 public class ListBlackListsResponse{

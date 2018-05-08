@@ -7,28 +7,28 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>visitorReasonId: (必填)事由idID</li>
- * <li>visitorReason: (必填)事由</li>
+ * <li>visitReasonId: (必填)事由idID</li>
+ * <li>visitReason: (必填)事由</li>
  * </ul>
  */
 public class BaseVisitorReasonDTO {
-    private Long visitorReasonId;
-    private String visitorReason;
+    private Long visitReasonId;
+    private String visitReason;
 
-    public Long getVisitorReasonId() {
-        return visitorReasonId;
+    public Long getVisitReasonId() {
+        return visitReasonId;
     }
 
-    public void setVisitorReasonId(Long visitorReasonId) {
-        this.visitorReasonId = visitorReasonId;
+    public void setVisitReasonId(Long visitReasonId) {
+        this.visitReasonId = visitReasonId;
     }
 
-    public String getVisitorReason() {
-        return visitorReason;
+    public String getVisitReason() {
+        return visitReason;
     }
 
-    public void setVisitorReason(String visitorReason) {
-        this.visitorReason = visitorReason;
+    public void setVisitReason(String visitReason) {
+        this.visitReason = visitReason;
     }
 
     @Override

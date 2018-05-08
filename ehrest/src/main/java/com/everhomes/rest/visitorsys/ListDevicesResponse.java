@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>deviceList: (必填)公司列表，{@link com.everhomes.rest.visitorsys.BaseDeviceDTO}</li>
+ * <li>deviceList: (必填)设备列表，{@link com.everhomes.rest.visitorsys.BaseDeviceDTO}</li>
  * </ul>
  */
 public class ListDevicesResponse {
