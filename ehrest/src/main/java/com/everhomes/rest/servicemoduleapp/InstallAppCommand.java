@@ -4,28 +4,28 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>appId: 应用Id</li>
- *     <li>orgId: 公司Id</li>
+ *     <li>originId: 应用originId</li>
+ *     <li>organizationId: 公司organizationId</li>
  * </ul>
  */
 public class InstallAppCommand {
-	private Long appId;
-	private Long orgId;
+	private Long originId;
+	private Long organizationId;
 
-	public Long getAppId() {
-		return appId;
+	public Long getOriginId() {
+		return originId;
 	}
 
-	public void setAppId(Long appId) {
-		this.appId = appId;
+	public void setOriginId(Long originId) {
+		this.originId = originId;
 	}
 
-	public Long getOrgId() {
-		return orgId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setOrgId(Long orgId) {
-		this.orgId = orgId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

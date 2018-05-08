@@ -266,8 +266,8 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         
         for(Long cAppId : communityOriginAppIds) {
             InstallAppCommand installCmd = new InstallAppCommand();
-            installCmd.setAppId(cAppId);
-            installCmd.setOrgId(organizationId);
+            installCmd.setOriginId(cAppId);
+            installCmd.setOrganizationId(organizationId);
             serviceModuleAppService.installApp(installCmd);
         }
         installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
@@ -383,8 +383,8 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         
         for(Long cAppId : communityOriginAppIds) {
             InstallAppCommand installCmd = new InstallAppCommand();
-            installCmd.setAppId(cAppId);
-            installCmd.setOrgId(anotherOrgId);
+            installCmd.setOriginId(cAppId);
+            installCmd.setOrganizationId(anotherOrgId);
             serviceModuleAppService.installApp(installCmd);
         }
         installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
@@ -497,8 +497,8 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         Long normalOrgId = 1041162l;
         Long cAppId = 114493l; // 管理员管理
         InstallAppCommand installCmd = new InstallAppCommand();
-        installCmd.setAppId(cAppId);
-        installCmd.setOrgId(normalOrgId);
+        installCmd.setOriginId(cAppId);
+        installCmd.setOrganizationId(normalOrgId);
         serviceModuleAppService.installApp(installCmd);
     }
     

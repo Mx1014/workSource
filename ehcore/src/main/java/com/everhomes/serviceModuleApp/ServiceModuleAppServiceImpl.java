@@ -243,25 +243,26 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ServiceModuleAppDTO installApp(InstallAppCommand cmd) {
 
-		ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(cmd.getAppId());
+		ServiceModuleApp serviceModuleApp = findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
+
 		if(serviceModuleApp == null){
-			LOGGER.error("app not found, appId = {}", cmd.getAppId());
+			LOGGER.error("app not found, originId = {}", cmd.getOriginId());
 			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
-					ServiceModuleAppServiceErrorCode.ERROR_SERVICEMODULEAPP_NOT_FOUND, "app not found, appId = " + cmd.getAppId());
+					ServiceModuleAppServiceErrorCode.ERROR_SERVICEMODULEAPP_NOT_FOUND, "app not found, originId = " + cmd.getOriginId());
 		}
 
 
-		OrganizationApp orgapps = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(serviceModuleApp.getOriginId(), cmd.getOrgId());
+		OrganizationApp orgapps = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(cmd.getOriginId(), cmd.getOrganizationId());
 
 		if(orgapps != null){
-			LOGGER.error("already install this app, appId = {}", cmd.getAppId());
+			LOGGER.error("already install this app, originId = {}", cmd.getOriginId());
 			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
-					ServiceModuleAppServiceErrorCode.ERROR_ALREADY_INSTALL_THIS_APP, "already install this app, appId = " + cmd.getAppId());
+					ServiceModuleAppServiceErrorCode.ERROR_ALREADY_INSTALL_THIS_APP, "already install this app, originId = " + cmd.getOriginId());
 		}
 
 		orgapps = new OrganizationApp();
-		orgapps.setAppOriginId(serviceModuleApp.getOriginId());
-		orgapps.setOrgId(cmd.getOrgId());
+		orgapps.setAppOriginId(cmd.getOriginId());
+		orgapps.setOrgId(cmd.getOrganizationId());
 		//TODO
 		//orgapps.setAppType();
 		orgapps.setStatus(OrganizationAppStatus.ENABLE.getCode());
@@ -269,7 +270,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapps.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
 		Long id = organizationAppProvider.createOrganizationApp(orgapps);
-
 
 		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
 		dto.setOrgAppId(id);
