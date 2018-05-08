@@ -50,7 +50,10 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         if (params.get("ownerType") != null) {
             ownerType = String.valueOf(params.get("ownerType"));
         }
-        String userName = (String) params.get("userName");
+        String userName = null;
+        if (params.get("userName") != null) {
+            userName = String.valueOf(params.get("userName"));
+        }
         String reportType = (String) params.get("reportType");
         Long ownerId = null;
         if (params.get("ownerId") != null) {
@@ -97,6 +100,8 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
             outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, userId);
         } else if (reportType.equals("exportPunchScheduling")) {
             outputStream = punchService.getPunchSchedulingOutputStream(queryTime, employees, timeRules, taskId);
+        }else if (reportType.equals("exportVacationBalances")) {
+            outputStream = punchService.getVacationBalanceOutputStream(ownerId, taskId);
         }
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);

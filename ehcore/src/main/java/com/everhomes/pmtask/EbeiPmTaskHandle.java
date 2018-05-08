@@ -488,7 +488,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
 
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
-
+            task.setStatus(FlowCaseStatus.PROCESS.getCode());
            pmTaskProvider.updateTask(task);
             return null;
         });

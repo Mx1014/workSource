@@ -69,4 +69,7 @@ public interface YellowPageService {
 	void syncOldForm();
 
 	void syncServiceAllianceApplicationRecords();
+	
+	SearchRequestInfoResponse listSeviceAllianceAppRecordsByEnterpriseId(Long enterpriseId, Long pageAnchor,
+			Integer pageSize);
 }

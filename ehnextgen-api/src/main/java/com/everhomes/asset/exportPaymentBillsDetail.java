@@ -16,6 +16,15 @@ public class exportPaymentBillsDetail {
     private String status;
     private String noticeTimes;
     private String contractNum;
+    private String invoiceNum;
+
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     public String getDateStr() {
         return dateStr;

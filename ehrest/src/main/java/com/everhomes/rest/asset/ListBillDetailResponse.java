@@ -34,7 +34,15 @@ public class ListBillDetailResponse {
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private String contractNum;
+    private String invoiceNum;
 
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     @Override
     public String toString() {

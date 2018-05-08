@@ -17,7 +17,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
-import org.elasticsearch.http.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -63,13 +61,7 @@ public class AssetController extends ControllerBase {
     @Autowired
     private AssetService assetService;
     @Autowired
-    private ConfigurationProvider configurationProvider;
-    @Autowired
     private PaymentService paymentService;
-    @Autowired
-    private PortalService portalService;
-    @Autowired
-    private UserPrivilegeMgr userPrivilegeMgr;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -667,15 +659,27 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改后保存一个未出账单          4?
     /**
-     * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
+     * <p>保存一个未出账单的修改</p>
      * <b>URL: /asset/modifyNotSettledBill</b>
      */
     @RequestMapping("modifyNotSettledBill")
     @RestReturn(value = String.class)
     public RestResponse modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
         assetService.modifyNotSettledBill(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    /**
+     * <p>保存一个已出账单的修改</p>
+     * <b>URL: /asset/modifySettledBill</b>
+     */
+    @RequestMapping("modifySettledBill")
+    @RestReturn(value = String.class)
+    public RestResponse modifySettledBill(ModifySettledBillCommand cmd) {
+        assetService.modifySettledBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -754,7 +758,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 保存一个新增账单         4
+
     /**
      * <p>保存一个新增账单</p>
      * <b>URL: /asset/createBill</b>
@@ -1235,6 +1239,33 @@ public class AssetController extends ControllerBase {
     @RequestMapping("exportBillTemplates")
     public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response){
         assetService.exportBillTemplates(cmd, response);
+    }
+
+    //
+    /**
+     * <b>URL: /asset/listBillRelatedTransac</b>
+     * <p>列出账单所属的交易明细</p>
+     */
+    @RequestMapping("listBillRelatedTransac")
+    public RestResponse listBillRelatedTransac(listBillRelatedTransacCommand cmd){
+        ListPaymentBillResp listPaymentBillResp = assetService.listBillRelatedTransac(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/reCalBill</b>
+     * <p>重新计算账单，不改变状态</p>
+     */
+    @RequestMapping("reCalBill")
+    public RestResponse reCalBill(ReCalBillCommand cmd){
+        assetService.reCalBill(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 
 

@@ -27,7 +27,7 @@ public interface PmTaskService {
 //	void assignTask(AssignTaskCommand cmd);
 
 	ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
-	
+
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
@@ -99,4 +99,25 @@ public interface PmTaskService {
 	void syncTaskStatistics(HttpServletResponse resp);
 
 	void syncCategories();
+
+	PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
+
+	void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp);
+
+	Object getThirdAddress(HttpServletRequest req);
+
+	Object createThirdTask(HttpServletRequest req);
+
+	Object listThirdTasks(HttpServletRequest req);
+
+	Object getThirdTaskDetail(HttpServletRequest req);
+
 }

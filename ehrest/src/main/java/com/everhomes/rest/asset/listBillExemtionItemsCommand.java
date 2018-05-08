@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>dateStr:账期</li>
  * <li>pageSize: 显示数量</li>
  * <li>pageAnchor: 锚点</li>
+ * <li>billGroupId: 账单组id</li>
  *</ul>
  */
 public class listBillExemtionItemsCommand {
@@ -19,6 +20,15 @@ public class listBillExemtionItemsCommand {
     private String dateStr;
     private Integer pageSize;
     private Long pageAnchor;
+    private Long billGroupId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     @Override
     public String toString() {

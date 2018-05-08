@@ -7,10 +7,11 @@ import com.everhomes.util.StringHelper;
  * <li>QUIT((byte) 0): 辞职</li>
  * <li>FIRE((byte) 1): 解雇</li>
  * <li>OTHER((byte) 2): 其它</li>
+ * <li>RETIRE((byte) 3): 退休</li>
  * </ul>
  */
 public enum ArchivesDismissType {
-    QUIT((byte) 0), FIRE((byte) 1), OTHER((byte) 2);
+    QUIT((byte) 0), FIRE((byte) 1), OTHER((byte) 2), RETIRE((byte)3);
     private Byte code;
 
     private ArchivesDismissType(Byte code) {

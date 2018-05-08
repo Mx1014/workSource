@@ -31,6 +31,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
 
     @Override
     public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
+        LOGGER.error("zuolin payment success call back, cmd={}", cmd);
         Long orderId = cmd.getOrderId();
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
         Map<String,Integer> billStatuses = new HashMap<>();
@@ -53,7 +54,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
 
     @Override
     public void payFail(SrvOrderPaymentNotificationCommand cmd) {
-        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
+        LOGGER.info("pay failed for zuolin, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)1);
             return null;
@@ -62,7 +63,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
 
     @Override
     public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
+        LOGGER.info("pay sccueed for refund in zuolin callback, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)6);
             return null;
@@ -71,7 +72,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
 
     @Override
     public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
-        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
+        LOGGER.info("pay failed for refund in zuolin callback, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)7);
             return null;

@@ -381,4 +381,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         return null;
     }
 
+    @Override
+    public void refreshToken() {
+
+    }
 }

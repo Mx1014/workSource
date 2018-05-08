@@ -158,7 +158,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Cacheable(value="Community", key="#id" , unless="#result == null")
     @Override
-    public Community findCommunityById(long id) {
+    public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
 
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
@@ -1546,7 +1546,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
-    public List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+    public List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword,List<Long> communityIds, Long pageAnchor,
                                                      Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
 
@@ -1561,6 +1561,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         if(null != areaId){
             cond = cond.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
+        }
+        if (null != communityIds){
+            cond = cond.and(Tables.EH_COMMUNITIES.ID.in(communityIds));
         }
 
         if(!StringUtils.isEmpty(keyword)){

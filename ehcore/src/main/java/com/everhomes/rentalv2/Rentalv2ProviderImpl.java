@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -29,33 +31,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.rentalv2.MaxMinPrice;
-import com.everhomes.rest.rentalv2.RentalSiteStatus;
-import com.everhomes.rest.rentalv2.RentalTimeIntervalOwnerType;
-import com.everhomes.rest.rentalv2.RentalType;
-import com.everhomes.rest.rentalv2.ResourceOrderStatus;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
-import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhRentalv2ResourceRanges;
-import com.everhomes.server.schema.tables.records.EhRentalv2CellsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2CloseDatesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ConfigAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2DefaultRulesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ItemsOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ItemsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrderAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrderPayorderMapRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2OrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2RefundOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceNumbersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourcePicsRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceRangesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourceTypesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2ResourcesRecord;
-import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
@@ -164,6 +142,23 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Orders.class, null);
 		return id;
 	}
+
+	@Override
+	public Long createRentalOrderStatistics(RentalOrderStatistics statistics) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2OrderStatistics.class));
+		statistics.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2OrderStatisticsRecord record = ConvertHelper.convert(statistics,
+			EhRentalv2OrderStatisticsRecord.class);
+		InsertQuery<EhRentalv2OrderStatisticsRecord> query = context.insertQuery(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhRentalv2OrderStatistics.class,null);
+		return id;
+	}
+
+
 
 	@Override
 	public Long createRentalItemBill(RentalItemsOrder rib) {
@@ -284,7 +279,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		
 		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
 			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
-			if (rentalTypes.contains(RentalType.HALFDAY) || rentalTypes.contains(RentalType.THREETIMEADAY)) {
+			if (rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
 				if (amorpm != null) {
 					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
@@ -306,7 +301,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
-			if (rentalTypes.contains(RentalType.HOUR)) {
+			if (rentalTypes.contains(RentalType.HOUR.getCode())) {
 				Timestamp[] beginEndTime = calculateHalfDayBeginEndTime(rentalResource, rentalCell);
 				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
@@ -825,6 +820,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public void deleteRentalOrderStatisticsByOrderId(Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2OrderStatisticsRecord> step = context.delete(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.ORDER_ID.eq(orderId);
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
 	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
 											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
 											 Long startTime, Long endTime, Byte invoiceFlag,Long userId){
@@ -868,6 +872,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 					return ConvertHelper.convert(r, RentalOrder.class);
 				});
 
+		return result;
+	}
+
+	@Override
+	public List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId, ListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.equal(organizationId));
+		if(null!=locator && locator.getAnchor() != null)
+			condition=condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(locator.getAnchor())));
+		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
+		step.limit(pageSize);
+		step.where(condition);
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
 		return result;
 	}
 
@@ -917,10 +939,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
 		if (null != startTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.gt(new Timestamp(startTime)));
 		}
 		if (null != endTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.lt(new Timestamp(endTime)));
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
@@ -974,6 +996,175 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public BigDecimal countRentalBillAmount(String resourceType,Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		BigDecimal count = new BigDecimal(0);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()).from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.equal(orgId));
+		count = step.where(condition).fetchOneInto(BigDecimal.class);
+
+		return count;
+	}
+
+	@Override
+	public List<RentalStatisticsDTO> listRentalBillAmountByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+																 Long startTime, Long endTime,Integer order){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record2<BigDecimal,Long>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum(),
+				Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.isNotNull());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		SortField<BigDecimal> sortOrder = Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum().asc();
+		if (order != null && order<0)
+			sortOrder = Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum().desc();
+
+		return step.where(condition).groupBy(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).orderBy(sortOrder).fetch()
+				.map(r->{
+					RentalStatisticsDTO dto = new RentalStatisticsDTO();
+					dto.setAmount(r.getValue(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()));
+					dto.setEnterpriseId(r.getValue(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID));
+					return dto;
+				});
+	}
+
+	@Override
+	public Integer countRentalBillNum(String resourceType, Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		Integer count = 0;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.equal(orgId));
+		count = step.where(condition).fetchOneInto(Integer.class);
+		return count;
+	}
+
+	@Override
+	public List<RentalStatisticsDTO> listRentalBillNumByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+															  Long startTime, Long endTime,Integer order){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record2<Integer,Long>> step = context.select(DSL.count(),Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.isNotNull());
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.equal(communityId));
+		SortField<Integer> sortOrder = DSL.count().asc();
+		if (order != null && order<0)
+			sortOrder = DSL.count().desc();
+
+		return step.where(condition).groupBy(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).orderBy(sortOrder).fetch().map(r->{
+			RentalStatisticsDTO dto = new RentalStatisticsDTO();
+			dto.setOrderCount(r.getValue(DSL.count()));
+			dto.setEnterpriseId(r.getValue(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID));
+			return dto;
+		});
+	}
+
+	@Override
+	public Long countRentalBillValidTime(String resourceType, Long resourceTypeId,Long communityId, Long startTime, Long endTime, Long rentalSiteId, Long orgId) {
+		Long count = 0l;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum()).from(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE.eq(resourceType);
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.COMMUNITY_ID.eq(communityId));
+		if (null!=startTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.ge(new Date(startTime)));
+		if (null!=endTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.le(new Date(endTime)));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_RESOURCE_ID.eq(rentalSiteId));
+		if (null!=orgId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID.eq(orgId));
+		count = step.where(condition).fetchOneInto(Long.class);
+		return count;
+	}
+
+	@Override
+	public List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+																	Long startTime, Long endTime,Integer order){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record2<BigDecimal,Long>> step = context.select(Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum(),
+				Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID).from(Tables.EH_RENTALV2_ORDER_STATISTICS);
+		Condition condition = Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID.isNotNull();
+		if (null != resourceType)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE.eq(resourceType));
+		if (null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if (null!=communityId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.COMMUNITY_ID.eq(communityId));
+		if (null!=startTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.ge(new Date(startTime)));
+		if (null!=endTime)
+			condition = condition.and(Tables.EH_RENTALV2_ORDER_STATISTICS.RENTAL_DATE.le(new Date(endTime)));
+		SortField<BigDecimal> sortOrder = Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum().asc();
+		if (order != null && order<0)
+			sortOrder = Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum().desc();
+		return step.where(condition).groupBy(Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID).orderBy(sortOrder).
+				fetch().map(r->{
+			RentalStatisticsDTO dto = new RentalStatisticsDTO();
+			dto.setUsedTime(r.getValue(Tables.EH_RENTALV2_ORDER_STATISTICS.VALID_TIME_LONG.sum()).longValue());
+			dto.setEnterpriseId(r.getValue(Tables.EH_RENTALV2_ORDER_STATISTICS.USER_ENTERPRISE_ID));
+			return dto;
+		});
+
+	}
+
+	@Override
 	public List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long> siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1010,6 +1201,22 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return step.where(condition).orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc())
 				.limit(pageSize).fetch().map((r) -> ConvertHelper.convert(r, RentalResource.class));
+	}
+
+	@Override
+	public List<RentalResource> findRentalSitesByCommunityId(String resouceType,Long resourceTypeId, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DELETED.getCode());
+		if (null!=resourceTypeId)
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		if(communityId  != null)
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
+		if (!StringUtils.isEmpty(resouceType))
+			condition=condition.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE.eq(resouceType));
+
+		return step.where(condition).fetch().map((r) -> ConvertHelper.convert(r, RentalResource.class));
 	}
 
 	@Override
@@ -1181,13 +1388,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return null;
 	}
 	@Override
-	public List<RentalOrder> listSuccessRentalBills() {
+	public List<RentalOrder> listTargetRentalBills(Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ORDERS);
 		//TODO：
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
-				.eq(SiteBillStatus.SUCCESS.getCode());
+				.eq(status);
 		step.where(condition);
 		List<RentalOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
@@ -1394,6 +1601,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public void createRentalDayopenTime(RentalDayopenTime rdt) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2DayopenTime.class));
+		rdt.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2DayopenTimeRecord record = ConvertHelper.convert(rdt,
+				EhRentalv2DayopenTimeRecord.class);
+		InsertQuery<EhRentalv2DayopenTimeRecord> query = context.insertQuery(Tables.EH_RENTALV2_DAYOPEN_TIME);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhRentalv2DayopenTime.class,null);
+
+	}
+
+	@Override
 	public void createRentalConfigAttachment(RentalConfigAttachment rca) {
 
 		long id = sequenceProvider.getNextSequence(NameMapper
@@ -1533,6 +1755,23 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
 
+		return result;
+	}
+
+	@Override
+	public List<RentalDayopenTime> queryRentalDayopenTimeByOwner(String resourceType, String ownerType, Long ownerId,Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_DAYOPEN_TIME);
+		Condition condition = Tables.EH_RENTALV2_DAYOPEN_TIME.RESOURCE_TYPE.eq(resourceType);
+		condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(ownerId));
+		if (null != rentalType)
+			condition = condition.and(Tables.EH_RENTALV2_DAYOPEN_TIME.RENTAL_TYPE.eq(rentalType));
+		step.where(condition);
+		List<RentalDayopenTime> result = step.fetch().map(r->{
+			return ConvertHelper.convert(r,RentalDayopenTime.class);
+		});
 		return result;
 	}
 
@@ -1699,6 +1938,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Integer deleteCount = step.execute();
 		return deleteCount;
 		
+	}
+
+	@Override
+	public Integer deleteRentalDayopenTimeByOwnerId(String resourceType, String ownerType, Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2DayopenTimeRecord > step = context.delete(Tables.EH_RENTALV2_DAYOPEN_TIME);
+		Condition condition = Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_TYPE.eq(ownerType)
+				.and(Tables.EH_RENTALV2_DAYOPEN_TIME.OWNER_ID.eq(id)).and(Tables.EH_RENTALV2_DAYOPEN_TIME.RESOURCE_TYPE.eq(resourceType));
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
 	}
 
 	@Override

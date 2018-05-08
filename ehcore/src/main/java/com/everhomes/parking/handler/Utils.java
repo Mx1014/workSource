@@ -39,6 +39,7 @@ import java.util.*;
 
 public class Utils {
 
+
     public static class MimeType {
         public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
         public static final String APPLICATION_JSON = "application/json";
@@ -209,6 +210,36 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
+    /**
+     * 中百畅停车场，要求月卡时间计算为当月时间
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThisMonth(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.MONTH,month);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    /**
+     *
+     * @param source
+     * @param month
+     * @return
+     */
+    static Long getTimestampByAddRealMonth(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.MONTH,month);
+
+        return calendar.getTimeInMillis();
+    }
+
     //获取到月底的天数
     static int getDaysToEndOfMonth(Calendar calendar){
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-calendar.get(Calendar.DAY_OF_MONTH);
@@ -236,6 +267,18 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat(style);
         return sdf.format(date);
     }
+    public static String longToString(long time, String style) {
+        return dateToStr(new Date(time),style);
+    }
+
+    static Long subtractionTime(Long startTime, String endtimeStamp) {
+        Long enttime = strToLong(endtimeStamp, DateStyle.DATE_TIME);
+        return subtractionTime(startTime,enttime);
+    }
+
+    static Long subtractionTime(long startTime, long endtime) {
+        return (endtime-startTime)/(60*1000);
+    }
 
     /**
      *
@@ -247,6 +290,19 @@ public class Utils {
         //设置body json格式
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, param, headers);
+    }
+
+    /**
+     *
+     * @param url
+     * @param param urlencoded
+     * @return
+     */
+    public static String postUrlencoded(String url, Map<String,String> param) {
+        //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_FORM_URLENCODED);
         return post(url, param, headers);
     }
     

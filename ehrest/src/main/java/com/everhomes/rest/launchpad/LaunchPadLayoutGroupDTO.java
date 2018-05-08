@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: groupId</li>
  * <li>groupName: 分组显示名称，用于显示，若显示时不需要名称则留空</li>
  * <li>widget: 组内控件，如Navigator、Banners、Coupons、Posts"</li>
  * <li>instanceConfig:  json格式，说明：widget实例相关的配置，不需要时为空，如Default、GovAgencies、Bizs、GaActions、CallPhones、ActionBars</li>
@@ -22,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class LaunchPadLayoutGroupDTO {
+	private Long id;
     private String groupName;
     private String widget;
     private String instanceConfig;
@@ -145,5 +147,13 @@ public class LaunchPadLayoutGroupDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 }

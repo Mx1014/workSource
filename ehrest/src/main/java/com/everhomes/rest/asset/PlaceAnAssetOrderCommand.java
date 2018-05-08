@@ -27,6 +27,7 @@ public class PlaceAnAssetOrderCommand {
     private String clientAppName;
     @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
+    private Long billGroupId;
     private String contactNum;
     private String amountOwed;
     private Long communityId;
@@ -36,6 +37,14 @@ public class PlaceAnAssetOrderCommand {
     private String ownerType;
     private String openid;
     private Integer namespaceId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     public String getClientAppName() {
         return clientAppName;
