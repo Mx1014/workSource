@@ -13,6 +13,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.openapi.OpenApiRedirectHandler;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 
@@ -33,12 +35,12 @@ public class LuFuOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	@Override
 	public String build(String redirectUrl, Map<String, String[]> parameterMap) {
 		try {
-			String phonenum;
-			/*UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
+			String phonenum = "";
+			UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
 			if(userIdentifier != null) {
 				phonenum = userIdentifier.getIdentifierToken();
-			}*/
-			phonenum = "15018490384";//杨崇鑫用于测试
+			}
+			//phonenum = "15018490384";//杨崇鑫用于测试
 			String key = configurationProvider.getValue(999963, ConfigConstants.OPENAPI_LUFU_KEY,"");
 			//路福综合广场按照安信行生成签名
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
