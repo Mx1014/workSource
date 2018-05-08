@@ -16,6 +16,7 @@ import java.util.List;
  *     <li>menuId: 关联的菜单id</li>
  *     <li>moduleControlType: 模块控制类型 参考{@link com.everhomes.rest.oauth2.ModuleManagementType}</li>
  *     <li>orgAppId: 公司安装app的id</li>
+ *     <li>status: 启用状态{@link com.everhomes.rest.servicemoduleapp.OrganizationAppStatus}</li>
  *     <li>appType: appType应用类型 0-oa, 1-园区, 2-服务{@link com.everhomes.rest.module.ServiceModuleAppType}</li>
  *     <li>profileId: 应用描述id</li>
  *     <li>description: 应用描述</li>
@@ -48,6 +49,7 @@ public class ServiceModuleAppDTO {
     private Long menuId;
     private String moduleControlType;
     private Long orgAppId;
+    private Byte status;
     private Byte appType;
     private Long profileId;
     private String description;
@@ -290,5 +292,13 @@ public class ServiceModuleAppDTO {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 }

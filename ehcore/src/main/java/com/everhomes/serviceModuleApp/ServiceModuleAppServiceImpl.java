@@ -321,6 +321,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			if (orgapp != null){
 				dto.setOrgAppId(orgapp.getId());
+				dto.setStatus(orgapp.getStatus());
 			}
 
 			//已安装的、未安装的、全部
