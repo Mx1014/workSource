@@ -12836,7 +12836,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(organizations != null){
             List<OrganizationDTO> dtoList = organizations.stream().map(r->ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
             //// TODO: 2018/5/8
-            res.setAnchor(locator.getAnchor());
+            res.setNextPageAnchor(locator.getAnchor());
             res.setDtos(dtoList);
         }
         return res;

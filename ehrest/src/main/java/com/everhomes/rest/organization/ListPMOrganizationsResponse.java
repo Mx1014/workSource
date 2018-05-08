@@ -15,7 +15,7 @@ public class ListPMOrganizationsResponse {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> dtos;
 
-    private Long anchor;
+    private Long nextPageAnchor;
 
     public List<OrganizationDTO> getDtos() {
         return dtos;
@@ -25,12 +25,12 @@ public class ListPMOrganizationsResponse {
         this.dtos = dtos;
     }
 
-    public Long getAnchor() {
-        return anchor;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public void setAnchor(Long anchor) {
-        this.anchor = anchor;
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     @Override
