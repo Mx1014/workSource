@@ -33,8 +33,13 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     //办理月卡，续费
     private static final String OPEN_CARD = "/park/openMonthCard";
     
-    //临时车
+    //临时车缴费单查询
     private static final String CHARGING = "/park/charging";
+    
+    //缴费通知
+    private static final String POSTCHARGE = "/park/postCharge";
+    
+    
 
     private static final int SUCCESS = 1;
 
@@ -76,11 +81,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     private XiaomaoCard getCard(String plateNumber, Long parkingId){
         JSONObject param = new JSONObject();
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId." + parkingId, "");
-
-        param.put("parkId", parkId);
         param.put("licenseNumber",plateNumber);
-        String jsonString = post(param,GET_CARD);
+        String jsonString = post(param,GET_CARD, parkingId);
 
         XiaomaoCard card = JSONObject.parseObject(jsonString, XiaomaoCard.class);
         if (card.getFlag() == SUCCESS){
@@ -104,14 +106,13 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
             String validEnd = sdf.format(timestampEnd);
 
             JSONObject param = new JSONObject();
-            param.put("parkId", card.getParkId());
             param.put("parkName", card.getParkName());
             param.put("memberType", card.getMemberType());
             param.put("licenseNumber", order.getPlateNumber());
             param.put("beginTime", validStart);
             param.put("endTime", validEnd);
 
-            String json = post(param, OPEN_CARD);
+            String json = post(param, OPEN_CARD, order.getParkingLotId());
 
             //将充值信息存入订单
             order.setErrorDescriptionJson(json);
@@ -126,10 +127,13 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return false;
     }
 
-    public String post(JSONObject param, String type) {
+    public String post(JSONObject param, String type, Long parkingLotId) {
         String url = configProvider.getValue("parking.xiaomao.url", "") + type;
-        String keyId = configProvider.getValue("parking.xiaomao.accessKeyId", "");
-        String key = configProvider.getValue("parking.xiaomao.accessKeyValue", "");
+        String parkId = configProvider.getValue("parking.xiaomao.parkId." + parkingLotId, "");
+        String keyId = configProvider.getValue("parking.xiaomao.accessKeyId."+parkingLotId, "");
+        String key = configProvider.getValue("parking.xiaomao.accessKeyValue."+parkingLotId, "");
+        
+        param.put("parkId", parkId);
         param.put("accessKeyId", keyId);
 
         String sign = getSign(param, key);
@@ -199,16 +203,29 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
-            if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
-                return rechargeMonthlyCard(order);
-            }
-            return false;
-        }else {
-            return addMonthCard(order);
-        }
-    }
+	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+			if (order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+				//月卡缴费
+				return rechargeMonthlyCard(order);
+			}
+
+			if (order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
+				//临时车缴费
+				return payTempCardFee(order);
+			}
+
+			return false;
+		}
+
+		// 开通月卡
+		if (order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+			return addMonthCard(order);
+		}
+
+		LOGGER.info("unknown type = " + order.getRechargeType());
+		return false;
+	}
 
     private boolean addMonthCard(ParkingRechargeOrder order){
 
@@ -238,14 +255,15 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         String validStart = sdf.format(timestampStart);
         String validEnd = sdf.format(timestampEnd);
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId." + order.getParkingLotId(), "");
-
         JSONObject param = new JSONObject();
-        param.put("parkId", parkId);
         param.put("memberType", request.getCardTypeId());
         param.put("licenseNumber", order.getPlateNumber());
         param.put("beginTime", validStart);
         param.put("endTime", validEnd);
+        
+        param.put("userName", request.getPlateOwnerName());
+        param.put("userTel", request.getPlateOwnerPhone());
+        param.put("companyName", request.getPlateOwnerEntperiseName());
 
         //TODO:测试
         boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
@@ -253,7 +271,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         if (flag) {
             json = "{\"flag\":1, \"message\":\"hhh\"}";
         }else {
-            json = post(param, OPEN_CARD);
+            json = post(param, OPEN_CARD, order.getParkingLotId());
         }
 
         //将充值信息存入订单
@@ -338,16 +356,34 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
         JSONObject param = new JSONObject();
         param.put("plateNo",plateNumber);
-        String result = post(param, CHARGING);
+        String result = post(param, CHARGING, parkingLot.getId());
         YinxingzhijieXiaomaoTempCard tempCard = JSONObject.parseObject(result, new TypeReference<YinxingzhijieXiaomaoTempCard>() {});
         ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+        
+        if (null == tempCard) {
+        	tempCard = new YinxingzhijieXiaomaoTempCard();
+        } 
+        
+        if(!tempCard.isSuccess()) {
+        	long nowTime = System.currentTimeMillis();
+        	long startTime = nowTime - 1000*60*10; //十分钟之前入场
+        	long chargeTime = nowTime - 1000*60*9; //九分钟之前计费
+        	
+        	tempCard.setStartTime(Utils.longToString(startTime, Utils.DateStyle.DATE_TIME));
+        	tempCard.setChargTime(Utils.longToString(chargeTime, Utils.DateStyle.DATE_TIME));
+        	tempCard.setTimeOut(15); //缴费之后15分钟内必须要离开
+        	tempCard.setShouldPay("0.00");
+        	tempCard.setOrderId("hmb_test_orderId"+nowTime);
+        	tempCard.setFlag(1);
+        }
+        
         if(tempCard != null  && tempCard.isSuccess()) {
             dto.setPlateNumber(plateNumber);
             dto.setEntryTime(Utils.strToLong(tempCard.getStartTime(),Utils.DateStyle.DATE_TIME));
             long now = System.currentTimeMillis();
             dto.setPayTime(now);
             dto.setParkingTime(Integer.valueOf(String.valueOf((now-dto.getEntryTime())/60000L)));
-            dto.setDelayTime(15);
+            dto.setDelayTime(155);
             dto.setPrice(new BigDecimal(tempCard.getShouldPay()));
             boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
             if(flag) {
@@ -361,4 +397,28 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return dto;
 
     }    
+    
+    private boolean payTempCardFee(ParkingRechargeOrder order) {
+    	
+        JSONObject params = new JSONObject();
+        params.put("plateNo", order.getPlateNumber());
+        params.put("orderId", order.getOrderToken());
+        params.put("payMoney", order.getPrice().setScale(2).toString());
+        String result = post(params, POSTCHARGE, order.getParkingLotId());
+        order.setErrorDescriptionJson(result);//缴费结果储存
+
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        Object obj = jsonObject.get("flag");
+        order.setErrorDescription(jsonObject.getString("message"));
+        if(null != obj ) {
+            int resCode = (int) obj;
+            if(resCode == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    
 }
