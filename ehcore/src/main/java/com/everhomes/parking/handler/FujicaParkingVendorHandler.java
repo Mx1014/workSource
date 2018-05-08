@@ -121,9 +121,17 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     public static void main (String[] args){
 
         String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
+       // String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
         JSONObject jo = new JSONObject();
         jo.put("ParkingCode","17000104590501");
         jo.put("CarNo","湘A4XNF5");
+
+//        jo.put("DealNo","sssasdasfaxcasdqwrx");
+//        jo.put("Amount",new BigDecimal(999));
+//        jo.put("ActualAmount",new BigDecimal(999));
+//        jo.put("DeductionAmount",new BigDecimal(0));
+//        jo.put("PayStyle","支付宝");
+//        jo.put("PayCostMachineOrderId","");
         String json = jo.toJSONString();
         String result = "";
         BufferedReader reader = null;
@@ -195,9 +203,6 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             }
         }
         System.out.println(result);
-        FujicaResponse response = JSONObject.parseObject(result, FujicaResponse.class);
-        FujicaJsonParam param = JSONObject.parseObject(response.getJsonParam(),FujicaJsonParam.class);
-        System.out.println(response.toString());
     }
 
     private  String doJsonPost(String urlPath, String json) {
