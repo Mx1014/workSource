@@ -112,6 +112,10 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setPrice(param.getActualAmount());
             dto.setOriginalPrice(param.getParkingFee());
             dto.setOrderToken(param.getParkingCode());
+            if (param.getChargeableTime()!=null && getTimestamp(param.getChargeableTime())<now){
+                dto.setRemainingTime((int)(now-getTimestamp(param.getChargeableTime()))/1000/60);
+            }
+
         }
         return dto;
     }
@@ -121,14 +125,14 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
     public static void main (String[] args){
 
         String urlPath = "http://mops-test.fujica.com.cn:8021/Api/Park/GetParkInfoByCarNo";
-       // String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
+        //String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
         JSONObject jo = new JSONObject();
         jo.put("ParkingCode","17000104590501");
-        jo.put("CarNo","湘A4XNF5");
+        jo.put("CarNo","湘A4YMTW");
 
 //        jo.put("DealNo","sssasdasfaxcasdqwrx");
-//        jo.put("Amount",new BigDecimal(999));
-//        jo.put("ActualAmount",new BigDecimal(999));
+//        jo.put("Amount",new BigDecimal(1));
+//        jo.put("ActualAmount",new BigDecimal(1));
 //        jo.put("DeductionAmount",new BigDecimal(0));
 //        jo.put("PayStyle","支付宝");
 //        jo.put("PayCostMachineOrderId","");
