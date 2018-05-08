@@ -49,8 +49,10 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
 
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+
 
 
 
@@ -73,13 +75,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2085,6 +2090,7 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryPeriodEmployeeEntityDTO dto = new SalaryPeriodEmployeeEntityDTO();
             dto.setGroupEntityName(entry.getValue());
             dto.setSalaryValue(r.getCells().get(entry.getKey()));
+            result.add(dto);
         }
         return result;
     }
