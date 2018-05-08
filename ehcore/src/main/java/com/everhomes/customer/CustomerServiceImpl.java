@@ -1122,7 +1122,7 @@ public class CustomerServiceImpl implements CustomerService {
             attachments.forEach((a) -> {
                 com.everhomes.rest.pmtask.AttachmentDescriptor bannerUrl = new com.everhomes.rest.pmtask.AttachmentDescriptor();
                 bannerUrl.setContentType(a.getContentUri());
-                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
                 bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
                 bannerUrls.add(bannerUrl);
             });
