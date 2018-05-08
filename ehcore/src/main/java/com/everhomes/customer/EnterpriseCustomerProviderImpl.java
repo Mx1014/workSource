@@ -1946,11 +1946,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAttachments.class));
         CustomerAttachements attachement = new CustomerAttachements();
-        attachement.setCustomerId(customerId);
         attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
+        attachement.setId(id);
+        attachement.setCustomerId(customerId);
         attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         attachement.setCreatorUid(UserContext.currentUserId());
-        attachement.setId(id);
         EhEnterpriseCustomerAttachmentsDao dao = new EhEnterpriseCustomerAttachmentsDao(context.configuration());
         dao.insert(attachement);
     }
