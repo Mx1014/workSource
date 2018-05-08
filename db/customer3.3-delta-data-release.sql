@@ -16,17 +16,14 @@ DELETE FROM eh_var_fields  WHERE name = 'contactMobile' AND module_name = 'enter
 
 -- 迁移合并之后的字段数据  联系人电话 座机电话  by jiarui
 UPDATE eh_enterprise_customers
-SET contact_phone = CONCAT('[',contact_mobile,',',contact_phone,']')
+SET contact_phone = CONCAT(contact_mobile,',',contact_phone)
 WHERE contact_phone IS NOT NULL AND contact_mobile IS NOT NULL;
 
 UPDATE eh_enterprise_customers
-SET contact_phone = CONCAT('[',contact_mobile,']')
+SET contact_phone = contact_mobile
 WHERE contact_phone IS NULL AND contact_mobile IS NOT NULL;
 
-UPDATE eh_enterprise_customers
-SET contact_phone = CONCAT('[',contact_phone,']')
-WHERE contact_phone IS NOT NULL AND contact_mobile IS NULL;
-
+UPDATE eh_enterprise_customers SET contact_phone = NULL WHERE contact_phone = '';
 -- 迁移企业管理的是否设置管理员
 UPDATE  eh_enterprise_customers SET admin_flag = IFNULL((SELECT set_admin_flag FROM eh_organizations WHERE id = eh_enterprise_customers.organization_id) ,0);
 
