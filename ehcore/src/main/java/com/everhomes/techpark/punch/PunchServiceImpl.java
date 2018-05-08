@@ -2828,8 +2828,19 @@ public class PunchServiceImpl implements PunchService {
         for (PunchDayLog pdl : list) {
             List<TimeInterval> tiDTOs = null;
             PunchTimeRule ptr = null;
-            List<PunchLog> logs = punchProvider.listPunchLogsByDate(pdl.getUserId(), pdl.getEnterpriseId(),
+            List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(pdl.getUserId(), pdl.getEnterpriseId(),
                     dateSF.get().format(pdl.getPunchDate()), ClockCode.SUCESS.getCode());
+            List<PunchLog> logs = new ArrayList<>();
+            
+            //2018年5月8日 修改by wh ,轮询打卡记录,只选取有效的(每一个打卡时间段取第一个和最后一个上/下班打卡)
+            for(int punchIntervalNo =1;punchIntervalNo<=pdl.getPunchTimesPerDay()/2;punchIntervalNo++){ 
+            	PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
+            	logs.add(onDutyLog);
+            	PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
+            	logs.add(offDutyLog);
+            } 
+           
+            
             if (null != logs) {
                 for (PunchLog log : logs) {
                     if (log.getApprovalStatus() != null) {
@@ -3233,7 +3244,7 @@ public class PunchServiceImpl implements PunchService {
 
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(0);
-        rowTitle.createCell(0).setCellValue("按月统计");
+        rowTitle.createCell(0).setCellValue("月度汇总");
         rowTitle.setRowStyle(titleStyle);
         //副标题
 
@@ -5459,7 +5470,7 @@ public class PunchServiceImpl implements PunchService {
         params.put("exceptionStatus", cmd.getExceptionStatus());
         params.put("userName", cmd.getUserName());
         params.put("reportType", "exportPunchStatistics");
-        String fileName = String.format("按月统计导出报表__%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+        String fileName = String.format("考勤报表%s-%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
                 , DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());

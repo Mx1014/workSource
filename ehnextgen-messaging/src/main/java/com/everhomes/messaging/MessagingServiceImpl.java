@@ -5,12 +5,16 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.message.MessageProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
@@ -19,6 +23,9 @@ import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MessagePersistWorker;
+import com.everhomes.util.Name;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +69,9 @@ public class MessagingServiceImpl implements MessagingService {
     private ConfigurationProvider configProvider;
 
     @Autowired
+    private MessageProvider messageProvider;
+
+    @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
 
     @Autowired
@@ -85,10 +95,12 @@ public class MessagingServiceImpl implements MessagingService {
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     static final Integer MAX_TIME_OUT =30*60*1000;
-    
+
     public MessagingServiceImpl() {
     }
-    
+
+    private final static String MESSAGE_INDEX_ID = "indexId";
+
     @PostConstruct
     public void setup() {
         if(handlers != null) {
@@ -141,7 +153,20 @@ public class MessagingServiceImpl implements MessagingService {
             if(r.getChannelToken() == null || r.getChannelToken().isEmpty()) {
                 LOGGER.warn("channel is empty!" + r.getStoreSequence());
             } else {
-             dtoMessages.add(toMessageDto(r));   
+                dtoMessages.add(toMessageDto(r));
+                MessageRecordDto record = new MessageRecordDto();
+                record.setAppId(r.getAppId());
+                record.setNamespaceId(r.getNamespaceId());
+                record.setMessageSeq(r.getMessageSequence());
+                record.setSenderUid(r.getSenderUid());
+                record.setSenderTag(MessageRecordSenderTag.FETCH_PASTTORECENT_MESSAGES.getCode());
+                record.setDstChannelType(r.getChannelType());
+                record.setDstChannelToken(r.getChannelToken());
+                record.setBodyType(r.getContextType());
+                record.setBody(r.getContent());
+                record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                MessagePersistWorker.getQueue().offer(record);
             }
         }
         
@@ -224,10 +249,14 @@ public class MessagingServiceImpl implements MessagingService {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
         MessageRoutingHandler handler = handlerMap.get(dstChannelType);
+
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {
-            
+
                 if(null == context) {
+                    //手动添加消息唯一索引
+                    message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
+
                     MessageRoutingContext newCtx = new MessageRoutingContext();
                     String inStr = null;
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.INCLUDE)))) {
