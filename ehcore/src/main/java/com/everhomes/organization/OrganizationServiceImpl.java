@@ -127,6 +127,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
@@ -314,6 +315,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private EnterpriseProvider enterpriseProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -13351,8 +13358,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-
-
     /**
      * 根据手机号、域空间Id、组织ID来查询eh_organization_members表中是否存在记录，如果存在记录的话，将该记录的id值设置为eh_organizations表中的admin_target_id值
      * @param entries
@@ -13373,6 +13378,26 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setAdminTargetId(id);
             //更新eh_organizations表中的信息
             organizationProvider.updateOrganizationSuperAdmin(organization);
+        }
+    }
+
+    public void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd){
+        //1.首先需要进行非空校验
+        if(cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
+            //说明传过来的参数不为空，那么我们就跟军该参数进行下面的一系列的操作
+            //下面所有的操作都保证在同一个事务中进行
+            dbProvider.execute((TransactionStatus status) -> {
+                //删除公司之前还需要检查该公司名下是否存在管理的项目，如果有则给出提示“无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。”
+                //根据organizationId来查询eh_organization_communities表中管理的项目是否存在
+                //// TODO: 2018/5/9  
+                //删除该公司下面的所有的应用
+                serviceModuleAppService.uninstallAppByOrganizationId(cmd.getOrganizationId());
+                //删除所有被其它公司授权管理应用的记录
+                serviceModuleAppAuthorizationService.deleteServiceModuleAppAuthorizationByOrganizationId(cmd.getOrganizationId());
+
+
+                return null;
+            });
         }
     }
 

@@ -1600,6 +1600,22 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/destoryOrganizationByOrgId</b>
+     * <p>根据企业编号来删除企业信息</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "destoryOrganizationByOrgId")
+    @RestReturn(value = String.class)
+    public RestResponse destoryOrganizationByOrgId(DestoryOrganizationCommand cmd){
+        RestResponse response = new RestResponse();
+        //// TODO: 2018/5/9
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/enterprise/detail</b>
      * <p>查看单个公司的具体属性(标准版)</p>
      */
