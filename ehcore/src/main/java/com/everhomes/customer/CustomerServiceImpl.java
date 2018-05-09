@@ -276,6 +276,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -539,7 +540,7 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
         // 同步到企业管理中   v3.2  現在改成已成交客户才同步  入口： 合同 、 入驻信息、excel
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-        if (levelItem != null && "已成交客户".equals(levelItem.getItemDisplayName())) {
+        if (levelItem != null && Objects.equals(cmd.getLevelItemId(), levelItem.getItemId())) {
             OrganizationDTO organizationDTO = createOrganization(customer);
             customer.setOrganizationId(organizationDTO.getId());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
