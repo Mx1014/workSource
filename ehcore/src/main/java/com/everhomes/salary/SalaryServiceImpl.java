@@ -2041,7 +2041,7 @@ public class SalaryServiceImpl implements SalaryService {
 	                    nameCellNumber = key;
 	                } else if (isContain(value,"手机号码")) {
 	                	contactCellNumber = key;
-	                } else if (!"序号".equals(value)){
+	                } else if (!isContain(value,"序号")){
 	                    cellMap.put(key, value);
 	                }
 	            }
