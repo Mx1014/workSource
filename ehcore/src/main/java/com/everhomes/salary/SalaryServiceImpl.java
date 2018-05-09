@@ -2285,7 +2285,7 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setCreateTime(spd.getCreateTime().getTime());
                 dto.setPayslipDetailId(spd.getId());
                 dto.setSalaryPeriod(spd.getSalaryPeriod());
-                String year = spd.getSalaryPeriod().substring(0, 3);
+                String year = spd.getSalaryPeriod().substring(0, 4);
                 if (null == resultMap.get(year)) {
                     resultMap.put(year, new ArrayList<>());
                 }
