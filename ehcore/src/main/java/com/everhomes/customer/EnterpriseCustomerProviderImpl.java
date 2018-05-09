@@ -23,6 +23,7 @@ import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -2033,10 +2034,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
                 .from(Tables.EH_ENTERPRISE_CUSTOMERS)
                 .fetchInto(Long.class);
+        List<Long> namespaceId = context.selectDistinct(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID)
+                .from(Tables.EH_LAUNCH_PAD_ITEMS)
+                .where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq(ActionType.PARKENTERPRISE.getCode()))
+                .fetchInto(Long.class);
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.in(namespaceId));
+        //大师说暂时可以用item来区分使用园区企业应用的namespaceId
         return query.fetchInto(Organization.class);
     }
 }
