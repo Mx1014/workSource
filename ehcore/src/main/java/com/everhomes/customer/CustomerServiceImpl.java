@@ -3612,7 +3612,16 @@ public class CustomerServiceImpl implements CustomerService {
                 if (addresses != null && addresses.size() > 0) {
                     addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
                 }
-                createEnterpriseCustomer(organization, organizationDetail.getAvatar(), organizationDetail, request.getCommunityId(), addressDTOs);
+                String avatar = "";
+                if (organizationDetail == null) {
+                    organizationDetail = new OrganizationDetail();//坑
+                    avatar = organizationDetail.getAvatar();
+                }
+                Long communityId = 0L;
+                if (request != null) {
+                    communityId = request.getCommunityId();
+                }
+                createEnterpriseCustomer(organization, avatar, organizationDetail, communityId, addressDTOs);
             }));
         }
     }
