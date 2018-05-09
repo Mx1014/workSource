@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.everhomes.rest.visitorsys.VisitorsysOwnerType;
 import com.everhomes.rest.visitorsys.VisitorsysSearchFlagType;
+import com.everhomes.rest.visitorsys.VisitorsysVisitStatus;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SortField;
@@ -90,6 +91,8 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 		}
 		if(params.getVisitStatusList()!=null){
 			condition=condition.and(community.VISIT_STATUS.in(params.getVisitStatusList()));
+		}else{
+			condition=condition.and(community.VISIT_STATUS.in(VisitorsysVisitStatus.getNormalStatus()));
 		}
 		if(params.getOfficeLocationId()!=null){
 			condition=condition.and(community.OFFICE_LOCATION_ID.in(params.getOfficeLocationId()));
@@ -107,7 +110,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 			if (params.getEndPlannedVisitTime() != null) {
 				condition = condition.and(community.PLANNED_VISIT_TIME.lt(new Timestamp(params.getEndPlannedVisitTime())));
 			}
-			sortField = Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.desc();
+			sortField = community.PLANNED_VISIT_TIME.desc();
 			if(params.getPageAnchor()!=null) {
 				condition = condition.and(community.PLANNED_VISIT_TIME.gt(new Timestamp(params.getPageAnchor())));
 			}
@@ -118,19 +121,18 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 			if (params.getEndVisitTime() != null) {
 				condition = condition.and(community.VISIT_TIME.lt(new Timestamp(params.getEndVisitTime())));
 			}
-			sortField = Tables.EH_VISITOR_SYS_VISITORS.VISIT_TIME.asc();
+			sortField = community.VISIT_TIME.asc();
 			if(params.getPageAnchor()!=null) {
 				condition = condition.and(community.VISIT_TIME.lt(new Timestamp(params.getPageAnchor())));
 			}
 		}else {
-			sortField = Tables.EH_VISITOR_SYS_VISITORS.ID.asc();
+			sortField = community.ID.desc();
 			if(params.getPageAnchor()!=null) {
-				condition = condition.and(community.ID.gt(params.getPageAnchor()));
+				condition = condition.and(community.ID.lt(params.getPageAnchor()));
 			}
 		}
 
 		//todo
-
 		if(params.getEnterpriseId()!=null){
 			condition=condition.and(enterprise.OWNER_ID.in(params.getEnterpriseId()));
 			condition=condition.and(enterprise.OWNER_TYPE.in(VisitorsysOwnerType.ENTERPRISE.getCode()));

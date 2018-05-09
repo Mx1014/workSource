@@ -4,6 +4,7 @@ package com.everhomes.visitorsys;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -71,6 +72,7 @@ public class VisitorSysOfficeLocationProviderImpl implements VisitorSysOfficeLoc
 				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.lt(pageAnchor))
+				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.desc())
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOfficeLocation.class));

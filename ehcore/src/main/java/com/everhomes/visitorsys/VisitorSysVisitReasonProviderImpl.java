@@ -59,7 +59,7 @@ public class VisitorSysVisitReasonProviderImpl implements VisitorSysVisitReasonP
 	}
 	
 	@Override
-	@Cacheable(value="listVisitorSysVisitReason", key="#namespaceId")
+	@Cacheable(value="listVisitorSysVisitReason", key="#namespaceId", unless="#result.size() == 0")
 	public List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId) {
 		List<VisitorSysVisitReason> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
 				.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(namespaceId))

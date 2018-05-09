@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import scala.Int;
 
 import java.io.IOException;
@@ -122,27 +123,28 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
         QueryBuilder qb = null;
-        if(params.getKeyWords() == null || params.getKeyWords().isEmpty()) {
+        if(StringUtils.isEmpty(params.getKeyWords())) {
             qb = QueryBuilders.matchAllQuery();
-        } else {
-            qb = QueryBuilders.multiMatchQuery(params.getKeyWords())
-                    .field("visitorName", 1.2f)
-                    .field("visitorPhone", 1.1f)
-                    .field("inviterName", 1.0f);
-
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("visitorName").addHighlightedField("visitorPhone").addHighlightedField("inviterName");
-
+        }else {
+            // es中超过10个字无法搜索出来结果，这里把关键词截断处理
+            if (params.getKeyWords().length() > 10) {
+                params.setKeyWords(params.getKeyWords().substring(0,10));
+            }
+            qb = QueryBuilders.boolQuery().must(QueryBuilders.queryString("*" + params.getKeyWords() + "*").field("visitorName").field("visitorPhone").field("inviterName"));
         }
+
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId",params.getNamespaceId());
         fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerType",params.getOwnerType()));
         fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerId",params.getOwnerId()));
         if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
-            FilterBuilder orfb = FilterBuilders.termFilter("visitStatus", params.getVisitStatusList().get(0));
+            FilterBuilder orfb = null;
             for (Byte aByte : params.getVisitStatusList()) {
-                orfb = FilterBuilders.orFilter(orfb,FilterBuilders.termFilter("visitStatus", aByte));
+                if(orfb!=null) {
+                    orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("visitStatus", aByte));
+                }else {
+                    orfb = FilterBuilders.termFilter("visitStatus", aByte);
+                }
             }
             fb = FilterBuilders.andFilter(fb,orfb);
         }
@@ -161,7 +163,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         }
 
         VisitorsysSearchFlagType visitorsysSearchFlagType = VisitorsysSearchFlagType.fromCode(params.getSearchFlag());
-        FieldSortBuilder sort = null;
+        FieldSortBuilder sort = SortBuilders.fieldSort("id").order(SortOrder.DESC);;
         if(visitorsysSearchFlagType == VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
             RangeFilterBuilder rf = new RangeFilterBuilder("plannedVisitTime");
             if (params.getStartPlannedVisitTime() != null) {
@@ -187,6 +189,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(params.getPageAnchor().intValue() * params.getPageSize()).setSize(params.getPageSize() + 1);
         builder.setQuery(qb);
+        builder.addSort(sort);
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("VisitorsysSearcherImpl query builder ："+builder);
@@ -290,7 +293,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 
     @Override
     public void syncVisitorsFromDb(Integer namespaceId) {
-        int pageSize = 200;
+        int pageSize = 4;
         this.deleteAll();
 
         ListBookedVisitorParams params = new ListBookedVisitorParams();
@@ -305,7 +308,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if(list.size()<pageSize){
                 break;
             }
-            params.setPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
+            params.setPageAnchor(list.get(list.size()-1).getId());
         }
     }
 

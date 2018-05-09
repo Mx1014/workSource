@@ -3,6 +3,8 @@ package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.app.AppProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -11,17 +13,28 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.search.OrganizationQueryResult;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.VisitorsysSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -30,6 +43,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -54,7 +68,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             "visitReasonId","visitReason"};
     @Autowired
     private DbProvider dbProvider;
-
     @Autowired
     private CoordinationProvider coordinationProvider;
     @Autowired
@@ -65,7 +78,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public VisitorSysVisitReasonProvider visitorSysVisitReasonProvider;
     @Autowired
     public VisitorSysCodingProvider visitorSysCodingProvider;
-
     @Autowired
     public VisitorSysConfigurationProvider visitorSysConfigurationProvider;
     @Autowired
@@ -76,13 +88,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public OrganizationProvider organizationProvider;
     @Autowired
     public VisitorsysSearcher visitorsysSearcher;
-
     @Autowired
-    private ContentServerService contentServerService;
+    public OrganizationSearcher organizationSearcher;
+    @Autowired
+    public ContentServerService contentServerService;
+    @Autowired
+    public SmsProvider smsProvider;
 
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         checkOwnerType(cmd.getOwnerType());
+        checkSearchFlag(cmd.getSearchFlag());
 
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
@@ -97,8 +113,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public GetBookedVisitorByIdResponse getBookedVisitorById(GetBookedVisitorByIdCommand cmd) {
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+        if(visitor==null)
+            return null;
         GetBookedVisitorByIdResponse response = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         response.setVisitorPicUrl(contentServerService.parserUri(visitor.getVisitorPicUri()));
+        response.setVisitorSignUrl(contentServerService.parserUri(visitor.getVisitorSignUri()));
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(visitor.getOwnerType());
+        if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
+            response.setCommunityFormValues(JSONObject.parseObject(visitor.getFormJsonValue(),
+                    new TypeReference<List<PostApprovalFormItem>>() {}));
+        }else{
+            response.setEnterpriseFormValues(JSONObject.parseObject(visitor.getFormJsonValue(),
+                    new TypeReference<List<PostApprovalFormItem>>() {}));
+        }
+
         return response;
     }
 
@@ -119,7 +147,27 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListCommunityOrganizationsResponse listCommunityOrganizations(ListCommunityOrganizationsCommand cmd) {
-        return null;
+        VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        if(visitorsysOwnerType==VisitorsysOwnerType.ENTERPRISE){
+            return null;
+        }
+        SearchOrganizationCommand orgCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        orgCmd.setKeyword(cmd.getKeyWords());
+        orgCmd.setCommunityId(cmd.getOwnerId());
+        orgCmd.setSimplifyFlag((byte)1);
+        OrganizationQueryResult organizationQueryResult = organizationSearcher.fuzzyQueryOrganizationByName(orgCmd);
+        if(organizationQueryResult==null || organizationQueryResult.getDtos()==null){
+            return null;
+        }
+        ListCommunityOrganizationsResponse response = new ListCommunityOrganizationsResponse();
+        response.setNextPageAnchor(organizationQueryResult.getPageAnchor());
+        response.setVisitorEnterpriseList(organizationQueryResult.getDtos().stream().map(r->{
+            BaseVisitorEnterpriseDTO dto = new BaseVisitorEnterpriseDTO();
+            dto.setEnterpriseId(r.getId());
+            dto.setEnterpriseName(r.getName());
+            return dto;
+        }).collect(Collectors.toList()));
+        return response;
     }
 
     @Override
@@ -184,16 +232,55 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void sendVisitorSMS(GetBookedVisitorByIdCommand cmd) {
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+        VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
+        if(visitorType==VisitorsysVisitorType.TEMPORARY){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "temporary visitor not support send sms");
+        }
+        VisitorsysVisitStatus status = checkVisitStatus(visitor.getVisitStatus());
+        if(VisitorsysVisitStatus.NOT_VISIT!=status){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "not support visitor status = "+visitor.getVisitStatus());
+        }
+        if(visitor.getVisitorPhone()==null){
+            return;
+        }
+
+        List<Tuple<String, Object>> variables =  new ArrayList();
+        smsProvider.addToTupleList(variables, VisitorsysErrorCode.SMS_APPNAME, "");
+        smsProvider.addToTupleList(variables, VisitorsysErrorCode.SMS_VISITENTERPRISENAME, visitor.getEnterpriseName());
+        smsProvider.addToTupleList(variables, VisitorsysErrorCode.SMS_INVITATIONLINK, generateInviationLink(visitor.getId()));
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(visitor.getNamespaceId(), visitor.getVisitorPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_INVITATION_LETTER, templateLocale, variables);
 
     }
 
     @Override
     public void deleteVisitor(GetBookedVisitorByIdCommand cmd) {
-
+//        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+//        if(cmd.getVisitorId()==null){
+//            return;
+//        }
+//        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+//
+//        visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getVisitorId())
     }
 
     @Override
-    public void confirmVisitor(GetBookedVisitorByIdCommand cmd) {
+    public void deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd) {
+//        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+//        if(cmd.getVisitorId()==null){
+//            return;
+//        }
+//        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+//
+//        visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getVisitorId())
+    }
+
+    @Override
+    public void confirmVisitor(CreateOrUpdateVisitorCommand cmd) {
 
     }
 
@@ -219,7 +306,38 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public BaseOfficeLocationDTO createOrUpdateOfficeLocation(CreateOrUpdateOfficeLocationCommand cmd) {
-        return null;
+        VisitorSysOfficeLocation convert = checkOfficeLocation(cmd);
+
+        if(cmd.getId()==null) {
+            visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(convert);
+        }else{
+            visitorSysOfficeLocationProvider.updateVisitorSysOfficeLocation(convert);
+        }
+        return ConvertHelper.convert(convert,BaseOfficeLocationDTO.class);
+    }
+
+    private VisitorSysOfficeLocation checkOfficeLocation(CreateOrUpdateOfficeLocationCommand cmd) {
+        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        VisitorSysOfficeLocation convert = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+        convert.setStatus(CommonStatus.ACTIVE.getCode());
+        if(cmd.getId()==null){
+            return convert;
+        }
+        else{
+            VisitorSysOfficeLocation old = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(cmd.getId());
+            if(old==null){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "unknown officeLoation id "+cmd.getId());
+            }
+            convert.setOwnerType(old.getOwnerType());
+            convert.setOwnerId(old.getOwnerId());
+            convert.setNamespaceId(old.getNamespaceId());
+            convert.setCreateTime(old.getCreateTime());
+            convert.setCreatorUid(old.getCreatorUid());
+            convert.setOperatorUid(old.getOperatorUid());
+            convert.setOperateTime(old.getOperateTime());
+        }
+        return convert;
     }
 
     @Override
@@ -255,6 +373,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public ListDoorGuardsResponse listDoorGuards(BaseVisitorsysCommand cmd) {
         return null;
+    }
+
+    @Override
+    public void rejectVisitor(GetBookedVisitorByIdCommand cmd) {
+
+    }
+
+    @Override
+    public void syncVisitor(BaseVisitorsysCommand cmd) {
+        visitorsysSearcher.syncVisitorsFromDb(cmd.getNamespaceId());
     }
 
     @Override
@@ -388,7 +516,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
         VisitorSysVisitor convert = ConvertHelper.convert(cmd, VisitorSysVisitor.class);
         convert.setParentId(0L);
-        //到访状态是等待确认，那么必须传到访时间
+        //到访状态是等待确认，那么必须设置到访时间
         if(status==VisitorsysVisitStatus.WAIT_CONFIRM_VISIT){
             convert.setVisitTime(new Timestamp(System.currentTimeMillis()));
         }
@@ -453,9 +581,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private VisitorsysVisitStatus checkInvaildVisitStatus(Byte visitStatus) {
         VisitorsysVisitStatus status = checkVisitStatus(visitStatus);
-        //以下三种状态，不能在创建用户的时候传入
+        //以下两种状态，不能在创建用户的时候传入
         if(status == VisitorsysVisitStatus.DELETED
-                || status==VisitorsysVisitStatus.HAS_VISITED
                 || status == VisitorsysVisitStatus.REJECTED_VISIT){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild visitor status = "+visitStatus);
@@ -572,7 +699,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     /**
-     * 生成邀请码
+     * 生成邀请码 RG+项目辨识码+预约日期+四位流水号
      * @param namespaceId
      * @param ownerType
      * @param ownerId
@@ -625,12 +752,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private String generateRandomCode() {
-//        int length = configurationProvider.getIntValue("visitorsys.coding.length",4);
-        int length = 4;
+        int length = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_RANDOMCODE_LENGTH,4);
+//        int length = 4;
         String randomCode = "";
         while(randomCode.length()<length){
             int i = (int) ((Math.random() * 36 + 65));
-            System.out.print(i+" ");
+//            System.out.print(i+" ");
             if(i<91){
                 randomCode+=(char)i;
             }else{
@@ -646,15 +773,59 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private String generateSerialCode(String serialCode) {
-        while(serialCode.length()<4){
+        if(serialCode==null)
+            return null;
+        int length = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_SERIALCODE_LENGTH,4);
+        while(serialCode.length()<length){
             serialCode="0"+serialCode;
         }
-        while(serialCode.length()>4){
+        while(serialCode.length()>length){
             serialCode=serialCode.substring(1,serialCode.length());
         }
         return serialCode;
     }
-//
+
+    /**
+     * 检查searchFlag参数
+     * @param searchFlag
+     * @return
+     */
+    private VisitorsysSearchFlagType checkSearchFlag(Byte searchFlag) {
+        VisitorsysSearchFlagType searchFlagType = VisitorsysSearchFlagType.fromCode(searchFlag);
+        if(searchFlagType==null || VisitorsysSearchFlagType.SYNCHRONIZATION==searchFlagType){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor search flag = "+searchFlag);
+        }
+        return searchFlagType;
+    }
+
+    /**
+     * 生成访客邀请码连接
+     * @param id 访客id
+     * @return
+     */
+    private String generateInviationLink(Long id) {
+        String invitationLinkTemp = configurationProvider.getValue(VisitorsysErrorCode.VISITORSYS_INVITATION_LINK,"%s/r?token=%s");
+        String homeUrl = configurationProvider.getValue("home.url","");
+        String token = WebTokenGenerator.getInstance().toWebToken(id);
+        return String.format(invitationLinkTemp,homeUrl,token);
+    }
+
+    /**
+     * 校验访客token
+     * @param token
+     * @return
+     */
+    private Long checkInviationToken(String token){
+        Long id = WebTokenGenerator.getInstance().fromWebToken(token, Long.class);
+        if(id==null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+                    , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild token "+token);
+        }
+        return id;
+    }
+
+
 //    public static void main(String[] args) {
 //        for (int i = 0; i <10000; i++) {
 //            System.out.println(new VisitorSysServiceImpl().generateRandomCode());

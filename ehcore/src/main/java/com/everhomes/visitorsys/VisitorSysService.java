@@ -27,7 +27,7 @@ public interface VisitorSysService {
 
     void deleteVisitor(GetBookedVisitorByIdCommand cmd);
 
-    void confirmVisitor(GetBookedVisitorByIdCommand cmd);
+    void confirmVisitor(CreateOrUpdateVisitorCommand cmd);
 
     GetStatisticsResponse getStatistics(GetStatisticsCommand cmd);
 
@@ -78,4 +78,10 @@ public interface VisitorSysService {
     GetEnterpriseFormResponse getEnterpriseForm(GetEnterpriseFormCommand cmd);
 
     GetEnterpriseFormForWebResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd);
+
+    void rejectVisitor(GetBookedVisitorByIdCommand cmd);
+
+    void syncVisitor(BaseVisitorsysCommand cmd);
+
+    void deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd);
 }

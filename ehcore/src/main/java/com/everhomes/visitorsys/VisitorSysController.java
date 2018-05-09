@@ -143,13 +143,30 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteVisitor</b>
 	 * <p>
-	 * 8.删除访客邀请-后台管理
+	 * 8.删除访客-后台管理
 	 * </p>
 	 */
 	@RequestMapping("deleteVisitor")
 	@RestReturn(String.class)
 	public RestResponse deleteVisitor(GetBookedVisitorByIdCommand cmd) {
 		visitorSysService.deleteVisitor(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/deleteVisitorAppoint</b>
+	 * <p>
+	 * 8.1.删除预约-后台管理
+	 * </p>
+	 */
+	@RequestMapping("deleteVisitorAppoint")
+	@RestReturn(String.class)
+	public RestResponse deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd) {
+		visitorSysService.deleteVisitorAppoint(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -165,7 +182,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("confirmVisitor")
 	@RestReturn(String.class)
-	public RestResponse confirmVisitor(GetBookedVisitorByIdCommand cmd) {
+	public RestResponse confirmVisitor(CreateOrUpdateVisitorCommand cmd) {
 		visitorSysService.confirmVisitor(cmd);
 
 		RestResponse response = new RestResponse();
@@ -389,6 +406,40 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse exportBookedVisitors(ListBookedVisitorsCommand cmd) {
 		visitorSysService.listBookedVisitors(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/rejectVisitor</b>
+	 * <p>
+	 * 23.拒绝访客-后台管理
+	 * </p>
+	 */
+	@RequestMapping("rejectVisitor")
+	@RestReturn(String.class)
+	public RestResponse rejectVisitor(GetBookedVisitorByIdCommand cmd) {
+		visitorSysService.rejectVisitor(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/syncVisitor</b>
+	 * <p>
+	 * 24.同步访客/预约-后台管理
+	 * </p>
+	 */
+	@RequestMapping("syncVisitor")
+	@RestReturn(String.class)
+	public RestResponse syncVisitor(BaseVisitorsysCommand cmd) {
+		visitorSysService.syncVisitor(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

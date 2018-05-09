@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 
  * <ul>
@@ -37,5 +41,9 @@ public enum VisitorsysVisitStatus {
 			}
 		}
 		return null;
+	}
+
+	public static List<Byte> getNormalStatus() {
+		return new ArrayList<>(Arrays.asList(NOT_VISIT.getCode(),WAIT_CONFIRM_VISIT.getCode(),HAS_VISITED.getCode(),REJECTED_VISIT.getCode()));
 	}
 }
