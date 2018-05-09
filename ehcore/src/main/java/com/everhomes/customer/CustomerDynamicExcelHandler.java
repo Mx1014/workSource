@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.CustomerDynamicSheetClass;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
@@ -838,6 +839,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     createOrganizationAdminCommand.setContactToken(contactToken);
                     cmds.add(createOrganizationAdminCommand);
                 }
+                //修改企业是否设置管理员
+                EnterpriseCustomer customer = customerProvider.findById(enterpriseCustomer.getId());
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                customerProvider.updateEnterpriseCustomer(customer);
             }
         }
         if (cmds.size() > 0) {

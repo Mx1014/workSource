@@ -32,6 +32,7 @@ import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationAttachment;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
@@ -210,6 +211,7 @@ import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -663,6 +665,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
             org.setWebsite(customer.getCorpWebsite());
+            org.setUnifiedSocialCreditCode(customer.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
             if (detail != null) {
@@ -766,7 +769,7 @@ public class CustomerServiceImpl implements CustomerService {
             String geohash = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
             updateCustomer.setGeohash(geohash);
         }
-        if (null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != -1) {
+        if (null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != 0) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 updateCustomer.setTrackingName(detail.getContactName());
@@ -780,6 +783,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
+
+        //创建或更新customer的bannerUri
+        enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
 
         //保存之后重查一遍 因为数据类型导致 fix 22978
         updateCustomer = checkEnterpriseCustomer(cmd.getId());
@@ -3592,5 +3598,90 @@ public class CustomerServiceImpl implements CustomerService {
             });
         }
         return dtos;
+    }
+
+    @Override
+    public void syncOrganizationToCustomer() {
+        List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
+        if (organizations != null && organizations.size() > 0) {
+            organizations.forEach((organization -> {
+                OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+                List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
+                List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
+                if (addresses != null && addresses.size() > 0) {
+                    addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
+                }
+                createEnterpriseCustomer(organization, organizationDetail.getAvatar(), organizationDetail, request.getCommunityId(), addressDTOs);
+            }));
+        }
+    }
+
+    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId, List<OrganizationAddressDTO> addressDTOs) {
+//        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
+//            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        if (customers != null && customers.size() > 0) {
+            EnterpriseCustomer customer = customers.get(0);
+            customer.setOrganizationId(organization.getId());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+            this.updateCustomerEntryInfo(customer, addressDTOs);
+
+        } else {
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setCommunityId(communityId);
+            customer.setNamespaceId(organization.getNamespaceId());
+            customer.setOrganizationId(organization.getId());
+            customer.setName(organization.getName());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+            this.updateCustomerEntryInfo(customer, addressDTOs);
+        }
+    }
+
+    private void updateCustomerEntryInfo(EnterpriseCustomer customer, List<OrganizationAddressDTO> addressDTOs) {
+        LOGGER.debug("updateCustomerEntryInfo customer id: {}, address: {}", customer.getId(), addressDTOs);
+        if (addressDTOs != null && addressDTOs.size() > 0) {
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            List<Long> addressIds = new ArrayList<>();
+            if (entryInfos != null && entryInfos.size() > 0) {
+                addressIds = entryInfos.stream().map(entryInfo -> {
+                    return entryInfo.getAddressId();
+                }).collect(Collectors.toList());
+            }
+
+            for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+                if (addressIds.contains(organizationAddressDTO.getAddressId())) {
+                    continue;
+                }
+
+                CustomerEntryInfo info = new CustomerEntryInfo();
+                info.setNamespaceId(customer.getNamespaceId());
+                info.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                info.setCustomerId(customer.getId());
+                info.setCustomerName(customer.getName());
+                info.setAddressId(organizationAddressDTO.getAddressId());
+                info.setBuildingId(organizationAddressDTO.getBuildingId());
+                enterpriseCustomerProvider.createCustomerEntryInfo(info);
+            }
+        }
     }
 }

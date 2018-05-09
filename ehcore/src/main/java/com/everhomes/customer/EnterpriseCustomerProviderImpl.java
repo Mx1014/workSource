@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
@@ -2004,5 +2005,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
                 .fetchInto(EnterpriseAttachment.class);
+    }
+
+    @Override
+    public List<Organization> listNoSyncOrganizations() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID).fetchInto(Long.class);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ORGANIZATIONS,Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
+        return query.fetchInto(Organization.class);
     }
 }

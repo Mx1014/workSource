@@ -1,6 +1,11 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -154,8 +159,14 @@ public class UpdateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
-
     private Byte deviceType;
+
+
+    private String unifiedSocialCreditCode;
+    private String postUri;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String hotline;
 
     public Long getCommunityId() {
         return communityId;
@@ -795,5 +806,42 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

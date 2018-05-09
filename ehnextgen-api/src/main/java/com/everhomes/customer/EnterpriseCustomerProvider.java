@@ -4,6 +4,7 @@ import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -170,4 +171,6 @@ public interface EnterpriseCustomerProvider {
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
 
     List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long id);
+
+    List<Organization> listNoSyncOrganizations();
 }

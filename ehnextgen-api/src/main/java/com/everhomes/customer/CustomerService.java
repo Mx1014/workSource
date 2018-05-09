@@ -358,4 +358,6 @@ public interface CustomerService {
     void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
 
     List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
+
+    void syncOrganizationToCustomer();
 }

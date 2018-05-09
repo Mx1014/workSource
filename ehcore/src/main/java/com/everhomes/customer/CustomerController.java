@@ -1631,4 +1631,17 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /customer/syncOrganizationToCustomer</b>
+     * <p>迁移企业管理数据到企业客户管理</p>
+     */
+    @RequestMapping("syncOrganizationToCustomer")
+    @RestReturn(value = OrganizationContactDTO.class, collection = true)
+    public RestResponse syncOrganizationToCustomer() {
+        customerService.syncOrganizationToCustomer();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

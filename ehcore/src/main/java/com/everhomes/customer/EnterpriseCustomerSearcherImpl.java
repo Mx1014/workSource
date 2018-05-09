@@ -41,7 +41,6 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
@@ -151,8 +150,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     buildings.add(e.getBuildingId().toString());
                     addressIds.add(e.getAddressId().toString());
                 });
-                builder.field("buildingId", StringUtils.join(buildings, "|"));
-                builder.field("addressId", StringUtils.join(addressIds, "|"));
+//                builder.field("buildingId", StringUtils.join(buildings, "|"));
+//                builder.field("addressId", StringUtils.join(addressIds, "|"));
+                builder.array("addressId", buildings);
+                builder.array("addressId", addressIds);
             }
             builder.endObject();
             return builder;
@@ -235,12 +236,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
         if (cmd.getAddressId() != null) {
-            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
-            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+//            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+//            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
         }
         if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
-            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+//            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+//            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
         }
 
         if(cmd.getCustomerCategoryId() != null)
