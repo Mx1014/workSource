@@ -428,13 +428,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         //添加查询条件，首先我们先将关键字转换为Long的，如果转换成功的话，那么就说明=该关键字是企业编号，那么就根据关键字搜索，否则我们就认为他是企业
         //名称，那么我们就根据企业名称进行搜索
-        try {
+/*        try {
             Long aLong = Long.valueOf(keywords);
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
         } catch (NumberFormatException e) {
             if (!StringUtils.isEmpty(keywords)) {
                 query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%"));
             }
+        }*/
+
+        //本来是根据企业名称和企业编号来进行模糊，也就是上面注释的那一段，那一段需要进行类型的转换，但是现在有变更了方案，只是根据企业名称来进行模糊所以就有了下面的
+        //这块逻辑
+        if (!StringUtils.isEmpty(keywords)) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%"));
         }
 
 
