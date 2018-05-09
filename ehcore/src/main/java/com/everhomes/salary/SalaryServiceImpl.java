@@ -2209,7 +2209,12 @@ public class SalaryServiceImpl implements SalaryService {
         dto.setPayslipDetailId(r.getId());
         List<SalaryPeriodEmployeeEntityDTO> content = JSON.parseArray(r.getPayslipContent(), SalaryPeriodEmployeeEntityDTO.class);
         dto.setCreateTime(r.getCreateTime().getTime());
-        dto.setCreatorName(findNameByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid()));
+
+        OrganizationMember member = findMemberByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid());
+        if (null != member) {
+        	dto.setCreatorName(member.getContactName());
+        	dto.setCreatorDetailId(member.getDetailId());
+        } 
         dto.setPayslipContent(content);
 //        LOGGER.debug("dto:" + dto);
         return dto;

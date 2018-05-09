@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>viewedFlag: 已查看0-否 1-是</li>
  * <li>status: 状态0-已发送 1-已撤回  2-已确认</li>
  * <li>creatorUid: 发放者id</li>
+ * <li>creatorDetailId: 发放者detail id</li>
  * <li>creatorName: 发放人姓名</li>
  * <li>createTime: 发放时间</li>
  * <li>salaryPeriod: 期数</li>
@@ -35,6 +36,7 @@ public class PayslipDetailDTO {
     private Byte viewedFlag;
     private Byte status;
     private Long creatorUid;
+    private Long creatorDetailId;
     private String creatorName;
     private Long createTime;
     private Long confirmTime;
@@ -137,5 +139,11 @@ public class PayslipDetailDTO {
 
 	public void setPayslipContent(List<SalaryPeriodEmployeeEntityDTO> payslipContent) {
 		this.payslipContent = payslipContent;
+	}
+	public Long getCreatorDetailId() {
+		return creatorDetailId;
+	}
+	public void setCreatorDetailId(Long creatorDetailId) {
+		this.creatorDetailId = creatorDetailId;
 	}
 }
