@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  * <li>namespaceId: (必填)域空间id</li>
- * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
+ * <li>ownerType: (必填)归属的类型，{@link VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>id: (必填)访客/预约ID</li>
  * <li>visitorName: (必填)访客姓名</li>
@@ -20,8 +20,9 @@ import java.sql.Timestamp;
  * <li>inviterName: (选填)邀请者姓名,预约访客必填</li>
  * <li>plannedVisitTime: (必填)计划到访时间</li>
  * <li>visitTime: (选填)到访时间/登记时间</li>
- * <li>visitStatus: (必填)到访状态列表，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
- * <li>visitorType: (必填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
+ * <li>visitStatus: (必填)访客状态列表，{@link VisitorsysVisitStatus}</li>
+ * <li>pointStatus: (必填)预约状态列表，{@link VisitorsysVisitStatus}</li>
+ * <li>visitorType: (必填)访客类型，{@link VisitorsysVisitorType}</li>
  * <li>enterpriseId: (选填)公司id，园区访客必填</li>
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
@@ -48,6 +49,7 @@ public class BaseVisitorDTO {
     private Timestamp visitTime;
 
     private Byte visitStatus;
+    private Byte pointStatus;
     private Byte visitorType;
 
     private Long enterpriseId;
@@ -55,14 +57,6 @@ public class BaseVisitorDTO {
 
     private Long officeLocationId;
     private String officeLocationName;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -86,6 +80,14 @@ public class BaseVisitorDTO {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getVisitorName() {
@@ -166,6 +168,14 @@ public class BaseVisitorDTO {
 
     public void setVisitStatus(Byte visitStatus) {
         this.visitStatus = visitStatus;
+    }
+
+    public Byte getPointStatus() {
+        return pointStatus;
+    }
+
+    public void setPointStatus(Byte pointStatus) {
+        this.pointStatus = pointStatus;
     }
 
     public Byte getVisitorType() {
