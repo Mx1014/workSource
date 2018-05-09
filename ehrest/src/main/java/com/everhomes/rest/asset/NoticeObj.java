@@ -12,7 +12,7 @@ package com.everhomes.rest.asset;
  *</ul>
  */
 public class NoticeObj {
-    private Byte noticeObjType;
+    private String noticeObjType;
     private Long noticeObjId;
     private String noticeObjName;
 
@@ -24,11 +24,11 @@ public class NoticeObj {
         this.noticeObjName = noticeObjName;
     }
 
-    public Byte getNoticeObjType() {
+    public String getNoticeObjType() {
         return noticeObjType;
     }
 
-    public void setNoticeObjType(Byte noticeObjType) {
+    public void setNoticeObjType(String noticeObjType) {
         this.noticeObjType = noticeObjType;
     }
 

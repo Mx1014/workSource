@@ -1479,7 +1479,7 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
             cir.setMsgNoticeTemplateId(config.getNoticeMsgId());
-            cir.setNoticeObjs(gson.fromJson(config.getNoticeObjs(), new TypeToken<List<List<NoticeObj>>>(){}.getType()));
+            cir.setNoticeObjs(gson.fromJson(config.getNoticeObjs(), new TypeToken<List<NoticeObj>>(){}.getType()));
             configsInRet.add(cir);
         }
         response.setConfigs(configsInRet);
