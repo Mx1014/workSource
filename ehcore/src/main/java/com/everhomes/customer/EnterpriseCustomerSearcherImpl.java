@@ -152,7 +152,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 });
 //                builder.field("buildingId", StringUtils.join(buildings, "|"));
 //                builder.field("addressId", StringUtils.join(addressIds, "|"));
-                builder.array("addressId", buildings);
+                builder.array("buildings", buildings);
                 builder.array("addressId", addressIds);
             }
             builder.endObject();

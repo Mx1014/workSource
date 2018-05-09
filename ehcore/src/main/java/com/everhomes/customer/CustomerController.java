@@ -285,10 +285,10 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/syncEnterpriseCustomer</b>
+     * <b>URL: /customer/syncEnterpriseCustomerIndex</b>
      * <p>同步企业客户</p>
      */
-    @RequestMapping("syncEnterpriseCustomer")
+    @RequestMapping("syncEnterpriseCustomerIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomer() {
         enterpriseCustomerSearcher.syncFromDb();
@@ -1636,7 +1636,7 @@ public class CustomerController extends ControllerBase {
      * <p>迁移企业管理数据到企业客户管理</p>
      */
     @RequestMapping("syncOrganizationToCustomer")
-    @RestReturn(value = OrganizationContactDTO.class, collection = true)
+    @RestReturn(value = String.class)
     public RestResponse syncOrganizationToCustomer() {
         customerService.syncOrganizationToCustomer();
         RestResponse response = new RestResponse();
