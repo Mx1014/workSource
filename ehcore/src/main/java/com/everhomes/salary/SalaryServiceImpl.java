@@ -2096,7 +2096,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     public String processSalaryPeriodString(String salaryPeriod) {
-        return salaryPeriod.substring(0, 3) + "年" + salaryPeriod.substring(4, 5) + "月";
+        return salaryPeriod.substring(0, 4) + "年" + salaryPeriod.substring(4, 6) + "月";
     }
 
     @Override
