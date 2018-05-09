@@ -26,6 +26,7 @@ import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.varField.FieldDTO;
@@ -2035,6 +2036,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         return query.fetchInto(Organization.class);
     }
 }
