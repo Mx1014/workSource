@@ -18,4 +18,6 @@ public interface ServiceModuleAppAuthorizationService {
     void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd);
 
     void updateAppProfile(UpdateAppProfileCommand cmd);
+
+    void deleteServiceModuleAppAuthorizationByOrganizationId(Long organizationId);
 }

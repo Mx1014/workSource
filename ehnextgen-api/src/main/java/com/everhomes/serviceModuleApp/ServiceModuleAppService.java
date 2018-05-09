@@ -34,7 +34,9 @@ public interface ServiceModuleAppService {
 
 	void uninstallApp(UninstallAppCommand cmd);
 
-	ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd);
+    void uninstallAppByOrganizationId(Long organizationId);
+
+    ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd);
 
     ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd);
 

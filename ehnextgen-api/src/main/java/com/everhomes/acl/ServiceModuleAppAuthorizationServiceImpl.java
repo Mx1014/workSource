@@ -224,5 +224,12 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         }
     }
 
+    @Override
+    public void deleteServiceModuleAppAuthorizationByOrganizationId(Long organizationId) {
+
+        //TODO
+
+    }
+
 
 }

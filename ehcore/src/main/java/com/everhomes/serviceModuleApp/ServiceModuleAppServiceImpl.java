@@ -297,6 +297,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
+	public void uninstallAppByOrganizationId(Long organizationId) {
+		//TODO
+	}
+
+
+	@Override
 	public ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd) {
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
