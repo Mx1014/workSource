@@ -2464,10 +2464,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			coordinationProvider.getNamedLock("Rental_schedule_flag1" ) //集群运行时只有一台执行定时任务
 					.tryEnter(() -> {
+						LOGGER.info("autoCompleteBills start:");
 						List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
 						Long currTime = DateHelper.currentGMTTime().getTime();
 						for (RentalOrder order : orders) {
 							if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+								LOGGER.info("the bill id is:{} startTime:{} endTime:{}",order.getId(),order.getStartTime(),order.getEndTime());
 								if (currTime + 60 * 1000L >= order.getEndTime().getTime()) {
 									VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
 									ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
