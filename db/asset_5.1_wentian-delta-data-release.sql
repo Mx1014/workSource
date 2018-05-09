@@ -1,0 +1,4 @@
+SET @id = ifnull((SELECT max(`id`) from `eh_locale_templates`),0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'user.notification', '4', 'zh_CN', '物业账单通知用户模板1', '尊敬的租户${targetName}先生/小姐：您好，您至今未缴：${dateStr}月服务费共计：${amount}元。请及时缴纳，谢谢您的配合！', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'user.notification', '5', 'zh_CN', '物业账单通知用户模板2', '尊敬的租户${targetName}先生/小姐：您好，请尽快缴纳${dateStr}月服务费：${amount}元。如您明日仍未缴纳，将视为逾期，我司将停止相关物业服务，并计收相应滞纳金，引起一切后果由租户自行承担。谢谢！', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'user.notification', '6', 'zh_CN', '物业账单通知用户模板3', '尊敬的租户${targetName}先生/小姐：您好，您已拖欠${dateStr}月服务费：${amount}元，我司至今未收到您的欠款。物业管理公司将按《物业管理条例》的规定，在欠费后次日对贵租户暂停各项服务，出现任何后果，责任自负。我公司并保留通过法律途径追缴的权利。', 0);

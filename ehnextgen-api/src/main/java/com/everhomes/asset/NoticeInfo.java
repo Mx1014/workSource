@@ -2,9 +2,13 @@
 package com.everhomes.asset;
 
 
-import java.math.BigDecimal;
+import com.everhomes.rest.asset.NoticeConfig;
 
-public class NoticeInfo {
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
+
+public class NoticeInfo implements Serializable{
     private String phoneNums;
     private BigDecimal amountRecevable;
     private BigDecimal amountOwed;
@@ -16,6 +20,33 @@ public class NoticeInfo {
 
     private String ownerType;
     private Long ownerId;
+    private Long appTemplateId;
+    private Long msgTemplateId;
+    private Boolean useTemplate;
+    private List<NoticeConfig> noticeObjs;
+    public Boolean isUseTemplate() {
+        return useTemplate;
+    }
+
+    public void setUseTemplate(Boolean useTemplate) {
+        this.useTemplate = useTemplate;
+    }
+
+    public Long getAppTemplateId() {
+        return appTemplateId;
+    }
+
+    public void setAppTemplateId(Long appTemplateId) {
+        this.appTemplateId = appTemplateId;
+    }
+
+    public Long getMsgTemplateId() {
+        return msgTemplateId;
+    }
+
+    public void setMsgTemplateId(Long msgTemplateId) {
+        this.msgTemplateId = msgTemplateId;
+    }
 
     public String getOwnerType() {
         return ownerType;
@@ -98,5 +129,13 @@ public class NoticeInfo {
 
     public void setAppName(String appName) {
         this.appName = appName;
+    }
+
+    public void setNoticeObjs(List<NoticeConfig> noticeObjs) {
+        this.noticeObjs = noticeObjs;
+    }
+
+    public List<NoticeConfig> getNoticeObjs() {
+        return noticeObjs;
     }
 }
