@@ -528,6 +528,11 @@ public class WXAuthController {// extends ControllerBase
         }
         
         userService.signupByThirdparkUser(wxUser, request);
+
+        //signupByThirdparkUser里面已经设置过一次了但是setDefaultCommunity有个问题，但是有一个问题setDefaultCommunity限定了对应的namespaceResource只能是1。
+        //add by yanjun 201805091940
+        userService.setDefaultCommunityForWx(wxUser.getId(), namespaceId);
+
         UserLogin userLogin = userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
 
         // 添加CurrentUser用于后期，检查identifi add by yanjun 20170926
