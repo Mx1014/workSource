@@ -161,16 +161,8 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if (params.getEndPlannedVisitTime() != null) {
                 rf.lt(params.getEndPlannedVisitTime());
             }
-            if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
-                FilterBuilder orfb = null;
-                for (Byte aByte : params.getVisitStatusList()) {
-                    if(orfb!=null) {
-                        orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("bookingStatus", aByte));
-                    }else {
-                        orfb = FilterBuilders.termFilter("bookingStatus", aByte);
-                    }
-                }
-                fb = FilterBuilders.andFilter(fb,orfb);
+            if(params.getBookingStatus()!=null){
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
             }
             sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.DESC);
         }else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
@@ -181,16 +173,8 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if (params.getEndVisitTime() != null) {
                 rf.lt(params.getEndVisitTime());
             }
-            if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
-                FilterBuilder orfb = null;
-                for (Byte aByte : params.getVisitStatusList()) {
-                    if(orfb!=null) {
-                        orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("visitStatus", aByte));
-                    }else {
-                        orfb = FilterBuilders.termFilter("visitStatus", aByte);
-                    }
-                }
-                fb = FilterBuilders.andFilter(fb,orfb);
+            if(params.getVisitStatus()!=null){
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitStatus", params.getVisitStatus()));
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
         }
@@ -308,7 +292,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 
     @Override
     public void syncVisitorsFromDb(Integer namespaceId) {
-        int pageSize = 4;
+        int pageSize = 200;
         this.deleteAll();
 
         ListBookedVisitorParams params = new ListBookedVisitorParams();

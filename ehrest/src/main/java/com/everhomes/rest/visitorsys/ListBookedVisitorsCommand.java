@@ -14,7 +14,8 @@ import java.util.List;
  * <li>appId: (必填)应用Id</li>
  * <li>keyWords: (选填)访客信息,访客姓名手机号码模糊搜索</li>
  * <li>visitorType: (选填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
- * <li>visitStatusList: (选填)到访状态列表，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
+ * <li>visitStatus: (选填)访客状态，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
+ * <li>bookingStatus: (选填)预约状态，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
  * <li>startPlannedVisitTime: (选填)计划到访时间开始，预约管理用</li>
  * <li>endPlannedVisitTime: (选填)计划到访时间结束，预约管理用</li>
  * <li>officeLocationId: (选填)办公地点id，企业访客模块用</li>
@@ -30,7 +31,8 @@ public class ListBookedVisitorsCommand extends BaseVisitorsysCommand{
     private Byte searchFlag;
     private String keyWords;
     private Byte visitorType;
-    private List<Byte> visitStatusList;
+    private Byte visitStatus;
+    private Byte bookingStatus;
     private Long startPlannedVisitTime;
     private Long endPlannedVisitTime;
     private Long officeLocationId;
@@ -65,12 +67,20 @@ public class ListBookedVisitorsCommand extends BaseVisitorsysCommand{
         this.visitorType = visitorType;
     }
 
-    public List<Byte> getVisitStatusList() {
-        return visitStatusList;
+    public Byte getVisitStatus() {
+        return visitStatus;
     }
 
-    public void setVisitStatusList(List<Byte> visitStatusList) {
-        this.visitStatusList = visitStatusList;
+    public void setVisitStatus(Byte visitStatus) {
+        this.visitStatus = visitStatus;
+    }
+
+    public Byte getBookingStatus() {
+        return bookingStatus;
+    }
+
+    public void setBookingStatus(Byte bookingStatus) {
+        this.bookingStatus = bookingStatus;
     }
 
     public Long getStartPlannedVisitTime() {

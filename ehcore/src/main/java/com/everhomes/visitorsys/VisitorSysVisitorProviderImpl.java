@@ -89,10 +89,11 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 		if(params.getVisitorType()!=null){
 			condition=condition.and(community.VISITOR_TYPE.eq(params.getVisitorType()));
 		}
-		if(params.getVisitStatusList()!=null){
-			condition=condition.and(community.VISIT_STATUS.in(params.getVisitStatusList()));
-		}else{
-			condition=condition.and(community.VISIT_STATUS.in(VisitorsysVisitStatus.getNormalStatus()));
+		if(params.getVisitStatus()!=null){
+			condition=condition.and(community.VISIT_STATUS.in(params.getVisitStatus()));
+		}
+		if(params.getBookingStatus()!=null){
+			condition=condition.and(community.BOOKING_STATUS.in(params.getBookingStatus()));
 		}
 		if(params.getOfficeLocationId()!=null){
 			condition=condition.and(community.OFFICE_LOCATION_ID.in(params.getOfficeLocationId()));
@@ -168,6 +169,22 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 			return null;
 		}
 		return list.get(0);
+	}
+
+	@Override
+	public void deleteVisitorSysVisitor(Integer namespaceId, Long visitorId) {
+		getReadWriteContext().update(Tables.EH_VISITOR_SYS_VISITORS)
+				.set(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS,VisitorsysVisitStatus.DELETED.getCode())
+				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.ID.eq(visitorId)).execute();
+	}
+
+	@Override
+	public void deleteVisitorSysVisitorAppoint(Integer namespaceId, Long visitorId) {
+		getReadWriteContext().update(Tables.EH_VISITOR_SYS_VISITORS)
+				.set(Tables.EH_VISITOR_SYS_VISITORS.BOOKING_STATUS,VisitorsysVisitStatus.DELETED.getCode())
+				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.ID.eq(visitorId)).execute();
 	}
 
 	private EhVisitorSysVisitorsDao getReadWriteDao() {

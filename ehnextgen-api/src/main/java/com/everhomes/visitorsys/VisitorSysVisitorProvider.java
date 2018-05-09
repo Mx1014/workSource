@@ -16,4 +16,8 @@ public interface VisitorSysVisitorProvider {
 	List<VisitorSysVisitor> listVisitorSysVisitor(ListBookedVisitorParams params);
 
     VisitorSysVisitor findVisitorSysVisitorByParentId(Integer namespaceId, Long id);
+
+    void deleteVisitorSysVisitor(Integer namespaceId, Long visitorId);
+
+    void deleteVisitorSysVisitorAppoint(Integer namespaceId, Long visitorId);
 }

@@ -282,24 +282,47 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void deleteVisitor(GetBookedVisitorByIdCommand cmd) {
-//        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-//        if(cmd.getVisitorId()==null){
-//            return;
-//        }
-//        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
-//
-//        visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getVisitorId())
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        if(cmd.getVisitorId()==null){
+            return;
+        }
+
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+        if(visitor==null){
+            return;
+        }
+        dbProvider.execute(r->{
+            visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            if(visitor.getParentId()==0){
+                VisitorSysVisitor subvisitor = visitorSysVisitorProvider.findVisitorSysVisitorByParentId(cmd.getNamespaceId(), visitor.getId());
+                visitorSysVisitorProvider.deleteVisitorSysVisitor(subvisitor.getNamespaceId(),subvisitor.getId());
+                visitorsysSearcher.syncVisitor(subvisitor.getNamespaceId(),subvisitor.getId());
+            }else{
+                visitorSysVisitorProvider.deleteVisitorSysVisitor(visitor.getNamespaceId(),visitor.getParentId());
+                visitorsysSearcher.syncVisitor(visitor.getNamespaceId(),visitor.getParentId());
+            }
+            return null;
+        });
+
     }
 
     @Override
     public void deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd) {
-//        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-//        if(cmd.getVisitorId()==null){
-//            return;
-//        }
-//        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
-//
-//        visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getVisitorId())
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        if(cmd.getVisitorId()==null){
+            return;
+        }
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
+        if(visitor==null){
+            return;
+        }
+
+        dbProvider.execute(r->{
+            visitorSysVisitorProvider.deleteVisitorSysVisitorAppoint(cmd.getNamespaceId(),cmd.getVisitorId());
+            visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            return null;
+        });
     }
 
     @Override
@@ -621,6 +644,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private VisitorsysVisitStatus checkStatus(Byte visitStatus) {
+        if(visitStatus==null){
+            return null;
+        }
         VisitorsysVisitStatus status = VisitorsysVisitStatus.fromCode(visitStatus);
         if(status==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL

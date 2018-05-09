@@ -57,7 +57,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listOfficeLocations</b>
 	 * <p>
-	 * 3.获取企业办公地点列表-后台管理
+	 * 3.获取办公地点列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listOfficeLocations")

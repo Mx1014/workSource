@@ -8,11 +8,11 @@ import java.util.List;
 /**
  * 
  * <ul>
- * <li>DELETED((byte)0): 已删除</li>
- * <li>NOT_VISIT((byte)1): 未到访</li>
- * <li>WAIT_CONFIRM_VISIT((byte)2): 等待确认</li>
- * <li>HAS_VISITED((byte)3): 已到访</li>
- * <li>REJECTED_VISIT((byte)4): 已拒绝</li>
+ * <li>DELETED((byte)0): 已删除（visitStatus,bookingStatus共用）</li>
+ * <li>NOT_VISIT((byte)1): 未到访（bookingStatus 预约访客用）</li>
+ * <li>WAIT_CONFIRM_VISIT((byte)2): 等待确认（visitStatus 访客管理用）</li>
+ * <li>HAS_VISITED((byte)3): 已到访(visitStatus,bookingStatus共用)</li>
+ * <li>REJECTED_VISIT((byte)4): 已拒绝（visitStatus 访客管理用）</li>
  * </ul>
  */
 public enum VisitorsysVisitStatus {
