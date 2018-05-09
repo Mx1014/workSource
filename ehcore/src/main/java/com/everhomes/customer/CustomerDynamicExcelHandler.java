@@ -815,10 +815,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 entryInfo.setAddress(address.getAddress());
                 entryInfo.setAddressId(address.getId());
                 entryInfo.setArea(address.getAreaName());
-                entryInfo.setAreaSize(new BigDecimal(address.getAreaSize()));
+                entryInfo.setAreaSize(new BigDecimal(address.getAreaSize() == null ? 0 : address.getAreaSize()));
                 entryInfo.setBuildingId(building.getId());
                 entryInfo.setCustomerId(enterpriseCustomer.getId());
                 entryInfo.setCustomerName(enterpriseCustomer.getName());
+                entryInfo.setNamespaceId(enterpriseCustomer.getNamespaceId());
                 customerProvider.createCustomerEntryInfo(entryInfo);
             }
         }
