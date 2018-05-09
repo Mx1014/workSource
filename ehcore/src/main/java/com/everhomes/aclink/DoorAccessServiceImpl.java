@@ -1,5 +1,8 @@
 package com.everhomes.aclink;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -27,10 +30,12 @@ import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -44,6 +49,7 @@ import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.messaging.*;
@@ -63,7 +69,22 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+import com.google.gson.JsonArray;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -237,6 +258,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
     private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
     private static Format huarunDateFormatter = FastDateFormat.getInstance("yyyy-MM-dd");
+
+//  大沙河项目 旺龙云对接
+    private final static String WANGLONG_APP_ID = "647984150393028609";
+    private final static String WANGLONG_APP_SECRET = "3A4E0D7F0E5A2C1E";
+
+    private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
+    private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
     
     @PostConstruct
     public void setup() {
@@ -717,7 +745,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "huarun response error " + resp.getDescription());
         	}
         }
-        
+
+        if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+            JSONObject data = JSON.parseObject(doorAcc.getFloorId());
+            String projectId = data.getString("building");
+//            JSONArray floors = data.getJSONArray("floors");
+//            for(int i = 0;i < floors.size();i++){
+//                JSONObject floor = floors.getJSONObject(i);
+//                String floorId = floor.getString("id");
+//            }
+            cmd.setKeyU(this.getKeyU(projectId,cmd.getUserId().toString()));
+        }
+
+
         DoorAuth doorAuth = ConvertHelper.convert(cmd, DoorAuth.class);
         DoorAuthDTO rlt = null;
         
@@ -4349,29 +4389,124 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd) {
-
         User user = UserContext.current().getUser();
-
+//      获取用户公司楼层
+        List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
+        List<AddressDTO> floors = new ArrayList<>();
+        for(OrganizationDTO dto : orgs) {
+            List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
+            for(OrganizationAddress addr  : addrs) {
+                Address addr2 = addressProvider.findAddressById(addr.getAddressId());
+                addr2 = ApartmentFloorHandler(addr2);
+                floors.add(ConvertHelper.convert(addr2,AddressDTO.class));
+            }
+        }
+//      获取设备
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
-
         DoorAccessGroupResp resp = new DoorAccessGroupResp();
-
         List<DoorAccessGroupDTO> groups = new ArrayList<>();
         resp.setGroups(groups);
-
         for(DoorAuth auth : auths){
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAccessGroupDTO group = new DoorAccessGroupDTO();
+            groups.add(group);
             if(null != access){
                 group.setId(access.getId());
                 group.setGroupName(access.getName());
-//                group.setKeyU(auth.getKeyU());
+                group.setKeyU(auth.getKeyU());
+                group.setQrDriver(auth.getDriver());
+                group.setStatus(access.getStatus());
+                group.setDescription(access.getDescription());
+                group.setCreateTime(access.getCreateTime());
                 List<DoorAccess> devices = doorAccessProvider.listDoorAccessByGroupId(access.getId(),999);
                 group.setDevices(devices.stream().map(r -> {return ConvertHelper.convert(r,DoorAccessDTO.class);}).collect(Collectors.toList()));
+                String floorStr = access.getFloorId();
+                String[] floorIds = new String[1];
+                if(floorStr.indexOf(",") > -1){
+                    floorIds = floorStr.split(",");
+                } else{
+                    floorIds[0] = floorStr;
+                }
+                for (String floorId : floorIds){
+                    floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
+                }
+                group.setFloors(floors.stream().distinct().collect(Collectors.toList()));
             }
-
         }
 
-        return null;
+        return resp;
     }
+
+    private Address ApartmentFloorHandler(Address addr){
+        if(null == addr.getApartmentFloor()) {
+            String aname = addr.getAddress();
+            String[] as = aname.split("-");
+            if(as.length > 1) {
+                aname = as[1];
+            } else {
+                aname = as[0];
+            }
+            Matcher m = npattern.matcher(aname);
+            if(m != null && m.find()) {
+                aname = m.group(0);
+                Long l = Long.parseLong(aname);
+                if(l >= -255 && l <= 255) {
+                    addr.setApartmentFloor(l.toString());
+                }
+            }
+        }
+        return addr;
+    }
+
+
+    private String getKeyU(String projectId,String userId) {
+
+        String keyU;
+        String secret;
+        Map<String,String> params = new HashMap<>();
+        params.put("appid",WANGLONG_APP_ID);
+        params.put("appsecret",WANGLONG_APP_SECRET);
+        params.put("projectId",projectId);
+        try {
+            String resp = HttpUtils.post(URL_GETAPPINFOS,params,1,"UTF-8");
+            JSONObject respObj = JSON.parseObject(resp);
+            if(0 != respObj.getInteger("msgCode")){
+                LOGGER.error("Http请求失败, msg={}",respObj.getString("msg"));
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "HttpRequest is fail.");
+            }
+            JSONArray dataArr = respObj.getJSONArray("data");
+            if(dataArr.size() <= 0){
+                LOGGER.error("Http请求数据为空, data={}",respObj.getString("data"));
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "HttpRequest is fail.");
+            }
+            JSONObject projectObj = dataArr.getJSONObject(0);
+            secret = projectObj.getString("encryptedKey");
+            Map<String,String> params1 = new HashMap<>();
+            params1.put("appid",WANGLONG_APP_ID);
+            params1.put("appsecret",WANGLONG_APP_SECRET);
+            params1.put("encryptedKey",secret);
+            params1.put("projectId",projectId);
+            params1.put("userId",userId);
+            String resp1 = HttpUtils.post(URL_GETKEYU,params1,1,"UTF-8");
+            JSONObject respObj1 = JSON.parseObject(resp1);
+            if(0 != respObj1.getInteger("msgCode")){
+                LOGGER.error("Http请求失败, msg={}",respObj1.getString("msg"));
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "HttpRequest is fail.");
+            }
+            keyU = respObj1.getJSONObject("data").getString("keyU");
+
+        } catch (Exception e) {
+            LOGGER.error("Http请求失败, projectId={},userId={}",projectId,userId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "HttpRequest is fail.");
+        }
+
+        return keyU;
+    }
+
+
+
 }
