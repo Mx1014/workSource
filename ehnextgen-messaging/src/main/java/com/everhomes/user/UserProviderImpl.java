@@ -441,6 +441,41 @@ public class UserProviderImpl implements UserProvider {
         return null;
     }
 
+
+    /**
+     *根据手机号和域空间来查询eh_user_identifiers表中的数据
+     * @param identifierToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(String identifierToken,Integer namespaceId) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
+    }
+
+
     /**
      * 根据域空间id和注册的手机号来查询对应的注册信息
      * @param namespaceId

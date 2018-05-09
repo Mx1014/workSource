@@ -13234,26 +13234,58 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     public void updateSuperAdmin(UpdateSuperAdminCommand cmd){
-        //根据手机号、域空间id、organizationId来查询eh_organization_members表中的信息
-        //判断
-        if(cmd.getEntries() != null && cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
-            //查询表eh_organization_members
-            Long id = organizationProvider.findOrganizationMembersByTokenAndSoON(cmd.getEntries(),cmd.getNamespaceId(),cmd.getOrganizationId());
-            //非空校验
-            if(id != null && !"".equals(id)){
-                //说明有值
-                //然后我们将这个id更新到eh_organizations表中的对应的admin_target_id字段中
-                //创建一个Organization类的对象
-                Organization organization = new Organization();
-                //将数据封装在Organization对象中
-                organization.setId(cmd.getOrganizationId());
-                organization.setAdminTargetId(id);
-                //更新eh_organizations表中的信息
-                organizationProvider.updateOrganizationSuperAdmin(organization);
+        //所以的操作必须在同一个事物中进行
+        dbProvider.execute((TransactionStatus status) -> {
+            //根据手机号、域空间id、organizationId来查询eh_organization_members表中的信息
+            //判断
+            if(cmd.getEntries() != null && cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
+
+                //判断该用户是否已经注册，在这里我们的更换的超级管理员只能是已经注册的
+                if(cmd.getIsSigned() == TrueOrFalseFlag.TRUE.getCode()){
+                    //说明该更换的超级管理员已经进行注册，那么我们可以继续向下走，否则不能进行
+                    //判断该用户是否已经加入了企业，也就是说在eh_organization_members表中是否存在记录
+                    if(cmd.getIsJoined() == TrueOrFalseFlag.TRUE.getCode()){
+                        //说明该更换的超级管理员已经加入了企业，在eh_organization_members表中存在记录，那么就好办，我们只需要根据该更换的超级
+                        //管理员的手机号、域空间ID、组织Id来查询eh_organization_members表中的信息，并且将该信息的id变更为eh_organizations表
+                        //中的admin_target_id字段就ok
+                        //查询表eh_organization_members
+                        this.updateOrganizationSuperAdmin(cmd.getEntries(),cmd.getNamespaceId(),cmd.getOrganizationId());
+                    }else if(cmd.getIsJoined() == TrueOrFalseFlag.FALSE.getCode()){
+                        //说明该更换的超级管理员没有加入企业，那也就是说在eh_organization_members表中是不存在记录的，那么我们就给其在eh_organization_members
+                        //表中创建一条记录，帮助其成为该公司的员工
+                        //创建OrganizationMember类的对象
+                        OrganizationMember organizationMember = new OrganizationMember();
+                        //将数据封装在该对象中
+                        organizationMember.setOrganizationId(cmd.getOrganizationId());
+                        organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                        organizationMember.setContactName(cmd.getContactor());
+                        organizationMember.setContactToken(cmd.getEntries());
+                        organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                        organizationMember.setGroupType(OrganizationTypeEnum.ENTERPRISE.getCode());
+                        organizationMember.setNamespaceId(cmd.getNamespaceId());
+                        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getEntries(),cmd.getNamespaceId());
+                        organizationMember.setTargetId(userIdentifier.getOwnerUid());
+                        //// TODO: 2018/5/9
+                        organizationProvider.insertIntoOrganizationMember(organizationMember);
+                        //更改eh_organizations表中的admin_target_id字段
+                        Organization organization = new Organization();
+                        //将数据封装在Organization对象中
+                        organization.setId(cmd.getOrganizationId());
+                        organization.setAdminTargetId(organizationMember.getId());
+                        //更新eh_organizations表中的信息
+                        organizationProvider.updateOrganizationSuperAdmin(organization);
+
+                    }
+
+                }
+
             }
-        }
+            return null;
+        });
 
     }
+
+
 
     /**
      * 添加入驻企业（标准版）
@@ -13316,6 +13348,31 @@ public class OrganizationServiceImpl implements OrganizationService {
         }else{
             LOGGER.info("organizationId can not be null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "organizationId can not be null");
+        }
+    }
+
+
+
+    /**
+     * 根据手机号、域空间Id、组织ID来查询eh_organization_members表中是否存在记录，如果存在记录的话，将该记录的id值设置为eh_organizations表中的admin_target_id值
+     * @param entries
+     * @param namespaceId
+     * @param organizationId
+     */
+    private void updateOrganizationSuperAdmin(String entries,Integer namespaceId,Long organizationId) {
+        //查询表eh_organization_members
+        Long id = organizationProvider.findOrganizationMembersByTokenAndSoON(entries, namespaceId, organizationId);
+        //非空校验
+        if (id != null && !"".equals(id)) {
+            //说明有值
+            //然后我们将这个id更新到eh_organizations表中的对应的admin_target_id字段中
+            //创建一个Organization类的对象
+            Organization organization = new Organization();
+            //将数据封装在Organization对象中
+            organization.setId(organizationId);
+            organization.setAdminTargetId(id);
+            //更新eh_organizations表中的信息
+            organizationProvider.updateOrganizationSuperAdmin(organization);
         }
     }
 

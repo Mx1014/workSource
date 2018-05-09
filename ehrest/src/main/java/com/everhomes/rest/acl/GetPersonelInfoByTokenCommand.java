@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
 public class GetPersonelInfoByTokenCommand {
     private String contactToken;
     private Long organizationId;
+    private Integer namespaceId;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -31,5 +32,13 @@ public class GetPersonelInfoByTokenCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 }
