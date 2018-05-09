@@ -168,6 +168,8 @@ public interface EnterpriseCustomerProvider {
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 
+    void updateEnterpriseCustomerAdminRecord(String contacToken);
+
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
 
     List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long id);

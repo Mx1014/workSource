@@ -24,6 +24,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.openapi.techpark.AllFlag;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.varField.FieldDTO;
@@ -1986,6 +1987,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken).and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
                 .execute();
+    }
+
+    @Override
+    public void updateEnterpriseCustomerAdminRecord(String contacToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(OrganizationMemberTargetType.UNTRACK.getCode()))
+                .fetchInto(CustomerAdminRecord.class);
+        if (records != null && records.size() > 0) {
+            for (CustomerAdminRecord record : records) {
+                record.setContactType(OrganizationMemberTargetType.USER.getCode());
+                EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+                dao.update(record);
+            }
+        }
     }
 
     @Override
