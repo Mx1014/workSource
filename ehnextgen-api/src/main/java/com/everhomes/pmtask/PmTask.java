@@ -14,5 +14,6 @@ public class PmTask extends EhPmTasks {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	} 
+	}
+
 }

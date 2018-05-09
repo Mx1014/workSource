@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
-import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -20,7 +20,7 @@ public class SendNoticeAction implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendNoticeAction.class);
 
     private String cmd;
-    private Long userId;
+    private Long operatorUid;
     private String schema;
     private Integer namespaceId;
 
@@ -35,14 +35,14 @@ public class SendNoticeAction implements Runnable {
         //一键推送
         LOGGER.debug("Start scheduling a push to push...." + cmd);
 
-        User user = userProvider.findUserById(userId);
-        user.setNamespaceId(namespaceId);
-        UserContext.setCurrentUser(user);
+        User operator = userProvider.findUserById(operatorUid);
+        operator.setNamespaceId(namespaceId);
+        UserContext.setCurrentUser(operator);
         UserContext.current().setScheme(schema);
-        UserContext.setCurrentNamespaceId(user.getNamespaceId());
+        UserContext.setCurrentNamespaceId(operator.getNamespaceId());
 
-        PropCommunityBuildAddessCommand command = (PropCommunityBuildAddessCommand) StringHelper.fromJsonString(cmd, PropCommunityBuildAddessCommand.class);
-        propertyMgrService.pushMessage(command, user);
+        SendNoticeCommand command = (SendNoticeCommand) StringHelper.fromJsonString(cmd, SendNoticeCommand.class);
+        propertyMgrService.pushMessage(command, operator);
 
         LOGGER.debug("End scheduling a push to push....");
 
@@ -51,9 +51,9 @@ public class SendNoticeAction implements Runnable {
         UserContext.current().setScheme(null);
     }
 
-    public SendNoticeAction(String cmd, String userId, String schema, Integer namespaceId){
+    public SendNoticeAction(String cmd, String operatorUid, String schema, Integer namespaceId){
         this.cmd = cmd;
-        this.userId = Long.valueOf(userId);
+        this.operatorUid = Long.valueOf(operatorUid);
         this.schema = schema;
         this.namespaceId = namespaceId;
     }

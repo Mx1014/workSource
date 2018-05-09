@@ -53,6 +53,16 @@ public class ListBillsDTO {
     private String ownerId;
     private String ownerType;
     private String payStatus;
+    // introduce invoice num for bill display. by wentian 2018/4/16 on earth
+    private String invoiceNum;
+
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     public String getPayStatus() {
         return payStatus;

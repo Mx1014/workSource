@@ -181,4 +181,6 @@ public interface AssetService {
 	ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd);
 
     void reCalBill(ReCalBillCommand cmd);
+
+    void modifySettledBill(ModifySettledBillCommand cmd);
 }

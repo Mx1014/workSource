@@ -652,6 +652,20 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 //        if (null != actualLogs) {
 //            result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
 //        }
+        if(actualLogs!=null && actualLogs.size()>0){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Map<String, String> temp = new LinkedHashMap<>();
+            for (ParkingActualClearanceLogDTO actualLog : actualLogs) {
+                if (null != actualLog.getEntryTime()) {
+                    temp.put("进场时间", sdf.format(actualLog.getEntryTime()));
+                }
+                if (null != actualLog.getExitTime()) {
+                    temp.put("出场时间", sdf.format(actualLog.getExitTime()));
+                }
+            }
+            log.setLogJson(JSONArray.toJSONString(temp));
+            clearanceLogProvider.updateClearanceLog(log);
+        }
         return actualLogs;
     }
 

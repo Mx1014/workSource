@@ -64,6 +64,13 @@ public class LaunchAdServiceImpl implements LaunchAdService {
         return new LaunchAdDTO();
     }
 
+    /*private LaunchAdDTO toClientLaunchAdDTO(LaunchAd launchAd) {
+        LaunchAdDTO launchAdDTO = this.toLaunchAdDTO(launchAd);
+        // 分钟化秒
+        launchAdDTO.setDisplayInterval(launchAd.getDisplayInterval() != null ? launchAd.getDisplayInterval() * 60 : 0);
+        return launchAdDTO;
+    }*/
+
     @Override
     public LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
         LaunchAd launchAd = launchAdProvider.findById(cmd.getId());

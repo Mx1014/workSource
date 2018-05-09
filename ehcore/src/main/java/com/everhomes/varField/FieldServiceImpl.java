@@ -9,12 +9,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
@@ -51,6 +54,10 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
@@ -166,6 +173,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -283,11 +293,13 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        //管理员权限校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(result -> {
-                return result.getGroupDisplayName();
-            }).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
 
@@ -301,10 +313,7 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,@Deprecated boolean onlyLeaf, boolean filter) {
-        //管理员权限校验
-        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
-            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
-        }
+
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
@@ -377,8 +386,17 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
-
+        if (1 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        if (2 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+    }
+
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
 
     @Override
@@ -724,9 +742,10 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
-                    cmd0.setPageSize(Integer.MAX_VALUE-1);
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
-                    if(response.getDtos() != null && response.getDtos().size() > 0) {
+                    cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
+                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
                             EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
@@ -991,6 +1010,22 @@ public class FieldServiceImpl implements FieldService {
                 break;
         }
         return data;
+    }
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
     }
 
     private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName,String sheetName) {

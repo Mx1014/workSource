@@ -356,4 +356,9 @@ public interface PunchProvider {
 	List<PunchLog> listPunchLogs(Long ownerId, List<Long> userIds, Long startDay, Long endDay);
 
 	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Byte status);
+
+	List<PunchExceptionRequest> listAbonormalExceptionRequestByOwnerAndMonth(String ownerType, Long organizationId, List<String> months);
+
+	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId,
+			Date startDate, Date endDate);
 }
