@@ -250,6 +250,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getCustomerCategoryId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));
 
+        if(cmd.getAdminFlag() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("adminFlag", cmd.getAdminFlag()));
+
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
 
