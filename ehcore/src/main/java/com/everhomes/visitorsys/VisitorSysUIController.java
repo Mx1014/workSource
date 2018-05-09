@@ -196,11 +196,28 @@ public class VisitorSysUIController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("confirmVerificationCode")
-	@RestReturn(String.class)
+	@RestReturn(ListBookedVisitorsResponse.class)
 	public RestResponse sendSMSVerificationCode(ConfirmVerificationCodeCommand cmd) {
 		visitorSysService.confirmVerificationCode(cmd);
 
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/visitorsys/getBookedVisitorById</b>
+	 * <p>
+	 * 12.获取预约详情-原生客户端
+	 * </p>
+	 */
+	@RequestMapping("getBookedVisitorById")
+	@RestReturn(GetBookedVisitorByIdResponse.class)
+	public RestResponse getBookedVisitorById(GetBookedVisitorByIdCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorById(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

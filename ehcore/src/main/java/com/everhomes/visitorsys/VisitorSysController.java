@@ -160,7 +160,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteVisitorAppoint</b>
 	 * <p>
-	 * 8.1.删除预约-后台管理
+	 * 9.删除预约-后台管理
 	 * </p>
 	 */
 	@RequestMapping("deleteVisitorAppoint")
@@ -177,7 +177,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/confirmVisitor</b>
 	 * <p>
-	 * 9.访客到访确认接口-后台管理
+	 * 10.访客到访确认接口-后台管理
 	 * </p>
 	 */
 	@RequestMapping("confirmVisitor")
@@ -194,7 +194,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/getStatistics</b>
 	 * <p>
-	 * 10.统计接口-后台管理
+	 * 11.统计接口-后台管理
 	 * </p>
 	 */
 	@RequestMapping("getStatistics")
@@ -211,7 +211,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/addDevice</b>
 	 * <p>
-	 * 11.添加设备(ipad/打印机)接口-后台管理
+	 * 12.添加设备(ipad/打印机)接口-后台管理
 	 * </p>
 	 */
 	@RequestMapping("addDevice")
@@ -228,7 +228,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listDevices</b>
 	 * <p>
-	 * 12.获取设备(ipad/打印机)接口列表-后台管理
+	 * 13.获取设备(ipad/打印机)接口列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listDevices")
@@ -245,7 +245,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteDevice</b>
 	 * <p>
-	 * 13.删除设备(ipad/打印机)-后台管理
+	 * 14.删除设备(ipad/打印机)-后台管理
 	 * </p>
 	 */
 	@RequestMapping("deleteDevice")
@@ -262,7 +262,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/createOrUpdateOfficeLocation</b>
 	 * <p>
-	 * 14.添加/更新企业办公地点-后台管理
+	 * 15.添加/更新企业办公地点-后台管理
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateOfficeLocation")
@@ -279,7 +279,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteOfficeLocation</b>
 	 * <p>
-	 * 15.删除企业办公地点-后台管理
+	 * 16.删除企业办公地点-后台管理
 	 * </p>
 	 */
 	@RequestMapping("deleteOfficeLocation")
@@ -296,7 +296,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/getConfiguration</b>
 	 * <p>
-	 * 16.获取配置-后台管理
+	 * 17.获取配置-后台管理
 	 * </p>
 	 */
 	@RequestMapping("getConfiguration")
@@ -313,7 +313,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/updateConfiguration</b>
 	 * <p>
-	 * 17.更新配置-后台管理
+	 * 18.更新配置-后台管理
 	 * </p>
 	 */
 	@RequestMapping("updateConfiguration")
@@ -330,7 +330,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listBlackLists</b>
 	 * <p>
-	 * 18.获取黑名单列表-后台管理
+	 * 19.获取黑名单列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listBlackLists")
@@ -347,7 +347,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/deleteBlackList</b>
 	 * <p>
-	 * 19.删除黑名单-后台管理
+	 * 20.删除黑名单-后台管理
 	 * </p>
 	 */
 	@RequestMapping("deleteBlackList")
@@ -364,7 +364,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/createOrUpdateBlackList</b>
 	 * <p>
-	 * 20.添加/更新黑名单-后台管理
+	 * 21.添加/更新黑名单-后台管理
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateBlackList")
@@ -382,7 +382,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listDoorGuards</b>
 	 * <p>
-	 * 21.门禁列表-后台管理
+	 * 22.门禁列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("listDoorGuards")
@@ -399,7 +399,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/exportBookedVisitors</b>
 	 * <p>
-	 * 22.导出预约访客/访客管理列表-后台管理
+	 * 23.导出预约访客/访客管理列表-后台管理
 	 * </p>
 	 */
 	@RequestMapping("exportBookedVisitors")
@@ -416,7 +416,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/rejectVisitor</b>
 	 * <p>
-	 * 23.拒绝访客-后台管理
+	 * 24.拒绝访客-后台管理
 	 * </p>
 	 */
 	@RequestMapping("rejectVisitor")
@@ -433,7 +433,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/syncVisitor</b>
 	 * <p>
-	 * 24.同步访客/预约-后台管理
+	 * 25.同步访客/预约-后台管理
 	 * </p>
 	 */
 	@RequestMapping("syncVisitor")
@@ -556,15 +556,15 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /visitorsys/deleteVisitorForWeb</b>
+	 * <b>URL: /visitorsys/deleteVisitorAppointForWeb</b>
 	 * <p>
-	 * 7.删除访客-h5（客户端/微信端）
+	 * 7.删除访客预约-h5（客户端/微信端）
 	 * </p>
 	 */
-	@RequestMapping("deleteVisitorForWeb")
+	@RequestMapping("deleteVisitorAppointForWeb")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
-	public RestResponse deleteVisitorForWeb(GetBookedVisitorByIdCommand cmd) {
+	public RestResponse deleteVisitorAppointForWeb(GetBookedVisitorByIdCommand cmd) {
 		visitorSysService.deleteVisitor(cmd);
 
 		RestResponse response = new RestResponse();
