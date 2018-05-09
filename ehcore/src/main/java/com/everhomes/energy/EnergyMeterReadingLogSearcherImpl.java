@@ -122,17 +122,19 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("meterNumber", meter.getMeterNumber());
 
                 List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-                StringBuffer addressString = new StringBuffer();
-                StringBuffer buildingString = new StringBuffer();
+                List<String> addressList = new ArrayList<>();
+                List<String> buildingList = new ArrayList<>();
                 if(existAddress!=null && existAddress.size()>0){
                     existAddress.forEach((r)->{
-                        addressString.append(r.getAddressId().toString()).append("|");
-                        buildingString.append(r.getBuildingId().toString()).append("|");
+                        addressList.add(r.getAddressId().toString());
+                        buildingList.add(r.getBuildingId().toString());
                     });
-                }
-                if(existAddress != null && existAddress.size() > 0) {
-                    builder.field("buildingId", buildingString);
-                    builder.field("addressId", addressString);
+                    if (!buildingList.isEmpty()) {
+                        builder.field("buildingId", String.join("|", addressList));
+                    }
+                    if (!addressList.isEmpty()) {
+                        builder.field("addressId", String.join("|", buildingList));
+                    }
                 }
             }
 
