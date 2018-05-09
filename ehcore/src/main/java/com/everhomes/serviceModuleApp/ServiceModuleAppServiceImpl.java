@@ -272,6 +272,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Long id = organizationAppProvider.createOrganizationApp(orgapps);
 
 		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+		dto.setStatus(orgapps.getStatus());
 		dto.setOrgAppId(id);
 
 		return dto;
