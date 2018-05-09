@@ -440,9 +440,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //本来是根据企业名称和企业编号来进行模糊，也就是上面注释的那一段，那一段需要进行类型的转换，但是现在有变更了方案，只是根据企业名称来进行模糊所以就有了下面的
         //这块逻辑
         if (!StringUtils.isEmpty(keywords)) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%"));
-        }
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%");
 
+            try {
+                Long aLong = Long.valueOf(keywords);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+            }
+
+            query.addConditions(conditionkeyword);
+        }
 
         //添加查询条件为有效的，active表示的是有效的数据
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
