@@ -12,6 +12,10 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 -- 企业客户类型由必选更改成非必选 合并动态表单多个字段   by jiarui
 UPDATE eh_var_fields SET mandatory_flag = 0 WHERE name = 'categoryItemId' AND module_name = 'enterprise_customer';
 UPDATE eh_var_fields SET display_name = '联系电话' WHERE name = 'contactPhone' AND module_name = 'enterprise_customer';
+
+set @fieldId = IFNULL((SELECT id FROM eh_var_fields WHERE name = 'contactMobile' AND module_name = 'enterprise_customer' LIMIT 1),0);
+DELETE FROM eh_var_field_scopes  where field_id = @fieldId and  module_name = 'enterprise_customer';
+
 DELETE FROM eh_var_fields  WHERE name = 'contactMobile' AND module_name = 'enterprise_customer';
 
 -- 迁移合并之后的字段数据  联系人电话 座机电话  by jiarui
