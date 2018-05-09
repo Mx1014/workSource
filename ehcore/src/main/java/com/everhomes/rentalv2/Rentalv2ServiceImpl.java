@@ -2538,9 +2538,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						Map<String, String> map = new HashMap<>();
 						map.put("resourceName", order.getResourceName());
 						Long uid = order.getCreatorUid();
-						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid,order.getUserEnterpriseId());
-						map.put("requestorName",member.getContactName());
-						map.put("requestorPhone",member.getContactToken());
+						if (order.getUserEnterpriseId()!=null) {
+							OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, order.getUserEnterpriseId());
+							map.put("requestorName", member.getContactName());
+							map.put("requestorPhone", member.getContactToken());
+						}else {
+							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+							map.put("requestorPhone",userIdentifier.getIdentifierToken());
+							User user = this.userProvider.findUserById(order.getRentalUid());
+							map.put("requestorName", user.getNickName());
+						}
 
 						RentalResource resource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 						Long chargeUid = resource.getChargeUid();
@@ -2799,13 +2806,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (null!=bill.getUserEnterpriseId()){
 			Organization org = this.organizationProvider.findOrganizationById(bill.getUserEnterpriseId());
-			dto.setCompanyName(org.getName());
-			List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
-			if (addresses!=null && addresses.size()>0) {
-				dto.setBuildingName(addresses.get(0).getBuildingName());
-				Address add = this.addressProvider.findAddressById(addresses.get(0).getAddressId());
-				if (add!=null)
-					dto.setAddress(add.getAddress());
+			if (org!=null) {
+				dto.setCompanyName(org.getName());
+				List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
+				if (addresses != null && addresses.size() > 0) {
+					dto.setBuildingName(addresses.get(0).getBuildingName());
+					Address add = this.addressProvider.findAddressById(addresses.get(0).getAddressId());
+					if (add != null)
+						dto.setAddress(add.getAddress());
+				}
 			}
 		}
 
