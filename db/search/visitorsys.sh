@@ -64,6 +64,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                     "type": "long",
                     "index": "not_analyzed"
                 },
+                "bookingStatus" : {
+                    "type": "long",
+                    "index": "not_analyzed"
+                },
                 "visitorType" : {
                     "type": "long",
                     "index": "not_analyzed"

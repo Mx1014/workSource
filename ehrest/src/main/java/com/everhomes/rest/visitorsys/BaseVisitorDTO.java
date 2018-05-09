@@ -21,7 +21,7 @@ import java.sql.Timestamp;
  * <li>plannedVisitTime: (必填)计划到访时间</li>
  * <li>visitTime: (选填)到访时间/登记时间</li>
  * <li>visitStatus: (必填)访客状态列表，{@link VisitorsysVisitStatus}</li>
- * <li>pointStatus: (必填)预约状态列表，{@link VisitorsysVisitStatus}</li>
+ * <li>bookingStatus: (必填)预约状态列表，{@link VisitorsysVisitStatus}</li>
  * <li>visitorType: (必填)访客类型，{@link VisitorsysVisitorType}</li>
  * <li>enterpriseId: (选填)公司id，园区访客必填</li>
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
@@ -49,7 +49,7 @@ public class BaseVisitorDTO {
     private Timestamp visitTime;
 
     private Byte visitStatus;
-    private Byte pointStatus;
+    private Byte bookingStatus;
     private Byte visitorType;
 
     private Long enterpriseId;
@@ -170,12 +170,12 @@ public class BaseVisitorDTO {
         this.visitStatus = visitStatus;
     }
 
-    public Byte getPointStatus() {
-        return pointStatus;
+    public Byte getBookingStatus() {
+        return bookingStatus;
     }
 
-    public void setPointStatus(Byte pointStatus) {
-        this.pointStatus = pointStatus;
+    public void setBookingStatus(Byte bookingStatus) {
+        this.bookingStatus = bookingStatus;
     }
 
     public Byte getVisitorType() {

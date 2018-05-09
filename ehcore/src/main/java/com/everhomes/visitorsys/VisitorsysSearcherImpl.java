@@ -45,7 +45,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 
     private static final String[] syncFields = {"namespaceId","ownerType","ownerId","id",
             "visitorName","followUpNumbers","visitorPhone","visitReasonId","visitReason",
-            "inviterId","inviterName","plannedVisitTime","visitTime","visitStatus",
+            "inviterId","inviterName","plannedVisitTime","visitTime","visitStatus","bookingStatus",
             "visitorType","enterpriseId","enterpriseName","officeLocationId","officeLocationName"};
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
@@ -137,17 +137,6 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId",params.getNamespaceId());
         fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerType",params.getOwnerType()));
         fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerId",params.getOwnerId()));
-        if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
-            FilterBuilder orfb = null;
-            for (Byte aByte : params.getVisitStatusList()) {
-                if(orfb!=null) {
-                    orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("visitStatus", aByte));
-                }else {
-                    orfb = FilterBuilders.termFilter("visitStatus", aByte);
-                }
-            }
-            fb = FilterBuilders.andFilter(fb,orfb);
-        }
         if(params.getVisitorType()!=null){
             fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitorType",params.getVisitorType()));
         }
@@ -172,6 +161,17 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if (params.getEndPlannedVisitTime() != null) {
                 rf.lt(params.getEndPlannedVisitTime());
             }
+            if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
+                FilterBuilder orfb = null;
+                for (Byte aByte : params.getVisitStatusList()) {
+                    if(orfb!=null) {
+                        orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("bookingStatus", aByte));
+                    }else {
+                        orfb = FilterBuilders.termFilter("bookingStatus", aByte);
+                    }
+                }
+                fb = FilterBuilders.andFilter(fb,orfb);
+            }
             sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.DESC);
         }else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
             RangeFilterBuilder rf = new RangeFilterBuilder("visitTime");
@@ -180,6 +180,17 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }
             if (params.getEndVisitTime() != null) {
                 rf.lt(params.getEndVisitTime());
+            }
+            if(params.getVisitStatusList() != null && params.getVisitStatusList().size()>0){
+                FilterBuilder orfb = null;
+                for (Byte aByte : params.getVisitStatusList()) {
+                    if(orfb!=null) {
+                        orfb = FilterBuilders.orFilter(orfb, FilterBuilders.termFilter("visitStatus", aByte));
+                    }else {
+                        orfb = FilterBuilders.termFilter("visitStatus", aByte);
+                    }
+                }
+                fb = FilterBuilders.andFilter(fb,orfb);
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
         }
@@ -260,6 +271,10 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 Object visitStatus = source.get("visitStatus");
                 if(visitStatus!=null){
                     dto.setVisitStatus(Byte.valueOf(visitStatus.toString()));
+                }
+                Object bookingStatus = source.get("bookingStatus");
+                if(bookingStatus!=null){
+                    dto.setBookingStatus(Byte.valueOf(bookingStatus.toString()));
                 }
                 Object visitorType = source.get("visitorType");
                 if(visitorType!=null){
