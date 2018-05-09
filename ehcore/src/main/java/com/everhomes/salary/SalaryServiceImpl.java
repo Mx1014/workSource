@@ -1966,7 +1966,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     public String processZLLink2PayslipDetail(Long payslipDetailId, String salaryPeriod) {
-        return "zl://salary/payslip-detail?payslipDetailId={" + payslipDetailId + "}&salaryPeriod={" + salaryPeriod + "}";
+        return "zl://salary/payslip-detail?payslipDetailId=" + payslipDetailId + "&salaryPeriod=" + salaryPeriod ;
     }
 
     @Override
