@@ -90,6 +90,7 @@ import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomerAdminsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -2027,9 +2028,10 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     @Override
     public List<Organization> listNoSyncOrganizations() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID).fetchInto(Long.class);
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(Tables.EH_ORGANIZATIONS,Tables.EH_ENTERPRISE_CUSTOMERS);
+        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .fetchInto(Long.class);
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
         return query.fetchInto(Organization.class);
     }
