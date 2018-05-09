@@ -2462,21 +2462,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Scheduled(cron = "30 29,59 * * * ? ")
 	public void autoCompleteBills(){
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
-			Long currTime = DateHelper.currentGMTTime().getTime();
-			for(RentalOrder order : orders ){
-				if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
-					if (currTime + 60*1000L >= order.getEndTime().getTime()){
-						VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
-						ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
-						if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
-							CompleteRentalOrderCommand cmd = new CompleteRentalOrderCommand();
-							cmd.setRentalBillId(order.getId());
-							this.completeRentalOrder(cmd);
+			coordinationProvider.getNamedLock("Rental_schedule_flag1" ) //集群运行时只有一台执行定时任务
+					.tryEnter(() -> {
+						LOGGER.info("autoCompleteBills start:");
+						List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
+						Long currTime = DateHelper.currentGMTTime().getTime();
+						for (RentalOrder order : orders) {
+							if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+								LOGGER.info("the bill id is:{} startTime:{} endTime:{}",order.getId(),order.getStartTime(),order.getEndTime());
+								if (currTime + 60 * 1000L >= order.getEndTime().getTime()) {
+									VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+									ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
+									if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
+										CompleteRentalOrderCommand cmd = new CompleteRentalOrderCommand();
+										cmd.setRentalBillId(order.getId());
+										this.completeRentalOrder(cmd);
+									}
+								}
+							}
 						}
-					}
-				}
-			}
+					});
 		}
 	}
 
@@ -2488,7 +2493,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void rentalSchedule(){
 		Boolean [] flag = {false};
 		Long currTime = DateHelper.currentGMTTime().getTime();
-		coordinationProvider.getNamedLock("Rental_schedule_flag" ) //集群运行时只有一台执行定时任务
+		coordinationProvider.getNamedLock("Rental_schedule_flag2" ) //集群运行时只有一台执行定时任务
 				.tryEnter(() -> {
 					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
 					Long timeFlag = currTime / 600000;

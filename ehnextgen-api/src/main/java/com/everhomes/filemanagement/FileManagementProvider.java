@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface FileManagementProvider {
 
-    void createFileCatalog(FileCatalog catalog);
+    Long createFileCatalog(FileCatalog catalog);
 
     void updateFileCatalog(FileCatalog catalog);
 
@@ -21,27 +21,23 @@ public interface FileManagementProvider {
 
     List<FileCatalog> queryFileCatalogs(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long detailId);
+//    List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long detailId);
 
     void createFileCatalogScope(FileCatalogScope scope);
 
-    void deleteFileCatalogScopeByCatalogId(Integer namespaceId, Long catalogId);
-
-    void deleteFileCatalogScopeNotInSourceIds(Integer namespaceId, Long catalogId, List<Long> sourceIds);
-
-    void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
+    void deleteOddFileCatalogScope(Integer namespaceId, Long catalogId, String sourceType, List<Long> sourceIds);
 
     void updateFileCatalogScope(FileCatalogScope scope);
 
-    void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
+    FileCatalogScope findFileCatalogScope(Long catalogId, Long sourceId, String sourceType);
 
-    FileCatalogScope findFileCatalogScopeBySourceId(Long catalogId, Long sourceId);
-
-    List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
+    List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, String keywords);
 
     void createFileContent(FileContent content);
 
     void updateFileContentStatusByIds(List<Long> ids, Byte status);
+
+    void deleteFileContentByCatalogId(Long catalogId);
 
     void updateFileContent(FileContent content);
 
@@ -50,8 +46,6 @@ public interface FileManagementProvider {
     FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
     List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
-
-//    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, String path, String keywords);
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 }

@@ -165,7 +165,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 
 		final Long userId = UserContext.current().getUser().getId();
@@ -179,7 +179,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		// 检查用户的项目权限是否合法
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -218,7 +218,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 
 		// 获取要修改的news
@@ -227,10 +227,10 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
 		}
-
+		
 		// 进行权限判断
 		final Long userId = UserContext.current().getUser().getId();
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());
 
 		// 设置新的值
 		news.setTitle(cmd.getTitle());
@@ -398,13 +398,14 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
-		// 权限核实
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		// 权限核实 
+		// 这里就不用projectId了，冗余了
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
 
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
@@ -1845,6 +1846,10 @@ public class NewsServiceImpl implements NewsService {
 		}
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		News news = findNewsById(userId, newsId);
+		if (null == news) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+		}
 
 		// 权限限制
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());

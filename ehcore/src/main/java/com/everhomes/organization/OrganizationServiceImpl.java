@@ -11830,6 +11830,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     jobPositionIds.add(jobPosition.getId());
                 }
             }
+            jobPositionIds.add(jobPositionId);//这个接口拿部门岗位人员有问题 增加这行  by jiarui
         }
 
         //organizationIds改为jobPositionIds by xiongying20170124
