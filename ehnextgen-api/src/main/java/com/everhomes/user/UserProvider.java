@@ -186,4 +186,12 @@ public interface UserProvider {
      */
     UserIdentifier getUserByToken(String contactToken,Integer namespaceId);
 
+    /**
+     * 根据手机号和域空间来查询eh_user_identifiers表中的数据
+     * @param identifierToken
+     * @param namespaceId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(String identifierToken,Integer namespaceId);
+
 }

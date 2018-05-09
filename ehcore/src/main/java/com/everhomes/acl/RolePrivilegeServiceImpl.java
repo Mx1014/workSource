@@ -1754,7 +1754,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd) {
 		GetPersonelInfoByTokenResponse response = new GetPersonelInfoByTokenResponse();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getContactToken());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getContactToken(),cmd.getNamespaceId());
 
 		//add by lei yuan
 //		boolean flag = checkAdministrators(cmd.getOrganizationId());
