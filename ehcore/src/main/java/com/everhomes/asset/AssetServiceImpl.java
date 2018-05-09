@@ -70,6 +70,7 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1463,7 +1464,36 @@ public class AssetServiceImpl implements AssetService {
     public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE,cmd.getOrganizationId());
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
-        response.setNoticeDays(assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId()));
+        List<NoticeConfig> configsInRet = new ArrayList<>();
+        List<PaymentNoticeConfig> configs = assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+        Gson gson = new Gson();
+        for(PaymentNoticeConfig config : configs){
+            NoticeConfig cir = new NoticeConfig();
+            cir.setAppNoticeTemplateId(config.getNoticeAppId());
+            cir.setDayType(config.getNoticeDayType());
+            if(config.getNoticeDayType() != null){
+                if(config.getNoticeDayType().byteValue() == (byte)1){
+                    cir.setDayRespectToDueDay(String.valueOf(config.getNoticeDayBefore()));
+                }else if(config.getNoticeDayType().byteValue() == (byte)0){
+                    cir.setDayRespectToDueDay(String.valueOf(config.getNoticeDayAfter()));
+                }
+            }
+            cir.setMsgNoticeTemplateId(config.getNoticeMsgId());
+            cir.setNoticeObjs(gson.fromJson(config.getNoticeObjs(), new TypeToken<List<List<NoticeObj>>>(){}.getType()));
+            configsInRet.add(cir);
+        }
+        response.setConfigs(configsInRet);
+        //todo mock app msg data first
+        List<MsgTemplate> msgTemplates = new ArrayList<>();
+        List<AppTemplate> appTemplates = new ArrayList<>();
+        msgTemplates.add(new MsgTemplate(20400110l, "尊敬的租户xx先生/小姐：您好，您至今未缴：{2018-5}月服务费共计：xx元。请及时缴纳，谢谢您的配合!"));
+        msgTemplates.add(new MsgTemplate(20400120l, "尊敬的租户xx先生/小姐：您好，请尽快缴纳{2018-5}月服务费：xx元。如您明日仍未缴纳，将视为逾期，我司将停止相关物业服务，并计收相应滞纳金，引起一切后果由租户自行承担。谢谢！"));
+        msgTemplates.add(new MsgTemplate(20400119l, "尊敬的租户xx先生/小姐：您好，您已拖欠{2018-5}月服务费：xx元，我司至今未收到您的欠款。物业管理公司将按《物业管理条例》的规定，在欠费后次日对贵租户暂停各项服务，出现任何后果，责任自负。我公司并保留通过法律途径追缴的权利。"));
+        appTemplates.add(new AppTemplate(20400666l, "尊敬的租户xx先生/小姐：您好，您至今未缴：{2018-5}月服务费共计：xx元。请及时缴纳，谢谢您的配合!"));
+        appTemplates.add(new AppTemplate(20400555l, "尊敬的租户xx先生/小姐：您好，请尽快缴纳{2018-5}月服务费：xx元。如您明日仍未缴纳，将视为逾期，我司将停止相关物业服务，并计收相应滞纳金，引起一切后果由租户自行承担。谢谢！"));
+        appTemplates.add(new AppTemplate(204001314l, "尊敬的租户xx先生/小姐：您好，您已拖欠{2018-5}月服务费：xx元，我司至今未收到您的欠款。物业管理公司将按《物业管理条例》的规定，在欠费后次日对贵租户暂停各项服务，出现任何后果，责任自负。我公司并保留通过法律途径追缴的权利。\n"));
+        response.setAppTemplates(appTemplates);
+        response.setMsgTemplates(msgTemplates);
         return response;
     }
 
@@ -2861,7 +2891,7 @@ public class AssetServiceImpl implements AssetService {
      * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
-    //todo +更改为有催缴新设置的才进行催缴，+催缴设置自带了模板的id
+    //todo +更改为有催缴新设置的才进行催缴，+催缴设置自带了模板的id, -欠费的每天不必催缴
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -2871,33 +2901,34 @@ public class AssetServiceImpl implements AssetService {
                 List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
 //            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
-                Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
+                Map<Long, List<PaymentNoticeConfig>> noticeConfigs = new HashMap<>();
                 for (int i = 0; i < configs.size(); i++) {
                     PaymentNoticeConfig config = configs.get(i);
                     if (noticeConfigs.containsKey(config.getOwnerId())) {
-                        noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
+                        noticeConfigs.get(config.getOwnerId()).add(config);
                     } else {
-                        List<Integer> days = new ArrayList<>();
-                        days.add(config.getNoticeDayBefore());
-                        noticeConfigs.put(config.getOwnerId(), days);
+                        List<PaymentNoticeConfig> configList = new ArrayList<>();
+                        configList.add(config);
+                        noticeConfigs.put(config.getOwnerId(), configList);
                     }
                 }
                 Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
                 // noticeConfig map中存有communityid和notice days
-                for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
+                for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
                     List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
                     for (int i = 0; i < bills.size(); i++) {
                         PaymentBills bill = bills.get(i);
                         if (!needNoticeBills.containsKey(bill.getId())) {
                             //已经在提醒名单的bill不需要再提醒
-                            List<Integer> days = map.getValue();
+                            List<PaymentNoticeConfig> days = map.getValue();
+                            // todo continue
                             for (int j = 0; j < days.size(); j++) {
-                                Integer day = days.get(j);
+                                PaymentNoticeConfig day = days.get(j);
                                 String dueDayDeadline = bill.getDueDayDeadline();
                                 try {
                                     Calendar deadline = newClearedCalendar();
                                     deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
-                                    deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
+//                                    deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
                                     if (today.compareTo(deadline) != -1) {
                                         needNoticeBills.put(bill.getId(), bill);
                                     }

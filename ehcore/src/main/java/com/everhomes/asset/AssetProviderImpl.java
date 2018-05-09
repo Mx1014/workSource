@@ -3584,14 +3584,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
+    public List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
         DSLContext context = getReadOnlyContext();
-        return context.select(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE)
-                .from(Tables.EH_PAYMENT_NOTICE_CONFIG)
+        return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
                 .where(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_TYPE.eq(ownerType))
-                .fetch(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE);
+                .fetchInto(PaymentNoticeConfig.class);
     }
 
     @Override
