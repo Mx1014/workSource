@@ -62,6 +62,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
@@ -129,6 +130,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 /**
@@ -1108,6 +1111,8 @@ public class FieldServiceImpl implements FieldService {
                     List<String> admin = new ArrayList<>();
                     contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
                     return String.join(",", admin);
+                }else {
+                    return "";
                 }
             }
         }
@@ -1117,6 +1122,8 @@ public class FieldServiceImpl implements FieldService {
                 List<String> entryInfo = new ArrayList<>();
                 entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
                 return String.join(",", entryInfo);
+            }else {
+                return "";
             }
         }
         try {
@@ -1200,11 +1207,15 @@ public class FieldServiceImpl implements FieldService {
                 invoke = String.valueOf(detail.getContactName());
             }else{
                 if(uid > 0) {
-                    UserInfo userInfo = userService.getUserInfo(uid);
-                    if(userInfo != null){
-                        invoke = String.valueOf(userInfo.getNickName());
-                    } else {
-                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    try {
+                        UserInfo userInfo = userService.getUserInfo(uid);
+                        if(userInfo != null){
+                            invoke = String.valueOf(userInfo.getNickName());
+                        } else {
+                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                        }
+                    }catch (Exception e){
+                        throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
                     }
                 } else {
                     invoke = "";
