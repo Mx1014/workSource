@@ -1,9 +1,6 @@
 package com.everhomes.rest.customer;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * Created by ying.xiong on 2018/2/5.
@@ -45,8 +42,7 @@ public class ExportEnterpriseCustomerCommand {
 
     private Long orgId;
 
-    @ItemType(Long.class)
-    private List<Long> trackingUids;
+    private String trackingUids;
 
     private Byte adminFlag;
 
@@ -206,14 +202,6 @@ public class ExportEnterpriseCustomerCommand {
         this.propertyArea = propertyArea;
     }
 
-    public List<Long> getTrackingUids() {
-        return trackingUids;
-    }
-
-    public void setTrackingUids(List<Long> trackingUids) {
-        this.trackingUids = trackingUids;
-    }
-
     public Byte getAdminFlag() {
         return adminFlag;
     }
@@ -260,6 +248,14 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setTrackingName(String trackingName) {
         this.trackingName = trackingName;
+    }
+
+    public String getTrackingUids() {
+        return trackingUids;
+    }
+
+    public void setTrackingUids(String trackingUids) {
+        this.trackingUids = trackingUids;
     }
 
     @Override

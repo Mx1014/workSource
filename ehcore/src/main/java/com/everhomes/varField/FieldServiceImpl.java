@@ -33,6 +33,7 @@ import com.everhomes.rest.customer.CustomerTrackingDTO;
 import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
 import com.everhomes.rest.customer.CustomerTrademarkDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ListCustomerAccountsCommand;
 import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
@@ -122,6 +123,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -740,10 +742,16 @@ public class FieldServiceImpl implements FieldService {
             case "员工情况":
                 if(customerType == null) {
                     SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    ExportEnterpriseCustomerCommand exportcmd = ConvertHelper.convert(params, ExportEnterpriseCustomerCommand.class);
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
                     cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    //request by get method
+                    if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
+                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                    }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
