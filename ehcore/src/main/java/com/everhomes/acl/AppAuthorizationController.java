@@ -120,10 +120,10 @@ public class AppAuthorizationController {
     }
 
     /**
-     * <b>URL: /app/authorizaiton/listAppAuthorizationsByOwnerId</b>
+     * <b>URL: /app/authorizaiton/listAppAuthorizationsByOrganizatioinId</b>
      * <p>属于其他公司授权到本公司的记录，不会包括自己公司给自己公司授权的记录</p>
      */
-    @RequestMapping("listAppAuthorizationsByOwnerId")
+    @RequestMapping("listAppAuthorizationsByOrganizatioinId")
     @RestReturn(value=ListAppAuthorizationsByOrganizatioinIdResponse.class)
     public RestResponse listAppAuthorizationsByOrganizatioinId(@Valid ListAppAuthorizationsByOrganizatioinIdCommand cmd) {
         ListAppAuthorizationsByOwnerIdResponse  res =  serviceModuleAppAuthorizationService.listAppAuthorizationsByOrganizatioinId(cmd);
