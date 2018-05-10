@@ -90,4 +90,11 @@ public interface AddressProvider {
      * @param addressIds
      */
     void betchDisclaimAddress(List<Long> addressIds);
+
+    /**
+     * 根据id的集合来批量的查询eh_addresses表中信息
+     * @param ids
+     * @return
+     */
+    List<Address> findAddressByIds(List<Long> ids,Integer namespaceId);
 }

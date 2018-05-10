@@ -742,4 +742,11 @@ public interface OrganizationProvider {
 	 * @param organizationId
 	 */
 	void deleteOrganizationCommunityRequestByOrgId(Long organizationId);
+
+	/**
+	 * 根据communityId来查询eh_communityAndBuilding_relationes表中的address_id字段
+	 * @param communityId
+	 * @return
+	 */
+	List<Long> getCommunityAndBuildingRelationesAddressIdsByCommunityId(Long communityId);
 }

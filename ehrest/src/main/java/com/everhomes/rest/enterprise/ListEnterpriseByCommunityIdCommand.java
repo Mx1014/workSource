@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 public class ListEnterpriseByCommunityIdCommand {
     @NotNull
     Long communityId;
+    private Integer namespaceId;
     
     Integer status;
     
@@ -70,6 +71,14 @@ public class ListEnterpriseByCommunityIdCommand {
 
     public void setEnterpriseName(String enterpriseName) {
         this.enterpriseName = enterpriseName;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

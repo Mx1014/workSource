@@ -6348,6 +6348,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     /**
+     * 根据communityId来查询eh_communityAndBuilding_relationes表中的address_id字段
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<Long> getCommunityAndBuildingRelationesAddressIdsByCommunityId(Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> addressIdList = context.select(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.ADDRESS_ID)
+                .from(Tables.EH_COMMUNITYANDBUILDING_RELATIONES)
+                .where(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId))
+                .fetchInto(Long.class);
+        return addressIdList;
+    }
+
+    /**
      * 根据手机号、域空间Id、组织id来查询表eh_organization_members中的id值
      * @param contactToken
      * @param namespaceId
