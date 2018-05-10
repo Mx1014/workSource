@@ -22,7 +22,6 @@ import com.everhomes.rest.acl.ServiceModuleEntryConstans;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
