@@ -1273,8 +1273,8 @@ public class AssetController extends ControllerBase {
      * <p>启动自动催缴的定时任务</p>
      */
     @RequestMapping("noticeTrigger")
-    public RestResponse noticeTrigger(){
-        assetService.noticeTrigger();
+    public RestResponse noticeTrigger(Integer namespaceId){
+        assetService.noticeTrigger(namespaceId);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");

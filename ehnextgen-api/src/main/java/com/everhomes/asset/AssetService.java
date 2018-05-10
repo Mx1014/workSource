@@ -156,8 +156,6 @@ public interface AssetService {
 
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
-	void activeAutoBillNotice();
-
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
 	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
@@ -184,5 +182,5 @@ public interface AssetService {
 
     void modifySettledBill(ModifySettledBillCommand cmd);
 
-    void noticeTrigger();
+    void noticeTrigger(Integer namespaceId);
 }

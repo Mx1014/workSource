@@ -2914,7 +2914,7 @@ public class AssetServiceImpl implements AssetService {
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
     @Scheduled(cron = "0 0 12 * * ?")
-    public void autoBillNotice() {
+    public void autoBillNotice(Integer namespaceId) {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
                 SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
@@ -2935,7 +2935,7 @@ public class AssetServiceImpl implements AssetService {
                 Map<Long, PaymentNoticeConfig> noticeConfigMap = new HashMap<>();
                 // noticeConfig map中存有communityid和notice days
                 for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
-                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(namespaceId,map.getKey());
                     for (int i = 0; i < bills.size(); i++) {
                         PaymentBills bill = bills.get(i);
                         if (!needNoticeBills.containsKey(bill.getId())) {
@@ -3037,11 +3037,6 @@ public class AssetServiceImpl implements AssetService {
 
     private List<Long> getAllMembersFromDepartment(Long noticeObjId) {
         return organizationProvider.findActiveUidsByTargetTypeAndOrgId("USER", noticeObjId);
-    }
-
-    @Override
-    public void activeAutoBillNotice() {
-        autoBillNotice();
     }
 
     @Override
@@ -3283,8 +3278,8 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void noticeTrigger() {
-        autoBillNotice();
+    public void noticeTrigger(Integer namespaceId) {
+        autoBillNotice(namespaceId);
     }
 
 

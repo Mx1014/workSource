@@ -245,7 +245,7 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
-    List<PaymentBills> getAllBillsByCommunity(Long key);
+    List<PaymentBills> getAllBillsByCommunity(Integer namespaceId, Long key);
 
 
     List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId);
