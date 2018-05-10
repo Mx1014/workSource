@@ -3303,7 +3303,7 @@ public class AssetServiceImpl implements AssetService {
                 Map<Long, PaymentNoticeConfig> noticeConfigMap = new HashMap<>();
                 // noticeConfig map中存有communityid和notice days
                 for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
-                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(null,map.getKey());
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(namespaceId,map.getKey());
                     for (int i = 0; i < bills.size(); i++) {
                         PaymentBills bill = bills.get(i);
                         if (!needNoticeBills.containsKey(bill.getId())) {
