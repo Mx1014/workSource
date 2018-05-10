@@ -231,18 +231,18 @@ public class PmsyServiceImpl implements PmsyService{
 			newMonthlyBill.setRequests(newRequests);
 			requests.add(newMonthlyBill);
 		}
-		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
 		if(pmsyCommunity == null){
 			LOGGER.error("pmsyCommunity relation is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"pmsyCommunity relation is not exist.");
-		}
-		response.setContact(pmsyCommunity.getContact());
+		}*/
+		//response.setContact(pmsyCommunity.getContact());
 		response.setCustomerId(cmd.getCustomerId());
 		response.setMonthCount(calculateMonthSet.size());
 		response.setPayerId(cmd.getPayerId());
 		response.setResourceId(cmd.getResourceId());
-		response.setBillTip(pmsyCommunity.getBillTip());
+		//response.setBillTip(pmsyCommunity.getBillTip());
 		response.setTotalAmount(totalAmount);
 		response.setProjectId(cmd.getProjectId());
 		//按时间排序
