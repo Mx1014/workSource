@@ -496,6 +496,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return null;
     }
 
+    @Override
+    public GetBookedVisitorByIdResponse getUIBookedVisitorById(GetUIBookedVisitorByIdCommand cmd) {
+        return null;
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
