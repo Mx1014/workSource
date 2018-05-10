@@ -10,7 +10,7 @@ import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
