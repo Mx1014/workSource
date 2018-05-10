@@ -23,5 +23,7 @@ UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '加班
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '出差申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRveVpHTm1ZekpqWlRRME5EZzRNamc1WkRBeE16RXdNVGcxT0RNeU5qbGhNUQ' WHERE `approval_attribute`='BUSINESS_TRIP';
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '外出申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvelpHTm1NemxtTm1SbVlURmhNVFl5Tm1VNE1UUTRZbU16Wm1WallqRTFOZw' WHERE `approval_attribute`='GO_OUT';
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '异常申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvNE9XSXpNbVEwWTJJMFkyVXdPVGxqTkRCbFpHWTNPRE5pTlRSak0yUmtNZw' WHERE `approval_attribute`='ABNORMAL_PUNCH';
-
 -- 审批3.0 end.
+
+-- 人事2.7同步数据，需要先执行schema后执行此sql start
+UPDATE `eh_archives_logs` SET `status` = 1 WHERE `operation_time` > NOW();

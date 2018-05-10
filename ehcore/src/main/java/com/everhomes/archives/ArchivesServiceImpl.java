@@ -1730,7 +1730,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
         dbProvider.execute((TransactionStatus status) -> {
             //  1.若为当天则立即执行
-            if (cmd.getEffectiveTime().toString().equals(ArchivesUtil.currentDate().toString()))
+            if (cmd.getEffectiveTime().equals(ArchivesUtil.currentDate().toString()))
                 transferArchivesEmployees(cmd);
                 //  2.若为其它时间则添加调整配置
             else {

@@ -27,17 +27,19 @@ ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `group_id` BIGINT NOT 
 -- 审批3.0 end.
 
 -- 人事2.7 start.
+ALTER TABLE `eh_archives_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0-cancel,1-pending,2-finish' AFTER `operation_remark` ;
+
 -- DROP TABLE IF EXISTS `eh_archives_operations`;
-CREATE TABLE `eh_archives_operations` (
-	`id` BIGINT NOT NULL,
-	`namespace_id` INT NOT NULL DEFAULT '0',
-	`organization_id` BIGINT NOT NULL DEFAULT '0',
-  `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
-  `operate_type` TINYINT NOT NULL COMMENT 'the type of operation',
-  `operate_date` DATE COMMENT 'the date of executing the operation',
-  `additional_info` TEXT COMMENT 'the addition information for the operation',
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT 'pending, execution',
-  `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
-  `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- CREATE TABLE `eh_archives_operations` (
+-- 	`id` BIGINT NOT NULL,
+-- 	`namespace_id` INT NOT NULL DEFAULT '0',
+-- 	`organization_id` BIGINT NOT NULL DEFAULT '0',
+--   `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
+--   `operate_type` TINYINT NOT NULL COMMENT 'the type of operation',
+--   `operate_date` DATE COMMENT 'the date of executing the operation',
+--   `additional_info` TEXT COMMENT 'the addition information for the operation',
+--   `status` TINYINT NOT NULL DEFAULT '0' COMMENT 'pending, execution',
+--   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+--   `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
+-- 	PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

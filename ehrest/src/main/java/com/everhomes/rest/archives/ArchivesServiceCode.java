@@ -24,4 +24,5 @@ public interface ArchivesServiceCode {
     String EMPLOYEE_LIST = "1004";   //  人员档案列表
     String EMPLOYEE_IMPORT_REMARK = "1005";  //  人员档案导入备注
 
+    int ERROR_DUPLICATE_OPERATION = 10001; //   相同的操作
 }
