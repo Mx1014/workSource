@@ -138,4 +138,23 @@ public class NoticeInfo implements Serializable{
     public List<NoticeConfig> getNoticeObjs() {
         return noticeObjs;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NoticeInfo)) return false;
+
+        NoticeInfo that = (NoticeInfo) o;
+
+        if (getTargetType() != null ? !getTargetType().equals(that.getTargetType()) : that.getTargetType() != null)
+            return false;
+        return getTargetId() != null ? getTargetId().equals(that.getTargetId()) : that.getTargetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getTargetType() != null ? getTargetType().hashCode() : 0;
+        result = 31 * result + (getTargetId() != null ? getTargetId().hashCode() : 0);
+        return result;
+    }
 }

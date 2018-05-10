@@ -495,4 +495,6 @@ public interface OrganizationProvider {
 	List<Organization> listPMOrganizations(Integer namespaceId);
 
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
+
+    List<Long> findActiveUidsByTargetTypeAndOrgId(String user, Long noticeObjId);
 }

@@ -5714,6 +5714,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<Long> findActiveUidsByTargetTypeAndOrgId(String targetType, Long orgId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .fetch(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID);
+    }
+
+    @Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}

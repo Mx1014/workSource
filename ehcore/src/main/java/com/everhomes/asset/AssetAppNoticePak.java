@@ -16,6 +16,15 @@ public class AssetAppNoticePak {
     private long uid;
     private Integer templateId;
     private Map<String, String> varibles;
+    private Boolean useTemplate;
+
+    public Boolean getUseTemplate() {
+        return useTemplate;
+    }
+
+    public void setUseTemplate(Boolean useTemplate) {
+        this.useTemplate = useTemplate;
+    }
 
     public long getUid() {
         return uid;

@@ -10,6 +10,3 @@ ALTER TABLE `eh_payment_notice_config` ADD COLUMN `create_uid` BIGINT DEFAULT NU
 
 
 
-
-
-

@@ -143,8 +143,6 @@ public interface SmsTemplateCode {
 
     int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
 
-    //物业缴费自动催款模板
-    int PAYMENT_NOTICE_TEMPLATE_ONE = 67;
-    int PAYMENT_NOTICE_TEMPLATE_TWO= 68;
-    int PAYMENT_NOTICE_TEMPLATE_THREE = 69;
+    //物业缴费自动催款模板SCOPE
+    static final String ASSET_MSG_SCOPE = "asset.sms";
 }

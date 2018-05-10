@@ -22,15 +22,13 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.*;
-import com.everhomes.portal.PortalService;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
@@ -38,9 +36,9 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -48,7 +46,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -58,7 +59,6 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -74,7 +74,6 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
@@ -114,9 +113,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private OrganizationSearcher organizationSearcher;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -173,25 +169,15 @@ public class AssetServiceImpl implements AssetService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
-    private PaymentService paymentService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
     private CustomerService customerService;
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
 
     @Autowired
-    private ContractProvider contractProvider;
+    private LocaleTemplateProvider localeTemplateProvider;
 
-    @Autowired
-    private ImportFileService importFileService;
 
-    @Autowired
-    private PortalService portalService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -404,10 +390,20 @@ public class AssetServiceImpl implements AssetService {
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
-                if(noticeInfo.isUseTemplate() != null && noticeInfo.isUseTemplate()){
-                    templateId = noticeInfo.getMsgTemplateId().intValue();
+                boolean smsGo = true;
+                try{
+                    //从自动催缴来的任务，如果没有模板id，就不催缴。其实这步没有必要，我在调用发送时就已经排除没有模板id的了，没有必要的’健壮性‘
+                    if(noticeInfo.isUseTemplate() != null && noticeInfo.isUseTemplate()){
+                        if(noticeInfo.getMsgTemplateId() == null){
+                            smsGo = false;
+                        }
+                        templateId = noticeInfo.getMsgTemplateId().intValue();
+                    }
+                }catch (Exception e){
+                    smsGo = false;
+                    LOGGER.error("sms notice failed, noticeinfo = {}",noticeInfo, e);
                 }
-                smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
+                if(smsGo) smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
             }
         } catch(Exception e){
             LOGGER.error("YZX MAIL SEND FAILED");
@@ -454,16 +450,27 @@ public class AssetServiceImpl implements AssetService {
                 messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
                 messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                 int msgId = UserNotificationTemplateCode.USER_PAYMENT_NOTICE;
-                //自动催缴设置了催缴模板的话，就覆盖默认的
-                if(pak.getTemplateId() != null){
-                    msgId = pak.getTemplateId().intValue();
+                String msgScope = UserNotificationTemplateCode.SCOPE;
+                boolean appGo = true;
+                try{
+                    if(pak.getUseTemplate() != null && pak.getUseTemplate() == true){
+                        //自动催缴设置了催缴模板的话，就覆盖默认的
+                        if(pak.getTemplateId() != null){
+                            msgScope = UserNotificationTemplateCode.ASSET_APP_NOTICE_SCOPE;
+                            msgId = pak.getTemplateId().intValue();
+                        }else{
+                            //从自动催缴来的任务，如果没有模板id，就不催缴。其实这步没有必要，我在调用发送时就已经排除没有模板id的了，反正已经写了，没有必要的’健壮性‘
+                            appGo = false;
+                        }
+                    }
+                }catch (Exception e){
+                    appGo = false;
+                    LOGGER.error("app notice failed, pak={}",pak,e);
                 }
-                String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(
-                        null, UserNotificationTemplateCode.SCOPE, msgId, "zh_CN"
-                        , pak.getVaribles(), "");
+                String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(null, msgScope, msgId, "zh_CN", pak.getVaribles(), "");
                 messageDto.setBody(notifyTextForApplicant);
                 messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-                if (StringUtils.isBlank(notifyTextForApplicant)) {
+                if (StringUtils.isBlank(notifyTextForApplicant) && appGo) {
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING
                             , MessageChannelType.USER.getCode(),
                             uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
@@ -482,6 +489,7 @@ public class AssetServiceImpl implements AssetService {
         pak.addToVariables("dateStr", noticeInfo.getDateStr());
         pak.addToVariables("amount", noticeInfo.getAmountOwed().toPlainString());
         pak.addToVariables("appName", noticeInfo.getAppName());
+        pak.setUseTemplate(noticeInfo.isUseTemplate());
         return pak;
     }
 
@@ -1482,9 +1490,9 @@ public class AssetServiceImpl implements AssetService {
             cir.setAppNoticeTemplateId(config.getNoticeAppId());
             cir.setDayType(config.getNoticeDayType());
             if(config.getNoticeDayType() != null){
-                if(config.getNoticeDayType().byteValue() == (byte)1){
+                if(config.getNoticeDayType().byteValue() == NoticeDayType.BEFORE.getCode()){
                     cir.setDayRespectToDueDay(String.valueOf(config.getNoticeDayBefore()));
-                }else if(config.getNoticeDayType().byteValue() == (byte)2){
+                }else if(config.getNoticeDayType().byteValue() == NoticeDayType.AFTER.getCode()){
                     cir.setDayRespectToDueDay(String.valueOf(config.getNoticeDayAfter()));
                 }
             }
@@ -1493,17 +1501,21 @@ public class AssetServiceImpl implements AssetService {
             configsInRet.add(cir);
         }
         response.setConfigs(configsInRet);
-        //todo mock app msg data first，现在用查的方式，msg，一个模板放debug，一个放release；app的话，就这三个
-        List<MsgTemplate> msgTemplates = new ArrayList<>();
-        List<AppTemplate> appTemplates = new ArrayList<>();
-        msgTemplates.add(new MsgTemplate(20400110l, "尊敬的租户xx先生/小姐：您好，您至今未缴：{2018-5}月服务费共计：xx元。请及时缴纳，谢谢您的配合!"));
-        msgTemplates.add(new MsgTemplate(20400120l, "尊敬的租户xx先生/小姐：您好，请尽快缴纳{2018-5}月服务费：xx元。如您明日仍未缴纳，将视为逾期，我司将停止相关物业服务，并计收相应滞纳金，引起一切后果由租户自行承担。谢谢！"));
-        msgTemplates.add(new MsgTemplate(20400119l, "尊敬的租户xx先生/小姐：您好，您已拖欠{2018-5}月服务费：xx元，我司至今未收到您的欠款。物业管理公司将按《物业管理条例》的规定，在欠费后次日对贵租户暂停各项服务，出现任何后果，责任自负。我公司并保留通过法律途径追缴的权利。"));
-        appTemplates.add(new AppTemplate(20400666l, "尊敬的租户xx先生/小姐：您好，您至今未缴：{2018-5}月服务费共计：xx元。请及时缴纳，谢谢您的配合!"));
-        appTemplates.add(new AppTemplate(20400555l, "尊敬的租户xx先生/小姐：您好，请尽快缴纳{2018-5}月服务费：xx元。如您明日仍未缴纳，将视为逾期，我司将停止相关物业服务，并计收相应滞纳金，引起一切后果由租户自行承担。谢谢！"));
-        appTemplates.add(new AppTemplate(204001314l, "尊敬的租户xx先生/小姐：您好，您已拖欠{2018-5}月服务费：xx元，我司至今未收到您的欠款。物业管理公司将按《物业管理条例》的规定，在欠费后次日对贵租户暂停各项服务，出现任何后果，责任自负。我公司并保留通过法律途径追缴的权利。\n"));
-        response.setAppTemplates(appTemplates);
-        response.setMsgTemplates(msgTemplates);
+        // 通知模板动态从eh_local_templates获得 by wentian @2018/5/10
+        List<MsgTemplate> retMsgTemplates = new ArrayList<>();
+        List<AppTemplate> retAppTemplates = new ArrayList<>();
+        List<LocaleTemplate> appTemplates = localeTemplateProvider.findLocaleTemplateByCode(UserNotificationTemplateCode.ASSET_APP_NOTICE_SCOPE);
+        List<LocaleTemplate> msgTemplates = localeTemplateProvider.findLocaleTemplateByCode(SmsTemplateCode.ASSET_MSG_SCOPE);
+        for(LocaleTemplate m : appTemplates){
+            AppTemplate appTemplate = new AppTemplate(m.getCode().longValue(), m.getText());
+            retAppTemplates.add(appTemplate);
+        }
+        for(LocaleTemplate m : msgTemplates){
+            MsgTemplate msgTemplate = new MsgTemplate(m.getCode().longValue(), m.getText());
+            retMsgTemplates.add(msgTemplate);
+        }
+        response.setAppTemplates(retAppTemplates);
+        response.setMsgTemplates(retMsgTemplates);
         return response;
     }
 
@@ -2898,10 +2910,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
+     *
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
-    //todo +更改为有催缴新设置的才进行催缴，+催缴设置自带了模板的id, -欠费的每天不必催缴
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -2909,8 +2920,6 @@ public class AssetServiceImpl implements AssetService {
                 SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
                 Calendar today = newClearedCalendar();
                 List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
-//            List<PaymentNoticeConfig> configs = new ArrayList<>();
-
                 Map<Long, List<PaymentNoticeConfig>> noticeConfigs = new HashMap<>();
                 for (int i = 0; i < configs.size(); i++) {
                     PaymentNoticeConfig config = configs.get(i);
@@ -2930,7 +2939,6 @@ public class AssetServiceImpl implements AssetService {
                     for (int i = 0; i < bills.size(); i++) {
                         PaymentBills bill = bills.get(i);
                         if (!needNoticeBills.containsKey(bill.getId())) {
-                            //已经在提醒名单的bill不需要再提醒
                             List<PaymentNoticeConfig> days = map.getValue();
                             for (int j = 0; j < days.size(); j++) {
                                 PaymentNoticeConfig day = days.get(j);
@@ -2939,12 +2947,13 @@ public class AssetServiceImpl implements AssetService {
                                     //比较此config与账单的时间，看是否应该催缴
                                     Calendar deadline = newClearedCalendar();
                                     deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
-                                    if(day.getNoticeDayType() != null && day.getNoticeDayType().byteValue() == (byte)2){
+                                    if(day.getNoticeDayType() != null && day.getNoticeDayType().byteValue() == NoticeDayType.AFTER.getCode()){
                                         deadline.add(Calendar.DAY_OF_MONTH, day.getNoticeDayAfter());
                                     }else{
-                                        deadline.add(Calendar.DAY_OF_MONTH, day.getNoticeDayBefore());
+                                        deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
                                     }
-                                    if (today.compareTo(deadline) != -1) {
+                                    //符合催缴的日期设定就催缴
+                                    if (today.compareTo(deadline) == 1) {
                                         needNoticeBills.put(bill.getId(), bill);
                                         noticeConfigMap.put(bill.getId(), day);
                                     }
@@ -2956,12 +2965,11 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }
                 List<Long> billIds = new ArrayList<>();
-                List<NoticeInfo> noticeInfoList = new ArrayList<>();
+                Set<NoticeInfo> noticeInfoList = new HashSet<>();
                 for (Map.Entry<Long, PaymentBills> entry : needNoticeBills.entrySet()) {
                     PaymentBills b = entry.getValue();
                     billIds.add(b.getId());
                     NoticeInfo info = new NoticeInfo();
-
                     info.setDateStr(b.getDateStr());
                     info.setTargetName(b.getTargetName());
                     info.setAmountOwed(b.getAmountOwed());
@@ -2974,46 +2982,63 @@ public class AssetServiceImpl implements AssetService {
                     PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
                     info.setMsgTemplateId(specificConfig.getNoticeMsgId());
                     info.setAppTemplateId(specificConfig.getNoticeAppId());
+                    if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
+                        continue;
+                    }
                     List<NoticeConfig> noticeConfigsList = (List<NoticeConfig>)new Gson()
                             .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeConfig>>() {
                             }.getType());
                     info.setNoticeObjs(noticeConfigsList);
+                    //根据催缴账单催缴
+                    info.setPhoneNums(b.getNoticetel());
+                    info.setTargetType(b.getTargetType());
+                    info.setTargetId(b.getTargetId());
+                    noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
-                    if(noticeConfigsList != null && noticeConfigsList.size() > 0){
-                        info.setTargetType(AssetPaymentStrings.EH_USER);
-                        for(int i = 0; i < noticeConfigsList.size(); i++){
+                    List<Long> userIds = new ArrayList<>();
+                    if(noticeConfigsList != null && noticeConfigsList.size() > 0) {
+                        for (int i = 0; i < noticeConfigsList.size(); i++) {
                             NoticeConfig config = noticeConfigsList.get(i);
                             List<NoticeObj> noticeObjs = config.getNoticeObjs();
-                            for(NoticeObj obj : noticeObjs){
+                            for (NoticeObj obj : noticeObjs) {
                                 Long noticeObjId = obj.getNoticeObjId();
-                                String noticeObjName = obj.getNoticeObjName();
                                 String noticeObjType = obj.getNoticeObjType();
-                                //todo 当组织机构情况下，获得所有的个体
+                                FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                                switch (sourceTypeA) {
+                                    // 具体部门
+                                    case SOURCE_DEPARTMENT:
+                                        userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                        break;
+                                    case SOURCE_USER:
+                                        userIds.add(noticeObjId);
+                                        break;
+                                }
                             }
-//                            try {
-//                                NoticeInfo newInfo = CopyUtils.deepCopy(info);
-//
-//                                newInfo.setTargetId();
-//                                newInfo.setTargetType();
-//                            } catch (Exception e) {
-//                                LOGGER.error("failed to have a new notice info, new info is ={}",info,e);
-//                            }
                         }
-                    }else{
-                        //根据催缴账单催缴
-                        info.setPhoneNums(b.getNoticetel());
-                        info.setTargetType(b.getTargetType());
-                        info.setTargetId(b.getTargetId());
-                        noticeInfoList.add(info);
+                    }
+                    //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
+                    for(Long uid : userIds){
+                        try {
+                            NoticeInfo newInfo = CopyUtils.deepCopy(info);
+                            newInfo.setTargetId(uid);
+                            newInfo.setTargetType(AssetPaymentStrings.EH_USER);
+                            noticeInfoList.add(newInfo);
+                        } catch (Exception e) {
+                            LOGGER.error("failed to have a new notice info, new info is ={}",info,e);
+                        }
                     }
                     //一个一个发，因为每个账单的变量注入值不一样
-                    NoticeWithTextAndMessage(billIds, noticeInfoList);
-
+                    NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
                 }
                 LOGGER.info("done");
             });
         }
     }
+
+    private List<Long> getAllMembersFromDepartment(Long noticeObjId) {
+        return organizationProvider.findActiveUidsByTargetTypeAndOrgId("USER", noticeObjId);
+    }
+
     @Override
     public void activeAutoBillNotice() {
         autoBillNotice();
