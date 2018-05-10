@@ -48,12 +48,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
-
-
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
-
-
 
 
 import org.apache.commons.collections.map.HashedMap;
@@ -74,11 +70,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 
-
-
 import javax.servlet.http.HttpServletResponse;
-
-
 
 
 import java.io.*;
@@ -1966,7 +1958,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     public String processZLLink2PayslipDetail(Long payslipDetailId, String salaryPeriod) {
-        return "zl://salary/payslip-detail?payslipDetailId=" + payslipDetailId + "&salaryPeriod=" + salaryPeriod ;
+        return "zl://salary/payslip-detail?payslipDetailId=" + payslipDetailId + "&salaryPeriod=" + salaryPeriod;
     }
 
     @Override
@@ -1977,7 +1969,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         List<MonthPayslipDTO> monthPayslip = new ArrayList<>();
         SortedMap<String, Integer> payslipMap = processYearMonthMap(cmd.getPayslipYear());
-        for(SalaryPayslip r : results){
+        for (SalaryPayslip r : results) {
             if (payslipMap.get(r.getSalaryPeriod()) == null) {
                 payslipMap.put(r.getSalaryPeriod(), salaryPayslipDetailProvider.countSend(r.getId()));
             } else {
@@ -1986,8 +1978,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
         Iterator i = payslipMap.entrySet().iterator();
         // Display elements
-        while(i.hasNext()) {
-        	Map.Entry<String, Integer> entry = (Map.Entry)i.next();
+        while (i.hasNext()) {
+            Map.Entry<String, Integer> entry = (Map.Entry) i.next();
             MonthPayslipDTO e = new MonthPayslipDTO();
             e.setSalaryPeriod(entry.getKey());
             e.setSendCount(entry.getValue());
@@ -1997,64 +1989,66 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private SortedMap<String, Integer> processYearMonthMap(String payslipYear) {
-    	SortedMap<String, Integer> result = new TreeMap<>();
-    	try{
-    		Calendar calendar = Calendar.getInstance();
-    		calendar.setTime(monthSF.get().parse(payslipYear+"12"));
-    		for(int i =1;i<=12;i++){
-    			result.put(monthSF.get().format(calendar.getTime()), 0);
-    			calendar.add(Calendar.MONTH, -1);
-    		}
-    	}catch(Exception e){
-    		LOGGER.error("processYearMonthMap 出错了",e);
-    	}
-		return result;
-	}
+        SortedMap<String, Integer> result = new TreeMap<>();
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(monthSF.get().parse(payslipYear + "12"));
+            for (int i = 1; i <= 12; i++) {
+                result.put(monthSF.get().format(calendar.getTime()), 0);
+                calendar.add(Calendar.MONTH, -1);
+            }
+        } catch (Exception e) {
+            LOGGER.error("processYearMonthMap 出错了", e);
+        }
+        return result;
+    }
 
-	@Override
+    @Override
     public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd) {
         ArrayList resultList = punchService.processImportExcel2ArrayList(files);
         List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList, cmd.getOwnerId());
         return new ImportPayslipResponse(cmd.getSalaryPeriod(), cmd.getPayslipName(), details);
     }
-	public static boolean isContain(String s1, String s2) {
-		if(s1==null)
-			return false;
-        return s1.contains(s2);  
+
+    public static boolean isContain(String s1, String s2) {
+        if (s1 == null)
+            return false;
+        return s1.contains(s2);
     }
+
     private List<PayslipDetailDTO> convertArrayList2PayslipDetailDTOList(ArrayList resultList, Long ownerId) {
         // TODO Auto-generated method stub
         List<PayslipDetailDTO> payslipDetailDTOs = new ArrayList<PayslipDetailDTO>();
-       
+
         String nameCellNumber = null;
         String contactCellNumber = null;
         Map<String, String> cellMap = new HashMap<>();
         RowResult title = null;
-        while(true){
-        	title = (RowResult) resultList.remove(0);
-	        for (Entry<String, String> entry : title.getCells().entrySet()) {
-	            String key = entry.getKey();
-	            String value = entry.getValue();
-	            if (null != value) {
-	                value = value.trim();
-	                if (isContain(value,"姓名")) {
-	                    nameCellNumber = key;
-	                } else if (isContain(value,"手机号码")) {
-	                	contactCellNumber = key;
-	                } else if (!isContain(value,"序号")){
-	                    cellMap.put(key, value);
-	                }
-	            }
-	        }
-	        if(StringUtils.isNotBlank(nameCellNumber)&&StringUtils.isNotBlank(contactCellNumber)){
-	        	break;
-	        }
-	        //没找到姓名和手机号说明不是标题, 清空map 
-	        cellMap.clear();
-	        if(resultList.size()==0){
-	        	throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_EXCEL_TITILE,
-                        "标题错误,找不到姓名手机号"); 
-	        }
+        while (true) {
+            title = (RowResult) resultList.remove(0);
+            for (Entry<String, String> entry : title.getCells().entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (null != value) {
+                    value = value.trim();
+                    if (isContain(value, "姓名")) {
+                        nameCellNumber = key;
+                    } else if (isContain(value, "手机号码")) {
+                        contactCellNumber = key;
+                    } else if (!isContain(value, "序号")) {
+                        cellMap.put(key, value);
+                    }
+                }
+            }
+            if (StringUtils.isNotBlank(nameCellNumber) && StringUtils.isNotBlank(contactCellNumber)) {
+                break;
+            }
+            //没找到姓名和手机号说明不是标题, 清空map
+            cellMap.clear();
+            if (resultList.size() == 0) {
+                throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_EXCEL_TITILE,
+                        "标题错误,找不到姓名手机号");
+            }
         }
 
         for (int rowIndex = 0; rowIndex < resultList.size(); rowIndex++) {
@@ -2084,7 +2078,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private List<SalaryPeriodEmployeeEntityDTO> processPayslipContent(RowResult r, Map<String, String> cellMap) {
-        List<SalaryPeriodEmployeeEntityDTO>  result = new ArrayList<>();
+        List<SalaryPeriodEmployeeEntityDTO> result = new ArrayList<>();
         for (Entry<String, String> entry : cellMap.entrySet()) {
             //key 是列号,cellMap取这列的结果是表头,r取这一列的结果是这一行的值
             SalaryPeriodEmployeeEntityDTO dto = new SalaryPeriodEmployeeEntityDTO();
@@ -2209,12 +2203,15 @@ public class SalaryServiceImpl implements SalaryService {
         dto.setPayslipDetailId(r.getId());
         List<SalaryPeriodEmployeeEntityDTO> content = JSON.parseArray(r.getPayslipContent(), SalaryPeriodEmployeeEntityDTO.class);
         dto.setCreateTime(r.getCreateTime().getTime());
-
+        OrganizationMemberDetails userDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(r.getUserDetailId());
+        if (null != userDetail) {
+            dto.setName(userDetail.getContactName());
+        }
         OrganizationMember member = findMemberByOwnerAndUser(r.getOrganizationId(), r.getCreatorUid());
         if (null != member) {
-        	dto.setCreatorName(member.getContactName());
-        	dto.setCreatorDetailId(member.getDetailId());
-        } 
+            dto.setCreatorName(member.getContactName());
+            dto.setCreatorDetailId(member.getDetailId());
+        }
         dto.setPayslipContent(content);
 //        LOGGER.debug("dto:" + dto);
         return dto;
@@ -2312,7 +2309,7 @@ public class SalaryServiceImpl implements SalaryService {
     public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd) {
 
         SalaryPayslipDetail result = salaryPayslipDetailProvider.findSalaryPayslipDetailById(cmd.getPayslipDetailId());
-        if (null == result||PayslipDetailStatus.REVOKED == PayslipDetailStatus.fromCode(result.getStatus())) {
+        if (null == result || PayslipDetailStatus.REVOKED == PayslipDetailStatus.fromCode(result.getStatus())) {
             return null;
         }
         if (NormalFlag.NO == NormalFlag.fromCode(result.getViewedFlag())) {
@@ -2321,15 +2318,15 @@ public class SalaryServiceImpl implements SalaryService {
         }
         if (result.getUserId().equals(UserContext.currentUserId())) {
             PayslipDetailDTO dto = convertPayslipDetailDTO(result);
-            for (int i = 0;i< dto.getPayslipContent().size();i++) {
+            for (int i = 0; i < dto.getPayslipContent().size(); i++) {
                 SalaryPeriodEmployeeEntityDTO entityDTO = dto.getPayslipContent().get(i);
                 //当字段属于不可见的,或者值为空/0 不显示给客户端
                 if (invisibleKeys.contains(entityDTO.getGroupEntityName().trim()) ||
                         "0".equals(entityDTO.getSalaryValue()) ||
                         StringUtils.isBlank(entityDTO.getSalaryValue())) {
-                   //app不用显示的
+                    //app不用显示的
                     dto.getPayslipContent().remove(entityDTO);
-                }else{
+                } else {
                     //不处理
                 }
             }
@@ -2348,13 +2345,14 @@ public class SalaryServiceImpl implements SalaryService {
         spd.setStatus(PayslipDetailStatus.CONFIRMED.getCode());
         salaryPayslipDetailProvider.updateSalaryPayslipDetail(spd);
     }
+
     /**
      * 自动确认.每15分钟把发放时间为7天前的都自动确认
-     * */
+     */
     @Scheduled(cron = "1 0/15 * * * ?")
     public void scheduledSendPushToUsers() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            salaryPayslipDetailProvider.confirmSalaryPayslipDetailBeforeDate(new Timestamp(DateHelper.currentGMTTime().getTime()-AUTO_CONFIRM));
+            salaryPayslipDetailProvider.confirmSalaryPayslipDetailBeforeDate(new Timestamp(DateHelper.currentGMTTime().getTime() - AUTO_CONFIRM));
         }
     }
 
