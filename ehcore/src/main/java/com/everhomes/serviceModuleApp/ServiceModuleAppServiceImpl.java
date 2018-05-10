@@ -98,6 +98,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Autowired
 	private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 
+	@Autowired
+	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -263,13 +266,14 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapps = new OrganizationApp();
 		orgapps.setAppOriginId(cmd.getOriginId());
 		orgapps.setOrgId(cmd.getOrganizationId());
-		//TODO
-		//orgapps.setAppType();
 		orgapps.setStatus(OrganizationAppStatus.ENABLE.getCode());
 		orgapps.setCreatorUid(UserContext.currentUserId());
 		orgapps.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
 		Long id = organizationAppProvider.createOrganizationApp(orgapps);
+
+		//给自己添加自己园区的所有授权
+		serviceModuleAppAuthorizationService.addAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getOriginId());
 
 		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
 		dto.setStatus(orgapps.getStatus());
@@ -293,6 +297,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapp.setOperatorUid(UserContext.currentUserId());
 		orgapp.setOperatorTime(new Timestamp(System.currentTimeMillis()));
 		organizationAppProvider.updateOrganizationApp(orgapp);
+
+		//删除该公司的所有授权
+		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), orgapp.getOrgId(), orgapp.getAppOriginId());
 
 	}
 

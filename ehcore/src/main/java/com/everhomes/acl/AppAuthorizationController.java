@@ -68,6 +68,7 @@ public class AppAuthorizationController {
     @RequestMapping("distributeServiceModuleAppAuthorization")
     @RestReturn(value = String.class)
     public RestResponse distributeServiceModuleAppAuthorization(@Valid DistributeServiceModuleAppAuthorizationCommand cmd) {
+        //TODO 需要对接权限细化
         serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -97,6 +98,36 @@ public class AppAuthorizationController {
     public RestResponse updateAppProfile(UpdateAppProfileCommand cmd) {
         serviceModuleAppAuthorizationService.updateAppProfile(cmd);
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /app/authorizaiton/listAppAuthorizationsByOwnerId</b>
+     * <p>获取属于该公司的应用的授权记录</p>
+     */
+    @RequestMapping("listAppAuthorizationsByOwnerId")
+    @RestReturn(value=ListAppAuthorizationsByOwnerIdResponse.class)
+    public RestResponse listAppAuthorizationsByOwnerId(@Valid ListAppAuthorizationsByOwnerIdCommand cmd) {
+        ListAppAuthorizationsByOwnerIdResponse  res =  serviceModuleAppAuthorizationService.listAppAuthorizationsByOwnerId(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /app/authorizaiton/listAppAuthorizationsByOwnerId</b>
+     * <p>属于其他公司授权到本公司的记录，不会包括自己公司给自己公司授权的记录</p>
+     */
+    @RequestMapping("listAppAuthorizationsByOwnerId")
+    @RestReturn(value=ListAppAuthorizationsByOrganizatioinIdResponse.class)
+    public RestResponse listAppAuthorizationsByOrganizatioinId(@Valid ListAppAuthorizationsByOrganizatioinIdCommand cmd) {
+        ListAppAuthorizationsByOwnerIdResponse  res =  serviceModuleAppAuthorizationService.listAppAuthorizationsByOrganizatioinId(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

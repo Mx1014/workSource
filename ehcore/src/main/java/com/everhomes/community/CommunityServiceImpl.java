@@ -4339,16 +4339,19 @@ public class CommunityServiceImpl implements CommunityService {
 					"Community is not found.");
 		}
 
+		//查询原属记录
+		OrganizationCommunity orgcom = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
 
-		OrganizationCommunity orgcom = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getFromOrgId(), cmd.getCommunityId());
-		if(orgcom == null){
-			LOGGER.error("organization_Community is not found.communityId=" + cmd.getCommunityId() + " orgid="  + cmd.getFromOrgId());
-			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_ORGANIZATION_COMMUNITY_NOT_EXIST,
-					"organization_Community is not found.");
+		if(orgcom != null){
+			orgcom.setOrganizationId(cmd.getToOrgId());
+			organizationProvider.updateOrganizationCommunity(orgcom);
+		}else {
+
+			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+			organizationCommunity.setOrganizationId(cmd.getToOrgId());
+			organizationCommunity.setCommunityId(cmd.getCommunityId());
+			organizationProvider.createOrganizationCommunity(organizationCommunity);
 		}
-
-		orgcom.setOrganizationId(cmd.getToOrgId());
-		organizationProvider.updateOrganizationCommunity(orgcom);
 
         //查询原有园区授权记录
         List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelations(community.getNamespaceId(), null, cmd.getCommunityId());

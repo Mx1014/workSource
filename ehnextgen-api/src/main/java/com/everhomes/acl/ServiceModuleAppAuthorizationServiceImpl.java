@@ -2,13 +2,18 @@ package com.everhomes.acl;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.acl.UpdateAppProfileCommand;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -35,6 +40,12 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     private RolePrivilegeService rolePrivilegeService;
     @Autowired
     private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
@@ -231,5 +242,117 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     }
 
+    @Override
+    public ListAppAuthorizationsByOwnerIdResponse listAppAuthorizationsByOwnerId(ListAppAuthorizationsByOwnerIdCommand cmd) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(cmd.getOwnerId()));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                if(cmd.getOrganizationId() != null){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+                }
 
+                return query;
+            }
+        });
+        List<ServiceModuleAppAuthorizationDTO> dtos = new ArrayList<ServiceModuleAppAuthorizationDTO>();
+        if(authorizations != null){
+            for (ServiceModuleAppAuthorization authorization: authorizations){
+                ServiceModuleAppAuthorizationDTO dto = toDto(authorization);
+                dtos.add(dto);
+            }
+        }
+
+        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public ListAppAuthorizationsByOwnerIdResponse listAppAuthorizationsByOrganizatioinId(ListAppAuthorizationsByOrganizatioinIdCommand cmd) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.ne(cmd.getOrganizationId()));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+
+                return query;
+            }
+        });
+        List<ServiceModuleAppAuthorizationDTO> dtos = new ArrayList<ServiceModuleAppAuthorizationDTO>();
+        if(authorizations != null){
+            for (ServiceModuleAppAuthorization authorization: authorizations){
+                ServiceModuleAppAuthorizationDTO dto = toDto(authorization);
+                dtos.add(dto);
+            }
+        }
+
+        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
+    private ServiceModuleAppAuthorizationDTO toDto(ServiceModuleAppAuthorization appAuthorization){
+        ServiceModuleAppAuthorizationDTO dto = ConvertHelper.convert(appAuthorization, ServiceModuleAppAuthorizationDTO.class);
+        Community community = communityProvider.findCommunityById(appAuthorization.getProjectId());
+        if(community != null){
+            dto.setProjectName(community.getName());
+        }
+        Organization ownerOrganization = organizationProvider.findOrganizationById(appAuthorization.getOwnerId());
+        if (ownerOrganization != null){
+            dto.setOwnerName(ownerOrganization.getName());
+        }
+        Organization toOrganization = organizationProvider.findOrganizationById(appAuthorization.getOrganizationId());
+        if(toOrganization != null){
+            dto.setOrganizationName(toOrganization.getName());
+        }
+        ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appAuthorization.getAppId());
+        if(serviceModuleApp != null){
+            dto.setAppName(serviceModuleApp.getName());
+        }
+
+        return dto;
+
+    }
+
+
+    @Override
+    public void addAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId) {
+        ListingLocator locator = new CrossShardListingLocator();
+        List<Community> communities = communityProvider.listCommunities(namespaceId, null, ownerId, null, null, null, locator, 10000);
+        List<Long> communityIds = new ArrayList<>();
+        if(communities != null){
+            communities.stream().map(r -> communityIds.add(r.getId()));
+        }
+
+        DistributeServiceModuleAppAuthorizationCommand cmd = new DistributeServiceModuleAppAuthorizationCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setOwnerId(ownerId);
+        cmd.setAppId(appId);
+        cmd.setToOrgId(ownerId);
+        cmd.setProjectIds(communityIds);
+        distributeServiceModuleAppAuthorization(cmd);
+    }
+
+    @Override
+    public void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
+                return query;
+            }
+        });
+
+        if(authorizations != null){
+            for (ServiceModuleAppAuthorization authorization: authorizations){
+                serviceModuleAppAuthorizationProvider.deleteServiceModuleAppAuthorization(authorization);
+            }
+        }
+
+    }
 }
