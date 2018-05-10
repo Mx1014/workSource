@@ -1016,18 +1016,46 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogs(Long userId,
-                                              Long companyId, String startDay, String endDay) {
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    public List<PunchLog> listPunchLogs(Long userId,
+                                              Long companyId, String startDay, String endDay) { 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
-//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
-//	 
-        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
-//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.USER_ID.isNotNull();
+        if(null != companyId){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(companyId));
+        }
+        if(null != userId){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.USER_ID.equal(userId));
+        } 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+                });
 
+        List<PunchLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchLog.class);
+        }).collect(Collectors.toList());
+        return result;
+    }
+    @Override
+    public List<PunchDayLog> listPunchDayLogs(Long userId,
+                                              Long companyId, String startDay, String endDay) { 
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS); 
+        Condition condition = Tables.EH_PUNCH_DAY_LOGS.USER_ID.isNotNull();
+        if(null != companyId){
+        	condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+        }
+        if(null != userId){
+        	condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+        } 
         if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
             Date startDate = Date.valueOf(startDay);
             Date endDate = Date.valueOf(endDay);
