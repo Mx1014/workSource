@@ -48,11 +48,11 @@ public class MonthPayslipDetailDTO implements Comparable {
         try {
             MonthPayslipDetailDTO dto = (MonthPayslipDetailDTO) o;
             if (Integer.valueOf(this.getSalaryPeriod()) < Integer.valueOf(dto.getSalaryPeriod())) {
-                return -1;
-            } else if (Integer.valueOf(this.getSalaryPeriod()) > Integer.valueOf(dto.getSalaryPeriod())) {
                 return 1;
+            } else if (Integer.valueOf(this.getSalaryPeriod()) > Integer.valueOf(dto.getSalaryPeriod())) {
+                return -1;
             } else {
-                return this.createTime < dto.getCreateTime() ? -1 : 1;
+                return this.createTime < dto.getCreateTime() ? 1 : -1;
             }
         } catch (Exception e) {
             //pass
