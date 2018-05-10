@@ -394,11 +394,6 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setOrderToken(tempFee.getOrderId());
 		dto.setRemainingTime(tempFee.getTimeOut());
 		
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (flag) {
-			dto.setPrice(new BigDecimal(0.01));
-		}
-		
 		return dto;
 
 	}    
