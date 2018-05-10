@@ -26,6 +26,7 @@ import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -1793,7 +1794,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 
     @Override
-    public List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, ListingLocator locator, int count) {
+    public List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, Byte ownerFlag, ListingLocator locator, int count) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES).getQuery();
@@ -1817,6 +1818,13 @@ public class CommunityProviderImpl implements CommunityProvider {
         if(orgId != null){
             query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.JOIN, Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+        }
+
+        //查询无归属的园区
+        if(ownerFlag != null && ownerFlag.byteValue() == 0){
+            SelectQuery<EhOrganizationCommunitiesRecord> notExistsquery = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+            notExistsquery.addConditions(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+            query.addConditions(DSL.notExists(notExistsquery));
         }
 
         query.addLimit(count);

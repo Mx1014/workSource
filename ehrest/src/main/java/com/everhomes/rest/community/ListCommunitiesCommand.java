@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityType: 参考{@link com.everhomes.rest.community.CommunityType}</li>
  *     <li>status: 参考{@link com.everhomes.rest.address.CommunityAdminStatus}</li>
+ *     <li>organizationOwnerFlag: 是否归属某个公司的，无归属的传0，其他情况时候不传</li>
  * </ul>
  */
 public class ListCommunitiesCommand {
@@ -22,7 +23,6 @@ public class ListCommunitiesCommand {
 	private Integer pageSize;
 
 	private String keyword;
-	@NotNull
 	private Long orgId;
 
 	@NotNull
@@ -30,6 +30,8 @@ public class ListCommunitiesCommand {
 
 	private Byte communityType;
 	private Byte status;
+
+	private Byte organizationOwnerFlag;
 
 
 	public Long getPageAnchor() {
@@ -86,6 +88,14 @@ public class ListCommunitiesCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Byte getOrganizationOwnerFlag() {
+		return organizationOwnerFlag;
+	}
+
+	public void setOrganizationOwnerFlag(Byte organizationOwnerFlag) {
+		this.organizationOwnerFlag = organizationOwnerFlag;
 	}
 
 	@Override

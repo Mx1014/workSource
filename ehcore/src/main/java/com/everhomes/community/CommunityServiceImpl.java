@@ -4248,7 +4248,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<Community> list = this.communityProvider.listCommunities(cmd.getNamespaceId(),cmd.getCommunityType(),cmd.getOrgId(),cmd.getKeyword(),cmd.getStatus(),locator, pageSize+1);
+		List<Community> list = this.communityProvider.listCommunities(cmd.getNamespaceId(),cmd.getCommunityType(),cmd.getOrgId(),cmd.getKeyword(),cmd.getStatus(), cmd.getOrganizationOwnerFlag(), locator, pageSize+1);
 
 		ListCommunitiesResponse response = new ListCommunitiesResponse();
 		if(list != null && list.size() > pageSize){

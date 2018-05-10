@@ -130,7 +130,7 @@ public interface CommunityProvider {
     Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
 	List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
 
-    List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, ListingLocator locator, int count);
+    List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, Byte ownerFlag, ListingLocator locator, int count);
 
     //在给予的communityIds的范围内根据参数中的经纬度进行排序
     List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
