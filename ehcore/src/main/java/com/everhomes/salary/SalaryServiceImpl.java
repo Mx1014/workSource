@@ -2320,7 +2320,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
         if (result.getUserId().equals(UserContext.currentUserId())) {
             PayslipDetailDTO dto = convertPayslipDetailDTO(result);
-            for (SalaryPeriodEmployeeEntityDTO entityDTO : dto.getPayslipContent()) {
+            for (int i = 0;i< dto.getPayslipContent().size();i++) {
+                SalaryPeriodEmployeeEntityDTO entityDTO = dto.getPayslipContent().get(i);
                 //当字段属于不可见的,或者值为空/0 不显示给客户端
                 if (invisibleKeys.contains(entityDTO.getGroupEntityName().trim()) ||
                         "0".equals(entityDTO.getSalaryValue()) ||
