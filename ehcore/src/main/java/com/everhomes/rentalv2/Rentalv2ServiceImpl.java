@@ -2474,9 +2474,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
 									ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
 									if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
-										CompleteRentalOrderCommand cmd = new CompleteRentalOrderCommand();
-										cmd.setRentalBillId(order.getId());
-										this.completeRentalOrder(cmd);
+                                        RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+                                        restoreRentalBill(order);
+                                        if ((order.getPayTotalMoney().subtract(order.getPaidMoney())).compareTo(BigDecimal.ZERO) == 0)
+                                            order.setStatus(SiteBillStatus.COMPLETE.getCode());
+                                        else
+                                            order.setStatus(SiteBillStatus.OWING_FEE.getCode());
+                                        order.setActualEndTime(new Timestamp(System.currentTimeMillis()));
+                                        order.setActualStartTime(order.getStartTime());
+                                        rentalv2Provider.updateRentalBill(order);
+                                        orderHandler.completeRentalOrder(order);
+                                        //发消息
+                                        RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+                                        if (order.getStatus() == SiteBillStatus.OWING_FEE.getCode()) {
+                                            handler.overTimeSendMessage(order);
+                                        }else if (order.getStatus() == SiteBillStatus.COMPLETE.getCode()) {
+                                            handler.completeOrderSendMessage(order);
+                                        }
 									}
 								}
 							}
