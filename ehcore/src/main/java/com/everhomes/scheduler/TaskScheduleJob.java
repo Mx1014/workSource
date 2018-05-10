@@ -103,7 +103,7 @@ public class TaskScheduleJob extends QuartzJobBean {
 
 
         } catch (Exception ex) {
-            LOGGER.error("Task fail, taskId={}", taskId);
+            LOGGER.error("Task fail, taskId={}, Exception", taskId, ex);
             ex.printStackTrace();
         }
     }
