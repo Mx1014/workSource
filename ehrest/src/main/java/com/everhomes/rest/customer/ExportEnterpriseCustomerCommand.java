@@ -1,6 +1,9 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2018/2/5.
@@ -41,6 +44,21 @@ public class ExportEnterpriseCustomerCommand {
     private Integer namespaceId;
 
     private Long orgId;
+
+    @ItemType(Long.class)
+    private List<Long> trackingUids;
+
+    private Byte adminFlag;
+
+    private Long buildingId;
+
+    private Long addressId;
+
+    private Long ownerId;
+
+    private String ownerType;
+
+    private String trackingName;
 
     public String getIncludedGroupIds() {
         return includedGroupIds;
@@ -186,6 +204,62 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setPropertyArea(String propertyArea) {
         this.propertyArea = propertyArea;
+    }
+
+    public List<Long> getTrackingUids() {
+        return trackingUids;
+    }
+
+    public void setTrackingUids(List<Long> trackingUids) {
+        this.trackingUids = trackingUids;
+    }
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public String getTrackingName() {
+        return trackingName;
+    }
+
+    public void setTrackingName(String trackingName) {
+        this.trackingName = trackingName;
     }
 
     @Override
