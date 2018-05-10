@@ -9,10 +9,9 @@ import java.util.Map;
 import java.util.UUID;
 
 
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationWorkPlaces;
+import com.everhomes.organization.*;
 import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.organization.OrganizationSiteApartmentDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.collect.Lists;
 import org.jooq.Record;
@@ -41,7 +40,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
@@ -220,6 +218,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
      */
     @Override
     public ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd){
+        List<OrganizationSiteApartmentDTO> organizationSiteApartmentDTOList = Lists.newArrayList();
         //创建ListEnterprisesResponse类的对象
         ListEnterprisesResponse response = new ListEnterprisesResponse();
         //创建List<EnterprisePropertyDTO>集合对象
@@ -233,6 +232,38 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             locator.setAnchor(cmd.getPageAnchor());
             int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
             enterprisePropertyDTOS = organizationProvider.findEnterpriseListByCommunityId(locator,cmd.getCommunityId(),pageSize,cmd.getKeyword());
+            //// TODO: 2018/5/10
+            //接下来我们还需要根据communityId来查询eh_communityAndBuilding_relationes表中的address_id信息，注意有可能是一个集合
+            //声明一个List<Long>类型的集合,用于承载address_id的集合
+            List<Long> addressIdList = Lists.newArrayList();
+            //// TODO: 2018/5/10 接下来需要查询eh_communityAndBuilding_relationes表中的信息
+            addressIdList = organizationProvider.getCommunityAndBuildingRelationesAddressIdsByCommunityId(cmd.getCommunityId());
+            //进行非空校验
+            if(CollectionUtils.isNotEmpty(addressIdList) && cmd.getNamespaceId() != null){
+                //说明查询出来的addressIdList集合不为空，那么我们就根据这些addressIdList来查询eh_addresses表中信息，从而得到对应的楼栋和门牌
+                //// TODO: 2018/5/10
+                List<Address> addressList = addressProvider.findAddressByIds(addressIdList,cmd.getNamespaceId());
+                //进行非空校验
+                if(CollectionUtils.isNotEmpty(addressList)){
+                    //说明查询出来的address信息不为空，那么我们对其进行遍历，拿出楼栋和门牌信息，并且创建一个集合来封装他们
+
+                    //采用forEach循环遍历集合List<Address>
+                    for(Address address : addressList){
+                        //创建OrganizationSiteApartmentDTO类的对象
+                        OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
+                        //将信息封装在对象中
+                        organizationSiteApartmentDTO.setBuildingName(address.getBuildingName());
+                        organizationSiteApartmentDTO.setApartmentName(address.getApartmentName());
+                        //添加到List<OrganizationSiteApartmentDTO>集合中
+                        organizationSiteApartmentDTOList.add(organizationSiteApartmentDTO);
+                    }
+                }
+            }
+            //遍历集合List<EnterprisePropertyDTO>
+            for(EnterprisePropertyDTO enterprisePropertyDTO : enterprisePropertyDTOS){
+                //将List<OrganizationSiteApartmentDTO>集合信息封装进去
+                enterprisePropertyDTO.setSiteDtos(organizationSiteApartmentDTOList);
+            }
         }
         response.setEnterprises(enterprisePropertyDTOS);
         return response;

@@ -1,6 +1,9 @@
 package com.everhomes.rest.enterprise;
 
+import com.everhomes.rest.organization.OrganizationSiteApartmentDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -16,6 +19,7 @@ public class EnterprisePropertyDTO {
     private Long organizationId;
     //办公地点名称
     private String siteName;
+    private List<OrganizationSiteApartmentDTO> siteDtos;
     private Long id;
 
     public String getName() {
@@ -48,6 +52,14 @@ public class EnterprisePropertyDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<OrganizationSiteApartmentDTO> getSiteDtos() {
+        return siteDtos;
+    }
+
+    public void setSiteDtos(List<OrganizationSiteApartmentDTO> siteDtos) {
+        this.siteDtos = siteDtos;
     }
 
     @Override
