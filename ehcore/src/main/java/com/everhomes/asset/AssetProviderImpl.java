@@ -3658,6 +3658,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_PAYMENT_BILLS.fields());
+        query.addFrom(Tables.EH_PAYMENT_BILLS);
         query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key));
         query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"));
         if(namespaceId!=null){
