@@ -60,7 +60,6 @@ public class TaskScheduleJob extends QuartzJobBean {
                 handler = (TaskHandler) PlatformContext.getComponent(c1);
             }catch (Exception ex){
                 taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
-                ex.printStackTrace();
                 throw ex;
             }
 
@@ -71,8 +70,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.beforeExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute beforeExecute method fail.");
-                ex.printStackTrace();
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.beforeExecute method fail.");
                 throw ex;
             }
 
@@ -80,7 +78,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try {
                 handler.execute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute execute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "execute taskHandler.execute method fail.");
                 throw ex;
             }
 
@@ -88,8 +86,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.commit(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute commit method fail.");
-                ex.printStackTrace();
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute taskHandler.commit method fail.");
                 throw ex;
             }
 
@@ -97,8 +94,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.afterExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute afterExecute method fail.");
-                ex.printStackTrace();
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.afterExecute method fail.");
                 throw ex;
             }
 
@@ -106,13 +102,9 @@ public class TaskScheduleJob extends QuartzJobBean {
             taskService.updateTaskStatus(taskId, TaskStatus.SUCCESS.getCode(),null);
 
 
-        } catch (Exception e) {
-            LOGGER.error("出错",e);
-
-            //1、更新任务状态为失败
-//            taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
- 
-            LOGGER.error("",e); 
+        } catch (Exception ex) {
+            LOGGER.error("Task fail, taskId={}", taskId);
+            ex.printStackTrace();
         }
     }
 
