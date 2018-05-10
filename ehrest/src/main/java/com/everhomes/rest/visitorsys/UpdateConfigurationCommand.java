@@ -18,7 +18,9 @@ import java.util.List;
  * <li>guideInfo: (选填)指引信息</li>
  * <li>ipadThemeRgb: (选填)客户端主题色</li>
  * <li>selfRegisterQrcodeUri: (选填)自助登记二维码uri</li>
+ * <li>welcomeShowType: (选填)欢迎页面类型，image显示图片，text显示富文本</li>
  * <li>welcomePages: (选填)欢迎富文本</li>
+ * <li>welcomePicUri: (选填)欢迎图片uri</li>
  * <li>secrecyAgreement: (选填)保密协议富文本</li>
  * <li>baseConfig: (选填)基本配置（配置中所有的是否配置和门禁配置），{@link com.everhomes.rest.visitorsys.VisitorsysBaseConfig}</li>
  * <li>formConfig: (选填)表单配置，{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
@@ -37,6 +39,8 @@ public class UpdateConfigurationCommand {
     private String selfRegisterQrcodeUri;
     private String secrecyAgreement;
     private String welcomePages;
+    private String welcomePicUri;
+    private String welcomeShowType;
 
     private VisitorsysBaseConfig baseConfig;
 //    private VisitorsysFormConfig formConfig;
@@ -146,6 +150,22 @@ public class UpdateConfigurationCommand {
 
     public void setPassCardConfig(VisitorsysPassCardConfig passCardConfig) {
         this.passCardConfig = passCardConfig;
+    }
+
+    public String getWelcomePicUri() {
+        return welcomePicUri;
+    }
+
+    public void setWelcomePicUri(String welcomePicUri) {
+        this.welcomePicUri = welcomePicUri;
+    }
+
+    public String getWelcomeShowType() {
+        return welcomeShowType;
+    }
+
+    public void setWelcomeShowType(String welcomeShowType) {
+        this.welcomeShowType = welcomeShowType;
     }
 
     @Override

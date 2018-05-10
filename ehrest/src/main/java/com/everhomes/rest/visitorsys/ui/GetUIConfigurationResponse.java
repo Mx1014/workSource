@@ -19,7 +19,9 @@ import java.util.List;
  * <li>guideInfo: (选填)指引信息</li>
  * <li>selfRegisterQrcodeUrl: (选填)自助登记二维码url</li>
  * <li>selfRegisterQrcodeUri: (选填)自助登记二维码uri</li>
+ * <li>welcomeShowType: (选填)欢迎页面类型，image显示图片，text显示富文本</li>
  * <li>welcomePages: (选填)欢迎富文本</li>
+ * <li>welcomePicUri: (选填)欢迎图片uri</li>
  * <li>secrecyAgreement: (选填)保密协议富文本</li>
  * <li>baseConfig: (选填)基本配置（配置中所有的是否配置和门禁配置），{@link com.everhomes.rest.visitorsys.VisitorsysBaseConfig}</li>
  * <li>formConfig: (选填)表单配置列表，{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
