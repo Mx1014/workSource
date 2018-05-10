@@ -8206,13 +8206,53 @@ public class PunchServiceImpl implements PunchService {
      * */
     @Override
     public void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd){
-    	List<PunchDayLog> dayLogs = punchProvider.listPunchDayLogs(cmd.getUserId(), cmd.getEnterpirseId(), cmd.getStartDayString(), cmd.getEndDayString());
-    	List<PunchLog> logs =  punchProvider.listPunchLogs(cmd.getUserId(), cmd.getEnterpirseId(), cmd.getStartDayString(), cmd.getEndDayString());
+    	if(cmd.getStartDayString()==null || cmd.getEndDayString()==null){
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER,
+                     "start end day can not null"); 
+    	}
+    	try {
+			Date startDay = dateSF.get().parse(cmd.getStartDayString());
+			Date endDay = dateSF.get().parse(cmd.getEndDayString());
+			Calendar startCalendar = Calendar.getInstance();
+	        startCalendar.setTime(startDay);
+	        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+	        Calendar endCalendar = Calendar.getInstance();
+	        endCalendar.setTime(endDay); 
+
+	        Map<Long, PunchTimeRule> punchTimeRuleMapId = new HashMap<>();
+	        for (; startCalendar.before(endCalendar); ) {
+	        	//循环公司
+	        	String startDayString = dateSF.get().format(startCalendar);
+	        	startCalendar.add(Calendar.DAY_OF_MONTH, 1);
+	        	String endDayString = dateSF.get().format(startCalendar);
+	        	List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(startDayString, endDayString);
+	        	if(null != enterpriseIds){
+	        		for(Long enterpriseId : enterpriseIds){
+	        			List<Long> userIds = punchProvider.listPunchLogUserId(enterpriseId, startDayString, endDayString);
+
+	    	        	if(null != userIds){
+	    	        		for(Long userId : userIds){
+	    	        			addPunchLogShouldPunchTime(userId, enterpriseId, startDayString, endDayString, punchTimeRuleMapId);
+	    	        		}
+	    	        	}
+	        		}
+	        	}
+	        }
+	    	
+    	} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    private void addPunchLogShouldPunchTime(Long userId, Long enterpriseId, String startDayString,
+			String endDayString, Map<Long, PunchTimeRule> punchTimeRuleMapId) {
+    	List<PunchDayLog> dayLogs = punchProvider.listPunchDayLogs(userId, enterpriseId, startDayString, endDayString);
+    	List<PunchLog> logs =  punchProvider.listPunchLogs(userId, enterpriseId, startDayString, endDayString);
     	if(null == dayLogs || null ==logs){
     		return;
     	}
 
-        Map<Long, PunchTimeRule> punchTimeRuleMapId = new HashMap<>();
         //存放每个公司每个人每天的规则 大小= 日期*公司*公司人数
         Map<String, PunchTimeRule> punchTimeRuleMapUserIdDate = new HashMap<>();
         // 循环每一天的考勤数据 把考勤规则查出来(使用缓存减少IO) 放到map里,供每次打卡查询
@@ -8236,8 +8276,9 @@ public class PunchServiceImpl implements PunchService {
             }
     		punchProvider.updatePunchLog(log);
     	}
-    }; 
-    private void addPunchLogShouldPunchTime(PunchLog log,List<PunchLog> logs, PunchTimeRule ptr) {
+	}
+
+	private void addPunchLogShouldPunchTime(PunchLog log,List<PunchLog> logs, PunchTimeRule ptr) {
 		if(PunchType.ON_DUTY == PunchType.fromCode(log.getPunchType())){
 			if(HommizationType.fromCode(ptr.getHommizationType())==HommizationType.FLEX){
 				//规则是弹性 加上弹性时间

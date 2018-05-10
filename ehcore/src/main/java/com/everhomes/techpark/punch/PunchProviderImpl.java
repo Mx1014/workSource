@@ -16,6 +16,7 @@ import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.server.schema.tables.daos.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -1014,7 +1015,43 @@ public class PunchProviderImpl implements PunchProvider {
         }).collect(Collectors.toList());
         return result;
     }
-
+    @Override
+    public List<Long> listPunchLogUserId(Long enterpriseId, String startDay, String endDay){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Long>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.USER_ID).from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(enterpriseId); 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<Long> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return r.value1();
+                });
+        return resultRecord;
+    }
+    
+    @Override
+	public List<Long> listPunchLogEnterprise(String startDay, String endDay){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Long>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID).from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.USER_ID.isNotNull(); 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<Long> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return r.value1();
+                });
+        return resultRecord;
+	}
     @Override
     public List<PunchLog> listPunchLogs(Long userId,
                                               Long companyId, String startDay, String endDay) { 
