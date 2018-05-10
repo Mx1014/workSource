@@ -3282,6 +3282,10 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum());
     }
 
+    @Override
+    public void noticeTrigger() {
+        autoBillNotice();
+    }
 
 
     @Override

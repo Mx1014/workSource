@@ -1268,6 +1268,19 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(){
+        assetService.noticeTrigger();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 
 }
 
