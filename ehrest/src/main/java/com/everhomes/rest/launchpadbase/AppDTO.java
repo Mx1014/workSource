@@ -13,6 +13,8 @@ public class AppDTO {
 
     private String name;
     private String iconUrl;
+    private Long moduleId;
+    private String instanceConfig;
     private String router;
 
     public String getName() {

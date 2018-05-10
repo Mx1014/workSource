@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>namespaceId：域空间id </li>
- * <li>appId：应用id </li>
+ * <li>appId：应用originId </li>
  * <li>ownerId：从属的物业公司 </li>
  * <li>toOrgId：分配公司 </li>
  * <li>projectIds：项目id集合 </li>

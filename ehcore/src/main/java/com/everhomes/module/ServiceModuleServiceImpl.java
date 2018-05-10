@@ -1223,20 +1223,4 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         return handler;
     }
-
-    @Override
-    public ServiceModuleRouterHandler getServiceModuleRouterHandler(Long moduleId) {
-        ServiceModuleRouterHandler handler = null;
-
-        if(moduleId != null && moduleId.longValue() > 0) {
-            String handlerPrefix = ServiceModuleRouterHandler.SERVICE_MODULE_ROUTER_HANDLER_PREFIX;
-            handler = PlatformContextNoWarnning.getComponent(handlerPrefix + moduleId);
-
-            if(handler == null){
-                LOGGER.info("ServiceModuleRouterHandler not exist moduleId = {}", moduleId);
-            }
-        }
-
-        return handler;
-    }
 }

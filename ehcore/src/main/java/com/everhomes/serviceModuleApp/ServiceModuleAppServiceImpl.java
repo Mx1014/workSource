@@ -357,7 +357,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
 
-		List<AppDTO> appDtos = new ArrayList<>();
+		List<ServiceModuleAppDTO> appDtos = new ArrayList<>();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
@@ -392,17 +392,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
 
-				AppDTO appDTO = new AppDTO();
+				ServiceModuleAppDTO appDTO = new ServiceModuleAppDTO();
 				appDTO.setName(app.getName());
 				if(app.getIconUri() != null){
 					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
 					appDTO.setIconUrl(url);
-				}
-
-				ServiceModuleRouterHandler handler = serviceModuleService.getServiceModuleRouterHandler(app.getModuleId());
-				if(handler != null){
-					String router = handler.getRouter(app);
-					appDTO.setRouter(router);
 				}
 				appDtos.add(appDTO);
 			}

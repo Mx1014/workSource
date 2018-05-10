@@ -4,53 +4,104 @@ package com.everhomes.rest.launchpadbase;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
 
 /**
  * <ul>
- *     <li>router: 卡片路由，业务可根据此Id进行详情跳转</li>
- *     <li>subject: 卡片标题</li>
- *     <li>content: 卡片内容</li>
- *     <li>coverUrl: 卡片封面url</li>
+ *     <li>moduleId: 模块id</li>
+ *     <li>contentId: 内容Id。此处为String，因为可能某些业务的内容id是String，例如新闻快讯</li>
+ *     <li>contentOne: 一级内容</li>
+ *     <li>contentTwo: 二级内容</li>
+ *     <li>contentThree: 三级内容</li>
+ *     <li>contentFour: 四级内容</li>
+ *     <li>contentFive: 五级内容</li>
+ *     <li>contentSix: 六级内容</li>
+ *     <li>contentSeven: 七级内容，要多于七级内容的话，恕运营板块容不下，请另找高就</li>
  * </ul>
  */
 public class OPPushCard {
 
-    private Long router;
-    private String subject;
-    private String content;
-    private String coverUrl;
+    private Long moduleId;
+    private String contentId;
 
-    public Long getRouter() {
-        return router;
+    private String contentOne;
+    private String contentTwo;
+    private String contentThree;
+    private String contentFour;
+    private String contentFive;
+    private String contentSix;
+    private String contentSeven;
+
+
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setRouter(Long router) {
-        this.router = router;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getContentId() {
+        return contentId;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
     }
 
-    public String getContent() {
-        return content;
+    public String getContentOne() {
+        return contentOne;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setContentOne(String contentOne) {
+        this.contentOne = contentOne;
     }
 
-    public String getCoverUrl() {
-        return coverUrl;
+    public String getContentTwo() {
+        return contentTwo;
     }
 
-    public void setCoverUrl(String coverUrl) {
-        this.coverUrl = coverUrl;
+    public void setContentTwo(String contentTwo) {
+        this.contentTwo = contentTwo;
+    }
+
+    public String getContentThree() {
+        return contentThree;
+    }
+
+    public void setContentThree(String contentThree) {
+        this.contentThree = contentThree;
+    }
+
+    public String getContentFour() {
+        return contentFour;
+    }
+
+    public void setContentFour(String contentFour) {
+        this.contentFour = contentFour;
+    }
+
+    public String getContentFive() {
+        return contentFive;
+    }
+
+    public void setContentFive(String contentFive) {
+        this.contentFive = contentFive;
+    }
+
+    public String getContentSix() {
+        return contentSix;
+    }
+
+    public void setContentSix(String contentSix) {
+        this.contentSix = contentSix;
+    }
+
+    public String getContentSeven() {
+        return contentSeven;
+    }
+
+    public void setContentSeven(String contentSeven) {
+        this.contentSeven = contentSeven;
     }
 
     @Override

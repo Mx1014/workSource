@@ -1812,7 +1812,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
 
         if(!StringUtils.isEmpty(keyword)){
-            query.addConditions(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+
+            query.addConditions(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.COMMUNITY_NUMBER.like('%'+keyword+'%')));
         }
 
         if(orgId != null){
