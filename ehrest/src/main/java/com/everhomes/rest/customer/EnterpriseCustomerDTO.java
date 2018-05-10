@@ -1,8 +1,8 @@
 package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

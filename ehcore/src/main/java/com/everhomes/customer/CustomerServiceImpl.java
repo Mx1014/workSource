@@ -1129,9 +1129,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(dto.getId());
         if (attachments != null && attachments.size() > 0) {
-            List<com.everhomes.rest.pmtask.AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
             attachments.forEach((a) -> {
-                com.everhomes.rest.pmtask.AttachmentDescriptor bannerUrl = new com.everhomes.rest.pmtask.AttachmentDescriptor();
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
                 bannerUrl.setContentType(a.getContentUri());
                 bannerUrl.setContentUri(a.getContentUri());
                 bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
