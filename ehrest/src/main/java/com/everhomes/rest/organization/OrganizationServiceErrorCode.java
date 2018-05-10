@@ -96,4 +96,6 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_JOB_POSITION_EXISTS = 300003; //通用岗位已存在
 
     int ERROR_ORG_NAME_REPEAT = 900030; //名称重复
+
+    int ERROR_FOR_HAS_COMMUNITIES = 900031; //无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。
 }

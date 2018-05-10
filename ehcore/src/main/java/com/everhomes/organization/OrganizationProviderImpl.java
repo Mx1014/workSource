@@ -447,6 +447,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
             }catch (Exception ex){
                 //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
             }
 
             query.addConditions(conditionkeyword);
@@ -6463,14 +6464,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-        try {
+
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
+            }
+
+            query.addConditions(conditionkeyword);
+        }
+
+        /*try {
             Long aLong = Long.valueOf(keyword);
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
         } catch (NumberFormatException e) {
             if (!StringUtils.isEmpty(keyword)) {
                 query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
             }
-        }
+        }*/
 
         if (null != locator.getAnchor()) {
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
@@ -6507,14 +6523,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (locator.getAnchor() != null)
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
 
-        try {
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
+            }
+
+            query.addConditions(conditionkeyword);
+        }
+
+/*        try {
             Long aLong = Long.valueOf(keyword);
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
         } catch (NumberFormatException e) {
             if (!StringUtils.isEmpty(keyword)) {
                 query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
             }
-        }
+        }*/
 
         if (communityId != null) {
             query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
@@ -6555,4 +6585,86 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .execute();
     }
 
+    /**
+     * 根据域空间Id和组织ID来删除eh_organization_member_details表中的信息
+     * @param organizationId
+     * @param namespaceId
+     */
+    @Override
+    public void deleteOrganizationMemberDetailByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+    /**
+     * 根据域空间Id和组织ID来删除eh_organization_members表中的信息
+     * @param organizationId
+     * @param namespaceId
+     */
+    @Override
+    public void deleteOrganizationMemberByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID来删除eh_organization_details表中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationDetailByOrganizationId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_DETAILS)
+                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+
+    /**
+     * 根据组织ID来删除eh_organizations表中的信息
+     * @param id
+     */
+    @Override
+    public void deleteOrganizationsById(Long id){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATIONS)
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(id))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID来删除公司所在项目的关系表（eh_organization_workplaces）中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationWorkPlacesByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID删除表eh_organization_community_requests中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationCommunityRequestByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
+                .execute();
+    }
 }

@@ -3,3 +3,6 @@
 UPDATE eh_service_modules set app_type = 0 where id=50000 OR parent_id = 50000 OR path LIKE '%/50000/%';
 UPDATE eh_service_modules set app_type = 1 WHERE app_type is NULL;
 UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 0);
+
+
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '900031', 'zh_CN', '无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试');
