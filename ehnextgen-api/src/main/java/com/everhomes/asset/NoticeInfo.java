@@ -3,6 +3,7 @@ package com.everhomes.asset;
 
 
 import com.everhomes.rest.asset.NoticeConfig;
+import com.everhomes.rest.asset.NoticeObj;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -23,7 +24,7 @@ public class NoticeInfo implements Serializable{
     private Long appTemplateId;
     private Long msgTemplateId;
     private Boolean useTemplate;
-    private List<NoticeConfig> noticeObjs;
+    private List<NoticeObj> noticeObjs;
     public Boolean isUseTemplate() {
         return useTemplate;
     }
@@ -131,12 +132,17 @@ public class NoticeInfo implements Serializable{
         this.appName = appName;
     }
 
-    public void setNoticeObjs(List<NoticeConfig> noticeObjs) {
-        this.noticeObjs = noticeObjs;
+    public Boolean getUseTemplate() {
+        return useTemplate;
     }
 
-    public List<NoticeConfig> getNoticeObjs() {
+    public List<NoticeObj> getNoticeObjs() {
+
         return noticeObjs;
+    }
+
+    public void setNoticeObjs(List<NoticeObj> noticeObjs) {
+        this.noticeObjs = noticeObjs;
     }
 
     @Override

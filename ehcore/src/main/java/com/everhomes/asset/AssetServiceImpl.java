@@ -1538,9 +1538,9 @@ public class AssetServiceImpl implements AssetService {
             noticeConfig.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             noticeConfig.setCreateUid(UserContext.currentUserId());
             noticeConfig.setNoticeDayType(config.getDayType());
-            if(config.getDayType() != null && config.getDayType().byteValue() == (byte)1){
+            if(config.getDayType() != null && config.getDayType().byteValue() == NoticeDayType.BEFORE.getCode()){
                 noticeConfig.setNoticeDayBefore(Integer.parseInt(config.getDayRespectToDueDay()));
-            }else if(config.getDayType() != null && config.getDayType().byteValue() == (byte) 0){
+            }else if(config.getDayType() != null && config.getDayType().byteValue() == NoticeDayType.AFTER.getCode()){
                 noticeConfig.setNoticeDayAfter(Integer.parseInt(config.getDayRespectToDueDay()));
             }
             noticeConfig.setNoticeAppId(config.getAppNoticeTemplateId());
@@ -2985,10 +2985,10 @@ public class AssetServiceImpl implements AssetService {
                     if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
                         continue;
                     }
-                    List<NoticeConfig> noticeConfigsList = (List<NoticeConfig>)new Gson()
-                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeConfig>>() {
+                    List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
+                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeObj>>() {
                             }.getType());
-                    info.setNoticeObjs(noticeConfigsList);
+                    info.setNoticeObjs(noticeObjs);
                     //根据催缴账单催缴
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
@@ -2996,26 +2996,21 @@ public class AssetServiceImpl implements AssetService {
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<Long> userIds = new ArrayList<>();
-                    if(noticeConfigsList != null && noticeConfigsList.size() > 0) {
-                        for (int i = 0; i < noticeConfigsList.size(); i++) {
-                            NoticeConfig config = noticeConfigsList.get(i);
-                            List<NoticeObj> noticeObjs = config.getNoticeObjs();
-                            for (NoticeObj obj : noticeObjs) {
-                                Long noticeObjId = obj.getNoticeObjId();
-                                String noticeObjType = obj.getNoticeObjType();
-                                FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
-                                switch (sourceTypeA) {
-                                    // 具体部门
-                                    case SOURCE_DEPARTMENT:
-                                        userIds.addAll(getAllMembersFromDepartment(noticeObjId));
-                                        break;
-                                    case SOURCE_USER:
-                                        userIds.add(noticeObjId);
-                                        break;
-                                }
-                            }
+                    for (NoticeObj obj : noticeObjs) {
+                        Long noticeObjId = obj.getNoticeObjId();
+                        String noticeObjType = obj.getNoticeObjType();
+                        FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        switch (sourceTypeA) {
+                            // 具体部门
+                            case SOURCE_DEPARTMENT:
+                                userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                break;
+                            case SOURCE_USER:
+                                userIds.add(noticeObjId);
+                                break;
                         }
                     }
+
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
                     for(Long uid : userIds){
                         try {
@@ -3353,10 +3348,10 @@ public class AssetServiceImpl implements AssetService {
                     if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
                         continue;
                     }
-                    List<NoticeConfig> noticeConfigsList = (List<NoticeConfig>)new Gson()
-                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeConfig>>() {
+                    List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
+                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeObj>>() {
                             }.getType());
-                    info.setNoticeObjs(noticeConfigsList);
+                    info.setNoticeObjs(noticeObjs);
                     //根据催缴账单催缴
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
@@ -3364,24 +3359,18 @@ public class AssetServiceImpl implements AssetService {
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<Long> userIds = new ArrayList<>();
-                    if(noticeConfigsList != null && noticeConfigsList.size() > 0) {
-                        for (int i = 0; i < noticeConfigsList.size(); i++) {
-                            NoticeConfig config = noticeConfigsList.get(i);
-                            List<NoticeObj> noticeObjs = config.getNoticeObjs();
-                            for (NoticeObj obj : noticeObjs) {
-                                Long noticeObjId = obj.getNoticeObjId();
-                                String noticeObjType = obj.getNoticeObjType();
-                                FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
-                                switch (sourceTypeA) {
-                                    // 具体部门
-                                    case SOURCE_DEPARTMENT:
-                                        userIds.addAll(getAllMembersFromDepartment(noticeObjId));
-                                        break;
-                                    case SOURCE_USER:
-                                        userIds.add(noticeObjId);
-                                        break;
-                                }
-                            }
+                    for (NoticeObj obj : noticeObjs) {
+                        Long noticeObjId = obj.getNoticeObjId();
+                        String noticeObjType = obj.getNoticeObjType();
+                        FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        switch (sourceTypeA) {
+                            // 具体部门
+                            case SOURCE_DEPARTMENT:
+                                userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                break;
+                            case SOURCE_USER:
+                                userIds.add(noticeObjId);
+                                break;
                         }
                     }
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
