@@ -2299,6 +2299,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         for (Entry<String, List<MonthPayslipDetailDTO>> entry : resultMap.entrySet()) {
             PayslipYearDTO yearDTO = new PayslipYearDTO(entry.getKey(), entry.getValue());
+            Collections.sort(yearDTO.getMonthPayslipDetails());
             response.getPayslipYears().add(yearDTO);
         }
         return response;
