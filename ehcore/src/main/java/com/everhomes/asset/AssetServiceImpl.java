@@ -2914,7 +2914,7 @@ public class AssetServiceImpl implements AssetService {
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
     @Scheduled(cron = "0 0 12 * * ?")
-    public void autoBillNotice(Integer namespaceId) {
+    public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
                 SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
@@ -2935,7 +2935,7 @@ public class AssetServiceImpl implements AssetService {
                 Map<Long, PaymentNoticeConfig> noticeConfigMap = new HashMap<>();
                 // noticeConfig map中存有communityid和notice days
                 for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
-                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(namespaceId,map.getKey());
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(null,map.getKey());
                     for (int i = 0; i < bills.size(); i++) {
                         PaymentBills bill = bills.get(i);
                         if (!needNoticeBills.containsKey(bill.getId())) {
@@ -3280,6 +3280,127 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void noticeTrigger(Integer namespaceId) {
         autoBillNotice(namespaceId);
+    }
+    // 冗余代码，为了测试
+    public void autoBillNotice(Integer namespaceId){
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+                Calendar today = newClearedCalendar();
+                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+                Map<Long, List<PaymentNoticeConfig>> noticeConfigs = new HashMap<>();
+                for (int i = 0; i < configs.size(); i++) {
+                    PaymentNoticeConfig config = configs.get(i);
+                    if (noticeConfigs.containsKey(config.getOwnerId())) {
+                        noticeConfigs.get(config.getOwnerId()).add(config);
+                    } else {
+                        List<PaymentNoticeConfig> configList = new ArrayList<>();
+                        configList.add(config);
+                        noticeConfigs.put(config.getOwnerId(), configList);
+                    }
+                }
+                Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
+                Map<Long, PaymentNoticeConfig> noticeConfigMap = new HashMap<>();
+                // noticeConfig map中存有communityid和notice days
+                for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(null,map.getKey());
+                    for (int i = 0; i < bills.size(); i++) {
+                        PaymentBills bill = bills.get(i);
+                        if (!needNoticeBills.containsKey(bill.getId())) {
+                            List<PaymentNoticeConfig> days = map.getValue();
+                            for (int j = 0; j < days.size(); j++) {
+                                PaymentNoticeConfig day = days.get(j);
+                                String dueDayDeadline = bill.getDueDayDeadline();
+                                try {
+                                    //比较此config与账单的时间，看是否应该催缴
+                                    Calendar deadline = newClearedCalendar();
+                                    deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
+                                    if(day.getNoticeDayType() != null && day.getNoticeDayType().byteValue() == NoticeDayType.AFTER.getCode()){
+                                        deadline.add(Calendar.DAY_OF_MONTH, day.getNoticeDayAfter());
+                                    }else{
+                                        deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
+                                    }
+                                    //符合催缴的日期设定就催缴
+                                    if (today.compareTo(deadline) == 1) {
+                                        needNoticeBills.put(bill.getId(), bill);
+                                        noticeConfigMap.put(bill.getId(), day);
+                                    }
+                                } catch (Exception e) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                List<Long> billIds = new ArrayList<>();
+                Set<NoticeInfo> noticeInfoList = new HashSet<>();
+                for (Map.Entry<Long, PaymentBills> entry : needNoticeBills.entrySet()) {
+                    PaymentBills b = entry.getValue();
+                    billIds.add(b.getId());
+                    NoticeInfo info = new NoticeInfo();
+                    info.setDateStr(b.getDateStr());
+                    info.setTargetName(b.getTargetName());
+                    info.setAmountOwed(b.getAmountOwed());
+                    info.setAmountRecevable(b.getAmountReceivable());
+                    info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                    info.setOwnerId(b.getOwnerId());
+                    info.setOwnerType(b.getOwnerType());
+                    //增加模板id by wentian sama @ 2018.5.9   u lies to me~
+                    info.setUseTemplate(true);
+                    PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
+                    info.setMsgTemplateId(specificConfig.getNoticeMsgId());
+                    info.setAppTemplateId(specificConfig.getNoticeAppId());
+                    if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
+                        continue;
+                    }
+                    List<NoticeConfig> noticeConfigsList = (List<NoticeConfig>)new Gson()
+                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeConfig>>() {
+                            }.getType());
+                    info.setNoticeObjs(noticeConfigsList);
+                    //根据催缴账单催缴
+                    info.setPhoneNums(b.getNoticetel());
+                    info.setTargetType(b.getTargetType());
+                    info.setTargetId(b.getTargetId());
+                    noticeInfoList.add(info);
+                    //待发送人员如如果是定义好的，之类就转成个人，再来一个info
+                    List<Long> userIds = new ArrayList<>();
+                    if(noticeConfigsList != null && noticeConfigsList.size() > 0) {
+                        for (int i = 0; i < noticeConfigsList.size(); i++) {
+                            NoticeConfig config = noticeConfigsList.get(i);
+                            List<NoticeObj> noticeObjs = config.getNoticeObjs();
+                            for (NoticeObj obj : noticeObjs) {
+                                Long noticeObjId = obj.getNoticeObjId();
+                                String noticeObjType = obj.getNoticeObjType();
+                                FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                                switch (sourceTypeA) {
+                                    // 具体部门
+                                    case SOURCE_DEPARTMENT:
+                                        userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                        break;
+                                    case SOURCE_USER:
+                                        userIds.add(noticeObjId);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
+                    for(Long uid : userIds){
+                        try {
+                            NoticeInfo newInfo = CopyUtils.deepCopy(info);
+                            newInfo.setTargetId(uid);
+                            newInfo.setTargetType(AssetPaymentStrings.EH_USER);
+                            noticeInfoList.add(newInfo);
+                        } catch (Exception e) {
+                            LOGGER.error("failed to have a new notice info, new info is ={}",info,e);
+                        }
+                    }
+                    //一个一个发，因为每个账单的变量注入值不一样
+                    NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
+                }
+                LOGGER.info("done");
+            });
+        }
     }
 
 
