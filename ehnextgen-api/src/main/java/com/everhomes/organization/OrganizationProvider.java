@@ -704,4 +704,42 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken);
+
+	/**
+	 * 根据域空间Id和组织ID来删除eh_organization_member_details表中的信息
+	 * @param organizationId
+	 * @param namespaceId
+	 */
+	void deleteOrganizationMemberDetailByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId);
+
+	/**
+	 * 根据域空间Id和组织ID来删除eh_organization_members表中的信息
+	 * @param organizationId
+	 * @param namespaceId
+	 */
+	void deleteOrganizationMemberByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId);
+
+	/**
+	 * 根据组织ID来删除eh_organization_details表中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationDetailByOrganizationId(Long organizationId);
+
+	/**
+	 * 根据组织ID来删除eh_organizations表中的信息
+	 * @param id
+	 */
+	void deleteOrganizationsById(Long id);
+
+	/**
+	 * 根据组织ID来删除公司所在项目的关系表（eh_organization_workplaces）中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationWorkPlacesByOrgId(Long organizationId);
+
+	/**
+	 * 根据组织ID删除表eh_organization_community_requests中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationCommunityRequestByOrgId(Long organizationId);
 }

@@ -13389,13 +13389,30 @@ public class OrganizationServiceImpl implements OrganizationService {
             dbProvider.execute((TransactionStatus status) -> {
                 //删除公司之前还需要检查该公司名下是否存在管理的项目，如果有则给出提示“无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。”
                 //根据organizationId来查询eh_organization_communities表中管理的项目是否存在
-                //// TODO: 2018/5/9  
+                List<OrganizationCommunity> organizationCommunityList = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+                //非空判断
+                if(!CollectionUtils.isEmpty(organizationCommunityList)){
+                    //说明该公司下面存在管理公司，那么我们现在就报错给前端，提示"无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。"
+                    LOGGER.error("there are communiyies under this organization");
+                    throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                            "User is not in the organization.");
+                }
                 //删除该公司下面的所有的应用
                 serviceModuleAppService.uninstallAppByOrganizationId(cmd.getOrganizationId());
                 //删除所有被其它公司授权管理应用的记录
                 serviceModuleAppAuthorizationService.deleteServiceModuleAppAuthorizationByOrganizationId(cmd.getOrganizationId());
-
-
+                //删除该公司下面的人事档案信息即根据域空间Id和组织Id来删除表eh_organization_member_details中信息
+                organizationProvider.deleteOrganizationMemberDetailByNamespaceIdAndOrgId(cmd.getOrganizationId(),cmd.getNamespaceId());
+                //根据域空间Id和组织ID来删除eh_organization_members表中的信息
+                organizationProvider.deleteOrganizationMemberByNamespaceIdAndOrgId(cmd.getOrganizationId(),cmd.getNamespaceId());
+                //根据组织ID来删除表eh_organization_details中的信息
+                organizationProvider.deleteOrganizationDetailByOrganizationId(cmd.getOrganizationId());
+                //根据组织id来删除eh_organizations表中的信息
+                organizationProvider.deleteOrganizationsById(cmd.getOrganizationId());
+                //根据组织ID来删除eh_organization_workplaces表（公司所在项目关系表）中的信息
+                organizationProvider.deleteOrganizationWorkPlacesByOrgId(cmd.getOrganizationId());
+                //根据组织Id来删除表eh_organization_community_requests表中的信息
+                organizationProvider.deleteOrganizationCommunityRequestByOrgId(cmd.getOrganizationId());
                 return null;
             });
         }
