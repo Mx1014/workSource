@@ -40,6 +40,10 @@ public enum DoorAccessType {
             return ACLINK_LINGLING;
         case 12:
         	return ACLINK_HUARUN_GROUP;
+        case 13:
+            return ACLINK_WANGLONG;
+        case 14:
+            return ACLINK_WANGLONG_GROUP;
         }
         
         return null;

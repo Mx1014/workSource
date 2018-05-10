@@ -4421,13 +4421,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 List<DoorAccess> devices = doorAccessProvider.listDoorAccessByGroupId(access.getId(),999);
                 group.setDevices(devices.stream().map(r -> {return ConvertHelper.convert(r,DoorAccessDTO.class);}).collect(Collectors.toList()));
                 String floorStr = access.getFloorId();
-                String[] floorIds = new String[1];
-                if(floorStr.indexOf(",") > -1){
-                    floorIds = floorStr.split(",");
-                } else{
-                    floorIds[0] = floorStr;
-                }
-                for (String floorId : floorIds){
+                JSONObject data = JSON.parseObject(access.getFloorId());
+                JSONArray jsonfloors = data.getJSONArray("floors");
+                for (int i = 0;i < jsonfloors.size();i++){
+                    String floorId = jsonfloors.getJSONObject(i).getString("id");
                     floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                 }
                 group.setFloors(floors.stream().distinct().collect(Collectors.toList()));
