@@ -19,7 +19,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModuleEntryProvider;
-import com.everhomes.module.ServiceModuleRouterHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResourceProvider;
