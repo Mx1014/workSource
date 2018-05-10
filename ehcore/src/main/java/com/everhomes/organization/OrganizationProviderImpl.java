@@ -6542,6 +6542,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (!StringUtils.isEmpty(keyword)) {
             Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
 
+            /*if (org.apache.commons.lang.math.NumberUtils.isDigits(keyword)) {
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID
+                        .eq(org.apache.commons.lang.math.NumberUtils.toLong(keyword)));
+            }*/
             try {
                 Long aLong = Long.valueOf(keyword);
                 conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
