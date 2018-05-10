@@ -59,7 +59,7 @@ public class TaskScheduleJob extends QuartzJobBean {
 //                handler = (FileDownloadTaskHandler) c1.newInstance();
                 handler = (TaskHandler) PlatformContext.getComponent(c1);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail. search log keyword: Task fail, taskId=" + taskId);
                 throw ex;
             }
 
@@ -70,7 +70,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.beforeExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.beforeExecute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.beforeExecute method fail. search log keyword: Task fail, taskId=" + taskId);
                 throw ex;
             }
 
@@ -78,7 +78,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try {
                 handler.execute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "execute taskHandler.execute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "execute taskHandler.execute method fail. search log keyword: Task fail, taskId=" + taskId);
                 throw ex;
             }
 
@@ -86,7 +86,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.commit(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute taskHandler.commit method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute taskHandler.commit method fail. search log keyword: Task fail, taskId=" + taskId);
                 throw ex;
             }
 
@@ -94,7 +94,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.afterExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.afterExecute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute taskHandler.afterExecute method fail. search log keyword: Task fail, taskId=" + taskId);
                 throw ex;
             }
 
