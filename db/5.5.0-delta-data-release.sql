@@ -48,3 +48,7 @@ INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_
 
 -- issue-26498 add by huangmingbo 2018-05-09
 UPDATE `eh_parking_lots` SET `config_json`='{"tempfeeFlag": 1, "rateFlag": 1, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 2, "contact": "18665331243","identityCardFlag":0}' WHERE  `id`in (10011, 10012);
+
+-- issue-29029 物业报修工作流状态修改
+UPDATE eh_pm_tasks t, eh_flow_cases f SET t.`status` = IFNULL(f.`status`, 3) WHERE t.`status` = 3 AND f.id = t.flow_case_id;
+UPDATE eh_pm_tasks t SET t.`status` = 2 WHERE t.`status` IN (1,3);
