@@ -1923,7 +1923,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 enterpriseCustomer.setContactAddress(organizationDetail.getAddress());
                 enterpriseCustomer.setLatitude(organizationDetail.getLatitude());
                 enterpriseCustomer.setLongitude(organizationDetail.getLongitude());
-                enterpriseCustomer.setTrackingUid(-1L);
                 enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
                 enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 

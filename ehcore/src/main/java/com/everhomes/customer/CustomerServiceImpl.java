@@ -807,7 +807,22 @@ public class CustomerServiceImpl implements CustomerService {
             command.setLongitude(updateCustomer.getLongitude());
             command.setLatitude(updateCustomer.getLatitude());
             command.setWebsite(updateCustomer.getCorpWebsite());
-            organizationService.updateEnterprise(command, false);
+            command.setAttachments(cmd.getBanner());
+            command.setPostUri(cmd.getPostUri());
+            command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+            command.setContactsPhone(cmd.getHotline());
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
+            if(entryInfos!=null && entryInfos.size()>0){
+                entryInfos.forEach((e)->{
+                    OrganizationAddressDTO addressDTO = new OrganizationAddressDTO();
+                    addressDTO.setAddressId(e.getAddressId());
+                    addressDTO.setBuildingId(e.getBuildingId());
+                    addressDTO.setEnterpriseId(customer.getOrganizationId());
+                    addressDTOs.add(addressDTO);
+                });
+            }
+            organizationService.updateEnterprise(command, true);
         } else {//没有企业的要新增一个
             OrganizationDTO dto = createOrganization(updateCustomer);
             updateCustomer.setOrganizationId(dto.getId());
