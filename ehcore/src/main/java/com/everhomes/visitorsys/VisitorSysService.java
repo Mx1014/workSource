@@ -84,4 +84,6 @@ public interface VisitorSysService {
     void syncVisitor(BaseVisitorsysCommand cmd);
 
     void deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd);
+
+    GetBookedVisitorByIdResponse getUIBookedVisitorById(GetUIBookedVisitorByIdCommand cmd);
 }

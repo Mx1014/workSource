@@ -5,6 +5,10 @@ import com.everhomes.util.StringHelper;
 
 /**
   *<ul>
+ * <li>appkey: (必填)appkey</li>
+ * <li>signature: (必填)签名</li>
+ * <li>nonce: (必填)3位随机数</li>
+ * <li>timestamp: (必填)当前时间戳</li>
  * <li>deviceType: (必填)设备类型，{@link com.everhomes.rest.visitorsys.VisitorsysDeviceType}</li>
  * <li>deviceTypeName: (必填)设备类型名称，如zuolin1，zuolin2</li>
  * <li>deviceId: (必填)设备唯一标识</li>
@@ -13,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>deviceName: (必填)设备名称</li>
   *</ul>
   */
-public class GetPairingCodeCommand {
+public class GetPairingCodeCommand extends BaseVisitorsysUICommand{
     private String deviceType;
     private String deviceTypeName;
     private String deviceId;

@@ -31,7 +31,7 @@ public class VisitorSysUIController extends ControllerBase {
 	 */
 	@RequestMapping("getHomePageConfiguration")
 	@RestReturn(GetHomePageConfigurationResponse.class)
-	public RestResponse getHomePageConfiguration() {
+	public RestResponse getHomePageConfiguration(BaseVisitorsysUICommand cmd) {
 		GetHomePageConfigurationResponse baseResponse = visitorSysService.getHomePageConfiguration();
 
 		RestResponse response = new RestResponse(baseResponse);
@@ -214,8 +214,8 @@ public class VisitorSysUIController extends ControllerBase {
 	 */
 	@RequestMapping("getBookedVisitorById")
 	@RestReturn(GetBookedVisitorByIdResponse.class)
-	public RestResponse getBookedVisitorById(GetBookedVisitorByIdCommand cmd) {
-		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorById(cmd);
+	public RestResponse getBookedVisitorById(GetUIBookedVisitorByIdCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getUIBookedVisitorById(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

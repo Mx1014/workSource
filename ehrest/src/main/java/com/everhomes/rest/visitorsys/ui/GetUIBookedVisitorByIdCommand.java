@@ -3,29 +3,28 @@ package com.everhomes.rest.visitorsys.ui;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 /**
- *<ul>
+ * <ul>
  * <li>appkey: (必填)appkey</li>
  * <li>signature: (必填)签名</li>
  * <li>nonce: (必填)3位随机数</li>
  * <li>timestamp: (必填)当前时间戳</li>
  * <li>deviceType: (必填)设备类型，{@link com.everhomes.rest.visitorsys.VisitorsysDeviceType}</li>
  * <li>deviceId: (必填)设备唯一标识</li>
- *<li>pairingCode : (必填)配对码</li>
- *</ul>
+ * <li>visitorId: (必填)访客id</li>
+ * </ul>
  */
+public class GetUIBookedVisitorByIdCommand extends BaseVisitorsysUICommand{
+    private Long visitorId;
 
-public class ConfirmPairingCodeCommand extends BaseVisitorsysUICommand{
-    private String pairingCode;
-
-    public String getPairingCode() {
-        return pairingCode;
+    public Long getVisitorId() {
+        return visitorId;
     }
 
-    public void setPairingCode(String pairingCode) {
-        this.pairingCode = pairingCode;
+    public void setVisitorId(Long visitorId) {
+        this.visitorId = visitorId;
     }
 
     @Override
