@@ -2,9 +2,7 @@
 package com.everhomes.visitorsys;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.visitorsys.BaseVisitorDTO;
-import com.everhomes.rest.visitorsys.ListBookedVisitorsResponse;
-import com.everhomes.rest.visitorsys.VisitorsysSearchFlagType;
+import com.everhomes.rest.visitorsys.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.VisitorsysSearcher;
@@ -17,6 +15,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -25,9 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import scala.Int;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -45,7 +42,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 
     private static final String[] syncFields = {"namespaceId","ownerType","ownerId","id",
             "visitorName","followUpNumbers","visitorPhone","visitReasonId","visitReason",
-            "inviterId","inviterName","plannedVisitTime","visitTime","visitStatus","bookingStatus",
+            "inviterId","inviterName","plannedVisitTime","visitTime","createTime","visitStatus","bookingStatus",
             "visitorType","enterpriseId","enterpriseName","officeLocationId","officeLocationName"};
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
@@ -85,9 +82,9 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 //            LOGGER.info(b.toString());
 //            feedDoc(String.valueOf(baseVisitorDTO.getId()), b);
 //        } catch (IOException ex) {
-//            LOGGER.error("Create visitorsys {} error",baseVisitorDTO.getId(),ex);
+//            LOGGER.error("Create VisitorSysCount {} error",baseVisitorDTO.getId(),ex);
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//                    "es Create visitorsys {} error",baseVisitorDTO.getId());
+//                    "es Create VisitorSysCount {} error",baseVisitorDTO.getId());
 //        }
 //    }
 
@@ -112,14 +109,29 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             LOGGER.info(b.toString());
             feedDoc(String.valueOf(idstring), b);
         } catch (Exception ex) {
-            LOGGER.error("Create visitorsys {} error",object.toString(),ex);
+            LOGGER.error("Create VisitorSysCount {} error",object.toString(),ex);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "es Create visitorsys "+object+" error");
+                    "es Create VisitorSysCount "+object+" error");
         }
     }
 
     @Override
     public ListBookedVisitorsResponse searchVisitors(ListBookedVisitorParams params) {
+        SearchResponse searchResponse = searchResponse(params,SearchType.QUERY_THEN_FETCH);
+        ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
+        List<BaseVisitorDTO> dtos = generateVisitorDtos(searchResponse);
+
+        if(dtos.size() > params.getPageSize()){
+            response.setNextPageAnchor(params.getPageAnchor()+1);
+            dtos.remove(dtos.size() - 1);
+        }
+
+        response.setVisitorDtoList(dtos);
+
+        return response;
+    }
+
+    private SearchResponse searchResponse(ListBookedVisitorParams params, SearchType searchType) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
         QueryBuilder qb = null;
@@ -163,6 +175,8 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }
             if(params.getBookingStatus()!=null){
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
+            }else{
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysVisitStatus.DELETED.getCode())));
             }
             sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.DESC);
         }else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
@@ -175,14 +189,18 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }
             if(params.getVisitStatus()!=null){
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitStatus", params.getVisitStatus()));
+            }else {
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysVisitStatus.DELETED.getCode())));
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
         }
 
 
         qb = QueryBuilders.filteredQuery(qb, fb);
-        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(params.getPageAnchor().intValue() * params.getPageSize()).setSize(params.getPageSize() + 1);
+        builder.setSearchType(searchType);
+        if(searchType == SearchType.QUERY_THEN_FETCH) {
+            builder.setFrom(params.getPageAnchor().intValue() * params.getPageSize()).setSize(params.getPageSize() + 1);
+        }
         builder.setQuery(qb);
         builder.addSort(sort);
 
@@ -190,19 +208,152 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             LOGGER.info("VisitorsysSearcherImpl query builder ："+builder);
 
         SearchResponse searchResponse = builder.execute().actionGet();
-        ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
-        List<BaseVisitorDTO> dtos = generateVisitorDtos(searchResponse);
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("VisitorsysSearcherImpl query searchResponse ："+searchResponse);
+        return searchResponse;
+    }
 
-        if(dtos.size() > params.getPageSize()){
-            response.setNextPageAnchor(params.getPageAnchor()+1);
-            dtos.remove(dtos.size() - 1);
+
+    private SearchResponse searchByAgg(ListBookedVisitorParams params, SearchType searchType) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb =  QueryBuilders.matchAllQuery();
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId",params.getNamespaceId());
+        fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerType",params.getOwnerType()));
+        fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("ownerId",params.getOwnerId()));
+
+        AggregationBuilders.terms("createTime");
+        if(params.getStartVisitorCountTime()!=null && params.getEndVisitorCountTime()!=null){
+            fb =FilterBuilders.andFilter(fb,
+                    FilterBuilders
+                            .rangeFilter("createTime")
+                            .from(params.getStartVisitTime())
+                            .to(params.getEndVisitorCountTime()));
         }
+        if(params.getStartDailyAvgVisitorTime()!=null && params.getEndDailyAvgVisitorTime()!=null){
+            fb =FilterBuilders.andFilter(fb,
+                    FilterBuilders
+                            .rangeFilter("createTime")
+                            .from(params.getStartDailyAvgVisitorTime())
+                            .to(params.getEndDailyAvgVisitorTime()));
+        }
+        if(params.getStartTimeShareAvgVisitorTime()!=null && params.getEndTimeShareAvgVisitorTime()!=null){
+            fb =FilterBuilders.andFilter(fb,
+                    FilterBuilders
+                            .rangeFilter("createTime")
+                            .from(params.getStartTimeShareAvgVisitorTime())
+                            .to(params.getEndTimeShareAvgVisitorTime()));
+        }
+        if(params.getStartRankingTime()!=null && params.getEndRankingTime()!=null){
+            fb =FilterBuilders.andFilter(fb,
+                    FilterBuilders
+                            .rangeFilter("createTime")
+                            .from(params.getStartRankingTime())
+                            .to(params.getEndRankingTime()));
+        }
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(searchType);
+        if(searchType == SearchType.QUERY_THEN_FETCH) {
+            builder.setFrom(0).setSize(Integer.MAX_VALUE);
+        }
+        builder.setQuery(qb);
 
-        response.setVisitorDtoList(dtos);
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("VisitorsysSearcherImpl query builder ："+builder);
 
+        SearchResponse searchResponse = builder.execute().actionGet();
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("VisitorsysSearcherImpl query searchResponse ："+searchResponse);
+        return searchResponse;
+    }
+
+
+    @Override
+    public GetStatisticsResponse countVisitors(GetStatisticsCommand cmd) {
+        GetStatisticsResponse response = new GetStatisticsResponse();
+        VisitorsysFlagType visitorsysFlagType = checkVisitorsysFlag(cmd.getStatsAllTimeCountFlag());
+        if(visitorsysFlagType == VisitorsysFlagType.YES){
+            response.setVisitorCount(searchVisitorCount(cmd));
+            response.setInvitedVisitorCount(searchInvitedVisitorCount(cmd));
+        }
+        if(cmd.getStartVisitorCountTime() != null && cmd.getEndVisitorCountTime()!=null){
+            SearchResponse searchResponse = searchTimeVisitorCount(cmd);
+            response.setTimeVisitorCount(searchResponse.getHits().getTotalHits());
+//            response.setVisitorCountStatsList(searchResponse);
+        }
         return response;
     }
 
+    private SearchResponse searchTimeVisitorCount(GetStatisticsCommand cmd) {
+        ListBookedVisitorParams params = new ListBookedVisitorParams();
+        params.setOwnerId(cmd.getOwnerId());
+        params.setOwnerType(cmd.getOwnerType());
+        params.setNamespaceId(cmd.getNamespaceId());
+        params.setSearchFlag(VisitorsysSearchFlagType.VISITOR_MANAGEMENT.getCode());
+        params.setStartVisitorCountTime(cmd.getStartVisitorCountTime());
+        params.setEndVisitorCountTime(cmd.getEndVisitorCountTime());
+        SearchResponse searchResponse = searchByAgg(params, SearchType.QUERY_THEN_FETCH);
+        return searchResponse;
+    }
+
+    private Long searchInvitedVisitorCount(GetStatisticsCommand cmd) {
+        ListBookedVisitorParams params = ConvertHelper.convert(cmd,ListBookedVisitorParams.class);
+        params.setSearchFlag(VisitorsysSearchFlagType.BOOKING_MANAGEMENT.getCode());
+        params.setVisitorType(VisitorsysVisitorType.BE_INVITED.getCode());
+        return searchResponse(params,SearchType.COUNT).getHits().getTotalHits();
+    }
+
+    private Long searchVisitorCount(GetStatisticsCommand cmd) {
+        ListBookedVisitorParams params = ConvertHelper.convert(cmd,ListBookedVisitorParams.class);
+        params.setSearchFlag(VisitorsysSearchFlagType.VISITOR_MANAGEMENT.getCode());
+        return searchResponse(params,SearchType.COUNT).getHits().getTotalHits();
+    }
+
+    /**
+     * 检查flag参数
+     * @param flag
+     * @return
+     */
+    private VisitorsysFlagType checkVisitorsysFlag(Byte flag) {
+        VisitorsysFlagType flagType = VisitorsysFlagType.fromCode(flag);
+        if(flagType ==null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor flag = "+flag);
+        }
+        return flagType;
+    }
+
+    @Override
+    public void syncVisitorsFromDb(Integer namespaceId) {
+        int pageSize = 200;
+        this.deleteAll();
+
+        ListBookedVisitorParams params = new ListBookedVisitorParams();
+        params.setSearchFlag(VisitorsysSearchFlagType.SYNCHRONIZATION.getCode());
+        params.setNamespaceId(namespaceId);
+        params.setPageSize(pageSize);
+        while(true){
+            List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitor(params);
+            for (VisitorSysVisitor visitorSysVisitor : list) {
+                feedDoc(ConvertHelper.convert(visitorSysVisitor, BaseVisitorDTO.class));
+            }
+            if(list.size()<pageSize){
+                break;
+            }
+            params.setPageAnchor(list.get(list.size()-1).getId());
+        }
+    }
+
+    @Override
+    public void syncVisitor(Integer namespaceId,Long visitorId) {
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(namespaceId, visitorId);
+        feedDoc(visitor);
+    }
+
+    @Override
+    public void syncVisitor(Object visitor) {
+        feedDoc(visitor);
+    }
     private List<BaseVisitorDTO> generateVisitorDtos(SearchResponse rsp) {
         List<BaseVisitorDTO> dtos = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
@@ -252,6 +403,10 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 if(visitTime!=null){
                     dto.setVisitTime(new Timestamp(Long.valueOf(visitTime.toString())));
                 }
+                Object createTime = source.get("createTime");
+                if(createTime!=null){
+                    dto.setCreateTime(new Timestamp(Long.valueOf(createTime.toString())));
+                }
                 Object visitStatus = source.get("visitStatus");
                 if(visitStatus!=null){
                     dto.setVisitStatus(Byte.valueOf(visitStatus.toString()));
@@ -290,35 +445,4 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         return dtos;
     }
 
-    @Override
-    public void syncVisitorsFromDb(Integer namespaceId) {
-        int pageSize = 200;
-        this.deleteAll();
-
-        ListBookedVisitorParams params = new ListBookedVisitorParams();
-        params.setSearchFlag(VisitorsysSearchFlagType.SYNCHRONIZATION.getCode());
-        params.setNamespaceId(namespaceId);
-        params.setPageSize(pageSize);
-        while(true){
-            List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitor(params);
-            for (VisitorSysVisitor visitorSysVisitor : list) {
-                feedDoc(ConvertHelper.convert(visitorSysVisitor, BaseVisitorDTO.class));
-            }
-            if(list.size()<pageSize){
-                break;
-            }
-            params.setPageAnchor(list.get(list.size()-1).getId());
-        }
-    }
-
-    @Override
-    public void syncVisitor(Integer namespaceId,Long visitorId) {
-        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(namespaceId, visitorId);
-        feedDoc(visitor);
-    }
-
-    @Override
-    public void syncVisitor(Object visitor) {
-        feedDoc(visitor);
-    }
 }

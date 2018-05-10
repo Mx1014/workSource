@@ -3,6 +3,7 @@ package com.everhomes.rest.visitorsys;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 
 /**
@@ -16,6 +17,7 @@ import java.sql.Timestamp;
  * <li>deviceVersion: (必填)设备版本</li>
  * <li>appVersion: (必填)app版本</li>
  * <li>deviceName: (必填)设备名称</li>
+ * <li>createTime: (必填)创建时间</li>
  * </ul>
  */
 public class BaseDeviceDTO {
@@ -29,6 +31,7 @@ public class BaseDeviceDTO {
     private String deviceVersion;
     private String deviceName;
     private String appVersion;
+    private Timestamp createTime;
 
     public Long getId() {
         return id;
@@ -108,6 +111,14 @@ public class BaseDeviceDTO {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override

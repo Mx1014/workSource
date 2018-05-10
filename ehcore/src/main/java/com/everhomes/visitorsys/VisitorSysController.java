@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestDoc(value = "visitorsys Controller", site = "core")
 @RestController
 @RequestMapping("/visitorsys")
@@ -200,6 +202,7 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("getStatistics")
 	@RestReturn(GetStatisticsResponse.class)
 	public RestResponse getStatistics(GetStatisticsCommand cmd) {
+		//todo
 		GetStatisticsResponse baseResponse = visitorSysService.getStatistics(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
@@ -387,7 +390,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("listDoorGuards")
 	@RestReturn(ListDoorGuardsResponse.class)
-	public RestResponse listDoorGuards(BaseVisitorsysCommand cmd) {
+	public RestResponse listDoorGuards(ListDoorGuardsCommand cmd) {
 		ListDoorGuardsResponse baseResponse = visitorSysService.listDoorGuards(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
@@ -404,8 +407,8 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("exportBookedVisitors")
 	@RestReturn(String.class)
-	public RestResponse exportBookedVisitors(ListBookedVisitorsCommand cmd) {
-		visitorSysService.listBookedVisitors(cmd);
+	public RestResponse exportBookedVisitors(ListBookedVisitorsCommand cmd,HttpServletResponse resp){
+		visitorSysService.exportBookedVisitors(cmd,resp);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -16,16 +16,18 @@ import java.util.List;
  * </ul>
  */
 public enum VisitorsysVisitStatus {
-	DELETED((byte)0),
-	NOT_VISIT((byte)1),
-	WAIT_CONFIRM_VISIT((byte)2),
-	HAS_VISITED((byte)3),
-	REJECTED_VISIT((byte)4);
+	DELETED((byte)0,"已删除"),
+	NOT_VISIT((byte)1,"未到访"),
+	WAIT_CONFIRM_VISIT((byte)2,"等待确认"),
+	HAS_VISITED((byte)3,"已到访"),
+	REJECTED_VISIT((byte)4,"已拒绝");
 
 	private byte code;
+	private String  desc;
 
-	private VisitorsysVisitStatus(byte code) {
+	private VisitorsysVisitStatus(byte code,String desc) {
 		this.code = code;
+		this.desc = desc;
 	}
 	
 	public byte getCode(){
@@ -46,4 +48,8 @@ public enum VisitorsysVisitStatus {
 	public static List<Byte> getNormalStatus() {
 		return new ArrayList<>(Arrays.asList(NOT_VISIT.getCode(),WAIT_CONFIRM_VISIT.getCode(),HAS_VISITED.getCode(),REJECTED_VISIT.getCode()));
 	}
+
+    public String getDesc() {
+		return desc;
+    }
 }

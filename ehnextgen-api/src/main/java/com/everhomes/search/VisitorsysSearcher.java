@@ -1,9 +1,7 @@
 // @formatter:off
 package com.everhomes.search;
 
-import com.everhomes.rest.visitorsys.BaseVisitorDTO;
-import com.everhomes.rest.visitorsys.ListBookedVisitorsCommand;
-import com.everhomes.rest.visitorsys.ListBookedVisitorsResponse;
+import com.everhomes.rest.visitorsys.*;
 import com.everhomes.visitorsys.ListBookedVisitorParams;
 
 import java.util.List;
@@ -49,4 +47,13 @@ public interface VisitorsysSearcher {
      * @param visitor
      */
     void syncVisitor(Object visitor);
+
+    /**
+     * 统计域空间下项目的预约和访客数量
+     * @param cmd
+     * @return
+     */
+
+    GetStatisticsResponse countVisitors(GetStatisticsCommand cmd);
+
 }

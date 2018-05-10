@@ -4,6 +4,12 @@ package com.everhomes.visitorsys;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.visitorsys.VisitorsysBaseConfig;
+import com.everhomes.rest.visitorsys.VisitorsysPassCardConfig;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +40,7 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 	public void createVisitorSysConfiguration(VisitorSysConfiguration visitorSysConfiguration) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVisitorSysConfigurations.class));
 		visitorSysConfiguration.setId(id);
+		beforeCreateOrUpdate(visitorSysConfiguration);
 		visitorSysConfiguration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysConfiguration.setCreatorUid(UserContext.current().getUser().getId());
 		visitorSysConfiguration.setOperateTime(visitorSysConfiguration.getCreateTime());
@@ -42,9 +49,30 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhVisitorSysConfigurations.class, null);
 	}
 
+	private void beforeCreateOrUpdate(VisitorSysConfiguration visitorSysConfiguration) {
+		if(visitorSysConfiguration.getBaseConfig()!=null) {
+			visitorSysConfiguration.setConfigJson(String.valueOf(visitorSysConfiguration.getBaseConfig()));
+		}else{
+			visitorSysConfiguration.setConfigJson(null);
+		}
+		if(visitorSysConfiguration.getFormConfig()!=null) {
+			visitorSysConfiguration.setConfigFormJson(String.valueOf(visitorSysConfiguration.getFormConfig()));
+		}else {
+			visitorSysConfiguration.setConfigFormJson(null);
+		}
+		if(visitorSysConfiguration.getPassCardConfig()!=null) {
+			visitorSysConfiguration.setConfigPassCardJson(String.valueOf(visitorSysConfiguration.getPassCardConfig()));
+		}else {
+			visitorSysConfiguration.setConfigPassCardJson(null);
+		}
+
+	}
+
 	@Override
 	public void updateVisitorSysConfiguration(VisitorSysConfiguration visitorSysConfiguration) {
 		assert (visitorSysConfiguration.getId() != null);
+		beforeCreateOrUpdate(visitorSysConfiguration);
+		visitorSysConfiguration.setConfigVersion(System.currentTimeMillis());
 		visitorSysConfiguration.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysConfiguration.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(visitorSysConfiguration);
@@ -73,9 +101,23 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 				.orderBy(Tables.EH_VISITOR_SYS_CONFIGURATIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysConfiguration.class));
 		if(list==null||list.size()==0){
-			return new VisitorSysConfiguration();
+			return null;
 		}
-		return list.get(0);
+		VisitorSysConfiguration configuration = list.get(0);
+		afterQuery(configuration);
+		return configuration;
+	}
+
+	private void afterQuery(VisitorSysConfiguration configuration) {
+		if(configuration.getConfigJson()!=null) {
+			configuration.setBaseConfig(JSONObject.parseObject(configuration.getConfigJson(), VisitorsysBaseConfig.class));
+		}
+		if(configuration.getConfigFormJson()!=null) {
+			configuration.setFormConfig(JSONObject.parseObject(configuration.getConfigFormJson(), new TypeReference<List<GeneralFormFieldDTO>>(){}));
+		}
+		if(configuration.getConfigPassCardJson()!=null) {
+			configuration.setPassCardConfig(JSONObject.parseObject(configuration.getConfigPassCardJson(), VisitorsysPassCardConfig.class));
+		}
 	}
 
 	private EhVisitorSysConfigurationsDao getReadWriteDao() {

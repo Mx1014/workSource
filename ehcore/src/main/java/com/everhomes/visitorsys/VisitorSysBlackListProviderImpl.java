@@ -4,6 +4,8 @@ package com.everhomes.visitorsys;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,7 @@ public class VisitorSysBlackListProviderImpl implements VisitorSysBlackListProvi
 		visitorSysBlackList.setCreatorUid(UserContext.current().getUser().getId());
 		visitorSysBlackList.setOperateTime(visitorSysBlackList.getCreateTime());
 		visitorSysBlackList.setOperatorUid(visitorSysBlackList.getCreatorUid());
+		visitorSysBlackList.setStatus(CommonStatus.ACTIVE.getCode());
 		getReadWriteDao().insert(visitorSysBlackList);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhVisitorSysBlackList.class, null);
 	}
@@ -47,6 +50,7 @@ public class VisitorSysBlackListProviderImpl implements VisitorSysBlackListProvi
 		assert (visitorSysBlackList.getId() != null);
 		visitorSysBlackList.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysBlackList.setOperatorUid(UserContext.current().getUser().getId());
+		visitorSysBlackList.setStatus(CommonStatus.ACTIVE.getCode());
 		getReadWriteDao().update(visitorSysBlackList);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhVisitorSysBlackList.class, visitorSysBlackList.getId());
 	}
@@ -63,7 +67,34 @@ public class VisitorSysBlackListProviderImpl implements VisitorSysBlackListProvi
 				.orderBy(Tables.EH_VISITOR_SYS_BLACK_LIST.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysBlackList.class));
 	}
-	
+
+	@Override
+	public List<VisitorSysBlackList> listVisitorSysBlackList(Integer namespaceId, String ownerType, Long ownerId,
+															 String keyWords, Integer pageSize, Long pageAnchor) {
+		Condition condition = Tables.EH_VISITOR_SYS_BLACK_LIST.NAMESPACE_ID.eq(namespaceId);
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.OWNER_TYPE.eq(ownerType));
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.OWNER_ID.eq(ownerId));
+		if(keyWords!=null){
+			Condition or = Tables.EH_VISITOR_SYS_BLACK_LIST.VISITOR_NAME.like("%" + keyWords + "%")
+					.or(Tables.EH_VISITOR_SYS_BLACK_LIST.VISITOR_PHONE.like("%" + keyWords + "%"));
+			condition.and(or);
+		}
+
+		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_BLACK_LIST)
+				.where(condition)
+				.orderBy(Tables.EH_VISITOR_SYS_BLACK_LIST.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysBlackList.class));
+	}
+
+	@Override
+	public void deleteBlackListById(Integer namespaceId, Long id) {
+		getReadWriteContext().update(Tables.EH_VISITOR_SYS_BLACK_LIST)
+				.set(Tables.EH_VISITOR_SYS_BLACK_LIST.STATUS, CommonStatus.INACTIVE.getCode())
+				.where(Tables.EH_VISITOR_SYS_BLACK_LIST.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_BLACK_LIST.ID.eq(id)).execute();
+	}
+
 	private EhVisitorSysBlackListDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -54,14 +54,6 @@ public class GetConfigurationResponse {
     //    private VisitorsysFormConfig formConfig;
     private VisitorsysPassCardConfig passCardConfig;
 
-    public GetConfigurationResponse() {
-        formConfig = generateDefaultFormConfig();
-    }
-
-    private List<GeneralFormFieldDTO> generateDefaultFormConfig() {
-        return null;
-    }
-
     public Integer getNamespaceId() {
         return namespaceId;
     }

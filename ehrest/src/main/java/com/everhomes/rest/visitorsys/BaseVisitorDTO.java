@@ -57,6 +57,7 @@ public class BaseVisitorDTO {
 
     private Long officeLocationId;
     private String officeLocationName;
+    private Timestamp createTime;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -216,6 +217,14 @@ public class BaseVisitorDTO {
 
     public void setOfficeLocationName(String officeLocationName) {
         this.officeLocationName = officeLocationName;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override

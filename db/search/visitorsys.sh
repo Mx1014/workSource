@@ -56,6 +56,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                     "type": "long",
                     "index": "not_analyzed"
                 },
+                "createTime" : {
+                    "type": "long",
+                    "index": "not_analyzed"
+                },
                 "visitTime" : {
                     "type": "long",
                     "index": "not_analyzed"

@@ -78,6 +78,15 @@ public class VisitorSysOfficeLocationProviderImpl implements VisitorSysOfficeLoc
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOfficeLocation.class));
 	}
 
+	@Override
+	public void deleteVisitorSysOfficeLocation(Integer namespaceId, Long id) {
+		getReadWriteContext().update(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS)
+				.set(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.STATUS,CommonStatus.INACTIVE.getCode())
+				.where(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_OFFICE_LOCATIONS.ID.eq(id))
+				.execute();
+	}
+
 	private EhVisitorSysOfficeLocationsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

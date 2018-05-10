@@ -45,6 +45,18 @@ public class ListBookedVisitorParams{
     private Long pageAnchor;
     private Integer pageSize;
 
+    //统计所用
+    private Long startVisitorCountTime;
+    private Long endVisitorCountTime;
+    private Long startDailyAvgVisitorTime;
+    private Long endDailyAvgVisitorTime;
+    private Long startTimeShareAvgVisitorTime;
+    private Long endTimeShareAvgVisitorTime;
+    private Long startRankingTime;
+    private Long endRankingTime;
+    private Long rankingPageAnchor;
+    private Integer rankingPageSize;
+
     public Byte getSearchFlag() {
         return searchFlag;
     }
@@ -179,6 +191,86 @@ public class ListBookedVisitorParams{
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getStartVisitorCountTime() {
+        return startVisitorCountTime;
+    }
+
+    public void setStartVisitorCountTime(Long startVisitorCountTime) {
+        this.startVisitorCountTime = startVisitorCountTime;
+    }
+
+    public Long getEndVisitorCountTime() {
+        return endVisitorCountTime;
+    }
+
+    public void setEndVisitorCountTime(Long endVisitorCountTime) {
+        this.endVisitorCountTime = endVisitorCountTime;
+    }
+
+    public Long getStartDailyAvgVisitorTime() {
+        return startDailyAvgVisitorTime;
+    }
+
+    public void setStartDailyAvgVisitorTime(Long startDailyAvgVisitorTime) {
+        this.startDailyAvgVisitorTime = startDailyAvgVisitorTime;
+    }
+
+    public Long getEndDailyAvgVisitorTime() {
+        return endDailyAvgVisitorTime;
+    }
+
+    public void setEndDailyAvgVisitorTime(Long endDailyAvgVisitorTime) {
+        this.endDailyAvgVisitorTime = endDailyAvgVisitorTime;
+    }
+
+    public Long getStartTimeShareAvgVisitorTime() {
+        return startTimeShareAvgVisitorTime;
+    }
+
+    public void setStartTimeShareAvgVisitorTime(Long startTimeShareAvgVisitorTime) {
+        this.startTimeShareAvgVisitorTime = startTimeShareAvgVisitorTime;
+    }
+
+    public Long getEndTimeShareAvgVisitorTime() {
+        return endTimeShareAvgVisitorTime;
+    }
+
+    public void setEndTimeShareAvgVisitorTime(Long endTimeShareAvgVisitorTime) {
+        this.endTimeShareAvgVisitorTime = endTimeShareAvgVisitorTime;
+    }
+
+    public Long getStartRankingTime() {
+        return startRankingTime;
+    }
+
+    public void setStartRankingTime(Long startRankingTime) {
+        this.startRankingTime = startRankingTime;
+    }
+
+    public Long getEndRankingTime() {
+        return endRankingTime;
+    }
+
+    public void setEndRankingTime(Long endRankingTime) {
+        this.endRankingTime = endRankingTime;
+    }
+
+    public Long getRankingPageAnchor() {
+        return rankingPageAnchor;
+    }
+
+    public void setRankingPageAnchor(Long rankingPageAnchor) {
+        this.rankingPageAnchor = rankingPageAnchor;
+    }
+
+    public Integer getRankingPageSize() {
+        return rankingPageSize;
+    }
+
+    public void setRankingPageSize(Integer rankingPageSize) {
+        this.rankingPageSize = rankingPageSize;
     }
 
     @Override

@@ -14,4 +14,6 @@ public interface VisitorSysOfficeLocationProvider {
 	List<VisitorSysOfficeLocation> listVisitorSysOfficeLocation();
 
 	List<VisitorSysOfficeLocation> listVisitorSysOfficeLocation(Integer namespaceId, String ownerType, Long ownerId, Integer pageSize, Long pageAnchor);
+
+    void deleteVisitorSysOfficeLocation(Integer namespaceId, Long id);
 }

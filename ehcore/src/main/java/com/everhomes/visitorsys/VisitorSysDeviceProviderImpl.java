@@ -4,6 +4,7 @@ package com.everhomes.visitorsys;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,27 @@ public class VisitorSysDeviceProviderImpl implements VisitorSysDeviceProvider {
 				.orderBy(Tables.EH_VISITOR_SYS_DEVICES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysDevice.class));
 	}
-	
+
+	@Override
+	public List<VisitorSysDevice> listVisitorSysDeviceByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_DEVICES)
+				.where(Tables.EH_VISITOR_SYS_DEVICES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_VISITOR_SYS_DEVICES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysDevice.class));
+	}
+
+	@Override
+	public void deleteDevice(Integer namespaceId, Long id) {
+		getReadWriteContext().update(Tables.EH_VISITOR_SYS_DEVICES)
+				.set(Tables.EH_VISITOR_SYS_DEVICES.STATUS,CommonStatus.INACTIVE.getCode())
+				.where(Tables.EH_VISITOR_SYS_DEVICES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.ID.eq(id))
+				.execute();
+	}
+
 	private EhVisitorSysDevicesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

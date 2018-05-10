@@ -21,19 +21,33 @@ import com.everhomes.util.StringHelper;
   *</ul>
   */
 public class VisitorsysBaseConfig {
-    private Byte visitorQrcodeFlag=1;
-    private Byte visitorInfoFlag=1;
-    private Byte trafficGuidanceFlag=1;
-    private Byte selfRegistrationFlag=1;
-    private Byte selfDefineWelComeFlag=1;
-    private Byte signSecrecyAgreementsFlag=0;
-    private Byte photosAllowedFlag=1;
-    private Byte AllowSkippingPhotosFlag=1;
-    private Byte followUpNumbersFlag=1;
-    private Byte doorGuardsFlag=0;
-    private Byte doorGuardsValidAfterConfirmedFlag=0;
+    private Byte visitorQrcodeFlag;
+    private Byte visitorInfoFlag;
+    private Byte trafficGuidanceFlag;
+    private Byte selfRegistrationFlag;
+    private Byte selfDefineWelComeFlag;
+    private Byte signSecrecyAgreementsFlag;
+    private Byte photosAllowedFlag;
+    private Byte AllowSkippingPhotosFlag;
+    private Byte followUpNumbersFlag;
+    private Byte doorGuardsFlag;
+    private Byte doorGuardsValidAfterConfirmedFlag;
     private String doorGuardId;
     private String doorGuardName;
+
+    public void generateDefaultValue(){
+        visitorQrcodeFlag=1;
+        visitorInfoFlag=1;
+        trafficGuidanceFlag=1;
+        selfRegistrationFlag=1;
+        selfDefineWelComeFlag=1;
+        signSecrecyAgreementsFlag=0;
+        photosAllowedFlag=1;
+        AllowSkippingPhotosFlag=1;
+        followUpNumbersFlag=1;
+        doorGuardsFlag=0;
+        doorGuardsValidAfterConfirmedFlag=0;
+    }
 
     public Byte getVisitorQrcodeFlag() {
         return visitorQrcodeFlag;

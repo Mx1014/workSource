@@ -6,6 +6,8 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @Author dengs[shuang.deng@zuolin.com]
  * @Date 2018/4/27 15:18
@@ -51,7 +53,7 @@ public interface VisitorSysService {
 
     CreateOrUpdateBlackListResponse createOrUpdateBlackList(CreateOrUpdateBlackListCommand cmd);
 
-    ListDoorGuardsResponse listDoorGuards(BaseVisitorsysCommand cmd);
+    ListDoorGuardsResponse listDoorGuards(ListDoorGuardsCommand cmd);
 
     GetInvitationLetterForWebResponse getInvitationLetterForWeb(GetInvitationLetterForWebCommand cmd);
 
@@ -86,4 +88,6 @@ public interface VisitorSysService {
     void deleteVisitorAppoint(GetBookedVisitorByIdCommand cmd);
 
     GetBookedVisitorByIdResponse getUIBookedVisitorById(GetUIBookedVisitorByIdCommand cmd);
+
+    void exportBookedVisitors(ListBookedVisitorsCommand cmd,HttpServletResponse resp);
 }
