@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
+ * <li>expiryTime：状态终止时间(app在超过这个时间之后要重新请求数据更新页面)</li> 
  * <li>punchIntervalNo：第几个打卡时间段</li> 
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
