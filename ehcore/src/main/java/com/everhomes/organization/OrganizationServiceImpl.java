@@ -1833,9 +1833,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setLongitude(cmd.getLongitude());
                 customer.setCorpWebsite(organization.getWebsite());
                 customer.setCorpLogoUri(cmd.getAvatar());
-                if(customer.getTrackingUid() == null) {
-                    customer.setTrackingUid(-1L);
-                }
+                customer.setPostUri(cmd.getPostUri());
+                customer.setHotline(cmd.getContactsPhone());
+                customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
             }

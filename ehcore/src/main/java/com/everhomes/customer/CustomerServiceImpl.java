@@ -821,6 +821,8 @@ public class CustomerServiceImpl implements CustomerService {
                     addressDTO.setEnterpriseId(customer.getOrganizationId());
                     addressDTOs.add(addressDTO);
                 });
+                command.setAttachments(cmd.getBanner());
+                command.setAddressDTOs(addressDTOs);
             }
             organizationService.updateEnterprise(command, true);
         } else {//没有企业的要新增一个
