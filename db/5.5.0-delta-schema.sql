@@ -32,3 +32,6 @@ ALTER TABLE `eh_service_hotlines` ADD COLUMN `status` TINYINT NOT NULL DEFAULT '
 
 -- by zheng
 ALTER TABLE `eh_configurations` modify `value` varchar(1024);
+
+-- add by yanjun 增加字段长度 201805091806
+ALTER TABLE `eh_service_module_apps` MODIFY COLUMN `custom_tag`  varchar(256)  NULL DEFAULT '';
