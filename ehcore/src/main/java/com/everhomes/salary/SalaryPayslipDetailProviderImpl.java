@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.salary.PayslipDetailStatus;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.DSLContext;
@@ -154,8 +155,8 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
     }
 
     @Override
-    public List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
-                                                             Long payslipId, String name, Byte status) {
+    public List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,Long payslipId, String name,
+                                                             Byte status, CrossShardListingLocator locator, Integer pageSize) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIP_DETAILS)
                 .where(Tables.EH_SALARY_PAYSLIP_DETAILS.OWNER_ID.eq(ownerId));
         if (null != payslipId) {
@@ -168,7 +169,10 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
         if (null != status) {
             step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.STATUS.eq(status));
         }
-        return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
+        if(null != locator && locator.getAnchor()!= null){
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.gt(locator.getAnchor()));
+        }
+        return step.orderBy(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.asc()).limit(pageSize).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslipDetail.class));
     }
 
     @Override

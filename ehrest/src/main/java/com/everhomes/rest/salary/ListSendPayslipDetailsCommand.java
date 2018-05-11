@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>payslipId: 工资条Id 必填</li>
  * <li>Name: 姓名 选填</li>
  * <li>status: 状态 不填-全部  0-已发送 1-已撤回  2-已确认 选填</li>
+ * <li>pageAnchor: </li>
+ * <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class ListSendPayslipDetailsCommand {
@@ -27,6 +29,10 @@ public class ListSendPayslipDetailsCommand {
 	private String name;
 	
 	private Byte status;
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
 
 	public ListSendPayslipDetailsCommand() {
 
@@ -94,4 +100,19 @@ public class ListSendPayslipDetailsCommand {
 		this.name = name;
 	}
 
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
 }

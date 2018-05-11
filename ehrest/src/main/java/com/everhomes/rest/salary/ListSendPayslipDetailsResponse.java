@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>返回值:
  * <li>details: 工资条详情</li>
  * <li>titiles: 额外的表头列表</li>
+ * <li>nextPageAnchor: 下页锚点</li>
  * </ul>
  */
 public class ListSendPayslipDetailsResponse {
@@ -19,14 +20,17 @@ public class ListSendPayslipDetailsResponse {
 	private List<PayslipDetailDTO> details;
 	
 	private List<String> titiles;
+
+	private Long nextPageAnchor;
 	public ListSendPayslipDetailsResponse() {
 
 	}
 
-	public ListSendPayslipDetailsResponse(List<PayslipDetailDTO> details, List<String> titiles) {
+	public ListSendPayslipDetailsResponse(List<PayslipDetailDTO> details, List<String> titiles, Long nextPageAnchor) {
 		super();
 		this.details = details;
 		this.titiles = titiles;
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	public List<PayslipDetailDTO> getDetails() {
@@ -50,4 +54,11 @@ public class ListSendPayslipDetailsResponse {
 		this.titiles = titiles;
 	}
 
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 }

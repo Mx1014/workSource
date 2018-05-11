@@ -76,7 +76,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2094,7 +2093,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public void sendPayslip(SendPayslipCommand cmd) {
+    public SendPayslipResponse sendPayslip(SendPayslipCommand cmd) {
         String salaryPeriodString = processSalaryPeriodString(cmd.getSalaryPeriod());
         SalaryPayslip sp = new SalaryPayslip();
         sp.setName(cmd.getPayslipName());
@@ -2122,7 +2121,7 @@ public class SalaryServiceImpl implements SalaryService {
             salaryPayslipDetailProvider.createSalaryPayslipDetail(spd);
             sendPayslipMessage(spd, salaryPeriodString);
         }
-
+        return new SendPayslipResponse(sp.getId());
     }
 
     private void sendPayslipMessage(SalaryPayslipDetail spd, String salaryPeriodString) {
@@ -2181,8 +2180,20 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if (null != cmd.getPageAnchor()) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
         List<SalaryPayslipDetail> results = salaryPayslipDetailProvider.listSalaryPayslipDetail(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getPayslipId(),
-                cmd.getName(), cmd.getStatus());
+                cmd.getName(), cmd.getStatus(), locator, pageSize + 1);
+
+        Long nextPageAnchor = null;
+        if (results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            nextPageAnchor = results.get(results.size() - 1).getId();
+        }
 //        LOGGER.debug("result " + StringHelper.toJsonString(results));
         if (null == results || results.size() == 0) {
             return null;
@@ -2195,7 +2206,7 @@ public class SalaryServiceImpl implements SalaryService {
         for (SalaryPeriodEmployeeEntityDTO entity : detialDTOs.get(0).getPayslipContent()) {
             titles.add(entity.getGroupEntityName());
         }
-        return new ListSendPayslipDetailsResponse(detialDTOs, titles);
+        return new ListSendPayslipDetailsResponse(detialDTOs, titles, nextPageAnchor);
     }
 
     private PayslipDetailDTO convertPayslipDetailDTO(SalaryPayslipDetail r) {
@@ -2320,14 +2331,18 @@ public class SalaryServiceImpl implements SalaryService {
             PayslipDetailDTO dto = convertPayslipDetailDTO(result);
             for (int i = 0; i < dto.getPayslipContent().size(); i++) {
                 SalaryPeriodEmployeeEntityDTO entityDTO = dto.getPayslipContent().get(i);
-                //当字段属于不可见的,或者值为空/0 不显示给客户端
-                if (invisibleKeys.contains(entityDTO.getGroupEntityName().trim()) ||
-                        "0".equals(entityDTO.getSalaryValue()) ||
+                //值为空/0 不显示给客户端
+                if ("0".equals(entityDTO.getSalaryValue()) ||
                         StringUtils.isBlank(entityDTO.getSalaryValue())) {
                     //app不用显示的
                     dto.getPayslipContent().remove(entityDTO);
                 } else {
-                    //不处理
+                    for(String invisibleKey : invisibleKeys){
+                        //当字段属于不可见的
+                        if(isContain(entityDTO.getGroupEntityName(),invisibleKey)){
+                            dto.getPayslipContent().remove(entityDTO);
+                        }
+                    }
                 }
             }
             dto.setPayslipContent(dto.getPayslipContent());

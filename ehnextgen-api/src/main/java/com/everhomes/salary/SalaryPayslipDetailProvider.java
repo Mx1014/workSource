@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +26,7 @@ public interface SalaryPayslipDetailProvider {
 	Integer countRevoke(Long payslipId);
 
 	List<SalaryPayslipDetail> listSalaryPayslipDetail(Long organizationId, Long ownerId,
-			Long payslipId, String name, Byte status);
+													  Long payslipId, String name, Byte status, CrossShardListingLocator locator, Integer pageSize);
 
 	List<SalaryPayslipDetail> listSalaryPayslipDetailBypayslipId(Long payslipId);
 

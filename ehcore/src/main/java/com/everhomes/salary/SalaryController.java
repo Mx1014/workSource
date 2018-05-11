@@ -3,6 +3,7 @@ package com.everhomes.salary;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.salary.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,42 +16,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.salary.ConfirmPayslipCommand;
-import com.everhomes.rest.salary.DeletePayslipCommand;
-import com.everhomes.rest.salary.ExportEmployeeSalaryTemplateCommand;
-import com.everhomes.rest.salary.ExportSalaryReportCommand;
-import com.everhomes.rest.salary.FileSalaryGroupCommand;
-import com.everhomes.rest.salary.FileSalaryGroupResponse;
-import com.everhomes.rest.salary.GetEmployeeEntitiesCommand;
-import com.everhomes.rest.salary.GetEmployeeEntitiesResponse;
-import com.everhomes.rest.salary.GetImportFileResultCommand;
-import com.everhomes.rest.salary.GetSalaryGroupStatusCommand;
-import com.everhomes.rest.salary.GetSalaryGroupStatusResponse;
-import com.everhomes.rest.salary.GetSalaryTaskStatusCommand;
-import com.everhomes.rest.salary.GetSalaryTaskStatusResponse;
-import com.everhomes.rest.salary.ImportPayslipCommand;
-import com.everhomes.rest.salary.ImportPayslipResponse;
-import com.everhomes.rest.salary.ListEnterprisesCommand;
-import com.everhomes.rest.salary.ListEnterprisesResponse;
-import com.everhomes.rest.salary.ListGroupEntitiesCommand;
-import com.everhomes.rest.salary.ListGroupEntitiesResponse;
-import com.everhomes.rest.salary.ListMonthPayslipSummaryCommand;
-import com.everhomes.rest.salary.ListMonthPayslipSummaryResponse;
-import com.everhomes.rest.salary.ListPayslipsDetailCommand;
-import com.everhomes.rest.salary.ListPayslipsDetailResponse;
-import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
-import com.everhomes.rest.salary.ListSalaryEmployeesResponse;
-import com.everhomes.rest.salary.ListSendPayslipDetailsCommand;
-import com.everhomes.rest.salary.ListSendPayslipDetailsResponse;
-import com.everhomes.rest.salary.ListUserPayslipsCommand;
-import com.everhomes.rest.salary.ListUserPayslipsResponse;
-import com.everhomes.rest.salary.ListYearPayslipSummaryCommand;
-import com.everhomes.rest.salary.ListYearPayslipSummaryResponse;
-import com.everhomes.rest.salary.NewSalaryMonthCommand;
-import com.everhomes.rest.salary.ResendPayslipCommand;
-import com.everhomes.rest.salary.RevokePayslipCommand;
-import com.everhomes.rest.salary.SendPayslipCommand;
-import com.everhomes.rest.salary.UpdateGroupEntitiesCommand;
 
 @RestController
 @RequestMapping("/salary")
@@ -281,10 +246,10 @@ public class SalaryController extends ControllerBase {
 	 * <b>URL: /salary/sendPayslip</b>
 	 */
 	@RequestMapping("sendPayslip")
-	@RestReturn(String.class)
+	@RestReturn(SendPayslipResponse.class)
 	public RestResponse sendPayslip(SendPayslipCommand cmd){
-		salaryService.sendPayslip(cmd);
-		return new RestResponse();
+		SendPayslipResponse resp = salaryService.sendPayslip(cmd);
+		return new RestResponse(resp);
 	}
 
 	/**
