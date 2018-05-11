@@ -234,6 +234,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -3568,9 +3569,11 @@ public class CustomerServiceImpl implements CustomerService {
             List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
             if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
                 customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
+            }else {
+                customer.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
             }
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
         }
     }
 
@@ -3625,7 +3628,10 @@ public class CustomerServiceImpl implements CustomerService {
             organizations.forEach((organization -> {
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
                 List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
-                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
+//                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
+                OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+                List<OrganizationAttachment> banners = organizationProvider.listOrganizationAttachments(organization.getId());
                 List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
                 if (addresses != null && addresses.size() > 0) {
                     addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
@@ -3639,12 +3645,12 @@ public class CustomerServiceImpl implements CustomerService {
                 if (request != null) {
                     communityId = request.getCommunityId();
                 }
-                createEnterpriseCustomer(organization, avatar, organizationDetail, communityId, addressDTOs);
+                createEnterpriseCustomer(organization, avatar, banners, org.getPostUri(), organizationDetail, communityId, addressDTOs);
             }));
         }
     }
 
-    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId, List<OrganizationAddressDTO> addressDTOs) {
+    private void createEnterpriseCustomer(Organization organization, String logo, List<OrganizationAttachment> banner , String postUri, OrganizationDetail enterprise, Long communityId, List<OrganizationAddressDTO> addressDTOs) {
 //        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
 //            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -3659,11 +3665,12 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setPostUri(postUri);
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
             //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-            this.updateCustomerEntryInfo(customer, addressDTOs);
+            this.updateCustomerEntryInfo(customer, addressDTOs,banner);
 
         } else {
             EnterpriseCustomer customer = new EnterpriseCustomer();
@@ -3676,23 +3683,22 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setPostUri(postUri);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
             //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-            this.updateCustomerEntryInfo(customer, addressDTOs);
+            this.updateCustomerEntryInfo(customer, addressDTOs,banner);
         }
     }
 
-    private void updateCustomerEntryInfo(EnterpriseCustomer customer, List<OrganizationAddressDTO> addressDTOs) {
+    private void updateCustomerEntryInfo(EnterpriseCustomer customer, List<OrganizationAddressDTO> addressDTOs, List<OrganizationAttachment> banner) {
         LOGGER.debug("updateCustomerEntryInfo customer id: {}, address: {}", customer.getId(), addressDTOs);
         if (addressDTOs != null && addressDTOs.size() > 0) {
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             List<Long> addressIds = new ArrayList<>();
             if (entryInfos != null && entryInfos.size() > 0) {
-                addressIds = entryInfos.stream().map(entryInfo -> {
-                    return entryInfo.getAddressId();
-                }).collect(Collectors.toList());
+                addressIds = entryInfos.stream().map(EhCustomerEntryInfos::getAddressId).collect(Collectors.toList());
             }
 
             for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
@@ -3709,6 +3715,17 @@ public class CustomerServiceImpl implements CustomerService {
                 info.setBuildingId(organizationAddressDTO.getBuildingId());
                 enterpriseCustomerProvider.createCustomerEntryInfo(info);
             }
+        }
+        if (banner != null && banner.size() > 0) {
+            List<AttachmentDescriptor> bannerList = new ArrayList<>();
+            banner.forEach((b) -> {
+                AttachmentDescriptor attachment = new AttachmentDescriptor();
+                attachment.setContentUri(b.getContentUri());
+                attachment.setContentUrl(b.getContentUrl());
+                attachment.setContentType(b.getContentType());
+                bannerList.add(attachment);
+            });
+            enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), bannerList);
         }
     }
 }

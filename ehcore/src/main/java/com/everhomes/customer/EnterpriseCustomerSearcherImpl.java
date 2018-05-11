@@ -57,6 +57,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/17.
@@ -510,7 +511,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCommunityId(customer.getCommunityId());
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
-        dto.setEntryInfos(entryInfos);
+        if (entryInfos != null && entryInfos.size() > 0) {
+            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+            dto.setEntryInfos(entryInfos);
+        }
         return dto;
     }
     
