@@ -1342,8 +1342,8 @@ public class CommunityServiceImpl implements CommunityService {
 					StringUtils.isNotBlank(r.getI())) {
 				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
 				data.setName(trim(r.getA()));
-				data.setAliasName(trim(r.getB()));
-				data.setAddress(trim(r.getC()));
+				data.setAliasName(trim(r.getC()));
+				data.setAddress(trim(r.getB()));
 				data.setLongitudeLatitude(trim(r.getD()));
 				data.setTrafficDescription(trim(r.getE()));
 				data.setAreaSize(trim(r.getF()));
