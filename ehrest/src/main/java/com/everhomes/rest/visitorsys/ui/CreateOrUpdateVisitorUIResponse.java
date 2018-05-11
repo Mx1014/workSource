@@ -1,13 +1,7 @@
 package com.everhomes.rest.visitorsys.ui;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.visitorsys.BaseVisitorDTO;
 import com.everhomes.rest.visitorsys.BaseVisitorInfoDTO;
-import com.everhomes.util.StringHelper;
-
-import java.sql.Timestamp;
-import java.util.List;
+import com.everhomes.rest.visitorsys.VisitorsysStatus;
 
 /**
  * <ul>
@@ -24,7 +18,7 @@ import java.util.List;
  * <li>inviterName: (选填)邀请者姓名,预约访客必填</li>
  * <li>plannedVisitTime: (必填)计划到访时间</li>
  * <li>visitTime: (选填)到访时间/登记时间</li>
- * <li>visitStatus: (必填)到访状态列表，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
+ * <li>visitStatus: (必填)到访状态列表，{@link VisitorsysStatus}</li>
  * <li>visitorType: (必填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
  * <li>enterpriseId: (选填)公司id，园区访客必填</li>
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>

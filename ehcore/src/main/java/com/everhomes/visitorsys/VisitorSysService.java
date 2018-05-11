@@ -43,7 +43,7 @@ public interface VisitorSysService {
 
     void deleteOfficeLocation(DeleteOfficeLocationCommand cmd);
 
-    GetConfigurationResponse getConfiguration(BaseVisitorsysCommand cmd);
+    GetConfigurationResponse getConfiguration(GetConfigurationCommand cmd);
 
     GetConfigurationResponse updateConfiguration(UpdateConfigurationCommand cmd);
 
@@ -65,21 +65,21 @@ public interface VisitorSysService {
 
     CreateOrUpdateVisitorUIResponse createOrUpdateUIVisitor(CreateOrUpdateVisitorUICommand cmd);
 
-    ListUIOfficeLocationsResponse listUIOfficeLocations(BaseVisitorsysUICommand cmd);
+    ListUIOfficeLocationsResponse listUIOfficeLocations(ListUIOfficeLocationsCommand cmd);
 
-    ListUICommunityOrganizationsResponse listUICommunityOrganizations(BaseVisitorsysUICommand cmd);
+    ListUICommunityOrganizationsResponse listUICommunityOrganizations(ListUICommunityOrganizationsCommand cmd);
 
     ListUIVisitReasonsResponse listUIVisitReasons(BaseVisitorsysUICommand cmd);
 
     void sendSMSVerificationCode(SendSMSVerificationCodeCommand cmd);
 
-    void confirmVerificationCode(ConfirmVerificationCodeCommand cmd);
+    ListBookedVisitorsResponse confirmVerificationCode(ConfirmVerificationCodeCommand cmd);
 
     GetHomePageConfigurationResponse getHomePageConfiguration();
 
-    GetEnterpriseFormResponse getEnterpriseForm(GetEnterpriseFormCommand cmd);
+    GetFormResponse getForm(GetFormCommand cmd);
 
-    GetEnterpriseFormForWebResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd);
+    GetFormForWebResponse getFormForWeb(GetFormForWebCommand cmd);
 
     void rejectVisitor(GetBookedVisitorByIdCommand cmd);
 
@@ -90,4 +90,8 @@ public interface VisitorSysService {
     GetBookedVisitorByIdResponse getUIBookedVisitorById(GetUIBookedVisitorByIdCommand cmd);
 
     void exportBookedVisitors(ListBookedVisitorsCommand cmd,HttpServletResponse resp);
+
+    GetConfigurationResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd);
+
+    void transferQrcode(TransferQrcodeCommand qrcode, HttpServletResponse resp);
 }

@@ -38,7 +38,7 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `follow_up_numbers` BIGINT COMMENT '随访人员数量',
   `invitation_no` VARCHAR(32) COMMENT '预约编号RG201804280001',
 -- 以下字段属于表单自定义字段，不好控制，所以放在json中存储
-  `invalid_time` DATETIME COMMENT '访邀失效时间',
+  `invalid_time` VARCHAR(32) COMMENT '访邀有效时长',
   `plate_no` VARCHAR(32) COMMENT '车牌号码',
   `id_number` VARCHAR(64) COMMENT '证件号码',
   `visit_floor` VARCHAR(128) COMMENT '到访楼层',

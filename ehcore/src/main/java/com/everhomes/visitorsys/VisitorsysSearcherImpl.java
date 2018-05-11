@@ -176,7 +176,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if(params.getBookingStatus()!=null){
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
             }else{
-                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysVisitStatus.DELETED.getCode())));
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
             }
             sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.DESC);
         }else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
@@ -190,7 +190,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if(params.getVisitStatus()!=null){
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitStatus", params.getVisitStatus()));
             }else {
-                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysVisitStatus.DELETED.getCode())));
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
         }

@@ -13,9 +13,16 @@ import java.util.List;
   *</ul>
   */
 
-public class GetEnterpriseFormForWebResponse {
+public class GetFormForWebResponse {
     @ItemType(GeneralFormFieldDTO.class)
     private List<GeneralFormFieldDTO> formConfig;
+
+    public GetFormForWebResponse(List<GeneralFormFieldDTO> formConfig) {
+        this.formConfig = formConfig;
+    }
+
+    public GetFormForWebResponse() {
+    }
 
     public List<GeneralFormFieldDTO> getFormConfig() {
         return formConfig;

@@ -8,7 +8,8 @@ import java.util.List;
 
 import com.everhomes.rest.visitorsys.VisitorsysOwnerType;
 import com.everhomes.rest.visitorsys.VisitorsysSearchFlagType;
-import com.everhomes.rest.visitorsys.VisitorsysVisitStatus;
+import com.everhomes.rest.visitorsys.VisitorsysStatus;
+import com.everhomes.rest.visitorsys.VisitorsysVisitorType;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SortField;
@@ -64,7 +65,13 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), VisitorSysVisitor.class);
 	}
-	
+
+	@Override
+	public VisitorSysVisitor findVisitorSysVisitorById(Long id) {
+		assert (id != null);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), VisitorSysVisitor.class);
+	}
+
 	@Override
 	public List<VisitorSysVisitor> listVisitorSysVisitor() {
 		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISITORS)
@@ -174,7 +181,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 	@Override
 	public void deleteVisitorSysVisitor(Integer namespaceId, Long visitorId) {
 		getReadWriteContext().update(Tables.EH_VISITOR_SYS_VISITORS)
-				.set(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS,VisitorsysVisitStatus.DELETED.getCode())
+				.set(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS, VisitorsysStatus.DELETED.getCode())
 				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.ID.eq(visitorId)).execute();
 	}
@@ -182,9 +189,27 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 	@Override
 	public void deleteVisitorSysVisitorAppoint(Integer namespaceId, Long visitorId) {
 		getReadWriteContext().update(Tables.EH_VISITOR_SYS_VISITORS)
-				.set(Tables.EH_VISITOR_SYS_VISITORS.BOOKING_STATUS,VisitorsysVisitStatus.DELETED.getCode())
+				.set(Tables.EH_VISITOR_SYS_VISITORS.BOOKING_STATUS, VisitorsysStatus.DELETED.getCode())
 				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.ID.eq(visitorId)).execute();
+	}
+
+	@Override
+	public List<VisitorSysVisitor> listVisitorSysVisitorByVisitorPhone(Integer namespaceId, String ownerType,
+																	   Long ownerId, String visitorPhone,
+																	   Timestamp startOfDay, Timestamp endOfDay) {
+
+		List<VisitorSysVisitor> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISITORS)
+				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_PHONE.eq(visitorPhone))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.gt(startOfDay))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.lt(endOfDay))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS.lt(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_TYPE.lt(VisitorsysVisitorType.BE_INVITED.getCode()))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
+		return list;
 	}
 
 	private EhVisitorSysVisitorsDao getReadWriteDao() {

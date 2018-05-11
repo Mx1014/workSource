@@ -1,9 +1,8 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.rest.visitorsys.VisitorsysStatus;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
@@ -13,8 +12,8 @@ import java.util.List;
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>keyWords: (选填)访客信息,访客姓名手机号码模糊搜索</li>
  * <li>visitorType: (选填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
- * <li>visitStatus: (选填)访客状态，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
- * <li>bookingStatus: (选填)预约状态，{@link com.everhomes.rest.visitorsys.VisitorsysVisitStatus}</li>
+ * <li>visitStatus: (选填)访客状态，{@link VisitorsysStatus}</li>
+ * <li>bookingStatus: (选填)预约状态，{@link VisitorsysStatus}</li>
  * <li>startPlannedVisitTime: (选填)计划到访时间开始，预约管理用</li>
  * <li>endPlannedVisitTime: (选填)计划到访时间结束，预约管理用</li>
  * <li>officeLocationId: (选填)办公地点id，企业访客模块用</li>

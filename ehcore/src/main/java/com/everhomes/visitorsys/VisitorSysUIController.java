@@ -87,15 +87,15 @@ public class VisitorSysUIController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/visitorsys/getEnterpriseForm</b>
+	 * <b>URL: /ui/visitorsys/getForm</b>
 	 * <p>
-	 * 5.根据选择的公司获取表单配置(园区访客用)-原生客户端
+	 * 5.根据Owner获取所在园区的表单，或者根据Owner和enterpriseId获取对应公司表单配置-原生客户端
 	 * </p>
 	 */
-	@RequestMapping("getEnterpriseConfiguration")
-	@RestReturn(GetEnterpriseFormResponse.class)
-	public RestResponse getEnterpriseForm(GetEnterpriseFormCommand cmd) {
-		GetEnterpriseFormResponse baseResponse = visitorSysService.getEnterpriseForm(cmd);
+	@RequestMapping("getForm")
+	@RestReturn(GetFormResponse.class)
+	public RestResponse getForm(GetFormCommand cmd) {
+		GetFormResponse baseResponse = visitorSysService.getForm(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -198,9 +198,9 @@ public class VisitorSysUIController extends ControllerBase {
 	@RequestMapping("confirmVerificationCode")
 	@RestReturn(ListBookedVisitorsResponse.class)
 	public RestResponse sendSMSVerificationCode(ConfirmVerificationCodeCommand cmd) {
-		visitorSysService.confirmVerificationCode(cmd);
+		ListBookedVisitorsResponse baseResponse = visitorSysService.confirmVerificationCode(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

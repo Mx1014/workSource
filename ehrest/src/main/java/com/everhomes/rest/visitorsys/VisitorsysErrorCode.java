@@ -16,6 +16,9 @@ public class VisitorsysErrorCode {
     public final static String VISITORSYS_PAIRINGCODE_LENGTH = "visitorsys.pairingcode.length";//配对码码长度，默认6
     public final static String VISITORSYS_INVITATION_LINK = "visitorsys.invitation.link";//访客管理邀请函地址模板 www.core.zuolin/visitorsys/invitation?id=dslfksdkfjdslfdsjlfasdjfl
     public static final String VISITORSYS_PAIRINGCODE_LIVE= "visitorsys.pairingcode.live";//配对码有效时长,默认60秒
+    public static final String VISITORSYS_VERIFICATIONCODE_LIVE= "visitorsys.verificationcode.live";//验证码对码有效时长,默认900秒
+    public final static String VISITORSYS_VERIFICATIONCODE_LENGTH = "visitorsys.verificationcode.length";//验证码码长度，默认6
+    public static final String VISITORSYS_MODLUENAME= "visitorsys.modluename";//模块名称
     //短信字段
     public final static String SMS_MODLUENAME = "modlueName";
     public final static String SMS_VERIFICATIONCODE = "verificationCode";
@@ -25,13 +28,17 @@ public class VisitorsysErrorCode {
 
     //redis缓存 前缀
     public final static String VISITORSYS_PAIRINGCODE_ = "visitorsys_pairingcode_";//配对码前缀
-    public static final String VISITORSYS_SUBJECT= "visitorsys_subject";//访客主题
+    public final static String VISITORSYS_VERIFICATIONCODE_ = "visitorsys_verificationcode_";//访客验证码前缀
+    public static final String VISITORSYS_SUBJECT= "visitorsys_subject";//访客ipad配对码验证监听的主题
 
 
     //异常码
     public final static String SCOPE = "visitorsys";
     public final static int ERROR_MUST_FILL = 180507001;  //必填项
     public final static int ERROR_PAIRING_TIMEOUT = 408;  //配对码验证超时
+    public final static int ERROR_DEVICE_NOT_FIND = 401;  //设备没找到
+    public final static int ERROR_VISITOR_NOT_FIND = 402;  //预约未找到
+    public final static int ERROR_ILLEGAL_VERIFICATIONCODE = 405;  //非法验证码
 
 
     //默认表单值
@@ -50,4 +57,6 @@ public class VisitorsysErrorCode {
             ",\"fieldExtra\":\"{\\\"limitWord\\\":100}\",\"fieldName\":\"visitAddresses\",\"fieldType\":\"SINGLE_LINE_TEXT\"" +
             ",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"}]";
 
+    //
+    public static final String SMS_MODLUENAME_CN= "【左邻访客】";//
 }

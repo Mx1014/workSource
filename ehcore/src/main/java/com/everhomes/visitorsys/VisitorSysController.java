@@ -7,6 +7,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
+import com.everhomes.rest.visitorsys.ui.GetFormCommand;
+import com.everhomes.rest.visitorsys.ui.GetFormResponse;
+import com.everhomes.rest.visitorsys.ui.TransferQrcodeCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -451,6 +454,41 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /visitorsys/getForm</b>
+	 * <p>
+	 * 26.根据Owner获取所在园区的表单，或者根据Owner和enterpriseId获取对应公司表单配置-后台管理
+	 * </p>
+	 */
+	@RequestMapping("getForm")
+	@RestReturn(GetFormResponse.class)
+	public RestResponse getForm(GetFormCommand cmd) {
+		GetFormResponse baseResponse = visitorSysService.getForm(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/transferQrcode</b>
+	 * <p>
+	 * 27.根据提供的qrcode，返回二维码流-后台管理
+	 * </p>
+	 */
+	@RequestMapping("transferQrcode")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse transferQrcode(TransferQrcodeCommand cmd, HttpServletResponse resp) {
+		visitorSysService.transferQrcode(cmd,resp);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /visitorsys/getConfigurationForWeb</b>
 	 * <p>
 	 * 1.获取配置-h5（客户端/微信端）
@@ -460,7 +498,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(GetConfigurationResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd) {
-		GetConfigurationResponse baseResponse = visitorSysService.getConfiguration(cmd);
+		GetConfigurationResponse baseResponse = visitorSysService.getConfigurationForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -469,16 +507,16 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /visitorsys/getEnterpriseFormForWeb</b>
+	 * <b>URL: /visitorsys/getFormForWeb</b>
 	 * <p>
-	 * 2.根据选择的公司获取公司配置(园区访客用)-h5（客户端/微信端）
+	 * 2..根据Owner获取所在园区的表单，或者根据Owner和enterpriseId获取对应公司表单配置-h5（客户端/微信端）
 	 * </p>
 	 */
-	@RequestMapping("getEnterpriseFormForWeb")
-	@RestReturn(GetEnterpriseFormForWebResponse.class)
+	@RequestMapping("getFormForWeb")
+	@RestReturn(GetFormForWebResponse.class)
 	@RequireAuthentication(false)
-	public RestResponse getEnterpriseFormForWeb(GetEnterpriseFormForWebCommand cmd) {
-		GetEnterpriseFormForWebResponse baseResponse = visitorSysService.getEnterpriseFormForWeb(cmd);
+	public RestResponse getFormForWeb(GetFormForWebCommand cmd) {
+		GetFormForWebResponse baseResponse = visitorSysService.getFormForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -568,7 +606,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
 	public RestResponse deleteVisitorAppointForWeb(GetBookedVisitorByIdCommand cmd) {
-		visitorSysService.deleteVisitor(cmd);
+		visitorSysService.deleteVisitorAppoint(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

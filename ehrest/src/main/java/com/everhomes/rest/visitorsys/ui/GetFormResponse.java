@@ -14,7 +14,7 @@ import java.util.List;
   *</ul>
   */
 
-public class GetEnterpriseFormResponse {
+public class GetFormResponse {
     @ItemType(GeneralFormFieldDTO.class)
     private List<GeneralFormFieldDTO> formConfig;
 
@@ -26,6 +26,12 @@ public class GetEnterpriseFormResponse {
         this.formConfig = formConfig;
     }
 
+    public GetFormResponse(List<GeneralFormFieldDTO> formConfig) {
+        this.formConfig = formConfig;
+    }
+
+    public GetFormResponse() {
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

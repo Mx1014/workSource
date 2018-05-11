@@ -13,14 +13,14 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseId: (必填)公司id</li>
  * </ul>
  */
-public class GetEnterpriseFormForWebCommand extends BaseVisitorsysCommand {
-    private Integer enterpriseId;
+public class GetFormForWebCommand extends BaseVisitorsysCommand {
+    private Long enterpriseId;
 
-    public Integer getEnterpriseId() {
+    public Long getEnterpriseId() {
         return enterpriseId;
     }
 
-    public void setEnterpriseId(Integer enterpriseId) {
+    public void setEnterpriseId(Long enterpriseId) {
         this.enterpriseId = enterpriseId;
     }
 

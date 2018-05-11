@@ -15,7 +15,7 @@ import java.util.List;
  * <li>REJECTED_VISIT((byte)4): 已拒绝（visitStatus 访客管理用）</li>
  * </ul>
  */
-public enum VisitorsysVisitStatus {
+public enum VisitorsysStatus {
 	DELETED((byte)0,"已删除"),
 	NOT_VISIT((byte)1,"未到访"),
 	WAIT_CONFIRM_VISIT((byte)2,"等待确认"),
@@ -25,7 +25,7 @@ public enum VisitorsysVisitStatus {
 	private byte code;
 	private String  desc;
 
-	private VisitorsysVisitStatus(byte code,String desc) {
+	private VisitorsysStatus(byte code, String desc) {
 		this.code = code;
 		this.desc = desc;
 	}
@@ -34,10 +34,10 @@ public enum VisitorsysVisitStatus {
 		return code;
 	}
 	
-	public static VisitorsysVisitStatus fromCode(Byte code) {
-		if (code != null) {
-			for (VisitorsysVisitStatus status : VisitorsysVisitStatus.values()) {
-				if (status.code == code.byteValue()) {
+	public static VisitorsysStatus fromBookingCode(Byte bookingCode) {
+		if (bookingCode != null) {
+			for (VisitorsysStatus status : getBookingStatus()) {
+				if (status.code == bookingCode.byteValue()) {
 					return status;
 				}
 			}
@@ -45,8 +45,31 @@ public enum VisitorsysVisitStatus {
 		return null;
 	}
 
-	public static List<Byte> getNormalStatus() {
-		return new ArrayList<>(Arrays.asList(NOT_VISIT.getCode(),WAIT_CONFIRM_VISIT.getCode(),HAS_VISITED.getCode(),REJECTED_VISIT.getCode()));
+	public static VisitorsysStatus fromVisitStatusCode(Byte visitStatusCode) {
+		if (visitStatusCode != null) {
+			for (VisitorsysStatus status : getVisitStatus()) {
+				if (status.code == visitStatusCode.byteValue()) {
+					return status;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 获取访客管理状态
+	 * @return
+	 */
+	public static List<VisitorsysStatus> getVisitStatus() {
+		return new ArrayList<>(Arrays.asList(DELETED,NOT_VISIT,HAS_VISITED));
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public static List<VisitorsysStatus> getBookingStatus() {
+		return new ArrayList<>(Arrays.asList(DELETED,WAIT_CONFIRM_VISIT,HAS_VISITED,REJECTED_VISIT));
 	}
 
     public String getDesc() {

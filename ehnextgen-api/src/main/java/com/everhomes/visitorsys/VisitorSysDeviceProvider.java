@@ -16,4 +16,6 @@ public interface VisitorSysDeviceProvider {
     List<VisitorSysDevice> listVisitorSysDeviceByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
 	void deleteDevice(Integer namespaceId, Long id);
+
+    VisitorSysDevice findVisitorSysDeviceByDeviceId(String deviceType, String deviceId);
 }

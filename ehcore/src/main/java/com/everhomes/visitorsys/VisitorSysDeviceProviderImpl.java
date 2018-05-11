@@ -85,6 +85,20 @@ public class VisitorSysDeviceProviderImpl implements VisitorSysDeviceProvider {
 				.execute();
 	}
 
+	@Override
+	public VisitorSysDevice findVisitorSysDeviceByDeviceId(String deviceType, String deviceId) {
+		List<VisitorSysDevice> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_DEVICES)
+				.where(Tables.EH_VISITOR_SYS_DEVICES.DEVICE_ID.eq(deviceId))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.DEVICE_TYPE.eq(deviceType))
+				.and(Tables.EH_VISITOR_SYS_DEVICES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_VISITOR_SYS_DEVICES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysDevice.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
+
 	private EhVisitorSysDevicesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

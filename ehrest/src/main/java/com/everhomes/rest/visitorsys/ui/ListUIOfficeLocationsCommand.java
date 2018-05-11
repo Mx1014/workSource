@@ -11,11 +11,21 @@ import com.everhomes.util.StringHelper;
  * <li>timestamp: (必填)当前时间戳</li>
  * <li>deviceType: (必填)设备类型，{@link com.everhomes.rest.visitorsys.VisitorsysDeviceType}</li>
  * <li>deviceId: (必填)设备唯一标识</li>
+ * <li>enterpriseId: (必填)公司Id</li>
  * <li>keyWords: (选填)关键字</li>
  * </ul>
  */
 public class ListUIOfficeLocationsCommand extends BaseVisitorsysUICommand{
+    private Long enterpriseId;
     private String keyWords;
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
 
     public String getKeyWords() {
         return keyWords;
