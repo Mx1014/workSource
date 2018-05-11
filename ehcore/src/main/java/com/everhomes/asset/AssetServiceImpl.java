@@ -470,7 +470,7 @@ public class AssetServiceImpl implements AssetService {
                 String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(null, msgScope, msgId, "zh_CN", pak.getVaribles(), "");
                 messageDto.setBody(notifyTextForApplicant);
                 messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-                if (StringUtils.isBlank(notifyTextForApplicant) && appGo) {
+                if (!StringUtils.isBlank(notifyTextForApplicant) && appGo) {
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING
                             , MessageChannelType.USER.getCode(),
                             uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());

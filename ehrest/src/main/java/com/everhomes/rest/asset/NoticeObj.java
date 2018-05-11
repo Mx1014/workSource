@@ -4,6 +4,9 @@ package com.everhomes.rest.asset;
 /**
  * Created by Wentian Wang on 2018/5/7.
  */
+
+import java.io.Serializable;
+
 /**
  *<ul>
  * <li>noticeObjType:催缴对象的类型</li>
@@ -11,7 +14,7 @@ package com.everhomes.rest.asset;
  * <li>noticeObjName:催缴对象的显示</li>
  *</ul>
  */
-public class NoticeObj {
+public class NoticeObj implements Serializable{
     private String noticeObjType;
     private Long noticeObjId;
     private String noticeObjName;
