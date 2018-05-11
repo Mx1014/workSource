@@ -833,7 +833,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 for (int i = 0; i < adminStrings.length; i++) {
                     String[] adminInfo = adminStrings[i].split("\\(");
                     String contactName = adminInfo[0];
-                    String contactToken = adminInfo[1];
+                    String contactToken = adminStrings[i].substring(adminStrings[i].indexOf("(")+1,adminStrings[i].indexOf(")"));
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
                     createOrganizationAdminCommand.setOrganizationId(enterpriseCustomer.getOrganizationId());
                     createOrganizationAdminCommand.setContactName(contactName);
