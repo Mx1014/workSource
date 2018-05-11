@@ -1,5 +1,7 @@
 package com.everhomes.rest.servicehotline;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * @author 黄明波
  *
@@ -25,5 +27,9 @@ public enum PrivilegeType {
 	public String getInfo() {
 		return this.info;
 	}
-
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
