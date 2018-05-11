@@ -22,6 +22,10 @@ public class ListMonthPayslipSummaryCommand {
 	
 	private String name;
 
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
 	public ListMonthPayslipSummaryCommand() {
 
 	}
@@ -70,4 +74,19 @@ public class ListMonthPayslipSummaryCommand {
 		this.name = name;
 	}
 
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
 }

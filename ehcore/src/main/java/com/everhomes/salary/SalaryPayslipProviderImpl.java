@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -92,7 +93,7 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
 
     @Override
     public List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId,
-                                                 String payslipYear, String name) {
+                                                 String payslipYear, String name, CrossShardListingLocator locator, Integer pageSize) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_PAYSLIPS)
                 .where(Tables.EH_SALARY_PAYSLIPS.OWNER_ID.eq(ownerId));
         if (null != organizationId) {
@@ -106,7 +107,10 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
             step = step.and(Tables.EH_SALARY_PAYSLIPS.NAME.in(name));
         }
 
-        return step.orderBy(Tables.EH_SALARY_PAYSLIPS.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslip.class));
+        if (null != locator && locator.getAnchor() != null) {
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.ID.gt(locator.getAnchor()));
+        }
+        return step.orderBy(Tables.EH_SALARY_PAYSLIPS.ID.asc()).limit(pageSize).fetch().map(r -> ConvertHelper.convert(r, SalaryPayslip.class));
 
     }
 

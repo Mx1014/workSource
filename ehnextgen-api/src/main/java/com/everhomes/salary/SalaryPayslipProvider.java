@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.util.List;
 
 public interface SalaryPayslipProvider {
@@ -13,7 +15,7 @@ public interface SalaryPayslipProvider {
 
 	List<SalaryPayslip> listSalaryPayslip();
 
-	List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId, String payslipYear, String Name);
+	List<SalaryPayslip> listSalaryPayslip(Long ownerId, Long organizationId, String payslipYear, String Name, CrossShardListingLocator locator, Integer pageSize);
 
 	void deleteSalaryPayslip(Long payslipId);
 

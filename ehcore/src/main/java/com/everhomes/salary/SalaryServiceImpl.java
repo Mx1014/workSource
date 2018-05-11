@@ -1962,7 +1962,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd) {
-        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOwnerId(), cmd.getOrganizationId(), cmd.getPayslipYear(), null);
+        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOwnerId(), cmd.getOrganizationId(), cmd.getPayslipYear(), null, null, Integer.MAX_VALUE - 1);
         if (null == results) {
             return null;
         }
@@ -2164,7 +2164,23 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListMonthPayslipSummaryResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd) {
-        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getSalaryPeriod(), cmd.getName());
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if (null != cmd.getPageAnchor()) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        List<SalaryPayslip> results = salaryPayslipProvider.listSalaryPayslip(cmd.getOrganizationId(), cmd.getOwnerId(),
+                cmd.getSalaryPeriod(), cmd.getName(), locator, pageSize + 1);
+
+        Long nextPageAnchor = null;
+        if (null == results || results.size() == 0) {
+            return null;
+        }
+        if (results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            nextPageAnchor = results.get(results.size() - 1).getId();
+        }
         return new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
             PayslipDTO dto = ConvertHelper.convert(r, PayslipDTO.class);
             dto.setPayslipId(r.getId());
@@ -2175,7 +2191,7 @@ public class SalaryServiceImpl implements SalaryService {
             dto.setViewCount(salaryPayslipDetailProvider.countView(r.getId()));
             dto.setRevokeCount(salaryPayslipDetailProvider.countRevoke(r.getId()));
             return dto;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toList()), nextPageAnchor);
     }
 
     @Override
@@ -2190,14 +2206,15 @@ public class SalaryServiceImpl implements SalaryService {
                 cmd.getName(), cmd.getStatus(), locator, pageSize + 1);
 
         Long nextPageAnchor = null;
+        if (null == results || results.size() == 0) {
+            return null;
+        }
         if (results.size() > pageSize) {
             results.remove(results.size() - 1);
             nextPageAnchor = results.get(results.size() - 1).getId();
         }
 //        LOGGER.debug("result " + StringHelper.toJsonString(results));
-        if (null == results || results.size() == 0) {
-            return null;
-        }
+
         List<PayslipDetailDTO> detialDTOs = results.stream().map(r -> {
             PayslipDetailDTO dto = convertPayslipDetailDTO(r);
             return dto;
@@ -2337,9 +2354,9 @@ public class SalaryServiceImpl implements SalaryService {
                     //app不用显示的
                     dto.getPayslipContent().remove(entityDTO);
                 } else {
-                    for(String invisibleKey : invisibleKeys){
+                    for (String invisibleKey : invisibleKeys) {
                         //当字段属于不可见的
-                        if(isContain(entityDTO.getGroupEntityName(),invisibleKey)){
+                        if (isContain(entityDTO.getGroupEntityName(), invisibleKey)) {
                             dto.getPayslipContent().remove(entityDTO);
                         }
                     }
