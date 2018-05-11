@@ -253,7 +253,7 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/connecting</b>
-     * <p>删除授权</p>
+     * <p>建立门禁websocket链接</p>
      * @return
      */
     @RequestMapping("connecting")
@@ -271,7 +271,7 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/disConnected</b>
-     * <p>删除授权</p>
+     * <p>断开门禁websocket链接</p>
      * @return
      */
     @RequestMapping("disConnected")
@@ -286,8 +286,8 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/syncDoorMessages</b>
-     * <p>删除授权</p>
+     * <b>URL: /aclink/syncWebsocketMessages</b>
+     * <p>消息同步</p>
      * @return
      */
     @RequestMapping("syncWebsocketMessages")
@@ -584,6 +584,23 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
         doorAccessService.remoteOpenDoor(cmd.getAuthId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/excuteMessage</b>
+     * <p>处理websocket发送的请求</p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("excuteMessage")
+    @RestReturn(value=String.class)
+    public RestResponse excuteMessage(@Valid AclinkWebSocketMessage cmd) {
+        doorAccessService.excuteMessage(cmd.getPayload());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
