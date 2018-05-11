@@ -177,6 +177,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -238,6 +239,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -544,10 +546,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setCalculationType(cmd.getCalculationType());
             updateCmd.setConfigId(cmd.getConfigId());
             updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+            //this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
-            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
-            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
+           // this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+           // this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
             // 创建一条初始读表记录
             ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
@@ -561,7 +563,25 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         meterSearcher.feedDoc(meter);
+        ExecutorUtil.submit(()->createMeterTask(meter));
         return toEnergyMeterDTO(meter, cmd.getNamespaceId());
+    }
+
+    private void createMeterTask(EnergyMeter meter) {
+        //task targetType null   planId 0
+        EnergyMeterTask task = new EnergyMeterTask();
+        task.setNamespaceId(meter.getNamespaceId());
+        task.setOwnerId(meter.getOwnerId());
+        task.setOwnerType(meter.getOwnerType());
+        task.setTargetId(meter.getCommunityId());
+        task.setPlanId(0L);
+        task.setMeterId(meter.getId());
+        task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
+        LocalDate date = LocalDate.now();
+        task.setExecutiveStartTime(Timestamp.valueOf(date.format(dateSF)));
+        task.setExecutiveExpireTime(Timestamp.valueOf(date.with(TemporalAdjusters.lastDayOfMonth()).format(dateSF)));
+        energyMeterTaskProvider.createEnergyMeterTask(task);
+        energyMeterTaskSearcher.feedDoc(task);
     }
 
     private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
@@ -2898,7 +2918,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
                     String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
                     EnergyAutoReadHandler handler = null;
-                    if (meter.getNamespaceId() == 999961 || meter.getNamespaceId() == 999992) {
+                    if (meter.getNamespaceId() == 999961) {
                          handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
                     }
                     if (handler != null) {
@@ -2911,10 +2931,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
                             log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
                             if (task != null) {
                                 log.setTaskId(task.getId());
+                                task.setReading(log.getReading());
+                                task.setStatus(EnergyTaskStatus.READ.getCode());
+                                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             }
-                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
                             log.setCommunityId(meter.getCommunityId());
                             log.setMeterId(meter.getId());
                             log.setNamespaceId(meter.getNamespaceId());
@@ -2928,6 +2951,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             }
                             dbProvider.execute(r -> {
                                 meterReadingLogProvider.createEnergyMeterReadingLog(log);
+                                energyMeterTaskProvider.updateEnergyMeterTask(task);
+                                energyMeterTaskSearcher.feedDoc(task);
                                 meter.setLastReading(log.getReading());
                                 meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
                                 meterProvider.updateEnergyMeter(meter);
@@ -2984,7 +3009,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         repeatSetting.setOwnerId(meters.get(0).getOwnerId());
                         repeatSetting.setOwnerType(meters.get(0).getOwnerType());
                         repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
-                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).format(autoDateSF)));
+                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
                         repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
                         repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
                         repeatSetting.setRepeatInterval(1);
@@ -5081,7 +5106,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public void testAutoReading() {
+    public void meterAutoReading() {
         LOGGER.debug("starting auto reading manual...");
         readMeterRemote();
         LOGGER.debug("ending auto reading manual...");

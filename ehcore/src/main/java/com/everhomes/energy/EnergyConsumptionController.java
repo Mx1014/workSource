@@ -814,7 +814,7 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(String.class)
     @RequestMapping("testAutoReadMeters")
     public RestResponse testAutoReadMeters() {
-        energyConsumptionService.testAutoReading();
+        energyConsumptionService.meterAutoReading();
         return success();
     }
 }
