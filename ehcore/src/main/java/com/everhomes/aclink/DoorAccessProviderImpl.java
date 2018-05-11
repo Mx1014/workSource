@@ -119,14 +119,16 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             if(locator.getAnchor() != null)
                 query.addConditions(Tables.EH_DOOR_ACCESS.ID.gt(locator.getAnchor()));
             query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
-            query.addLimit(count - objs.size());
-
+            //if count == 0 ,list all, by liuyilin 20180408 
+            if(count >0){
+            	query.addLimit(count + 1);
+            }
             query.fetch().map((r) -> {
                 objs.add(ConvertHelper.convert(r, DoorAccess.class));
                 return null;
             });
 
-            if(objs.size() >= count) {
+            if(count>0 && objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
                 return AfterAction.done;
             } else {
