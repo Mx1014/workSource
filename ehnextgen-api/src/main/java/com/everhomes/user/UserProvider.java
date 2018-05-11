@@ -169,4 +169,6 @@ public interface UserProvider {
     List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
 	
 	String findMobileByUid(Long contactId);
+
+    String findUserTokenOfUser(Long userId);
 }

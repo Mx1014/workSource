@@ -13,7 +13,7 @@ import java.util.Map;
  */
 
 public class AssetAppNoticePak {
-    private long uid;
+    private Long uid;
     private Integer templateId;
     private Map<String, String> varibles;
     private Boolean useTemplate;
@@ -26,11 +26,11 @@ public class AssetAppNoticePak {
         this.useTemplate = useTemplate;
     }
 
-    public long getUid() {
+    public Long getUid() {
         return uid;
     }
 
-    public void setUid(long uid) {
+    public void setUid(Long uid) {
         this.uid = uid;
     }
 

@@ -10,6 +10,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 
@@ -496,5 +497,5 @@ public interface OrganizationProvider {
 
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
 
-    List<Long> findActiveUidsByTargetTypeAndOrgId(String user, Long noticeObjId);
+	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
 }

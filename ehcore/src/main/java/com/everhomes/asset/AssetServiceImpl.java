@@ -444,6 +444,10 @@ public class AssetServiceImpl implements AssetService {
         for (int k = 0; k < uids.size(); k++) {
             try {
                 AssetAppNoticePak pak = uids.get(k);
+                //targetId为0的，也就是untrack的用户，不用发app信息
+                if(pak.getUid() == null){
+                    continue;
+                }
                 MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
                 messageDto.setSenderUid(2L);
@@ -473,7 +477,7 @@ public class AssetServiceImpl implements AssetService {
                 if (!StringUtils.isBlank(notifyTextForApplicant) && appGo) {
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING
                             , MessageChannelType.USER.getCode(),
-                            uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                            String.valueOf(pak.getUid()), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
             } catch (Exception e) {
                 LOGGER.error("WUYE BILL SENDING MESSAGE FAILED", e);
@@ -2995,7 +2999,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setTargetId(b.getTargetId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
-                    List<Long> userIds = new ArrayList<>();
+                    List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
                     for (NoticeObj obj : noticeObjs) {
                         Long noticeObjId = obj.getNoticeObjId();
                         String noticeObjType = obj.getNoticeObjType();
@@ -3003,19 +3007,23 @@ public class AssetServiceImpl implements AssetService {
                         switch (sourceTypeA) {
                             // 具体部门
                             case SOURCE_DEPARTMENT:
-                                userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                userIds.addAll(getAllMembersFromDepartment(noticeObjId, "USER","UNTRACK"));
                                 break;
                             case SOURCE_USER:
-                                userIds.add(noticeObjId);
+                                NoticeMemberIdAndContact c = new NoticeMemberIdAndContact();
+                                c.setTargetId(noticeObjId);
+                                c.setContactToken(userProvider.findUserTokenOfUser(noticeObjId));
+                                userIds.add(c);
                                 break;
                         }
                     }
 
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
-                    for(Long uid : userIds){
+                    for(NoticeMemberIdAndContact uid : userIds){
                         try {
                             NoticeInfo newInfo = CopyUtils.deepCopy(info);
-                            newInfo.setTargetId(uid);
+                            newInfo.setTargetId(uid.getTargetId());
+                            newInfo.setPhoneNums(uid.getContactToken());
                             newInfo.setTargetType(AssetPaymentStrings.EH_USER);
                             noticeInfoList.add(newInfo);
                         } catch (Exception e) {
@@ -3030,8 +3038,8 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
-    private List<Long> getAllMembersFromDepartment(Long noticeObjId) {
-        return organizationProvider.findActiveUidsByTargetTypeAndOrgId("USER", noticeObjId);
+    private List<NoticeMemberIdAndContact> getAllMembersFromDepartment(Long noticeObjId, String ... types) {
+        return organizationProvider.findActiveUidsByTargetTypeAndOrgId( noticeObjId,types);
     }
 
     @Override
@@ -3358,7 +3366,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setTargetId(b.getTargetId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
-                    List<Long> userIds = new ArrayList<>();
+                    List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
                     for (NoticeObj obj : noticeObjs) {
                         Long noticeObjId = obj.getNoticeObjId();
                         String noticeObjType = obj.getNoticeObjType();
@@ -3366,18 +3374,23 @@ public class AssetServiceImpl implements AssetService {
                         switch (sourceTypeA) {
                             // 具体部门
                             case SOURCE_DEPARTMENT:
-                                userIds.addAll(getAllMembersFromDepartment(noticeObjId));
+                                userIds.addAll(getAllMembersFromDepartment(noticeObjId, "USER","UNTRACK"));
                                 break;
                             case SOURCE_USER:
-                                userIds.add(noticeObjId);
+                                NoticeMemberIdAndContact c = new NoticeMemberIdAndContact();
+                                c.setTargetId(noticeObjId);
+                                c.setContactToken(userProvider.findUserTokenOfUser(noticeObjId));
+                                userIds.add(c);
                                 break;
                         }
                     }
+
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
-                    for(Long uid : userIds){
+                    for(NoticeMemberIdAndContact uid : userIds){
                         try {
                             NoticeInfo newInfo = CopyUtils.deepCopy(info);
-                            newInfo.setTargetId(uid);
+                            newInfo.setTargetId(uid.getTargetId());
+                            newInfo.setPhoneNums(uid.getContactToken());
                             newInfo.setTargetType(AssetPaymentStrings.EH_USER);
                             noticeInfoList.add(newInfo);
                         } catch (Exception e) {
