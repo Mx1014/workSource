@@ -1,9 +1,19 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>ownerId：所属机构Id</li>
+ * <li>ownerType：所属机构类型 0小区1企业2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
+ * <li>startStr：起始时间yyyy-MM-dd</li>
+ * <li>endStr：终止时间yyyy-MM-dd</li>
+ * <li>doorAccessGroupId：门禁组id</li>
+ * </ul>
+ */
 public class AuthVisitorStatisticCommand {
     @NotNull
     private Long ownerId;
@@ -17,6 +27,8 @@ public class AuthVisitorStatisticCommand {
     
     private String startStr;
     private String endStr;
+    
+    private Long doorAccessGroupId;
     
     public Long getStart() {
         return start;
@@ -57,7 +69,14 @@ public class AuthVisitorStatisticCommand {
     public void setEndStr(String endStr) {
         this.endStr = endStr;
     }
-    @Override
+    
+    public Long getDoorAccessGroupId() {
+		return doorAccessGroupId;
+	}
+	public void setDoorAccessGroupId(Long doorAccessGroupId) {
+		this.doorAccessGroupId = doorAccessGroupId;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
