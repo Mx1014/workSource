@@ -725,4 +725,10 @@ public interface OrganizationService {
 	 */
 	void deleteWorkPlacesByOrgId(DeleteWorkPlacesCommand cmd);
 
+	/**
+	 * 根据公司ID和域空间ID来删除公司以及相应的信息
+	 * @param cmd
+	 */
+	void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd);
+
 }

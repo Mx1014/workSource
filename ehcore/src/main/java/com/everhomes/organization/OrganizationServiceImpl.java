@@ -13381,6 +13381,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    /**
+     * 根据公司ID和域空间ID来删除公司以及相应的信息
+     * @param cmd
+     */
+    @Override
     public void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd){
         //1.首先需要进行非空校验
         if(cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){

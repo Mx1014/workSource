@@ -1794,6 +1794,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			task = importFileService.executeTask(() -> {
 				ImportFileResponse response = new ImportFileResponse();
 				List<ImportApartmentDataDTO> datas = handleImportApartmentData(resultList);
+				//
+
 				if(datas.size() > 0){
 					//设置导出报错的结果excel的标题
 					response.setTitle(datas.get(0));
@@ -2091,8 +2093,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
-				data.setBuildingName(trim(r.getA()));
-				data.setApartmentName(trim(r.getB()));
+				//在将buildingName封装在ImportApartmentDataDTO对象之前，我们需要
+				data.setBuildingName(trim(r.getB()));
+				data.setApartmentName(trim(r.getA()));
 				data.setStatus(trim(r.getC()));
 
                 //产品变更模板

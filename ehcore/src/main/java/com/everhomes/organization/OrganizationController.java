@@ -1609,7 +1609,7 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse destoryOrganizationByOrgId(DestoryOrganizationCommand cmd){
         RestResponse response = new RestResponse();
-        //// TODO: 2018/5/9
+        organizationService.destoryOrganizationByOrgId(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
