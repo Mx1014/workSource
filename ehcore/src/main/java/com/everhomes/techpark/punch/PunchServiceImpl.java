@@ -8224,7 +8224,7 @@ public class PunchServiceImpl implements PunchService {
 	        for (; startCalendar.before(endCalendar); ) {
 	        	//循环公司
 	        	String startDayString = dateSF.get().format(startCalendar);
-	        	startCalendar.add(Calendar.DAY_OF_MONTH, 1);
+	        	startCalendar.add(Calendar.MONTH, 1);
 	        	String endDayString = dateSF.get().format(startCalendar);
 	        	List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(startDayString, endDayString);
 	        	if(null != enterpriseIds){
