@@ -2363,6 +2363,8 @@ public class SalaryServiceImpl implements SalaryService {
                         //当字段属于不可见的
                         if (isContain(entityDTO.getGroupEntityName(), invisibleKey)) {
                             dto.getPayslipContent().remove(entityDTO);
+                            i--;
+                            break;
                         }
                     }
                 }
