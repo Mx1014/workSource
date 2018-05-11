@@ -9,21 +9,31 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>moreCardRouter: 跳转更多路由</li>
- *     <li>cards: 卡片信息{@link OPPushCard} </li>
+ *     <li>moduleId: moduleId</li>
+ *     <li>instanceConfig: instanceConfig</li>
+ *     <li>cards: 卡片信息{@link OPPushCard}</li>
  * </ul>
  */
 public class ListOPPushCardsResponse {
 
-    private String moreCardRouter;
+    private Long moduleId;
+    private String instanceConfig;
     private List<OPPushCard> cards;
 
-    public String getMoreCardRouter() {
-        return moreCardRouter;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setMoreCardRouter(String moreCardRouter) {
-        this.moreCardRouter = moreCardRouter;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public String getInstanceConfig() {
+        return instanceConfig;
+    }
+
+    public void setInstanceConfig(String instanceConfig) {
+        this.instanceConfig = instanceConfig;
     }
 
     public List<OPPushCard> getCards() {

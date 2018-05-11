@@ -22,7 +22,6 @@ import com.everhomes.rest.acl.ServiceModuleEntryConstans;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
@@ -357,7 +356,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
 
-		List<AppDTO> appDtos = new ArrayList<>();
+		List<ServiceModuleAppDTO> appDtos = new ArrayList<>();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
@@ -392,17 +391,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
 
-				AppDTO appDTO = new AppDTO();
+				ServiceModuleAppDTO appDTO = new ServiceModuleAppDTO();
 				appDTO.setName(app.getName());
 				if(app.getIconUri() != null){
 					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
 					appDTO.setIconUrl(url);
-				}
-
-				ServiceModuleRouterHandler handler = serviceModuleService.getServiceModuleRouterHandler(app.getModuleId());
-				if(handler != null){
-					String router = handler.getRouter(app);
-					appDTO.setRouter(router);
 				}
 				appDtos.add(appDTO);
 			}
