@@ -391,19 +391,19 @@ public class PmsyServiceImpl implements PmsyService{
 		Integer namespaceId = UserContext.current().getNamespaceId();
 		Long userId = user.getId();
 		
-		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
 		if(pmsyCommunity == null){
 			LOGGER.error("pmsyCommunity relation is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"pmsyCommunity relation is not exist.");
-		}
+		}*/
 		PmsyPayer payer = pmsyProvider.findPmPayersById(cmd.getPmPayerId());
 		
 		PmsyOrder order = new PmsyOrder();
 		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		order.setCreatorUid(userId);
 		order.setNamespaceId(namespaceId);
-		order.setOwnerId(pmsyCommunity.getCommunityId());
+		//order.setOwnerId(pmsyCommunity.getCommunityId());
 		order.setOwnerType(cmd.getOwnerType());
 		order.setStatus(PmsyOrderStatus.UNPAID.getCode());
 		order.setUserContact(payer.getUserContact());
