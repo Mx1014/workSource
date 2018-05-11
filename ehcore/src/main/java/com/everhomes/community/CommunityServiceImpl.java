@@ -1275,13 +1275,14 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 
-		if (StringUtils.isEmpty(data.getAddress())) {
+/*		if (StringUtils.isEmpty(data.getAddress())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
 			log.setData(data);
 			log.setErrorLog("address cannot be empty");
 			return log;
-		}
+		}*/
 
+/*
 		if (StringUtils.isEmpty(data.getContactor())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
 			log.setData(data);
@@ -1302,6 +1303,7 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("latitude longitude error");
 			return log;
 		}
+*/
 
 		return null;
 	}
