@@ -2308,7 +2308,8 @@ public class SalaryServiceImpl implements SalaryService {
             return null;
         }
         ListUserPayslipsResponse response = new ListUserPayslipsResponse(new ArrayList<>());
-        Map<String, List<MonthPayslipDetailDTO>> resultMap = new HashedMap();
+        // Display elements
+        SortedMap<String, List<MonthPayslipDetailDTO>> resultMap = new TreeMap<>();
         for (SalaryPayslipDetail spd : results) {
             if (null != spd) {
                 MonthPayslipDetailDTO dto = new MonthPayslipDetailDTO();
@@ -2322,7 +2323,10 @@ public class SalaryServiceImpl implements SalaryService {
                 resultMap.get(year).add(dto);
             }
         }
-        for (Entry<String, List<MonthPayslipDetailDTO>> entry : resultMap.entrySet()) {
+        Iterator i = resultMap.entrySet().iterator();
+
+        while (i.hasNext()) {
+            Map.Entry<String, List<MonthPayslipDetailDTO>> entry = (Map.Entry) i.next();
             PayslipYearDTO yearDTO = new PayslipYearDTO(entry.getKey(), entry.getValue());
             Collections.sort(yearDTO.getMonthPayslipDetails());
             response.getPayslipYears().add(yearDTO);
