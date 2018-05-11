@@ -101,6 +101,15 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return null;
     }
 
+    /**   
+    * @Function: XiaomaoParkingVendorHandler.java
+    * @Description: 月卡充值
+    *
+    * @version: v1.0.0
+    * @author:	 黄明波
+    * @date: 2018年5月10日 下午2:35:05 
+    *
+    */
     private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
         XiaomaoCard card = getCard(order.getPlateNumber(), order.getParkingLotId());
@@ -264,7 +273,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }
         long nowTime = getStartTimeMillis();
         Timestamp timestampStart = new Timestamp(nowTime);
-		Timestamp timestampEnd = getCardEndTime(nowTime, order.getMonthCount().intValue());
+		Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(nowTime, order.getMonthCount().intValue());
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 
@@ -385,11 +394,6 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setOrderToken(tempFee.getOrderId());
 		dto.setRemainingTime(tempFee.getTimeOut());
 		
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (flag) {
-			dto.setPrice(new BigDecimal(0.01));
-		}
-		
 		return dto;
 
 	}    
@@ -483,7 +487,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
 			long now = getStartTimeMillis();
 			cardInfoDTO.setOpenDate(now);
-			cardInfoDTO.setExpireDate(getCardEndTime(now, requestMonthCount).getTime());
+			cardInfoDTO.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
 
 			// 根据配置设定收费标准，默认按实际天数，即ParkingCardExpiredRechargeType.ACTUAL(2)
 			if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
@@ -528,11 +532,11 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 	
 	/**   
 	* @Function: XiaomaoParkingVendorHandler.java
-	* @Description: 根据source时间戳增加mounth个月后的时间
+	* @Description: 月卡充值时使用，像深圳湾生态园的机制一样。
 	*
 	*/
 	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
-		return Utils.getTimestampByAddNatureMonth(expireTime, addMounthNum);
+		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
 	}
 	
 	private final List<XiaomaoCardType> listCardTypes(Long parkingLot) {
