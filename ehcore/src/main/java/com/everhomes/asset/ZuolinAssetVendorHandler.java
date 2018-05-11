@@ -902,7 +902,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     // stringbuilder append null results in 'null' str
                     // , thus hereby I use emtpy string to replace 'null' str by wentian @2018.5.11
                     if(StringUtils.isBlank(dto.getAddressStr())){
-                        dto.setAddressStr("");
+                        dto.setAddressStr(dto.getAddressStr().replace("null","").trim());
                     }
                     tabBills.add(dto);
                 }
