@@ -116,6 +116,10 @@ public class CommunityProviderImpl implements CommunityProvider {
         long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
 
         community.setId(id);
+
+        if(community.getCommunityNumber() == null){
+            community.setCommunityNumber("L"  + id);
+        }
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         community.setCreatorUid(creatorId);
         community.setUuid(UUID.randomUUID().toString());
