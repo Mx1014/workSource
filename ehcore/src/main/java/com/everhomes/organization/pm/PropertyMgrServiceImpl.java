@@ -2413,6 +2413,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		communityProvider.updateBuilding(building);
 		communityProvider.updateCommunity(community);
+		//删除门牌
+		//// TODO: 2018/5/11
+		addressProvider.deleteAddressById(cmd.getId());
 	}
 
 	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
