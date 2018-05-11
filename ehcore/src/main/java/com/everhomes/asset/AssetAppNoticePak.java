@@ -2,6 +2,7 @@
 package com.everhomes.asset;
 
 
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import java.util.HashMap;
@@ -17,6 +18,11 @@ public class AssetAppNoticePak {
     private Integer templateId;
     private Map<String, String> varibles;
     private Boolean useTemplate;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public Boolean getUseTemplate() {
         return useTemplate;

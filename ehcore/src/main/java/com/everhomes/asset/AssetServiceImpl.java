@@ -401,14 +401,14 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }catch (Exception e){
                     smsGo = false;
-                    LOGGER.error("sms notice failed, noticeinfo = {}",noticeInfo, e);
+                    LOGGER.error("sms notice failed once, noticeinfo = {}",noticeInfo, e);
                 }
                 if(smsGo) smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
             }
         } catch(Exception e){
-            LOGGER.error("YZX MAIL SEND FAILED");
+            LOGGER.error("sms notice failed once",e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "YZX MAIL SEND FAILED");
+                    "sms notice failed once");
         }
         //客户在系统内，把需要推送的uid放在list中
         for (int i = 0; i < noticeInfos.size(); i++) {
@@ -3371,6 +3371,11 @@ public class AssetServiceImpl implements AssetService {
                         Long noticeObjId = obj.getNoticeObjId();
                         String noticeObjType = obj.getNoticeObjType();
                         FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        if(sourceTypeA == null){
+                            LOGGER.error("sourceType faild to fromcode, noticeObjType={},noticeConfigMap.getConfigId={}"
+                                    ,noticeObjType, noticeConfigMap.get(b.getId()).getId());
+                            continue;
+                        }
                         switch (sourceTypeA) {
                             // 具体部门
                             case SOURCE_DEPARTMENT:

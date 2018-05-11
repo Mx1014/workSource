@@ -4,6 +4,7 @@ package com.everhomes.asset;
 
 import com.everhomes.rest.asset.NoticeConfig;
 import com.everhomes.rest.asset.NoticeObj;
+import com.everhomes.util.StringHelper;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -139,6 +140,11 @@ public class NoticeInfo implements Serializable{
     public List<NoticeObj> getNoticeObjs() {
 
         return noticeObjs;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
     public void setNoticeObjs(List<NoticeObj> noticeObjs) {
