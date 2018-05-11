@@ -728,7 +728,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         log.setOperationTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
         Organization department = organizationProvider.findOrganizationById(cmd.getDepartmentIds().get(0));
         log.setStringTag1(department.getName());
-        log.setStringTag2(convertToArchivesInfo(cmd.getEmployeeType(), ArchivesParameter.EMPLOYEE_TYPE));
+        log.setStringTag2(convertToArchivesInfo(cmd.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
         log.setStringTag3(cmd.getMonths().toString() + "个月");
         log.setOperatorUid(userId);
         log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));

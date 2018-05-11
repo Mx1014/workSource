@@ -246,7 +246,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.eq(detailId));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.le(ArchivesUtil.currentDate()));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesConfigurationStatus.PENDING.getCode()));
         return query.fetchAnyInto(ArchivesOperationalConfiguration.class);
     }
