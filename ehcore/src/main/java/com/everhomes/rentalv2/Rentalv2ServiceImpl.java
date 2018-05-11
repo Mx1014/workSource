@@ -4209,7 +4209,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void onOrderCancel(RentalOrder order) {
 		//终止工作流
 		FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
-		if(null != flowcase && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
+		if(null != flowcase && !FlowCaseStatus.ABSORTED.getCode().equals(flowcase.getStatus()) && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
 			FlowAutoStepDTO dto = new FlowAutoStepDTO();
 			dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 			dto.setFlowCaseId(flowcase.getId());
