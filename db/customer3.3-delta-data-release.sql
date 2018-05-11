@@ -1,6 +1,6 @@
 -- 删除管理员设置界面的企业管理module
-DELETE FROM eh_service_modules WHERE id = 33000;
-DELETE  FROM  eh_service_module_apps WHERE  module_id = 33000;
+--  DELETE FROM eh_service_modules WHERE id = 33000;
+-- DELETE  FROM  eh_service_module_apps WHERE  module_id = 33000;
 
 -- 企业客户管理增加的权限 将企业管理中的管理员作为权限项  by jiarui
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ('21115', '0', '设置管理员', '企业客户管理 设置管理员', NULL);
