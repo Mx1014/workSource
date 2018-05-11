@@ -118,9 +118,12 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		if(null != flowCase.getReferId()){
 			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		}
-		CancelRentalBillCommand cmd = new CancelRentalBillCommand();
-		cmd.setRentalBillId(order.getId());
-		rentalv2Service.cancelRentalBill(cmd);
+		if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
+				&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode()) {
+			CancelRentalBillCommand cmd = new CancelRentalBillCommand();
+			cmd.setRentalBillId(order.getId());
+			rentalv2Service.cancelRentalBill(cmd,false);
+		}
 
 	}
 
