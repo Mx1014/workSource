@@ -3701,7 +3701,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public void cancelRentalBill(CancelRentalBillCommand cmd) {
+	public void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsordFlow) {
 
 		Long timestamp = System.currentTimeMillis();
 
@@ -3769,7 +3769,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
-			onOrderCancel(order);
+			onOrderCancel(order,ifAbsordFlow);
 			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
 				String[] ids = order.getDoorAuthId().split(",");
 				for (String id:ids)
@@ -4206,10 +4206,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public void onOrderCancel(RentalOrder order) {
+	public void onOrderCancel(RentalOrder order,boolean ifAbsordFlow) {
 		//终止工作流
 		FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
-		if(null != flowcase && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
+		if(null != flowcase && ifAbsordFlow && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
 			FlowAutoStepDTO dto = new FlowAutoStepDTO();
 			dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 			dto.setFlowCaseId(flowcase.getId());

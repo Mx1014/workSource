@@ -130,10 +130,10 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                         buildingList.add(r.getBuildingId().toString());
                     });
                     if (!buildingList.isEmpty()) {
-                        builder.field("buildingId", String.join("|", addressList));
+                        builder.field("buildingId", String.join("|", buildingList));
                     }
                     if (!addressList.isEmpty()) {
-                        builder.field("addressId", String.join("|", buildingList));
+                        builder.field("addressId", String.join("|", addressList));
                     }
                 }
             }
