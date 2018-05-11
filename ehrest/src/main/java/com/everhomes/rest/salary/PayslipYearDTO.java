@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>monthPayslipDetails: 工资条列表{@link com.everhomes.rest.salary.MonthPayslipDetailDTO}</li>
  * </ul>
  */
-public class PayslipYearDTO {
+public class PayslipYearDTO implements Comparable {
 	private String year;
 
     private List<MonthPayslipDetailDTO> monthPayslipDetails;
@@ -45,5 +45,16 @@ public class PayslipYearDTO {
 
 	public void setMonthPayslipDetails(List<MonthPayslipDetailDTO> monthPayslipDetails) {
 		this.monthPayslipDetails = monthPayslipDetails;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		try {
+			PayslipYearDTO dto = (PayslipYearDTO) o;
+				return Integer.valueOf(this.getYear()) < Integer.valueOf(this.getYear()) ? 1 : -1;
+		} catch (Exception e) {
+			//pass
+		}
+		return 0;
 	}
 }

@@ -2331,6 +2331,7 @@ public class SalaryServiceImpl implements SalaryService {
             Collections.sort(yearDTO.getMonthPayslipDetails());
             response.getPayslipYears().add(yearDTO);
         }
+        Collections.sort(response.getPayslipYears());
         return response;
     }
 
