@@ -223,7 +223,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         final AclinkWebSocketHandler handler = this;
         
         if(cmd.getPayload() != null) {
-            LOGGER.info("Got reply=" + cmd);    
+            LOGGER.info("Got reply = {}", cmd);    
         }
         
         httpRestCallProvider.restCall("/aclink/excuteMessage", params, new ListenableFutureCallback<ResponseEntity<String>> () {
