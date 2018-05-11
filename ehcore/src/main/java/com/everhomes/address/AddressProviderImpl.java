@@ -719,4 +719,21 @@ public class AddressProviderImpl implements AddressProvider {
                 .fetchInto(Address.class);
         return addressList;
     }
+
+    /**
+     * 根据buildingName和CommunityId来查询eh_addersses表中的门牌的数量
+     * @param buildingName
+     * @param communityId
+     * @return
+     */
+    public int getApartmentCountByBuildNameAndCommunityId(String buildingName,Long communityId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        int apartmentCount = context.selectCount().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+                .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .fetchAnyInto(Integer.class);
+        return apartmentCount;
+
+    }
 }

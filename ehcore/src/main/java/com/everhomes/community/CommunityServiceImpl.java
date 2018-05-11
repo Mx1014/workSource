@@ -4,6 +4,7 @@ package com.everhomes.community;
 import com.everhomes.acl.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -72,6 +73,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
@@ -191,6 +193,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private ServiceModuleAppAuthorizationProvider serviceModuleAppAuthorizationProvider;
+
+    @Autowired
+	private BuildingProvider buildingProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -662,6 +667,18 @@ public class CommunityServiceImpl implements CommunityService {
 
         	return dto;
         }).collect(Collectors.toList());
+
+        if(CollectionUtils.isNotEmpty(dtoList)){
+        	
+			//由于之前在返回给前端的楼栋信息中没有门牌的数量，所以在这里添加上
+			//遍历楼栋的集合
+			for(BuildingDTO buildingDTO : dtoList){
+				//拿到每一个楼栋的名称，然后根据楼栋名称和项目编号查询eh_addresses表中的门牌总数
+				//// TODO: 2018/5/11
+				int apartmentCount = addressProvider.getApartmentCountByBuildNameAndCommunityId(buildingDTO.getName(),cmd.getCommunityId());
+				buildingDTO.setApartmentCount(apartmentCount);
+			}
+		}
 
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}

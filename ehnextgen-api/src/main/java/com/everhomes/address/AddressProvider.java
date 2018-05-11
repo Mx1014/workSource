@@ -97,4 +97,12 @@ public interface AddressProvider {
      * @return
      */
     List<Address> findAddressByIds(List<Long> ids,Integer namespaceId);
+
+    /**
+     * 根据buildingName和CommunityId来查询eh_addersses表中的门牌的数量
+     * @param buildingName
+     * @param communityId
+     * @return
+     */
+    int getApartmentCountByBuildNameAndCommunityId(String buildingName,Long communityId);
 }

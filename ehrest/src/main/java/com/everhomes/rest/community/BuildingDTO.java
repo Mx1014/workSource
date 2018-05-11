@@ -107,6 +107,8 @@ public class BuildingDTO {
 
 	private String floorCount;
 	private String trafficDescription;
+
+	private int apartmentCount;
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
@@ -399,5 +401,13 @@ public class BuildingDTO {
 
 	public void setBuildingNumber(String buildingNumber) {
 		this.buildingNumber = buildingNumber;
+	}
+
+	public int getApartmentCount() {
+		return apartmentCount;
+	}
+
+	public void setApartmentCount(int apartmentCount) {
+		this.apartmentCount = apartmentCount;
 	}
 }
