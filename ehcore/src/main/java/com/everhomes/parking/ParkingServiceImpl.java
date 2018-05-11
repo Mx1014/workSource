@@ -1482,6 +1482,7 @@ public class ParkingServiceImpl implements ParkingService {
 			long pastTime = now - entryTime;
 			int pastMinute = (int) (pastTime / (60 * 1000));
 
+			// 还未计费时，只显示剩余时间
 			if (pastMinute <= delayTime) {
 				dto.setRemainingTime(delayTime - pastMinute);
 
@@ -1494,6 +1495,7 @@ public class ParkingServiceImpl implements ParkingService {
 						cmd.getParkingLotId(), cmd.getPlateNumber(), startDate, endDate);
 
 				if (null != order) {
+					//如果已缴费，显示剩余离场时间
 					Timestamp rechargeTime = order.getRechargeTime();
 					pastTime = now - rechargeTime.getTime();
 					pastMinute = (int) (pastTime / (60 * 1000));

@@ -121,7 +121,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //            }
         }
 
-        return instanceConfig;
+        //edit by 马世亨
+        return null;
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){

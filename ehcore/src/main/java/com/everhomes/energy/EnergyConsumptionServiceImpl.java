@@ -3025,20 +3025,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
         String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+        if ("core.zuolin.com".equals(configurationProvider.getValue(0,"home.url", ""))) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+                 PrintStream stream = new PrintStream(out)) {
+                e.printStackTrace(stream);
+                String message = out.toString("UTF-8");
+                handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
+                // out.reset();
+                e.getCause().printStackTrace(stream);
+                message = out.toString("UTF-8");
+                handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
 
-        try (   ByteArrayOutputStream out = new ByteArrayOutputStream();
-                PrintStream stream = new PrintStream(out))
-        {
-            e.printStackTrace(stream);
-            String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
-            // out.reset();
-            e.getCause().printStackTrace(stream);
-            message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
-
-        } catch (Exception ignored) {
-            //
+            } catch (Exception ignored) {
+                //
+            }
         }
     }
 

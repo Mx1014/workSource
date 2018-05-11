@@ -4858,16 +4858,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Calendar endDay = Calendar.getInstance();
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0), cmd.getNamespaceId());
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(endDay, 0), cmd.getNamespaceId());
 		//增加统计维修中和维修总数
-		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
-		equipmentProvider.statInMaintanceTaskCount(statTasks, getDayBegin(cal, 0), getDayEnd(cal, 0), command);
+//		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
+//		equipmentProvider.statInMaintanceTaskCount(statTasks, getDayBegin(cal, 0), getDayEnd(cal, 0), command);
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0), cmd.getNamespaceId());
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(endDay, 0), cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
+		response.setCompleteInspection(statTasks.getCompleteInspectionTasks());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());

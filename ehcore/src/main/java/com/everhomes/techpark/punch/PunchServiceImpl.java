@@ -3246,7 +3246,7 @@ public class PunchServiceImpl implements PunchService {
 
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(0);
-        rowTitle.createCell(0).setCellValue("月度汇总");
+        rowTitle.createCell(0).setCellValue("打卡记录");
         rowTitle.setRowStyle(titleStyle);
         //副标题
 
