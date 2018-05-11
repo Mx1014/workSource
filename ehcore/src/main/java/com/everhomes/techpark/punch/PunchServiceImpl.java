@@ -8240,9 +8240,8 @@ public class PunchServiceImpl implements PunchService {
 	        	}
 	        }
 	    	
-    	} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+    	} catch (Exception e) {
+			LOGGER.error(" addPunchLogShouldPunchTime error : ",e);
 		}
     }
     private void addPunchLogShouldPunchTime(Long userId, Long enterpriseId, String startDayString,
