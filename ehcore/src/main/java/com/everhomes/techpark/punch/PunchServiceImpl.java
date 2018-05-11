@@ -2971,14 +2971,14 @@ public class PunchServiceImpl implements PunchService {
         Calendar punchTime = Calendar.getInstance();
         punchTime.setTime(log.getPunchTime());
 //        new  .divide(new BigDecimal(8*3600*1000),2, RoundingMode.HALF_UP);
-        return log.getRuleTime() - getTimeLong(punchTime, null);
+        return log.getShouldPunchTime()==null?log.getRuleTime():log.getShouldPunchTime() - getTimeLong(punchTime, null);
     }
 
     private Long processBelateTime(PunchLog log) {
         Calendar punchTime = Calendar.getInstance();
         punchTime.setTime(log.getPunchTime());
 //        new  .divide(new BigDecimal(8*3600*1000),2, RoundingMode.HALF_UP);
-        return getTimeLong(punchTime, null) - log.getRuleTime();
+        return getTimeLong(punchTime, null) - (log.getShouldPunchTime()==null?log.getRuleTime():log.getShouldPunchTime());
     }
 
     private Byte countWorkDay(String status) {
@@ -8229,10 +8229,12 @@ public class PunchServiceImpl implements PunchService {
 	        	List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(startDayString, endDayString);
 	        	if(null != enterpriseIds){
 	        		for(Long enterpriseId : enterpriseIds){
+	        			LOGGER.debug("addPunchLogShouldPunchTime startDay {} endDay {} enterpriseId {} ",startDayString, endDayString,enterpriseId);
 	        			List<Long> userIds = punchProvider.listPunchLogUserId(enterpriseId, startDayString, endDayString);
-
 	    	        	if(null != userIds){
 	    	        		for(Long userId : userIds){
+	    	        			LOGGER.debug("addPunchLogShouldPunchTime startDay {} endDay {} enterpriseId {} userId ",
+	    	        					startDayString, endDayString,enterpriseId,userId);
 	    	        			addPunchLogShouldPunchTime(userId, enterpriseId, startDayString, endDayString, punchTimeRuleMapId);
 	    	        		}
 	    	        	}
