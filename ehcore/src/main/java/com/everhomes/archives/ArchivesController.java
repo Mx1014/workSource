@@ -297,6 +297,20 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/checkArchivesOperation</b>
+     * <p>11-5.员工调整校验</p>
+     */
+    @RequestMapping("checkArchivesOperation")
+    @RestReturn(value = String.class)
+    public RestResponse checkArchivesOperation(CheckOperationCommand cmd){
+        CheckOperationResponse res = archivesService.checkArchivesOperation(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/updateArchivesForm</b>
      * <p>12-1.增加、修改档案字段</p>
      */

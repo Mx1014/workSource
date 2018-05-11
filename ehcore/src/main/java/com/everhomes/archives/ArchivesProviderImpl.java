@@ -218,6 +218,27 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
+    public void createOperationalConfiguration(ArchivesOperationalConfiguration config) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesOperationalConfigurations.class));
+        config.setId(id);
+        config.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        config.setOperatorUid(UserContext.currentUserId());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesOperationalConfigurationsDao dao = new EhArchivesOperationalConfigurationsDao(context.configuration());
+        dao.insert(config);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesOperationalConfigurations.class, null);
+    }
+
+    @Override
+    public void updateOperationalConfiguration(ArchivesOperationalConfiguration config) {
+        config.setOperatorUid(UserContext.currentUserId());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesOperationalConfigurationsDao dao = new EhArchivesOperationalConfigurationsDao(context.configuration());
+        dao.update(config);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesOperationalConfigurations.class, config.getId());
+    }
+
+    /*@Override
     public void createArchivesConfigurations(ArchivesConfigurations configuration){
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesConfigurations.class));
         configuration.setId(id);
@@ -241,7 +262,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         dao.update(configuration);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesConfigurations.class, configuration.getId());
-    }
+    }*/
 
     @Override
     public List<ArchivesConfigurations> listArchivesConfigurations(Date date){

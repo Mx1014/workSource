@@ -42,7 +42,7 @@ public interface ArchivesParameter {
 
     static final String EMPLOYEE_STATUS = "employeeStatus";    //	员工状态
 
-    static final String EMPLOYMEN_TTIME = "employmentTime";
+    static final String EMPLOYMENT_TTIME = "employmentTime";
 
     static final String SALARY_CARD_NUMBER = "salaryCardNumber";
 

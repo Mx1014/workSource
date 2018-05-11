@@ -39,9 +39,9 @@ public interface ArchivesProvider {
 
     ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
 
-    void createArchivesConfigurations(ArchivesConfigurations configuration);
+    void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    void updateArchivesConfigurations(ArchivesConfigurations configuration);
+    void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
     List<ArchivesConfigurations> listArchivesConfigurations(Date date);
 
