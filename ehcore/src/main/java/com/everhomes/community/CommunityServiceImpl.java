@@ -32,7 +32,6 @@ import com.everhomes.namespace.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
-import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
@@ -42,8 +41,8 @@ import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.family.FamilyDTO;
@@ -61,7 +60,6 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
@@ -77,7 +75,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.JoinType;
@@ -893,6 +890,16 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 
+		//首先需要根据namespaceId和communityId来进行查询数据库eh_building中是否存在楼栋名称相同的楼栋
+		//// TODO: 2018/5/11
+		List<com.everhomes.building.Building> buildingList = buildingProvider.getBuildingByCommunityIdAndNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId(),cmd.getName());
+		//非空校验
+		if(CollectionUtils.isNotEmpty(buildingList)){
+			//说明库里面之前就有和该楼栋名称相同的楼栋，那么就不能用该名称作为新建的楼栋，直接给前端报错
+			LOGGER.error("the buildingName has been used");
+			throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, BuildingServiceErrorCode.ERROR_BUILDINGNAME_HASBEENUSED,
+					"the buildingName has been used");
+		}
 		Building building = ConvertHelper.convert(cmd, Building.class);
 
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());

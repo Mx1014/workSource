@@ -21,5 +21,13 @@ public interface BuildingProvider {
 	List<Building> listBuildingByNamespaceType(Integer namespaceId, String namespaceType);
 
 
+	/**
+	 * 根据项目编号communityId和域空间IdnamespaceId来查询eh_buildings表中的信息
+	 * @param communityId
+	 * @param namespaceId
+	 * @param buildingName
+	 * @return
+	 */
+	List<Building> getBuildingByCommunityIdAndNamespaceId(Long communityId,Integer namespaceId,String buildingName);
 
 }

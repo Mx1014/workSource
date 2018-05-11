@@ -120,5 +120,23 @@ public class BuildingProviderImpl implements BuildingProvider {
 		return dbProvider.getDslContext(accessSpec);
 	}
 
+	/**
+	 * 根据项目编号communityId和域空间IdnamespaceId来查询eh_buildings表中的信息
+	 * @param communityId
+	 * @param namespaceId
+	 * @return
+	 */
+	@Override
+	public List<Building> getBuildingByCommunityIdAndNamespaceId(Long communityId,Integer namespaceId,String buildingName){
+		//获取上下文
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Building> buildingList = context.select().from(Tables.EH_BUILDINGS)
+				.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_BUILDINGS.NAME.eq(buildingName))
+				.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+				.fetchInto(Building.class);
+		return buildingList;
+	}
+
 
 }
