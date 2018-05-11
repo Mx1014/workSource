@@ -1583,9 +1583,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "辞职";
                 else if(dismissType.equals(ArchivesDismissType.FIRE.getCode()))
                     return "解雇";
-                if(dismissType.equals(ArchivesDismissType.OTHER.getCode()))
+                else if(dismissType.equals(ArchivesDismissType.OTHER.getCode()))
                     return "其它";
-                if(dismissType.equals(ArchivesDismissType.RETIRE.getCode()))
+                else if(dismissType.equals(ArchivesDismissType.RETIRE.getCode()))
                     return "退休";
                 break;
             case ArchivesParameter.DISMISS_REASON:
@@ -1608,6 +1608,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "违纪";
                 else if (dismissReason.equals(ArchivesDismissReason.OTHER.getCode()))
                     return "其他";
+                else if (dismissReason.equals(ArchivesDismissReason.RETIRE.getCode()))
+                    return "退休";
                 break;
         }
         return "";
