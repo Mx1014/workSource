@@ -10,6 +10,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.rest.me_menu.ListMeWebMenusCommand;
 import com.everhomes.rest.menu.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,5 +86,24 @@ public class MenuController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /menu/listMenuForPcEntry</b>
+     * <p>获取pc门户菜单</p>
+     */
+    @RequestMapping("listMenuForPcEntry")
+    @RestReturn(value=ListMenuForPcEntryResponse.class)
+    public RestResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd) {
+        ListMenuForPcEntryResponse res = webMenuService.listMenuForPcEntry(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+
 
 }

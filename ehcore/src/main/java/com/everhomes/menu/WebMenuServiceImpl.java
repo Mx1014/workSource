@@ -892,4 +892,27 @@ public class WebMenuServiceImpl implements WebMenuService {
 //		}
 //	}
 
+
+	@Override
+	public ListMenuForPcEntryResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd) {
+
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(cmd.getNamespaceId(), cmd.getModuleIds());
+
+		List<WebMenuDTO> dtos = new ArrayList<>();
+		if (apps != null) {
+			for (ServiceModuleApp app: apps){
+
+				List<WebMenu> webMenus = webMenuProvider.listMenuByModuleIdAndType(app.getModuleId(), WebMenuType.PARK.getCode());
+				if(webMenus != null && webMenus.size() > 0){
+					WebMenuDTO dto = ConvertHelper.convert(webMenus.get(0), WebMenuDTO.class);
+					dto.setConfigId(app.getId());
+					dtos.add(dto);
+				}
+			}
+		}
+
+		ListMenuForPcEntryResponse response = new ListMenuForPcEntryResponse();
+		response.setDtos(dtos);
+		return response;
+	}
 }
