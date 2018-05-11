@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.archives.ArchivesConfigurationStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -238,6 +239,29 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesOperationalConfigurations.class, config.getId());
     }
 
+    @Override
+    public ArchivesOperationalConfiguration findOldConfiguration(Integer namespaceId, Long organizationId, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.eq(detailId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.le(ArchivesUtil.currentDate()));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesConfigurationStatus.PENDING.getCode()));
+        return query.fetchAnyInto(ArchivesOperationalConfiguration.class);
+    }
+
+    @Override
+    public void createOperationalLog(ArchivesOperationalLog log) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesOperationalLogs.class));
+        log.setId(id);
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesOperationalLogsDao dao = new EhArchivesOperationalLogsDao(context.configuration());
+        dao.insert(log);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesOperationalLogs.class, null);
+    }
+
     /*@Override
     public void createArchivesConfigurations(ArchivesConfigurations configuration){
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesConfigurations.class));
@@ -264,7 +288,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesConfigurations.class, configuration.getId());
     }*/
 
-    @Override
+    /*@Override
     public List<ArchivesConfigurations> listArchivesConfigurations(Date date){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_CONFIGURATIONS);
@@ -311,7 +335,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
             return results;
         }
         return null;
-    }
+    }*/
 
     @Override
     public void createArchivesNotifications(ArchivesNotifications notification){

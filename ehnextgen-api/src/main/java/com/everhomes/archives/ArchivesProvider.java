@@ -43,11 +43,15 @@ public interface ArchivesProvider {
 
     void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+    ArchivesOperationalConfiguration findOldConfiguration(Integer nameapaceId, Long organizationId, Long detailId);
 
-    void createArchivesLogs(ArchivesLogs log);
+    void createOperationalLog(ArchivesOperationalLog log);
 
-    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
+//    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+
+//    void createArchivesLogs(ArchivesLogs log);
+
+//    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
 
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
 

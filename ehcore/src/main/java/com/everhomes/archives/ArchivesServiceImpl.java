@@ -192,7 +192,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
         //  5.增加入职记录
-        checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.currentDate());
+        AddArchivesEmployeeCommand logCommand = ConvertHelper.convert(cmd, AddArchivesEmployeeCommand.class);
+        logCommand.setCheckInTime(String.valueOf(employee.getCheckInTime()));
+        logCommand.setEmploymentTime(logCommand.getCheckInTime());
+        logCommand.setMonths(0);
+        logCommand.setEmployeeType(EmployeeType.FULLTIME.getCode());
+        logCommand.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
+        addCheckInLogs(detailId, logCommand);
         return dto;
     }
 
@@ -218,7 +224,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 TransferArchivesEmployeesCommand logCommand = ConvertHelper.convert(cmd, TransferArchivesEmployeesCommand.class);
                 logCommand.setEffectiveTime(String.valueOf(ArchivesUtil.currentDate()));
                 logCommand.setTransferType(ArchivesTransferType.OTHER.getCode());
-                transferArchivesEmployeesLogs(logCommand);
+                addTransferLogs(logCommand);
             }
             return null;
         });
@@ -257,7 +263,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dismissCommand.setDismissType(ArchivesDismissType.OTHER.getCode());
                 dismissCommand.setDismissReason(ArchivesDismissReason.OTHER.getCode());
                 dismissCommand.setDismissRemark(localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.CONTACT_DELETE, "zh_CN", "delete by admin"));
-                dismissArchivesEmployeesLogs(dismissCommand);
+                addDismissLogs(dismissCommand);
             }
             return null;
         });
@@ -711,34 +717,40 @@ public class ArchivesServiceImpl implements ArchivesService {
     /*
      * 增加入职记录
      */
-    private void checkInArchivesEmployeesLogs(Long organizationId, Long detailId, Date checkInTime) {
+    private void addCheckInLogs(Long detailId, AddArchivesEmployeeCommand cmd) {
         Long userId = UserContext.currentUserId();
-        ArchivesLogs log = new ArchivesLogs();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ArchivesOperationalLog log = new ArchivesOperationalLog();
+        log.setNamespaceId(namespaceId);
         log.setDetailId(detailId);
-        log.setOrganizationId(organizationId);
+        log.setOrganizationId(cmd.getOrganizationId());
         log.setOperationType(ArchivesOperationType.CHECK_IN.getCode());
-        log.setOperationTime(checkInTime);
+        log.setOperationTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
+        Organization department = organizationProvider.findOrganizationById(cmd.getDepartmentIds().get(0));
+        log.setStringTag1(department.getName());
+        log.setStringTag2(convertToArchivesInfo(cmd.getEmployeeType(), ArchivesParameter.EMPLOYEE_TYPE));
+        log.setStringTag3(cmd.getMonths().toString() + "个月");
         log.setOperatorUid(userId);
-        log.setOperatorName(getEmployeeRealName(userId, organizationId));
-        archivesProvider.createArchivesLogs(log);
+        log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
+        archivesProvider.createOperationalLog(log);
     }
 
     /*
      * 增加转正记录
      */
-    private void employArchivesEmployeesLogs(EmployArchivesEmployeesCommand cmd) {
+    private void addEmployLogs(EmployArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
-                ArchivesLogs log = new ArchivesLogs();
+                ArchivesOperationalLog log = new ArchivesOperationalLog();
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
-                log.setOperationReason(cmd.getEmploymentEvaluation());
+                log.setStringTag1(cmd.getEmploymentEvaluation());
                 log.setOperatorUid(userId);
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
-                archivesProvider.createArchivesLogs(log);
+                archivesProvider.createOperationalLog(log);
             }
         }
     }
@@ -746,9 +758,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     /*
      * 增加调整记录
      */
-    private void transferArchivesEmployeesLogs(TransferArchivesEmployeesCommand cmd) {
+    private void addTransferLogs(TransferArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
-        if (cmd.getDetailIds() != null) {
+        /*if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesLogs log = new ArchivesLogs();
                 Map<String, Object> map = new LinkedHashMap<>();
@@ -765,27 +777,30 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
                 archivesProvider.createArchivesLogs(log);
             }
-        }
+        }*/
     }
 
     /*
      * 增加离职记录
      */
-    private void dismissArchivesEmployeesLogs(DismissArchivesEmployeesCommand cmd) {
+    private void addDismissLogs(DismissArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
-                ArchivesLogs log = new ArchivesLogs();
+                ArchivesOperationalLog log = new ArchivesOperationalLog();
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.DISMISS.getCode());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
-                log.setOperationCategory(cmd.getDismissType());
+                log.setStringTag1(convertToArchivesInfo(cmd.getDismissType(), ArchivesParameter.DISMISS_TYPE));
+                log.setStringTag2(convertToArchivesInfo(cmd.getDismissReason(), ArchivesParameter.DISMISS_REASON));
+                log.setStringTag3(cmd.getDismissRemark());
+/*                log.setOperationCategory(cmd.getDismissType());
                 log.setOperationReason(convertToArchivesInfo(cmd.getDismissReason(), "dismissReason"));
-                log.setOperationRemark(cmd.getDismissRemark());
+                log.setOperationRemark(cmd.getDismissRemark());*/
                 log.setOperatorUid(userId);
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
-                archivesProvider.createArchivesLogs(log);
+                archivesProvider.createOperationalLog(log);
             }
         }
     }
@@ -965,7 +980,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
         //  4.增加入职记录
-        checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.parseDate(cmd.getCheckInTime()));
+        addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
@@ -1085,10 +1100,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId) {
-        List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(organizationId, detailId);
+/*        List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(organizationId, detailId);
         if (logs != null && logs.size() > 0) {
             return logs.stream().map(r -> ConvertHelper.convert(r, ArchivesLogDTO.class)).collect(Collectors.toList());
-        }
+        }*/
         return null;
     }
 
@@ -1562,6 +1577,17 @@ public class ArchivesServiceImpl implements ArchivesService {
                     }
                 }
                 break;
+            case ArchivesParameter.DISMISS_TYPE:
+                Byte dismissType = (Byte) obj;
+                if(dismissType.equals(ArchivesDismissType.QUIT.getCode()))
+                    return "辞职";
+                else if(dismissType.equals(ArchivesDismissType.FIRE.getCode()))
+                    return "解雇";
+                if(dismissType.equals(ArchivesDismissType.OTHER.getCode()))
+                    return "其它";
+                if(dismissType.equals(ArchivesDismissType.RETIRE.getCode()))
+                    return "退休";
+                break;
             case ArchivesParameter.DISMISS_REASON:
                 Byte dismissReason = (Byte) obj;
                 if (dismissReason.equals(ArchivesDismissReason.SALARY.getCode()))
@@ -1805,18 +1831,17 @@ public class ArchivesServiceImpl implements ArchivesService {
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
                 //  添加定时配置
-                ArchivesOperationalConfiguration config = new ArchivesOperationalConfiguration();
-                config.setNamespaceId(namespaceId);
-                config.setOrganizationId(cmd.getOrganizationId());
-                config.setDetailId(detailId);
-                config.setOperateType(ArchivesOperationType.EMPLOY.getCode());
-                config.setOperateDate(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
-                config.setAdditionalInfo(StringHelper.toJsonString(cmd));
-                archivesProvider.createOperationalConfiguration(config);
+                createOperationalConfiguration(
+                        namespaceId,
+                        cmd.getOrganizationId(),
+                        detailId,
+                        ArchivesOperationType.EMPLOY.getCode(),
+                        ArchivesUtil.parseDate(cmd.getEmploymentTime()),
+                        StringHelper.toJsonString(cmd));
             }
         }
         //  TODO：添加转正记录
-        employArchivesEmployeesLogs(cmd);
+        addEmployLogs(cmd);
     }
 
     @Override
@@ -1826,18 +1851,17 @@ public class ArchivesServiceImpl implements ArchivesService {
             transferArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {
-                ArchivesOperationalConfiguration config = new ArchivesOperationalConfiguration();
-                config.setNamespaceId(namespaceId);
-                config.setOrganizationId(cmd.getOrganizationId());
-                config.setDetailId(detailId);
-                config.setOperateType(ArchivesOperationType.TRANSFER.getCode());
-                config.setOperateDate(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
-                config.setAdditionalInfo(StringHelper.toJsonString(cmd));
-                archivesProvider.createOperationalConfiguration(config);
+                createOperationalConfiguration(
+                        namespaceId,
+                        cmd.getOrganizationId(),
+                        detailId,
+                        ArchivesOperationType.TRANSFER.getCode(),
+                        ArchivesUtil.parseDate(cmd.getEffectiveTime()),
+                        StringHelper.toJsonString(cmd));
             }
         }
         //   TODO：更新人员调整记录
-        transferArchivesEmployeesLogs(cmd);
+        addTransferLogs(cmd);
     }
 
     @Override
@@ -1847,18 +1871,36 @@ public class ArchivesServiceImpl implements ArchivesService {
             dismissArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {
-                ArchivesOperationalConfiguration config = new ArchivesOperationalConfiguration();
-                config.setNamespaceId(namespaceId);
-                config.setOrganizationId(cmd.getOrganizationId());
-                config.setDetailId(detailId);
-                config.setOperateType(ArchivesOperationType.DISMISS.getCode());
-                config.setOperateDate(ArchivesUtil.parseDate(cmd.getDismissTime()));
-                config.setAdditionalInfo(StringHelper.toJsonString(cmd));
-                archivesProvider.createOperationalConfiguration(config);
+                createOperationalConfiguration(
+                        namespaceId,
+                        cmd.getOrganizationId(),
+                        detailId,
+                        ArchivesOperationType.DISMISS.getCode(),
+                        ArchivesUtil.parseDate(cmd.getDismissTime()),
+                        StringHelper.toJsonString(cmd));
             }
         }
         //  TODO：添加人员离职记录
-        dismissArchivesEmployeesLogs(cmd);
+        addDismissLogs(cmd);
+    }
+
+    private void createOperationalConfiguration(
+            Integer namespaceId, Long organizationId, Long detailId, Byte operationType, Date date, String cmd){
+        //  1.若有上一次配置则先取消
+        ArchivesOperationalConfiguration oldConfig = archivesProvider.findOldConfiguration(namespaceId, organizationId, detailId);
+        if(oldConfig != null){
+            oldConfig.setStatus(ArchivesConfigurationStatus.CANCEL.getCode());
+            archivesProvider.updateOperationalConfiguration(oldConfig);
+        }
+        //  2.添加新配置
+        ArchivesOperationalConfiguration newConfig = new ArchivesOperationalConfiguration();
+        newConfig.setNamespaceId(namespaceId);
+        newConfig.setOrganizationId(organizationId);
+        newConfig.setDetailId(detailId);
+        newConfig.setOperateType(operationType);
+        newConfig.setOperateDate(date);
+        newConfig.setAdditionalInfo(cmd);
+        archivesProvider.createOperationalConfiguration(newConfig);
     }
 
     @Override
@@ -1920,7 +1962,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 archivesProvider.createArchivesConfigurations(configuration);
             }
             //  3.更新人员调整记录
-            transferArchivesEmployeesLogs(cmd);
+            addTransferLogs(cmd);
             return null;
         });
     }
@@ -1954,7 +1996,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 archivesProvider.createArchivesConfigurations(configuration);
             }
             //  3.添加人员离职记录
-            dismissArchivesEmployeesLogs(cmd);
+            addDismissLogs(cmd);
             return null;
         });
     }

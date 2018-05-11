@@ -38,7 +38,7 @@ CREATE TABLE `eh_archives_operational_configurations` (
   `operate_type` TINYINT NOT NULL COMMENT 'the type of operation',
   `operate_date` DATE COMMENT 'the date of executing the operation',
   `additional_info` TEXT COMMENT 'the addition information for the operation',
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0-cancel, 1-pending, 2-complete',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-cancel, 1-pending, 2-complete',
   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
   `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
 	PRIMARY KEY (`id`)
