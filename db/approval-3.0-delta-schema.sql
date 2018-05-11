@@ -27,19 +27,38 @@ ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `group_id` BIGINT NOT 
 -- 审批3.0 end.
 
 -- 人事2.7 start.
-ALTER TABLE `eh_archives_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0-cancel,1-pending,2-finish' AFTER `operation_remark` ;
+-- ALTER TABLE `eh_archives_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0-cancel,1-pending,2-finish' AFTER `operation_remark` ;
 
--- DROP TABLE IF EXISTS `eh_archives_operations`;
--- CREATE TABLE `eh_archives_operations` (
--- 	`id` BIGINT NOT NULL,
--- 	`namespace_id` INT NOT NULL DEFAULT '0',
--- 	`organization_id` BIGINT NOT NULL DEFAULT '0',
---   `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
---   `operate_type` TINYINT NOT NULL COMMENT 'the type of operation',
---   `operate_date` DATE COMMENT 'the date of executing the operation',
---   `additional_info` TEXT COMMENT 'the addition information for the operation',
---   `status` TINYINT NOT NULL DEFAULT '0' COMMENT 'pending, execution',
---   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
---   `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
--- 	PRIMARY KEY (`id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
+CREATE TABLE `eh_archives_operational_configurations` (
+	`id` BIGINT NOT NULL,
+	`namespace_id` INT NOT NULL DEFAULT '0',
+	`organization_id` BIGINT NOT NULL DEFAULT '0',
+  `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
+  `operate_type` TINYINT NOT NULL COMMENT 'the type of operation',
+  `operate_date` DATE COMMENT 'the date of executing the operation',
+  `additional_info` TEXT COMMENT 'the addition information for the operation',
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0-cancel, 1-pending, 2-complete',
+  `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+  `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_archives_operational_logs`;
+CREATE TABLE `eh_archives_operational_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the log',
+  `namespace_id` INT NOT NULL DEFAULT '0',
+  `organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the organization',
+  `detail_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the detail id that belongs to the employee',
+  `operation_type` TINYINT NOT NULL COMMENT 'the type of the operate',
+  `operation_time` DATE NOT NULL COMMENT 'the time of the operate',
+  `string_tag1` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `string_tag2` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `string_tag3` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `string_tag4` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `string_tag5` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `operator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+  `operator_name` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+  `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -26,4 +26,4 @@ UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '异常
 -- 审批3.0 end.
 
 -- 人事2.7同步数据，需要先执行schema后执行此sql start
-UPDATE `eh_archives_logs` SET `status` = 1 WHERE `operation_time` > NOW();
+-- UPDATE `eh_archives_logs` SET `status` = 1 WHERE `operation_time` > NOW();
