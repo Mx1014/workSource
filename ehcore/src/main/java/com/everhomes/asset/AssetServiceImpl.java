@@ -392,7 +392,7 @@ public class AssetServiceImpl implements AssetService {
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
                 boolean smsGo = true;
                 try{
-                    //从自动催缴来的任务，如果没有模板id，就不催缴。其实这步没有必要，我在调用发送时就已经排除没有模板id的了，没有必要的’健壮性‘
+                    //从自动催缴来的任务，如果没有模板id，就不催缴。
                     if(noticeInfo.isUseTemplate() != null && noticeInfo.isUseTemplate()){
                         if(noticeInfo.getMsgTemplateId() == null){
                             smsGo = false;
@@ -463,7 +463,7 @@ public class AssetServiceImpl implements AssetService {
                             msgScope = UserNotificationTemplateCode.ASSET_APP_NOTICE_SCOPE;
                             msgId = pak.getTemplateId().intValue();
                         }else{
-                            //从自动催缴来的任务，如果没有模板id，就不催缴。其实这步没有必要，我在调用发送时就已经排除没有模板id的了，反正已经写了，没有必要的’健壮性‘
+                            //从自动催缴来的任务，如果没有模板id，就不催缴
                             appGo = false;
                         }
                     }
@@ -3353,7 +3353,7 @@ public class AssetServiceImpl implements AssetService {
                     PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
                     info.setMsgTemplateId(specificConfig.getNoticeMsgId());
                     info.setAppTemplateId(specificConfig.getNoticeAppId());
-                    if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
+                    if(info.getMsgTemplateId() == null && info.getAppTemplateId() == null){
                         continue;
                     }
                     List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
