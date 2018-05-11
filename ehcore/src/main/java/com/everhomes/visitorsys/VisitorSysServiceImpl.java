@@ -1081,7 +1081,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param map
      */
     private void setVisitorFormValues(VisitorSysVisitor convert, Map<String, PostApprovalFormItem> map) {
-        convert.setInvalidTime(new Timestamp(Long.valueOf(map.get("invalidTime").getFieldValue())));
+        convert.setInvalidTime(map.get("invalidTime").getFieldValue());
         convert.setPlateNo(map.get("plateNo").getFieldValue());
         convert.setIdNumber(map.get("idNumber").getFieldValue());
         convert.setVisitFloor(map.get("visitFloor").getFieldValue());
