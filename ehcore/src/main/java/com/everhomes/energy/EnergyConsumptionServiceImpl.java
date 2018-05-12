@@ -579,9 +579,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setPlanId(0L);
         task.setMeterId(meter.getId());
         task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
-        LocalDate date = meter.getCreateTime().toLocalDateTime().toLocalDate();
-        task.setExecutiveStartTime(Timestamp.valueOf(date.format(dateSF)));
-        String endDayString = LocalDateTime.of(date.with(TemporalAdjusters.lastDayOfMonth()), LocalTime.MAX).format(dateSF);
+        LocalDateTime dateTime = meter.getCreateTime().toLocalDateTime();
+        task.setExecutiveStartTime(Timestamp.valueOf(dateTime.format(dateSF)));
+        String endDayString = LocalDateTime.of(dateTime.toLocalDate().with(TemporalAdjusters.lastDayOfMonth()), LocalTime.MAX).format(dateSF);
         task.setExecutiveExpireTime(Timestamp.valueOf(endDayString));
         energyMeterTaskProvider.createEnergyMeterTask(task);
         energyMeterTaskSearcher.feedDoc(task);
