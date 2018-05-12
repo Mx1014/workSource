@@ -177,7 +177,6 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -564,8 +563,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         meterSearcher.feedDoc(meter);
-        if (cmd.getNamespaceId() == 999961) {
-            ExecutorUtil.submit(() -> createMeterTask(meter));
+        if (cmd.getNamespaceId() == 999961 && EnergyAutoReadingFlag.TURE.equals(EnergyAutoReadingFlag.fromStatus(cmd.getAutoFlag()))) {
+            createMeterTask(meter);
         }
         return toEnergyMeterDTO(meter, cmd.getNamespaceId());
     }
@@ -2955,8 +2954,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             }
                             dbProvider.execute(r -> {
                                 meterReadingLogProvider.createEnergyMeterReadingLog(log);
-                                energyMeterTaskProvider.updateEnergyMeterTask(task);
-                                energyMeterTaskSearcher.feedDoc(task);
+                                if (task != null) {
+                                    energyMeterTaskProvider.updateEnergyMeterTask(task);
+                                    energyMeterTaskSearcher.feedDoc(task);
+                                }
                                 meter.setLastReading(log.getReading());
                                 meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
                                 meterProvider.updateEnergyMeter(meter);
