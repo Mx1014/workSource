@@ -238,6 +238,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -563,7 +564,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         meterSearcher.feedDoc(meter);
-        ExecutorUtil.submit(()->createMeterTask(meter));
+        if (cmd.getNamespaceId() == 999961) {
+            ExecutorUtil.submit(() -> createMeterTask(meter));
+        }
         return toEnergyMeterDTO(meter, cmd.getNamespaceId());
     }
 
@@ -577,9 +580,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setPlanId(0L);
         task.setMeterId(meter.getId());
         task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
-        LocalDate date = LocalDate.now();
+        LocalDate date = meter.getCreateTime().toLocalDateTime().toLocalDate();
         task.setExecutiveStartTime(Timestamp.valueOf(date.format(dateSF)));
-        task.setExecutiveExpireTime(Timestamp.valueOf(date.with(TemporalAdjusters.lastDayOfMonth()).format(dateSF)));
+        String endDayString = LocalDateTime.of(date.with(TemporalAdjusters.lastDayOfMonth()), LocalTime.MAX).format(dateSF);
+        task.setExecutiveExpireTime(Timestamp.valueOf(endDayString));
         energyMeterTaskProvider.createEnergyMeterTask(task);
         energyMeterTaskSearcher.feedDoc(task);
     }
@@ -2908,7 +2912,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //     * 每天早上5点10分刷自动读表
 //     */
 //    @Scheduled(cron = "0 10 5 L * ?")
-    public void readMeterRemote() {
+    private void readMeterRemote() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
             List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
@@ -4561,7 +4565,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 Timestamp startTime = strToTimestamp(str);
                 Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
                 task.setExecutiveStartTime(startTime);
-                task.setExecutiveExpireTime(expiredTime);
+                LocalDateTime endTime = expiredTime.toLocalDateTime();
+                task.setExecutiveExpireTime(Timestamp.valueOf(LocalDateTime.of(endTime.toLocalDate(),LocalTime.MAX)));
 
                 energyMeterTaskProvider.createEnergyMeterTask(task);
                 energyMeterTaskSearcher.feedDoc(task);
@@ -5110,5 +5115,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         LOGGER.debug("starting auto reading manual...");
         readMeterRemote();
         LOGGER.debug("ending auto reading manual...");
+    }
+
+    @Override
+    public void addMeterPeriodTaskById(Long meterId) {
+        EnergyMeter meter = meterProvider.findById(999961, meterId);
+        createMeterTask(meter);
     }
 }
