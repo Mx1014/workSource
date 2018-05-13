@@ -18,6 +18,8 @@ public interface ArchivesServiceCode {
     int ERROR_CONTACT_SHORT_TOKEN_WRONG_FORMAT = 100012;  //  短号格式错误
     int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
 
+    int ERROR_NO_TARGETS = 200001;  //  通知目标为空
+
     String CONTACT_DELETE = "1001";  //  通讯录删除
     String CONTACT_LIST = "1002";    //  通讯录成员列表
     String EMPLOYEE_IMPORT_MODULE = "1003";  //  人员档案导入模板

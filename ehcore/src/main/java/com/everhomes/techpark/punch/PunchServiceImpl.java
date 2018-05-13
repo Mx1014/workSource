@@ -17,7 +17,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterpriseApproval.EnterpriseApprovalService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
@@ -236,7 +235,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -9320,7 +9318,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                     saveImportVacation(resultList, cmd.getOrganizationId(), fileLog, response, userId);
                 } else {
-                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROR.getCode());
                 }
                 return response;
             }
@@ -9498,22 +9496,22 @@ public class PunchServiceImpl implements PunchService {
     private String checkImportVacationTitle(Map<String, String> titleMap, Long organizationId) {
         if (!"手机".equals(titleMap.get("A"))) {
             LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"姓名".equals(titleMap.get("B"))) {
             LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"年假余额".equals(titleMap.get("C"))) {
             LOGGER.error("第3列不是年假余额而是" + titleMap.get("C"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"调休余额".equals(titleMap.get("D"))) {
             LOGGER.error("第4列不是调休余额而是" + titleMap.get("D"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         return null;
     }

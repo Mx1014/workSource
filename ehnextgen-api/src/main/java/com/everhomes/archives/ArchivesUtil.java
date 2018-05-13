@@ -1,13 +1,27 @@
 package com.everhomes.archives;
 
-import java.sql.Date;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.archives.ArchivesDismissReason;
+import com.everhomes.rest.archives.ArchivesDismissType;
+import com.everhomes.rest.archives.ArchivesParameter;
+import com.everhomes.rest.general_approval.GeneralFormFieldAttribute;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.organization.EmployeeStatus;
+import com.everhomes.rest.organization.EmployeeType;
+import com.everhomes.rest.organization.MaritalFlag;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.user.UserGender;
+import org.springframework.util.StringUtils;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ArchivesUtil {
 
@@ -79,5 +93,31 @@ public class ArchivesUtil {
         LocalDate nowDate = LocalDate.now();
         LocalDate date = nowDate.plusDays(DayOfWeek.SUNDAY.getValue() - nowDate.getDayOfWeek().getValue());
         return java.sql.Date.valueOf(date);
+    }
+
+    /**
+     * 获取月份与日期(MMdd格式)
+     */
+    public static String getMonthAndDay(java.sql.Date date) {
+        if (date == null)
+            return null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        return formatter.format(date.toLocalDate());
+    }
+
+    /**
+     * 数字与26字母的转换
+     * (1-A,2-B...)
+     */
+    public static String GetExcelLetter(int n) {
+        String s = "";
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0)
+                m = 26;
+            s = (char) (m + 64) + s;
+            n = (n - m) / 26;
+        }
+        return s;
     }
 }

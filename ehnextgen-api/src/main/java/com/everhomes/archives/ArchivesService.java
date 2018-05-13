@@ -26,8 +26,6 @@ public interface ArchivesService {
 
     void stickArchivesContact(StickArchivesContactCommand cmd);
 
-//    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
-
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
     ImportFileTaskDTO importArchivesContacts(
@@ -66,15 +64,15 @@ public interface ArchivesService {
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
 
-    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
+//    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
-    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
+//    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
 
-    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
+//    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
 
-    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
+//    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
 
     void deleteArchivesDismissEmployees(Long detailId, Long organizationId);
 
@@ -110,9 +108,9 @@ public interface ArchivesService {
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
-    void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
+    void setArchivesNotification(ArchivesNotificationCommand cmd);
 
-    void initArchivesNotification();
+    void runArchivesNotificationCycle();
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
