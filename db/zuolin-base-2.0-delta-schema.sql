@@ -33,7 +33,6 @@ ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 -- 园区应用配置表（不跟随管理公司时的自定义配置）
 CREATE TABLE `eh_app_community_configs` (
   `id` bigint(20) NOT NULL,
-  `organization_app_id` bigint(20) DEFAULT NULL COMMENT '安装id，即eh_organization_apps的id',
   `app_origin_id` bigint(20) DEFAULT NULL COMMENT 'app_origin_id',
   `community_id` bigint(20) DEFAULT NULL,
   `visibility_flag` tinyint(4) DEFAULT NULL,
