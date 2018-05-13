@@ -13,7 +13,7 @@ import java.util.List;
  *     <li>keepAuthorizationFlag: 保留并转移当前项目的园区运营应用授权 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
-public class ChangeOrganizationCommunityCommand {
+public class ChangeOrganizationCommunitiesCommand {
 
     private List<Long> communityIds;
     private Long fromOrgId;

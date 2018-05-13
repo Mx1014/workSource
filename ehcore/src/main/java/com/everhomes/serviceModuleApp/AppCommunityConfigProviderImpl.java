@@ -88,6 +88,26 @@ public class AppCommunityConfigProviderImpl implements AppCommunityConfigProvide
     }
 
     @Override
+    public AppCommunityConfig findAppCommunityConfigByCommunityIdAndAppOriginId(Long communityId, Long appOriginId) {
+        try {
+            AppCommunityConfig[] result = new AppCommunityConfig[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAppCommunityConfigs.class));
+
+            result[0] = context.select().from(Tables.EH_APP_COMMUNITY_CONFIGS)
+                    .where(Tables.EH_APP_COMMUNITY_CONFIGS.COMMUNITY_ID.eq(communityId)
+                            .and(Tables.EH_APP_COMMUNITY_CONFIGS.APP_ORIGIN_ID.eq(appOriginId)))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, AppCommunityConfig.class);
+                    });
+
+            return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
+
+    @Override
     public List<AppCommunityConfig> queryAppCommunityConfigs(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAppCommunityConfigs.class));
 

@@ -311,20 +311,35 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd) {
 
+		ListServiceModuleAppsByOrganizationIdResponse response = new  ListServiceModuleAppsByOrganizationIdResponse();
+
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
 
-		//获取所有应用，在内存中处理。
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByAppTypeAndKeyword(releaseVersion.getId(), cmd.getAppType(), cmd.getKeyword());
+		int pageSize = 20;
+		if(cmd.getPageSize() != null){
+			pageSize = cmd.getPageSize();
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), cmd.getAppType(), cmd.getKeyword(), cmd.getOrganizationId(), cmd.getInstallFlag(), cmd.getPageAnchor(), pageSize + 1);
 		if(apps == null){
 			return null;
 		}
 
+		if(apps.size() > pageSize){
+			apps.remove(pageSize);
+			response.setNextPageAnchor(apps.get(pageSize - 1).getId());
+		}
+
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
-			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrganizationId());
-			ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
-
 			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrganizationId());
+			if (orgapp != null){
+				dto.setOrgAppId(orgapp.getId());
+				dto.setStatus(orgapp.getStatus());
+			}
+
+			ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 			if(profile != null){
 				dto.setAppNo(profile.getAppNo());
 				dto.setDisplayVersion(profile.getDisplayVersion());
@@ -332,22 +347,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				dto.setIconUrl(url);
 			}
 
-			if (orgapp != null){
-				dto.setOrgAppId(orgapp.getId());
-				dto.setStatus(orgapp.getStatus());
-			}
-
-			//已安装的、未安装的、全部
-			if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.TRUE && orgapp != null){
-				dtos.add(dto);
-			}else if(TrueOrFalseFlag.fromCode(cmd.getInstallFlag()) == TrueOrFalseFlag.FALSE && orgapp == null) {
-				dtos.add(dto);
-			}else if(cmd.getInstallFlag() == null){
-				dtos.add(dto);
-			}
+			dtos.add(dto);
 		}
 
-		ListServiceModuleAppsByOrganizationIdResponse response = new  ListServiceModuleAppsByOrganizationIdResponse();
+
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
@@ -452,10 +455,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			//园区自定义的app配置
 			for (OrganizationApp organizationApp: organizationApps){
 				AppCommunityConfig config = new AppCommunityConfig();
-				config.setOrganizationAppId(organizationApp.getId());
+				config.setAppOriginId(organizationApp.getAppOriginId());
 				config.setCommunityId(cmd.getCommunityId());
-				config.setDisplayName(organizationApp.getAliasName());
-				config.setVisibilityFlag(TrueOrFalseFlag.TRUE.getCode());
+				config.setDisplayName(organizationApp.getDisplayName());
+				config.setVisibilityFlag(organizationApp.getVisibilityFlag() == null ? TrueOrFalseFlag.TRUE.getCode(): organizationApp.getVisibilityFlag());
 				config.setCreatorUid(UserContext.currentUserId());
 				config.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				appCommunityConfigProvider.createAppCommunityConfig(config);
@@ -465,9 +468,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		Community community = null;
+		if(cmd.getCommunityId() != null){
+			community = communityProvider.findCommunityById(cmd.getCommunityId());
+		}
+
 		List<AppCommunityConfigDTO>  dtos = new ArrayList<>();
-		if(community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
+		if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
 
 			//自定义配置的
 			List<AppCommunityConfig> appCommunityConfigs = appCommunityConfigProvider.queryAppCommunityConfigs(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
@@ -488,13 +495,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}else {
 
 			//跟随默认方案的
-			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
-
 			//管理公司安装的app
 			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationProperty.getOrganizationId()));
+					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(cmd.getOrganizationId()));
 					return query;
 				}
 			});
@@ -503,8 +508,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (OrganizationApp app: organizationApps){
 					AppCommunityConfig config = new AppCommunityConfig();
 					config.setAppOriginId(app.getAppOriginId());
-					config.setOrganizationAppId(app.getId());
-					config.setDisplayName(app.getAliasName());
+					config.setDisplayName(app.getDisplayName());
+					config.setVisibilityFlag(app.getVisibilityFlag() == null ? TrueOrFalseFlag.TRUE.getCode() : app.getVisibilityFlag());
 					AppCommunityConfigDTO dto = toDto(config);
 					dtos.add(dto);
 				}
@@ -539,11 +544,31 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public void updateAppCommunityConfig(UpdateAppCommunityConfigCommand cmd) {
-		AppCommunityConfig config = appCommunityConfigProvider.getAppCommunityConfigById(cmd.getId());
-		config.setDisplayName(cmd.getDisplayName());
-		config.setVisibilityFlag(cmd.getVisibilityFlag());
-		config.setOperatorUid(UserContext.currentUserId());
-		config.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-		appCommunityConfigProvider.updateAppCommunityConfig(config);
+
+		if(cmd.getCommunityId() != null){
+			AppCommunityConfig config = appCommunityConfigProvider.findAppCommunityConfigByCommunityIdAndAppOriginId(cmd.getCommunityId(), cmd.getAppOriginId());
+			if(config == null){
+				config = new AppCommunityConfig();
+				config.setAppOriginId(cmd.getAppOriginId());
+				config.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				config.setCreatorUid(UserContext.currentUserId());
+				config.setDisplayName(cmd.getDisplayName());
+				config.setVisibilityFlag(cmd.getVisibilityFlag());
+				appCommunityConfigProvider.createAppCommunityConfig(config);
+			}else {
+				config.setDisplayName(cmd.getDisplayName());
+				config.setVisibilityFlag(cmd.getVisibilityFlag());
+				config.setOperatorUid(UserContext.currentUserId());
+				config.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+				appCommunityConfigProvider.updateAppCommunityConfig(config);
+			}
+
+		}else {
+			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(cmd.getAppOriginId(), cmd.getOrganizationId());
+			orgapp.setDisplayName(cmd.getDisplayName());
+			orgapp.setVisibilityFlag(cmd.getVisibilityFlag());
+			organizationAppProvider.updateOrganizationApp(orgapp);
+		}
+
 	}
 }

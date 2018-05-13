@@ -154,5 +154,7 @@ public interface CommunityService {
 
     void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd);
 
-	void changeOrganizationCommunity(ChangeOrganizationCommunityCommand cmd);
+	void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd);
+
+	void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId, Byte keepAuthorizationFlag);
 }

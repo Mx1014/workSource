@@ -4,22 +4,42 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>organizationId: 管理公司id</li>
+ *     <li>communityId: 园区Id，不填则是默认方案</li>
+ *     <li>appOriginId: appOriginId</li>
  *     <li>visibilityFlag: 是否可见{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>displayName: 显示名称</li>
  * </ul>
  */
 public class UpdateAppCommunityConfigCommand {
-	private Long id;
+	private Long organizationId;
+	private Long communityId;
+	private Long appOriginId;
 	private Byte visibilityFlag;
 	private String displayName;
 
-	public Long getId() {
-		return id;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getAppOriginId() {
+		return appOriginId;
+	}
+
+	public void setAppOriginId(Long appOriginId) {
+		this.appOriginId = appOriginId;
 	}
 
 	public Byte getVisibilityFlag() {

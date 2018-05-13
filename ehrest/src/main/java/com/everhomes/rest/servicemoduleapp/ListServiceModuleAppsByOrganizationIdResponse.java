@@ -17,6 +17,7 @@ public class ListServiceModuleAppsByOrganizationIdResponse {
 
 	@ItemType(ServiceModuleAppDTO.class)
 	private List<ServiceModuleAppDTO> serviceModuleApps;
+	private Long nextPageAnchor;
 
 	public List<ServiceModuleAppDTO> getServiceModuleApps() {
 		return serviceModuleApps;
@@ -24,6 +25,14 @@ public class ListServiceModuleAppsByOrganizationIdResponse {
 
 	public void setServiceModuleApps(List<ServiceModuleAppDTO> serviceModuleApps) {
 		this.serviceModuleApps = serviceModuleApps;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	@Override
