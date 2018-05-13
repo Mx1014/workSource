@@ -42,7 +42,6 @@ CREATE TABLE `eh_app_community_configs` (
   `operator_uid` bigint(20) DEFAULT NULL,
   `operator_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `organization_app_id` (`organization_app_id`) USING BTREE,
   KEY `community_id` (`community_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
