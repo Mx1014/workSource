@@ -40,10 +40,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("createOrganizationAdmin")
     @RestReturn(value=OrganizationContactDTO.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        /*SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
             resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
-        }
+        }*/
         RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
