@@ -166,6 +166,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         VisitorsysSearchFlagType visitorsysSearchFlagType = VisitorsysSearchFlagType.fromCode(params.getSearchFlag());
         FieldSortBuilder sort = SortBuilders.fieldSort("id").order(SortOrder.DESC);;
         if(visitorsysSearchFlagType == VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
+            fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitorType",VisitorsysVisitorType.BE_INVITED.getCode()));
             RangeFilterBuilder rf = new RangeFilterBuilder("plannedVisitTime");
             if (params.getStartPlannedVisitTime() != null) {
                 rf.gt(params.getStartPlannedVisitTime());
@@ -178,7 +179,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }else{
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
             }
-            sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.DESC);
+            sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.ASC);
         }else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
             RangeFilterBuilder rf = new RangeFilterBuilder("visitTime");
             if (params.getStartVisitTime() != null) {
@@ -193,6 +194,15 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
+        }else if(visitorsysSearchFlagType == VisitorsysSearchFlagType.CLIENT_BOOKING){
+            fb =FilterBuilders.andFilter(fb,FilterBuilders.termFilter("visitorType",VisitorsysVisitorType.BE_INVITED.getCode()));
+
+            if(params.getBookingStatus()!=null){
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
+            }else{
+                fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
+            }
+            sort = SortBuilders.fieldSort("createTime").order(SortOrder.DESC);
         }
 
 

@@ -12,10 +12,12 @@ import com.everhomes.util.StringHelper;
  * <li>deviceType: (必填)设备类型，{@link com.everhomes.rest.visitorsys.VisitorsysDeviceType}</li>
  * <li>deviceId: (必填)设备唯一标识</li>
  * <li>enterpriseId: (必填)公司id</li>
+ * <li>locationId: (必填)办公地点id</li>
  * </ul>
  */
-public class GetFormCommand extends BaseVisitorsysUICommand {
+public class GetUIFormCommand extends BaseVisitorsysUICommand {
     private Long enterpriseId;
+    private Long locationId;
 
     public Long getEnterpriseId() {
         return enterpriseId;
@@ -23,6 +25,14 @@ public class GetFormCommand extends BaseVisitorsysUICommand {
 
     public void setEnterpriseId(Long enterpriseId) {
         this.enterpriseId = enterpriseId;
+    }
+
+    public Long getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(Long locationId) {
+        this.locationId = locationId;
     }
 
     @Override

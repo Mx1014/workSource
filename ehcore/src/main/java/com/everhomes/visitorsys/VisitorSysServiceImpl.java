@@ -142,15 +142,29 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         response.setVisitorPicUrl(contentServerService.parserUri(visitor.getVisitorPicUri()));
         response.setVisitorSignUrl(contentServerService.parserUri(visitor.getVisitorSignUri()));
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(visitor.getOwnerType());
+        VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             response.setCommunityFormValues(JSONObject.parseObject(visitor.getFormJsonValue(),
+                    new TypeReference<List<PostApprovalFormItem>>() {}));
+            response.setEnterpriseFormValues(JSONObject.parseObject(relatedVisitor.getFormJsonValue(),
                     new TypeReference<List<PostApprovalFormItem>>() {}));
         }else{
             response.setEnterpriseFormValues(JSONObject.parseObject(visitor.getFormJsonValue(),
                     new TypeReference<List<PostApprovalFormItem>>() {}));
+            response.setCommunityFormValues(JSONObject.parseObject(relatedVisitor.getFormJsonValue(),
+                    new TypeReference<List<PostApprovalFormItem>>() {}));
         }
 
         return response;
+    }
+
+    private VisitorSysVisitor getRelatedVisitor(VisitorSysVisitor visitor) {
+        if(visitor.getParentId()==null)
+            return null;
+        if(visitor.getParentId()==0L){
+            return visitorSysVisitorProvider.findVisitorSysVisitorByParentId(visitor.getNamespaceId(), visitor.getId());
+        }
+        return visitorSysVisitorProvider.findVisitorSysVisitorById(visitor.getNamespaceId(), visitor.getParentId());
     }
 
     @Override
@@ -322,14 +336,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         dbProvider.execute(r->{
             visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
             visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
-            if(visitor.getParentId()==0){
-                VisitorSysVisitor subvisitor = visitorSysVisitorProvider.findVisitorSysVisitorByParentId(cmd.getNamespaceId(), visitor.getId());
-                visitorSysVisitorProvider.deleteVisitorSysVisitor(subvisitor.getNamespaceId(),subvisitor.getId());
-                visitorsysSearcher.syncVisitor(subvisitor.getNamespaceId(),subvisitor.getId());
-            }else{
-                visitorSysVisitorProvider.deleteVisitorSysVisitor(visitor.getNamespaceId(),visitor.getParentId());
-                visitorsysSearcher.syncVisitor(visitor.getNamespaceId(),visitor.getParentId());
-            }
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            visitorSysVisitorProvider.deleteVisitorSysVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
+            visitorsysSearcher.syncVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
             return null;
         });
 
@@ -642,15 +651,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         dbProvider.execute(r->{
             visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
             visitorsysSearcher.syncVisitor(visitor);
-            VisitorSysVisitor subvisitor = null;
-            if(visitor.getParentId()==0){
-                subvisitor = visitorSysVisitorProvider.findVisitorSysVisitorByParentId(visitor.getNamespaceId(), visitor.getId());
-
-            }else{
-                subvisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(visitor.getNamespaceId(), visitor.getParentId());
-            }
-            visitorSysVisitorProvider.updateVisitorSysVisitor(subvisitor);
-            visitorsysSearcher.syncVisitor(subvisitor);
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
+            visitorsysSearcher.syncVisitor(relatedVisitor);
             return null;
         });
     }
@@ -1230,6 +1233,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //设置创建预约访客属性
         if(visitorsysVisitorType==VisitorsysVisitorType.BE_INVITED){
             checkMustFillParams(visitor, "plannedVisitTime");
+            if(visitor.getPlannedVisitTime().getTime()<System.currentTimeMillis()){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+                        , ErrorCodes.ERROR_INVALID_PARAMETER, "invalid passed plannedVisitTime "+visitor.getPlannedVisitTime());
+            }
             if(visitor.getId()==null) {
                 visitor.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());
             }
@@ -1272,12 +1279,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private VisitorSysVisitor generateRelatedVisitor(VisitorSysVisitor visitor, List<PostApprovalFormItem> formValues) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(visitor.getOwnerType());
-        VisitorSysVisitor relatedVisitor = null;
-        if (visitor.getParentId()==0) {
-            relatedVisitor = visitorSysVisitorProvider.findVisitorSysVisitorByParentId(visitor.getNamespaceId(), visitor.getId());
-        }else {
-            relatedVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(visitor.getNamespaceId(), visitor.getParentId());
-        }
+        VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
         VisitorSysVisitor convert = ConvertHelper.convert(visitor, VisitorSysVisitor.class);
         //新建访客/预约
         if(relatedVisitor !=null){

@@ -94,8 +94,8 @@ public class VisitorSysUIController extends ControllerBase {
 	 */
 	@RequestMapping("getForm")
 	@RestReturn(GetFormResponse.class)
-	public RestResponse getForm(GetFormCommand cmd) {
-		GetFormResponse baseResponse = visitorSysService.getForm(cmd);
+	public RestResponse getForm(GetUIFormCommand cmd) {
+		GetFormResponse baseResponse = visitorSysService.getUIForm(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

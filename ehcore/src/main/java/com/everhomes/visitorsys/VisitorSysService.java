@@ -3,6 +3,7 @@ package com.everhomes.visitorsys;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
+import com.everhomes.rest.visitorsys.GetFormCommand;
 import com.everhomes.rest.visitorsys.ui.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -76,6 +77,8 @@ public interface VisitorSysService {
     ListBookedVisitorsResponse confirmVerificationCode(ConfirmVerificationCodeCommand cmd);
 
     GetHomePageConfigurationResponse getHomePageConfiguration();
+
+    GetFormResponse getUIForm(GetUIFormCommand cmd);
 
     GetFormResponse getForm(GetFormCommand cmd);
 

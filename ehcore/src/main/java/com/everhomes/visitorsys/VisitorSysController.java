@@ -7,15 +7,17 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
-import com.everhomes.rest.visitorsys.ui.GetFormCommand;
+import com.everhomes.rest.visitorsys.ui.GetUIFormCommand;
 import com.everhomes.rest.visitorsys.ui.GetFormResponse;
 import com.everhomes.rest.visitorsys.ui.TransferQrcodeCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
 
 @RestDoc(value = "visitorsys Controller", site = "core")
 @RestController
@@ -24,6 +26,12 @@ public class VisitorSysController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
+
+	@Override
+	public void initListBinder(WebDataBinder binder) {
+		super.initListBinder(binder);
+		binder.registerCustomEditor(Timestamp.class,new TimestampEditor());
+	}
 
 	/**
 	 * <b>URL: /visitorsys/listBookedVisitors</b>
@@ -461,8 +469,8 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("getForm")
 	@RestReturn(GetFormResponse.class)
-	public RestResponse getForm(GetFormCommand cmd) {
-		GetFormResponse baseResponse = visitorSysService.getForm(cmd);
+	public RestResponse getForm(GetUIFormCommand cmd) {
+		GetFormResponse baseResponse = visitorSysService.getUIForm(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
