@@ -8267,12 +8267,12 @@ public class PunchServiceImpl implements PunchService {
     		}
     		String ptrKey = getPtrMapKey(log.getUserId(),log.getEnterpriseId(),dateSF.get().format(log.getPunchDate()));
     		if (punchTimeRuleMapUserIdDate.containsKey(ptrKey)) {
-    			//无法追溯到这一天的考勤规则 就直接用规则时间,如果规则时间也没有,就是非常历史的数据不管他
-                log.setShouldPunchTime(log.getRuleTime());
-            } else {
             	PunchTimeRule ptr = punchTimeRuleMapUserIdDate.get(ptrKey);
             	 //请假的汇总interval
                 addPunchLogShouldPunchTime(log,logs,ptr);
+            } else {
+            	//无法追溯到这一天的考勤规则 就直接用规则时间,如果规则时间也没有,就是非常历史的数据不管他
+                log.setShouldPunchTime(log.getRuleTime());
                 
             }
     		punchProvider.updatePunchLog(log);
