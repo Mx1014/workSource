@@ -452,7 +452,7 @@ public class AssetServiceImpl implements AssetService {
                 MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
                 messageDto.setSenderUid(2L);
-                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+
                 messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                 int msgId = UserNotificationTemplateCode.USER_PAYMENT_NOTICE;
                 String msgScope = UserNotificationTemplateCode.SCOPE;
@@ -478,6 +478,7 @@ public class AssetServiceImpl implements AssetService {
                 if (!StringUtils.isBlank(notifyTextForApplicant) && appGo) {
                     String pakUidStr = String.valueOf(pak.getUid());
                     LOGGER.info("pakUidStr" + pakUidStr);
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), pakUidStr));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING
                             , MessageChannelType.USER.getCode(), pakUidStr
                             , messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
@@ -3407,6 +3408,9 @@ public class AssetServiceImpl implements AssetService {
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
                     for(NoticeMemberIdAndContact uid : userIds){
                         try {
+                            if(uid.getTargetId() == info.getTargetId()){
+                                continue;
+                            }
                             NoticeInfo newInfo = CopyUtils.deepCopy(info);
                             newInfo.setTargetId(uid.getTargetId());
                             newInfo.setPhoneNums(uid.getContactToken());
