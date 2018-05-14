@@ -9,3 +9,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organ
 insert into eh_locale_strings(scope,code,locale,`text`)values('building',10004,'zh_CN','该楼栋名称已经存在，请更换其他名称');
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900032,'zh_CN','姓名为空');
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900033,'zh_CN','办公地点名称为空');
+insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900034,'zh_CN','办公地点所属项目为空');
+insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900035,'zh_CN','是否属于管理公司标志为空');
+insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900036,'zh_CN','是否属于服务商标志为空');
+insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900037,'zh_CN','是否启用工作台标志为空');

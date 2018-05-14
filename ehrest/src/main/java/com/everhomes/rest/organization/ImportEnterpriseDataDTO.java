@@ -26,18 +26,18 @@ public class ImportEnterpriseDataDTO {
 	private String address = "";
 */
 	//办公地点楼栋和门牌集合
-	private List<OrganizationApartDTO> siteDtos;
+	private List<OrganizationSiteApartmentDTO> siteDtos;
 
 	//办公地点名称
 	private String workPlaceName;
 	//办公地点所属项目名称
 	private String communityName;
 	//是否属于管理公司标志
-	private Byte pmFlag;
+	private String pmFlag;
 	//是否属于服务商标志
-	private Byte serviceSupportFlag;
+	private String serviceSupportFlag;
 	//是否启用移动工作台
-	private Byte workPlatFormFlag;
+	private String workPlatFormFlag;
 	//管理的项目名称集合
 	private List<CommunityDTO> communityDTOList;
 
@@ -171,27 +171,27 @@ public class ImportEnterpriseDataDTO {
 		this.communityName = communityName;
 	}
 
-	public Byte getPmFlag() {
+	public String getPmFlag() {
 		return pmFlag;
 	}
 
-	public void setPmFlag(Byte pmFlag) {
+	public void setPmFlag(String pmFlag) {
 		this.pmFlag = pmFlag;
 	}
 
-	public Byte getServiceSupportFlag() {
+	public String getServiceSupportFlag() {
 		return serviceSupportFlag;
 	}
 
-	public void setServiceSupportFlag(Byte serviceSupportFlag) {
+	public void setServiceSupportFlag(String serviceSupportFlag) {
 		this.serviceSupportFlag = serviceSupportFlag;
 	}
 
-	public Byte getWorkPlatFormFlag() {
+	public String getWorkPlatFormFlag() {
 		return workPlatFormFlag;
 	}
 
-	public void setWorkPlatFormFlag(Byte workPlatFormFlag) {
+	public void setWorkPlatFormFlag(String workPlatFormFlag) {
 		this.workPlatFormFlag = workPlatFormFlag;
 	}
 
@@ -203,11 +203,11 @@ public class ImportEnterpriseDataDTO {
 		this.communityDTOList = communityDTOList;
 	}
 
-	public List<OrganizationApartDTO> getSiteDtos() {
+	public List<OrganizationSiteApartmentDTO> getSiteDtos() {
 		return siteDtos;
 	}
 
-	public void setSiteDtos(List<OrganizationApartDTO> siteDtos) {
+	public void setSiteDtos(List<OrganizationSiteApartmentDTO> siteDtos) {
 		this.siteDtos = siteDtos;
 	}
 

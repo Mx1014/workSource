@@ -8209,9 +8209,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list) {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
         //创建楼栋和门牌的集合
-        List<OrganizationApartDTO> organizationApartDTOList = Lists.newArrayList();
+        List<OrganizationSiteApartmentDTO> siteDtos = Lists.newArrayList();
         //创建OrganizationApartDTO类的对象
-        OrganizationApartDTO organizationApartDTO = new OrganizationApartDTO();
+        OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
         //创建管理的项目的集合
         List<CommunityDTO> communityDTOList = Lists.newArrayList();
         //创建CommunityDTO类的对象
@@ -8248,14 +8248,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCommunityName(r.getG().trim());
                 if (null != r.getH()){
                     for(String str : r.getH().split(",")){
-                        organizationApartDTO.setBuildingName(str.split("-")[0]);
-                        organizationApartDTO.setApartmentName(str.split("-")[1]);
+                        organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
+                        organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
                     }
-                    organizationApartDTOList.add(organizationApartDTO);
-                    data.setSiteDtos(organizationApartDTOList);
+                    siteDtos.add(organizationSiteApartmentDTO);
+                    data.setSiteDtos(siteDtos);
                 }
                 if (null != r.getI())
-                    data.setPmFlag(Byte.valueOf(r.getI().trim()));
+                    data.setPmFlag(r.getI().trim());
                 if (null != r.getJ()){
                     for(String str : r.getJ().split(",")){
                         communityDTO.setName(str);
@@ -8264,9 +8264,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCommunityDTOList(communityDTOList);
                 }
                 if (null != r.getK())
-                    data.setServiceSupportFlag(Byte.valueOf(r.getK().trim()));
+                    data.setServiceSupportFlag(r.getK().trim());
                 if (null != r.getL())
-                    data.setWorkPlatFormFlag(Byte.valueOf(r.getL().trim()));
+                    data.setWorkPlatFormFlag(r.getL().trim());
                     datas.add(data);
             }
         }
@@ -8335,7 +8335,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(!CollectionUtils.isEmpty(list)){
             //说明集合不为空，那么我们将该集合进行遍历
             for(ImportEnterpriseDataDTO importEnterpriseDataDTO : list){
-                Community community = communityProvider.findCommunityByNameAndNamespaceId(importEnterpriseDataDTO.getName(),namespaceId);
+                Community community = communityProvider.findCommunityByNameAndNamespaceId(importEnterpriseDataDTO.getCommunityName(),namespaceId);
 
                 //创建公司Organization类的对象
                 Organization organization = new Organization();
@@ -8388,7 +8388,45 @@ public class OrganizationServiceImpl implements OrganizationService {
                     continue;
                 }
 
-                、、
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getCommunityName())){
+                    LOGGER.error("communityName is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("communityName is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("communityName is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_COMMUNITYNAME_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getPmFlag())){
+                    LOGGER.error("PmFlag is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("PmFlag is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("PmFlag is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_PMFLAG_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getServiceSupportFlag())){
+                    LOGGER.error("serviceSupportFlag is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("serviceSupportFlag is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("serviceSupportFlag is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_SERVICESUPPORT_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getWorkPlatFormFlag())){
+                    LOGGER.error("workPlatformFlag is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("workPlatformFlag is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("workPlatformFlag is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_WORKPLATFORM_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
 
                 //创建群组Group类的对象
                 Group group = new Group();
@@ -8434,20 +8472,26 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 organization.setGroupId(group.getId());
                 //表明该公司是否是管理公司 1-是 0-否
-                if(importEnterpriseDataDTO.getPmFlag() != null){
-                    organization.setPmFlag(importEnterpriseDataDTO.getPmFlag().byteValue());
+                if(importEnterpriseDataDTO.getPmFlag() != null && importEnterpriseDataDTO.getPmFlag().equals("是")){
+                    organization.setPmFlag(Byte.valueOf("1"));
+                }else{
+                    organization.setPmFlag(Byte.valueOf("0"));
                 }
                 //表明该公司是否是服务商，1-服务商 0-否
-                if(importEnterpriseDataDTO.getServiceSupportFlag() != null){
-                    organization.setServiceSupportFlag(importEnterpriseDataDTO.getServiceSupportFlag().byteValue());
+                if(importEnterpriseDataDTO.getServiceSupportFlag() != null && importEnterpriseDataDTO.getServiceSupportFlag().equals("是")){
+                    organization.setServiceSupportFlag(Byte.valueOf("1"));
+                }else{
+                    organization.setServiceSupportFlag(Byte.valueOf("0"));
                 }
-                if(importEnterpriseDataDTO.getWorkPlatFormFlag() != null){
-                    organization.setWorkPlatformFlag(importEnterpriseDataDTO.getWorkPlatFormFlag().byteValue());
+                if(importEnterpriseDataDTO.getWorkPlatFormFlag() != null && importEnterpriseDataDTO.getWorkPlatFormFlag().equals("启用")){
+                    organization.setWorkPlatformFlag(Byte.valueOf("1"));
+                }else{
+                    organization.setWorkPlatformFlag(Byte.valueOf("0"));
                 }
                 organizationProvider.createOrganization(organization);
 
                 //根据是否是管理公司来进行添加eh_organization_communities表数据，只有是管理公司才能拥有管理的项目
-                if(importEnterpriseDataDTO.getPmFlag() != null && importEnterpriseDataDTO.getPmFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                if(importEnterpriseDataDTO.getPmFlag() != null && importEnterpriseDataDTO.getPmFlag().equals("是")){
                     //说明是管理员，那么我们就可以将管理的项目添加到eh_organization_communities表中
                     if(!CollectionUtils.isEmpty(importEnterpriseDataDTO.getCommunityDTOList())){
                         //说明管理的项目不为空，那么我们根据管理的项目名称查出来管理项目的id的集合
@@ -8479,8 +8523,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                 }
 
-
-
+                //首先需要创建List<CreateOfficeSiteCommand> officeSites集合
+                List<CreateOfficeSiteCommand> officeSites = Lists.newArrayList();
+                //创建CreateOfficeSiteCommand类的对象
+                CreateOfficeSiteCommand createOfficeSiteCommand = new CreateOfficeSiteCommand();
+                //创建List<OrganizationSiteApartmentDTO> siteDtos集合
+                List<OrganizationSiteApartmentDTO> siteDtos = Lists.newArrayList();
+                //创建OrganizationSiteApartmentDTO类的对象
+                OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
+                //将数据封装在对象CreateOfficeSiteCommand中
+                createOfficeSiteCommand.setCommunityId(community.getId());
+                createOfficeSiteCommand.setSiteName(importEnterpriseDataDTO.getWorkPlaceName());
+                //从ImportEnterpriseDataDTO对象中拿到楼栋和门牌对应的名称的集合
+                siteDtos = importEnterpriseDataDTO.getSiteDtos();
+                、、
                 //向办公地点表中添加数据
                 if(cmd.getOfficeSites() != null){
                     //说明传过来的所在项目和名称以及其中的楼栋和门牌不为空，那么我们将其进行遍历
