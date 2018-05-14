@@ -282,7 +282,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	@Override
 	public List<ServiceModuleApp> listServiceModuleAppsByOrganizationId(Long versionId, Byte appType, String keyword, Long organizationId, Byte installFlag, Long pageAnchor, int pageSize) {
 
-		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_SERVICE_MODULE_APPS);
+		SelectQuery query = getReadOnlyContext().select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		if(appType != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
@@ -314,7 +314,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		query.addLimit(pageSize);
 
-		List<ServiceModuleApp> apps = query.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
 	}
 
