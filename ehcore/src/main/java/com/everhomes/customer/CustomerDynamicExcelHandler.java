@@ -264,10 +264,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 if ("trackingUid".equals(column.getFieldName())) {
                                     Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
                                     if (isAdmin) {
-                                        enterpriseCustomer.setTrackingName(column.getValue());
+                                        //产品要求改成 姓名（phone）
+                                        String username = "";
+                                        String contactPhone = "";
+                                        if(StringUtils.isNotEmpty(column.getValue())){
+                                            username =  column.getValue().split("\\(")[0];
+                                            contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
+                                        }
+                                        enterpriseCustomer.setTrackingName(username);
                                         List<User> users = null;
                                         if (StringUtils.isNotEmpty(column.getValue())) {
-                                            users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                            users = userProvider.listUserByKeyword(contactPhone, namespaceId, new CrossShardListingLocator(), 2);
                                         }
                                         if (users != null && users.size() > 0) {
                                             column.setValue(users.get(0).getId().toString());
