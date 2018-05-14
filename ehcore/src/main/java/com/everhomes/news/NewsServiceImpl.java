@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.base.Joiner;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -719,12 +721,14 @@ public class NewsServiceImpl implements NewsService {
 		} else if (enumStatus == NewsStatus.DRAFT) {
 			must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.DRAFT.getCode() + "}}"));
 		}
-		if (null != tagIds) {
-			for (Long id : tagIds) {
-				if (id == null) {
-					continue;
-				}
-				must.add(JSONObject.parse("{\"term\":{\"tag\":" + id + "}}"));
+		
+		// 同一个tag对子tag取交集，不同的tag取并集
+		List<TagSearchItem> items = getTagSearchItems(namespaceId, categoryId, tagIds);
+		boolean containItems = !CollectionUtils.isEmpty(items);
+		if (containItems) {
+			for (TagSearchItem item : items) {
+				String idList = Joiner.on(",").join(item.getChildTagIds());
+				must.add(JSONObject.parse("{\"terms\":{\"tag\":[" + idList + "]}}"));
 			}
 		}
 
@@ -751,6 +755,9 @@ public class NewsServiceImpl implements NewsService {
 	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId,
 			String keyword, List<Long> tagIds, Long pageAnchor, Integer pageSize, boolean isScene, Byte status) {
 
+		// 更新tagId
+//		updateTagIds(namespaceId, tagIds);
+		
 		String jsonString = getSearchJson(communityId, userId, namespaceId, categoryId, keyword, tagIds, pageAnchor,
 				pageSize, status);
 
@@ -2135,5 +2142,131 @@ public class NewsServiceImpl implements NewsService {
 		
 		//文字较长，截取默认长度
 		news.setContentAbstract(contentAbstract.substring(0, NEWS_CONTENT_ABSTRACT_DEFAULT_LEN));
+	}
+	
+	/**
+	 * 前端或app可能会传来父标签Id，作为查询一整个类型的条件
+	 * 这时需要将子标签都获取，作为查询条件。
+	 * 且不同的类型是需要做交集的。
+	 * @param tagIds
+	 * @return
+	 */
+	private List<TagSearchItem> getTagSearchItems(Integer namespaceId, Long categoryId, List<Long> tagIds) {
+
+		if (null == tagIds || tagIds.size() <= 0) {
+			return null;
+		}
+
+		// 1.去重
+		List<Long> newTagIds = new ArrayList<Long>(new HashSet<Long>(tagIds));
+
+
+		Map<Long, List<Long>> itemMap = new HashMap<>(10); //key为parentId, value为childIdList
+		// 获取所有的标签
+		List<NewsTag> newsTags = getAllNewsTags(namespaceId, categoryId);
+		if (CollectionUtils.isEmpty(newsTags)) {
+			return null;
+		}
+		
+		// 保存tagIds至itemMap
+		for (Long tagId : newTagIds) {
+
+			if (null == tagId || tagId <= 0) {
+				continue;
+			}
+
+			// 获取该tagId的标签信息
+			for (NewsTag newsTag : newsTags) {
+				if (!tagId.equals(newsTag.getId())) {
+					continue;
+				}
+
+				formTagIdMap(itemMap, newsTag, newsTags);
+				break;
+			}
+		}
+		
+		// 根据tagIdMap来组装筛选条件
+		return formTagSearchItems(itemMap);
+	}
+	
+	/**
+	 * 获取当前域名和版本下的所有标签
+	 * 
+	 * @param parentTagId
+	 * @return
+	 */
+	private List<NewsTag> getAllNewsTags(Integer namespaceId, Long categoryId) {
+		return newsProvider.listNewsTag(namespaceId, null, null, null, null, categoryId);
+	}
+	
+	/**   
+	* @Function: NewsServiceImpl.java
+	* @Description: 构造以父节点为key，孩子节点为valueList的map
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月4日 下午4:01:07 
+	*
+	*/
+	private void formTagIdMap(Map<Long, List<Long>> itemMap, NewsTag newsTag, List<NewsTag> newsTags) {
+		
+		List<Long> valueList = null;
+		
+		// 如果是父亲节点，将所有孩子节点都找出来
+		if (isParentTag(newsTag)) {
+			
+			if (null == itemMap.get(newsTag.getId())) {
+				valueList = new ArrayList<Long>(10);
+			}
+			
+			// 将所有孩子节点添加上去
+			for (NewsTag tag : newsTags) {
+				if (newsTag.getId().equals(tag.getParentId())) {
+					valueList.add(tag.getId());
+				}
+			}
+			
+			itemMap.put(newsTag.getId(), valueList);
+			return;
+		}
+		
+		// 孩子节点
+		valueList = itemMap.get(newsTag.getParentId());
+		if (null == valueList) {
+			valueList = new ArrayList<Long>(10);
+		}
+		
+		valueList.add(newsTag.getId());
+		itemMap.put(newsTag.getParentId(), valueList);
+	}
+	
+	/**   
+	* @Function: NewsServiceImpl.java
+	* @Description: 根据tagId map生成查询项
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月4日 下午4:25:58 
+	*
+	*/
+	private List<TagSearchItem> formTagSearchItems(Map<Long, List<Long>> itemMap) {
+		if (itemMap.isEmpty()) {
+			return null;
+		}
+
+		List<TagSearchItem> searchItems = new ArrayList<>(10);
+		for (Long parentId : itemMap.keySet()) {
+			TagSearchItem item = new TagSearchItem();
+			item.setParentTagId(parentId);
+			item.setChildTagIds(itemMap.get(parentId));
+			searchItems.add(item);
+		}
+		
+		return searchItems;
+	}
+	
+	private boolean isParentTag(NewsTag tag) {
+		return 0 == tag.getParentId();
 	}
 }
