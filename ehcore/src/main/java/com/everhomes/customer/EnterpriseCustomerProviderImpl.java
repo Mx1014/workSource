@@ -1688,24 +1688,26 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        }
 						}
                         if("trackingUid".equals(field.getFieldName())) {
-                            if("-1".equals(oldData)) {
+                            if (oldData == null || oldData.equals("")) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if("-1".equals(newData)) {
+                            if (newData == null || newData.equals("")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
                             }
-
                         }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
 						content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+						if(field.getFieldParam().contains("image")){
+                            content = content.split(":")[0];
+                        }
 						buffer.append(content);
 						buffer.append(";");
 					}
