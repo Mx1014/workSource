@@ -396,8 +396,9 @@ public class AssetServiceImpl implements AssetService {
                     if(noticeInfo.isUseTemplate() != null && noticeInfo.isUseTemplate()){
                         if(noticeInfo.getMsgTemplateId() == null){
                             smsGo = false;
+                        }else{
+                            templateId = noticeInfo.getMsgTemplateId().intValue();
                         }
-                        templateId = noticeInfo.getMsgTemplateId().intValue();
                     }
                 }catch (Exception e){
                     smsGo = false;
@@ -475,9 +476,11 @@ public class AssetServiceImpl implements AssetService {
                 messageDto.setBody(notifyTextForApplicant);
                 messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
                 if (!StringUtils.isBlank(notifyTextForApplicant) && appGo) {
+                    String pakUidStr = String.valueOf(pak.getUid());
+                    LOGGER.info("pakUidStr" + pakUidStr);
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING
-                            , MessageChannelType.USER.getCode(),
-                            String.valueOf(pak.getUid()), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                            , MessageChannelType.USER.getCode(), pakUidStr
+                            , messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
             } catch (Exception e) {
                 LOGGER.error("WUYE BILL SENDING MESSAGE FAILED", e);
