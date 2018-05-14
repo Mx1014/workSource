@@ -3,9 +3,7 @@ package com.everhomes.wx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -19,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -31,6 +30,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -64,6 +64,9 @@ public class WeChatServiceImpl implements WeChatService {
     
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     static final String ACCESS_TOKEN = "wechat.accesstoken";
     static final String JSAPI_TICKENT = "jsapi.ticket";
@@ -290,10 +293,23 @@ public class WeChatServiceImpl implements WeChatService {
 	}
 	
 	private ListenableFuture<ResponseEntity<String>> restCall(String cmd, Object params, String getParams, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
-        
+
         AsyncRestTemplate template = new AsyncRestTemplate();
         String url = getRestUri(cmd) + getParams;
-        
+
+//        //TODO for test
+//        url = "http://members.3322.org/dyndns/getip";
+//        //使用测试环境没有固定ip代理访问，从有外网ip的服务器访问微信，从而实现固定id
+//        String wechatProxyHost = configurationProvider.getValue("wechat.proxy.host", null);
+//        int wechatProxyPort = configurationProvider.getIntValue("wechat.proxy.port", 0);
+//        if(wechatProxyHost != null && wechatProxyPort != 0){
+//            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+//            InetSocketAddress address = new InetSocketAddress(wechatProxyHost,wechatProxyPort);
+//            Proxy proxy = new Proxy(Proxy.Type.HTTP,address);
+//            factory.setProxy(proxy);
+//            template.setAsyncRequestFactory(factory);
+//        }
+
         ListenableFuture<ResponseEntity<String>> future = template.exchange(url, HttpMethod.GET, null, String.class);
         
         if(responseCallback != null) {
@@ -314,6 +330,18 @@ public class WeChatServiceImpl implements WeChatService {
         }
         
     }
+
+
+//    /**
+//     * 想测试上面的restCall方法啊，但是它是private方法
+//     * @param cmd
+//     * @param params
+//     * @param url
+//     */
+//    @Override
+//    public String testRestCall(String cmd, Object params, String url){
+//        return restCall(cmd, params, url);
+//    }
 
     public static Map<String, String> sign(String jsapi_ticket, String url) {
         Map<String, String> ret = new HashMap<String, String>();
