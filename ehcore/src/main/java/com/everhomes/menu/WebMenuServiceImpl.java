@@ -896,7 +896,77 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Override
 	public ListMenuForPcEntryResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd) {
 
-		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(cmd.getNamespaceId(), cmd.getModuleIds());
+
+		//很无奈，这里的菜单是写死的
+
+		List<Long> moduleIds = new ArrayList<>();
+
+		WebMenuDTO introduces = new WebMenuDTO();
+		introduces.setName("走进园区");
+		introduces.setDtos(new ArrayList<>());
+
+		WebMenuDTO introduce1 = new WebMenuDTO();
+		introduce1.setName("园区介绍");
+		introduces.getDtos().add(introduce1);
+
+		WebMenuDTO introduce2 = new WebMenuDTO();
+		introduce2.setName("名企风采");
+		introduces.getDtos().add(introduce2);
+
+		WebMenuDTO introduce3 = new WebMenuDTO();
+		introduce3.setName("联系我们");
+		introduces.getDtos().add(introduce3);
+
+
+
+		WebMenuDTO trends = new WebMenuDTO();
+		trends.setName("园区动态");
+		moduleIds.clear();
+		moduleIds.add(10300L);//公告
+		moduleIds.add(10800L);//园区快讯
+		moduleIds.add(10600L);//活动
+
+		List<WebMenuDTO> sbuTrends = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		trends.setDtos(sbuTrends);
+
+		WebMenuDTO services = new WebMenuDTO();
+		services.setName("园区服务");
+		moduleIds.clear();
+		moduleIds.add(40100L);//招租管理
+		moduleIds.add(40500L);//服务联盟
+		moduleIds.add(20100L);//物业报修
+		List<WebMenuDTO> sbuServices = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		services.setDtos(sbuServices);
+
+
+		WebMenuDTO resources = new WebMenuDTO();
+		resources.setName("预定中心");
+		moduleIds.clear();
+		moduleIds.add(40400L);//资源预定
+		List<WebMenuDTO> sbuResources = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		resources.setDtos(sbuResources);
+
+
+		ListMenuForPcEntryResponse response = new ListMenuForPcEntryResponse();
+
+		List<WebMenuDTO> dtos = new ArrayList<>();
+		dtos.add(introduces);
+		dtos.add(trends);
+		dtos.add(services);
+		dtos.add(resources);
+
+		response.setDtos(dtos);
+		return response;
+	}
+
+	/**
+	 * 给listMenuForPcEntry用的，只有菜单，没有目录结构
+	 * @param namespaceId
+	 * @param moduleIds
+	 * @return
+	 */
+	private List<WebMenuDTO> findWebMenuDtoByModuleIds(Integer namespaceId, List<Long> moduleIds){
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(namespaceId, moduleIds);
 
 		List<WebMenuDTO> dtos = new ArrayList<>();
 		if (apps != null) {
@@ -911,8 +981,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 		}
 
-		ListMenuForPcEntryResponse response = new ListMenuForPcEntryResponse();
-		response.setDtos(dtos);
-		return response;
+		return dtos;
 	}
 }
