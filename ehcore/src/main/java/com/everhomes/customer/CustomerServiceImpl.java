@@ -2386,8 +2386,10 @@ public class CustomerServiceImpl implements CustomerService {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+                organizationSearcher.feedDoc(organization);
             }
         }
+        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     @Override
