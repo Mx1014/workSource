@@ -106,7 +106,7 @@ CREATE TABLE `eh_smart_card_keys` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(256) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 无效, 1 有效',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -180,3 +180,8 @@ ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `icon_uri`  varchar(255) 
 
 -- 标准版里app的配置是否跟随默认配置
 ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
+
+
+-- 标准版本的 key 增加用户 ID
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
+
