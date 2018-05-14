@@ -16,7 +16,7 @@ CREATE TABLE `eh_message_records` (
   `sender_uid` BIGINT(20) DEFAULT NULL,
   `sender_tag` VARCHAR(32) DEFAULT NULL COMMENT 'sender generated tag',
   `channels_info` VARCHAR(2048) DEFAULT NULL,
-  `body_type`VARCHAR(32
+  `body_type`VARCHAR(32),
   `body` VARCHAR(2048),
   `delivery_option` INT(2) DEFAULT '0',
   `create_time` DATETIME NOT NULL COMMENT 'message creation time',
@@ -35,7 +35,7 @@ ALTER TABLE `eh_configurations` MODIFY `value` VARCHAR(1024);
 
 -- add by yanjun 增加字段长度 201805091806
  
-ALTER TABLE `eh_service_module_apps` MODIFY COLUMN `custom_tag`  VARCHAR(256)  NULL DEFAULT ''
+ALTER TABLE `eh_service_module_apps` MODIFY COLUMN `custom_tag`  VARCHAR(256)  NULL DEFAULT '';
 -- issue-23470 by liuyilin
 ALTER TABLE `eh_door_access`
 ADD `enable_amount` TINYINT COMMENT '是否支持按次数开门的授权';
