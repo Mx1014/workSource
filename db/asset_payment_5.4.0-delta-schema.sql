@@ -1,1 +1,1 @@
-ALTER TABLE `eh_payment_bills` ADD COLUMN `payment_type` tinyint DEFAULT 0 COMMENT '账单的支付方式（0-未知，1-支付宝，2-微信，3-对公转账，4-线下缴费）';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `payment_type` int DEFAULT null COMMENT '账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）';
