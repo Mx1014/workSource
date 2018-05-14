@@ -278,7 +278,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -544,8 +543,8 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
         // 同步到企业管理中   v3.2  現在改成已成交客户才同步  入口： 合同 、 入驻信息、excel
-        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-        if (levelItem != null && Objects.equals(cmd.getLevelItemId(), levelItem.getItemId())) {
+        //ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+        if (customer.getLevelItemId() != null && customer.getLevelItemId() == 6) {
             OrganizationDTO organizationDTO = createOrganization(customer);
             customer.setOrganizationId(organizationDTO.getId());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -2167,6 +2166,13 @@ public class CustomerServiceImpl implements CustomerService {
                 enterpriseCustomerSearcher.feedDoc(customer);
                 updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
+        } else if (customer != null) {
+            //这里增加入驻信息后自动同步到企业管理
+            OrganizationDTO organizationDTO = createOrganization(customer);
+            customer.setOrganizationId(organizationDTO.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+            updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
         }
     }
 
