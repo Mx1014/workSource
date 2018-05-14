@@ -8233,7 +8233,7 @@ public class PunchServiceImpl implements PunchService {
 	        			List<Long> userIds = punchProvider.listPunchLogUserId(enterpriseId, startDayString, endDayString);
 	    	        	if(null != userIds){
 	    	        		for(Long userId : userIds){
-	    	        			LOGGER.debug("addPunchLogShouldPunchTime startDay {} endDay {} enterpriseId {} userId ",
+	    	        			LOGGER.debug("addPunchLogShouldPunchTime startDay {} endDay {} enterpriseId {} userId {}",
 	    	        					startDayString, endDayString,enterpriseId,userId);
 	    	        			addPunchLogShouldPunchTime(userId, enterpriseId, startDayString, endDayString, punchTimeRuleMapId);
 	    	        		}
