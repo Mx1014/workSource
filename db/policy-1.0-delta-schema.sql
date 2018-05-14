@@ -53,17 +53,20 @@ ADD `valid_auth_amount` INT COMMENT '剩余的开门次数';
 -- 增加应打卡时间给punch_log
 ALTER TABLE `eh_punch_logs` ADD should_punch_time BIGINT COMMENT '应该打卡时间(用以计算早退迟到时长)';
 
-
 CREATE TABLE `eh_policies` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `category_id` VARCHAR(100) NOT NULL DEFAULT '政策对应的企业类型' ,
-	`title` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '政策标题',
-	`outline` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '政策概要',
+  `category_id` VARCHAR(100) NOT NULL DEFAULT '' ,
+	`title` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '',
+	`outline` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
 	`content` text COMMENT 'content data',
 	`priority` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the rank of policy',
+	`creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+	`updater_uid` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -72,16 +75,17 @@ CREATE TABLE `eh_policy_records` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `category_id` VARCHAR(100) NOT NULL DEFAULT '查询企业类型',
-	`creator_id` bigint(20) NOT NULL COMMENT '查询人id',
-	`creator_name` varchar(128) NOT NULL COMMENT '查询人名称',
-	`creator_phone` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '查询人联系方式',
-	`creator_org_id` bigint(20) NOT NULL COMMENT '查询公司id',
-	`creator_org_name` varchar(128) NOT NULL COMMENT '查询公司名称',
+  `category_id` VARCHAR(100) NOT NULL DEFAULT '' ,
+	`creator_id` bigint(20) NOT NULL COMMENT '',
+	`creator_name` varchar(128) NOT NULL COMMENT '',
+	`creator_phone` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
+	`creator_org_id` bigint(20) NOT NULL COMMENT '',
+	`creator_org_name` varchar(128) NOT NULL COMMENT '',
 	`content` text COMMENT 'content data',
 	`turnover` varchar(60) NOT NULL DEFAULT '' COMMENT '营业额',
 	`tax` varchar(60) NOT NULL DEFAULT '' COMMENT '纳税总额',
 	`qualification` varchar(60) NOT NULL DEFAULT '' COMMENT '单位资质',
 	`financing` varchar(60) NOT NULL DEFAULT '' COMMENT 'A轮融资',
+	`create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
