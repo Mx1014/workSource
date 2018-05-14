@@ -1817,15 +1817,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         CheckOperationResponse response = new CheckOperationResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<ArchivesOperationalConfiguration> results = archivesProvider.listOldConfigurations(namespaceId, cmd.getDetailIds());
-        if(results.size() == 0){
+        if (results.size() == 0) {
             response.setFlag(TrueOrFalseFlag.FALSE.getCode());
             return response;
-        }else{
+        } else {
             response.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            response.setResults(results.stream().map(r ->{
+            response.setResults(results.stream().map(r -> {
                 ArchivesOperationalConfigurationDTO dto = ConvertHelper.convert(r, ArchivesOperationalConfigurationDTO.class);
                 OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
-                if(employee == null)
+                if (employee == null)
                     dto.setContactName("");
                 else
                     dto.setContactName(employee.getContactName());
