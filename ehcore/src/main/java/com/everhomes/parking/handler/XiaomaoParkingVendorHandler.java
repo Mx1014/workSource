@@ -394,11 +394,6 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setOrderToken(tempFee.getOrderId());
 		dto.setRemainingTime(tempFee.getTimeOut());
 		
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (flag) {
-			dto.setPrice(new BigDecimal(0.01));
-		}
-		
 		return dto;
 
 	}    
@@ -505,7 +500,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
 				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
 						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+								.divide(new BigDecimal(maxDay), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 				cardInfoDTO.setPayMoney(price);
 			}
 			

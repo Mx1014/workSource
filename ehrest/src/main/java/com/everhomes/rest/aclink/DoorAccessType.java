@@ -2,10 +2,12 @@ package com.everhomes.rest.aclink;
 
 /**
  * <ul>
- * <li>ZLACLINK_WIFI: 0, 带 WIFI</li>
- * <li>ZLACLINK_NOWIFI: 1, 不带 WIFI</li>
- * <li>ACLINK_GROUP: 5, 分组设备</li>
- * <li>ACLINK_LINGLING: 6, 令令开门设备</li>
+ * <li>ZLACLINK_WIFI((byte)0):左邻, 带 WIFI</li>
+ * <li>ZLACLINK_NOWIFI((byte)1): 左邻, 不带 WIFI</li>
+ * <li>ACLINK_ZL_GROUP((byte)5):左邻, 分组设备</li>
+ * <li>ACLINK_LINGLING_GROUP((byte)6):令令，分组设备</li>
+ * <li>ACLINK_LINGLING((byte)11):令令,开门设备</li>
+ * <li>ACLINK_HUARUN_GROUP((byte)12):华润,分组设备</li>
  * </ul>
  * @author janson
  *

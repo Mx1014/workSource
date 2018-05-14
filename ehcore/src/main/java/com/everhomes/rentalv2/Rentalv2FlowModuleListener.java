@@ -113,7 +113,17 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		FlowCase flowCase = ctx.getFlowCase();
+		RentalOrder order = null;
+		if(null != flowCase.getReferId()){
+			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
+		}
+		if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
+				&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode()) {
+			CancelRentalBillCommand cmd = new CancelRentalBillCommand();
+			cmd.setRentalBillId(order.getId());
+			rentalv2Service.cancelRentalBill(cmd,false);
+		}
 
 	}
 
@@ -153,12 +163,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
 				}
-			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
-				CancelRentalBillCommand cmd = new CancelRentalBillCommand();
-				cmd.setRentalBillId(order.getId());
-				if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
-						&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode())
-					rentalv2Service.cancelRentalBill(cmd);
 			}
 
 		}

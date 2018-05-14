@@ -89,4 +89,6 @@ public interface DoorAuthProvider {
             CrossShardListingLocator locator, int pageSize, Integer namespaceId);
 
     DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone);
+
+	List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone);
 }
