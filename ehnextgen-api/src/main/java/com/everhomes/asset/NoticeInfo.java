@@ -25,7 +25,7 @@ public class NoticeInfo implements Serializable{
     private Long appTemplateId;
     private Long msgTemplateId;
     private Boolean useTemplate;
-    private List<NoticeObj> noticeObjs;
+//    private List<NoticeObj> noticeObjs;
     public Boolean isUseTemplate() {
         return useTemplate;
     }
@@ -137,19 +137,12 @@ public class NoticeInfo implements Serializable{
         return useTemplate;
     }
 
-    public List<NoticeObj> getNoticeObjs() {
-
-        return noticeObjs;
-    }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public void setNoticeObjs(List<NoticeObj> noticeObjs) {
-        this.noticeObjs = noticeObjs;
-    }
 
     @Override
     public boolean equals(Object o) {

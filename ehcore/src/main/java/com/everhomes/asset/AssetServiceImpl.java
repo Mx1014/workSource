@@ -2997,7 +2997,10 @@ public class AssetServiceImpl implements AssetService {
                     List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
                             .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeObj>>() {
                             }.getType());
-                    info.setNoticeObjs(noticeObjs);
+                    if(noticeObjs == null){
+                        noticeObjs = new ArrayList<>();
+                    }
+//                    info.setNoticeObjs(noticeObjs);
                     //根据催缴账单催缴
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
@@ -3364,7 +3367,10 @@ public class AssetServiceImpl implements AssetService {
                     List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
                             .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeObj>>() {
                             }.getType());
-                    info.setNoticeObjs(noticeObjs);
+                    if(noticeObjs == null){
+                        noticeObjs = new ArrayList<>();
+                    }
+//                    info.setNoticeObjs(noticeObjs);
                     //根据催缴账单催缴
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
