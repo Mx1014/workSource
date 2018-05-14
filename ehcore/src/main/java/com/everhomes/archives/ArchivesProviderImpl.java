@@ -251,12 +251,13 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds) {
+    public List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType) {
         List<ArchivesOperationalConfiguration> results;
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.in(detailIds));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(operationType));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         results = query.fetch().map(r -> ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));

@@ -1816,7 +1816,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd) {
         CheckOperationResponse response = new CheckOperationResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ArchivesOperationalConfiguration> results = archivesProvider.listOldConfigurations(namespaceId, cmd.getDetailIds());
+        List<ArchivesOperationalConfiguration> results = archivesProvider.listOldConfigurations(namespaceId, cmd.getDetailIds(), cmd.getOperationType());
         if (results.size() == 0) {
             response.setFlag(TrueOrFalseFlag.FALSE.getCode());
             return response;
