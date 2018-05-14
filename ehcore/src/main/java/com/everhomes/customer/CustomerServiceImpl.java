@@ -234,6 +234,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -384,6 +385,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private YellowPageService yellowPageService;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
 
 
     @Override
@@ -2212,12 +2216,16 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
 
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        Organization organization = new Organization();
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
-            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (organization != null) {
                 deleteOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
+        //sync to es
+        enterpriseCustomerSearcher.feedDoc(customer);
+        organizationSearcher.feedDoc(organization);
     }
 
     private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {

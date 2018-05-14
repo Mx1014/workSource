@@ -118,6 +118,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
         FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
         ds.setDisplayName(group.getTitle());
@@ -176,25 +177,38 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
                 }
             });
-            //增加管理员设置
-            if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
-                DynamicField df = new DynamicField();
-                df.setFieldName("enterpriseAdmins");
-                df.setDisplayName("企业管理员");
-                df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                DynamicField df1 = new DynamicField();
-                df1.setFieldName("entryInfos");
-                df1.setDisplayName("楼栋门牌");
-                df1.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                dynamicFields.add(df);
-                dynamicFields.add(df1);
-            }
+            sortedFields = sortDynamicFields(ds, dynamicFields);
         }
 
-        ds.setDynamicFields(dynamicFields);
+        ds.setDynamicFields(sortedFields);
         List<DynamicSheet> sheets = new ArrayList<>();
         sheets.add(ds);
         return sheets;
+    }
+
+    private List<DynamicField> sortDynamicFields(DynamicSheet ds,List<DynamicField> dynamicFields) {
+        List<DynamicField> fields = new ArrayList<>();
+        if(dynamicFields!=null && dynamicFields.size()>0){
+            for (DynamicField field : dynamicFields) {
+                fields.add(field);
+                //产品要求 企业管理员和楼栋门牌放在excel的前面
+                if(field.getFieldName().equals("contactAddress")){
+                    if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
+                        DynamicField df = new DynamicField();
+                        df.setFieldName("enterpriseAdmins");
+                        df.setDisplayName("企业管理员");
+                        df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
+                        fields.add(df);
+                        DynamicField df1 = new DynamicField();
+                        df1.setFieldName("entryInfos");
+                        df1.setDisplayName("楼栋门牌");
+                        df1.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
+                        fields.add(df1);
+                    }
+                }
+            }
+        }
+        return fields;
     }
 
     @Override
