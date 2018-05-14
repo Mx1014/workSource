@@ -258,8 +258,8 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 }
 
                 //不包含授权给自己的记录
-                if(cmd.getIncludeAuthToOwnerFlag() != null &&cmd.getIncludeAuthToOwnerFlag().byteValue() == 0){
-                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID));
+                if(cmd.getIncludeAuthToOwnerFlag() != null && cmd.getIncludeAuthToOwnerFlag().byteValue() == 0){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.ne(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID));
                 }
 
                 if(cmd.getPageAnchor() != null){

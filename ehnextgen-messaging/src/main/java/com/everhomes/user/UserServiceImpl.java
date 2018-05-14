@@ -120,6 +120,8 @@ import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.smartcard.SmartCardKey;
+import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
@@ -388,6 +390,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
     private PictureValidateService pictureValidateService;
 
+	@Autowired
+	private SmartCardKeyProvider smartCardKeyProvider;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -6219,6 +6223,13 @@ public class UserServiceImpl implements UserService {
             keyGenerator.init(512);
             Key secretKey = keyGenerator.generateKey();
             String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
+            
+            SmartCardKey obj = new SmartCardKey();
+            obj.setNamespaceId(UserContext.getCurrentNamespaceId());
+            obj.setStatus(TrueOrFalseFlag.TRUE.getCode());
+            obj.setName("default");
+            smartCardKeyProvider.createSmartCardKey(obj);
+            
             resp.setSmartCardId(0l);
             resp.setSmartCardKey(resultStr);
         } catch (NoSuchAlgorithmException e) {

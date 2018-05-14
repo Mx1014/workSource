@@ -24,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhSmartCardKeys;
 import com.everhomes.server.schema.tables.records.EhSmartCardKeysRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class SmartCardKeyProviderImpl implements SmartCardKeyProvider {
@@ -107,5 +108,8 @@ public class SmartCardKeyProviderImpl implements SmartCardKeyProvider {
     }
 
     private void prepareObj(SmartCardKey obj) {
+        Long t = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(t));
+        obj.setUpdateTime(new Timestamp(t));
     }
 }
