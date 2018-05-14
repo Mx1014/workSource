@@ -11,6 +11,7 @@ import java.util.List;
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>keyWords: (必填)搜索关键字</li>
  * <li>pageAnchor: (选填)锚点</li>
  * <li>pageSize: (选填)每页的数量</li>

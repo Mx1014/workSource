@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * </ul>
  */
 public class BaseVisitorsysCommand {
@@ -16,6 +17,7 @@ public class BaseVisitorsysCommand {
     private String ownerType;
     private Long ownerId;
     private Long appId;
+    private String ownerToken;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -47,6 +49,14 @@ public class BaseVisitorsysCommand {
 
     public void setAppId(Long appId) {
         this.appId = appId;
+    }
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
     }
 
     @Override

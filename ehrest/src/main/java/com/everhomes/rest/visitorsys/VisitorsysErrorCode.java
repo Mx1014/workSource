@@ -15,6 +15,7 @@ public class VisitorsysErrorCode {
     public final static String VISITORSYS_SERIALCODE_LENGTH = "visitorsys.serialcode.length";//流水码码长度，默认4
     public final static String VISITORSYS_PAIRINGCODE_LENGTH = "visitorsys.pairingcode.length";//配对码码长度，默认6
     public final static String VISITORSYS_INVITATION_LINK = "visitorsys.invitation.link";//访客管理邀请函地址模板 www.core.zuolin/visitorsys/invitation?id=dslfksdkfjdslfdsjlfasdjfl
+    public final static String VISITORSYS_SELFREGISTER_LINK = "visitorsys.selfregister.link";//访客管理自助登记上下文 %s/selfregister?token=%s
     public static final String VISITORSYS_PAIRINGCODE_LIVE= "visitorsys.pairingcode.live";//配对码有效时长,默认60秒
     public static final String VISITORSYS_VERIFICATIONCODE_LIVE= "visitorsys.verificationcode.live";//验证码对码有效时长,默认900秒
     public final static String VISITORSYS_VERIFICATIONCODE_LENGTH = "visitorsys.verificationcode.length";//验证码码长度，默认6

@@ -13,6 +13,7 @@ import java.util.List;
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>id: (选填)访客/预约ID,更新必填</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>visitorName: (必填)访客姓名</li>
  * <li>followUpNumbers: (选填)随访人数</li>
  * <li>visitorPhone: (必填)访客电话</li>
@@ -53,6 +54,8 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
     private List<PostApprovalFormItem> communityFormValues;
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> enterpriseFormValues;
+
+    private String ownerToken;
 
     private String visitorPicUri;
     private Byte sendMessageInviterFlag;
@@ -116,6 +119,14 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setVisitorSignCharacter(String visitorSignCharacter) {
         this.visitorSignCharacter = visitorSignCharacter;
+    }
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
     }
 
     @Override

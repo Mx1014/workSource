@@ -127,7 +127,7 @@ CREATE TABLE `eh_visitor_sys_configurations` (
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
   `config_version` BIGINT COMMENT '配置版本',
   `guide_info` varchar(2048) COMMENT '指引信息',
-  `self_register_qrcode_uri` VARCHAR(1024) COMMENT '自助登记二维码uri地址',
+  `owner_token` VARCHAR(32) NOT NULL UNIQUE COMMENT '自助登记二维码ownerToken地址',
   `logo_uri` VARCHAR(1024) COMMENT '客户端封面图uri地址',
   `welcome_pic_uri` VARCHAR(1024) COMMENT '客户端欢迎页面uri地址',
   `ipad_theme_rgb` VARCHAR(32) COMMENT '客户端主题rgb',

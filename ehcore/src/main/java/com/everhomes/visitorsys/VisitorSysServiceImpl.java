@@ -358,6 +358,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         dbProvider.execute(r->{
             visitorSysVisitorProvider.deleteVisitorSysVisitorAppoint(cmd.getNamespaceId(),cmd.getVisitorId());
             visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            visitorSysVisitorProvider.deleteVisitorSysVisitorAppoint(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
+            visitorsysSearcher.syncVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
             return null;
         });
     }
@@ -378,8 +381,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param visitor
      * @return
      */
-    private VisitorSysVisitor generateConfirmVisitor(VisitorSysVisitor visitor) {
-        visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+    private VisitorSysVisitor generateConfirmVisitor(VisitorSysVisitor visitor,VisitorsysVisitorType visitorsysVisitorType) {
+        if(visitorsysVisitorType == VisitorsysVisitorType.BE_INVITED) {
+            visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+        }
         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
         visitor.setConfirmTime(new Timestamp(System.currentTimeMillis()));
         User user = UserContext.current().getUser();
@@ -422,7 +427,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 sysDevice.setNamespaceId(cmd.getNamespaceId());
                 sysDevice.setOwnerType(cmd.getOwnerType());
                 sysDevice.setStatus(CommonStatus.ACTIVE.getCode());
-                sysDevice.setAppKey(pairingCode);
+                sysDevice.setPairingCode(pairingCode);
                 visitorSysDeviceProvider.createVisitorSysDevice(sysDevice);
                 return ConvertHelper.convert(sysDevice,AddDeviceResponse.class);
             }
@@ -473,7 +478,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         ListDevicesResponse devicesResponse = new ListDevicesResponse();
-        devicesResponse.setDeviceList(deviceList.stream().map(r->ConvertHelper.convert(devicesResponse,BaseDeviceDTO.class)).collect(Collectors.toList()));
+        devicesResponse.setDeviceList(deviceList.stream().map(r->ConvertHelper.convert(r,BaseDeviceDTO.class)).collect(Collectors.toList()));
         return devicesResponse;
     }
 
@@ -528,7 +533,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetConfigurationResponse getConfiguration(GetConfigurationCommand cmd) {
         checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
+       VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
+        if(configuration==null){
+            Tuple<VisitorSysConfiguration, Boolean> enter = coordinationProvider.getNamedLock
+                    (CoordinationLocks.VISITOR_SYS_CONFIG.getCode() + cmd.getOwnerType() + cmd.getOwnerId()).enter(() -> {
+                VisitorSysConfiguration newConfiguration = ConvertHelper.convert(cmd, VisitorSysConfiguration.class);
+                newConfiguration.setConfigVersion(0L);
+                newConfiguration.setSelfRegisterQrcodeUri(generateConfigOwnerToken());
+                visitorSysConfigurationProvider.createVisitorSysConfiguration(newConfiguration);
+                return newConfiguration;
+            });
+            if(enter.second()) {
+                configuration = enter.first();
+            }
+        }
         GetConfigurationResponse configurationResponse = getDefaultConfiguration();
         configurationResponse = VisitorSysUtils.copyAllNotNullProperties(configuration,configurationResponse);
         return configurationResponse;
@@ -554,22 +572,45 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetConfigurationResponse updateConfiguration(UpdateConfigurationCommand cmd) {
-       checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
-        if(configuration == null){
-            configuration = ConvertHelper.convert(cmd, VisitorSysConfiguration.class);
-            configuration.setConfigVersion(System.currentTimeMillis());
-            visitorSysConfigurationProvider.createVisitorSysConfiguration(configuration);
-        }else{
-            configuration = VisitorSysUtils.copyNotNullProperties(cmd, configuration);
-            visitorSysConfigurationProvider.updateVisitorSysConfiguration(configuration);
-        }
-        GetConfigurationResponse response = ConvertHelper.convert(configuration,GetConfigurationResponse.class);
+        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        Tuple<VisitorSysConfiguration, Boolean> enter = coordinationProvider.getNamedLock
+                (CoordinationLocks.VISITOR_SYS_CONFIG.getCode() + cmd.getOwnerType() + cmd.getOwnerId()).enter(() -> {
+            VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+            if (configuration == null) {
+                configuration = ConvertHelper.convert(cmd, VisitorSysConfiguration.class);
+                configuration.setConfigVersion(System.currentTimeMillis());
+                visitorSysConfigurationProvider.createVisitorSysConfiguration(configuration);
+            } else {
+                configuration = VisitorSysUtils.copyNotNullProperties(cmd, configuration);
+                configuration.setConfigVersion(System.currentTimeMillis());
+                visitorSysConfigurationProvider.updateVisitorSysConfiguration(configuration);
+            }
+            return configuration;
+        });
+        GetConfigurationResponse response = ConvertHelper.convert(enter.first(),GetConfigurationResponse.class);
         response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
         response.setWelcomePicUrl(contentServerService.parserUri(response.getWelcomePicUri()));
-        response.setSelfRegisterQrcodeUrl(contentServerService.parserUri(response.getSelfRegisterQrcodeUri()));
+        response.setSelfRegisterQrcodeUrl(generateQrcodeUrl(response.getSelfRegisterQrcodeUri()));
         return null;
     }
+
+    private String generateQrcodeUrl(String ownerToken) {
+        String invitationLinkTemp = configurationProvider.getValue(VisitorsysErrorCode.VISITORSYS_SELFREGISTER_LINK,"%s/selfregister?token=%s");
+        String homeUrl = configurationProvider.getValue("home.url","");
+        return String.format(invitationLinkTemp,homeUrl,ownerToken);
+    }
+
+    private String generateConfigOwnerToken() {
+        String ownerToken = null;
+        VisitorSysConfiguration exist = null;
+        do{
+            ownerToken = generateLetterNumCode(16);
+            exist = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwnerToken(ownerToken);
+        }
+        while (exist!=null);
+        return ownerToken;
+    }
+
 
     @Override
     public ListBlackListsResponse listBlackLists(ListBlackListsCommand cmd) {
@@ -695,7 +736,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String pairingCode = generateUnrepeatPairingCode();
         String key = generatePairingCodeKey(pairingCode);
         ValueOperations<String, String> valueOperations = getValueOperations(key);
-        int pairingCodelive = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_PAIRINGCODE_LIVE, 60);
+        int pairingCodelive = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_PAIRINGCODE_LIVE, 600);
         valueOperations.set(key,String.valueOf(device),pairingCodelive,TimeUnit.SECONDS);
         GetPairingCodeResponse response = new GetPairingCodeResponse();
         response.setPairingCode(pairingCode);
@@ -715,7 +756,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
         DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
         RestResponse response =  new RestResponse();
-        int pairingCodelive = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_PAIRINGCODE_LIVE, 60);
+        int pairingCodelive = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_PAIRINGCODE_LIVE, 600);
         localBusSubscriberBuilder.build(VisitorsysErrorCode.VISITORSYS_SUBJECT + "." + cmd.getPairingCode(), new LocalBusOneshotSubscriber() {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
@@ -1257,8 +1298,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitor.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());
             }
             visitor.setBookingStatus(visitor.getVisitStatus());
-            visitor.setInviterId(UserContext.current().getUser().getId());
-            visitor.setInviterName(UserContext.current().getUser().getAccountName());
+            if(visitStatus == VisitorsysStatus.NOT_VISIT) {
+                visitor.setInviterId(UserContext.current().getUser().getId());
+                visitor.setInviterName(UserContext.current().getUser().getAccountName());
+            }
         }else{
             if(visitStatus == VisitorsysStatus.NOT_VISIT){
                 visitStatus = VisitorsysStatus.WAIT_CONFIRM_VISIT;
@@ -1272,7 +1315,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitStatus== VisitorsysStatus.WAIT_CONFIRM_VISIT){
             visitor.setVisitTime(new Timestamp(System.currentTimeMillis()));
         }else if(visitStatus == VisitorsysStatus.HAS_VISITED){//如果已到访状态
-            generateConfirmVisitor(visitor);
+            generateConfirmVisitor(visitor,visitorsysVisitorType);
         }
         Map<String, PostApprovalFormItem> map =null;
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && visitor.getCommunityFormValues()!=null) {
@@ -1363,9 +1406,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysCoding.setNamespaceId(namespaceId);
         visitorSysCoding.setOwnerId(ownerId);
         visitorSysCoding.setOwnerType(ownerType);
-        String randomCode = generateRandomCode();
+        int length = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_RANDOMCODE_LENGTH,4);
+        String randomCode = generateLetterNumCode(length);
         while(visitorSysCodingProvider.findVisitorSysCodingByRandomCode(randomCode)!=null){
-            randomCode = generateRandomCode();
+            randomCode = generateLetterNumCode(length);
         }
         visitorSysCoding.setRandomCode(randomCode);
         visitorSysCoding.setSerialCode(0);
@@ -1375,18 +1419,25 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     /**
-     * 生成固定位数的项目辨识码
+     * 生成大小写加数字的混合随机字符串
      * @return
      */
-    private String generateRandomCode() {
-        int length = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_RANDOMCODE_LENGTH,4);
+    private String generateLetterNumCode(int length) {
         String randomCode = "";
-        while(randomCode.length()<length){
-            int i = (int) ((Math.random() * 36 + 65));
-            if(i<91){
-                randomCode+=(char)i;
-            }else{
-                randomCode+=i-91;
+        Random rand = new Random();
+        for(int i=0;i<length;i++){
+            int num = rand.nextInt(3);
+            switch(num){
+                case 0:
+                    char c1 = (char)(rand.nextInt(26)+'a');//生成随机小写字母
+                    randomCode += c1;
+                    break;
+                case 1:
+                    char c2 = (char)(rand.nextInt(26)+'A');//生成随机大写字母
+                    randomCode += c2;
+                    break;
+                case 2:
+                    randomCode += rand.nextInt(10);//生成随机数字
             }
         }
         return randomCode;

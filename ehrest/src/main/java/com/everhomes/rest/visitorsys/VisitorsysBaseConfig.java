@@ -39,11 +39,11 @@ public class VisitorsysBaseConfig {
         visitorQrcodeFlag=1;
         visitorInfoFlag=1;
         trafficGuidanceFlag=1;
-        selfRegistrationFlag=1;
-        selfDefineWelComeFlag=1;
+        selfRegistrationFlag=0;
+        selfDefineWelComeFlag=0;
         signSecrecyAgreementsFlag=0;
-        photosAllowedFlag=1;
-        AllowSkippingPhotosFlag=1;
+        photosAllowedFlag=0;
+        AllowSkippingPhotosFlag=0;
         followUpNumbersFlag=1;
         doorGuardsFlag=0;
         doorGuardsValidAfterConfirmedFlag=0;

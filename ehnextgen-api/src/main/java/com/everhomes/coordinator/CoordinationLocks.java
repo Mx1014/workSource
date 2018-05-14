@@ -130,7 +130,8 @@ public enum CoordinationLocks {
     REMIND_SORTING("remind_sorting"),
     REMIND_SCHEDULED("remind_scheduled"),
 
-    VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no");
+    VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
+    VISITOR_SYS_CONFIG("visitor_sys_config");
 
     private String code;
 

@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
  * <li>visitorId: (必填)访客id</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * </ul>
  */
 public class GetBookedVisitorByIdCommand extends BaseVisitorsysCommand{
