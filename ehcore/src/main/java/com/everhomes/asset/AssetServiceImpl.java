@@ -488,7 +488,12 @@ public class AssetServiceImpl implements AssetService {
 
     private AssetAppNoticePak createAssetAppNoticePak(NoticeInfo noticeInfo) {
         AssetAppNoticePak pak = new AssetAppNoticePak();
-        pak.setTemplateId(noticeInfo.getAppTemplateId().intValue());
+        try{
+            pak.setTemplateId(noticeInfo.getAppTemplateId()==null?null:noticeInfo.getAppTemplateId().intValue());
+        }catch (Exception e){
+            pak.setTemplateId(null);
+            LOGGER.error("pak for app msg failed to get templateId from noticeInfo which is ={}",noticeInfo);
+        }
         pak.addToVariables("targetName", noticeInfo.getTargetName());
         pak.addToVariables("dateStr", noticeInfo.getDateStr());
         pak.addToVariables("amount", noticeInfo.getAmountOwed().toPlainString());
