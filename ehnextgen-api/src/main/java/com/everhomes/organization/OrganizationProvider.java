@@ -749,4 +749,11 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<Long> getCommunityAndBuildingRelationesAddressIdsByCommunityId(Long communityId);
+
+	/**
+	 * 根据项目名称的集合来查询项目编号的集合
+	 * @param communityNameList
+	 * @return
+	 */
+	List<Long> findCommunityIdListByNames(List<String> communityNameList);
 }

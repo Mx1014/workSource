@@ -158,4 +158,12 @@ public interface CommunityProvider {
      * @return
      */
     List<Long> findOrganizationIdsByNamespaceId(Long communityId , Integer namespaceId);
+
+    /**
+     * 根据项目名称和域空间Id来查询项目
+     * @param name
+     * @param namespaceId
+     * @return
+     */
+    Community findCommunityByNameAndNamespaceId(String name,Integer namespaceId);
 }

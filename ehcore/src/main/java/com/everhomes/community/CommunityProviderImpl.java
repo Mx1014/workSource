@@ -1900,4 +1900,21 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 
+    /**
+     * 根据项目名称和域空间Id来查询项目
+     * @param name
+     * @param namespaceId
+     * @return
+     */
+    public Community findCommunityByNameAndNamespaceId(String name,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        Community community = context.select().from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.NAME.eq(name))
+                .fetchAnyInto(Community.class);
+        return community;
+    }
+
+
 }

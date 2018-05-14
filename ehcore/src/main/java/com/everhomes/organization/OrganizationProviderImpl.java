@@ -6687,4 +6687,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
                 .execute();
     }
+
+
+    /**
+     * 根据项目名称的集合来查询项目编号的集合
+     * @param communityNameList
+     * @return
+     */
+    public List<Long> findCommunityIdListByNames(List<String> communityNameList){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<Long> communityIdList = context.select(Tables.EH_COMMUNITIES.ID).from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAME.in(communityNameList))
+                .fetchInto(Long.class);
+        return communityIdList;
+    }
 }

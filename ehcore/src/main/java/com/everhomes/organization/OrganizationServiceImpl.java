@@ -8096,7 +8096,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile file, Long userId) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_IMPORT, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+//        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_IMPORT, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         Long communityId = cmd.getCommunityId();
         ImportFileTask task = new ImportFileTask();
         try {
@@ -8208,6 +8208,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list) {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
+        //创建楼栋和门牌的集合
+        List<OrganizationApartDTO> organizationApartDTOList = Lists.newArrayList();
+        //创建OrganizationApartDTO类的对象
+        OrganizationApartDTO organizationApartDTO = new OrganizationApartDTO();
+        //创建管理的项目的集合
+        List<CommunityDTO> communityDTOList = Lists.newArrayList();
+        //创建CommunityDTO类的对象
+        CommunityDTO communityDTO = new CommunityDTO();
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
             if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) ||
@@ -8218,30 +8226,48 @@ public class OrganizationServiceImpl implements OrganizationService {
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getK()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
+                    //设置公司名称
                     data.setName(r.getA().trim());
                 if (null != r.getB())
+                    //设置公司简称
                     data.setDisplayName(r.getB().trim());
                 if (null != r.getC())
-                    data.setAdminName(r.getC().trim());
+                    //设置人员规模
+                    data.setMemberRange(r.getC().trim());
                 if (null != r.getD())
+                    //设置管理员手机号
                     data.setAdminToken(r.getD().trim());
                 if (null != r.getE())
-                    data.setEmail(r.getE().trim());
+                    //设置管理员姓名
+                    data.setAdminName(r.getE().trim());
                 if (null != r.getF())
-                    data.setBuildingName(r.getF().trim());
+                    //设置办公地点名称
+                    data.setWorkPlaceName(r.getF().trim());
                 if (null != r.getG())
-                    data.setAddress(r.getG().trim());
-                if (null != r.getH())
-                    data.setContact(r.getH().trim());
+                    //设置办公地点所属项目名称
+                    data.setCommunityName(r.getG().trim());
+                if (null != r.getH()){
+                    for(String str : r.getH().split(",")){
+                        organizationApartDTO.setBuildingName(str.split("-")[0]);
+                        organizationApartDTO.setApartmentName(str.split("-")[1]);
+                    }
+                    organizationApartDTOList.add(organizationApartDTO);
+                    data.setSiteDtos(organizationApartDTOList);
+                }
                 if (null != r.getI())
-                    data.setNumber(r.getI().trim());
-                if (null != r.getJ())
-                    data.setCheckinDate(r.getJ().trim());
+                    data.setPmFlag(Byte.valueOf(r.getI().trim()));
+                if (null != r.getJ()){
+                    for(String str : r.getJ().split(",")){
+                        communityDTO.setName(str);
+                        communityDTOList.add(communityDTO);
+                    }
+                    data.setCommunityDTOList(communityDTOList);
+                }
                 if (null != r.getK())
-                    data.setDescription(r.getK().trim());
+                    data.setServiceSupportFlag(Byte.valueOf(r.getK().trim()));
                 if (null != r.getL())
-                    data.setUnifiedSocialCreditCode(r.getL().trim());
-                datas.add(data);
+                    data.setWorkPlatFormFlag(Byte.valueOf(r.getL().trim()));
+                    datas.add(data);
             }
         }
         return datas;
@@ -8302,12 +8328,216 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<ImportFileResultLog<ImportEnterpriseDataDTO>> importEnterprise(List<ImportEnterpriseDataDTO> list, Long userId, ImportEnterpriseDataCommand cmd) {
         User user = UserContext.current().getUser();
-
-        List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
-
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
+        //首先需要进行非空校验
+        if(!CollectionUtils.isEmpty(list)){
+            //说明集合不为空，那么我们将该集合进行遍历
+            for(ImportEnterpriseDataDTO importEnterpriseDataDTO : list){
+                Community community = communityProvider.findCommunityByNameAndNamespaceId(importEnterpriseDataDTO.getName(),namespaceId);
+
+                //创建公司Organization类的对象
+                Organization organization = new Organization();
+                ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+                if (StringUtils.isEmpty(importEnterpriseDataDTO.getName())) {
+                    LOGGER.error("enterprise name is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("enterprise name is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if (CollectionUtils.isEmpty(importEnterpriseDataDTO.getSiteDtos())) {
+                    LOGGER.error("buildingName and apartmentName are null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("buildingName and apartmentName are null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getAdminToken())){
+                    LOGGER.error("adminToken is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("adminToken is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("adminToken is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getAdminName())){
+                    LOGGER.error("adminName is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("adminName is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("adminName is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ADMINNAME_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                if(StringUtils.isEmpty(importEnterpriseDataDTO.getWorkPlaceName())){
+                    LOGGER.error("workPlaceName is null, data = {}", importEnterpriseDataDTO);
+                    LOGGER.error("workPlaceName is null, data = {}", importEnterpriseDataDTO);
+                    log.setData(importEnterpriseDataDTO);
+                    log.setErrorLog("workPlaceName is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_WORKPLACENAME_ISNULL);
+                    errorDataLogs.add(log);
+                    continue;
+                }
+
+                、、
+
+                //创建群组Group类的对象
+                Group group = new Group();
+                //将数据封装在对象中
+                group.setName(importEnterpriseDataDTO.getName());
+                group.setDisplayName(importEnterpriseDataDTO.getDisplayName());
+
+                group.setStatus(OrganizationStatus.ACTIVE.getCode());
+
+                group.setCreatorUid(user.getId());
+
+                group.setNamespaceId(namespaceId);
+
+                group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+
+                group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+
+                groupProvider.createGroup(group);
+
+
+                //检查公司名称是否已经存在
+                checkOrgNameUnique(null, cmd.getNamespaceId(), importEnterpriseDataDTO.getName());
+                //设置eh_organizations表中的parent_id字段
+                organization.setParentId(0L);
+                //设置level
+                organization.setLevel(1);
+                //设置path
+                organization.setPath("");
+                //设置企业名称
+                organization.setName(importEnterpriseDataDTO.getName());
+                //设置group_type字段
+                organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+                //设置status为2
+                organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+                //设置organizationType
+                organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+                //设置域空间Id
+                organization.setNamespaceId(namespaceId);
+                //设置创建时间
+                organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                //设置更新时间
+                organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+                organization.setGroupId(group.getId());
+                //表明该公司是否是管理公司 1-是 0-否
+                if(importEnterpriseDataDTO.getPmFlag() != null){
+                    organization.setPmFlag(importEnterpriseDataDTO.getPmFlag().byteValue());
+                }
+                //表明该公司是否是服务商，1-服务商 0-否
+                if(importEnterpriseDataDTO.getServiceSupportFlag() != null){
+                    organization.setServiceSupportFlag(importEnterpriseDataDTO.getServiceSupportFlag().byteValue());
+                }
+                if(importEnterpriseDataDTO.getWorkPlatFormFlag() != null){
+                    organization.setWorkPlatformFlag(importEnterpriseDataDTO.getWorkPlatFormFlag().byteValue());
+                }
+                organizationProvider.createOrganization(organization);
+
+                //根据是否是管理公司来进行添加eh_organization_communities表数据，只有是管理公司才能拥有管理的项目
+                if(importEnterpriseDataDTO.getPmFlag() != null && importEnterpriseDataDTO.getPmFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                    //说明是管理员，那么我们就可以将管理的项目添加到eh_organization_communities表中
+                    if(!CollectionUtils.isEmpty(importEnterpriseDataDTO.getCommunityDTOList())){
+                        //说明管理的项目不为空，那么我们根据管理的项目名称查出来管理项目的id的集合
+                        //// TODO: 2018/5/14
+                        List<CommunityDTO> communityDTOList = importEnterpriseDataDTO.getCommunityDTOList();
+                        //进行非空校验
+                        if(!CollectionUtils.isEmpty(communityDTOList)){
+                            //集合communityDTOList不为空
+                            //创建一个集合List<String>用于承载项目名称
+                            List<String> communityNameList = Lists.newArrayList();
+                            for(CommunityDTO communityDTO : communityDTOList){
+                                communityNameList.add(communityDTO.getName());
+                            }
+                            //// TODO: 2018/5/14  
+                            List<Long> communityIdList = organizationProvider.findCommunityIdListByNames(communityNameList);
+                            //进行非空校验
+                            if(!CollectionUtils.isEmpty(communityIdList)){
+                                //说明集合communityIdList不为空
+                                for(Long lon : communityIdList){
+                                    OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+                                    organizationCommunity.setCommunityId(lon);
+                                    organizationCommunity.setOrganizationId(organization.getId());
+                                    organizationProvider.insertOrganizationCommunity(organizationCommunity);
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+
+
+
+                //向办公地点表中添加数据
+                if(cmd.getOfficeSites() != null){
+                    //说明传过来的所在项目和名称以及其中的楼栋和门牌不为空，那么我们将其进行遍历
+                    for(CreateOfficeSiteCommand createOfficeSiteCommand :cmd.getOfficeSites()){
+                        //这样的话拿到的是每一个办公所在地，以及其中的楼栋和门牌
+                        //首先我们将办公地址名称和办公地点id持久化到表eh_organization_workPlaces中
+                        //创建OrganizationWorkPlaces类的对象
+                        OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                        //将数据封装在对象中
+                        organizationWorkPlaces.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                        organizationWorkPlaces.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
+                        //将上面的organization对象中的id也封装在对象中
+                        organizationWorkPlaces.setOrganizationId(organization.getId());
+                        //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
+                        organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
+                        //现在的情况是这样的，我们还需要进行维护一张表eh_enterprise_community_map的信息，这张表其实在标准版中是不适用的
+                        //后面的话会逐步的进行淘汰，但是现在当给eh_organization_workPlaces表中添加一调数据的同时，还需要向eh_enterprise_community_map
+                        //中添加同样的数据
+                        //// TODO: 2018/5/4
+                        //创建EnterpriseCommunityMap类的对象
+                        EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+                        //将数据封装在对象EnterpriseCommunityMap中
+                        enterpriseCommunityMap.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                        enterpriseCommunityMap.setMemberId(organization.getId());
+                        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                        //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
+                        //表eh_enterprise_community_map中
+                        enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
+                        //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+                        //首先进行遍历楼栋集合
+                        if(createOfficeSiteCommand.getSiteDtos() != null){
+                            //说明楼栋和门牌不为空，注意他是一个集合
+                            //遍历
+                            for(OrganizationSiteApartmentDTO organizationSiteApartmentDTO : createOfficeSiteCommand.getSiteDtos()){
+                                //这样的话我们拿到的是每一个楼栋以及对应的门牌
+                                //创建CommunityAndBuildingRelationes对象，并且将数据封装在对象中，然后持久化到数据库
+                                CommunityAndBuildingRelationes communityAndBuildingRelationes = new CommunityAndBuildingRelationes();
+                                communityAndBuildingRelationes.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                                communityAndBuildingRelationes.setAddressId(organizationSiteApartmentDTO.getApartmentId());
+                                communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
+                                //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
+                                organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
+                            }
+                        }
+
+                    }
+                }
+
+
+
+
+            }
+        }
+
+
 
         // 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
         Map<Long, List<Long>> orgAddressIds = new HashMap<>();
@@ -8317,7 +8547,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-            if (StringUtils.isEmpty(data.getName())) {
+  /*          if (StringUtils.isEmpty(data.getName())) {
                 LOGGER.error("enterprise name is null, data = {}", data);
                 log.setData(data);
                 log.setErrorLog("enterprise name is null");
@@ -8326,24 +8556,16 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            if (StringUtils.isEmpty(data.getBuildingName())) {
-                LOGGER.error("building name is null, data = {}", data);
+            if (CollectionUtils.isEmpty(data.getSiteDtos())) {
+                LOGGER.error("buildingName and apartmentName are null, data = {}", data);
                 log.setData(data);
-                log.setErrorLog("building name is null");
+                log.setErrorLog("buildingName and apartmentName are null");
                 log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
                 errorDataLogs.add(log);
                 continue;
-            }
+            }*/
 
-            if (StringUtils.isEmpty(data.getAddress())) {
-                LOGGER.error("address name is null, data = {}", data);
-                log.setData(data);
-                log.setErrorLog("address name is null");
-                log.setCode(OrganizationServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY);
-                errorDataLogs.add(log);
-                continue;
-            }
-            enterpriseCommand.setName(data.getName());
+/*            enterpriseCommand.setName(data.getName());
             enterpriseCommand.setDisplayName(data.getDisplayName());
             enterpriseCommand.setContactsPhone(data.getContact());
             enterpriseCommand.setDescription(data.getDescription());
@@ -8352,11 +8574,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCommand.setCommunityId(cmd.getCommunityId());
             enterpriseCommand.setEmailDomain(data.getEmail());
             enterpriseCommand.setCheckinDate(data.getCheckinDate());
-            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());
+            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());*/
             if (!StringUtils.isEmpty(data.getNumber())) {
                 enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
             }
-
+            //接下来
             Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
 
             if (null == building) {
