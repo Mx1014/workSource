@@ -18,19 +18,20 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
-import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
+import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
+import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
+import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
-import com.everhomes.rest.pmsy.PmsyBillsResponse;
-import com.everhomes.rest.pmsy.AddressDTO;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.ListResourceCommand;
-import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 
 @RestController
 @RequestMapping("/pmsy")
@@ -145,6 +146,22 @@ public class PmsyController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+    
+    /**
+     * <b>URL: /pmsy/createPmBillOrderV2</b>
+     * <p>创建订单</p>
+     */
+    @RequestMapping("createPmBillOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createPmBillOrderV2(@Valid CreatePmsyBillOrderCommand cmd) {
+        PreOrderDTO dto = pmsyService.createPmBillOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    
     
     /**
      * <b>URL: /pmsy/setPmProperty</b>

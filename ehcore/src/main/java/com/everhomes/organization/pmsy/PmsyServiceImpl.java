@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -24,11 +22,16 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
+import com.everhomes.rest.activity.ActivityTimeResponse;
+import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
@@ -36,18 +39,17 @@ import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
 import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.PmBillsOrdersDTO;
+import com.everhomes.rest.pmsy.PmsyBillItemDTO;
 import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
-import com.everhomes.rest.pmsy.PmsyBillItemDTO;
+import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
-import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyPayerStatus;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -68,6 +70,9 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private PayService payService;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -387,8 +392,47 @@ public class PmsyServiceImpl implements PmsyService{
 	@Override
 	public CommonOrderDTO createPmBillOrder(CreatePmsyBillOrderCommand cmd){
 		
+		PmsyOrder order = createPmsyOrder(cmd);
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(order.getUserName());
+		orderCmd.setOrderNo(order.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		orderCmd.setSubject("物业缴费订单简要描述");
+		orderCmd.setTotalFee(order.getOrderAmount());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+	}
+	
+	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
+		PmsyOrder order = createPmsyOrder(cmd);
+		
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		preOrderCommand.setOrderId(order.getId());
+		Long amount = payService.changePayAmount(order.getOrderAmount());
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(UserContext.currentUserId());
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+		return callBack;
+	}
+	
+	private PmsyOrder createPmsyOrder(CreatePmsyBillOrderCommand cmd){
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.current().getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = user.getId();
 		
 		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
@@ -445,23 +489,7 @@ public class PmsyServiceImpl implements PmsyService{
 			
 		}
 		pmsyProvider.createPmsyOrderItem(pmsyOrderItemList);
-		
-		//调用统一处理订单接口，返回统一订单格式
-		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(order.getUserName());
-		orderCmd.setOrderNo(order.getId().toString());
-		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
-		orderCmd.setSubject("物业缴费订单简要描述");
-		orderCmd.setTotalFee(order.getOrderAmount());
-		CommonOrderDTO dto = null;
-		try {
-			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-		} catch (Exception e) {
-			LOGGER.error("convertToCommonOrder is fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"convertToCommonOrder is fail.");
-		}
-		return dto;
+		return order;
 	}
 	
 	@Override
