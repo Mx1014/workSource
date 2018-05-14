@@ -3852,38 +3852,34 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
-        for(OrganizationMember member : members) {
+        for (OrganizationMember member : members) {
             Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
 
-            if(organization != null) {
-                if(LOGGER.isInfoEnabled()) {
+            if (organization != null) {
+                if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
                 }
-                if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                    //部门岗位
+                    ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+                    departmentGroup.setGroupId(organization.getParentId());
+                    departmentGroup.setPositionId(organization.getId());
+                    groupDtos.add(departmentGroup);
 
+                    //通用岗位
                     List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
                     }
 
-                    if(maps != null && maps.size() > 0) {
-                        for(OrganizationJobPositionMap map : maps) {
-                            ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-                            group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-                            group.setPositionId(map.getJobPositionId());
-                            groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+                    if (maps != null && maps.size() > 0) {
+                        for (OrganizationJobPositionMap map : maps) {
                             String[] path = organization.getPath().split("/");
                             Long organizationId = Long.valueOf(path[1]);
                             ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
                             topGroup.setGroupId(organizationId);
                             topGroup.setPositionId(map.getJobPositionId());
                             groupDtos.add(topGroup);
-//							}
-
                         }
 
                     }
@@ -3893,6 +3889,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     group.setPositionId(0L);
                     groupDtos.add(group);
                 }
+
             }
         }
 
