@@ -2152,12 +2152,12 @@ public class CustomerServiceImpl implements CustomerService {
             entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
         }
         enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
-
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+                organizationSearcher.feedDoc(organization);
             }else {
                 //这里增加入驻信息后自动同步到企业管理
                 OrganizationDTO organizationDTO = createOrganization(customer);
@@ -2165,6 +2165,8 @@ public class CustomerServiceImpl implements CustomerService {
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
                 updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+                Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+                organizationSearcher.feedDoc(createOrganization);
             }
         } else if (customer != null) {
             //这里增加入驻信息后自动同步到企业管理
@@ -2173,7 +2175,10 @@ public class CustomerServiceImpl implements CustomerService {
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
             updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
         }
+        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
