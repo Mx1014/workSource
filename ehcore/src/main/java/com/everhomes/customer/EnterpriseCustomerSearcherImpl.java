@@ -130,7 +130,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("communityId", customer.getCommunityId());
             builder.field("namespaceId", customer.getNamespaceId());
             builder.field("name", customer.getName());
-            builder.field("contactMobile", customer.getContactMobile());
+            builder.field("contactPhone", customer.getContactPhone());
             builder.field("contactName", customer.getContactName());
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
@@ -223,7 +223,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     .field("name", 1.5f)
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
-                    .field("contactMobile", 1.0f)
+                    .field("contactPhone", 1.0f)
                     .field("trackingName" , 1.0f);
 
             builder.setHighlighterFragmentSize(60);

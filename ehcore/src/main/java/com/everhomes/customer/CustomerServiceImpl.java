@@ -2234,6 +2234,13 @@ public class CustomerServiceImpl implements CustomerService {
                 deleteOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
             }
         }
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if (entryInfos == null || entryInfos.size() == 0) {
+            if (organization != null) {
+                organizationProvider.deleteOrganization(organization);
+                organizationSearcher.deleteById(organization.getId());
+            }
+        }
         //sync to es
         enterpriseCustomerSearcher.feedDoc(customer);
         organizationSearcher.feedDoc(organization);

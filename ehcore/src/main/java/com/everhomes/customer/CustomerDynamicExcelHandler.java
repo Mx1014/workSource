@@ -120,7 +120,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
         List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
-        ds.setClassName(group.getName());
+//        ds.setClassName(group.getName());
         ds.setDisplayName(group.getTitle());
         ds.setGroupId(group.getId());
 
