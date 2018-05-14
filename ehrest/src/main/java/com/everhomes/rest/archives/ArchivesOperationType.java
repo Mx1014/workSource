@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>CHECK_IN((byte) 0): 入职</li>
  * <li>EMPLOY((byte) 1): 转正</li>
- * <li>TRANSFER((byte) 2): 调整</li>
+ * <li>TRANSFER((byte) 2): 调动</li>
  * <li>DISMISS((byte)3): 离职</li>
  * </ul>
  */

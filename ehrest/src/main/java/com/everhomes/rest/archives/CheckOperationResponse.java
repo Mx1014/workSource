@@ -5,12 +5,18 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>flag: 标志 0-否 1-是</li>
+ * <li>results: 配置列表 参考{@link com.everhomes.rest.archives.ArchivesOperationalConfigurationDTO}</li>
+ * </ul>
+ */
 public class CheckOperationResponse {
 
     private Byte flag;
 
-    @ItemType(String.class)
-    private List<String> results;
+    @ItemType(ArchivesOperationalConfigurationDTO.class)
+    private List<ArchivesOperationalConfigurationDTO> results;
 
     public CheckOperationResponse() {
     }
@@ -23,11 +29,11 @@ public class CheckOperationResponse {
         this.flag = flag;
     }
 
-    public List<String> getResults() {
+    public List<ArchivesOperationalConfigurationDTO> getResults() {
         return results;
     }
 
-    public void setResults(List<String> results) {
+    public void setResults(List<ArchivesOperationalConfigurationDTO> results) {
         this.results = results;
     }
 

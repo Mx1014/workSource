@@ -43,7 +43,9 @@ public interface ArchivesProvider {
 
     void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    ArchivesOperationalConfiguration findOldConfiguration(Integer nameapaceId, Long organizationId, Long detailId);
+    ArchivesOperationalConfiguration findOldConfiguration(Integer namespaceId, Long organizationId, Long detailId);
+
+    List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds);
 
     void createOperationalLog(ArchivesOperationalLog log);
 

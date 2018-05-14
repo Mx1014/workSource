@@ -1612,7 +1612,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
                 //  添加定时配置
-                createOperationalConfiguration(
+                createArchivesOperation(
                         namespaceId,
                         cmd.getOrganizationId(),
                         detailId,
@@ -1644,7 +1644,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             transferArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {
-                createOperationalConfiguration(
+                createArchivesOperation(
                         namespaceId,
                         cmd.getOrganizationId(),
                         detailId,
@@ -1672,7 +1672,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dismissArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {
-                createOperationalConfiguration(
+                createArchivesOperation(
                         namespaceId,
                         cmd.getOrganizationId(),
                         detailId,
@@ -1770,12 +1770,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             archivesProvider.deleteArchivesDismissEmployees(dismissEmployee);
     }
 
-    private void createOperationalConfiguration(
+    private void createArchivesOperation(
             Integer namespaceId, Long organizationId, Long detailId, Byte operationType, Date date, String cmd) {
         //  1.若有上一次配置则先取消
         ArchivesOperationalConfiguration oldConfig = archivesProvider.findOldConfiguration(namespaceId, organizationId, detailId);
         if (oldConfig != null) {
-            oldConfig.setStatus(ArchivesConfigurationStatus.CANCEL.getCode());
+            oldConfig.setStatus(ArchivesOperationStatus.CANCEL.getCode());
             archivesProvider.updateOperationalConfiguration(oldConfig);
         }
         //  2.添加新配置
@@ -1814,7 +1814,25 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd) {
-        return null;
+        CheckOperationResponse response = new CheckOperationResponse();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ArchivesOperationalConfiguration> results = archivesProvider.listOldConfigurations(namespaceId, cmd.getDetailIds());
+        if(results.size() == 0){
+            response.setFlag(TrueOrFalseFlag.FALSE.getCode());
+            return response;
+        }else{
+            response.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            response.setResults(results.stream().map(r ->{
+                ArchivesOperationalConfigurationDTO dto = ConvertHelper.convert(r, ArchivesOperationalConfigurationDTO.class);
+                OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
+                if(employee == null)
+                    dto.setContactName("");
+                else
+                    dto.setContactName(employee.getContactName());
+                return dto;
+            }).collect(Collectors.toList()));
+            return response;
+        }
     }
 
     @Override

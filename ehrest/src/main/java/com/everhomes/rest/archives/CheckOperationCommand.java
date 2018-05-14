@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: 选择人员ids</li>
- * <li>operationType: 操作类型 参考{@link com.everhomes.rest.archives.ArchivesOperationType}</li>
- * 0-入职, 1-转正, 2-调整, 3-离职
+ * <li>operationType: 操作类型 0-入职 1-转正 2-调整 3-离职 参考{@link com.everhomes.rest.archives.ArchivesOperationType}</li>
  * </ul>
  */
 public class CheckOperationCommand {
