@@ -301,7 +301,7 @@ public class ArchivesController extends ControllerBase{
      * <p>8-5.校验已存在的定时操作</p>
      */
     @RequestMapping("checkArchivesOperation")
-    @RestReturn(value = String.class)
+    @RestReturn(value = CheckOperationResponse.class)
     public RestResponse checkArchivesOperation(CheckOperationCommand cmd){
         CheckOperationResponse res = archivesService.checkArchivesOperation(cmd);
         RestResponse response = new RestResponse(res);
