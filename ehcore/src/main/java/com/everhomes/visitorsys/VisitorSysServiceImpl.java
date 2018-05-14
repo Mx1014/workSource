@@ -871,6 +871,22 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetFormResponse getForm(GetFormCommand cmd) {
+        GetConfigurationCommand command = new GetConfigurationCommand();
+        command.setNamespaceId(cmd.getNamespaceId());
+        VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY){
+            command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
+            command.setOwnerId(cmd.getEnterpriseId());
+        }else{
+            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
+            command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
+            command.setOwnerId(communityId);
+        }
+        return new GetFormResponse(getConfiguration(command).getFormConfig());
+    }
+
+    @Override
+    public GetFormResponse getUIForm(GetUIFormCommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(device.getNamespaceId());
