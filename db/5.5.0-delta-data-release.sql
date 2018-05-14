@@ -48,3 +48,7 @@ INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_
 
 -- issue-26498 add by huangmingbo 2018-05-09
 UPDATE `eh_parking_lots` SET `config_json`='{"tempfeeFlag": 1, "rateFlag": 1, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 2, "contact": "18665331243","identityCardFlag":0}' WHERE  `id`in (10011, 10012);
+
+-- 路福联合广场对接的秘钥 by 杨崇鑫
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+VALUES ('openapi.lufu.key', '70f2ea6d54fb44d5a18ac11f66d25154', '路福联合广场对接的秘钥', 999963, NULL);
