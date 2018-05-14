@@ -24,8 +24,10 @@ public enum PunchType {
     
     public static PunchType fromCode(Byte code) {
         for(PunchType t : PunchType.values()) {
-            if (t.code == code) {
-                return t;
+        	if(null !=code){
+	            if (code.equals(t.code)) {
+	                return t;
+	            }
             }
         }
         
