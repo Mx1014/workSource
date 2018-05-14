@@ -1945,7 +1945,7 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
-        Long operatorId = operator.getId();
+        Long operatorId = operator == null ? 0 : operator.getId();
         Long organizationId = cmd.getOrganizationId();
         Long communityId = cmd.getCommunityId();
         final Long forumId = cmd.getForumId();
