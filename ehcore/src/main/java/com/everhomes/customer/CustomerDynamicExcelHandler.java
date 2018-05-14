@@ -117,10 +117,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
-        FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+       // FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        //用名字搜会有问题
+        FieldGroup group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
         List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
-//        ds.setClassName(group.getName());
+        ds.setClassName(group.getName());
         ds.setDisplayName(group.getTitle());
         ds.setGroupId(group.getId());
 
