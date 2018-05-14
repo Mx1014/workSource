@@ -16,7 +16,8 @@ CREATE TABLE `eh_organization_apps` (
   `id` bigint(20) NOT NULL,
   `app_origin_id` bigint(20) DEFAULT NULL,
   `org_id` bigint(20) DEFAULT NULL,
-  `alias_name` varchar(255) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
@@ -32,7 +33,6 @@ ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
 -- 园区应用配置表（不跟随管理公司时的自定义配置）
 CREATE TABLE `eh_app_community_configs` (
   `id` bigint(20) NOT NULL,
-  `organization_app_id` bigint(20) DEFAULT NULL COMMENT '安装id，即eh_organization_apps的id',
   `app_origin_id` bigint(20) DEFAULT NULL COMMENT 'app_origin_id',
   `community_id` bigint(20) DEFAULT NULL,
   `visibility_flag` tinyint(4) DEFAULT NULL,
@@ -42,7 +42,6 @@ CREATE TABLE `eh_app_community_configs` (
   `operator_uid` bigint(20) DEFAULT NULL,
   `operator_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `organization_app_id` (`organization_app_id`) USING BTREE,
   KEY `community_id` (`community_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

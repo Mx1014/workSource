@@ -8,16 +8,19 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.server.schema.tables.records.EhOrganizationAppsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,6 +276,45 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
 		List<ServiceModuleApp> apps = query.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppsByOrganizationId(Long versionId, Byte appType, String keyword, Long organizationId, Byte installFlag, Long pageAnchor, int pageSize) {
+
+		SelectQuery query = getReadOnlyContext().select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		if(appType != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
+		}
+		if(keyword != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAME.like("%" + keyword + "%"));
+		}
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
+
+		if(installFlag != null && installFlag.byteValue() == 1){
+			//已安装
+			query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
+			query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationId));
+			query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.ne(OrganizationAppStatus.DELETE.getCode()));
+		}else if(installFlag != null && installFlag.byteValue() == 0){
+			//未安装
+			SelectQuery<EhOrganizationAppsRecord> notExistQuery = getReadOnlyContext().selectQuery(Tables.EH_ORGANIZATION_APPS);
+			notExistQuery.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationId));
+			notExistQuery.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.ne(OrganizationAppStatus.DELETE.getCode()));
+			notExistQuery.addConditions(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID));
+			query.addConditions(DSL.notExists(notExistQuery));
+		}
+
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
+
+		if(pageAnchor != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ID.gt(pageAnchor));
+		}
+
+		query.addLimit(pageSize);
+
+		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
 	}
 

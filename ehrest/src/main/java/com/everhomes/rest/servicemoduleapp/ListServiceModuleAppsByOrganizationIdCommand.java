@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *     <li>appType: 应用类型，0-oa, 1-园区, 2-服务 参考{@link ServiceModuleAppType}</li>
  *     <li>installFlag: 是否已安装，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>keyword: 搜索字段</li>
+ *     <li>pageAnchor: pageAnchor</li>
+ *     <li>pageSize: pageSize</li>
  * </ul>
  */
 public class ListServiceModuleAppsByOrganizationIdCommand {
@@ -20,6 +22,8 @@ public class ListServiceModuleAppsByOrganizationIdCommand {
 	private Byte appType;
 	private Byte installFlag;
 	private String keyword;
+	private Long pageAnchor;
+	private Integer pageSize;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -59,6 +63,22 @@ public class ListServiceModuleAppsByOrganizationIdCommand {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override

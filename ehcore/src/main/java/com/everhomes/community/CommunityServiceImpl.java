@@ -4352,47 +4352,71 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void changeOrganizationCommunity(ChangeOrganizationCommunityCommand cmd) {
-		if(cmd.getCommunityId() == null){
+	public void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd) {
+
+		dbProvider.execute(status -> {
+
+			for (Long communityId: cmd.getCommunityIds()){
+				changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId(), cmd.getKeepAuthorizationFlag());
+			}
+
+			return null;
+		});
+
+
+	}
+
+	@Override
+	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId, Byte keepAuthorizationFlag) {
+
+		if(communityId == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
-		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		Community community = this.communityProvider.findCommunityById(communityId);
 		if(community == null){
-			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+			LOGGER.error("Community is not found.communityId=" + communityId);
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 					"Community is not found.");
 		}
 
 		//查询原属记录
-		OrganizationCommunity orgcom = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
+		OrganizationCommunity orgcom = organizationProvider.findOrganizationProperty(communityId);
 
-		if(orgcom != null){
-			orgcom.setOrganizationId(cmd.getToOrgId());
-			organizationProvider.updateOrganizationCommunity(orgcom);
-		}else {
 
-			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
-			organizationCommunity.setOrganizationId(cmd.getToOrgId());
-			organizationCommunity.setCommunityId(cmd.getCommunityId());
-			organizationProvider.createOrganizationCommunity(organizationCommunity);
-		}
+		dbProvider.execute(status -> {
 
-        //查询原有园区授权记录
-        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelations(community.getNamespaceId(), null, cmd.getCommunityId());
+			if(orgcom != null){
+				orgcom.setOrganizationId(toOrgId);
+				organizationProvider.updateOrganizationCommunity(orgcom);
+			}else {
 
-        if(serviceModuleAppAuthorizations != null){
-            for (ServiceModuleAppAuthorization authorization: serviceModuleAppAuthorizations){
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setOrganizationId(toOrgId);
+				organizationCommunity.setCommunityId(communityId);
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}
 
-                //管理公司自己的应用要迁移，不保留授权的话也要迁移
-                if(authorization.getOrganizationId().equals(cmd.getFromOrgId()) || cmd.getKeepAuthorizationFlag() == null || cmd.getKeepAuthorizationFlag().byteValue() == 0){
-                    authorization.setOrganizationId(cmd.getToOrgId());
-                    authorization.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-                    serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorization(authorization);
-                }
-            }
-        }
+			//查询原有园区授权记录
+			List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelations(community.getNamespaceId(), null, communityId);
+
+			if(serviceModuleAppAuthorizations != null){
+				for (ServiceModuleAppAuthorization authorization: serviceModuleAppAuthorizations){
+
+					//管理公司自己的应用要迁移，不保留授权的话也要迁移
+					if(authorization.getOrganizationId().equals(fromOrgId) || keepAuthorizationFlag == null || keepAuthorizationFlag.byteValue() == 0){
+						authorization.setOrganizationId(toOrgId);
+						authorization.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+						serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorization(authorization);
+					}
+				}
+			}
+
+			return null;
+		});
+
+
 
 	}
 }

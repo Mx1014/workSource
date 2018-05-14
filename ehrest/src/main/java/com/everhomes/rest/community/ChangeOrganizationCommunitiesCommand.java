@@ -3,27 +3,29 @@ package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- *     <li>communityId: 园区Id</li>
+ *     <li>communityIds: communityIds列表</li>
  *     <li>fromOrgId: 原属管理公司Id</li>
  *     <li>toOrgId: 新的管理公司Id</li>
  *     <li>keepAuthorizationFlag: 保留并转移当前项目的园区运营应用授权 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
-public class ChangeOrganizationCommunityCommand {
+public class ChangeOrganizationCommunitiesCommand {
 
-    private Long communityId;
+    private List<Long> communityIds;
     private Long fromOrgId;
     private Long toOrgId;
     private Byte keepAuthorizationFlag;
 
-    public Long getCommunityId() {
-        return communityId;
+    public List<Long> getCommunityIds() {
+        return communityIds;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
     }
 
     public Long getFromOrgId() {

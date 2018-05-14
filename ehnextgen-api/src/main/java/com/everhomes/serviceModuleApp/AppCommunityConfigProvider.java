@@ -17,7 +17,9 @@ public interface AppCommunityConfigProvider {
 
     AppCommunityConfig getAppCommunityConfigById(Long id);
 
+    AppCommunityConfig findAppCommunityConfigByCommunityIdAndAppOriginId(Long communityId, Long appOriginId);
+
     List<AppCommunityConfig> queryAppCommunityConfigs(ListingLocator locator,
-            int count, ListingQueryBuilderCallback queryBuilderCallback);
+                                                      int count, ListingQueryBuilderCallback queryBuilderCallback);
 
 }

@@ -7,12 +7,21 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>namespaceId: 域空间id</li>
- *     <li>ownerId: ownerId</li>
+ *     <li>dtos: dtos</li>
+ *     <li>nextPageAnchor: nextPageAnchor</li>
  * </ul>
  */
 public class ListAppAuthorizationsByOwnerIdResponse {
     private List<ServiceModuleAppAuthorizationDTO> dtos;
+    private Long nextPageAnchor;
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
+    }
 
     public List<ServiceModuleAppAuthorizationDTO> getDtos() {
         return dtos;

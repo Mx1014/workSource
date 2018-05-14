@@ -244,6 +244,10 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public ListAppAuthorizationsByOwnerIdResponse listAppAuthorizationsByOwnerId(ListAppAuthorizationsByOwnerIdCommand cmd) {
+        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
+
+        final int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -253,9 +257,27 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                     query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
                 }
 
+                //不包含授权给自己的记录
+                if(cmd.getIncludeAuthToOwnerFlag() != null &&cmd.getIncludeAuthToOwnerFlag().byteValue() == 0){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID));
+                }
+
+                if(cmd.getPageAnchor() != null){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ID.gt(cmd.getPageAnchor()));
+                }
+                query.addLimit(pageSize);
+
+                query.addOrderBy(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ID.asc());
+
                 return query;
             }
         });
+
+        if(authorizations != null && authorizations.size() > pageSize){
+            authorizations.remove(pageSize);
+            response.setNextPageAnchor(authorizations.get(pageSize - 1).getId());
+
+        }
         List<ServiceModuleAppAuthorizationDTO> dtos = new ArrayList<ServiceModuleAppAuthorizationDTO>();
         if(authorizations != null){
             for (ServiceModuleAppAuthorization authorization: authorizations){
@@ -264,13 +286,17 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             }
         }
 
-        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
         response.setDtos(dtos);
         return response;
     }
 
     @Override
     public ListAppAuthorizationsByOwnerIdResponse listAppAuthorizationsByOrganizatioinId(ListAppAuthorizationsByOrganizatioinIdCommand cmd) {
+
+        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
+
+        final int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -278,9 +304,23 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 
+
+                if(cmd.getPageAnchor() != null){
+                    query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ID.gt(cmd.getPageAnchor()));
+                }
+                query.addLimit(pageSize);
+
+
                 return query;
             }
         });
+
+        if(authorizations != null && authorizations.size() > pageSize){
+            authorizations.remove(pageSize);
+            response.setNextPageAnchor(authorizations.get(pageSize - 1).getId());
+
+        }
+
         List<ServiceModuleAppAuthorizationDTO> dtos = new ArrayList<ServiceModuleAppAuthorizationDTO>();
         if(authorizations != null){
             for (ServiceModuleAppAuthorization authorization: authorizations){
@@ -289,7 +329,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             }
         }
 
-        ListAppAuthorizationsByOwnerIdResponse response = new ListAppAuthorizationsByOwnerIdResponse();
+
         response.setDtos(dtos);
         return response;
     }
