@@ -8223,9 +8223,9 @@ public class PunchServiceImpl implements PunchService {
 	        Map<Long, PunchTimeRule> punchTimeRuleMapId = new HashMap<>();
 	        for (; startCalendar.before(endCalendar); ) {
 	        	//循环公司
-	        	String startDayString = dateSF.get().format(startCalendar);
+	        	String startDayString = dateSF.get().format(startCalendar.getTime());
 	        	startCalendar.add(Calendar.MONTH, 1);
-	        	String endDayString = dateSF.get().format(startCalendar);
+	        	String endDayString = dateSF.get().format(startCalendar.getTime());
 	        	List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(startDayString, endDayString);
 	        	if(null != enterpriseIds){
 	        		for(Long enterpriseId : enterpriseIds){
