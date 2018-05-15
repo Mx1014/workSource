@@ -2067,6 +2067,10 @@ public class ForumServiceImpl implements ForumService {
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
             }
+
+            if (TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHING_AND_EXPIRED) {
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+            }
             
             
             if(condition != null) {
