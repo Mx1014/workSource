@@ -37,6 +37,14 @@ public class GetUserConfigAfterStartupResponse {
         this.smartCardKey = smartCardKey;
     }
 
+    public List<SmartCardHandler> getSmartCardhandlers() {
+        return smartCardhandlers;
+    }
+
+    public void setSmartCardhandlers(List<SmartCardHandler> smartCardhandlers) {
+        this.smartCardhandlers = smartCardhandlers;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

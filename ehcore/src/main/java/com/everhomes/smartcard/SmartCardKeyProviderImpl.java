@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhSmartCardKeysDao;
@@ -111,5 +113,19 @@ public class SmartCardKeyProviderImpl implements SmartCardKeyProvider {
         Long t = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(t));
         obj.setUpdateTime(new Timestamp(t));
+    }
+    
+    @Override
+    public List<SmartCardKey> queryLatestSmartCardKeys(Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSmartCardKeys.class));
+        SelectQuery<EhSmartCardKeysRecord> query = context.selectQuery(Tables.EH_SMART_CARD_KEYS);
+        query.addConditions(Tables.EH_SMART_CARD_KEYS.USER_ID.eq(userId));
+        query.addConditions(Tables.EH_SMART_CARD_KEYS.STATUS.eq(TrueOrFalseFlag.TRUE.getCode()));
+        query.addLimit(100);
+        query.addOrderBy(Tables.EH_SMART_CARD_KEYS.CREATE_TIME.desc());
+        List<SmartCardKey> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, SmartCardKey.class);
+        });
+        return objs;
     }
 }
