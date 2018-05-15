@@ -21,6 +21,17 @@ public class GetHomePageConfigurationResponse{
     private String buttonName;
     private Long configVersion=0L;
 
+    public GetHomePageConfigurationResponse() {
+    }
+
+    public GetHomePageConfigurationResponse(String zlLogoUri, String zlLogoUrl, String welcomeDocument, String buttonName, Long configVersion) {
+        this.zlLogoUri = zlLogoUri;
+        this.zlLogoUrl = zlLogoUrl;
+        this.welcomeDocument = welcomeDocument;
+        this.buttonName = buttonName;
+        this.configVersion = configVersion;
+    }
+
     public String getZlLogoUri() {
         return zlLogoUri;
     }

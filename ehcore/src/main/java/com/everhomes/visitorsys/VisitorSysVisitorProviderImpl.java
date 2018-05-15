@@ -206,8 +206,8 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_PHONE.eq(visitorPhone))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.gt(startOfDay))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.PLANNED_VISIT_TIME.lt(endOfDay))
-				.and(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS.lt(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()))
-				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_TYPE.lt(VisitorsysVisitorType.BE_INVITED.getCode()))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.BOOKING_STATUS.eq(VisitorsysStatus.NOT_VISIT.getCode()))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_TYPE.eq(VisitorsysVisitorType.BE_INVITED.getCode()))
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
 		return list;
 	}

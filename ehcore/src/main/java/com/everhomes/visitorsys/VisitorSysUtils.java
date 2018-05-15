@@ -18,7 +18,7 @@ public class VisitorSysUtils {
     public static Timestamp getStartOfDay(long now) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(now);
-        calendar.set(Calendar.HOUR,0);
+        calendar.set(Calendar.HOUR_OF_DAY,0);
         calendar.set(Calendar.MINUTE,0);
         calendar.set(Calendar.SECOND,0);
         return new Timestamp(calendar.getTimeInMillis());
@@ -28,7 +28,7 @@ public class VisitorSysUtils {
     public static Timestamp getEndOfDay(long now) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(now);
-        calendar.set(Calendar.HOUR,23);
+        calendar.set(Calendar.HOUR_OF_DAY,23);
         calendar.set(Calendar.MINUTE,59);
         calendar.set(Calendar.SECOND,59);
         return new Timestamp(calendar.getTimeInMillis());
@@ -107,6 +107,47 @@ public class VisitorSysUtils {
             }
         }
         return target;
+    }
+
+    /**
+     * 生成大小写加数字的混合随机字符串
+     * @return
+     */
+    public static String generateLetterNumCode(int length) {
+        String randomCode = "";
+        Random rand = new Random();
+        for(int i=0;i<length;i++){
+            int num = rand.nextInt(3);
+            switch(num){
+                case 0:
+                    char c1 = (char)(rand.nextInt(26)+'a');//生成随机小写字母
+                    randomCode += c1;
+                    break;
+                case 1:
+                    char c2 = (char)(rand.nextInt(26)+'A');//生成随机大写字母
+                    randomCode += c2;
+                    break;
+                case 2:
+                    randomCode += rand.nextInt(10);//生成随机数字
+            }
+        }
+        return randomCode;
+    }
+    /**
+     * 生成固定长度的数字
+     * @param codeLength
+     * @return
+     */
+    public static String generateNumCode(int codeLength) {
+        String code = "";
+        while(code.length()<codeLength){
+            int i = (int) (Math.random() * 10);
+            code +=i;
+        }
+        while(code.length()>codeLength){
+            code = code.substring(1, code.length());
+        }
+        return code;
     }
 
      public static boolean isNeedPropertiesCopy(Object result){

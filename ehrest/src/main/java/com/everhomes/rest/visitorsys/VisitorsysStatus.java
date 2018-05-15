@@ -61,7 +61,7 @@ public enum VisitorsysStatus {
 	 * @return
 	 */
 	public static List<VisitorsysStatus> getVisitStatus() {
-		return new ArrayList<>(Arrays.asList(DELETED,NOT_VISIT,HAS_VISITED));
+		return new ArrayList<>(Arrays.asList(DELETED,WAIT_CONFIRM_VISIT,HAS_VISITED,REJECTED_VISIT));
 	}
 
 	/**
@@ -69,7 +69,7 @@ public enum VisitorsysStatus {
 	 * @return
 	 */
 	public static List<VisitorsysStatus> getBookingStatus() {
-		return new ArrayList<>(Arrays.asList(DELETED,WAIT_CONFIRM_VISIT,HAS_VISITED,REJECTED_VISIT));
+		return new ArrayList<>(Arrays.asList(DELETED,NOT_VISIT,HAS_VISITED));
 	}
 
     public String getDesc() {

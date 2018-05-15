@@ -10,9 +10,12 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import java.sql.Timestamp;
 
 @RestDoc(value = "/ui/visitorsys Controller", site = "core")
 @RestController
@@ -22,7 +25,11 @@ public class VisitorSysUIController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
-
+	@Override
+	public void initListBinder(WebDataBinder binder) {
+		super.initListBinder(binder);
+		binder.registerCustomEditor(Timestamp.class,new TimestampEditor());
+	}
 	/**
 	 * <b>URL: /ui/visitorsys/getHomePageConfiguration</b>
 	 * <p>

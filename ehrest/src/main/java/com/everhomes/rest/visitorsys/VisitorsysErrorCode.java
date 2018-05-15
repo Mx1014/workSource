@@ -21,7 +21,9 @@ public class VisitorsysErrorCode {
     public final static String VISITORSYS_VERIFICATIONCODE_LENGTH = "visitorsys.verificationcode.length";//验证码码长度，默认6
     public static final String VISITORSYS_MODLUENAME= "visitorsys.modluename";//模块名称
     public static final String VISITORSYS_QRCODE_HEIGHT= "visitorsys.qrcode.height";//二维码高度 300
-    public static final String VISITORSYS_QRCODE_WIDTH= "visitorsys.qrcode.height";//二维码宽度 300
+    public static final String VISITORSYS_QRCODE_WIDTH= "visitorsys.qrcode.width";//二维码宽度 300
+    public static final String VISITORSYS_IPAD_CONFIG = "visitorsys.ipad.config";//ipad左邻logo,welcome,button,version
+
     //短信字段
     public final static String SMS_MODLUENAME = "modlueName";
     public final static String SMS_VERIFICATIONCODE = "verificationCode";
@@ -37,14 +39,15 @@ public class VisitorsysErrorCode {
 
     //异常码
     public final static String SCOPE = "visitorsys";
-    public final static int ERROR_MUST_FILL = 180507001;  //必填项
+    public final static int ERROR_MUST_FILL = 1001;  //必填项
     public final static int ERROR_PAIRING_TIMEOUT = 408;  //配对码验证超时
-    public final static int ERROR_DEVICE_NOT_FIND = 401;  //设备没找到
-    public final static int ERROR_VISITOR_NOT_FIND = 402;  //预约未找到
-    public final static int ERROR_ILLEGAL_VERIFICATIONCODE = 405;  //非法验证码
-    public final static int ERROR_REPEAT_PHONE = 406;  //重复的黑名单电话号码
-    public final static int ERROR_INBLACKLIST_PHONE_COMMUNITY = 407;  //此手机号码已进入黑名单
-    public final static int ERROR_INBLACKLIST_PHONE_ENTERPRISE= 408;  //此手机号码已进入黑名单
+    public final static int ERROR_DEVICE_NOT_FIND = 1401;  //设备没找到
+    public final static int ERROR_VISITOR_NOT_FIND = 1402;  //预约未找到
+    public final static int ERROR_ILLEGAL_VERIFICATIONCODE = 1405;  //非法验证码
+    public final static int ERROR_REPEAT_PHONE = 1406;  //重复的黑名单电话号码
+    public final static int ERROR_INBLACKLIST_PHONE_COMMUNITY = 1407;  //此手机号码已进入黑名单
+    public final static int ERROR_INBLACKLIST_PHONE_ENTERPRISE= 1408;  //此手机号码已进入黑名单
+    public final static int ERROR_REGISTED_IPAD= 1409;  //此ipad已被注册过
 
 
     //默认表单值

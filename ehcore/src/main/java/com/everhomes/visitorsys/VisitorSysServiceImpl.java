@@ -26,7 +26,6 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.visitorsys.*;
@@ -124,7 +123,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private DoorAccessService doorAccessService;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
-        beforePostForWeb(cmd);
         checkOwnerType(cmd.getOwnerType());
         checkSearchFlag(cmd.getSearchFlag());
 
@@ -342,7 +340,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "temporary visitor not support send sms");
         }
-        VisitorsysStatus status = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysStatus status = checkBookingStatus(visitor.getBookingStatus());
         if(VisitorsysStatus.NOT_VISIT!=status){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "not support visitor status = "+visitor.getVisitStatus());
@@ -673,7 +671,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String ownerToken = null;
         VisitorSysConfiguration exist = null;
         do{
-            ownerToken = generateLetterNumCode(16);
+            ownerToken = VisitorSysUtils.generateLetterNumCode(16);
             exist = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwnerToken(ownerToken);
         }
         while (exist!=null);
@@ -792,11 +790,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "unknown visitorToken "+cmd.getVisitorToken());
         }
 
-        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), visitor.getOwnerType(), visitor.getOwnerId());
+        GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
         GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
         response = VisitorSysUtils.copyAllNotNullProperties(configuration, response);
         response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
-//        response.setQrcodeUrl(contentServerService.parserUri(response.getQrcode()));
         VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(visitor.getOfficeLocationId());
         response.setOfficeLocationDTO(ConvertHelper.convert(location,BaseOfficeLocationDTO.class));
         response.setVisitorInfoDTO(ConvertHelper.convert(visitor,BaseVisitorInfoDTO.class));
@@ -813,6 +810,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public ListBookedVisitorsResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd) {
         beforePostForWeb(cmd);
+        cmd.setSearchFlag(VisitorsysSearchFlagType.CLIENT_BOOKING.getCode());
+        cmd.setVisitorType(VisitorsysVisitorType.BE_INVITED.getCode());
+        checkBookingStatus(cmd.getBookingStatus());
         return listBookedVisitors(cmd);
     }
 
@@ -856,6 +856,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetPairingCodeResponse getPairingCode(GetPairingCodeCommand cmd) {
         VisitorSysDevice device = ConvertHelper.convert(cmd, VisitorSysDevice.class);
+        VisitorSysDevice exist = visitorSysDeviceProvider.findVisitorSysDeviceByDeviceId(device.getDeviceType(), device.getDeviceId());
+        if(exist!=null){
+            throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_REGISTED_IPAD,
+                    "registed device");
+        }
         String pairingCode = generateUnrepeatPairingCode();
         String key = generatePairingCodeKey(pairingCode);
         ValueOperations<String, String> valueOperations = getValueOperations(key);
@@ -927,7 +932,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public CreateOrUpdateVisitorUIResponse createOrUpdateUIVisitor(CreateOrUpdateVisitorUICommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
         CreateOrUpdateVisitorCommand createOrUpdateVisitorCommand = ConvertHelper.convert(cmd, CreateOrUpdateVisitorCommand.class);
-        createOrUpdateVisitorCommand = VisitorSysUtils.copyAllNotNullProperties(device, createOrUpdateVisitorCommand);
+        createOrUpdateVisitorCommand = VisitorSysUtils.copyNotNullProperties(device, createOrUpdateVisitorCommand,new ArrayList(Arrays.asList("getId","setId")));
         GetBookedVisitorByIdResponse orUpdateVisitor = createOrUpdateVisitor(createOrUpdateVisitorCommand);
         return ConvertHelper.convert(orUpdateVisitor,CreateOrUpdateVisitorUIResponse.class);
     }
@@ -963,14 +968,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void sendSMSVerificationCode(SendSMSVerificationCodeCommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
-        long now = System.currentTimeMillis();
-        List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
-                (device.getNamespaceId(),device.getOwnerType(),device.getOwnerId(),cmd.getVisitorPhone()
-                        ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
-        if(list==null || list.size()==0){
-            throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_VISITOR_NOT_FIND,
-                    "visitor not find.");
-        }
+//        long now = System.currentTimeMillis();
+//        List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
+//                (device.getNamespaceId(),device.getOwnerType(),device.getOwnerId(),cmd.getVisitorPhone()
+//                        ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
+//        if(list==null || list.size()==0){
+//            throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_VISITOR_NOT_FIND,
+//                    "visitor not find.");
+//        }
         List<Tuple<String, Object>> variables =  new ArrayList();
         smsProvider.addToTupleList(variables, VisitorsysErrorCode.SMS_MODLUENAME, configurationProvider.getValue(VisitorsysErrorCode.VISITORSYS_MODLUENAME,VisitorsysErrorCode.SMS_MODLUENAME_CN));
         smsProvider.addToTupleList(variables, VisitorsysErrorCode.SMS_VERIFICATIONCODE, generateVerificationCode(cmd.getVisitorPhone()));
@@ -988,13 +993,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String verificationCode = null;
         int pairingCodeLength = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_VERIFICATIONCODE_LENGTH, 6);
         do{
-            verificationCode = generateCode(pairingCodeLength);
+            verificationCode = VisitorSysUtils.generateNumCode(pairingCodeLength);
             String key = generateVerificationKey(verificationCode,visitorPhone);
             ValueOperations<String, String> valueOperations = getValueOperations(key);
             value = valueOperations.get(key);
         }while (value!=null);
 
-        String key = VisitorsysErrorCode.VISITORSYS_VERIFICATIONCODE_+verificationCode;
+        String key = generateVerificationKey(verificationCode,visitorPhone);
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int live = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_VERIFICATIONCODE_LIVE, 900);
         valueOperations.set(key,verificationCode, live,TimeUnit.SECONDS);
@@ -1012,7 +1017,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "unknown verificatcode "+cmd.getVerificationCode());
         }
-        String key = generateVerificationKey(cmd.getVisitorPhone(),cmd.getVerificationCode());
+        String key = generateVerificationKey(cmd.getVerificationCode(),cmd.getVisitorPhone());
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         String value = valueOperations.get(key);
         if(value==null){
@@ -1030,7 +1035,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetHomePageConfigurationResponse getHomePageConfiguration() {
-        return null;
+        String ipadHomePageConfig = configurationProvider.getValue(VisitorsysErrorCode.VISITORSYS_IPAD_CONFIG,"uri,欢迎使用左邻访客,开始配置,0");
+        String[] split = ipadHomePageConfig.split(",");
+        if(split!=null && split.length==4) {
+            String welcomeDocument = split[1];
+            String buttonName = split[2];
+            String version = split[3];
+            String zlLogoUrl = contentServerService.parserUri(split[0]);
+            return new GetHomePageConfigurationResponse(split[0],zlLogoUrl,welcomeDocument,buttonName,Long.valueOf(version));
+        }
+        return new GetHomePageConfigurationResponse();
     }
 
     @Override
@@ -1419,6 +1433,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return visitor;
     }
 
+    /**
+     * 检查一些访客非法的字段，矛盾的字段，或设置为正确的值，
+     * 或抛出异常
+     * @param visitor
+     */
     private void checkVisitor(VisitorSysVisitor visitor) {
         for (String s : checkMustFillField) {
             checkMustFillParams(visitor,s);
@@ -1554,40 +1573,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysCoding.setOwnerId(ownerId);
         visitorSysCoding.setOwnerType(ownerType);
         int length = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_RANDOMCODE_LENGTH,4);
-        String randomCode = generateLetterNumCode(length);
+        String randomCode = VisitorSysUtils.generateLetterNumCode(length);
         while(visitorSysCodingProvider.findVisitorSysCodingByRandomCode(randomCode)!=null){
-            randomCode = generateLetterNumCode(length);
+            randomCode = VisitorSysUtils.generateLetterNumCode(length);
         }
         visitorSysCoding.setRandomCode(randomCode);
         visitorSysCoding.setSerialCode(0);
         visitorSysCoding.setStatus((byte)2);
         visitorSysCodingProvider.createVisitorSysCoding(visitorSysCoding);
         return visitorSysCoding;
-    }
-
-    /**
-     * 生成大小写加数字的混合随机字符串
-     * @return
-     */
-    private String generateLetterNumCode(int length) {
-        String randomCode = "";
-        Random rand = new Random();
-        for(int i=0;i<length;i++){
-            int num = rand.nextInt(3);
-            switch(num){
-                case 0:
-                    char c1 = (char)(rand.nextInt(26)+'a');//生成随机小写字母
-                    randomCode += c1;
-                    break;
-                case 1:
-                    char c2 = (char)(rand.nextInt(26)+'A');//生成随机大写字母
-                    randomCode += c2;
-                    break;
-                case 2:
-                    randomCode += rand.nextInt(10);//生成随机数字
-            }
-        }
-        return randomCode;
     }
 
     /**
@@ -1608,22 +1602,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return serialCode;
     }
 
-    /**
-     * 生成固定长度的数字
-     * @param codeLength
-     * @return
-     */
-    private String generateCode(int codeLength) {
-        String code = "";
-        while(code.length()<codeLength){
-            int i = (int) (Math.random() * 10);
-            code +=i;
-        }
-        while(code.length()>codeLength){
-            code = code.substring(1, code.length());
-        }
-        return code;
-    }
 
     /**
      * 生成不重复随机配对码
@@ -1634,7 +1612,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String pairingCode = null;
         int pairingCodeLength = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_PAIRINGCODE_LENGTH, 6);
         do{
-            pairingCode = generateCode(pairingCodeLength);
+            pairingCode = VisitorSysUtils.generateNumCode(pairingCodeLength);
             String key = generatePairingCodeKey(pairingCode);
             ValueOperations<String, String> valueOperations = getValueOperations(key);
             jsonValue = valueOperations.get(key);
