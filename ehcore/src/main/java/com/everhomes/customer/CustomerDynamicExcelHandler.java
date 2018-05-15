@@ -854,6 +854,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
+            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
