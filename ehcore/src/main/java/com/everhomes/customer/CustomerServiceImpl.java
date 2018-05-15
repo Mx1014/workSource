@@ -881,7 +881,7 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
-        if (customer.getOrganizationId() != null) {
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
             command.setId(customer.getOrganizationId());
             organizationService.deleteEnterpriseById(command, false);
