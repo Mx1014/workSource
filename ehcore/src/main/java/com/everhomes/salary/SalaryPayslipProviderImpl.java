@@ -104,7 +104,7 @@ public class SalaryPayslipProviderImpl implements SalaryPayslipProvider {
         }
 
         if (null != name) {
-            step = step.and(Tables.EH_SALARY_PAYSLIPS.NAME.in(name));
+            step = step.and(Tables.EH_SALARY_PAYSLIPS.NAME.like("%" + name + "%"));
         }
 
         if (null != locator && locator.getAnchor() != null) {
