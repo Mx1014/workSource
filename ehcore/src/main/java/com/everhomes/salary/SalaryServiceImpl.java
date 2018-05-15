@@ -2077,7 +2077,7 @@ public class SalaryServiceImpl implements SalaryService {
                 		OrganizationMemberTargetType.UNTRACK == OrganizationMemberTargetType.fromCode(memebrDetail.getTargetType())){
                     dto.setImportResult(PayslipImportResult.USER_UNTRACK.getCode());
                 }else {
-                	
+                	dto.setName(memebrDetail.getContactName());
                     dto.setImportResult(PayslipImportResult.SUCESS.getCode());
                     dto.setUserId(memebrDetail.getTargetId());
                     dto.setUserDetailId(memebrDetail.getId());
