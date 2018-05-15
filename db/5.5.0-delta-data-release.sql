@@ -56,3 +56,6 @@ VALUES ('openapi.lufu.key', '70f2ea6d54fb44d5a18ac11f66d25154', '路福联合广
 -- issue-29029 物业报修工作流状态修改
 UPDATE eh_pm_tasks t, eh_flow_cases f SET t.`status` = IFNULL(f.`status`, 3) WHERE t.`status` = 3 AND f.id = t.flow_case_id;
 UPDATE eh_pm_tasks t SET t.`status` = 2 WHERE t.`status` IN (1,3);
+
+-- 物业报修应用配置设置默认值
+UPDATE `eh_service_modules` SET `instance_config`='{\"angetSwitch\":1}' WHERE (`id`='20100')
