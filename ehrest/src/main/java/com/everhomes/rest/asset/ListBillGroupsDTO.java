@@ -21,8 +21,17 @@ public class ListBillGroupsDTO {
     private Integer defaultOrder;
     private Byte billingCycle;
     private Integer billingDay;
+    private Byte billingDayType;
     private Integer dueDay;
     private Byte dueDayType;
+
+    public Byte getBillingDayType() {
+        return billingDayType;
+    }
+
+    public void setBillingDayType(Byte billingDayType) {
+        this.billingDayType = billingDayType;
+    }
 
     @Override
     public String toString() {

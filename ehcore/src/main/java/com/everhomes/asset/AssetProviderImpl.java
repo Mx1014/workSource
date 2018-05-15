@@ -862,6 +862,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingDay(r.getValue(t.BILLS_DAY));
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
+                    dto.setBillingDayType(r.getValue(t.BILLS_DAY_TYPE));
                     list.add(dto);
                     return null;
                 });
@@ -2776,6 +2777,7 @@ public class AssetProviderImpl implements AssetProvider {
         group.setId(nextGroupId);
         group.setBalanceDateType(cmd.getBillingCycle());
         group.setBillsDay(cmd.getBillDay());
+        group.setBillsDayType(cmd.getBillDayType());
         group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         group.setCreatorUid(UserContext.currentUserId());
         group.setBrotherGroupId(brotherGroupId);
