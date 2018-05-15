@@ -2980,9 +2980,9 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                 }
-                List<Long> billIds = new ArrayList<>();
-                Set<NoticeInfo> noticeInfoList = new HashSet<>();
                 for (Map.Entry<Long, PaymentBills> entry : needNoticeBills.entrySet()) {
+                    List<Long> billIds = new ArrayList<>();
+                    Set<NoticeInfo> noticeInfoList = new HashSet<>();
                     PaymentBills b = entry.getValue();
                     billIds.add(b.getId());
                     NoticeInfo info = new NoticeInfo();
@@ -3379,9 +3379,9 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                 }
-                List<Long> billIds = new ArrayList<>();
-                Set<NoticeInfo> noticeInfoList = new HashSet<>();
                 for (Map.Entry<Long, PaymentBills> entry : needNoticeBills.entrySet()) {
+                    List<Long> billIds = new ArrayList<>();
+                    Set<NoticeInfo> noticeInfoList = new HashSet<>();
                     PaymentBills b = entry.getValue();
                     billIds.add(b.getId());
                     NoticeInfo info = new NoticeInfo();
@@ -3452,7 +3452,8 @@ public class AssetServiceImpl implements AssetService {
                             LOGGER.error("failed to have a new notice info, new info is ={}",info,e);
                         }
                     }
-                    //一个一个发，因为每个账单的变量注入值不一样
+                    //一个一个发, billIds的size只有一
+                    LOGGER.info("billIds size should be one, now = {}",billIds.size());
                     NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
                 }
                 LOGGER.info("done");
