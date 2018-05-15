@@ -1586,4 +1586,13 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/exportCustomerDetails</b>
+     * <p>是否看过同步结果</p>
+     */
+    @RequestMapping("exportCustomerDetails")
+    public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse) {
+        return customerService.exportCustomerDetails(cmd,httpResponse);
+    }
 }
