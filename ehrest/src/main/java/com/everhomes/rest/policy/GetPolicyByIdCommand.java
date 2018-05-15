@@ -9,7 +9,7 @@ package com.everhomes.rest.policy;
  * <li>ownerId: 所属项目id</li>
  * </ul>
  */
-public class DeletePolicyCommand {
+public class GetPolicyByIdCommand {
 
     private Long id;
     private Integer namespaceId;

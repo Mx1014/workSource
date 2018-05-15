@@ -88,3 +88,18 @@ CREATE TABLE `eh_policy_records` (
 	`create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_policy_agent_rules` (
+  `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type : community ; organization',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
+  `agent_flag` TINYINT(4) DEFAULT NULL COMMENT '是否代办:0为不可代办，1为可代办',
+  `agent_phone` varchar(64) DEFAULT NULL COMMENT '联系方式',
+	`agent_info` varchar(64) DEFAULT NULL COMMENT '代办介绍',
+	`creator_id` bigint(20) NOT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`updater_uid` bigint(20) NOT NULL COMMENT '修改人',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

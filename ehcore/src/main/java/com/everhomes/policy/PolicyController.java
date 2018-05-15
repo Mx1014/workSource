@@ -42,7 +42,7 @@ public class PolicyController extends ControllerBase {
      */
     @RequestMapping("deletePolicy")
     @RestReturn(value=String.class)
-    public RestResponse deletePolicy(DeletePolicyCommand cmd) {
+    public RestResponse deletePolicy(GetPolicyByIdCommand cmd) {
         policyService.deletePolicy(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -79,6 +79,20 @@ public class PolicyController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /policy/searchPolicyById</b>
+     * <p>根据id获取政策</p>
+     */
+    @RequestMapping("searchPolicyById")
+    @RestReturn(value=PolicyDTO.class)
+    public RestResponse searchPolicyById(GetPolicyByIdCommand cmd) {
+        PolicyDTO dto = policyService.searchPolicyById(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /policy/searchPolicies</b>
      * <p>根据关键字获取政策</p>
      */
@@ -101,6 +115,20 @@ public class PolicyController extends ControllerBase {
     public RestResponse searchPolicyRecords(GetPolicyRecordCommand cmd) {
         List<PolicyRecordDTO> dtos = policyRecordService.searchPolicyRecords(cmd);
         RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /policy/searchPolicyRecordsById</b>
+     * <p>根据Id查询政策计算器记录</p>
+     */
+    @RequestMapping("searchPolicyRecordsById")
+    @RestReturn(value=PolicyDTO.class)
+    public RestResponse searchPolicyRecordsById(GetPolicyByIdCommand cmd) {
+        PolicyRecordDTO dto = policyRecordService.searchPolicyRecordById(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
