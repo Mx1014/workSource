@@ -163,7 +163,7 @@ public class SalaryPayslipDetailProviderImpl implements SalaryPayslipDetailProvi
             step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.PAYSLIP_ID.eq(payslipId));
         }
         if (null != name) {
-            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.NAME.eq(name));
+            step = step.and(Tables.EH_SALARY_PAYSLIP_DETAILS.NAME.like("%" + name + "%"));
         }
 
         if (null != status) {

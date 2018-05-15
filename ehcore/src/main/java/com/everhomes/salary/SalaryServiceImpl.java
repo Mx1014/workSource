@@ -2122,6 +2122,10 @@ public class SalaryServiceImpl implements SalaryService {
                 continue;
             }
             SalaryPayslipDetail spd = ConvertHelper.convert(dto, SalaryPayslipDetail.class);
+            if(null != dto.getUserDetailId()){
+            	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getUserDetailId());
+            	spd.setName(detail.getContactName());
+            }
             spd.setPayslipId(sp.getId());
             spd.setNamespaceId(UserContext.getCurrentNamespaceId());
             spd.setOrganizationId(cmd.getOrganizationId());
