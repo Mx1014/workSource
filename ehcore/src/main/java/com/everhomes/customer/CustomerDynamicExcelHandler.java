@@ -861,6 +861,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
             createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            if (StringUtils.isEmpty(customerAddressString)) {
+                organizationProvider.deleteOrganizationById(exist.getOrganizationId());
+                Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+                if (organization != null)
+                    organizationSearcher.feedDoc(organization);
+            }
         }
     }
 
