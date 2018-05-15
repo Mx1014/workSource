@@ -500,4 +500,6 @@ public interface OrganizationProvider {
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
 
 	OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
+
+    void deleteAllOrganizationAddressById(Long organizationId);
 }

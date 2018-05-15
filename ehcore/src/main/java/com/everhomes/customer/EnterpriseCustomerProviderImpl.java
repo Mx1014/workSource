@@ -2048,4 +2048,20 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         //大师说暂时可以用item来区分使用园区企业应用的namespaceId
         return query.fetchInto(Organization.class);
     }
+
+    @Override
+    public void deleteAllCustomerEntryInfo(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public void deleteAllEnterpriseCustomerAdminRecord(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
+                .execute();
+    }
 }

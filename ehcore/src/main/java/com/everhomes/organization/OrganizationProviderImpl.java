@@ -5816,4 +5816,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
 
+
+    @Override
+    public void deleteAllOrganizationAddressById(Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_ADDRESSES)
+                .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
 }

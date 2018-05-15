@@ -13,11 +13,13 @@ import com.everhomes.dynamicExcel.DynamicRowDTO;
 import com.everhomes.dynamicExcel.DynamicSheet;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.CustomerDynamicSheetClass;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
@@ -25,6 +27,7 @@ import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -38,6 +41,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldGroup;
 import com.everhomes.varField.FieldProvider;
@@ -319,22 +323,30 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
 
-                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
-                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
-                            if(customers != null && customers.size() > 0) {
-                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
-                                failedNumber ++;
-                                flag = false;
-                                break;
-                            }
-                        }
+//                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
+//                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
+//                            if(customers != null && customers.size() > 0) {
+////                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
+////                                failedNumber ++;
+////                                flag = false;
+////                                break;
+//                                customers.forEach((c)-> {
+//                                    customerSearcher.deleteById(c.getId());
+//                                    customerProvider.deleteEnterpriseCustomer(c);
+//                                });
+//                            }
+//                        }
                         if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
                             List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, enterpriseCustomer.getName());
                             if(customers != null && customers.size() > 0) {
-                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
-                                failedNumber ++;
-                                flag = false;
-                                break;
+//                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
+//                                failedNumber ++;
+//                                flag = false;
+//                                break;
+                                for (EnterpriseCustomer customer : customers) {
+                                    updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                                }
+                                continue;
                             }
                         }
 
@@ -829,10 +841,25 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
+    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
+        if (exist != null && enterpriseCustomer != null) {
+            enterpriseCustomer.setId(exist.getId());
+            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            customerSearcher.feedDoc(enterpriseCustomer);
+            customerService.saveCustomerEvent(3, enterpriseCustomer, null, (byte) 0);
+            createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
+            customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
+        }
+    }
+
     private void createEnterpriseCustomerEntryInfo(EnterpriseCustomer enterpriseCustomer, String customerAddressString) {
         if (StringUtils.isEmpty(customerAddressString)) {
             return;
         }
+        customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+        organizationProvider.deleteAllOrganizationAddressById(enterpriseCustomer.getOrganizationId());
         String buildingNames[] = customerAddressString.split(",");
         if(buildingNames.length>0){
             for (String buildingNameString : buildingNames) {
@@ -850,6 +877,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 entryInfo.setCustomerName(enterpriseCustomer.getName());
                 entryInfo.setNamespaceId(enterpriseCustomer.getNamespaceId());
                 customerProvider.createCustomerEntryInfo(entryInfo);
+                OrganizationAddress organizationAddress = new OrganizationAddress();
+                Address addr = this.addressProvider.findAddressById(address.getId());
+                if (addr != null) {
+                    address.setBuildingName(addr.getBuildingName());
+                }
+                organizationAddress.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                organizationAddress.setAddressId(address.getId());
+                organizationAddress.setBuildingId(building.getId());
+                organizationAddress.setCreatorUid(UserContext.currentUserId());
+                organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+
+                this.organizationProvider.createOrganizationAddress(organizationAddress);
             }
         }
     }
@@ -857,6 +898,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
         List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
         if (StringUtils.isNotEmpty(customerAdminString)) {
+            customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
+
+            List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
+            if(records!=null && records.size()>0){
+                for (CustomerAdminRecord record: records) {
+                    DeleteOrganizationAdminCommand command = new DeleteOrganizationAdminCommand();
+                    command.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                    command.setCommunityId(enterpriseCustomer.getCommunityId());
+                    //TODO:
+//                    command.setOwnerId(enterpriseCustomer.);
+                    command.setOwnerType("EhOrganizations");
+                    rolePrivilegeService.deleteOrganizationAdministrators(command);
+                }
+            }
             String[] adminStrings = customerAdminString.split(",");
             if (adminStrings.length > 0) {
                 for (int i = 0; i < adminStrings.length; i++) {
@@ -873,6 +928,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 EnterpriseCustomer customer = customerProvider.findById(enterpriseCustomer.getId());
                 customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
                 customerProvider.updateEnterpriseCustomer(customer);
+                customerSearcher.feedDoc(customer);
             }
         }
         if (cmds.size() > 0) {
