@@ -3664,6 +3664,8 @@ public class AssetProviderImpl implements AssetProvider {
         if(namespaceId!=null){
             query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
         }
+        query.addConditions(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1));
+        query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0));
         return query.fetchInto(PaymentBills.class);
     }
 
@@ -4159,6 +4161,17 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_IDENTIFIER.eq(billGroupName1));
         }
         return query.fetchInto(PaymentAppView.class);
+    }
+
+    @Override
+    public List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId) {
+        DSLContext context = getReadOnlyContext();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_PAYMENT_NOTICE_CONFIG);
+        if(namespaceId!=null){
+            query.addConditions(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId));
+        }
+        return query.fetchInto(PaymentNoticeConfig.class);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

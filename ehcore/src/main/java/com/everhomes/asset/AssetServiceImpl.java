@@ -3315,7 +3315,7 @@ public class AssetServiceImpl implements AssetService {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
                 SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
                 Calendar today = newClearedCalendar();
-                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigsByNameSpaceId(namespaceId);
                 Map<Long, List<PaymentNoticeConfig>> noticeConfigs = new HashMap<>();
                 for (int i = 0; i < configs.size(); i++) {
                     PaymentNoticeConfig config = configs.get(i);
@@ -3349,7 +3349,7 @@ public class AssetServiceImpl implements AssetService {
                                         deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
                                     }
                                     //符合催缴的日期设定就催缴
-                                    if (today.compareTo(deadline) == 1) {
+                                    if (today.compareTo(deadline) == 0) {
                                         needNoticeBills.put(bill.getId(), bill);
                                         noticeConfigMap.put(bill.getId(), day);
                                     }
