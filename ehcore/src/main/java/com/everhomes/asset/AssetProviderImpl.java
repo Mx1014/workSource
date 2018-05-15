@@ -4144,7 +4144,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1) {
+    public List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_PAYMENT_APP_VIEWS);
@@ -4152,11 +4152,11 @@ public class AssetProviderImpl implements AssetProvider {
         if(communityId!=null){
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.COMMUNITY_ID.eq(communityId));
         }
-        if(!org.jooq.tools.StringUtils.isBlank(ownerType)){
+        if(remarkCheckList[0]) {
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_TYPE.eq(targetType));
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_IDENTIFIER.eq(ownerType));
         }
-        if(!org.jooq.tools.StringUtils.isBlank(billGroupName1)){
+        if(remarkCheckList[1]){
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_TYPE.eq(billGroupName));
             query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_IDENTIFIER.eq(billGroupName1));
         }

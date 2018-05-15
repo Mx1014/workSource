@@ -313,7 +313,7 @@ public interface AssetProvider {
 
     String getAddressByBillId(Long id);
 
-    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1);
+    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 }

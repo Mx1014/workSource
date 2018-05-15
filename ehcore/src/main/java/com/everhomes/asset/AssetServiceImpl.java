@@ -80,6 +80,7 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -3138,14 +3139,25 @@ public class AssetServiceImpl implements AssetService {
         Integer namespaceId = cmd.getNamespaceId();
         Byte hasContractView = 1;
         Byte hasPay = 1;
+        Boolean[] remarkCheckList = new Boolean[3];
+        remarkCheckList[0] = false;
+        remarkCheckList[1] = false;
+        remarkCheckList[2] = false;
         if(namespaceId==null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
         if(cmd.getBillGroupId() != null && cmd.getBillGroupName() == null){
             cmd.setBillGroupName(assetProvider.findBillGroupNameById(cmd.getBillGroupId()));
         }
+        if(!StringUtils.isBlank(cmd.getOwnerType())){
+            remarkCheckList[0] = true;
+        }
+        if(!StringUtils.isBlank(cmd.getBillGroupName()) && namespaceId == 999971){
+            remarkCheckList[0] = false;
+            remarkCheckList[1] = true;
+        }
         List<PaymentAppView> views = assetProvider.findAppViewsByNamespaceIdOrRemark(namespaceId, cmd.getCommunityId(), "targetType",cmd.getOwnerType(),
-               "billGroupName", cmd.getBillGroupName());
+               "billGroupName", cmd.getBillGroupName(), remarkCheckList);
         for(PaymentAppView view : views){
             if(view.getViewItem().equals(PaymentViewItems.CONTRACT.getCode())){
                 hasContractView = view.getHasView();
