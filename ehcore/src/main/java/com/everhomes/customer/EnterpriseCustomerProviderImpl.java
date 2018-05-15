@@ -5,10 +5,12 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
@@ -21,7 +23,12 @@ import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
@@ -43,6 +50,8 @@ import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
@@ -61,6 +70,8 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAdmins;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
@@ -80,7 +91,9 @@ import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomerAdminsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -1674,25 +1687,27 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
-                        if ("trackingUid".equals(field.getFieldName())) {
-                            if (oldData == null) {
+                        if("trackingUid".equals(field.getFieldName())) {
+                            if (oldData == null || oldData.equals("")) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if (newData == null) {
+                            if (newData == null || newData.equals("")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
                             }
-
                         }
                         Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
 						content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+						if(field.getFieldParam().contains("image")){
+                            content = content.split(":")[0];
+                        }
 						buffer.append(content);
 						buffer.append(";");
 					}
@@ -1927,4 +1942,126 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return query.fetchInto(AuthorizationRelation.class);
     }
 
+    @Override
+    public void updateEnterpriseBannerUri(Long customerId, List<AttachmentDescriptor> banners) {
+        deleteCustomerBannerUriByCustomerId(customerId);
+        if (banners != null && banners.size() > 0) {
+            banners.forEach((b) -> createCustomerBannerUri(customerId, b));
+        }
+    }
+
+    private void createCustomerBannerUri(Long customerId, AttachmentDescriptor banner) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAttachments.class));
+        CustomerAttachements attachement = new CustomerAttachements();
+        attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
+        attachement.setId(id);
+        attachement.setCustomerId(customerId);
+        attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachement.setCreatorUid(UserContext.currentUserId());
+        EhEnterpriseCustomerAttachmentsDao dao = new EhEnterpriseCustomerAttachmentsDao(context.configuration());
+        dao.insert(attachement);
+    }
+
+    private void deleteCustomerBannerUriByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
+        CustomerAdminRecord record = new CustomerAdminRecord();
+        record.setContactName(contactName);
+        record.setContactToken(contactToken);
+        record.setCustomerId(customerId);
+        record.setContactType(contactType);
+        record.setId(id);
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        record.setCreatorUid(UserContext.currentUserId());
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+        dao.insert(record);
+    }
+
+    @Override
+    public void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken).and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
+                .execute();
+    }
+
+    @Override
+    public void updateEnterpriseCustomerAdminRecord(String contacToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(OrganizationMemberTargetType.UNTRACK.getCode()))
+                .fetchInto(CustomerAdminRecord.class);
+        if (records != null && records.size() > 0) {
+            for (CustomerAdminRecord record : records) {
+                record.setContactType(OrganizationMemberTargetType.USER.getCode());
+                EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+                dao.update(record);
+            }
+        }
+    }
+
+    @Override
+    public List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId, String contactType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomerAdminsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId));
+        if (contactType != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(contactType));
+        }
+        return query.fetchInto(CustomerAdminRecord.class);
+    }
+
+    @Override
+    public List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .fetchInto(EnterpriseAttachment.class);
+    }
+
+    @Override
+    public List<Organization> listNoSyncOrganizations() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .fetchInto(Long.class);
+        List<Long> namespaceId = context.selectDistinct(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID)
+                .from(Tables.EH_LAUNCH_PAD_ITEMS)
+                .where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq(ActionType.PARKENTERPRISE.getCode()))
+                .fetchInto(Long.class);
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.in(namespaceId));
+        //大师说暂时可以用item来区分使用园区企业应用的namespaceId
+        return query.fetchInto(Organization.class);
+    }
+
+    @Override
+    public void deleteAllCustomerEntryInfo(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public void deleteAllEnterpriseCustomerAdminRecord(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
+                .execute();
+    }
 }

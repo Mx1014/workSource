@@ -33,6 +33,7 @@ import com.everhomes.rest.customer.CustomerTrackingDTO;
 import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
 import com.everhomes.rest.customer.CustomerTrademarkDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ListCustomerAccountsCommand;
 import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
@@ -56,6 +57,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -121,6 +123,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -237,11 +240,11 @@ public class FieldServiceImpl implements FieldService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
         List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
@@ -739,10 +742,16 @@ public class FieldServiceImpl implements FieldService {
             case "员工情况":
                 if(customerType == null) {
                     SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    ExportEnterpriseCustomerCommand exportcmd = ConvertHelper.convert(params, ExportEnterpriseCustomerCommand.class);
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
                     cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    //request by get method
+                    if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
+                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                    }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
@@ -1099,6 +1108,29 @@ public class FieldServiceImpl implements FieldService {
         if(invoke==null){
             return "";
         }
+        //增加管理员和楼栋门牌特殊情况
+        if ("enterpriseAdmins".equals(fieldName)) {
+            if(invoke instanceof  ArrayList){
+                List<OrganizationContactDTO> contacts =  (ArrayList<OrganizationContactDTO>) invoke;
+                if(contacts.size()>0){
+                    List<String> admin = new ArrayList<>();
+                    contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
+                    return String.join(",", admin);
+                }else {
+                    return "";
+                }
+            }
+        }
+        if("entryInfos".equals(fieldName)){
+            List<CustomerEntryInfoDTO> entryInfos = (ArrayList<CustomerEntryInfoDTO>) invoke;
+            if(entryInfos.size()>0){
+                List<String> entryInfo = new ArrayList<>();
+                entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
+                return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
+        }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
                 SimpleDateFormat sdf = null;
@@ -1180,11 +1212,15 @@ public class FieldServiceImpl implements FieldService {
                 invoke = String.valueOf(detail.getContactName());
             }else{
                 if(uid > 0) {
-                    UserInfo userInfo = userService.getUserInfo(uid);
-                    if(userInfo != null){
-                        invoke = String.valueOf(userInfo.getNickName());
-                    } else {
-                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    try {
+                        UserInfo userInfo = userService.getUserInfo(uid);
+                        if(userInfo != null){
+                            invoke = String.valueOf(userInfo.getNickName());
+                        } else {
+                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("cannot find user any information.uid={}",uid);
                     }
                 } else {
                     invoke = "";
@@ -1622,7 +1658,8 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
+//            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(group.getName()))) {
+            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !(group.getGroupId() == 1L)) {
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;

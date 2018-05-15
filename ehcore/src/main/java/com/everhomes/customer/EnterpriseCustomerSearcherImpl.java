@@ -6,13 +6,17 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -37,6 +41,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
@@ -52,6 +57,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/17.
@@ -80,6 +86,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Override
     public String getIndexType() {
@@ -121,7 +130,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("communityId", customer.getCommunityId());
             builder.field("namespaceId", customer.getNamespaceId());
             builder.field("name", customer.getName());
-            builder.field("contactMobile", customer.getContactMobile());
+            builder.field("contactPhone", customer.getContactPhone());
             builder.field("contactName", customer.getContactName());
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
@@ -134,7 +143,20 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
-           
+            builder.field("adminFlag" , customer.getAdminFlag());
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            if (entryInfos != null && entryInfos.size() > 0) {
+                List<String> buildings = new ArrayList<>();
+                List<String> addressIds = new ArrayList<>();
+                entryInfos.forEach((e) -> {
+                    buildings.add(e.getBuildingId().toString());
+                    addressIds.add(e.getAddressId().toString());
+                });
+                builder.field("buildingId", StringUtils.join(buildings, "|"));
+                builder.field("addressId", StringUtils.join(addressIds, "|"));
+//                builder.array("buildings", buildings);
+//                builder.array("addressId", addressIds);
+            }
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -201,7 +223,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     .field("name", 1.5f)
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
-                    .field("contactMobile", 1.0f)
+                    .field("contactPhone", 1.0f)
                     .field("trackingName" , 1.0f);
 
             builder.setHighlighterFragmentSize(60);
@@ -215,9 +237,22 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+        }
 
         if(cmd.getCustomerCategoryId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));
+
+        if(cmd.getAdminFlag() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("adminFlag", cmd.getAdminFlag()));
 
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
@@ -289,7 +324,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -464,6 +499,22 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
              result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
         }
         dto.setTrackingPeriod(result);
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        //楼栋门牌
+        ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
+        command1.setCommunityId(customer.getCommunityId());
+        command1.setCustomerId(customer.getId());
+        List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
+        if (entryInfos != null && entryInfos.size() > 0) {
+            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+            dto.setEntryInfos(entryInfos);
+        }
         return dto;
     }
     

@@ -1,7 +1,12 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -76,6 +81,7 @@ import java.sql.Timestamp;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty: 联系人职务</li>
+ *     <li>signedUpCount: 注册人数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -171,9 +177,20 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private BigDecimal riskInvestmentAmount;
     private Boolean thirdPartFlag = false;
 
-    private String trackingPhone;
-    private String deviceType;
     private Integer trackingPeriod;
+    private String deviceType;
+    private String trackingPhone;
+    private String hotline;
+    private String unifiedSocialCreditCode;
+    private Integer signedUpCount;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String postUri;
+    private String postUrl;
+    @ItemType(OrganizationContactDTO.class)
+    private List<OrganizationContactDTO> enterpriseAdmins;
+    @ItemType(CustomerEntryInfoDTO.class)
+    private  List<CustomerEntryInfoDTO> entryInfos;
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -901,6 +918,70 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setTrackingPeriod(Integer trackingPeriod) {
         this.trackingPeriod = trackingPeriod;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public List<OrganizationContactDTO> getEnterpriseAdmins() {
+        return enterpriseAdmins;
+    }
+
+    public void setEnterpriseAdmins(List<OrganizationContactDTO> enterpriseAdmins) {
+        this.enterpriseAdmins = enterpriseAdmins;
+    }
+
+    public List<CustomerEntryInfoDTO> getEntryInfos() {
+        return entryInfos;
+    }
+
+    public void setEntryInfos(List<CustomerEntryInfoDTO> entryInfos) {
+        this.entryInfos = entryInfos;
+    }
+
+    public String getPostUrl() {
+        return postUrl;
+    }
+
+    public void setPostUrl(String postUrl) {
+        this.postUrl = postUrl;
+    }
+
+    public Integer getSignedUpCount() {
+        return signedUpCount;
+    }
+
+    public void setSignedUpCount(Integer signedUpCount) {
+        this.signedUpCount = signedUpCount;
     }
 
     @Override
