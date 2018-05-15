@@ -369,10 +369,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                             //企业客户新增成功,保存客户事件
                             customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
-
-                            OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                            enterpriseCustomer.setOrganizationId(organizationDTO.getId());
-
+                            if (StringUtils.isNotEmpty(customerAddressString)) {
+                                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                                enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+                            }
                             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
                             customerSearcher.feedDoc(enterpriseCustomer);
                             //这里还需要增加企业管理员的record和role  & address buildings 呵
