@@ -963,7 +963,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 
 
-
 		moduleIds.clear();
 		moduleIds.add(40500L);//服务联盟
 		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
@@ -985,9 +984,23 @@ public class WebMenuServiceImpl implements WebMenuService {
 		WebMenuDTO resources = new WebMenuDTO();
 		resources.setName("预定中心");
 
+
+		List<WebMenuDTO> sbuResources = new ArrayList<>();
+
 		moduleIds.clear();
 		moduleIds.add(40400L);//资源预定
-		List<WebMenuDTO> sbuResources = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		List<WebMenuDTO> resources404 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(resources404 != null && resources404.size() > 0){
+			sbuResources.addAll(resources404);
+		}
+
+		moduleIds.clear();
+		moduleIds.add(40200L);//工位预定
+		List<WebMenuDTO> resources402 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(resources402 != null && resources402.size() > 0){
+			sbuResources.addAll(resources402);
+		}
+
 		resources.setDtos(sbuResources);
 
 
