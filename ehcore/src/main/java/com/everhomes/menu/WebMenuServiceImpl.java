@@ -907,14 +907,17 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		WebMenuDTO introduce1 = new WebMenuDTO();
 		introduce1.setName("园区介绍");
+		introduce1.setDataType("community-introduce");
 		introduces.getDtos().add(introduce1);
 
 		WebMenuDTO introduce2 = new WebMenuDTO();
 		introduce2.setName("名企风采");
+		introduce2.setDataType("enterprise-management");
 		introduces.getDtos().add(introduce2);
 
 		WebMenuDTO introduce3 = new WebMenuDTO();
 		introduce3.setName("联系我们");
+		introduce3.setDataType("service-online");
 		introduces.getDtos().add(introduce3);
 
 
@@ -1016,6 +1019,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				List<WebMenu> webMenus = webMenuProvider.listMenuByModuleIdAndType(app.getModuleId(), WebMenuType.PARK.getCode());
 				if(webMenus != null && webMenus.size() > 0){
 					WebMenuDTO dto = ConvertHelper.convert(webMenus.get(0), WebMenuDTO.class);
+					dto.setName(app.getName());
 					dto.setConfigId(app.getId());
 					dtos.add(dto);
 				}
