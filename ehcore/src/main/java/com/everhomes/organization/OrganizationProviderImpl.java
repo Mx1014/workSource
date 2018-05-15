@@ -2,6 +2,7 @@
 package com.everhomes.organization;
 
 import com.everhomes.address.Address;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -6694,6 +6695,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * @param communityNameList
      * @return
      */
+    @Override
     public List<Long> findCommunityIdListByNames(List<String> communityNameList){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -6701,5 +6703,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .where(Tables.EH_COMMUNITIES.NAME.in(communityNameList))
                 .fetchInto(Long.class);
         return communityIdList;
+    }
+
+    /**
+     * 根据项目Id和域空间Id和楼栋名称来查询eh_buildings表中的楼栋信息
+     * @param communityId
+     * @param namespaceId
+     * @param buildingName
+     * @return
+     */
+    @Override
+    public Building findBuildingByCommunityIdAndBuildingNameWithNamespaceId(Long communityId,Integer namespaceId,String buildingName){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Building building = context.select().from(Tables.EH_BUILDINGS)
+                .where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_BUILDINGS.NAME.eq(buildingName))
+                .fetchAnyInto(Building.class);
+        return building;
     }
 }

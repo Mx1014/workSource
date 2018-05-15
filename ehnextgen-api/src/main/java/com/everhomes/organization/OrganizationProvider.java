@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
@@ -756,4 +757,13 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<Long> findCommunityIdListByNames(List<String> communityNameList);
+
+	/**
+	 * 根据项目Id和域空间Id和楼栋名称来查询eh_buildings表中的楼栋信息
+	 * @param communityId
+	 * @param namespaceId
+	 * @param buildingName
+	 * @return
+	 */
+	Building findBuildingByCommunityIdAndBuildingNameWithNamespaceId(Long communityId, Integer namespaceId, String buildingName);
 }
