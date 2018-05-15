@@ -20,6 +20,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.organization.*;
@@ -5711,6 +5712,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
+    }
+
+    @Override
+    public List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long orgId, String ...targetTypes) {
+        List<NoticeMemberIdAndContact> ret = new ArrayList<>();
+       this.dbProvider.getDslContext(AccessSpec.readOnly())
+            .select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID, Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN)
+                .from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.in(targetTypes))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .fetch().forEach(r ->{
+                    NoticeMemberIdAndContact c = new NoticeMemberIdAndContact();
+                    c.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+                    c.setTargetId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+                    ret.add(c);
+                });
+       return ret;
     }
 
     @Override
