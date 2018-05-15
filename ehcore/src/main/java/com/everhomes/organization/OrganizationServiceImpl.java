@@ -1193,13 +1193,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
             if (null == organization) {
                 LOGGER.debug("organization is null, id = " + id);
-                return null;
+//                return null;
+                break;
             } else if (OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
                 LOGGER.debug("organization not is enterprise, id = " + id);
-                return null;
+//                return null;
+                break;
             } else if (organization.getParentId() != 0L) {
                 LOGGER.debug("organization is children organization, id = " + id);
-                return null;
+//                return null;
+                break;
             }
             dto.setId(organization.getId());
             dto.setEnterpriseName(organization.getName());
