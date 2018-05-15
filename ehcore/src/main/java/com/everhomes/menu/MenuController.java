@@ -13,6 +13,7 @@ import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.me_menu.ListMeWebMenusCommand;
 import com.everhomes.rest.menu.*;
 
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,6 +95,7 @@ public class MenuController extends ControllerBase {
      */
     @RequestMapping("listMenuForPcEntry")
     @RestReturn(value=ListMenuForPcEntryResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd) {
         ListMenuForPcEntryResponse res = webMenuService.listMenuForPcEntry(cmd);
         RestResponse response =  new RestResponse(res);
