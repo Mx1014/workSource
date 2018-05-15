@@ -5,11 +5,11 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>	SUCESS((byte) 0,"成功"), CANNOT_FIND_USER((byte) 1,"找不到用户"),NULL_CONTACT((byte) 2,"手机号为空");;</li>
+ * <li>	SUCESS((byte) 0,"成功"), CANNOT_FIND_USER((byte) 1,"找不到用户-废弃此状态"),NULL_CONTACT((byte) 2,"员工不存在"),USER_UNTRACK((byte) 3,"号码未注册");</li>
  * </ul>
  */
 public enum PayslipImportResult {
-	SUCESS((byte) 0,"成功"), CANNOT_FIND_USER((byte) 1,"找不到用户"),NULL_CONTACT((byte) 2,"手机号为空"),USER_UNTRACK((byte) 3,"手机号为空");
+	SUCESS((byte) 0,"成功"), CANNOT_FIND_USER((byte) 1,"找不到用户"),NULL_CONTACT((byte) 2,"员工不存在"),USER_UNTRACK((byte) 3,"号码未注册");
 	private Byte code;
 	private String descri;
 
