@@ -7,7 +7,7 @@ ALTER TABLE `eh_payment_notice_config` ADD COLUMN `create_time` DATETIME DEFAULT
 ALTER TABLE `eh_payment_notice_config` ADD COLUMN `create_uid` BIGINT DEFAULT NULL COMMENT '创建账号id';
 
 -- 缴费app端支付按钮和合同查看隐藏
-CREATE TABLE `eh_payment_app_view`(
+CREATE TABLE `eh_payment_app_views`(
   `id` BIGINT COMMENT 'primary key',
   `namespace_id` INTEGER DEFAULT NULL ,
   `community_id` BIGINT DEFAULT NULL ,

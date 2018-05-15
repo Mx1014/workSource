@@ -4145,18 +4145,18 @@ public class AssetProviderImpl implements AssetProvider {
     public List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(Tables.EH_PAYMENT_APP_VIEW);
-        query.addConditions(Tables.EH_PAYMENT_APP_VIEW.NAMESPACE_ID.eq(namespaceId));
+        query.addFrom(Tables.EH_PAYMENT_APP_VIEWS);
+        query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.NAMESPACE_ID.eq(namespaceId));
         if(communityId!=null){
-            query.addConditions(Tables.EH_PAYMENT_APP_VIEW.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.COMMUNITY_ID.eq(communityId));
         }
         if(!org.jooq.tools.StringUtils.isBlank(ownerType)){
-            query.addConditions(Tables.EH_PAYMENT_APP_VIEW.REMARK1_TYPE.eq(targetType));
-            query.addConditions(Tables.EH_PAYMENT_APP_VIEW.REMARK1_IDENTIFIER.eq(ownerType));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_TYPE.eq(targetType));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_IDENTIFIER.eq(ownerType));
         }
         if(!org.jooq.tools.StringUtils.isBlank(billGroupName1)){
-            query.addConditions(Tables.EH_PAYMENT_APP_VIEW.REMARK2_TYPE.eq(billGroupName));
-            query.addConditions(Tables.EH_PAYMENT_APP_VIEW.REMARK2_IDENTIFIER.eq(billGroupName1));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_TYPE.eq(billGroupName));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_IDENTIFIER.eq(billGroupName1));
         }
         return query.fetchInto(PaymentAppView.class);
     }
