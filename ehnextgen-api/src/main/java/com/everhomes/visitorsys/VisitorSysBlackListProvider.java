@@ -16,4 +16,6 @@ public interface VisitorSysBlackListProvider {
 	List<VisitorSysBlackList> listVisitorSysBlackList(Integer namespaceId, String ownerType, Long ownerId, String keyWords, Integer pageSize, Long pageAnchor);
 
 	void deleteBlackListById(Integer namespaceId, Long id);
+
+    VisitorSysBlackList findVisitorSysBlackListByPhone(Integer namespaceId, String ownerType, Long ownerId, String visitorPhone);
 }

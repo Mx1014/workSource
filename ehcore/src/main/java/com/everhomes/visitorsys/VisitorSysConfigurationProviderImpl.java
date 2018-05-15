@@ -41,6 +41,7 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVisitorSysConfigurations.class));
 		visitorSysConfiguration.setId(id);
 		beforeCreateOrUpdate(visitorSysConfiguration);
+		visitorSysConfiguration.setConfigVersion(System.currentTimeMillis());
 		visitorSysConfiguration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysConfiguration.setCreatorUid(UserContext.current().getUser().getId());
 		visitorSysConfiguration.setOperateTime(visitorSysConfiguration.getCreateTime());
@@ -72,6 +73,7 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 	public void updateVisitorSysConfiguration(VisitorSysConfiguration visitorSysConfiguration) {
 		assert (visitorSysConfiguration.getId() != null);
 		beforeCreateOrUpdate(visitorSysConfiguration);
+		visitorSysConfiguration.setConfigVersion(System.currentTimeMillis());
 		visitorSysConfiguration.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		visitorSysConfiguration.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(visitorSysConfiguration);
@@ -110,7 +112,7 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 	@Override
 	public VisitorSysConfiguration findVisitorSysConfigurationByOwnerToken(String ownerToken) {
 		List<VisitorSysConfiguration> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CONFIGURATIONS)
-				.where(Tables.EH_VISITOR_SYS_CONFIGURATIONS.SELF_REGISTER_QRCODE_URI.eq(ownerToken))
+				.where(Tables.EH_VISITOR_SYS_CONFIGURATIONS.OWNER_TOKEN.eq(ownerToken))
 				.orderBy(Tables.EH_VISITOR_SYS_CONFIGURATIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysConfiguration.class));
 		if(list==null||list.size()==0){

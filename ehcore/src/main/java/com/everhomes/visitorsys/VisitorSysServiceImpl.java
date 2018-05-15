@@ -26,6 +26,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.visitorsys.*;
@@ -48,7 +49,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -120,6 +124,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private DoorAccessService doorAccessService;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
+        beforePostForWeb(cmd);
         checkOwnerType(cmd.getOwnerType());
         checkSearchFlag(cmd.getSearchFlag());
 
@@ -134,6 +139,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetBookedVisitorByIdResponse getBookedVisitorById(GetBookedVisitorByIdCommand cmd) {
+        beforePostForWeb(cmd);
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
         if(visitor==null)
@@ -209,6 +215,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListVisitReasonsResponse listVisitReasons(BaseVisitorsysCommand cmd) {
+        beforePostForWeb(cmd);
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId());
         ListVisitReasonsResponse response = new ListVisitReasonsResponse();
@@ -224,6 +231,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitor(CreateOrUpdateVisitorCommand cmd) {
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
         if(cmd.getId()==null) {
             //检查参数，生成访客实体
             VisitorSysVisitor visitor = checkCreateVisitor(cmd);
@@ -247,6 +255,36 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    private void checkBlackList(Integer namespaceId, String ownerType, Long ownerId, String visitorPhone,Long enterpriseId) {
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
+        VisitorSysBlackList blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, ownerType, ownerId, visitorPhone);
+        if(blackList!=null){
+            if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
+                throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_INBLACKLIST_PHONE_COMMUNITY,
+                        "black list " + ownerType + ", phone = " + visitorPhone);
+            }else {
+                throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_INBLACKLIST_PHONE_ENTERPRISE,
+                        "black list " + ownerType + ", phone = " + visitorPhone);
+            }
+        }
+        if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
+            blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, VisitorsysOwnerType.ENTERPRISE.getCode(),
+                    enterpriseId, visitorPhone);
+            if(blackList!=null){
+                throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_INBLACKLIST_PHONE_ENTERPRISE,
+                        "black list enterprise, phone = " + visitorPhone);
+            }
+        }else{
+            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
+            blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, VisitorsysOwnerType.COMMUNITY.getCode(),
+                    communityId, visitorPhone);
+            if(blackList!=null){
+                throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_INBLACKLIST_PHONE_ENTERPRISE,
+                        "black list community, phone = " + visitorPhone);
+            }
+        }
     }
 
     /**
@@ -532,14 +570,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetConfigurationResponse getConfiguration(GetConfigurationCommand cmd) {
-        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+       checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(), cmd.getOwnerId());
         if(configuration==null){
             Tuple<VisitorSysConfiguration, Boolean> enter = coordinationProvider.getNamedLock
                     (CoordinationLocks.VISITOR_SYS_CONFIG.getCode() + cmd.getOwnerType() + cmd.getOwnerId()).enter(() -> {
                 VisitorSysConfiguration newConfiguration = ConvertHelper.convert(cmd, VisitorSysConfiguration.class);
                 newConfiguration.setConfigVersion(0L);
-                newConfiguration.setSelfRegisterQrcodeUri(generateConfigOwnerToken());
+                newConfiguration.setOwnerToken(generateConfigOwnerToken());
                 visitorSysConfigurationProvider.createVisitorSysConfiguration(newConfiguration);
                 return newConfiguration;
             });
@@ -549,12 +587,40 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         GetConfigurationResponse configurationResponse = getDefaultConfiguration();
         configurationResponse = VisitorSysUtils.copyAllNotNullProperties(configuration,configurationResponse);
+        configurationResponse.setSelfRegisterQrcodeUrl(generateQrcodeUrl(configuration.getOwnerToken()));
+        afterGetConfiguration(configurationResponse);
         return configurationResponse;
     }
 
     @Override
     public void transferQrcode(TransferQrcodeCommand qrcode, HttpServletResponse resp) {
+        BufferedOutputStream bos = null;
+        ByteArrayOutputStream out = null;
+        try {
+            Integer width = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_QRCODE_WIDTH,300);
+            Integer height = configurationProvider.getIntValue(VisitorsysErrorCode.VISITORSYS_QRCODE_HEIGHT,300);
+            BufferedImage image = QRCodeEncoder.createQrCodeWithOutWhite(qrcode.getQrcode(), QRCodeConfig.CHARSET_UTF8,
+                    width, height, null,QRCodeConfig.FORMAT_PNG,QRCodeConfig.BLACK,0xEEFFFFFF);
+//            BufferedImage image = QRCodeEncoder.createQrCode(qrcode.getQrcode(),
+//                    width, height, null);
+            out = new ByteArrayOutputStream();
+            ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
 
+            String fileName = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + QRCodeConfig.FORMAT_PNG;
+            resp.setContentType("application/octet-stream;");
+            resp.setHeader("Content-disposition", "attachment; filename="
+                    + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+            resp.setHeader("Content-Length", String.valueOf(out.size()));
+
+            bos = new BufferedOutputStream(resp.getOutputStream());
+            ImageIO.write(image, QRCodeConfig.FORMAT_PNG, bos);
+        } catch (Exception e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to download the package file");
+        } finally {
+            FileHelper.closeOuputStream(out);
+            FileHelper.closeOuputStream(bos);
+        }
     }
 
 
@@ -578,20 +644,23 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
             if (configuration == null) {
                 configuration = ConvertHelper.convert(cmd, VisitorSysConfiguration.class);
-                configuration.setConfigVersion(System.currentTimeMillis());
                 visitorSysConfigurationProvider.createVisitorSysConfiguration(configuration);
             } else {
                 configuration = VisitorSysUtils.copyNotNullProperties(cmd, configuration);
-                configuration.setConfigVersion(System.currentTimeMillis());
                 visitorSysConfigurationProvider.updateVisitorSysConfiguration(configuration);
             }
             return configuration;
         });
-        GetConfigurationResponse response = ConvertHelper.convert(enter.first(),GetConfigurationResponse.class);
+        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+        GetConfigurationResponse response = ConvertHelper.convert(configuration,GetConfigurationResponse.class);
+        response.setSelfRegisterQrcodeUrl(generateQrcodeUrl(enter.first().getOwnerToken()));
+        afterGetConfiguration(response);
+        return response;
+    }
+
+    private void afterGetConfiguration(GetConfigurationResponse response){
         response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
         response.setWelcomePicUrl(contentServerService.parserUri(response.getWelcomePicUri()));
-        response.setSelfRegisterQrcodeUrl(generateQrcodeUrl(response.getSelfRegisterQrcodeUri()));
-        return null;
     }
 
     private String generateQrcodeUrl(String ownerToken) {
@@ -640,9 +709,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public CreateOrUpdateBlackListResponse createOrUpdateBlackList(CreateOrUpdateBlackListCommand cmd) {
         checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        if(cmd.getId()!=null) {
+        checkMustFillParams(cmd,"visitorPhone");
+        if(cmd.getId()==null) {
             VisitorSysBlackList convert = ConvertHelper.convert(cmd, VisitorSysBlackList.class);
             visitorSysBlackListProvider.createVisitorSysBlackList(convert);
+            VisitorSysBlackList blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone());
+            if(blackList!=null){
+                throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE, VisitorsysErrorCode.ERROR_REPEAT_PHONE,
+                        "repeat phone");
+            }
         }else {
             VisitorSysBlackList blackList = visitorSysBlackListProvider.findVisitorSysBlackListById(cmd.getId());
             if(blackList==null){
@@ -662,6 +737,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         ListDoorAccessGroupCommand doorcmd = ConvertHelper.convert(cmd,ListDoorAccessGroupCommand.class);
         doorcmd.setSearch(cmd.getKeyWords());
+        doorcmd.setOwnerType((byte)0);
         ListDoorAccessResponse listDoorAccessResponse = doorAccessService.listDoorAccessGroup(doorcmd);
         if(listDoorAccessResponse==null || listDoorAccessResponse.getDoors()==null){
             return null;
@@ -685,14 +761,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "unknown visitor "+cmd.getVisitorId());
         }
         visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
         dbProvider.execute(r->{
-            return null;
-        });
-
-        dbProvider.execute(r->{
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            relatedVisitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+            if(type == VisitorsysVisitorType.BE_INVITED){
+                visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+                relatedVisitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+            }
             visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
             visitorsysSearcher.syncVisitor(visitor);
-            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
             visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
             visitorsysSearcher.syncVisitor(relatedVisitor);
             return null;
@@ -726,7 +804,52 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     @Override
+    public GetBookedVisitorByIdResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
+        beforePostForWeb(cmd);
+        return createOrUpdateVisitor(cmd);
+
+    }
+
+    @Override
+    public ListBookedVisitorsResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd) {
+        beforePostForWeb(cmd);
+        return listBookedVisitors(cmd);
+    }
+
+    @Override
+    public GetBookedVisitorByIdResponse getBookedVisitorByIdForWeb(GetBookedVisitorByIdCommand cmd) {
+        beforePostForWeb(cmd);
+        return getBookedVisitorById(cmd);
+    }
+
+    @Override
+    public ListVisitReasonsResponse listVisitReasonsForWeb(BaseVisitorsysCommand cmd) {
+        beforePostForWeb(cmd);
+        return listVisitReasons(cmd);
+    }
+
+    @Override
+    public void deleteVisitorAppointForWeb(GetBookedVisitorByIdCommand cmd) {
+        beforePostForWeb(cmd);
+        deleteVisitorAppoint(cmd);
+
+    }
+
+    @Override
+    public ListOfficeLocationsResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd) {
+        beforePostForWeb(cmd);
+        return listOfficeLocations(cmd);
+    }
+
+    @Override
+    public ListCommunityOrganizationsResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd) {
+        beforePostForWeb(cmd);
+        return listCommunityOrganizations(cmd);
+    }
+
+    @Override
     public GetConfigurationResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd) {
+        beforePostForWeb(cmd);
         return getConfiguration(ConvertHelper.convert(cmd,GetConfigurationCommand.class));
     }
 
@@ -943,8 +1066,24 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return new GetFormResponse(getConfiguration(command).getFormConfig());
     }
 
+    private void beforePostForWeb(BaseVisitorsysCommand cmd){
+        if(cmd.getOwnerToken()==null){
+            return;
+        }
+        VisitorSysConfiguration configuration = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwnerToken(cmd.getOwnerToken());
+        if(configuration!=null){
+            cmd.setNamespaceId(configuration.getNamespaceId());
+            cmd.setOwnerType(configuration.getOwnerType());
+            cmd.setOwnerId(configuration.getOwnerId());
+        }
+        LOGGER.error("beforePostForWeb is fail. {}",cmd.getOwnerToken());
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                "unknown ownerToken "+cmd.getOwnerToken());
+    }
+
     @Override
     public GetFormForWebResponse getFormForWeb(GetFormForWebCommand cmd) {
+        beforePostForWeb(cmd);
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(cmd.getNamespaceId());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1241,6 +1380,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         JSONArray jsonArray = JSONObject.parseArray( owner.getConfigFormJson());
         for (Object o : jsonArray) {
             GeneralFormFieldDTO dto = JSONObject.parseObject(o.toString(),GeneralFormFieldDTO.class);
+            if(dto.getRequiredFlag() ==null) {
+                continue;
+            }
             if(dto.getRequiredFlag() == 1 && map.get(dto.getFieldName())==null){
                 throw RuntimeErrorException.errorWith(VisitorsysErrorCode.SCOPE
                         , VisitorsysErrorCode.ERROR_MUST_FILL, dto.getFieldDisplayName()+" should not be null");

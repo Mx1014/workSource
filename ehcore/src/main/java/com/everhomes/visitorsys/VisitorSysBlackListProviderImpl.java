@@ -95,6 +95,24 @@ public class VisitorSysBlackListProviderImpl implements VisitorSysBlackListProvi
 				.and(Tables.EH_VISITOR_SYS_BLACK_LIST.ID.eq(id)).execute();
 	}
 
+	@Override
+	public VisitorSysBlackList findVisitorSysBlackListByPhone(Integer namespaceId, String ownerType, Long ownerId, String visitorPhone) {
+		Condition condition = Tables.EH_VISITOR_SYS_BLACK_LIST.NAMESPACE_ID.eq(namespaceId);
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.OWNER_TYPE.eq(ownerType));
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.OWNER_ID.eq(ownerId));
+		condition = condition.and( Tables.EH_VISITOR_SYS_BLACK_LIST.VISITOR_PHONE.eq(visitorPhone));
+
+		List<VisitorSysBlackList> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_BLACK_LIST)
+				.where(condition)
+				.orderBy(Tables.EH_VISITOR_SYS_BLACK_LIST.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysBlackList.class));
+		if(list==null || list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
 	private EhVisitorSysBlackListDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

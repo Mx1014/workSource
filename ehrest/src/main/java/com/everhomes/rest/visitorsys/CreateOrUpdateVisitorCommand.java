@@ -12,7 +12,7 @@ import java.util.List;
  * <li>namespaceId: (必填)域空间id</li>
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
- * <li>id: (选填)访客/预约ID,更新必填</li>
+ * <li>appId: (必填)应用Id</li>
  * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>visitorName: (必填)访客姓名</li>
  * <li>followUpNumbers: (选填)随访人数</li>
@@ -40,28 +40,15 @@ import java.util.List;
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
-//    private Timestamp invalidTime;
-//    private String plateNo;
-//    private String idNumber;
-//    private String visitFloor;
-//    private String visitAddresses;
-// * <li>invalidTime: (根据配置选填/必填)有效期</li>
-// * <li>plateNo: (根据配置选填/必填)车牌号</li>
-// * <li>idNumber: (根据配置选填/必填)证件号码</li>
-// * <li>visitFloor: (根据配置选填/必填)到访楼层</li>
-// * <li>visitAddresses: (根据配置选填/必填)到访门牌</li>
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> communityFormValues;
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> enterpriseFormValues;
 
-    private String ownerToken;
-
     private String visitorPicUri;
     private Byte sendMessageInviterFlag;
     private Byte sendSmsFlag;
 
-//    private String formJsonValue;
     private String visitorSignUri;
     private String visitorSignCharacter;
 
@@ -119,14 +106,6 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setVisitorSignCharacter(String visitorSignCharacter) {
         this.visitorSignCharacter = visitorSignCharacter;
-    }
-
-    public String getOwnerToken() {
-        return ownerToken;
-    }
-
-    public void setOwnerToken(String ownerToken) {
-        this.ownerToken = ownerToken;
     }
 
     @Override

@@ -20,6 +20,8 @@ public class VisitorsysErrorCode {
     public static final String VISITORSYS_VERIFICATIONCODE_LIVE= "visitorsys.verificationcode.live";//验证码对码有效时长,默认900秒
     public final static String VISITORSYS_VERIFICATIONCODE_LENGTH = "visitorsys.verificationcode.length";//验证码码长度，默认6
     public static final String VISITORSYS_MODLUENAME= "visitorsys.modluename";//模块名称
+    public static final String VISITORSYS_QRCODE_HEIGHT= "visitorsys.qrcode.height";//二维码高度 300
+    public static final String VISITORSYS_QRCODE_WIDTH= "visitorsys.qrcode.height";//二维码宽度 300
     //短信字段
     public final static String SMS_MODLUENAME = "modlueName";
     public final static String SMS_VERIFICATIONCODE = "verificationCode";
@@ -40,6 +42,9 @@ public class VisitorsysErrorCode {
     public final static int ERROR_DEVICE_NOT_FIND = 401;  //设备没找到
     public final static int ERROR_VISITOR_NOT_FIND = 402;  //预约未找到
     public final static int ERROR_ILLEGAL_VERIFICATIONCODE = 405;  //非法验证码
+    public final static int ERROR_REPEAT_PHONE = 406;  //重复的黑名单电话号码
+    public final static int ERROR_INBLACKLIST_PHONE_COMMUNITY = 407;  //此手机号码已进入黑名单
+    public final static int ERROR_INBLACKLIST_PHONE_ENTERPRISE= 408;  //此手机号码已进入黑名单
 
 
     //默认表单值

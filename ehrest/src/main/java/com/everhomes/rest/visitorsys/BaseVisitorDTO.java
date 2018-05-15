@@ -8,9 +8,10 @@ import java.sql.Timestamp;
 /**
  * <ul>
  * <li>namespaceId: (必填)域空间id</li>
- * <li>ownerType: (必填)归属的类型，{@link VisitorsysOwnerType}</li>
+ * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
- * <li>id: (必填)访客/预约ID</li>
+ * <li>appId: (必填)应用Id</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>visitorName: (必填)访客姓名</li>
  * <li>followUpNumbers: (选填)随访人数</li>
  * <li>visitorPhone: (必填)访客电话</li>
@@ -29,11 +30,7 @@ import java.sql.Timestamp;
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
  * </ul>
  */
-public class BaseVisitorDTO {
-    private Integer namespaceId;
-    private String ownerType;
-    private Long ownerId;
-
+public class BaseVisitorDTO extends BaseVisitorsysCommand{
     private Long id;
     private String visitorName;
     private Long followUpNumbers;
@@ -58,30 +55,6 @@ public class BaseVisitorDTO {
     private Long officeLocationId;
     private String officeLocationName;
     private Timestamp createTime;
-
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
 
     public Long getId() {
         return id;

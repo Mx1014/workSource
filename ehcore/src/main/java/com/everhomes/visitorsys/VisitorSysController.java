@@ -469,8 +469,8 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("getForm")
 	@RestReturn(GetFormResponse.class)
-	public RestResponse getForm(GetUIFormCommand cmd) {
-		GetFormResponse baseResponse = visitorSysService.getUIForm(cmd);
+	public RestResponse getForm(GetFormCommand cmd) {
+		GetFormResponse baseResponse = visitorSysService.getForm(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -542,7 +542,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(ListBookedVisitorsResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd) {
-		ListBookedVisitorsResponse baseResponse = visitorSysService.listBookedVisitors(cmd);
+		ListBookedVisitorsResponse baseResponse = visitorSysService.listBookedVisitorsForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -560,7 +560,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(GetBookedVisitorByIdResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse getBookedVisitorByIdForWeb(GetBookedVisitorByIdCommand cmd) {
-		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorById(cmd);
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorByIdForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -578,7 +578,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(ListVisitReasonsResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse listVisitReasonsForWeb(BaseVisitorsysCommand cmd) {
-		ListVisitReasonsResponse baseResponse = visitorSysService.listVisitReasons(cmd);
+		ListVisitReasonsResponse baseResponse = visitorSysService.listVisitReasonsForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -596,7 +596,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(GetBookedVisitorByIdResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
-		GetBookedVisitorByIdResponse baseResponse = visitorSysService.createOrUpdateVisitor(cmd);
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.createOrUpdateVisitorForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -614,7 +614,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
 	public RestResponse deleteVisitorAppointForWeb(GetBookedVisitorByIdCommand cmd) {
-		visitorSysService.deleteVisitorAppoint(cmd);
+		visitorSysService.deleteVisitorAppointForWeb(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -632,7 +632,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(ListOfficeLocationsResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd) {
-		ListOfficeLocationsResponse baseResponse = visitorSysService.listOfficeLocations(cmd);
+		ListOfficeLocationsResponse baseResponse = visitorSysService.listOfficeLocationsForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -650,7 +650,7 @@ public class VisitorSysController extends ControllerBase {
 	@RestReturn(ListCommunityOrganizationsResponse.class)
 	@RequireAuthentication(false)
 	public RestResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd) {
-		ListCommunityOrganizationsResponse baseResponse = visitorSysService.listCommunityOrganizations(cmd);
+		ListCommunityOrganizationsResponse baseResponse = visitorSysService.listCommunityOrganizationsForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

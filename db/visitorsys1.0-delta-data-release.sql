@@ -7,9 +7,20 @@ INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('6', '0', 'community', '0', '开会', '2', '0', now(), '0', now());
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('7', '0', 'community', '0', '施工', '2', '0', now(), '0', now());
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('8', '0', 'community', '0', '其它原因', '2', '0', now(), '0', now());
-
+-- 访客管理1.0短信模板 by dengs,20180507
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('sms.default', 67, 'zh_CN', '验证码-访客管理', '${modlueName}你的验证码是${verificationCode}。验证码15分钟内有效。', '0');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('sms.default', 68, 'zh_CN', '访客邀请-访客管理', '${appName}你收到了一条来自${visitEnterpriseName}的访客邀请，请点击查看：${invitationLink}', '0');
 
+-- 访客管理1.0 连接配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.invitation.link', '%s/r?token=%s', '访客管理邀请函连接地址', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.selfregister.link', '%s/r?token=%s', '访客管理邀请函连接地址', '0', NULL);
 
+-- 访客管理1.0 模块配置
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41800', '园区访客', '40000', '/40000/41800', '1', '2', '2', '180', now(), '{"url":"https://www.zuolin.com/mobile/static/coming_soon/index.html"}', '13', now(), '0', '0', '0', '0', 'community_control');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('52100', '企业访客', '50000', '/50000/52100', '1', '2', '2', '210', now(), '{"url":"https://www.zuolin.com/mobile/static/coming_soon/index.html"}', '13', now(), '0', '0', '0', '0', 'org_control');
+
+-- 访客管理1.0 菜单配置
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16033000', '园区访客', '16030000', NULL, 'visitor-park', '1', '2', '/16000000/16030000/16033000', 'zuolin', '22', '41800', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('45141800', '园区访客', '45000000', NULL, 'visitor-park', '1', '2', '/45000000/45141800', 'park', '22', '41800', '2', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48052100', '企业访客', '48000000', NULL, 'visitor-enterprise', '1', '2', '/48000000/48052100', 'park', '20', '52100', '2', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('72152100', '企业访客', '72000000', NULL, 'visitor-enterprise', '1', '2', '/72000000/72152100', 'organization', '18', '52100', '2', 'system', 'module', NULL);

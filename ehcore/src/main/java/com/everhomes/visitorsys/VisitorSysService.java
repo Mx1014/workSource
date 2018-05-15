@@ -97,4 +97,18 @@ public interface VisitorSysService {
     GetConfigurationResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd);
 
     void transferQrcode(TransferQrcodeCommand qrcode, HttpServletResponse resp);
+
+    GetBookedVisitorByIdResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd);
+
+    ListBookedVisitorsResponse listBookedVisitorsForWeb(ListBookedVisitorsCommand cmd);
+
+    GetBookedVisitorByIdResponse getBookedVisitorByIdForWeb(GetBookedVisitorByIdCommand cmd);
+
+    ListVisitReasonsResponse listVisitReasonsForWeb(BaseVisitorsysCommand cmd);
+
+    void deleteVisitorAppointForWeb(GetBookedVisitorByIdCommand cmd);
+
+    ListOfficeLocationsResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd);
+
+    ListCommunityOrganizationsResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd);
 }
