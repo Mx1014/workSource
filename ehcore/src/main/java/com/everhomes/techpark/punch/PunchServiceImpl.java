@@ -8265,17 +8265,21 @@ public class PunchServiceImpl implements PunchService {
     		if(log.getShouldPunchTime() != null ){
     			continue;
     		}
-    		String ptrKey = getPtrMapKey(log.getUserId(),log.getEnterpriseId(),dateSF.get().format(log.getPunchDate()));
-    		if (punchTimeRuleMapUserIdDate.containsKey(ptrKey)) {
-            	PunchTimeRule ptr = punchTimeRuleMapUserIdDate.get(ptrKey);
-            	 //请假的汇总interval
-                addPunchLogShouldPunchTime(log,logs,ptr);
-            } else {
-            	//无法追溯到这一天的考勤规则 就直接用规则时间,如果规则时间也没有,就是非常历史的数据不管他
-                log.setShouldPunchTime(log.getRuleTime());
-                
-            }
-    		punchProvider.updatePunchLog(log);
+    		try{
+	    		String ptrKey = getPtrMapKey(log.getUserId(),log.getEnterpriseId(),dateSF.get().format(log.getPunchDate()));
+	    		if (punchTimeRuleMapUserIdDate.containsKey(ptrKey)) {
+	            	PunchTimeRule ptr = punchTimeRuleMapUserIdDate.get(ptrKey);
+	            	 //请假的汇总interval
+	                addPunchLogShouldPunchTime(log,logs,ptr);
+	            } else {
+	            	//无法追溯到这一天的考勤规则 就直接用规则时间,如果规则时间也没有,就是非常历史的数据不管他
+	                log.setShouldPunchTime(log.getRuleTime());
+	                
+	            }
+	    		punchProvider.updatePunchLog(log);
+    		}catch(Exception e){
+    			LOGGER.error("add log shoud punch time error : ",e);
+    		}
     	}
 	}
 
@@ -8283,18 +8287,18 @@ public class PunchServiceImpl implements PunchService {
 		if(PunchType.ON_DUTY == PunchType.fromCode(log.getPunchType())){
 			if(HommizationType.fromCode(ptr.getHommizationType())==HommizationType.FLEX){
 				//规则是弹性 加上弹性时间
-				log.setShouldPunchTime(log.getRuleTime()+ ptr.getFlexTimeLong());
+				log.setShouldPunchTime(log.getRuleTime()+ (ptr.getFlexTimeLong()==null?0:ptr.getFlexTimeLong()));
 			}else if((HommizationType.fromCode(ptr.getHommizationType())==HommizationType.LATEARRIVE)&&
 					log.getPunchIntervalNo().equals(1)){ 
 				//晚到晚走的第一次打卡 加上弹性时间
-				log.setShouldPunchTime(log.getRuleTime()+ ptr.getFlexTimeLong());
+				log.setShouldPunchTime(log.getRuleTime()+ (ptr.getFlexTimeLong()==null?0:ptr.getFlexTimeLong()));
 			}else{
 				log.setShouldPunchTime(log.getRuleTime());
 			}
 		}else if(PunchType.OFF_DUTY == PunchType.fromCode(log.getPunchType())){
 			if(HommizationType.fromCode(ptr.getHommizationType())==HommizationType.FLEX){
 				//规则是弹性 减去弹性时间
-				log.setShouldPunchTime(log.getRuleTime() - ptr.getFlexTimeLong());
+				log.setShouldPunchTime(log.getRuleTime() - (ptr.getFlexTimeLong()==null?0:ptr.getFlexTimeLong()));
 			}else if((HommizationType.fromCode(ptr.getHommizationType())==HommizationType.LATEARRIVE)&&
 					log.getPunchIntervalNo().equals(ptr.getPunchTimesPerDay()/2)){
 				//晚到晚走的最后一次打卡 
@@ -8726,7 +8730,7 @@ public class PunchServiceImpl implements PunchService {
                 }
             }
         } else if (ptr.getHommizationType().equals(HommizationType.FLEX.getCode())) {
-            leaveTime = leaveTime - ptr.getFlexTimeLong();
+            leaveTime = leaveTime - (ptr.getFlexTimeLong()==null?0:ptr.getFlexTimeLong());
         }
         return leaveTime;
     }
