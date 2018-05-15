@@ -13,6 +13,8 @@ import com.everhomes.dynamicExcel.DynamicRowDTO;
 import com.everhomes.dynamicExcel.DynamicSheet;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
@@ -23,6 +25,7 @@ import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
@@ -37,6 +40,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -125,6 +129,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractSearcher contractSearcher;
 
 
     @Override
@@ -857,6 +867,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
+            //修改了客户名称则要同步修改合同里面的客户名称
+            if (!exist.getName().equals(enterpriseCustomer.getName())) {
+                List<Contract> contracts = contractProvider.listContractByCustomerId(exist.getCommunityId(), exist.getId(), CustomerType.ENTERPRISE.getCode());
+                if (contracts != null && contracts.size() > 0) {
+                    for (Contract contract : contracts) {
+                        contract.setCustomerName(enterpriseCustomer.getName());
+                        contractProvider.updateContract(contract);
+                        contractSearcher.feedDoc(contract);
+                    }
+                }
+            }
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
             try {
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
