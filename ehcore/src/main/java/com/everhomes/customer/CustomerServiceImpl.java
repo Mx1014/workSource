@@ -2237,8 +2237,8 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
             if (organization != null) {
-                organizationProvider.deleteOrganization(organization);
                 organizationSearcher.deleteById(organization.getId());
+                organizationProvider.deleteOrganization(organization);
             }
         }
         //sync to es
