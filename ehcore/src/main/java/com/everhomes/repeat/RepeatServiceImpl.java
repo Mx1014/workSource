@@ -1,18 +1,5 @@
 package com.everhomes.repeat;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.repeat.RangeDTO;
@@ -27,6 +14,18 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class RepeatServiceImpl implements RepeatService {
@@ -105,7 +104,7 @@ public class RepeatServiceImpl implements RepeatService {
 	@Override
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
-		
+		repeatProvider.deleteRepeatSettingsById(id);
 	}
 
 	@Override
