@@ -519,10 +519,10 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         final Date now = new Date();
         final Date later = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(28));
 
-        System.out.format("Current password: %06d\n", totp.generateOneTimePassword(secretKey, now));
+        System.out.format("Current password: %08d\n", totp.generateOneTimePassword(secretKey, now));
         
         SecretKeySpec key2 = new SecretKeySpec(secretKey.getEncoded(), totp2.getAlgorithm());
-        System.out.format("Future password:  %06d\n", totp2.generateOneTimePassword(key2, now));
+        System.out.format("Future password:  %08d\n", totp2.generateOneTimePassword(key2, later));
 
     }
 }
