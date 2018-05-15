@@ -2373,14 +2373,15 @@ public class SalaryServiceImpl implements SalaryService {
             for (int i = 0; i < dto.getPayslipContent().size(); i++) {
                 SalaryPeriodEmployeeEntityDTO entityDTO = dto.getPayslipContent().get(i);
                 //值为空/0 不显示给客户端
-                if ("0".equals(entityDTO.getSalaryValue()) ||
-                        StringUtils.isBlank(entityDTO.getSalaryValue())) {
+                if (entityDTO.getSalaryValue() == null || "0".equals(entityDTO.getSalaryValue()) ||
+                        StringUtils.isBlank(entityDTO.getSalaryValue()) ) {
                     //app不用显示的
                     dto.getPayslipContent().remove(entityDTO);
                 } else {
                     for (String invisibleKey : invisibleKeys) {
                         //当字段属于不可见的
-                        if (isContain(entityDTO.getGroupEntityName(), invisibleKey)) {
+                        if (isContain(entityDTO.getGroupEntityName(), invisibleKey)
+                        		&& !isContain(entityDTO.getGroupEntityName(), invisibleKey)) {
                             dto.getPayslipContent().remove(entityDTO);
                             i--;
                             break;
