@@ -6279,23 +6279,31 @@ public class UserServiceImpl implements UserService {
             Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
             List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(UserContext.currentUserId());
             if(cards != null) {
-                for(SmartCardKey card : cards) {
+                
+                int j;
+                OUTLOOP:
+                for(j = 0; j < cards.size(); j++) {
+                    SmartCardKey card = cards.get(j);
                     for(long i = -1; i < 1; i++) {
                         String code = generateTotp(totp, "", nowInSec + i);
                         if(code.equals(cmd.getCardCode())) {
                             resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
-                            
-                            //invalid the old one
-                            if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
-                                card.setStatus(TrueOrFalseFlag.FALSE.getCode());
-                                smartCardKeyProvider.updateSmartCardKey(card);
-                            }
-                            
-                            return resp;
+                            break OUTLOOP;
                         }
                     }
-                    
-                }                
+                }
+                
+                if(j < cards.size()) {
+                    for(j = j+1; j < cards.size(); j++) {
+                        //invalid the old one
+                        SmartCardKey card = cards.get(j);
+                        if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                            card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                            smartCardKeyProvider.updateSmartCardKey(card);
+                        }   
+                    }  
+                }
+                
             }
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
