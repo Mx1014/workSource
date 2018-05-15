@@ -81,7 +81,6 @@ CREATE TABLE `eh_policy_records` (
 	`creator_phone` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
 	`creator_org_id` bigint(20) NOT NULL COMMENT '',
 	`creator_org_name` varchar(128) NOT NULL COMMENT '',
-	`content` text COMMENT 'content data',
 	`turnover` varchar(60) NOT NULL DEFAULT '' COMMENT '营业额',
 	`tax` varchar(60) NOT NULL DEFAULT '' COMMENT '纳税总额',
 	`qualification` varchar(60) NOT NULL DEFAULT '' COMMENT '单位资质',

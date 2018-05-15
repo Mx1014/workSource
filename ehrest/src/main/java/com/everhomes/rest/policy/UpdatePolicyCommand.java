@@ -1,11 +1,8 @@
 package com.everhomes.rest.policy;
 
-
-import com.everhomes.util.StringHelper;
-
-
 /**
  * <ul>
+ * <li>id: 主键</li>
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目id</li>
@@ -13,10 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>title: 政策标题</li>
  * <li>outline: 政策概要</li>
  * <li>content: 政策详情</li>
- * <li>priority: 排序</li>
  * </ul>
  */
-public class PolicyDTO {
+public class UpdatePolicyCommand {
 
     private Long id;
     private Integer namespaceId;
@@ -26,7 +22,6 @@ public class PolicyDTO {
     private String title;
     private String outline;
     private String content;
-    private Long priority;
 
     public Long getId() {
         return id;
@@ -90,18 +85,5 @@ public class PolicyDTO {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Long getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Long priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
     }
 }
