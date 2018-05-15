@@ -271,6 +271,9 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
     long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
 
+
+    long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+
     long CONTRACT_CREATE = 21201L;//新增合同
     long CONTRACT_LAUNCH = 21202L;//签约 发起审批
     long CONTRACT_UPDATE = 21203L;//修改
