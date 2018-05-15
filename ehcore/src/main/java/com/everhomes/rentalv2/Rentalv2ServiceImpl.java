@@ -1151,7 +1151,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
-				locator, pageSize, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
+				locator, pageSize+1, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
 
 		if(null == rentalSites)
 			return response;
@@ -6335,7 +6335,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}   
 		}
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 
