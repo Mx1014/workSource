@@ -312,4 +312,6 @@ public interface AssetProvider {
     boolean checkBillExistById(Long billId);
 
     String getAddressByBillId(Long id);
+
+    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, String targetType, String ownerType, String billGroupName, String billGroupName1);
 }

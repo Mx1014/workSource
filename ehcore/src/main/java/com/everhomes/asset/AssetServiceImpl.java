@@ -3139,31 +3139,44 @@ public class AssetServiceImpl implements AssetService {
         if(namespaceId==null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
-        switch (namespaceId){
-            case 999958:
-                hasPay = 0;
-            case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
-                break;
-            case 999983:
-                //hasContractView = 0;
-                //正中会要求可以看合同
-                hasContractView = 1;
-                hasPay = 0;
-                break;
-            case 999966:
-                //深圳湾要求可以看合同，只查费不显示支付按钮
-                hasContractView = 1;
-                hasPay = 0;
-                break;
-            case 999955:
-                //住总ELive只是查询账单，没有合同，没有支付按钮
-                hasContractView = 0;
-                hasPay = 0;
-                break;
-            default:
-                break;
+        if(cmd.getBillGroupId() != null && cmd.getBillGroupName() == null){
+            cmd.setBillGroupName(assetProvider.findBillGroupNameById(cmd.getBillGroupId()));
         }
+        List<PaymentAppView> views = assetProvider.findAppViewsByNamespaceIdOrRemark(namespaceId, "targetType",cmd.getOwnerType(),
+               "billGroupName", cmd.getBillGroupName());
+        for(PaymentAppView view : views){
+            if(view.getViewItem.equals(PaymentViewItems.CONTRACT.getCode())){
+                hasContractView = view.getHasView();
+            }else if(view.getViewItem.equals(PaymentViewItems.PAY.getCode())){
+                hasPay = view.getHasView();
+            }
+        }
+        //用数据库配置的方式替代了
+//        switch (namespaceId){
+//            case 999958:
+//                hasPay = 0;
+//            case 999971:
+//                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
+//                break;
+//            case 999983:
+//                //hasContractView = 0;
+//                //正中会要求可以看合同
+//                hasContractView = 1;
+//                hasPay = 0;
+//                break;
+//            case 999966:
+//                //深圳湾要求可以看合同，只查费不显示支付按钮
+//                hasContractView = 1;
+//                hasPay = 0;
+//                break;
+//            case 999955:
+//                //住总ELive只是查询账单，没有合同，没有支付按钮
+//                hasContractView = 0;
+//                hasPay = 0;
+//                break;
+//            default:
+//                break;
+//        }
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
         return dto;
