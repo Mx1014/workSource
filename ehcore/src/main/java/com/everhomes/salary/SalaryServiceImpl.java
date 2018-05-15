@@ -44,12 +44,17 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import com.everhomes.util.RestClient.Response;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
+
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+
+
 
 
 import org.apache.commons.collections.map.HashedMap;
@@ -70,7 +75,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 import java.io.*;
@@ -2182,7 +2191,7 @@ public class SalaryServiceImpl implements SalaryService {
             results.remove(results.size() - 1);
             nextPageAnchor = results.get(results.size() - 1).getId();
         }
-        return new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
+        ListMonthPayslipSummaryResponse response = new ListMonthPayslipSummaryResponse(results.stream().map(r -> {
             PayslipDTO dto = ConvertHelper.convert(r, PayslipDTO.class);
             dto.setPayslipId(r.getId());
             dto.setCreateTime(r.getCreateTime().getTime());
@@ -2193,6 +2202,8 @@ public class SalaryServiceImpl implements SalaryService {
             dto.setRevokeCount(salaryPayslipDetailProvider.countRevoke(r.getId()));
             return dto;
         }).collect(Collectors.toList()), nextPageAnchor);
+        Collections.sort(response.getPayslips());
+        return response;
     }
 
     @Override

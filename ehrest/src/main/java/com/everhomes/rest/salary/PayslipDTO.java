@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 发放时间</li>
  * </ul>
  */
-public class PayslipDTO {
+public class PayslipDTO implements Comparable{
 
 	private Long payslipId;
     private String salaryPeriod;
@@ -113,5 +113,16 @@ public class PayslipDTO {
 
 	public void setViewCount(Integer viewCount) {
 		this.viewCount = viewCount;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		try {
+			PayslipDTO dto = (PayslipDTO) o;
+				return this.getCreateTime() < dto.getCreateTime() ? 1 : -1;
+		} catch (Exception e) {
+			//pass
+		}
+		return 0;
 	}
 }
