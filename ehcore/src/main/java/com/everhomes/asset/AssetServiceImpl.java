@@ -3154,6 +3154,7 @@ public class AssetServiceImpl implements AssetService {
         cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER))){
             remarkCheckList[0] = true;
         }
+        // 999971目前判断逻辑在前端
         if(!StringUtils.isBlank(cmd.getBillGroupName()) && namespaceId == 999971){
             remarkCheckList[0] = false;
             remarkCheckList[1] = true;
