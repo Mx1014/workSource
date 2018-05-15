@@ -184,4 +184,5 @@ ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL 
 
 -- 标准版本的 key 增加用户 ID
 ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `namespace_id`;
 

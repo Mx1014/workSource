@@ -18,4 +18,6 @@ public interface SmartCardKeyProvider {
     List<SmartCardKey> querySmartCardKeys(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback);
 
+    List<SmartCardKey> queryLatestSmartCardKeys(Long userId);
+
 }

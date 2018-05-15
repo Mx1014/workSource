@@ -392,6 +392,8 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private SmartCardKeyProvider smartCardKeyProvider;
+	
+   private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -6212,43 +6214,102 @@ public class UserServiceImpl implements UserService {
 		response.setDtos(dtos);
 		return response;
 	}
+	
+	private TimeBasedOneTimePasswordGenerator getTotp() throws NoSuchAlgorithmException {
+	    TimeBasedOneTimePasswordGenerator totp = totpLocal.get();
+        if(totp == null) {
+            totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
+            totpLocal.set(totp);
+        }
+      return totp;
+	}
 
     @Override
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
         TimeBasedOneTimePasswordGenerator totp;
+        
         try {
-            totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
-            keyGenerator.init(512);
-            Key secretKey = keyGenerator.generateKey();
-            String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
+            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(UserContext.currentUserId());
+            SmartCardKey obj = null;
+            if(cards == null || cards.size() < 10) {
+                totp = getTotp();
+                KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+                keyGenerator.init(512);
+                Key secretKey = keyGenerator.generateKey();
+                String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
+                
+                //use new card for this user
+                obj = new SmartCardKey();
+                obj.setNamespaceId(UserContext.getCurrentNamespaceId());
+                obj.setStatus(TrueOrFalseFlag.TRUE.getCode());
+                obj.setName("default");
+                obj.setUserId(UserContext.currentUserId());
+//                obj.setCardKey(resultStr);
+                smartCardKeyProvider.createSmartCardKey(obj);
+            } else {
+                //use the newest one
+                obj = cards.get(0);
+            }
             
-            SmartCardKey obj = new SmartCardKey();
-            obj.setNamespaceId(UserContext.getCurrentNamespaceId());
-            obj.setStatus(TrueOrFalseFlag.TRUE.getCode());
-            obj.setName("default");
-            smartCardKeyProvider.createSmartCardKey(obj);
-            
-            resp.setSmartCardId(0l);
-            resp.setSmartCardKey(resultStr);
+            resp.setSmartCardId(obj.getId());
+//            resp.setSmartCardKey(obj.getCardKey());
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("generate totp failed", e);
         }
         return resp;
     }
+    
+    private String generateTotp(TimeBasedOneTimePasswordGenerator totp, String smartKey, long nowInSec) throws InvalidKeyException, NoSuchAlgorithmException {
+        SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(smartKey.getBytes()), totp.getAlgorithm());
+        int topt = totp.generateOneTimePassword(key, new Date(nowInSec * 1000));
+        long randomUid = 1000000000 + UserContext.currentUserId();
+        randomUid = (randomUid) ^ (long)topt;
+        return String.valueOf(randomUid) + String.valueOf(topt);
+    }
 
     @Override
     public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
-        // TODO Auto-generated method stub
-        return null;
+        TimeBasedOneTimePasswordGenerator totp;
+        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+        resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
+        
+        try {
+            totp = getTotp();
+            Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
+            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(UserContext.currentUserId());
+            if(cards != null) {
+                for(SmartCardKey card : cards) {
+                    for(long i = -1; i < 1; i++) {
+                        String code = generateTotp(totp, "", nowInSec + i);
+                        if(code.equals(cmd.getCardCode())) {
+                            resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
+                            
+                            //invalid the old one
+                            if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                                card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                                smartCardKeyProvider.updateSmartCardKey(card);
+                            }
+                            
+                            return resp;
+                        }
+                    }
+                    
+                }                
+            }
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            LOGGER.error("generate totp failed", e);
+        }
+        
+        return resp;
     }
 
     @Override
     public GenerateSmartCardCodeResponse generateSmartCardCode(GenerateSmartCardCodeCommand cmd) {
         GenerateSmartCardCodeResponse resp = new GenerateSmartCardCodeResponse();
         try {
-            TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator(30l, TimeUnit.SECONDS, 8);
+            TimeBasedOneTimePasswordGenerator totp = getTotp();
             SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(cmd.getSmartCardKey().getBytes()), totp.getAlgorithm());
             resp.setNow(DateHelper.currentGMTTime().getTime() / 1000);
             if(cmd.getNow() == null) {
@@ -6256,11 +6317,9 @@ public class UserServiceImpl implements UserService {
             }
             
             int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
-            long randomUid = UserContext.currentUserId();
-            if(randomUid > 10) {
-                randomUid = (randomUid) ^ (long)topt;
-                resp.setQrCode(String.valueOf(randomUid) + String.valueOf(topt));
-            }
+            long randomUid = 1000000000 + UserContext.currentUserId();
+            randomUid = (randomUid) ^ (long)topt;
+            resp.setQrCode(String.valueOf(randomUid) + String.valueOf(topt));
             
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
