@@ -2966,7 +2966,9 @@ public class AssetServiceImpl implements AssetService {
                                         deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
                                     }
                                     //符合催缴的日期设定就催缴
-                                    if (today.compareTo(deadline) == 1) {
+                                    String todayInDate = yyyyMMdd.format(today);
+                                    String deadlineInDate = yyyyMMdd.format(deadline);
+                                    if (todayInDate.equalsIgnoreCase(deadlineInDate)) {
                                         needNoticeBills.put(bill.getId(), bill);
                                         noticeConfigMap.put(bill.getId(), day);
                                     }
@@ -3349,7 +3351,9 @@ public class AssetServiceImpl implements AssetService {
                                         deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
                                     }
                                     //符合催缴的日期设定就催缴
-                                    if (today.compareTo(deadline) == 0) {
+                                    String todayInDate = yyyyMMdd.format(today);
+                                    String deadlineInDate = yyyyMMdd.format(deadline);
+                                    if (todayInDate.equalsIgnoreCase(deadlineInDate)) {
                                         needNoticeBills.put(bill.getId(), bill);
                                         noticeConfigMap.put(bill.getId(), day);
                                     }
