@@ -502,4 +502,6 @@ public interface OrganizationProvider {
 	OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
 
     void deleteAllOrganizationAddressById(Long organizationId);
+
+	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
 }

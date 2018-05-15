@@ -1868,5 +1868,16 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
-    
+    @Override
+    public String findUserTokenOfUser(Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
+        try{
+            return context.select(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(userId))
+                    .fetchOne(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+        }catch (Exception e){
+            LOGGER.error("there is more than one token for a fixed uid, uid = {}",userId, e);
+            return null;
+        }
+    }
 }
