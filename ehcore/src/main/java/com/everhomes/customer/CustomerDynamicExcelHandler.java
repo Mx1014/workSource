@@ -856,7 +856,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             enterpriseCustomer.setId(exist.getId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
-            customerService.saveCustomerEvent(3, enterpriseCustomer, null, (byte) 0);
+            customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
             createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
             createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
