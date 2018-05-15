@@ -4404,6 +4404,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //      获取设备
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
         DoorAccessGroupResp resp = new DoorAccessGroupResp();
+        resp.setUserId(user.getId());
         List<DoorAccessGroupDTO> groups = new ArrayList<>();
         resp.setGroups(groups);
         for(DoorAuth auth : auths){
@@ -4419,15 +4420,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 group.setDescription(access.getDescription());
                 group.setCreateTime(access.getCreateTime());
                 List<DoorAccess> devices = doorAccessProvider.listDoorAccessByGroupId(access.getId(),999);
-                group.setDevices(devices.stream().map(r -> {return ConvertHelper.convert(r,DoorAccessDTO.class);}).collect(Collectors.toList()));
-                String floorStr = access.getFloorId();
+                group.setDevices(devices.stream().map(r -> {
+                    DoorAccessDeviceDTO device = new DoorAccessDeviceDTO();
+                    device.setDevUnique(r.getHardwareId());
+                    device.setDeviceName(r.getDisplayNameNotEmpty());
+                    device.setDeviceType(r.getDoorType());
+                    return device;
+                }).collect(Collectors.toList()));
                 JSONObject data = JSON.parseObject(access.getFloorId());
                 JSONArray jsonfloors = data.getJSONArray("floors");
                 for (int i = 0;i < jsonfloors.size();i++){
                     String floorId = jsonfloors.getJSONObject(i).getString("id");
                     floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                 }
-                group.setFloors(floors.stream().distinct().collect(Collectors.toList()));
+                group.setFloors(floors.stream().distinct().map(r->{return r.getApartmentFloor();}).collect(Collectors.toList()));
             }
         }
 

@@ -16,8 +16,8 @@ import java.util.List;
  * <li>qrDriver: QR 门禁类型 参考 {@link com.everhomes.rest.aclink.DoorAccessDriverType}</li>
  * <li>keyU: 用户密钥</li>
  * <li>createTime: 创建时间</li>
- * <li>devices: 设备列表 参考 {@link com.everhomes.rest.aclink.DoorAccessDTO} </li>
- * <li>floors: 授权楼层 参考 {@link com.everhomes.rest.address.AddressDTO} </li>
+ * <li>devices: 设备列表 参考 {@link com.everhomes.rest.aclink.DoorAccessDeviceDTO} </li>
+ * <li>floors: 授权楼层 </li>
  * </ul>
  *
  */
@@ -31,10 +31,9 @@ public class DoorAccessGroupDTO {
     private String qrDriver;
     private Timestamp createTime;
     private String keyU;
-    @ItemType(DoorAccessDTO.class)
-    private List<DoorAccessDTO> devices;
-    @ItemType(AddressDTO.class)
-    private List<AddressDTO> floors;
+    @ItemType(DoorAccessDeviceDTO.class)
+    private List<DoorAccessDeviceDTO> devices;
+    private List<String> floors;
 
     public Long getId() {
         return id;
@@ -92,19 +91,19 @@ public class DoorAccessGroupDTO {
         this.keyU = keyU;
     }
 
-    public List<DoorAccessDTO> getDevices() {
+    public List<DoorAccessDeviceDTO> getDevices() {
         return devices;
     }
 
-    public void setDevices(List<DoorAccessDTO> devices) {
+    public void setDevices(List<DoorAccessDeviceDTO> devices) {
         this.devices = devices;
     }
 
-    public List<AddressDTO> getFloors() {
+    public List<String> getFloors() {
         return floors;
     }
 
-    public void setFloors(List<AddressDTO> floors) {
+    public void setFloors(List<String> floors) {
         this.floors = floors;
     }
 
