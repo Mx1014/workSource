@@ -868,6 +868,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         if (StringUtils.isEmpty(customerAddressString)) {
             return;
         }
+        customerAddressString = customerAddressString.replaceAll("\n", "");
         customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
         organizationProvider.deleteAllOrganizationAddressById(enterpriseCustomer.getOrganizationId());
         String buildingNames[] = customerAddressString.split(",");
@@ -912,6 +913,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
         List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
         if (StringUtils.isNotEmpty(customerAdminString)) {
+            customerAdminString = customerAdminString.replaceAll("\n", "");
             customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
 
             List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
