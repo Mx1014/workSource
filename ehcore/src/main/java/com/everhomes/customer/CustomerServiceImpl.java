@@ -829,11 +829,12 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setAddressDTOs(addressDTOs);
             }
             organizationService.updateEnterprise(command, true);
-        } else {//没有企业的要新增一个
-            OrganizationDTO dto = createOrganization(updateCustomer);
-            updateCustomer.setOrganizationId(dto.getId());
-            enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         }
+//        else {//没有企业的要新增一个
+//            OrganizationDTO dto = createOrganization(updateCustomer);
+//            updateCustomer.setOrganizationId(dto.getId());
+//            enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
+//        }
 
         //修改了客户名称则要同步修改合同里面的客户名称
         if (!customer.getName().equals(cmd.getName())) {
