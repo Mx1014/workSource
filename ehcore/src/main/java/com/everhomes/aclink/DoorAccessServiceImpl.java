@@ -770,7 +770,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setRightOpen(cmd.getRightOpen());
                         doorAuth.setRightRemote(cmd.getRightRemote());
                         doorAuth.setRightVisitor(cmd.getRightVisitor());
-                        
+                        if(null != cmd.getKeyU()){
+                            doorAuth.setKeyU(cmd.getKeyU());
+                        }
                         doorAuthProvider.updateDoorAuth(doorAuth);
                         return doorAuth;
                         }
@@ -790,6 +792,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     doorAuth.setOrganization(cmd.getOrganization());
                     doorAuth.setDescription(cmd.getDescription());
+                    doorAuth.setKeyU(cmd.getKeyU());
                     
                     //Set the auth driver type
                     if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
@@ -797,6 +800,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());
                     } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
                     		doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+                    }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+                        doorAuth.setDriver(DoorAccessDriverType.WANG_LONG.getCode());
                     } else {
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
@@ -4433,7 +4438,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     String floorId = jsonfloors.getJSONObject(i).getString("id");
                     floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                 }
-                group.setFloors(floors.stream().distinct().map(r->{return r.getApartmentFloor();}).collect(Collectors.toList()));
+                group.setFloors(floors.stream().distinct().map(r->{return r.getApartmentFloor();}).sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
             }
         }
 
