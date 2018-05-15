@@ -3149,7 +3149,9 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getBillGroupId() != null && cmd.getBillGroupName() == null){
             cmd.setBillGroupName(assetProvider.findBillGroupNameById(cmd.getBillGroupId()));
         }
-        if(!StringUtils.isBlank(cmd.getOwnerType())){
+        //是否进行ownerType判断
+        if(!StringUtils.isBlank(cmd.getOwnerType()) && (cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)||
+        cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER))){
             remarkCheckList[0] = true;
         }
         if(!StringUtils.isBlank(cmd.getBillGroupName()) && namespaceId == 999971){

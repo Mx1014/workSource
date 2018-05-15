@@ -12,10 +12,8 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 -- 用来查找模板用的
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'asset.sms', @code_id, 'zh_CN', '短信通知模板，用于欠费前', '尊敬的租户${targetName}先生/小姐：您好，您至今未缴：${dateStr}月服务费共计：${amount}元。请及时缴纳，谢谢您的配合！', 0);
 
--- 999971企业的不显示缴费，999958，999983，999966，999954不缴费，999955不看合同不缴费 by wentian 2018/5/15
+-- 999958，999983，999966，999954不缴费，999955不看合同不缴费 by wentian 2018/5/15
 set @id = IFNULL((select max(`id`) from `eh_payment_app_views`),0);
-INSERT INTO `eh_payment_app_views` (`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) VALUES (@id:=@id+1, 999971, NULL, 0, 'PAY', 'targetType', 'eh_organization', NULL, NULL, NULL, NULL);
-INSERT INTO `eh_payment_app_views` (`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) VALUES (@id:=@id+1, 999971, NULL, 1, 'PAY', NULL , NULL , 'billGroupName', '租金', NULL, NULL);
 INSERT INTO `eh_payment_app_views` (`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) VALUES (@id:=@id+1, 999983, NULL, 0, 'PAY', NULL , NULL , NULL, NULL, NULL, NULL);
 INSERT INTO `eh_payment_app_views` (`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) VALUES (@id:=@id+1, 999958, NULL, 0, 'PAY', NULL , NULL , NULL, NULL, NULL, NULL);
 INSERT INTO `eh_payment_app_views` (`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) VALUES (@id:=@id+1, 999966, NULL, 0, 'PAY', NULL , NULL , NULL, NULL, NULL, NULL);
