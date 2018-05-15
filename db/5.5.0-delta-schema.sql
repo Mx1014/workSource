@@ -16,7 +16,7 @@ CREATE TABLE `eh_message_records` (
   `sender_uid` BIGINT(20) DEFAULT NULL,
   `sender_tag` VARCHAR(32) DEFAULT NULL COMMENT 'sender generated tag',
   `channels_info` VARCHAR(2048) DEFAULT NULL,
-  `body_type`VARCHAR(32
+  `body_type`VARCHAR(32),
   `body` VARCHAR(2048),
   `delivery_option` INT(2) DEFAULT '0',
   `create_time` DATETIME NOT NULL COMMENT 'message creation time',
@@ -35,7 +35,7 @@ ALTER TABLE `eh_configurations` MODIFY `value` VARCHAR(1024);
 
 -- add by yanjun 增加字段长度 201805091806
  
-ALTER TABLE `eh_service_module_apps` MODIFY COLUMN `custom_tag`  VARCHAR(256)  NULL DEFAULT ''
+ALTER TABLE `eh_service_module_apps` MODIFY COLUMN `custom_tag`  VARCHAR(256)  NULL DEFAULT '';
 -- issue-23470 by liuyilin
 ALTER TABLE `eh_door_access`
 ADD `enable_amount` TINYINT COMMENT '是否支持按次数开门的授权';
@@ -52,3 +52,29 @@ ADD `valid_auth_amount` INT COMMENT '剩余的开门次数';
 -- added by wh 
 -- 增加应打卡时间给punch_log
 ALTER TABLE `eh_punch_logs` ADD should_punch_time BIGINT COMMENT '应该打卡时间(用以计算早退迟到时长)';
+
+
+-- asset_5.1_wentian by wentian
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `notice_day_after` INTEGER DEFAULT NULL COMMENT '欠费日期后多少天';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `notice_day_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1:欠费前；2：欠费后';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `notice_objs` VARCHAR(3064) DEFAULT NULL COMMENT '催缴对象,格式为{type+id,type+id,...}';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `notice_app_id` BIGINT DEFAULT NULL COMMENT '催缴app信息模板的id';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `notice_msg_id` BIGINT DEFAULT NULL COMMENT '催缴sms信息模板的id';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `create_time` DATETIME DEFAULT NULL COMMENT '创建时间';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `create_uid` BIGINT DEFAULT NULL COMMENT '创建账号id';
+
+-- 缴费app端支付按钮和合同查看隐藏
+CREATE TABLE `eh_payment_app_views`(
+  `id` BIGINT COMMENT 'primary key',
+  `namespace_id` INTEGER DEFAULT NULL ,
+  `community_id` BIGINT DEFAULT NULL ,
+  `has_view` TINYINT NOT NULL ,
+  `view_item` VARCHAR(16) NOT NULL ,
+  `remark1_type` VARCHAR(16) DEFAULT NULL ,
+  `remark1_identifier` VARCHAR(128) DEFAULT NULL ,
+  `remark2_type` VARCHAR(16) DEFAULT NULL ,
+  `remark2_identifier` VARCHAR(128) DEFAULT NULL,
+  `remark3_type` VARCHAR(16) DEFAULT NULL ,
+  `remark3_identifier` VARCHAR(128) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '缴费app端支付按钮和合同查看隐藏';

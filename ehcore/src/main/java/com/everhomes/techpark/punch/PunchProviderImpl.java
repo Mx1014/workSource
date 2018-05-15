@@ -1070,10 +1070,10 @@ public class PunchProviderImpl implements PunchProvider {
             condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
         }
         // modify by wh 2017-4-25 order by punch date asc
-        List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+        List<EhPunchLogsRecord> resultRecord = step.where(condition)
                 .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
                 .map((r) -> {
-                    return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+                    return ConvertHelper.convert(r, EhPunchLogsRecord.class);
                 });
 
         List<PunchLog> result = resultRecord.stream().map((r) -> {
