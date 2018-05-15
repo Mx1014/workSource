@@ -13721,9 +13721,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                             "User is not in the organization.");
                 }
                 //删除该公司下面的所有的应用
-                serviceModuleAppService.uninstallAppByOrganizationId(cmd.getOrganizationId());
+                //// TODO: 2018/5/15 这个严军还没有实现暂时不调用
+//                serviceModuleAppService.uninstallAppByOrganizationId(cmd.getOrganizationId());
                 //删除所有被其它公司授权管理应用的记录
-                serviceModuleAppAuthorizationService.deleteServiceModuleAppAuthorizationByOrganizationId(cmd.getOrganizationId());
+                //// TODO: 2018/5/15 这个严军暂时还没有实现，暂时不调用
+//                serviceModuleAppAuthorizationService.deleteServiceModuleAppAuthorizationByOrganizationId(cmd.getOrganizationId());
                 //删除该公司下面的人事档案信息即根据域空间Id和组织Id来删除表eh_organization_member_details中信息
                 organizationProvider.deleteOrganizationMemberDetailByNamespaceIdAndOrgId(cmd.getOrganizationId(),cmd.getNamespaceId());
                 //根据域空间Id和组织ID来删除eh_organization_members表中的信息
