@@ -10,6 +10,15 @@ public class FunctionDisableListCommand {
     private String ownerType;
     private Long billGroupId;
     private String billGroupName;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public String getBillGroupName() {
         return billGroupName;

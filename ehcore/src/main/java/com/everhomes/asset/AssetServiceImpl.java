@@ -3128,7 +3128,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     * 暂时性方案，通过域空间来定义功能是否可用
+     *
      */
     @Override
     public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
@@ -3142,12 +3142,12 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getBillGroupId() != null && cmd.getBillGroupName() == null){
             cmd.setBillGroupName(assetProvider.findBillGroupNameById(cmd.getBillGroupId()));
         }
-        List<PaymentAppView> views = assetProvider.findAppViewsByNamespaceIdOrRemark(namespaceId, "targetType",cmd.getOwnerType(),
+        List<PaymentAppView> views = assetProvider.findAppViewsByNamespaceIdOrRemark(namespaceId, cmd.getCommunityId(), "targetType",cmd.getOwnerType(),
                "billGroupName", cmd.getBillGroupName());
         for(PaymentAppView view : views){
-            if(view.getViewItem.equals(PaymentViewItems.CONTRACT.getCode())){
+            if(view.getViewItem().equals(PaymentViewItems.CONTRACT.getCode())){
                 hasContractView = view.getHasView();
-            }else if(view.getViewItem.equals(PaymentViewItems.PAY.getCode())){
+            }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
                 hasPay = view.getHasView();
             }
         }
