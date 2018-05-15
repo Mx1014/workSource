@@ -13,6 +13,7 @@ import com.everhomes.dynamicExcel.DynamicRowDTO;
 import com.everhomes.dynamicExcel.DynamicSheet;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -36,6 +37,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -120,6 +122,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
+
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -232,6 +238,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
         Long uid = UserContext.currentUserId();
+        Long ownerId = customerInfo.getOwnerId();
+        String ownerType = customerInfo.getOwnerType();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
             if(sheet == null) {
@@ -251,6 +259,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
                         enterpriseCustomer.setNamespaceId(namespaceId);
                         enterpriseCustomer.setCommunityId(communityId);
+                        enterpriseCustomer.setOwnerId(ownerId);
+                        enterpriseCustomer.setOwnerType(ownerType);
                         enterpriseCustomer.setCreatorUid(uid);
                         String customerAdminString = "";
                         String customerAddressString = "";
@@ -850,7 +860,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
             createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
-            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
         }
     }
 
@@ -891,6 +900,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
                 this.organizationProvider.createOrganizationAddress(organizationAddress);
+                Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
+                if (organization != null)
+                    organizationSearcher.feedDoc(organization);
             }
         }
     }
@@ -906,9 +918,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     DeleteOrganizationAdminCommand command = new DeleteOrganizationAdminCommand();
                     command.setOrganizationId(enterpriseCustomer.getOrganizationId());
                     command.setCommunityId(enterpriseCustomer.getCommunityId());
-                    //TODO:
-//                    command.setOwnerId(enterpriseCustomer.);
-                    command.setOwnerType("EhOrganizations");
+                    command.setOwnerId(enterpriseCustomer.getOwnerId());
+                    command.setOwnerType(enterpriseCustomer.getOwnerType());
+                    command.setContactToken(record.getContactToken());
                     rolePrivilegeService.deleteOrganizationAdministrators(command);
                 }
             }
