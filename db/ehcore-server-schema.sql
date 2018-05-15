@@ -17968,7 +17968,6 @@ CREATE TABLE `eh_payment_bill_certificate` (
   `id` bigint(20) NOT NULL,
   `bill_id` bigint(20) NOT NULL COMMENT '该凭证记录对应的账单id',
   `certificate_uri` varchar(255) DEFAULT NULL COMMENT '上传凭证图片的uri',
-  `certificate_note` varchar(255) DEFAULT NULL COMMENT '上传凭证时的留言',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
