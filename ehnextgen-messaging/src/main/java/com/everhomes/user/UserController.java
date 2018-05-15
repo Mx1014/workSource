@@ -1471,6 +1471,7 @@ public class UserController extends ControllerBase {
      * @return {@link SmartCardVerifyResponse}
      */
     @RequestMapping("smartCardVerify")
+    @RequireAuthentication(false)
     @RestReturn(SmartCardVerifyResponse.class)
     public RestResponse smartCardVerify(SmartCardVerifyCommand cmd) {
         SmartCardVerifyResponse obj = userService.smartCardVerify(cmd);
@@ -1486,7 +1487,6 @@ public class UserController extends ControllerBase {
      * @return {@link GenerateSmartCardCodeResponse}
      */
     @RequestMapping("generateSmartCardCode")
-    @RequireAuthentication(false)
     @RestReturn(GenerateSmartCardCodeResponse.class)
     public RestResponse generateOneCardCode(GenerateSmartCardCodeCommand cmd) {
         GenerateSmartCardCodeResponse obj = userService.generateSmartCardCode(cmd);
