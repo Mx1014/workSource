@@ -240,11 +240,11 @@ public class FieldServiceImpl implements FieldService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
         List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }

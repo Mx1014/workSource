@@ -66,6 +66,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.everhomes.organization.OrganizationSearcherImpl.isContainChinese;
+
 /**
  * Created by ying.xiong on 2018/1/12.
  */
@@ -117,9 +119,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
-       // FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        FieldGroup group = new FieldGroup();
         //用名字搜会有问题
-        FieldGroup group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
+        if (isContainChinese(sheetName)) {
+            group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        } else {
+            group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
+        }
         List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
