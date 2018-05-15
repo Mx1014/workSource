@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
