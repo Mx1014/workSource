@@ -424,6 +424,7 @@ public class PmsyServiceImpl implements PmsyService{
 
 		preOrderCommand.setPayerId(UserContext.currentUserId());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
