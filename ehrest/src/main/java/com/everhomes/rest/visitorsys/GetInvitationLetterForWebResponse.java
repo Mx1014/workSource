@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *<li>qrcode : (选填)二维码字符串</li>
  *<li>visitorInfoDTO : (必填)访客信息， {@link com.everhomes.rest.visitorsys.BaseVisitorInfoDTO}</li>
  *<li>officeLocationDTO : (必填)地址信息， {@link com.everhomes.rest.visitorsys.BaseOfficeLocationDTO}</li>
+ * <li>guideInfo: (选填)指引信息</li>
+ * <li>baseConfig: (选填)基本配置（配置中所有的是否配置和门禁配置），{@link com.everhomes.rest.visitorsys.VisitorsysBaseConfig}</li>
  *</ul>
  */
 public class GetInvitationLetterForWebResponse {
@@ -22,6 +24,8 @@ public class GetInvitationLetterForWebResponse {
 
     private BaseVisitorInfoDTO visitorInfoDTO;
     private BaseOfficeLocationDTO officeLocationDTO;
+    private VisitorsysBaseConfig baseConfig;
+    private String guideInfo;
 
     public String getLogoUrl() {
         return logoUrl;
@@ -77,6 +81,22 @@ public class GetInvitationLetterForWebResponse {
 
     public void setOfficeLocationDTO(BaseOfficeLocationDTO officeLocationDTO) {
         this.officeLocationDTO = officeLocationDTO;
+    }
+
+    public VisitorsysBaseConfig getBaseConfig() {
+        return baseConfig;
+    }
+
+    public void setBaseConfig(VisitorsysBaseConfig baseConfig) {
+        this.baseConfig = baseConfig;
+    }
+
+    public String getGuideInfo() {
+        return guideInfo;
+    }
+
+    public void setGuideInfo(String guideInfo) {
+        this.guideInfo = guideInfo;
     }
 
     @Override

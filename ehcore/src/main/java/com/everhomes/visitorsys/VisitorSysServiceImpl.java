@@ -1066,6 +1066,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return new GetFormResponse(getConfiguration(command).getFormConfig());
     }
 
+    /**
+     * 转换ownerToke为namespace和Owner，并设置到cmd参数中
+     * @param cmd
+     */
     private void beforePostForWeb(BaseVisitorsysCommand cmd){
         if(cmd.getOwnerToken()==null){
             return;
@@ -1075,6 +1079,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             cmd.setNamespaceId(configuration.getNamespaceId());
             cmd.setOwnerType(configuration.getOwnerType());
             cmd.setOwnerId(configuration.getOwnerId());
+            return;
         }
         LOGGER.error("beforePostForWeb is fail. {}",cmd.getOwnerToken());
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
