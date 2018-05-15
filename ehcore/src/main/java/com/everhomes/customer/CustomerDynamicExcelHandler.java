@@ -886,6 +886,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 entryInfo.setCustomerName(enterpriseCustomer.getName());
                 entryInfo.setNamespaceId(enterpriseCustomer.getNamespaceId());
                 customerProvider.createCustomerEntryInfo(entryInfo);
+                customerSearcher.feedDoc(enterpriseCustomer);
                 OrganizationAddress organizationAddress = new OrganizationAddress();
                 Address addr = this.addressProvider.findAddressById(address.getId());
                 if (addr != null) {
