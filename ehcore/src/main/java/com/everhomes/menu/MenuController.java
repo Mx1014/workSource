@@ -104,6 +104,20 @@ public class MenuController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /menu/listMenuForPcEntryServices</b>
+     * <p>获取pc门户聚焦服务菜单</p>
+     */
+    @RequestMapping("listMenuForPcEntryServices")
+    @RestReturn(value=ListMenuForPcEntryServicesResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listMenuForPcEntryServices(ListMenuForPcEntryServicesCommand cmd) {
+        ListMenuForPcEntryServicesResponse res = webMenuService.listMenuForPcEntryServices(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 

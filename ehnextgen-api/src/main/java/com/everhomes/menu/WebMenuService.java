@@ -23,4 +23,6 @@ public interface WebMenuService {
     void refleshMenuByPortalVersion(Long versionId);
 
     ListMenuForPcEntryResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd);
+
+    ListMenuForPcEntryServicesResponse listMenuForPcEntryServices(ListMenuForPcEntryServicesCommand cmd);
 }

@@ -921,26 +921,67 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		WebMenuDTO trends = new WebMenuDTO();
 		trends.setName("园区动态");
+		List<WebMenuDTO> sbuTrends = new ArrayList<>();
+
 		moduleIds.clear();
 		moduleIds.add(10300L);//公告
-		moduleIds.add(10800L);//园区快讯
-		moduleIds.add(10600L);//活动
+		List<WebMenuDTO> sbuTrend103 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(sbuTrend103 != null && sbuTrend103.size() > 0){
+			sbuTrends.addAll(sbuTrend103);
+		}
 
-		List<WebMenuDTO> sbuTrends = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		moduleIds.clear();
+		moduleIds.add(10800L);//园区快讯
+		List<WebMenuDTO> sbuTrend108 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(sbuTrend108 != null && sbuTrend108.size() > 0){
+			sbuTrends.addAll(sbuTrend108);
+		}
+
+		moduleIds.clear();
+		moduleIds.add(10600L);//活动
+		List<WebMenuDTO> sbuTrend106 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(sbuTrend106 != null && sbuTrend106.size() > 0){
+			sbuTrends.addAll(sbuTrend106);
+		}
+
 		trends.setDtos(sbuTrends);
+
+
 
 		WebMenuDTO services = new WebMenuDTO();
 		services.setName("园区服务");
+		List<WebMenuDTO> sbuServices = new ArrayList<>();
+
 		moduleIds.clear();
 		moduleIds.add(40100L);//招租管理
+		List<WebMenuDTO> services401 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services401 != null && services401.size() > 0){
+			sbuServices.addAll(services401);
+		}
+
+
+
+		moduleIds.clear();
 		moduleIds.add(40500L);//服务联盟
+		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services405 != null && services405.size() > 0){
+			sbuServices.addAll(services405);
+		}
+
+
+		moduleIds.clear();
 		moduleIds.add(20100L);//物业报修
-		List<WebMenuDTO> sbuServices = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		List<WebMenuDTO> services201 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services201 != null && services201.size() > 0){
+			sbuServices.addAll(services201);
+		}
+
 		services.setDtos(sbuServices);
 
 
 		WebMenuDTO resources = new WebMenuDTO();
 		resources.setName("预定中心");
+
 		moduleIds.clear();
 		moduleIds.add(40400L);//资源预定
 		List<WebMenuDTO> sbuResources = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
@@ -982,5 +1023,67 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 
 		return dtos;
+	}
+
+	@Override
+	public ListMenuForPcEntryServicesResponse listMenuForPcEntryServices(ListMenuForPcEntryServicesCommand cmd) {
+
+
+		//很无奈，这里的菜单是写死的
+
+		ListMenuForPcEntryServicesResponse response = new ListMenuForPcEntryServicesResponse();
+
+		List<WebMenuDTO> services = new ArrayList<>();
+
+		List<Long> moduleIds = new ArrayList<>();
+		moduleIds.clear();
+		moduleIds.add(40100L);//招租管理
+		List<WebMenuDTO> services401 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services401 == null || services401.size() ==  0){
+			WebMenuDTO dto = new WebMenuDTO();
+			dto.setName("园区招商");
+			services.add(dto);
+		}else {
+			services.add(services401.get(0));
+		}
+
+		moduleIds.clear();
+		moduleIds.add(40500L);//服务联盟
+		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services405 == null || services405.size() == 0){
+			WebMenuDTO dto4051 = new WebMenuDTO();
+			dto4051.setName("服务联盟1");
+			services.add(dto4051);
+
+			WebMenuDTO dto4052 = new WebMenuDTO();
+			dto4052.setName("服务联盟2");
+			services.add(dto4052);
+		}else if(services405.size() == 1){
+			services.add(services405.get(0));
+
+			WebMenuDTO dto4052 = new WebMenuDTO();
+			dto4052.setName("服务联盟1");
+			services.add(dto4052);
+		}else {
+			services.add(services405.get(0));
+			services.add(services405.get(1));
+		}
+
+
+		moduleIds.clear();
+		moduleIds.add(20100L);//物业报修
+		List<WebMenuDTO> services201 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services201 == null || services201.size() == 0){
+			WebMenuDTO dto = new WebMenuDTO();
+			dto.setName("物业服务");
+			services.add(dto);
+		}else {
+			services.add(services201.get(0));
+		}
+
+
+		response.setDtos(services);
+
+		return response;
 	}
 }
