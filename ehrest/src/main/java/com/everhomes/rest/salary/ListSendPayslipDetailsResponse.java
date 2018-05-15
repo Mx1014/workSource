@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>details: 工资条详情</li>
+ * <li>details: 工资条详情 {@link com.everhomes.rest.salary.PayslipDetailDTO}</li>
  * <li>titiles: 额外的表头列表</li>
  * <li>nextPageAnchor: 下页锚点</li>
  * </ul>
