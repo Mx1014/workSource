@@ -8661,6 +8661,7 @@ public class PunchServiceImpl implements PunchService {
                 result.setRuleTime(ptr.getStartEarlyTimeLong());
                 //最晚上班时间_结合请假时间进行计算
 //				Long startlateTime = calculateStartlateTime(ptr, tiDTOs);
+                result.setShouldPunchTime(ptr.getStartLateTimeLong());
                 if (punchTimeLong < ptr.getStartLateTimeLong()) {
                     result.setClockStatus(PunchStatus.NORMAL.getCode());
                     result.setExpiryTime(ptr.getStartLateTimeLong());
