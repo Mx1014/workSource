@@ -148,10 +148,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteOrganizationAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
-            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_DELETE);
-        }
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+//            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_DELETE);
+//        }
         rolePrivilegeService.deleteOrganizationAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -213,10 +213,10 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        /*SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
             resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_LIST);
-        }
+        }*/
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
