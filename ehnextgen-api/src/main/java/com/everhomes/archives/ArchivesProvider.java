@@ -55,6 +55,8 @@ public interface ArchivesProvider {
 
 //    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
 
+    List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
+
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
 
     ArchivesNotifications findArchivesNotificationsByOrganizationId(Integer namespaceId, Long organizationId);

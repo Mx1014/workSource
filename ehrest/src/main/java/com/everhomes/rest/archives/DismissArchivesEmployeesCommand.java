@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class DismissArchivesEmployeesCommand {
 
-    private Long organizationId;
-
     @ItemType(Long.class)
     private List<Long> detailIds;
+
+    private Long organizationId;
 
     private Byte dismissType;
 
@@ -33,20 +33,7 @@ public class DismissArchivesEmployeesCommand {
 
     private String dismissRemark;
 
-    //  added by Rong for social security at 01.05-2018
-    private Byte socialSecurityEndMonth;
-
-    private Byte accumulationFundEndMonth;
-
     public DismissArchivesEmployeesCommand() {
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
     }
 
     public List<Long> getDetailIds() {
@@ -55,6 +42,14 @@ public class DismissArchivesEmployeesCommand {
 
     public void setDetailIds(List<Long> detailIds) {
         this.detailIds = detailIds;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Byte getDismissType() {
@@ -87,22 +82,6 @@ public class DismissArchivesEmployeesCommand {
 
     public void setDismissRemark(String dismissRemark) {
         this.dismissRemark = dismissRemark;
-    }
-
-    public Byte getSocialSecurityEndMonth() {
-        return socialSecurityEndMonth;
-    }
-
-    public void setSocialSecurityEndMonth(Byte socialSecurityEndMonth) {
-        this.socialSecurityEndMonth = socialSecurityEndMonth;
-    }
-
-    public Byte getAccumulationFundEndMonth() {
-        return accumulationFundEndMonth;
-    }
-
-    public void setAccumulationFundEndMonth(Byte accumulationFundEndMonth) {
-        this.accumulationFundEndMonth = accumulationFundEndMonth;
     }
 
     @Override

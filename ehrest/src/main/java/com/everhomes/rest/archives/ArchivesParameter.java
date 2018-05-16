@@ -42,7 +42,7 @@ public interface ArchivesParameter {
 
     String EMPLOYEE_STATUS = "employeeStatus";    //	员工状态
 
-    String EMPLOYMENT_TTIME = "employmentTime";
+    String EMPLOYMENT_TIME = "employmentTime";
 
     String SALARY_CARD_NUMBER = "salaryCardNumber";
 
@@ -108,6 +108,8 @@ public interface ArchivesParameter {
 
     String DISMISS_REASON = "dismissReason";    //	离职原因
 
+    String DISMISS_REMARK = "dismissRemark";
+
     String DEPARTMENT_IDS = "departmentIds";
 
     String JOB_POSITION_IDS = "jobPositionIds";
@@ -117,5 +119,9 @@ public interface ArchivesParameter {
     String MONTH = "month";
 
     String TRANSFER_TYPE = "transferType";
+
+    String EMPLOYMENT_REMARK = "employmentRemark";
+
+    String TRANSFER_REMARK = "transferRemark";
 
 }

@@ -761,7 +761,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public String convertToOrgNames(Map<Long, String> map) {
         StringBuilder names = new StringBuilder();
-        if (map != null && map.size() > 0){
+        if (map != null && map.size() > 0) {
             for (String value : map.values())
                 names.append(value).append(",");
             //  remove the comma
@@ -778,12 +778,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         return ids;
     }
 
-    private String getOrgNamesByIds(List<Long> orgIds){
+    private String getOrgNamesByIds(List<Long> orgIds) {
         StringBuilder names = new StringBuilder();
-        if(orgIds != null && orgIds.size()>0){
-            for(Long orgId : orgIds){
+        if (orgIds != null && orgIds.size() > 0) {
+            for (Long orgId : orgIds) {
                 Organization org = organizationProvider.findOrganizationById(orgId);
-                if(org != null)
+                if (org != null)
                     names.append(org.getName()).append(",");
             }
             names = new StringBuilder(names.subSequence(0, names.length() - 1));
@@ -1127,30 +1127,30 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private void addTransferLogs(TransferArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
-        if(cmd.getDetailIds() != null){
-            for(Long detailId : cmd.getDetailIds()){
+        if (cmd.getDetailIds() != null) {
+            for (Long detailId : cmd.getDetailIds()) {
                 ArchivesOperationalLog log = new ArchivesOperationalLog();
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
                 Map<String, Object> map = new HashMap<>();
-                if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0){
+                if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0) {
                     map.put("oldDepNames", convertToOrgNames(getEmployeeDepartment(detailId)));
                     map.put("newDepNames", getOrgNamesByIds(cmd.getDepartmentIds()));
-                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_DEPARTMENT_CHANGE,"zb_CN", map, ""));
+                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_DEPARTMENT_CHANGE, "zb_CN", map, ""));
                 }
-                if(cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0){
+                if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
                     map.put("oldDepNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
                     map.put("newDepNames", getOrgNamesByIds(cmd.getJobPositionIds()));
-                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_POSITION_CHANGE,"zb_CN", map, ""));
+                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_POSITION_CHANGE, "zb_CN", map, ""));
                 }
-                if(cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0){
+                if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
                     map.put("oldDepNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
                     map.put("newDepNames", getOrgNamesByIds(cmd.getJobLevelIds()));
-                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_LEVEL_CHANGE,"zb_CN", map, ""));
+                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_LEVEL_CHANGE, "zb_CN", map, ""));
                 }
-                log.setStringTag4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(),ArchivesParameter.TRANSFER_TYPE));
+                log.setStringTag4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(), ArchivesParameter.TRANSFER_TYPE));
                 log.setStringTag5(cmd.getTransferReason());
                 log.setOperatorUid(userId);
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
@@ -1182,11 +1182,50 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId) {
+        List<ArchivesLogDTO> results = new ArrayList<>();
+        List<ArchivesOperationalLog> logs = archivesProvider.listArchivesLogs(organizationId, detailId);
+        if (logs.size() > 0) {
+            results = logs.stream().map(r -> {
+                ArchivesLogDTO dto = ConvertHelper.convert(r, ArchivesLogDTO.class);
+                processArchivesLog(dto, r);
+                return dto;
+            }).collect(Collectors.toList());
+        }
 /*        List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(organizationId, detailId);
         if (logs != null && logs.size() > 0) {
             return logs.stream().map(r -> ConvertHelper.convert(r, ArchivesLogDTO.class)).collect(Collectors.toList());
         }*/
-        return null;
+        return results;
+    }
+
+    private void processArchivesLog(ArchivesLogDTO dto, ArchivesOperationalLog log) {
+        Map<String, String> map = new HashMap<>();
+        switch (ArchivesOperationType.fromCode(log.getOperationType())){
+            case CHECK_IN:
+                map.put(ArchivesParameter.DEPARTMENT, log.getStringTag1());
+                map.put(ArchivesParameter.EMPLOYEE_STATUS, log.getStringTag2());
+                map.put(ArchivesParameter.MONTH, log.getStringTag3());
+                break;
+            case EMPLOY:
+                map.put(ArchivesParameter.EMPLOYMENT_REMARK, log.getStringTag1());
+                break;
+            case TRANSFER:
+                if (log.getStringTag1() != null)
+                    map.put(ArchivesParameter.DEPARTMENT, log.getStringTag1());
+                if (log.getStringTag2() != null)
+                    map.put(ArchivesParameter.JOB_POSITION, log.getStringTag2());
+                if (log.getStringTag3() != null)
+                    map.put(ArchivesParameter.JOB_LEVEL, log.getStringTag3());
+                map.put(ArchivesParameter.TRANSFER_TYPE, log.getStringTag4());
+                map.put(ArchivesParameter.TRANSFER_REMARK, log.getStringTag5());
+                break;
+            case DISMISS:
+                map.put(ArchivesParameter.DISMISS_TYPE, log.getStringTag1());
+                map.put(ArchivesParameter.DISMISS_REASON, log.getStringTag2());
+                map.put(ArchivesParameter.DISMISS_REMARK, log.getStringTag3());
+                break;
+        }
+        dto.setLogs(map);
     }
 
     /********************    assistant function for Archives start    ********************/
@@ -1260,7 +1299,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     case ArchivesParameter.EMPLOYEE_STATUS:
                         employee.setEmployeeStatus(ArchivesUtil.convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.EMPLOYEE_STATUS));
                         break;
-                    case ArchivesParameter.EMPLOYMENT_TTIME:
+                    case ArchivesParameter.EMPLOYMENT_TIME:
                         employee.setEmploymentTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
                         break;
                     case ArchivesParameter.SALARY_CARD_NUMBER:
@@ -1374,7 +1413,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.EMERGENCY_CONTACT, employee.getEmergencyContact());
         valueMap.put(ArchivesParameter.EMPLOYEE_TYPE, ArchivesUtil.resolveArchivesEnum(employee.getEmployeeType(), ArchivesParameter.EMPLOYEE_TYPE));
         valueMap.put(ArchivesParameter.EMPLOYEE_STATUS, ArchivesUtil.resolveArchivesEnum(employee.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
-        valueMap.put(ArchivesParameter.EMPLOYMENT_TTIME, String.valueOf(employee.getEmploymentTime()));
+        valueMap.put(ArchivesParameter.EMPLOYMENT_TIME, String.valueOf(employee.getEmploymentTime()));
         valueMap.put(ArchivesParameter.EMPLOYEE_NO, employee.getEmployeeNo());
         valueMap.put(ArchivesParameter.CONTACT_SHORT_TOKEN, employee.getContactShortToken());
         valueMap.put(ArchivesParameter.WORK_EMAIL, employee.getWorkEmail());

@@ -252,7 +252,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
 
     @Override
     public List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType) {
-        List<ArchivesOperationalConfiguration> results;
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -260,10 +259,12 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(operationType));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
-        results = query.fetch().map(r -> ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));
-        if (results != null || results.size() > 0)
-            return results;
-        return new ArrayList<>();
+        List<ArchivesOperationalConfiguration> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class))
+            return null;
+        });
+        return results;
     }
 
     @Override
@@ -351,6 +352,20 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         }
         return null;
     }*/
+
+    @Override
+    public List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesOperationalLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_LOGS);
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_LOGS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_LOGS.DETAIL_ID.eq(detailId));
+        List<ArchivesOperationalLog> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesOperationalLog.class));
+            return null;
+        });
+        return results;
+    }
 
     @Override
     public void createArchivesNotifications(ArchivesNotifications notification){
