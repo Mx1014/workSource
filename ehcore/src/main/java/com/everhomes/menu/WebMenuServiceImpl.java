@@ -907,9 +907,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		moduleIds.clear();
 		moduleIds.add(40500L);//园区介绍
-		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
-		if(services405 != null && services405.size() > 0){
-			for(WebMenuDTO dto: services405){
+		List<WebMenuDTO> services405001 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services405001 != null && services405001.size() > 0){
+			for(WebMenuDTO dto: services405001){
 				if("园区介绍".equals(dto.getName())){
 					introduces.getDtos().add(dto);
 					break;
