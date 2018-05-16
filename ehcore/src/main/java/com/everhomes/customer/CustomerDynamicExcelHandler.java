@@ -980,16 +980,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
         if (cmds.size() > 0) {
             cmds.forEach((c) -> {
-                rolePrivilegeService.createOrganizationAdmin(c);
-                //增加record
-                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
-                String contactType = null;
-                if (null != userIdentifier) {
-                    contactType = OrganizationMemberTargetType.USER.getCode();
-                } else {
-                    contactType = OrganizationMemberTargetType.UNTRACK.getCode();
-                }
-                customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
+               try {
+                   //增加record
+                   UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
+                   String contactType = null;
+                   if (null != userIdentifier) {
+                       contactType = OrganizationMemberTargetType.USER.getCode();
+                   } else {
+                       contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+                   }
+                   customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
+                   if(c.getOrganizationId()!=null && c.getOrganizationId()!=0){
+                       rolePrivilegeService.createOrganizationAdmin(c);
+                   }
+               }catch (Exception e ){
+                   LOGGER.error("create organization admin erro :{}", e);
+               }
             });
         }
     }
