@@ -1,8 +1,10 @@
 package com.everhomes.rest.aclink;
 
+import com.everhomes.rest.RestResponseBase;
+
 import java.util.List;
 
-public class DoorAccessGroupResp {
+public class DoorAccessGroupResp extends RestResponseBase {
 
     private Long userId;
     List<DoorAccessGroupDTO> groups;
