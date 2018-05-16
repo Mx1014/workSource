@@ -120,6 +120,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         LOGGER.debug("testListAllPMEnterpise end");
     }
     
+    /**
+     * 获取普通公司列表
+     */
     @Test
     public void testListNormalEnterprise() {
         OrganizationType oType = OrganizationType.ENTERPRISE;
@@ -131,6 +134,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         LOGGER.debug("testListNormalEnterprise end");
     }
     
+    /**
+     * 获取某一项目下的公司列表
+     */
     @Test
     public void testListEnterpirseByCommunityId() {
         Long communityId = 240111044332060169l;
@@ -141,6 +147,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         Assert.assertTrue(resp.getDtos().size() == 3);   
     }
     
+    /**
+     * 获取小区列表
+     */
     @Test
     public void testListResidents() {
         CommunityType cType = CommunityType.RESIDENTIAL;
@@ -156,6 +165,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         Assert.assertTrue(communities.size() == 2);
     }
     
+    /**
+     * 获取园区列表
+     */
     @Test
     public void testListComercials() {
         CommunityType cType = CommunityType.COMMERCIAL;
@@ -171,6 +183,9 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         Assert.assertTrue(communities.size() == 3);
     }
     
+    /**
+     * 获取所有应用列表
+     */
     @Test
     public void testServiceModuleApp() {
         List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
@@ -180,10 +195,14 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         Assert.assertTrue(authOrganizationIds.size() == 1);
     }
     
+    /**
+     * 给管理公司安装所有应用
+     */
     @Test
     public void testServiceModuleAppCreate() {
         Long projectId = 240111044332060169l;
         
+        /* 获取当前公司的所有应用授权 */
         ListingLocator locator = new ListingLocator();
         List<ServiceModuleAppAuthorization> authors = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(locator, 10000, new ListingQueryBuilderCallback() {
             @Override
@@ -193,14 +212,17 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             }
         });
         
+        /* 清空所有应用授权 */
         for(ServiceModuleAppAuthorization obj : authors) {
             serviceModuleAppAuthorizationProvider.deleteServiceModuleAppAuthorization(obj);    
         }
         
+        /* 获取所有应用 */
         List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
         List<Long> appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
         Assert.assertTrue(appOriginIds.size() > 0);
         
+        /* 给管理公司本域空间安装所有的应用 */
         for(Long appId : appOriginIds) {
             ServiceModuleAppAuthorization obj = new ServiceModuleAppAuthorization();
             obj.setAppId(appId);
@@ -211,16 +233,19 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorization(obj);    
         }
         
+        /*  */
         List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
         Assert.assertTrue(authCommunityIds.size() > 0);
     }
     
+    /* 给管理公司安装应用，并且把管理公司某个应用分配出去 */
     @Test
     public void testServiceModuleDistrube() {
 //        Long projectId = 240111044332060169l;
         Long normalOrgId = 1041162l;
         Long normalDisAppId = 115084l;//资产管理
         
+        /* 获取当前公司的所有应用授权 */
         ListingLocator locator = new ListingLocator();
         List<ServiceModuleAppAuthorization> authors = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(locator, 10000, new ListingQueryBuilderCallback() {
             @Override
@@ -231,11 +256,13 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             }
         });
         
+        /* 清空所有应用授权 */
         //remove all distrube information
         for(ServiceModuleAppAuthorization obj : authors) {
             serviceModuleAppAuthorizationProvider.deleteServiceModuleAppAuthorization(obj);    
         }
         
+        /* 删除管理公司所有已经安装的应用 */
         //remove all install apps
         ListServiceModuleAppsByOrganizationIdCommand installAppsCmd = new ListServiceModuleAppsByOrganizationIdCommand();
         installAppsCmd.setAppType(ServiceModuleAppType.COMMUNITY.getCode());
@@ -253,10 +280,12 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         installAppsResp = serviceModuleAppService.listServiceModuleAppsByOrganizationId(installAppsCmd);
         Assert.assertTrue(installAppsResp.getServiceModuleApps().size() == 0);
         
+        /* 获取所有应用 */
         List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
         List<Long> appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
         Assert.assertTrue(appOriginIds.size() > 0);
         
+        /* 获取所有园区相关的应用 */
         List<Long> communityOriginAppIds = new ArrayList<>();
         for(ServiceModuleApp r: allApps) {
             if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
@@ -264,6 +293,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
             }
         }
         
+        /* 把所有园区的应用安装到公司 */
         for(Long cAppId : communityOriginAppIds) {
             InstallAppCommand installCmd = new InstallAppCommand();
             installCmd.setOriginId(cAppId);
@@ -288,7 +318,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         for(Community c : communities) {
             projectIds.add(c.getId());
         }
-        
+        /* 给管理公司相应的应用授权 */
         for(Long appId : communityOriginAppIds) {
             DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
             distrubeCmd.setAppId(appId);
@@ -302,7 +332,7 @@ public class ZuolinBaseInitialTest extends CoreServerTestCase {
         List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
         Assert.assertTrue(authCommunityIds.size() == projectIds.size());
         
-        {
+        {/* 把管理公司的应用，分配给普通公司 */
             DistributeServiceModuleAppAuthorizationCommand distrubeCmd = new DistributeServiceModuleAppAuthorizationCommand();
             distrubeCmd.setAppId(normalDisAppId);
             distrubeCmd.setNamespaceId(namespaceId);
