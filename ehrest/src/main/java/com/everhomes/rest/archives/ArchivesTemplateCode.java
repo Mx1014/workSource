@@ -23,7 +23,7 @@ public interface ArchivesTemplateCode {
 
 
 	int OPERATION_PROBATION_PERIOD = 101;     //  操作提示试用期
-	int OPERATION_DEPARTMENT_CHANGE = 102;    //  操作提示部门变动
+	int OPERATION_ORG_CHANGE = 102;    //  操作提示部门、岗位、职级变动
 	int OPERATION_JOB_POSITION_CHANGE = 103;  //  操作提示岗位变动
 	int OPERATION_JOB_LEVEL_CHANGE = 104;     //  操作提示职级变动
 }

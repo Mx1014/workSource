@@ -1136,19 +1136,19 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
                 Map<String, Object> map = new HashMap<>();
                 if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0) {
-                    map.put("oldDepNames", convertToOrgNames(getEmployeeDepartment(detailId)));
-                    map.put("newDepNames", getOrgNamesByIds(cmd.getDepartmentIds()));
-                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_DEPARTMENT_CHANGE, "zb_CN", map, ""));
+                    map.put("oldOrgNames", convertToOrgNames(getEmployeeDepartment(detailId)));
+                    map.put("newOrgNames", getOrgNamesByIds(cmd.getDepartmentIds()));
+                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
                 }
                 if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
-                    map.put("oldDepNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
-                    map.put("newDepNames", getOrgNamesByIds(cmd.getJobPositionIds()));
-                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_POSITION_CHANGE, "zb_CN", map, ""));
+                    map.put("oldOrgNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
+                    map.put("newOrgNames", getOrgNamesByIds(cmd.getJobPositionIds()));
+                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
                 }
                 if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
-                    map.put("oldDepNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
-                    map.put("newDepNames", getOrgNamesByIds(cmd.getJobLevelIds()));
-                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_LEVEL_CHANGE, "zb_CN", map, ""));
+                    map.put("oldOrgNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
+                    map.put("newOrgNames", getOrgNamesByIds(cmd.getJobLevelIds()));
+                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
                 }
                 log.setStringTag4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(), ArchivesParameter.TRANSFER_TYPE));
                 log.setStringTag5(cmd.getTransferReason());
