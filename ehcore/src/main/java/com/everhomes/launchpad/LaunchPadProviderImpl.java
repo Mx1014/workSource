@@ -179,6 +179,17 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
+	public void deleteLaunchPadLayout(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadLayouts.class, null);
+	}
+
+
+	@Override
 	public LaunchPadLayout findLaunchPadLayoutById(long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(LaunchPadLayout.class, id));
 		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());

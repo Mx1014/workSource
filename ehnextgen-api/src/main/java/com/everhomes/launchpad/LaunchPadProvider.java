@@ -24,6 +24,9 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup, Byte scopeCode, long scopeId, List<String> tag);
     List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags, String categryName);
     void updateLaunchPadLayout(LaunchPadLayout launchPadLayout);
+
+    void deleteLaunchPadLayout(Long id);
+
     LaunchPadLayout findLaunchPadLayoutById(long id);
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);
     List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, Map<Byte, Long> defalutScopeMap, String keyword, int offset, int pageSize);

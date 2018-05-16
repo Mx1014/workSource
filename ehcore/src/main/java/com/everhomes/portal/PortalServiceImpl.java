@@ -1678,57 +1678,69 @@ public class PortalServiceImpl implements PortalService {
 		Long versionCode =  releaseVersion.getDateVersion().longValue() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 
 
-		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
-		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+//		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
+//		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+//
+//			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
+//				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
+//				if(null != launchPadLayout){
+////					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
+////						versionCode = launchPadLayout.getVersionCode() + 1;
+////					}
+//
+//					launchPadLayout.setVersionCode(versionCode.longValue());
+//					layoutJson.setVersionCode(versionCode.toString());
+//					String json = StringHelper.toJsonString(layoutJson);
+//					launchPadLayout.setLayoutJson(json);
+//
+//					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
+//
+//				}
+//			}
+//		}else{
 
-			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
-				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
-				if(null != launchPadLayout){
-//					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
-//						versionCode = launchPadLayout.getVersionCode() + 1;
-//					}
 
-					launchPadLayout.setVersionCode(versionCode.longValue());
-					layoutJson.setVersionCode(versionCode.toString());
-					String json = StringHelper.toJsonString(layoutJson);
-					launchPadLayout.setLayoutJson(json);
-
-					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
-
-				}
-			}
-		}else{
-			layoutJson.setVersionCode(versionCode.toString());
-			String json = StringHelper.toJsonString(layoutJson);
-			launchPadLayout.setNamespaceId(layout.getNamespaceId());
-			launchPadLayout.setName(layout.getName());
-			launchPadLayout.setVersionCode(versionCode.longValue());
-			launchPadLayout.setMinVersionCode(0L);
-			launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
-			launchPadLayout.setScopeCode((byte)0);
-			launchPadLayout.setApplyPolicy((byte)0);
-			launchPadLayout.setScopeId(0L);
-			launchPadLayout.setLayoutJson(json);
-
-			if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
-				launchPadLayout.setPreviewPortalVersionId(versionId);
-			}
-
-			for (SceneType sceneType: SceneType.values()) {
-				if(sceneType == SceneType.DEFAULT ||
-						sceneType == SceneType.PARK_TOURIST ||
-						sceneType == SceneType.PM_ADMIN){
-					launchPadLayout.setSceneType(sceneType.getCode());
-					launchPadProvider.createLaunchPadLayout(launchPadLayout);
-					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
-					mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
-					mapping.setPortalContentId(layout.getId());
-					mapping.setCreatorUid(user.getId());
-					mapping.setLaunchPadContentId(launchPadLayout.getId());
-					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+		//上面mapping不靠谱，此处删除所有的同名字的layout  edit by yanjun 201805161519
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+			List<LaunchPadLayout> launchPadLayouts = launchPadProvider.getLaunchPadLayouts(layout.getName(), layout.getNamespaceId());
+			if(launchPadLayouts != null){
+				for (LaunchPadLayout deleteLayout: launchPadLayouts){
+					launchPadProvider.deleteLaunchPadLayout(deleteLayout.getId());
 				}
 			}
 		}
+
+		layoutJson.setVersionCode(versionCode.toString());
+		String json = StringHelper.toJsonString(layoutJson);
+		launchPadLayout.setNamespaceId(layout.getNamespaceId());
+		launchPadLayout.setName(layout.getName());
+		launchPadLayout.setVersionCode(versionCode.longValue());
+		launchPadLayout.setMinVersionCode(0L);
+		launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
+		launchPadLayout.setScopeCode((byte)0);
+		launchPadLayout.setApplyPolicy((byte)0);
+		launchPadLayout.setScopeId(0L);
+		launchPadLayout.setLayoutJson(json);
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			launchPadLayout.setPreviewPortalVersionId(versionId);
+		}
+
+		for (SceneType sceneType: SceneType.values()) {
+			if(sceneType == SceneType.DEFAULT ||
+					sceneType == SceneType.PARK_TOURIST ||
+					sceneType == SceneType.PM_ADMIN){
+				launchPadLayout.setSceneType(sceneType.getCode());
+				launchPadProvider.createLaunchPadLayout(launchPadLayout);
+				PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+				mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
+				mapping.setPortalContentId(layout.getId());
+				mapping.setCreatorUid(user.getId());
+				mapping.setLaunchPadContentId(launchPadLayout.getId());
+				portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+			}
+		}
+//		}
 	}
 
 
