@@ -359,6 +359,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         SelectQuery<EhArchivesOperationalLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_LOGS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_LOGS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_LOGS.DETAIL_ID.eq(detailId));
+        query.addOrderBy(Tables.EH_ARCHIVES_OPERATIONAL_LOGS.OPERATION_TIME.desc());
         List<ArchivesOperationalLog> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ArchivesOperationalLog.class));

@@ -1132,7 +1132,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesOperationalLog log = new ArchivesOperationalLog();
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
-                log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
+                log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
                 Map<String, Object> map = new HashMap<>();
                 if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0) {
@@ -1502,9 +1502,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //  先生成记录后执行用以保存前部门
+        addTransferLogs(cmd);
         if (cmd.getEffectiveTime().equals(ArchivesUtil.currentDate().toString())) {
-            //  先生成记录后执行用以保存前部门
-            addTransferLogs(cmd);
             transferArchivesEmployees(cmd);
         } else {
             for (Long detailId : cmd.getDetailIds()) {
@@ -1516,7 +1516,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                         ArchivesUtil.parseDate(cmd.getEffectiveTime()),
                         StringHelper.toJsonString(cmd));
             }
-            addTransferLogs(cmd);
         }
     }
 
@@ -1872,83 +1871,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         return formOriginId;
     }
 
-    /*
-    @Override
-    public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
-        dbProvider.execute((TransactionStatus status) -> {
-            //  1.若为当天则立即执行
-            if (cmd.getEffectiveTime().equals(ArchivesUtil.currentDate().toString()))
-                transferArchivesEmployees(cmd);
-                //  2.若为其它时间则添加调整配置
-            else {
-                ArchivesConfigurations configuration = new ArchivesConfigurations();
-                configuration.setOrganizationId(cmd.getOrganizationId());
-                configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
-                configuration.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
-                configuration.setOperationInformation(StringHelper.toJsonString(cmd));
-                archivesProvider.createArchivesConfigurations(configuration);
-            }
-            //  3.更新人员调整记录
-            addTransferLogs(cmd);
-            return null;
-        });
-    }
-
-
-    *//**
-     * 员工部门调整
-     *//*
-
-
-    @Override
-    public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
-
-        dbProvider.execute((TransactionStatus status) -> {
-            //  1.更新员工离职时间
-            for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
-                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
-            }
-            //  2.若为当天则立即执行
-            if (cmd.getDismissTime().toString().equals(ArchivesUtil.currentDate().toString()))
-                dismissArchivesEmployees(cmd);
-                //  3.若为其它时间则添加离职配置
-            else {
-                ArchivesConfigurations configuration = new ArchivesConfigurations();
-                configuration.setOrganizationId(cmd.getOrganizationId());
-                configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());
-                configuration.setOperationTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
-                configuration.setOperationInformation(StringHelper.toJsonString(cmd));
-                archivesProvider.createArchivesConfigurations(configuration);
-            }
-            //  3.添加人员离职记录
-            addDismissLogs(cmd);
-            return null;
-        });
-    }
-
-    *//**
-     * 员工离职
-     *//*
-
-
-
-
-     */
-
-    /**
-     * 删除离职表中的员工
-     *//*
-
-
-
-
-    @Override
-    public CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd) {
-        return null;
-    }
-*/
     @Override
     public ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd) {
         ArchivesFroms form = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
