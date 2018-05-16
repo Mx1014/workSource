@@ -1,0 +1,111 @@
+package com.everhomes.rest.decoration;
+
+/**
+ * <ul>
+ * <li>communityId：项目id</li>
+ * <li>startTime：开始时间</li>
+ * <li>endTime：结束时间</li>
+ * <li>address：门牌号</li>
+ * <li>status：申请状态 参考{@link com.everhomes.rest.decoration.DecorationRequestStatus}</li>
+ * <li>keyWord：关键字</li>
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * </ul>
+ */
+public class SearchRequestsCommand {
+
+    private Long communityId;
+    private Long startTime;
+    private Long endTime;
+    private String address;
+    private Byte status;
+    private String keyWord;
+
+    private Long pageAnchor;
+    private Integer pageSize;
+    private Long currentPMId;
+    private Long currentProjectId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public String getKeyWord() {
+        return keyWord;
+    }
+
+    public void setKeyWord(String keyWord) {
+        this.keyWord = keyWord;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
+
+}
