@@ -484,7 +484,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     /**
-     * 将访客状态转为已确认到访
+     * 将访客状态转为已拒绝
      * @param visitor
      * @return
      */
