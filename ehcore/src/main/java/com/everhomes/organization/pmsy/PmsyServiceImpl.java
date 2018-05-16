@@ -279,6 +279,10 @@ public class PmsyServiceImpl implements PmsyService{
 			params.put("strToken", "syswin");
 			params.put("p0", "UserRev_GetFeeList");
 			params.put("p1", cmd.getCustomerId());
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("siyuan->/pmsy/getPmsyBills->getMonthlyPmBill()-TimeToString(), billDateStr={}, TimeToString={}",
+    					cmd.getBillDateStr(), TimeToString(cmd.getBillDateStr()));
+    		}
 			params.put("p2", TimeToString(cmd.getBillDateStr()));
 			params.put("p3", TimeToString(cmd.getBillDateStr()));
 			params.put("p4", cmd.getProjectId());
