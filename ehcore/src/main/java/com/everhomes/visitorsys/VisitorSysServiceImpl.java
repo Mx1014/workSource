@@ -19,6 +19,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.approval.CommonStatus;
@@ -1458,11 +1459,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(visitor.getId()==null) {
                 visitor.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());
             }
-            visitor.setBookingStatus(visitor.getVisitStatus());
+            if(visitStatus == VisitorsysStatus.NOT_VISIT || visitStatus == VisitorsysStatus.HAS_VISITED){
+                visitor.setBookingStatus(visitor.getVisitStatus());
+            }
             if(visitStatus == VisitorsysStatus.NOT_VISIT) {
                 visitor.setInviterId(UserContext.current().getUser().getId());
                 visitor.setInviterName(UserContext.current().getUser().getAccountName());
             }
+            //设置门禁相关的二维码，门禁的id
+            checkDoorGuard(configuration,visitor);
         }else{
             if(visitStatus == VisitorsysStatus.NOT_VISIT){
                 visitStatus = VisitorsysStatus.WAIT_CONFIRM_VISIT;
@@ -1491,6 +1496,38 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
     }
 
+    /**
+     * 设置门禁二维码
+     * @param configuration
+     * @param visitor
+     */
+    private void checkDoorGuard(GetConfigurationResponse configuration, VisitorSysVisitor visitor) {
+        if(configuration.getBaseConfig()==null || configuration.getBaseConfig().getDoorGuardId()==null){
+            return;
+        }
+        VisitorsysVisitorType visitorsysVisitorType = checkVisitorType(visitor.getVisitorType());
+        if(visitorsysVisitorType!=VisitorsysVisitorType.BE_INVITED){
+            return;
+        }
+        VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsFlag());
+        if(doorGuardsFlag== VisitorsysFlagType.NO){
+            return;
+        }
+        VisitorsysFlagType doorGuardsConfirmedFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
+        VisitorsysStatus bookingStatus = checkBookingStatus(visitor.getBookingStatus());
+        if(VisitorsysFlagType.YES == doorGuardsConfirmedFlag && bookingStatus==VisitorsysStatus.NOT_VISIT){
+            return;
+        }
+        //todo 申请门禁二维码，并且设置到visitor中
+    }
+
+    /**
+     * 获取表单配置
+     * @param namespaceId
+     * @param ownerType
+     * @param ownerId
+     * @param enterpriseFormValues
+     */
     private void checkFormConfiguration(Integer namespaceId, String ownerType, Long ownerId, List<PostApprovalFormItem> enterpriseFormValues) {
         GetConfigurationCommand cmd = new GetConfigurationCommand();
         cmd.setNamespaceId(namespaceId);
