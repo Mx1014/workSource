@@ -6,7 +6,7 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `enterprise_id` BIGINT '到访公司id',
+  `enterprise_id` BIGINT COMMENT '到访公司id',
   `enterprise_name` VARCHAR(256)  COMMENT '到访公司名称,园区则无',
 -- 以下字段必须出现在展示和搜索中，所以必须提出来作为字段
   `visitor_name` VARCHAR(256) COMMENT '访客姓名',
