@@ -269,15 +269,9 @@ public class PmsyServiceImpl implements PmsyService{
 			monthlyDebtAmount = new BigDecimal(0);
 		
 		String url = configProvider.getValue("haian.siyuan", "");
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Request to siyuan, url={}, param={}", url, cmd);
-		}
+		
 		String json = PmsyHttpUtil.post(url,"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
 				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");
-			
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Response from siyuan, result={}", json);
-		}
 		
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
