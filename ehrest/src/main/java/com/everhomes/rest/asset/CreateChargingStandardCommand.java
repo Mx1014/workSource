@@ -18,7 +18,6 @@ import java.util.List;
  * <li>chargingStandardName:收费标准名称</li>
  * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化(斜面);4:斜率在不同变量区间取值不同（阶梯）（楼梯）;</li>
  * <li>billingCycle:计费周期,参考{@link com.everhomes.rest.asset.BillingCycle}</li>
- * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
  * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
  * <li>instruction:说明</li>
@@ -42,8 +41,6 @@ public class CreateChargingStandardCommand {
     private Byte formulaType;
     @NotNull
     private Byte billingCycle;
-    @NotNull
-    private Byte priceUnitType;
     private String formula;
     @NotNull
     private String formulaJson;
@@ -158,14 +155,6 @@ public class CreateChargingStandardCommand {
 
     public void setBillingCycle(Byte billingCycle) {
         this.billingCycle = billingCycle;
-    }
-
-    public Byte getPriceUnitType() {
-        return priceUnitType;
-    }
-
-    public void setPriceUnitType(Byte priceUnitType) {
-        this.priceUnitType = priceUnitType;
     }
 
     public String getFormulaJson() {
