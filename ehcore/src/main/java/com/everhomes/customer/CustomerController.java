@@ -1589,7 +1589,7 @@ public class CustomerController extends ControllerBase {
 
     /**
      * <b>URL: /customer/exportCustomerDetails</b>
-     * <p>是否看过同步结果</p>
+     * <p>导出客户统计信息</p>
      */
     @RequestMapping("exportCustomerDetails")
     public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse) {
