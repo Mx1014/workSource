@@ -1,5 +1,6 @@
 package com.everhomes.organization.pmsy;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -7,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +22,10 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
-import com.everhomes.rest.activity.ActivityTimeResponse;
-import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -270,45 +271,69 @@ public class PmsyServiceImpl implements PmsyService{
 		
 		String url = configProvider.getValue("haian.siyuan", "");
 		
-		String json = PmsyHttpUtil.post(url,"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
-				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");
+		/*String json = PmsyHttpUtil.post(url,"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
+				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");*/
 		
-		Gson gson = new Gson();
-		Map map = gson.fromJson(json, Map.class);
-		List list = (List) map.get("UserRev_GetFeeList");
-		Map map2 = (Map) list.get(0);
-		List list2 = (List) map2.get("Syswin");
-		
-		for(Object o:list2){
-			Map map3 = (Map) o;
-			if(!cmd.getResourceId().equals((String)map3.get("ResID")))
-				continue;
-			Long billDateStr = StringToTime((String)map3.get("RepYears"));
-			if(cmd.getBillDateStr().longValue() != billDateStr.longValue())
-				continue;
-			PmsyBillItemDTO dto = new PmsyBillItemDTO();
-			dto.setCustomerId(cmd.getCustomerId());
-			dto.setBillId((String)map3.get("ID"));
+		Map<String, String> params = new HashMap<String, String>();
+		try {
+			params.put("strToken", "syswin");
+			params.put("p0", "UserRev_GetFeeList");
+			params.put("p1", cmd.getCustomerId());
+			params.put("p2", TimeToString(cmd.getBillDateStr()));
+			params.put("p3", TimeToString(cmd.getBillDateStr()));
+			params.put("p4", cmd.getProjectId());
+			params.put("p5", "01");
+			params.put("p6", "");
+			params.put("p7", "");
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Request to siyuan, url={}, param={}", url, params);
+    		}
+			String result = HttpUtils.post(url, params, 600, false);
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Response from siyuan, result={}", result);
+    		}
+			String json = result.substring(result.indexOf(">{")+1, result.indexOf("</string>"));
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Response from siyuan, result->substring={}", json);
+    		}
+			Gson gson = new Gson();
+			Map map = gson.fromJson(json, Map.class);
+			List list = (List) map.get("UserRev_GetFeeList");
+			Map map2 = (Map) list.get(0);
+			List list2 = (List) map2.get("Syswin");
+			for(Object o:list2){
+				Map map3 = (Map) o;
+				if(!cmd.getResourceId().equals((String)map3.get("ResID")))
+					continue;
+				Long billDateStr = StringToTime((String)map3.get("RepYears"));
+				if(cmd.getBillDateStr().longValue() != billDateStr.longValue())
+					continue;
+				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setCustomerId(cmd.getCustomerId());
+				dto.setBillId((String)map3.get("ID"));
+					
+				dto.setBillDateStr(billDateStr);
+				dto.setItemName((String)map3.get("IpItemName"));
+				BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
+				BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
+				BigDecimal receivableAmount = priRev.add(lFRev);
+				dto.setReceivableAmount(receivableAmount);
+				BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
+				BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
+				BigDecimal debtAmount = priFailures.add(lFFailures);
+				dto.setDebtAmount(debtAmount);
 				
-			dto.setBillDateStr(billDateStr);
-			dto.setItemName((String)map3.get("IpItemName"));
-			BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
-			BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
-			BigDecimal receivableAmount = priRev.add(lFRev);
-			dto.setReceivableAmount(receivableAmount);
-			BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
-			BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
-			BigDecimal debtAmount = priFailures.add(lFFailures);
-			dto.setDebtAmount(debtAmount);
-			
-			requests.add(dto);
-			monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
-			monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
-			
-			mb.setBillDateStr(billDateStr);
+				requests.add(dto);
+				monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+				monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+				
+				mb.setBillDateStr(billDateStr);
+			}
+			mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+			mb.setMonthlyDebtAmount(monthlyDebtAmount);
+		} catch (Exception e) {
+			LOGGER.debug("getMonthlyPmBill from siyuan, url={}, param={}, exception={}", url, params, e);
 		}
-		mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
-		mb.setMonthlyDebtAmount(monthlyDebtAmount);
 		return mb;
 	}
 	
