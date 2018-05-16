@@ -2258,8 +2258,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             mapPlans.put(plan.getId(), plan);
         }
 
-        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, planIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, planIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhEquipmentInspectionPlanGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
             query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {

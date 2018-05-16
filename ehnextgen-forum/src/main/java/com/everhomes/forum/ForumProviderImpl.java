@@ -838,8 +838,11 @@ public class ForumProviderImpl implements ForumProvider {
             mapPosts.put(post.getId(), post);
         }
         
-        List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, postIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, postIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhForumAttachmentsRecord> query = context.selectQuery(Tables.EH_FORUM_ATTACHMENTS);
             query.addConditions(Tables.EH_FORUM_ATTACHMENTS.POST_ID.in(postIds));
             query.fetch().map((EhForumAttachmentsRecord record) -> {

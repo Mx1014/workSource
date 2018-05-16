@@ -936,9 +936,12 @@ public class CommunityProviderImpl implements CommunityProvider {
         	buildingIds.add(building.getId());
         	mapBuildings.put(building.getId(), building);
         }
-
-        List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
             query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.in(buildingIds));
             query.fetch().map((EhBuildingAttachmentsRecord record) -> {
