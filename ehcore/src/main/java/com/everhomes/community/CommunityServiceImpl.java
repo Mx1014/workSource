@@ -765,7 +765,7 @@ public class CommunityServiceImpl implements CommunityService {
 		 } else {
 
 			 dto.setBuildingName(dto.getName());
-			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getName());
 
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
