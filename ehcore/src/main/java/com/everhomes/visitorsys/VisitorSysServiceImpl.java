@@ -15,6 +15,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -25,6 +27,7 @@ import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -120,6 +123,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     private VisitorSysBlackListProvider visitorSysBlackListProvider;
     @Autowired
+    private GeneralFormProvider generalFormProvider;
+    @Autowired
     private DoorAccessService doorAccessService;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
@@ -158,8 +163,30 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             response.setCommunityFormValues(JSONObject.parseObject(relatedVisitor.getFormJsonValue(),
                     new TypeReference<List<PostApprovalFormItem>>() {}));
         }
-
+        response.setVisitorActionList(generateActionList(visitor,relatedVisitor));
         return response;
+    }
+
+    private List<BaseVisitorActionDTO> generateActionList(VisitorSysVisitor visitor, VisitorSysVisitor relatedVisitor) {
+        List<BaseVisitorActionDTO> list = new ArrayList<>(6);
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            addActionDto(list,visitor);
+            addActionDto(list,relatedVisitor);
+        }else{
+            addActionDto(list,visitor);
+            addActionDto(list,relatedVisitor);
+        }
+        return list;
+    }
+
+    private void addActionDto(List<BaseVisitorActionDTO> list, VisitorSysVisitor visitor){
+        BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((byte)1,visitor.getVisitTime(),null,visitor.getInviterName());
+        BaseVisitorActionDTO dto2 = new BaseVisitorActionDTO((byte)2,visitor.getConfirmTime(),visitor.getConfirmUid(),visitor.getConfirmUname());
+        BaseVisitorActionDTO dto3 = new BaseVisitorActionDTO((byte)3,visitor.getRefuseTime(),visitor.getRefuseUid(),visitor.getRefuseUname());
+        list.add(dto1);
+        list.add(dto2);
+        list.add(dto3);
     }
 
     private VisitorSysVisitor getRelatedVisitor(VisitorSysVisitor visitor) {
@@ -175,14 +202,23 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 
-        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
-        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
-        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
+//        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
+//        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
         ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
-        if(visitorSysOfficeLocations!=null && visitorSysOfficeLocations.size()==pageSize){
-            response.setNextPageAnchor(visitorSysOfficeLocations.get(pageSize-1).getId());
+//        if(visitorSysOfficeLocations!=null && visitorSysOfficeLocations.size()==pageSize){
+//            response.setNextPageAnchor(visitorSysOfficeLocations.get(pageSize-1).getId());
+//        }
+//        response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+        List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
+        Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        if(organization!=null) {
+            BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
+            dto.setId(cmd.getOwnerId());
+            dto.setOfficeLocationName(organization.getName());
+            officeLocationList.add(dto);
         }
-        response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+        response.setOfficeLocationList(officeLocationList);
         return response;
     }
 
@@ -322,6 +358,24 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             related = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
         }
+        VisitorsysStatus visitorsysStatus = checkVisitStatus(visitor.getVisitStatus());
+        //如果是确认到访，那么不能更新关联访客记录的状态，因为需要两次到访，首先是园区，然后是公司。
+        if(visitorsysStatus == VisitorsysStatus.HAS_VISITED){
+            VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+            if(type == VisitorsysVisitorType.BE_INVITED) {
+                related.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+            }
+            related.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+            related.setConfirmTime(null);
+            related.setConfirmUid(null);
+            related.setConfirmUname(null);
+        }else if(visitorsysStatus == VisitorsysStatus.WAIT_CONFIRM_VISIT){
+            VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+            if(type == VisitorsysVisitorType.BE_INVITED) {
+                related.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+            }
+            related.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());
+        }
         visitorSysVisitorProvider.updateVisitorSysVisitor(related);
         visitorsysSearcher.syncVisitor(related);
         return null;
@@ -426,6 +480,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         User user = UserContext.current().getUser();
         visitor.setConfirmUid(user==null?-1:user.getId());
         visitor.setConfirmUname(user==null?"anonymous":user.getAccountName());
+        return visitor;
+    }
+
+    /**
+     * 将访客状态转为已确认到访
+     * @param visitor
+     * @return
+     */
+    private VisitorSysVisitor generateRejectVisitor(VisitorSysVisitor visitor) {
+        visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
+        User user = UserContext.current().getUser();
+        visitor.setRefuseUid(user==null?-1:user.getId());
+        visitor.setRefuseUname(user==null?"anonymous":user.getAccountName());
         return visitor;
     }
 
@@ -623,10 +691,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
 
     private GetConfigurationResponse getDefaultConfiguration() {
-        List<GeneralFormFieldDTO> formConfig = JSONObject.parseObject(VisitorsysConstant.DEFAULT_FORM_JSON,
-                new TypeReference<List<GeneralFormFieldDTO>>() {});
         GetConfigurationResponse response = new GetConfigurationResponse();
-        response.setFormConfig(formConfig);
+        GeneralForm forms = generalFormProvider.getActiveGeneralFormByName(VisitorsysConstant.COMMUNITY_MODULE_ID, 0L, "visitorsys", "visitorsys");
+        if(forms!=null) {
+            List<GeneralFormFieldDTO> formConfig = JSONObject.parseObject(forms.getTemplateText(),
+                    new TypeReference<List<GeneralFormFieldDTO>>() {
+                    });
+            response.setFormConfig(formConfig);
+        }
         VisitorsysBaseConfig visitorsysBaseConfig = new VisitorsysBaseConfig();
         visitorsysBaseConfig.generateDefaultValue();
         response.setBaseConfig(visitorsysBaseConfig);
@@ -758,19 +830,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "unknown visitor "+cmd.getVisitorId());
         }
-        visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+
         dbProvider.execute(r->{
-            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
-            relatedVisitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-            if(type == VisitorsysVisitorType.BE_INVITED){
-                visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-                relatedVisitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-            }
+//            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            generateRejectVisitor(visitor);
             visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
             visitorsysSearcher.syncVisitor(visitor);
-            visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
-            visitorsysSearcher.syncVisitor(relatedVisitor);
+//            visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
+//            visitorsysSearcher.syncVisitor(relatedVisitor);
             return null;
         });
     }

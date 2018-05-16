@@ -19,6 +19,16 @@ public class BaseVisitorActionDTO {
     private Long uid;
     private String uname;
 
+    public BaseVisitorActionDTO(Byte actionType, Timestamp time, Long uid, String uname) {
+        this.actionType = actionType;
+        this.time = time;
+        this.uid = uid;
+        this.uname = uname;
+    }
+
+    public BaseVisitorActionDTO() {
+    }
+
     public Byte getActionType() {
         return actionType;
     }

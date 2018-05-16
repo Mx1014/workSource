@@ -34,6 +34,7 @@ public class VisitorsysConstant {
     public static final String VISITORSYS_IPAD_CONFIG = "visitorsys.ipad.config";//ipad左邻logo,welcome,button,version
 
     //短信字段
+    public static final String SMS_MODLUENAME_CN= "【左邻访客】";//短信发送模块名称
     public final static String SMS_MODLUENAME = "modlueName";
     public final static String SMS_VERIFICATIONCODE = "verificationCode";
     public final static String SMS_APPNAME = "appName";
@@ -58,27 +59,7 @@ public class VisitorsysConstant {
     public final static int ERROR_INBLACKLIST_PHONE_ENTERPRISE= 1408;  //此手机号码已进入黑名单
     public final static int ERROR_REGISTED_IPAD= 1409;  //此ipad已被注册过
 
+    //常规常量
+    public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id
 
-//    //默认表单值
-//    public static final String DEFAULT_FORM_JSON = "[{\"dataSourceType\":\"\",\"dynamicFlag\":1,\"fieldDisplayName\":\"失效时间\",\"fieldExtra\":\"" +
-//            "{\\\"limitWord\\\":10}\",\"fieldName\":\"invalidTime\",\"fieldType\":\"INTEGER_TEXT\",\"renderType\":\"DEFAULT\"," +
-//            "\"requiredFlag\":0,\"validatorType\":\"NUM_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"\"," +
-//            "\"dynamicFlag\":1,\"fieldDisplayName\":\"车牌号码\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":" +
-//            "\"plateNo\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType" +
-//            "\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"\",\"dynamicFlag\":1,\"fieldDisplayName\":\"证件号码\"," +
-//            "\"fieldExtra\":\"{\\\"limitWord\\\":50}\",\"fieldName\":\"idNumber\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\"," +
-//            "\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"\"" +
-//            ",\"dynamicFlag\":1,\"fieldDisplayName\":\"到访楼层\",\"fieldExtra\":\"{\\\"limitWord\\\":100}\"" +
-//            ",\"fieldName\":\"visitFloor\",\"fieldType\":\"SINGLE_LINE_TEXT\"" +
-//            ",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\"" +
-//            ",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"\",\"dynamicFlag\":1,\"fieldDisplayName\":\"到访门牌\"" +
-//            ",\"fieldExtra\":\"{\\\"limitWord\\\":100}\",\"fieldName\":\"visitAddresses\",\"fieldType\":\"SINGLE_LINE_TEXT\"" +
-//            ",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"}]";
-//
-//    //
-//    public static final String SMS_MODLUENAME_CN= "【左邻访客】";//
-    public static final String DEFAULT_FORM_JSON = "";
-
-    //
-    public static final String SMS_MODLUENAME_CN= "";//
 }
