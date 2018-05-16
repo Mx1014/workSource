@@ -101,7 +101,9 @@ public class ForumProviderImpl implements ForumProvider {
     
     @Override
     public void createForum(Forum forum) {
-        long id = this.shardingProvider.allocShardableContentId(EhForums.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhForums.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhForums.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForums.class, id));
         
         EhForumsDao dao = new EhForumsDao(context.configuration());
@@ -207,8 +209,10 @@ public class ForumProviderImpl implements ForumProvider {
     public void createPost(Post post) {
         long startTime = System.currentTimeMillis();
         assert(post.getForumId() != null);
-        
-        long id = this.shardingProvider.allocShardableContentId(EhForumPosts.class).second();
+
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhForumPosts.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhForumPosts.class).second();
         long seq = sequenceProvider.getNextSequence(Constants.FORUM_MODIFY_SEQUENCE_DOMAIN_NAME);
         
         post.setId(id);

@@ -108,7 +108,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public void createCommunity(Long creatorId, Community community) {
-        long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhCommunities.class);
+        //long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
 
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

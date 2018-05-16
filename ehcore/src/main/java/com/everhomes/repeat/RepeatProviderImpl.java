@@ -35,8 +35,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(RepeatProviderImpl.
 	private SequenceProvider sequenceProvider;
 	@Override
 	public void createRepeatSettings(RepeatSettings repeat) {
-
-		long id = this.shardingProvider.allocShardableContentId(EhRepeatSettings.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+	    long id = this.dbProvider.allocPojoRecordId(EhRepeatSettings.class);
+		//long id = this.shardingProvider.allocShardableContentId(EhRepeatSettings.class).second();
 		
 		repeat.setId(id);
 		repeat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
