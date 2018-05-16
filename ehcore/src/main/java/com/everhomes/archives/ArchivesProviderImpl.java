@@ -261,7 +261,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         List<ArchivesOperationalConfiguration> results = new ArrayList<>();
         query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class))
+            results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));
             return null;
         });
         return results;
