@@ -798,37 +798,40 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
-            UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
-            command.setId(updateCustomer.getOrganizationId());
-            command.setName(updateCustomer.getName());
-            command.setDisplayName(updateCustomer.getNickName());
-            command.setNamespaceId(updateCustomer.getNamespaceId());
-            command.setAvatar(updateCustomer.getCorpLogoUri());
-            command.setDescription(updateCustomer.getCorpDescription());
-            command.setCommunityId(updateCustomer.getCommunityId());
-            command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
-            command.setAddress(updateCustomer.getContactAddress());
-            command.setLongitude(updateCustomer.getLongitude());
-            command.setLatitude(updateCustomer.getLatitude());
-            command.setWebsite(updateCustomer.getCorpWebsite());
-            command.setAttachments(cmd.getBanner());
-            command.setPostUri(cmd.getPostUri());
-            command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
-            command.setContactsPhone(cmd.getHotline());
-            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
-            List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
-            if(entryInfos!=null && entryInfos.size()>0){
-                entryInfos.forEach((e)->{
-                    OrganizationAddressDTO addressDTO = new OrganizationAddressDTO();
-                    addressDTO.setAddressId(e.getAddressId());
-                    addressDTO.setBuildingId(e.getBuildingId());
-                    addressDTO.setEnterpriseId(customer.getOrganizationId());
-                    addressDTOs.add(addressDTO);
-                });
+            Organization org = organizationProvider.findOrganizationById(updateCustomer.getOrganizationId());
+            if (org != null) {
+                UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
+                command.setId(updateCustomer.getOrganizationId());
+                command.setName(updateCustomer.getName());
+                command.setDisplayName(updateCustomer.getNickName());
+                command.setNamespaceId(updateCustomer.getNamespaceId());
+                command.setAvatar(updateCustomer.getCorpLogoUri());
+                command.setDescription(updateCustomer.getCorpDescription());
+                command.setCommunityId(updateCustomer.getCommunityId());
+                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
+                command.setAddress(updateCustomer.getContactAddress());
+                command.setLongitude(updateCustomer.getLongitude());
+                command.setLatitude(updateCustomer.getLatitude());
+                command.setWebsite(updateCustomer.getCorpWebsite());
                 command.setAttachments(cmd.getBanner());
-                command.setAddressDTOs(addressDTOs);
+                command.setPostUri(cmd.getPostUri());
+                command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+                command.setContactsPhone(cmd.getHotline());
+                List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+                List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
+                if (entryInfos != null && entryInfos.size() > 0) {
+                    entryInfos.forEach((e) -> {
+                        OrganizationAddressDTO addressDTO = new OrganizationAddressDTO();
+                        addressDTO.setAddressId(e.getAddressId());
+                        addressDTO.setBuildingId(e.getBuildingId());
+                        addressDTO.setEnterpriseId(customer.getOrganizationId());
+                        addressDTOs.add(addressDTO);
+                    });
+                    command.setAttachments(cmd.getBanner());
+                    command.setAddressDTOs(addressDTOs);
+                }
+                organizationService.updateEnterprise(command, true);
             }
-            organizationService.updateEnterprise(command, true);
         }
 //        else {//没有企业的要新增一个
 //            OrganizationDTO dto = createOrganization(updateCustomer);
@@ -2249,6 +2252,9 @@ public class CustomerServiceImpl implements CustomerService {
             if (organization != null) {
                 organizationSearcher.deleteById(organization.getId());
                 organizationProvider.deleteOrganization(organization);
+                if (customer != null) {
+                    customer.setOrganizationId(0L);
+                }
             }
         }
         //sync to es
