@@ -2,7 +2,7 @@ package com.everhomes.rest.archives;
 
 public interface ArchivesServiceCode {
 
-    static final String SCOPE = "archives";
+    String SCOPE = "archives";
 
     int ERROR_NAME_IS_EMPTY = 100001;    //  姓名不能为空
     int ERROR_NAME_TOO_LONG = 100002;    //  姓名过长
@@ -13,7 +13,7 @@ public interface ArchivesServiceCode {
     int ERROR_EMPLOYEE_TYPE_IS_EMPTY = 100007;  //  员工类型不能为空
     int ERROR_DEPARTMENT_NOT_FOUND = 100008; //  部门不存在
     int ERROR_JOB_POSITION_NOT_FOUND = 100009; //  职务不存在
-    int ERROR_CONTACT_ENNAME_WRONG_FORMAT = 100010;  //  英文名格式错误
+    int ERROR_CONTACT_EN_NAME_WRONG_FORMAT = 100010;  //  英文名格式错误
     int ERROR_WORK_EMAIL_WRONG_FORMAT = 100011;  //  邮箱格式错误
     int ERROR_CONTACT_SHORT_TOKEN_WRONG_FORMAT = 100012;  //  短号格式错误
     int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
@@ -25,6 +25,4 @@ public interface ArchivesServiceCode {
     String EMPLOYEE_IMPORT_MODULE = "1003";  //  人员档案导入模板
     String EMPLOYEE_LIST = "1004";   //  人员档案列表
     String EMPLOYEE_IMPORT_REMARK = "1005";  //  人员档案导入备注
-
-    int ERROR_DUPLICATE_OPERATION = 10001; //   相同的操作
 }

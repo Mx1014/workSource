@@ -1,25 +1,29 @@
 package com.everhomes.rest.archives;
 
 public interface ArchivesTemplateCode {
-	static final String SCOPE = "archives.notification";
+	String SCOPE = "archives.notification";
 
-	static final int ARCHIVES_PROBATION_CASE = 1;		//	试用或实习员工
+	int ARCHIVES_PROBATION_CASE = 1;		//	试用或实习员工
 
-	static final int ARCHIVES_ON_THE_JOB_CASE = 2;		//	在职员工
+	int ARCHIVES_ON_THE_JOB_CASE = 2;		//	在职员工
 
-	static final int ARCHIVES_DISMISS_CASE = 3;			//	离职员工
+	int ARCHIVES_DISMISS_CASE = 3;			//	离职员工
 
-	static final int ARCHIVES_DEPARTMENT_CHANGE = 4;	//	用户部门的变动信息记录
+	int ARCHIVES_REMIND_BEGINNING = 5;		//	人事提醒开头
 
-	static final int ARCHIVES_REMIND_BEGINNING = 5;		//	人事提醒开头
+	int ARCHIVES_REMIND_EMPLOYMENT = 6;	//	人事转正提醒
 
-	static final int ARCHIVES_REMIND_EMPLOYMENT = 6;	//	人事转正提醒
+	int ARCHIVES_REMIND_CONTRACT = 7;		//	人事合同到期提醒
 
-	static final int ARCHIVES_REMIND_CONTRACT = 7;		//	人事合同到期提醒
+	int ARCHIVES_REMIND_ID	= 8;			//	人事身份证到期提醒
 
-	static final int ARCHIVES_REMIND_ID	= 8;			//	人事身份证到期提醒
+	int ARCHIVES_REMIND_ANNIVERSARY = 9;	//	人事周年提醒
 
-	static final int ARCHIVES_REMIND_ANNIVERSARY = 9;	//	人事周年提醒
+	int ARCHIVES_REMIND_BIRTH = 10;		//	人事生日提醒
 
-	static final int ARCHIVES_REMIND_BIRTH = 10;		//	人事生日提醒
+
+	int OPERATION_PROBATION_PERIOD = 101;     //  操作提示试用期
+	int OPERATION_DEPARTMENT_CHANGE = 102;    //  操作提示部门变动
+	int OPERATION_JOB_POSITION_CHANGE = 103;  //  操作提示岗位变动
+	int OPERATION_JOB_LEVEL_CHANGE = 104;     //  操作提示职级变动
 }

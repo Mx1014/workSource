@@ -2,116 +2,116 @@ package com.everhomes.rest.archives;
 
 public interface ArchivesParameter {
 
-    static final String BIRTHDAY = "birthday";
+    String BIRTHDAY = "birthday";
 
-    static final String CONTACT_NAME = "contactName";
+    String CONTACT_NAME = "contactName";
 
-    static final String GENDER = "gender";        //	性别
+    String GENDER = "gender";        //	性别
 
-    static final String CONTACT_TOKEN = "contactToken";
+    String CONTACT_TOKEN = "contactToken";
 
-    static final String REGION_CODE = "regionCode";
+    String REGION_CODE = "regionCode";
 
-    static final String EMPLOYEE_NO = "employeeNo";
+    String EMPLOYEE_NO = "employeeNo";
 
-    static final String MARITAL_FLAG = "maritalFlag";    //	婚姻状况
+    String MARITAL_FLAG = "maritalFlag";    //	婚姻状况
 
-    static final String POLITICAL_FLAG = "politicalFlag";
+    String POLITICAL_FLAG = "politicalFlag";
 
-    static final String NATIVE_PLACE = "nativePlace";
+    String NATIVE_PLACE = "nativePlace";
 
-    static final String EN_NAME = "enName";
+    String EN_NAME = "enName";
 
-    static final String REG_RESIDENCE = "regResidence";
+    String REG_RESIDENCE = "regResidence";
 
-    static final String ID_NUMBER = "idNumber";
+    String ID_NUMBER = "idNumber";
 
-    static final String EMAIL = "email";
+    String EMAIL = "email";
 
-    static final String WECHAT = "wechat";
+    String WECHAT = "wechat";
 
-    static final String QQ = "qq";
+    String QQ = "qq";
 
-    static final String EMERGENCY_NAME = "emergencyName";
+    String EMERGENCY_NAME = "emergencyName";
 
-    static final String EMERGENCY_CONTACT = "emergencyContact";
+    String EMERGENCY_CONTACT = "emergencyContact";
 
-    static final String ADDRESS = "address";
+    String ADDRESS = "address";
 
-    static final String EMPLOYEE_TYPE = "employeeType";    //	员工类型
+    String EMPLOYEE_TYPE = "employeeType";    //	员工类型
 
-    static final String EMPLOYEE_STATUS = "employeeStatus";    //	员工状态
+    String EMPLOYEE_STATUS = "employeeStatus";    //	员工状态
 
-    static final String EMPLOYMENT_TTIME = "employmentTime";
+    String EMPLOYMENT_TTIME = "employmentTime";
 
-    static final String SALARY_CARD_NUMBER = "salaryCardNumber";
+    String SALARY_CARD_NUMBER = "salaryCardNumber";
 
-    static final String SOCIAL_SECURITY_NUMBER = "socialSecurityNumber";
+    String SOCIAL_SECURITY_NUMBER = "socialSecurityNumber";
 
-    static final String PROVIDENT_FUND_NUMBER = "providentFundNumber";
+    String PROVIDENT_FUND_NUMBER = "providentFundNumber";
 
-    static final String CHECK_IN_TIME = "checkInTime";
+    String CHECK_IN_TIME = "checkInTime";
 
-    static final String PROCREATIVE = "procreative";
+    String PROCREATIVE = "procreative";
 
-    static final String ETHNICITY = "ethnicity";
+    String ETHNICITY = "ethnicity";
 
-    static final String ID_TYPE = "idType";
+    String ID_TYPE = "idType";
 
-    static final String ID_EXPIRY_DATE = "idExpiryDate";
+    String ID_EXPIRY_DATE = "idExpiryDate";
 
-    static final String DEGREE = "degree";
+    String DEGREE = "degree";
 
-    static final String GRADUATION_SCHOOL = "graduationSchool";
+    String GRADUATION_SCHOOL = "graduationSchool";
 
-    static final String GRADUATION_TIME = "graduationTime";
+    String GRADUATION_TIME = "graduationTime";
 
-    static final String EMERGENCY_RELATIONSHIP = "emergencyRelationship";
+    String EMERGENCY_RELATIONSHIP = "emergencyRelationship";
 
-    static final String CONTACT_SHORT_TOKEN = "contactShortToken";
+    String CONTACT_SHORT_TOKEN = "contactShortToken";
 
-    static final String WORK_EMAIL = "workEmail";
+    String WORK_EMAIL = "workEmail";
 
-    static final String CONTRACT_PARTY_ID = "contractPartyId";
+    String CONTRACT_PARTY_ID = "contractPartyId";
 
-    static final String WORK_START_TIME = "workStartTime";
+    String WORK_START_TIME = "workStartTime";
 
-    static final String CONTRACT_START_TIME = "contractStartTime";
+    String CONTRACT_START_TIME = "contractStartTime";
 
-    static final String CONTRACT_END_TIME = "contractEndTime";
+    String CONTRACT_END_TIME = "contractEndTime";
 
-    static final String SALARY_CARD_BANK = "salaryCardBank";
+    String SALARY_CARD_BANK = "salaryCardBank";
 
-    static final String REG_RESIDENCE_TYPE = "regResidenceType";
+    String REG_RESIDENCE_TYPE = "regResidenceType";
 
-    static final String ID_PHOTO = "idPhoto";
+    String ID_PHOTO = "idPhoto";
 
-    static final String VISA_PHOTO = "visaPhoto";
+    String VISA_PHOTO = "visaPhoto";
 
-    static final String LIFE_PHOTO = "lifePhoto";
+    String LIFE_PHOTO = "lifePhoto";
 
-    static final String ENTRY_FORM = "entryForm";
+    String ENTRY_FORM = "entryForm";
 
-    static final String GRADUATION_CERTIFICATE = "graduationCertificate";
+    String GRADUATION_CERTIFICATE = "graduationCertificate";
 
-    static final String DEGREE_CERTIFICATE = "degreeCertificate";
+    String DEGREE_CERTIFICATE = "degreeCertificate";
 
-    static final String CONTRACT_CERTIFICATE = "contractCertificate";
+    String CONTRACT_CERTIFICATE = "contractCertificate";
 
-    static final String DEPARTMENT = "department";    //	部门
+    String DEPARTMENT = "department";    //	部门
 
-    static final String JOB_POSITION = "jobPosition";
+    String JOB_POSITION = "jobPosition";
 
-    static final String JOB_LEVEL = "jobLevel";
+    String JOB_LEVEL = "jobLevel";
 
-    static final String DISMISS_TYPE = "dismissType";   //  离职类型
+    String DISMISS_TYPE = "dismissType";   //  离职类型
 
-    static final String DISMISS_REASON = "dismissReason";    //	离职原因
+    String DISMISS_REASON = "dismissReason";    //	离职原因
 
-    static final String DEPARTMENT_IDS = "departmentIds";
+    String DEPARTMENT_IDS = "departmentIds";
 
-    static final String JOB_POSITION_IDS = "jobPositionIds";
+    String JOB_POSITION_IDS = "jobPositionIds";
 
-    static final String JOB_LEVEL_IDS = "jobLevelIds";
+    String JOB_LEVEL_IDS = "jobLevelIds";
 
 }
