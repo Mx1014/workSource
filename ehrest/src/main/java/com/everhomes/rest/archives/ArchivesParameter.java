@@ -116,4 +116,6 @@ public interface ArchivesParameter {
 
     String MONTH = "month";
 
+    String TRANSFER_TYPE = "transferType";
+
 }

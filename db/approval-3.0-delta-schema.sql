@@ -57,6 +57,7 @@ CREATE TABLE `eh_archives_operational_logs` (
   `string_tag3` VARCHAR(1024) COMMENT 'redundant information for the operate',
   `string_tag4` VARCHAR(1024) COMMENT 'redundant information for the operate',
   `string_tag5` VARCHAR(1024) COMMENT 'redundant information for the operate',
+  `string_tag6` VARCHAR(1024) COMMENT 'redundant information for the operate',
   `operator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
   `operator_name` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',

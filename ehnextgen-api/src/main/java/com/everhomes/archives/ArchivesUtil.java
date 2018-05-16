@@ -6,6 +6,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.archives.ArchivesDismissReason;
 import com.everhomes.rest.archives.ArchivesDismissType;
 import com.everhomes.rest.archives.ArchivesParameter;
+import com.everhomes.rest.archives.ArchivesTransferType;
 import com.everhomes.rest.general_approval.GeneralFormFieldAttribute;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.EmployeeStatus;
@@ -216,6 +217,18 @@ public class ArchivesUtil {
                 else if (value == EmployeeStatus.DISMISSAL.getCode())
                     return "离职";
                 break;
+
+            case ArchivesParameter.TRANSFER_TYPE:
+                if(value == null)
+                    return "";
+                else if (value == ArchivesTransferType.PROMOTE.getCode())
+                    return "晋升";
+                else if (value == ArchivesTransferType.TRANSFER.getCode())
+                    return "调整";
+                else if (value == ArchivesTransferType.OTHER.getCode())
+                    return "其他";
+                break;
+
             /*case ArchivesParameter.DEPARTMENT:
                 List<OrganizationDTO> departments = (List<OrganizationDTO>) obj;
                 if (departments != null && departments.size() > 0) {

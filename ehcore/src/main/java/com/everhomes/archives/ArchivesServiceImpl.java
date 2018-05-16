@@ -1095,7 +1095,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         log.setStringTag1(getOrgNamesByIds(cmd.getDepartmentIds()));
         log.setStringTag2(ArchivesUtil.resolveArchivesEnum(cmd.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put(ArchivesParameter.MONTH, cmd.getMonth());
+        map.put("map", cmd.getMonth());
         log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_PROBATION_PERIOD, "zh_CN", map, "months"));
         log.setOperatorUid(userId);
         log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
@@ -1133,26 +1133,30 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
-            }
-        }
-        /*if (cmd.getDetailIds() != null) {
-            for (Long detailId : cmd.getDetailIds()) {
-                ArchivesLogs log = new ArchivesLogs();
-                Map<String, Object> map = new LinkedHashMap<>();
-                map.put("new", convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                String remark = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DEPARTMENT_CHANGE, "zh_CN", map, "");
-                log.setDetailId(detailId);
-                log.setOrganizationId(cmd.getOrganizationId());
-                log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
-                log.setOperationCategory(cmd.getTransferType());
-                log.setOperationReason(cmd.getTransferReason());
-                log.setOperationRemark(remark);
+                Map<String, Object> map = new HashMap<>();
+                if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0){
+                    map.put("oldDepNames", convertToOrgNames(getEmployeeDepartment(detailId)));
+                    map.put("newDepNames", getOrgNamesByIds(cmd.getDepartmentIds()));
+                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_DEPARTMENT_CHANGE,"zb_CN", map, ""));
+                }
+                if(cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0){
+                    map.put("oldDepNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
+                    map.put("newDepNames", getOrgNamesByIds(cmd.getJobPositionIds()));
+                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_POSITION_CHANGE,"zb_CN", map, ""));
+                }
+                if(cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0){
+                    map.put("oldDepNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
+                    map.put("newDepNames", getOrgNamesByIds(cmd.getJobLevelIds()));
+                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_JOB_LEVEL_CHANGE,"zb_CN", map, ""));
+                }
+                log.setStringTag4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(),ArchivesParameter.TRANSFER_TYPE));
+                log.setStringTag5(cmd.getTransferReason());
                 log.setOperatorUid(userId);
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
-                archivesProvider.createArchivesLogs(log);
+                archivesProvider.createOperationalLog(log);
             }
-        }*/
+        }
     }
 
     /**
