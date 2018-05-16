@@ -1267,6 +1267,35 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+    
+    /**
+     * <b>URL: /asset/listUploadCertificates</b>
+     * <p>线下缴费场景，显示付费凭证图片</p>
+     */
+    @RequestMapping("listUploadCertificates")
+    @RestReturn(value=UploadCertificateInfoDTO.class)
+    public RestResponse listUploadCertificates(ListUploadCertificatesCommand cmd){
+    	UploadCertificateInfoDTO dto = assetService.listUploadCertificates(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <b>URL: /asset/uploadCertificate</b>
+     * <p>线下缴费场景，上传付费凭证图片</p>
+     */
+    //TODO
+    @RequestMapping("uploadCertificate")
+    @RestReturn(value=UploadCertificateInfoDTO.class)
+    public RestResponse uploadCertificate(UploadCertificateCommand cmd){
+    	UploadCertificateInfoDTO dto = assetService.uploadCertificate(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 
 }

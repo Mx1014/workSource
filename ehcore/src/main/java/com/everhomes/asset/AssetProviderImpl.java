@@ -20,6 +20,7 @@ import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -117,7 +118,7 @@ public class AssetProviderImpl implements AssetProvider {
     public AssetBill findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
-
+        	
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
@@ -481,6 +482,7 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
+        Integer paymentType = cmd.getPaymentType();
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -518,6 +520,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        if(paymentType!=null){
+            query.addConditions(t.PAYMENT_TYPE.eq(paymentType));
+        }
         query.addOrderBy(t.DATE_STR.desc());
 //        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
@@ -548,6 +553,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setContractId(String.valueOf(r.getContractId()));
             // 增加发票编号
             dto.setInvoiceNum(r.getInvoiceNumber());
+            //添加支付方式
+            dto.setPaymentType(r.getPaymentType());
             list.add(dto);
             return null;});
         return list;
@@ -1467,10 +1474,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         EhPaymentBillItems item = Tables.EH_PAYMENT_BILL_ITEMS.as("item");
         //BILL
+        //手动调整缴费状态时，需要将PAYMENT_TYPE置为0（线下支付）
         context.update(bill)
                 .set(bill.STATUS,(byte)1)
                 .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_OWED)
                 .set(bill.AMOUNT_OWED,new BigDecimal("0"))
+                .set(bill.PAYMENT_TYPE,0)
                 .where(bill.ID.eq(billId))
                 .execute();
         //bill item
@@ -2482,7 +2491,7 @@ public class AssetProviderImpl implements AssetProvider {
                 });
         return list.size() > 0 ? list.get(0) : null;
     }
-
+/*
     @Override
     public void changeBillStatusOnPaiedOff(List<Long> billIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2492,6 +2501,37 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.STATUS,(byte)1)
                 .where(t.ID.in(billIds))
                 .execute();
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+        //更改金钱
+        context.update(t)
+                .set(t.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
+    }
+    */
+    
+    @Override
+    public void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds,Integer paymentType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        //更新订单状态，记录订单的支付方式
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .set(t.PAYMENT_TYPE,paymentType)
+                .where(t.ID.in(billIds))
+                .execute();
+        //更新各收费项的状态
         context.update(t1)
                 .set(t1.STATUS,(byte)1)
                 .where(t1.BILL_ID.in(billIds))
@@ -4158,8 +4198,65 @@ public class AssetProviderImpl implements AssetProvider {
         return map;
     }
 
+    //根据billId查询相应的凭证图片记录
+    @Override
+	public List<PaymentBillCertificate> listUploadCertificates(Long billId) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	SelectQuery<Record> selectQuery = dslContext.selectQuery();
+    	selectQuery.addFrom(Tables.EH_PAYMENT_BILL_CERTIFICATE);
+    	selectQuery.addConditions(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId));
+    	List<PaymentBillCertificate> paymentBillCertificateList = selectQuery.fetch().map(r->{
+    		PaymentBillCertificate paymentBillCertificate = ConvertHelper.convert(r, PaymentBillCertificate.class);
+    		return paymentBillCertificate;
+    	});
+		return paymentBillCertificateList;
+	}
 
-
+    //根据billId查询对应的上传缴费凭证时的留言
+    @Override
+	public String getCertificateNote(Long billId) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	String certificateNote = dslContext.select(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE)
+    							.from(Tables.EH_PAYMENT_BILLS)
+    							.where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+    							.fetchOne(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE);
+		return certificateNote;
+	}
+    
+    //更新上传的缴费凭证的图片信息
+    @Override
+	public void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhPaymentBillCertificateDao dao = new EhPaymentBillCertificateDao(dslContext.configuration());
+    	
+    	List<PaymentBillCertificate> list = new ArrayList<>();
+    	certificateUris.stream().forEach(r->{
+    		PaymentBillCertificate paymentBillCertificate = new PaymentBillCertificate();
+    		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillCertificate.class));
+    		paymentBillCertificate.setId(id);
+    		paymentBillCertificate.setBillId(billId);
+    		paymentBillCertificate.setCertificateUri(r);
+    		list.add(paymentBillCertificate);
+    	});
+    	
+    	this.dbProvider.execute((TransactionStatus status) -> {
+    		//更新上传凭证时附带的留言
+            dslContext.update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE, certificateNote)
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+            //删除之前EH_PAYMENT_BILL_CERTIFICATE表中与该billId相关联的缴费凭证的记录
+            dslContext.delete(Tables.EH_PAYMENT_BILL_CERTIFICATE)
+            		.where(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId))
+            		.execute();
+    		//重新添加缴费凭证图片信息
+            list.stream().forEach(r->{
+            	dao.insert(r);
+            });
+            return status;
+        });
+	}
+    
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }
@@ -4172,6 +4269,4 @@ public class AssetProviderImpl implements AssetProvider {
     private static EhPaymentChargingStandards standard = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standard");
     private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("itemScope");
     private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("groupRule");
-
-
 }

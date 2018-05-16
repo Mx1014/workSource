@@ -12,6 +12,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerService;
@@ -191,6 +192,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private PortalService portalService;
+    
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -232,7 +236,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-        //校验查看的权限
+       //校验查看的权限
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
@@ -4376,4 +4380,65 @@ public class AssetServiceImpl implements AssetService {
         }
         return fieldMap;
     }
+
+	//线下缴费场景，显示付费凭证图片
+	@Override
+	public UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd) {
+		UploadCertificateInfoDTO uploadCertificateInfoDTO = new UploadCertificateInfoDTO();
+		//获取账单对应的各凭证图片信息
+		List<PaymentBillCertificate> paymentBillCertificateList = assetProvider.listUploadCertificates(cmd.getBillId());
+		List<UploadCertificateDTO> uploadCertificateDTOList = paymentBillCertificateList.stream().map(r->{
+			UploadCertificateDTO dto = new UploadCertificateDTO();
+			dto.setUri(r.getCertificateUri());
+			//根据uri来获取url
+			String url = contentServerService.parserUri(dto.getUri(),EntityType.DOMAIN.getCode(),cmd.getBillId());
+			dto.setUrl(url);
+			return dto;
+		}).collect(Collectors.toList());
+		uploadCertificateInfoDTO.setUploadCertificateDTOList(uploadCertificateDTOList);
+		//获取账单对应的上传凭证时的留言
+		String certificateNote = assetProvider.getCertificateNote(cmd.getBillId());
+		uploadCertificateInfoDTO.setCertificateNote(certificateNote);
+		
+		return uploadCertificateInfoDTO;
+	}
+	
+	//线下缴费场景，上传缴费凭证
+	@Override
+	public UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd) {
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("upload certificate for bill: billId = {}", cmd.getBillId());
+        }
+		//除去前端传过来的空uri字符串
+		if (cmd.getCertificateUris()!=null) {
+			List<String> uris = cmd.getCertificateUris();
+			Iterator<String> it = uris.iterator();
+			while (it.hasNext()) {
+				String uri = (String) it.next();
+				if (org.springframework.util.StringUtils.isEmpty(uri)) {
+					it.remove();
+				}
+			}
+		}
+		//一次最多上传6张缴费凭证图片(范围为1-6张)
+		if(cmd.getCertificateUris().size()==0 || cmd.getCertificateUris().size()>6){
+			throw RuntimeErrorException.errorWith(AssetServiceErrorCode.SCOPE, 
+					AssetServiceErrorCode.UPLOAD_CERTIFICATES_NUM_ERROR, "upload certificates num is out of range");
+		}
+		//判断该账单（paymentBill）已存在，若账单不存在则不做操作
+		PaymentBills paymentBill = assetProvider.findPaymentBillById(cmd.getBillId());
+		if (paymentBill==null) {
+			throw RuntimeErrorException.errorWith(AssetServiceErrorCode.SCOPE, 
+					AssetServiceErrorCode.ASSET_BILL_NOT_EXIST, "the bill does not exist");
+		}
+		//更新数据库中缴费凭证的相关信息
+		assetProvider.updatePaymentBillCertificates(cmd.getBillId(),cmd.getCertificateNote(),cmd.getCertificateUris());
+		//重新查询更新后的缴费凭证图片的uri和url传给前端
+		ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+		listUploadCertificatesCommand.setBillId(cmd.getBillId());
+		UploadCertificateInfoDTO uploadCertificateInfoDTO = listUploadCertificates(listUploadCertificatesCommand);		
+		
+		return uploadCertificateInfoDTO;	
+	}
+	
 }
