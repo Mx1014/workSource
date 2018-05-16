@@ -19,6 +19,7 @@ package com.everhomes.controller;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.springframework.util.Assert;
 
@@ -80,5 +81,16 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
     public void close() throws IOException {
         super.close();
         this.targetStream.close();
+    }
+
+	// 由于平台升级到1.0.0版本，spring也跟随升级了，所以需要补充以下接口，
+	// 以下isReady()和setWriteListener()的实现是抄支付系统中kelven的实现 by lqs 20180516
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public void setWriteListener(WriteListener listener) {
     }
 }
