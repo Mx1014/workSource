@@ -1,6 +1,8 @@
 package com.everhomes.order;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
 *@author created by yangcx
@@ -16,9 +18,17 @@ public class Test {
         return  amount.multiply(new BigDecimal(100)).longValue();
     }
 	
+	public String TimeToString(Long time){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+		return sdf.format(new Date(time));
+	}
+	
 	public static void main(String[] args) {
 		Test test = new Test();
 		System.out.println(test.changePayAmount(new BigDecimal("0.1")));
+		
+		
+		System.out.println(test.TimeToString(Long.parseLong("1522512000000")));
 	}
-
+	
 }

@@ -90,7 +90,7 @@ public class PmsyController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmsy/findMonthlyPmBill</b>
+	 * <b>URL: /pmsy/getPmsyBills</b>
 	 * <p>查询单月物业缴费单</p>
 	 */
 	@RequestMapping(value="getPmsyBills")
