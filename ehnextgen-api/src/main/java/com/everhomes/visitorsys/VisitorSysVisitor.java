@@ -13,6 +13,10 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 	private Long enterpriseId;
 	private List<PostApprovalFormItem> communityFormValues;
 	private List<PostApprovalFormItem> enterpriseFormValues;
+	private String statsDate;
+	private Integer statsHour;
+	private Integer statsWeek;
+	private Long communityId;
 
 	public Long getEnterpriseId() {
 		return enterpriseId;
@@ -36,6 +40,38 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
 		this.enterpriseFormValues = enterpriseFormValues;
+	}
+
+	public String getStatsDate() {
+		return statsDate;
+	}
+
+	public void setStatsDate(String statsDate) {
+		this.statsDate = statsDate;
+	}
+
+	public Integer getStatsHour() {
+		return statsHour;
+	}
+
+	public void setStatsHour(Integer statsHour) {
+		this.statsHour = statsHour;
+	}
+
+	public Integer getStatsWeek() {
+		return statsWeek;
+	}
+
+	public void setStatsWeek(Integer statsWeek) {
+		this.statsWeek = statsWeek;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	@Override

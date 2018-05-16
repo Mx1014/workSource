@@ -33,7 +33,18 @@ public enum VisitorsysStatus {
 	public byte getCode(){
 		return code;
 	}
-	
+
+	public static VisitorsysStatus fromCode(Byte bookingCode) {
+		if (bookingCode != null) {
+			for (VisitorsysStatus status : VisitorsysStatus.values()) {
+				if (status.code == bookingCode.byteValue()) {
+					return status;
+				}
+			}
+		}
+		return null;
+	}
+
 	public static VisitorsysStatus fromBookingCode(Byte bookingCode) {
 		if (bookingCode != null) {
 			for (VisitorsysStatus status : getBookingStatus()) {

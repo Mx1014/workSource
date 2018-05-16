@@ -91,7 +91,20 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                 "officeLocationName" : {
                     "type": "string",
                     "index": "not_analyzed"
-                }
+                },
+               "statsDate" : {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "statsHour" : {
+                    "type": "string",
+                    "index": "not_analyzed"
+                 },
+                 "statsWeek" : {
+                    "type": "string",
+                    "index": "not_analyzed"
+                 }
+
             }
           }
 

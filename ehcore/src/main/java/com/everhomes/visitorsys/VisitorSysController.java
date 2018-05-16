@@ -213,7 +213,6 @@ public class VisitorSysController extends ControllerBase {
 	@RequestMapping("getStatistics")
 	@RestReturn(GetStatisticsResponse.class)
 	public RestResponse getStatistics(GetStatisticsCommand cmd) {
-		//todo
 		GetStatisticsResponse baseResponse = visitorSysService.getStatistics(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);

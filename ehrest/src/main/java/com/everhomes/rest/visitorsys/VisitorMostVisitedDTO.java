@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
 public class VisitorMostVisitedDTO{
     private Integer ranking;
     private String enterpriseName;
-    private Integer visitorCount;
+    private Long visitorCount;
 
     public Integer getRanking() {
         return ranking;
@@ -31,11 +31,11 @@ public class VisitorMostVisitedDTO{
         this.enterpriseName = enterpriseName;
     }
 
-    public Integer getVisitorCount() {
+    public Long getVisitorCount() {
         return visitorCount;
     }
 
-    public void setVisitorCount(Integer visitorCount) {
+    public void setVisitorCount(Long visitorCount) {
         this.visitorCount = visitorCount;
     }
 

@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>VisitorsysConstant: 返回码参考 {@link com.everhomes.rest.visitorsys.VisitorsysConstant}</li>
  * <li>appkey: (必填)appkey</li>
  * <li>signature: (必填)签名</li>
  * <li>nonce: (必填)3位随机数</li>

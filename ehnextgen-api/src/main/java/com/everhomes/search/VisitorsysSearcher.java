@@ -3,6 +3,7 @@ package com.everhomes.search;
 
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.visitorsys.ListBookedVisitorParams;
+import com.everhomes.visitorsys.VisitorSysVisitor;
 
 import java.util.List;
 
@@ -17,12 +18,6 @@ public interface VisitorsysSearcher {
      * @param visitorId
      */
     void deleteById(Long visitorId);
-
-    /**
-     * 同步预约/访客至es
-     * @param object
-     */
-    void feedDoc(Object object);
 
     /**
      *  搜索预约
@@ -46,7 +41,7 @@ public interface VisitorsysSearcher {
      * 同步到es
      * @param visitor
      */
-    void syncVisitor(Object visitor);
+    void syncVisitor(VisitorSysVisitor visitor);
 
     /**
      * 统计域空间下项目的预约和访客数量
@@ -54,6 +49,6 @@ public interface VisitorsysSearcher {
      * @return
      */
 
-    GetStatisticsResponse countVisitors(GetStatisticsCommand cmd);
+    GetStatisticsResponse getStatistics(GetStatisticsCommand cmd);
 
 }

@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
+ * <li>id: (必填)id</li>
  * <li>namespaceId: (必填)域空间id</li>
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
