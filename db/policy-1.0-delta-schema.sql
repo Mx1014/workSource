@@ -96,7 +96,7 @@ CREATE TABLE `eh_policy_agent_rules` (
   `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
   `agent_flag` TINYINT(4) DEFAULT NULL COMMENT '是否代办:0为不可代办，1为可代办',
   `agent_phone` varchar(64) DEFAULT NULL COMMENT '联系方式',
-	`agent_info` varchar(64) DEFAULT NULL COMMENT '代办介绍',
+	`agent_info` text COMMENT '代办介绍',
 	`creator_id` bigint(20) NOT NULL COMMENT '创建人',
 	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
 	`updater_uid` bigint(20) NOT NULL COMMENT '修改人',

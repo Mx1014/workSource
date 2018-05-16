@@ -15,6 +15,8 @@ package com.everhomes.rest.policy;
  * <li>tax: 纳税总额</li>
  * <li>qualification: 单位资质</li>
  * <li>financing: A轮融资</li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class GetPolicyCommand {
@@ -32,6 +34,9 @@ public class GetPolicyCommand {
     private String tax;
     private String qualification;
     private String financing;
+
+    private Long pageAnchor;
+    private Integer pageSize;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -135,5 +140,21 @@ public class GetPolicyCommand {
 
     public void setFinancing(String financing) {
         this.financing = financing;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 }

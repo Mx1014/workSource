@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestDoc(value="Policy controller", site="policy")
@@ -21,6 +22,8 @@ public class PolicyController extends ControllerBase {
     private PolicyService policyService;
     @Autowired
     private PolicyRecordService policyRecordService;
+    @Autowired
+    private PolicyAgentRuleService policyAgentRuleService;
 
     /**
      * <b>URL: /policy/createPolicy</b>
@@ -69,12 +72,9 @@ public class PolicyController extends ControllerBase {
      * <p>根据标题获取政策</p>
      */
     @RequestMapping("listPolicies")
-    @RestReturn(value=PolicyDTO.class, collection=true)
-    public RestResponse listPoliciesByTitle(listPoliciesCommand cmd) {
-        List<PolicyDTO> dtos = policyService.listPoliciesByTitle(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+    @RestReturn(value=PolicyResponse.class)
+    public PolicyResponse listPoliciesByTitle(listPoliciesCommand cmd) {
+        PolicyResponse response = policyService.listPoliciesByTitle(cmd);
         return response;
     }
 
@@ -97,12 +97,9 @@ public class PolicyController extends ControllerBase {
      * <p>根据关键字获取政策</p>
      */
     @RequestMapping("searchPolicies")
-    @RestReturn(value=PolicyDTO.class, collection=true)
-    public RestResponse searchPolicies(GetPolicyCommand cmd) {
-        List<PolicyDTO> dtos = policyService.searchPolicies(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+    @RestReturn(value=PolicyResponse.class)
+    public PolicyResponse searchPolicies(GetPolicyCommand cmd) {
+        PolicyResponse response = policyService.searchPolicies(cmd);
         return response;
     }
 
@@ -111,12 +108,9 @@ public class PolicyController extends ControllerBase {
      * <p>查询政策计算器记录</p>
      */
     @RequestMapping("searchPolicyRecords")
-    @RestReturn(value=PolicyDTO.class, collection=true)
-    public RestResponse searchPolicyRecords(GetPolicyRecordCommand cmd) {
-        List<PolicyRecordDTO> dtos = policyRecordService.searchPolicyRecords(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+    @RestReturn(value=PolicyRecordResponse.class)
+    public PolicyRecordResponse searchPolicyRecords(GetPolicyRecordCommand cmd) {
+        PolicyRecordResponse response = policyRecordService.searchPolicyRecords(cmd);
         return response;
     }
 
@@ -128,6 +122,43 @@ public class PolicyController extends ControllerBase {
     @RestReturn(value=PolicyDTO.class)
     public RestResponse searchPolicyRecordsById(GetPolicyByIdCommand cmd) {
         PolicyRecordDTO dto = policyRecordService.searchPolicyRecordById(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /policy/exportPolicyRecords</b>
+     * <p>导出查询记录列表</p>
+     */
+    @RequestMapping("exportPolicyRecords")
+    public void exportPolicyRecords(GetPolicyRecordCommand cmd, HttpServletResponse resp) {
+        policyRecordService.exportPolicyRecords(cmd, resp);
+    }
+
+    /**
+     * <b>URL: /policy/admin/setPolicyAgent</b>
+     * <p>设置政策代办</p>
+     */
+    @RequestMapping("admin/setPolicyAgent")
+    @RestReturn(value=PolicyAgentRuleDTO.class)
+    public RestResponse setPolicyAgent(SetPolicyAgentRuleCommand cmd) {
+        PolicyAgentRuleDTO dto = policyAgentRuleService.setPolicyAgentRule(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /policy/admin/searchPolicyAgentRule</b>
+     * <p>查询政策代办</p>
+     */
+    @RequestMapping("admin/searchPolicyAgentRule")
+    @RestReturn(value=PolicyAgentRuleDTO.class)
+    public RestResponse searchPolicyAgentRule(GetPolicyAgentRuleCommand cmd) {
+        PolicyAgentRuleDTO dto = policyAgentRuleService.searchPolicyAgentRuleById(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

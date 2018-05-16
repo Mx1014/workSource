@@ -71,14 +71,14 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
-    public List<PolicyDTO> listPoliciesByTitle(listPoliciesCommand cmd) {
+    public PolicyResponse listPoliciesByTitle(listPoliciesCommand cmd) {
         this.checkNamespaceNOwnerId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         return null;
     }
 
     @Override
-    public List<PolicyDTO> searchPolicies(GetPolicyCommand cmd) {
+    public PolicyResponse searchPolicies(GetPolicyCommand cmd) {
         return null;
     }
 

@@ -8,6 +8,9 @@ package com.everhomes.rest.policy;
  * <li>ownerId: 所属项目id</li>
  * <li>categoryId: 企业类型</li>
  * <li>title: 政策标题</li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
+ * <li>currentPMId: 当前管理公司ID</li>
  * </ul>
  */
 public class listPoliciesCommand {
@@ -16,6 +19,11 @@ public class listPoliciesCommand {
     private Long ownerId;
     private String categoryId;
     private String title;
+
+    private Long pageAnchor;
+    private Integer pageSize;
+
+    private Long currentPMId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -55,5 +63,29 @@ public class listPoliciesCommand {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
     }
 }

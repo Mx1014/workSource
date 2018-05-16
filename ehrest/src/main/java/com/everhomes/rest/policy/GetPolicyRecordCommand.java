@@ -9,6 +9,9 @@ package com.everhomes.rest.policy;
  * <li>beginDate: 开始日期</li>
  * <li>endDate: 结束日期</li>
  * <li>keyWord: 关键字（用户姓名/联系电话/企业名称）</li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
+ * <li>currentPMId: 当前管理公司ID</li>
  * </ul>
  */
 public class GetPolicyRecordCommand {
@@ -20,6 +23,11 @@ public class GetPolicyRecordCommand {
     private Long beginDate;
     private Long endDate;
     private String keyWord;
+
+    private Long pageAnchor;
+    private Integer pageSize;
+
+    private Long currentPMId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -75,5 +83,29 @@ public class GetPolicyRecordCommand {
 
     public void setKeyWord(String keyWord) {
         this.keyWord = keyWord;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
     }
 }

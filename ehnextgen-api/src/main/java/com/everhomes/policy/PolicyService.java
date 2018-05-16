@@ -11,6 +11,6 @@ public interface PolicyService {
     void deletePolicy(GetPolicyByIdCommand cmd);
     PolicyDTO searchPolicyById(GetPolicyByIdCommand cmd);
 
-    List<PolicyDTO> listPoliciesByTitle(listPoliciesCommand cmd);
-    List<PolicyDTO> searchPolicies(GetPolicyCommand cmd);
+    PolicyResponse listPoliciesByTitle(listPoliciesCommand cmd);
+    PolicyResponse searchPolicies(GetPolicyCommand cmd);
 }
