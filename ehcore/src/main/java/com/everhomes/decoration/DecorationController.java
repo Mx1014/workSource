@@ -22,6 +22,8 @@ import static org.apache.poi.hslf.record.RecordTypes.List;
 @RequestMapping("/decoration")
 public class DecorationController extends ControllerBase {
 
+    public static final Integer moduleId = 43000;
+    public static final String moduleType = "DECORATION";
     @Autowired
     private GeneralFormService generalFormService;
     @Autowired

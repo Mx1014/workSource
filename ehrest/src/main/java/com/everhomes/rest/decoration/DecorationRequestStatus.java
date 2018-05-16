@@ -1,19 +1,21 @@
 package com.everhomes.rest.decoration;
 
 public enum DecorationRequestStatus {
-    APPLY((byte)1,"装修申请"),
-    FILE_APPROVAL((byte)2,"资料审核"),
-    PAYMENT((byte)3,"缴费"),
-    CONSTRACT((byte)3,"进场施工"),
-    CHECK((byte)4,"验收"),
-    REFOUND((byte)5,"押金退回"),
-    COMPLETE((byte)6,"完成");
+    APPLY((byte)1,"装修申请","DECORATION_APPLY"),
+    FILE_APPROVAL((byte)2,"资料审核","DECORATION_FILE_APPROVAL"),
+    PAYMENT((byte)3,"缴费",""),
+    CONSTRACT((byte)3,"进场施工",""),
+    CHECK((byte)4,"验收","DECORATION_CHECK"),
+    REFOUND((byte)5,"押金退回",""),
+    COMPLETE((byte)6,"完成","");
 
     private byte code;
     private String describe;
-    private DecorationRequestStatus(byte code,String describe) {
+    private String flowOwnerType;
+    private DecorationRequestStatus(byte code,String describe,String flowOwnerType) {
         this.code = code;
         this.describe = describe;
+        this.flowOwnerType = flowOwnerType;
     }
     public byte getCode() {
         return this.code;
@@ -31,5 +33,9 @@ public enum DecorationRequestStatus {
 
     public String getDescribe() {
         return describe;
+    }
+
+    public String getFlowOwnerType() {
+        return flowOwnerType;
     }
 }
