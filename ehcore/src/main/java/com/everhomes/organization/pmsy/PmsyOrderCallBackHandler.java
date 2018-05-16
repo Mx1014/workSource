@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.organization.pmsy;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -33,11 +35,12 @@ public class PmsyOrderCallBackHandler implements PaymentCallBackHandler {
 		cmd2.setPayTime(cmd.getPayDatetime());
 		
 		
-		PmsyOrderEmbeddedHandler pmsyOrderEmbeddedHandler = new PmsyOrderEmbeddedHandler();
+		OrderEmbeddedHandler orderEmbeddedHandler = PlatformContext.getComponent(
+				OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+OrderType.PM_SIYUAN_CODE);
 		if(cmd2.getPayStatus().equalsIgnoreCase("1"))
-			pmsyOrderEmbeddedHandler.paySuccess(cmd2);
+			orderEmbeddedHandler.paySuccess(cmd2);
 	}
-
+	
 	@Override
 	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 		//TODO: 失败
