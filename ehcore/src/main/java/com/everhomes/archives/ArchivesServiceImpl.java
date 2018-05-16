@@ -1138,17 +1138,17 @@ public class ArchivesServiceImpl implements ArchivesService {
                 if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeDepartment(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getDepartmentIds()));
-                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
+                    log.setStringTag1(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getJobPositionIds()));
-                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
+                    log.setStringTag2(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getJobLevelIds()));
-                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zb_CN", map, ""));
+                    log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 log.setStringTag4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(), ArchivesParameter.TRANSFER_TYPE));
                 log.setStringTag5(cmd.getTransferReason());
