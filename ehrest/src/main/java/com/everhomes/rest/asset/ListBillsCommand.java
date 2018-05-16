@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
  * <li>contractNum:合同编号</li>
- * <li>paymentType:支付方式</li>
+ * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  *</ul>
  */
 public class ListBillsCommand {

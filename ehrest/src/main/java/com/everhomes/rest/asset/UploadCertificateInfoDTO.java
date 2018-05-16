@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  * <li>billId:账单id</li>
  * <li>certificateNote:上传凭证的留言</li>
- * <li>uploadCertificateDTOList:该账单下包含的凭证图片信息</li>
+ * <li>uploadCertificateDTOList:该账单下包含的凭证图片信息(包含图片uri和url)</li>
  *</ul>
  */
 public class UploadCertificateInfoDTO {

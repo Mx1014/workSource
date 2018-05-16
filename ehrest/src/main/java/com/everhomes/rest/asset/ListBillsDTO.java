@@ -30,7 +30,7 @@ import java.math.BigDecimal;
  * <li>dateStrBegin:所属者类型</li>
  * <li>dateStrEnd:所属者类型</li>
  * <li>payStatus:清账信息</li>
- * <li>paymentType:支付方式</li>
+ * <li>paymentType:支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -56,6 +56,7 @@ public class ListBillsDTO {
     private String payStatus;
     // introduce invoice num for bill display. by wentian 2018/4/16 on earth
     private String invoiceNum;
+    // introduce paymentType for bill display by steve 2018/5/16 on earth
     private Integer paymentType;
 
     public Integer getPaymentType() {
