@@ -114,4 +114,6 @@ public interface ArchivesParameter {
 
     String JOB_LEVEL_IDS = "jobLevelIds";
 
+    String MONTH = "month";
+
 }

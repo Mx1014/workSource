@@ -28,7 +28,6 @@ import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.scheduler.RunningFlag;
@@ -195,7 +194,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         AddArchivesEmployeeCommand logCommand = ConvertHelper.convert(cmd, AddArchivesEmployeeCommand.class);
         logCommand.setCheckInTime(String.valueOf(employee.getCheckInTime()));
         logCommand.setEmploymentTime(logCommand.getCheckInTime());
-        logCommand.setMonths(0);
+        logCommand.setMonth(0);
         logCommand.setEmployeeType(EmployeeType.FULLTIME.getCode());
         logCommand.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
         addCheckInLogs(detailId, logCommand);
@@ -779,7 +778,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return ids;
     }
 
-    private String convertToOrgNamesByIds(List<Long> orgIds){
+    private String getOrgNamesByIds(List<Long> orgIds){
         StringBuilder names = new StringBuilder();
         if(orgIds != null && orgIds.size()>0){
             for(Long orgId : orgIds){
@@ -1092,10 +1091,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         log.setOrganizationId(cmd.getOrganizationId());
         log.setOperationType(ArchivesOperationType.CHECK_IN.getCode());
         log.setOperationTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-        Organization department = organizationProvider.findOrganizationById(cmd.getDepartmentIds().get(0));
-        log.setStringTag1(department.getName());
+//        Organization department = organizationProvider.findOrganizationById(cmd.getDepartmentIds().get(0));
+        log.setStringTag1(getOrgNamesByIds(cmd.getDepartmentIds()));
         log.setStringTag2(ArchivesUtil.resolveArchivesEnum(cmd.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
-        log.setStringTag3(cmd.getMonths().toString() + "个月");
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put(ArchivesParameter.MONTH, cmd.getMonth());
+        log.setStringTag3(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.OPERATION_PROBATION_PERIOD, "zh_CN", map, "months"));
         log.setOperatorUid(userId);
         log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
         archivesProvider.createOperationalLog(log);
@@ -1373,7 +1374,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.EMPLOYEE_NO, employee.getEmployeeNo());
         valueMap.put(ArchivesParameter.CONTACT_SHORT_TOKEN, employee.getContactShortToken());
         valueMap.put(ArchivesParameter.WORK_EMAIL, employee.getWorkEmail());
-        valueMap.put(ArchivesParameter.CONTRACT_PARTY_ID, convertToOrgNamesByIds(Collections.singletonList(employee.getContractPartyId())));
+        valueMap.put(ArchivesParameter.CONTRACT_PARTY_ID, getOrgNamesByIds(Collections.singletonList(employee.getContractPartyId())));
         valueMap.put(ArchivesParameter.SALARY_CARD_NUMBER, employee.getSalaryCardNumber());
         valueMap.put(ArchivesParameter.SALARY_CARD_BANK, employee.getSalaryCardBank());
         valueMap.put(ArchivesParameter.SOCIAL_SECURITY_NUMBER, employee.getSocialSecurityNumber());
