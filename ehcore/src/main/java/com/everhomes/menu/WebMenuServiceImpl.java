@@ -905,10 +905,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 		introduces.setName("走进园区");
 		introduces.setDtos(new ArrayList<>());
 
-		WebMenuDTO introduce1 = new WebMenuDTO();
-		introduce1.setName("园区介绍");
-		introduce1.setDataType("community-introduce");
-		introduces.getDtos().add(introduce1);
+		moduleIds.clear();
+		moduleIds.add(40500L);//园区介绍
+		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
+		if(services405 != null && services405.size() > 0){
+			for(WebMenuDTO dto: services405){
+				if("园区介绍".equals(dto.getName())){
+					introduces.getDtos().add(dto);
+					break;
+				}
+			}
+
+		}
 
 		WebMenuDTO introduce2 = new WebMenuDTO();
 		introduce2.setName("名企风采");
@@ -967,7 +975,13 @@ public class WebMenuServiceImpl implements WebMenuService {
 		moduleIds.add(40500L);//服务联盟
 		List<WebMenuDTO> services405 = findWebMenuDtoByModuleIds(cmd.getNamespaceId(), moduleIds);
 		if(services405 != null && services405.size() > 0){
-			sbuServices.addAll(services405);
+			for(WebMenuDTO dto: services405){
+				if("园区介绍".equals(dto.getName())){
+					continue;
+				}
+				sbuServices.add(dto);
+			}
+
 		}
 
 
@@ -982,7 +996,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 
 		WebMenuDTO resources = new WebMenuDTO();
-		resources.setName("预定中心");
+		resources.setName("预订中心");
 
 
 		List<WebMenuDTO> sbuResources = new ArrayList<>();
