@@ -131,3 +131,5 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 
 -- 企业简介改成richText
 UPDATE `eh_var_fields` SET `field_param`='{\"fieldParamType\": \"richText\", \"length\": 204800}' WHERE `name`='corpDescription' and `module_name`='enterprise_customer';
+
+UPDATE eh_var_field_scopes set mandatory_flag = 1 where  field_id in (10966,10965);
