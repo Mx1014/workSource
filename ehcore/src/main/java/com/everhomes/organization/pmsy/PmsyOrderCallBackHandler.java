@@ -34,10 +34,8 @@ public class PmsyOrderCallBackHandler implements PaymentCallBackHandler {
 		
 		
 		PmsyOrderEmbeddedHandler pmsyOrderEmbeddedHandler = new PmsyOrderEmbeddedHandler();
-		if(cmd2.getPayStatus().equalsIgnoreCase("success"))
+		if(cmd2.getPayStatus().equalsIgnoreCase("1"))
 			pmsyOrderEmbeddedHandler.paySuccess(cmd2);
-		if(cmd2.getPayStatus().equalsIgnoreCase("fail"))
-			pmsyOrderEmbeddedHandler.payFail(cmd2);
 	}
 
 	@Override
