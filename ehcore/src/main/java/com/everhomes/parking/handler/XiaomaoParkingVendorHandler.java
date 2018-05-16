@@ -36,20 +36,20 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final String GET_CARD = "/park/getMonthCard";
     //办理月卡，续费
     private static final String OPEN_CARD = "/park/openMonthCard";
-    
+
     //临时车缴费单查询
     private static final String CHARGING = "/park/charging";
-    
+
     //缴费通知
     private static final String POSTCHARGE = "/park/postCharge";
-    
+
  // 新增月卡接口
 	private static final String HANDLER_MONTHCARD = "/park/handleMonthCard";
-	
+
 	// 获取月卡类型接口
 	private static final String GET_MONTHCARD_TYPE = "/park/getMonthCardType";
-    
-    
+
+
 
     private static final int SUCCESS = 1;
 
@@ -101,13 +101,13 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return null;
     }
 
-    /**   
+    /**
     * @Function: XiaomaoParkingVendorHandler.java
     * @Description: 月卡充值
     *
     * @version: v1.0.0
     * @author:	 黄明波
-    * @date: 2018年5月10日 下午2:35:05 
+    * @date: 2018年5月10日 下午2:35:05
     *
     */
     private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
@@ -151,7 +151,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         String parkId = configProvider.getValue("parking.xiaomao.parkId." + parkingLotId, "");
         String keyId = configProvider.getValue("parking.xiaomao.accessKeyId."+parkingLotId, "");
         String key = configProvider.getValue("parking.xiaomao.accessKeyValue."+parkingLotId, "");
-        
+
         param.put("parkId", parkId);
         param.put("accessKeyId", keyId);
 
@@ -216,11 +216,11 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
                 break;
             }
         }
-        
+
         if (null == temp) {
         	return;
         }
-        
+
         dto.setCardTypeId(temp.getStandardId());
         dto.setCardType(temp.getStandardType());
         dto.setRateToken(r.getId().toString());
@@ -252,17 +252,17 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		return false;
 	}
 
-    /**   
+    /**
     * @Function: XiaomaoParkingVendorHandler.java
     * @Description: 开通月卡
     *
     * @version: v1.0.0
     * @author:	 黄明波
-    * @date: 2018年4月9日 下午6:41:07 
+    * @date: 2018年4月9日 下午6:41:07
     *
     */
     private boolean openMonthCard(ParkingRechargeOrder order){
-    	
+
         ParkingCardRequest request;
         if (null != order.getCardRequestId()) {
             request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
@@ -366,7 +366,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-    	
+
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		String result = post(param, CHARGING, parkingLot.getId());
@@ -379,11 +379,11 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		}
 
 		int freeParkingTime  = configProvider.getIntValue("parking.xiaomao.free.time", 15); //初始停车时长，单位分
-		long startTime = Utils.strToLong(tempFee.getStartTime(), Utils.DateStyle.DATE_TIME); 
+		long startTime = Utils.strToLong(tempFee.getStartTime(), Utils.DateStyle.DATE_TIME);
 		long chargeTime = Utils.strToLong(tempFee.getChargeTime(), Utils.DateStyle.DATE_TIME); //以小猫的计费时间为准
 		int parkingTime = (int)((chargeTime - startTime) / (1000 * 60));
-		
-		
+
+
 		dto.setPlateNumber(plateNumber);
 		dto.setEntryTime(startTime);
 		dto.setPayTime(chargeTime);
@@ -393,13 +393,13 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setDelayTime(delayTime);
 		dto.setOrderToken(tempFee.getOrderId());
 		dto.setRemainingTime(tempFee.getTimeOut());
-		
+
 		return dto;
 
-	}    
-    
+	}
+
     private boolean payTempCardFee(ParkingRechargeOrder order) {
-    	
+
         JSONObject params = new JSONObject();
         params.put("plateNo", order.getPlateNumber());
         params.put("orderId", order.getOrderToken());
@@ -418,14 +418,14 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }
         return false;
     }
-    
+
 	@Override
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		 
+
 		 OpenCardInfoDTO cardInfoDTO = new OpenCardInfoDTO();
 
 		do {
-			
+
 			//查询申请记录
 			ParkingCardRequest parkingCardRequest = parkingProvider
 					.findParkingCardRequestById(cmd.getParkingRequestId());
@@ -459,7 +459,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 			if (null == rateDTOList || rateDTOList.isEmpty()) {
 				break;
 			}
-			
+
 			ParkingRechargeRateDTO targetRateDTO = null;
 			String cardTypeId = parkingCardRequest.getCardTypeId();
 			for (ParkingRechargeRateDTO rateDTO : rateDTOList) {
@@ -500,25 +500,25 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
 				BigDecimal price = cardInfoDTO.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
 						.add(cardInfoDTO.getPrice().multiply(new BigDecimal(maxDay - today + 1))
-								.divide(new BigDecimal(maxDay), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 				cardInfoDTO.setPayMoney(price);
 			}
-			
+
 			cardInfoDTO.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
 
 		} while (false);
-		
+
 		return cardInfoDTO;
 	}
-	
-	/**   
+
+	/**
 	* @Function: XiaomaoParkingVendorHandler.java
 	* @Description: 获取月卡开始时间。(默认为系统当前时间戳)
 	* 为了测试不同的开卡时间，可通过parking.xiaomao.openCardDate参数进行配置开始时间
 	*
 	* @version: v1.0.0
 	* @author:	 黄明波
-	* @date: 2018年5月9日 下午3:38:32 
+	* @date: 2018年5月9日 下午3:38:32
 	*
 	*/
 	private final long getStartTimeMillis() {
@@ -526,11 +526,11 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 		if (StringUtils.isBlank(cardStartStr)) {
 			return System.currentTimeMillis();
 		}
-		
+
 		return Utils.strToLong(cardStartStr, Utils.DateStyle.DATE_TIME);
 	}
-	
-	/**   
+
+	/**
 	* @Function: XiaomaoParkingVendorHandler.java
 	* @Description: 月卡充值时使用，像深圳湾生态园的机制一样。
 	*
@@ -538,7 +538,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
 		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
 	}
-	
+
 	private final List<XiaomaoCardType> listCardTypes(Long parkingLot) {
 
 		List<XiaomaoCardType> cardTypeList = new ArrayList<XiaomaoCardType>(0);
@@ -564,15 +564,15 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return cardTypeList;
 	}
-	
-	
-	/**   
+
+
+	/**
 	* @Function: XiaomaoParkingVendorHandler.java
 	* @Description: 传输的公司名不允许问号和逗号
 	*
 	* @version: v1.0.0
 	* @author:	 黄明波
-	* @date: 2018年5月9日 下午4:56:31 
+	* @date: 2018年5月9日 下午4:56:31
 	*
 	*/
 	private String checkCompanyName(String companyName) {
@@ -582,5 +582,5 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return companyName;
 	}
-    
+
 }
