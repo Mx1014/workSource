@@ -2073,7 +2073,7 @@ public class SalaryServiceImpl implements SalaryService {
                 memebrDetail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, dto.getUserContact());
                 if (null == memebrDetail ) {
                     dto.setImportResult(PayslipImportResult.NULL_CONTACT.getCode());
-                } if( memebrDetail.getTargetId().equals(0L) || 
+                }else if( memebrDetail.getTargetId().equals(0L) || 
                 		OrganizationMemberTargetType.UNTRACK == OrganizationMemberTargetType.fromCode(memebrDetail.getTargetType())){
                     dto.setImportResult(PayslipImportResult.USER_UNTRACK.getCode());
                 }else {
