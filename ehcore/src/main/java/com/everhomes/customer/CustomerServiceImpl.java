@@ -3566,12 +3566,56 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void setNewTalentSheetHeadAndBookRow(Sheet talentSheet, List<CustomerTalentStatisticsDTO> dtos1) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("人才类型");
+        row.createCell(++i).setCellValue("人才数");
+        if (dtos1 != null && dtos1.size() > 0) {
+            dtos1.forEach((r) -> setTalentSheetBookRow(talentSheet, r));
+        }
+    }
+
+    private void setTalentSheetBookRow(Sheet talentSheet, CustomerTalentStatisticsDTO dto) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getCategoryName() == null ? "未知" : dto.getCategoryName());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0L : dto.getCustomerMemberCount());
     }
 
     private void setNewIndustrySheetHeadAndBookRow(Sheet industrySheet, List<CustomerIndustryStatisticsDTO> dtos) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("行业");
+        row.createCell(++i).setCellValue("企业数");
+        if (dtos != null && dtos.size() > 0) {
+            dtos.forEach((r) -> setIndustrySheetBookRow(industrySheet, r));
+        }
+    }
+
+    private void setIndustrySheetBookRow(Sheet industrySheet, CustomerIndustryStatisticsDTO dto) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0L : dto.getCustomerCount());
     }
 
     private void setNewCustomerStatisticSheetHeadAndBookRow(Sheet customerStatisticSheet, List<CustomerAnnualStatisticDTO> statisticDTOs) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("企业名称");
+        row.createCell(++i).setCellValue("营业额（元）本年度截止到当前");
+        row.createCell(++i).setCellValue("纳税额（元）本年度截止到当前");
+        if (statisticDTOs != null && statisticDTOs.size() > 0) {
+            statisticDTOs.forEach((r) -> setCustomerStatisticSheetBookRow(customerStatisticSheet, r));
+        }
+    }
+
+    private void setCustomerStatisticSheetBookRow(Sheet customerStatisticSheet, CustomerAnnualStatisticDTO dto) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getEnterpriseCustomerName());
+        row.createCell(++i).setCellValue(dto.getTurnover().toString());
+        row.createCell(++i).setCellValue(dto.getTaxPayment().toString());
     }
 
     public HttpServletResponse download(String path, HttpServletResponse response) {
