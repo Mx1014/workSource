@@ -2159,27 +2159,36 @@ public class CustomerServiceImpl implements CustomerService {
             if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
                 organizationSearcher.feedDoc(organization);
-            }else {
-                //这里增加入驻信息后自动同步到企业管理
-                OrganizationDTO organizationDTO = createOrganization(customer);
-                customer.setOrganizationId(organizationDTO.getId());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
-                updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
-                Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
-                organizationSearcher.feedDoc(createOrganization);
+            } else {
+                syncCustomerInfoIntoOrganization(entryInfo, customer);
             }
         } else if (customer != null) {
-            //这里增加入驻信息后自动同步到企业管理
-            OrganizationDTO organizationDTO = createOrganization(customer);
-            customer.setOrganizationId(organizationDTO.getId());
-            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-            enterpriseCustomerSearcher.feedDoc(customer);
-            updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            syncCustomerInfoIntoOrganization(entryInfo, customer);
+        }
+        enterpriseCustomerSearcher.feedDoc(customer);
+    }
+
+    private void syncCustomerInfoIntoOrganization(CustomerEntryInfo entryInfo, EnterpriseCustomer customer) {
+        //这里增加入驻信息后自动同步到企业管理
+        OrganizationDTO organizationDTO = createOrganization(customer);
+        customer.setOrganizationId(organizationDTO.getId());
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+        updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+        List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(customer.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentUri());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), customer.getId()));
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(customer.getOrganizationId(), bannerUrls, UserContext.currentUserId());
             Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             organizationSearcher.feedDoc(createOrganization);
         }
-        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
