@@ -4,11 +4,9 @@ package com.everhomes.order;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PayOrderCommand;
-import com.everhomes.pay.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.PayOrderRestResponse;
-import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
 import com.everhomes.user.User;
 
 import java.math.BigDecimal;
@@ -138,5 +136,5 @@ public interface PayService {
      * @param cmd 参数
      * @return 订单信息
      */
-    QueryOrderPaymentStatusRestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd);
+    QueryOrderPaymentStatusCommandResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd);
 }
