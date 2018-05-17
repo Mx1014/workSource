@@ -83,8 +83,8 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
         this.targetStream.close();
     }
 
-	// 由于平台升级到1.0.0版本，spring也跟随升级了，所以需要补充以下接口，
-	// 以下isReady()和setWriteListener()的实现是抄支付系统中kelven的实现 by lqs 20180516
+	// 鍗囩骇骞冲彴鍖呯増鏈埌1.0.x锛宻pringboot鐗堟湰涔熻鍗囩骇锛岄渶瑕佽ˉ鍏呮帴鍙ｏ紝
+    // 浠ヤ笅isReady()鍜宻etWriteListener()鎺ュ彛鐨勫疄鐜版槸鎶勮嚜鏀粯绯荤粺涓殑kelven瀹炵幇 by lqs 20180516
     @Override
     public boolean isReady() {
         return true;
