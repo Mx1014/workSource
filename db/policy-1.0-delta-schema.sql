@@ -53,12 +53,13 @@ ADD `valid_auth_amount` INT COMMENT '剩余的开门次数';
 -- 增加应打卡时间给punch_log
 ALTER TABLE `eh_punch_logs` ADD should_punch_time BIGINT COMMENT '应该打卡时间(用以计算早退迟到时长)';
 
+DROP TABLE IF EXISTS `eh_policies`;
 CREATE TABLE `eh_policies` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `category_id` VARCHAR(100) NOT NULL DEFAULT '' ,
+  `category_id` VARCHAR(100),
 	`title` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '',
 	`outline` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
 	`content` text COMMENT 'content data',
@@ -104,10 +105,10 @@ CREATE TABLE `eh_policy_agent_rules` (
   `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
   `agent_flag` TINYINT(4) DEFAULT NULL COMMENT '是否代办:0为不可代办，1为可代办',
   `agent_phone` varchar(64) DEFAULT NULL COMMENT '联系方式',
-	`agent_info` text COMMENT '代办介绍',
+	`agent_info` text DEFAULT NULL COMMENT '代办介绍',
 	`creator_id` bigint(20) NOT NULL COMMENT '创建人',
 	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
-	`updater_uid` bigint(20) NOT NULL COMMENT '修改人',
+	`updater_uid` bigint(20) COMMENT '修改人',
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
