@@ -1730,7 +1730,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void assetFeeHandlerForBillCycles(Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder
-            , PaymentBillGroupRule groupRul, PaymentBillGroup group, FeeRules rule,BillingCycle cycle
+            , PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle
             , EhPaymentChargingStandards standard,Byte billingCycle,PaymentChargingItemScope itemScope ) {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
