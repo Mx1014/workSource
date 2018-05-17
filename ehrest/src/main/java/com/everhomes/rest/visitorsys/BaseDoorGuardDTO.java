@@ -7,11 +7,13 @@ import com.everhomes.util.StringHelper;
   *<ul>
  *<li>doorGuardId : (必填)门禁id</li>
  *<li>doorGuardName : (必填)门禁名称</li>
+ *<li>hardwareId : (必填)门禁硬件id</li>
   *</ul>
   */
 public class BaseDoorGuardDTO {
     private String doorGuardId;
     private String doorGuardName;
+    private String hardwareId;
 
     public String getDoorGuardId() {
         return doorGuardId;
@@ -27,6 +29,14 @@ public class BaseDoorGuardDTO {
 
     public void setDoorGuardName(String doorGuardName) {
         this.doorGuardName = doorGuardName;
+    }
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
     }
 
     @Override

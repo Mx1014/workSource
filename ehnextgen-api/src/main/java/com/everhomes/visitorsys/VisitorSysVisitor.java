@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem;
 import com.everhomes.server.schema.tables.pojos.EhVisitorSysVisitors;
 import com.everhomes.util.StringHelper;
 
@@ -10,35 +10,26 @@ import java.util.List;
 public class VisitorSysVisitor extends EhVisitorSysVisitors {
 	
 	private static final long serialVersionUID = -1090547867158368768L;
-	private Long enterpriseId;
-	private List<PostApprovalFormItem> communityFormValues;
-	private List<PostApprovalFormItem> enterpriseFormValues;
+	private List<VisitorsysApprovalFormItem> communityFormValues;
+	private List<VisitorsysApprovalFormItem> enterpriseFormValues;
 	private String statsDate;
 	private Integer statsHour;
 	private Integer statsWeek;
 	private Long communityId;
 
-	public Long getEnterpriseId() {
-		return enterpriseId;
-	}
-
-	public void setEnterpriseId(Long enterpriseId) {
-		this.enterpriseId = enterpriseId;
-	}
-
-	public List<PostApprovalFormItem> getCommunityFormValues() {
+	public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
 		return communityFormValues;
 	}
 
-	public void setCommunityFormValues(List<PostApprovalFormItem> communityFormValues) {
+	public void setCommunityFormValues(List<VisitorsysApprovalFormItem> communityFormValues) {
 		this.communityFormValues = communityFormValues;
 	}
 
-	public List<PostApprovalFormItem> getEnterpriseFormValues() {
+	public List<VisitorsysApprovalFormItem> getEnterpriseFormValues() {
 		return enterpriseFormValues;
 	}
 
-	public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
+	public void setEnterpriseFormValues(List<VisitorsysApprovalFormItem> enterpriseFormValues) {
 		this.enterpriseFormValues = enterpriseFormValues;
 	}
 

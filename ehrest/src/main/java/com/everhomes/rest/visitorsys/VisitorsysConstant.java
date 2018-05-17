@@ -32,7 +32,6 @@ public class VisitorsysConstant {
     public static final String VISITORSYS_QRCODE_HEIGHT= "visitorsys.qrcode.height";//二维码高度 300
     public static final String VISITORSYS_QRCODE_WIDTH= "visitorsys.qrcode.width";//二维码宽度 300
     public static final String VISITORSYS_IPAD_CONFIG = "visitorsys.ipad.config";//ipad左邻logo,welcome,button,version
-
     //短信字段
     public static final String SMS_MODLUENAME_CN= "【左邻访客】";//短信发送模块名称
     public final static String SMS_MODLUENAME = "modlueName";
