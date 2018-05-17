@@ -7,6 +7,6 @@ public interface PolicyProvider {
     Policy updatePolicy(Policy policy);
     void deletePolicyById(Long id);
     Policy searchPolicyById(Long id);
-    List<Policy> listPoliciesByTitle(Integer namespaceId, String ownerType, Long ownerId, String title);
-    List<Policy> searchPoliciesByCategory(Integer namespaceId, String ownerType, Long ownerId, String category);
+    List<Policy> listPoliciesByTitle(Integer namespaceId, String ownerType, List<Long> ownerId, String title, Long pageAnchor, Integer pageSize);
+    List<Policy> searchPoliciesByCategory(Integer namespaceId, String ownerType,Long ownerId, String category, Long pageAnchor, Integer pageSize);
 }

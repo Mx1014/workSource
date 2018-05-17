@@ -71,22 +71,26 @@ public class PolicyProviderImpl implements PolicyProvider {
     }
 
     @Override
-    public List<Policy> listPoliciesByTitle(Integer namespaceId, String ownerType, Long ownerId, String title) {
+    public List<Policy> listPoliciesByTitle(Integer namespaceId, String ownerType, List<Long> ownerIds, String title, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicies.class));
         SelectQuery query = context.selectQuery(Tables.EH_POLICIES);
         if(null != namespaceId)
             query.addConditions(Tables.EH_POLICIES.NAMESPACE_ID.eq(namespaceId));
         if(StringUtils.isNotEmpty(ownerType))
             query.addConditions(Tables.EH_POLICIES.OWNER_TYPE.eq(ownerType));
-        if(null != ownerId)
-            query.addConditions(Tables.EH_POLICIES.OWNER_ID.eq(ownerId));
+        if(ownerIds.size() > 0)
+            query.addConditions(Tables.EH_POLICIES.OWNER_ID.in(ownerIds));
         if(null != title)
             query.addConditions(Tables.EH_POLICIES.TITLE.like("%" + title + "%"));
+        if(null != pageAnchor)
+            query.addConditions(Tables.EH_POLICIES.ID.lt(pageAnchor));
+        query.addOrderBy(Tables.EH_POLICIES.ID.desc());
+        query.addLimit(pageSize);
         return query.fetch().map(r->ConvertHelper.convert(r,Policy.class));
     }
 
     @Override
-    public List<Policy> searchPoliciesByCategory(Integer namespaceId, String ownerType, Long ownerId, String category) {
+    public List<Policy> searchPoliciesByCategory(Integer namespaceId, String ownerType, Long ownerId, String category, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicies.class));
         SelectQuery query = context.selectQuery(Tables.EH_POLICIES);
         if(null != namespaceId)
@@ -94,9 +98,13 @@ public class PolicyProviderImpl implements PolicyProvider {
         if(StringUtils.isNotEmpty(ownerType))
             query.addConditions(Tables.EH_POLICIES.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
-            query.addConditions(Tables.EH_POLICIES.OWNER_ID.eq(ownerId));
+            query.addConditions(Tables.EH_POLICIES.OWNER_ID.in(ownerId));
         if(null != category)
             query.addConditions(Tables.EH_POLICIES.CATEGORY_ID.like("%" + category + "%"));
+        if(null != pageAnchor)
+            query.addConditions(Tables.EH_POLICIES.ID.lt(pageAnchor));
+        query.addOrderBy(Tables.EH_POLICIES.ID.desc());
+        query.addLimit(pageSize);
         return query.fetch().map(r->ConvertHelper.convert(r,Policy.class));
     }
 }

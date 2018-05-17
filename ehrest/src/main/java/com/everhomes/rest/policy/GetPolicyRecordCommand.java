@@ -12,6 +12,7 @@ package com.everhomes.rest.policy;
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
  * <li>currentPMId: 当前管理公司ID</li>
+ * <li>appId: 应用ID</li>
  * </ul>
  */
 public class GetPolicyRecordCommand {
@@ -28,6 +29,7 @@ public class GetPolicyRecordCommand {
     private Integer pageSize;
 
     private Long currentPMId;
+    private Long appId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -107,5 +109,13 @@ public class GetPolicyRecordCommand {
 
     public void setCurrentPMId(Long currentPMId) {
         this.currentPMId = currentPMId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }

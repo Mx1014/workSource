@@ -1,13 +1,16 @@
 package com.everhomes.policy;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.policy.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +33,12 @@ public class PolicyServiceImpl implements PolicyService {
     @Autowired
     private ServiceModuleService serviceModuleService;
 
+    @Autowired
+    private PolicyRecordService policyRecordService;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
+
     @Override
     public PolicyDTO createPolicy(CreatePolicyCommand cmd) {
         User user = UserContext.current().getUser();
@@ -42,8 +51,10 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     public PolicyDTO updatePolicy(UpdatePolicyCommand cmd) {
         User user = UserContext.current().getUser();
-        if(null == cmd.getId()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"id is empty");
+        if (null == cmd.getId()) {
+            LOGGER.error("Invalid Id parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid Id parameter.");
         }
         Policy policy = policyProvider.searchPolicyById(cmd.getId());
         if(null != cmd.getTitle())
@@ -60,26 +71,53 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     public void deletePolicy(GetPolicyByIdCommand cmd) {
         if(null != cmd.getId()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"id is empty");
+            LOGGER.error("Invalid Id parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid Id parameter.");
         }
         policyProvider.deletePolicyById(cmd.getId());
     }
 
     @Override
     public PolicyDTO searchPolicyById(GetPolicyByIdCommand cmd) {
-        return null;
+        Policy result = policyProvider.searchPolicyById(cmd.getId());
+        if(null == cmd.getNamespaceId() && result.getNamespaceId() != cmd.getNamespaceId()){
+            LOGGER.error("Invalid namespaceId parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid namespaceId parameter.");
+        }
+        return ConvertHelper.convert(result,PolicyDTO.class);
     }
 
     @Override
     public PolicyResponse listPoliciesByTitle(listPoliciesCommand cmd) {
         this.checkNamespaceNOwnerId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-
-        return null;
+        List<Long> ownerIds = this.getOwnerIds(cmd.getOwnerId(),cmd.getCurrentPMId());
+        cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider,cmd.getPageSize()));
+        PolicyResponse resp = new PolicyResponse();
+        List<Policy> results = policyProvider.listPoliciesByTitle(cmd.getNamespaceId(),cmd.getOwnerType(), ownerIds, cmd.getTitle(), cmd.getPageAnchor(), cmd.getPageSize());
+        if(results.size() > 0)
+            resp.setNextPageAnchor(results.get(0).getId());
+        resp.setDtos(results.stream().map(r -> ConvertHelper.convert(r,PolicyDTO.class)).collect(Collectors.toList()));
+        return resp;
     }
 
     @Override
     public PolicyResponse searchPolicies(GetPolicyCommand cmd) {
-        return null;
+
+        cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider,cmd.getPageSize()));
+
+        if(null == cmd.getPageAnchor()) {
+            PolicyRecord record = ConvertHelper.convert(cmd,PolicyRecord.class);
+            policyRecordService.createPolicyRecord(record);
+        }
+
+        PolicyResponse resp = new PolicyResponse();
+        List<Policy> results = policyProvider.searchPoliciesByCategory(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCategoryId(),cmd.getPageAnchor(),cmd.getPageSize());
+        if(results.size() > 0)
+            resp.setNextPageAnchor(results.get(0).getId());
+        resp.setDtos(results.stream().map(r -> ConvertHelper.convert(r,PolicyDTO.class)).collect(Collectors.toList()));
+        return resp;
     }
 
     private void checkNamespaceNOwnerId(Integer namespaceId, String ownerType, Long ownerId){

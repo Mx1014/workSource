@@ -1,13 +1,14 @@
 package com.everhomes.rest.policy;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 
-public class PolicyResponse {
+public class PolicyResponse extends RestResponseBase {
     private Long nextPageAnchor;
-    @ItemType(PolicyRecordDTO.class)
-    private List<PolicyRecordDTO> dtos;
+    @ItemType(PolicyDTO.class)
+    private List<PolicyDTO> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -17,11 +18,11 @@ public class PolicyResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<PolicyRecordDTO> getDtos() {
+    public List<PolicyDTO> getDtos() {
         return dtos;
     }
 
-    public void setDtos(List<PolicyRecordDTO> dtos) {
+    public void setDtos(List<PolicyDTO> dtos) {
         this.dtos = dtos;
     }
 }

@@ -5,7 +5,7 @@ package com.everhomes.rest.policy;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目id</li>
- * <li>categoryId: 企业类型</li>
+ * <li>categoryIds: 企业类型</li>
  * <li>title: 政策标题</li>
  * <li>outline: 政策概要</li>
  * <li>content: 政策详情</li>
@@ -16,7 +16,7 @@ public class CreatePolicyCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String categoryId;
+    private String[] categoryIds;
     private String title;
     private String outline;
     private String content;
@@ -45,12 +45,12 @@ public class CreatePolicyCommand {
         this.ownerId = ownerId;
     }
 
-    public String getCategoryId() {
-        return categoryId;
+    public String[] getCategoryIds() {
+        return categoryIds;
     }
 
-    public void setCategoryId(String categoryId) {
-        this.categoryId = categoryId;
+    public void setCategoryIds(String[] categoryIds) {
+        this.categoryIds = categoryIds;
     }
 
     public String getTitle() {
