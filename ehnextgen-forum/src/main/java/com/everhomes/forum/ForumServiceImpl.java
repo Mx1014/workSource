@@ -240,6 +240,11 @@ public class ForumServiceImpl implements ForumService {
             cmd.setForumEntryId(0L);
         }
 
+        //没有forumId，则设置当前域空间默认的forumId
+        if(cmd.getForumId() == null) {
+            setNamespaceDefaultForumId(cmd);
+        }
+
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
 
@@ -5432,7 +5437,26 @@ public class ForumServiceImpl implements ForumService {
     		topicCmd.setForumId(community.getDefaultForumId());
     	}
     }
-    
+
+    /**
+     *
+     * 设置当前域空间默认forumId
+     */
+    private void setNamespaceDefaultForumId(NewTopicCommand topicCmd) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+
+        if(UserContext.getCurrentNamespaceId() == null){
+            return;
+        }
+
+        List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+
+        if(communities != null && communities.size() > 0){
+            topicCmd.setForumId(communities.get(0).getDefaultForumId());
+        }
+    }
+
     @Override
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
         User user = UserContext.current().getUser();
