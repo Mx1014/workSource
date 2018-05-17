@@ -6,6 +6,7 @@ package com.everhomes.rest.decoration;
  * <li>name</li>
  * <li>size</li>
  * <li>fileUri</li>
+ * <li>fileUrl</li>
  * </ul>
  */
 public class DecorationAttachmentDTO {
@@ -14,6 +15,7 @@ public class DecorationAttachmentDTO {
     private String attachmentType;
     private String size;
     private String fileUri;
+    private String fileUrl;
 
     public String getName() {
         return name;
@@ -45,5 +47,13 @@ public class DecorationAttachmentDTO {
 
     public void setFileUri(String fileUri) {
         this.fileUri = fileUri;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }

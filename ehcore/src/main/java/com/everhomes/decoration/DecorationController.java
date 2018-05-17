@@ -22,6 +22,8 @@ import static org.apache.poi.hslf.record.RecordTypes.List;
 @RequestMapping("/decoration")
 public class DecorationController extends ControllerBase {
 
+    @Autowired
+    private DecorationService decorationService;
     public static final Integer moduleId = 43000;
     public static final String moduleType = "decoration";
     @Autowired
@@ -55,7 +57,8 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getBaseSetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.BASIC.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -135,7 +138,8 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getFileSetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.FILE.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -200,7 +204,8 @@ public class DecorationController extends ControllerBase {
     public RestResponse getApplySetting(@Valid GetIlluStrationCommand cmd) {
 
         cmd.setOwnerType(IllustrationType.APPLY.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -250,7 +255,8 @@ public class DecorationController extends ControllerBase {
     public RestResponse getCompleteSetting(@Valid GetIlluStrationCommand cmd) {
 
         cmd.setOwnerType(IllustrationType.COMPLETE.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -266,7 +272,8 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getRefoundSetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.REFOUND.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

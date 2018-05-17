@@ -2,10 +2,12 @@ package com.everhomes.decoration.admin;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.decoration.DecorationService;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.decoration.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +19,8 @@ import javax.validation.Valid;
 @RequestMapping("/decoration/admin")
 public class DecorationAdminController extends ControllerBase {
 
+    @Autowired
+    private DecorationService decorationService;
     /**
      * <b>URL: /decoration/admin/searchRequests</b>
      * <p>
@@ -176,9 +180,9 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("getBaseSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getBaseSetting(@Valid GetIlluStrationCommand cmd) {
-
         cmd.setOwnerType(IllustrationType.BASIC.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -191,9 +195,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateBaseSetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateBaseSetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.BASIC.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -209,9 +214,9 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("getFileSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getFileSetting(@Valid GetIlluStrationCommand cmd) {
-
         cmd.setOwnerType(IllustrationType.FILE.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -224,9 +229,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateFileSetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateFileSetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.FILE.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -242,9 +248,9 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("getFeeSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getFeeSetting(@Valid GetIlluStrationCommand cmd) {
-
         cmd.setOwnerType(IllustrationType.FEE.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -257,9 +263,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateFeeSetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateFeeSetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.FEE.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -276,7 +283,8 @@ public class DecorationAdminController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getApplySetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.APPLY.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -289,9 +297,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateApplySetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateApplySetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.APPLY.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -308,7 +317,8 @@ public class DecorationAdminController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getCompleteSetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.COMPLETE.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -321,9 +331,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateCompleteSetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateCompleteSetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.COMPLETE.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -340,7 +351,8 @@ public class DecorationAdminController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getRefoundSetting(@Valid GetIlluStrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.REFOUND.getCode());
-        RestResponse response = new RestResponse();
+        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -353,9 +365,10 @@ public class DecorationAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("updateRefoundSetting")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(String.class)
     public RestResponse updateRefoundSetting(@Valid UpdateIllustrationCommand cmd) {
         cmd.setOwnerType(IllustrationType.REFOUND.getCode());
+        this.decorationService.setIllustration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
