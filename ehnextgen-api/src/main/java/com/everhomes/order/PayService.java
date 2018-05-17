@@ -3,10 +3,8 @@ package com.everhomes.order;
 
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.PayOrderCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pay.controller.PayOrderRestResponse;
 import com.everhomes.user.User;
 
 import java.math.BigDecimal;
@@ -129,7 +127,7 @@ public interface PayService {
      * @param cmd 参数
      * @return 订单信息
      */
-    PayOrderRestResponse payOrder(PayOrderCommand cmd);
+    PayOrderCommandResponse payOrder(PayOrderCommand cmd);
 
     /**
      * 为h5支付界面提供转发查询订单支付状态接口

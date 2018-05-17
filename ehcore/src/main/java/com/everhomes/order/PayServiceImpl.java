@@ -22,6 +22,8 @@ import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayOrderCommand;
+import com.everhomes.rest.order.PayOrderCommandResponse;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommandResponse;
 import com.everhomes.rest.pay.controller.*;
@@ -868,16 +870,24 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
     @Override
-    public PayOrderRestResponse payOrder(PayOrderCommand cmd) {
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("payOrder-cmd=" + GsonUtil.toJson(cmd));}
+    public PayOrderCommandResponse payOrder(PayOrderCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Pay order, cmd={}", cmd);
+        }
         PayOrderRestResponse response = restClient.restCall(
                 "POST",
                 ApiConstants.ORDER_PAYORDER_URL,
                 cmd,
                 PayOrderRestResponse.class);
 
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("payOrder-response=" + GsonUtil.toJson(response));}
-        return response;
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Pay order, response={}", response);
+        }
+        
+        // 由于使用非rest包的类会导致编译rest包报错，故把原来从pay工程里引用的command和response类拷贝一份放到core server的rest包里
+        // by lqs 20180517
+        //return response;
+        return ConvertHelper.convert(response.getResponse(), PayOrderCommandResponse.class);
     }
 
     @Override
