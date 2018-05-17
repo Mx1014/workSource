@@ -129,7 +129,8 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'hotline', '咨询电话', 'String', '11', '/1/11/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
--- 企业简介改成richText
+-- 企业简介改成richText by jiarui
 UPDATE `eh_var_fields` SET `field_param`='{\"fieldParamType\": \"richText\", \"length\": 204800}' WHERE `name`='corpDescription' and `module_name`='enterprise_customer';
 
 UPDATE eh_var_field_scopes set mandatory_flag = 1 where  field_id in (10966,10965);
+UPDATE  eh_enterprise_customers set tracking_uid = NULL  WHERE  tracking_uid = -1;
