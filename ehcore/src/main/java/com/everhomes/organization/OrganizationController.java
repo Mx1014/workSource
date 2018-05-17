@@ -1723,7 +1723,7 @@ public class OrganizationController extends ControllerBase {
     public RestResponse getAdminType(GetAdminTypeCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
-        adminType.setSupperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+        adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

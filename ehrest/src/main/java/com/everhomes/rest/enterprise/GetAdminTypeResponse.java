@@ -10,14 +10,14 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class GetAdminTypeResponse {
-    private Byte supperAdminFlag;
+    private Byte superAdminFlag;
 
-    public Byte getSupperAdminFlag() {
-        return supperAdminFlag;
+    public Byte getSuperAdminFlag() {
+        return superAdminFlag;
     }
 
-    public void setSupperAdminFlag(Byte supperAdminFlag) {
-        this.supperAdminFlag = supperAdminFlag;
+    public void setSuperAdminFlag(Byte supperAdminFlag) {
+        this.superAdminFlag = supperAdminFlag;
     }
 
     @Override
