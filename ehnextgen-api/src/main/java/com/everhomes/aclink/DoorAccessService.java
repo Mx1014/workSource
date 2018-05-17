@@ -150,4 +150,8 @@ public interface DoorAccessService {
             HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
+	
+	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
+	
+	public int invalidVistorAuth(Long DoorId, String phone);
 }

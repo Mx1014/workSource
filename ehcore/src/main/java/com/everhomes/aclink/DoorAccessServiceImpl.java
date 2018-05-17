@@ -2464,7 +2464,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setAddress(cmd.getAddress());
                 doorAcc.setAvatar(cmd.getAddress());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
-                doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                //edited by liuyilin
+                //doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                doorAcc.setDoorType(DoorAccessType.ACLINK_ZL_GROUP.getCode());
+                //---
                 doorAcc.setUuid(groupHardwareId);
                 doorAcc.setAesIv(aesKey);//save the original aesKey, TODO save it to aes server key?
                 doorAccessProvider.createDoorAccess(doorAcc);
@@ -2530,7 +2533,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setAddress(cmd.getAddress());
                 doorAcc.setAvatar(cmd.getAddress());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
-                doorAcc.setDoorType(cmd.getGroupType());
+                //edited by liuyilin
+//                doorAcc.setDoorType(cmd.getGroupType());
+                doorAcc.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
+                //--
                 doorAcc.setUuid(groupHardwareId);
                 doorAcc.setAesIv("");
                 doorAccessProvider.createDoorAccess(doorAcc);
@@ -2665,8 +2671,29 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //zuolin device qr. normal visitor auth
     private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
-        
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd);
+        
+        String nickName = getRealName(user);
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
+        
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+        		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+        	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+        
+        return ConvertHelper.convert(auth, DoorAuthDTO.class);        
+    }
+    
+    private DoorAuth createZuolinQrAuth(User user, DoorAccess doorAccess, CreateDoorVisitorCommand cmd){
         if(doorAccess == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
         }
@@ -2727,24 +2754,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
-        
-        String nickName = getRealName(user);
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
-        
-        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
-        		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
-        
-        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
-        	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
-        }
-        
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
-        String templateLocale = user.getLocale();
-        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
-        
-        return ConvertHelper.convert(auth, DoorAuthDTO.class);        
+        return auth;
     }
     
     //huarun device qr. normal visitor auth
@@ -4346,4 +4356,30 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
     }
     
+	@Override
+	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
+		User user = UserContext.current().getUser();
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        DoorAuth auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+        dto.setQrString(auth.getQrKey());
+		return dto;
+	}
+
+	/**
+	 * 根据电话号码合门禁组的id将授权设置为失效
+	 * doorId为门禁组id
+	 */
+	@Override
+	public int invalidVistorAuth(Long doorId, String phone) {
+		List<DoorAuth> listAuth = doorAuthProvider.listValidDoorAuthByVisitorPhone(doorId, phone);
+		if(listAuth != null && listAuth.size() > 0){
+			for(DoorAuth auth : listAuth){
+				auth.setStatus(DoorAuthStatus.INVALID.getCode());
+			}
+			doorAuthProvider.updateDoorAuth(listAuth);
+			return 1;
+		}
+		return 0;
+	}
 }
