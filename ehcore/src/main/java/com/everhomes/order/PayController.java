@@ -4,12 +4,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.PayOrderCommand;
-import com.everhomes.pay.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.PayOrderRestResponse;
 import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
+import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,9 +132,9 @@ public class PayController extends ControllerBase {
      * <p>转发支付订单接口</p>
      */
     @RequestMapping("payOrder")
-    @RestReturn(value=PayOrderRestResponse.class)
+    @RestReturn(value=PayOrderCommandResponse.class)
     public RestResponse payOrder(PayOrderCommand cmd) {
-        PayOrderRestResponse cmdResponse = payService.payOrder(cmd);
+        PayOrderCommandResponse cmdResponse = payService.payOrder(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
