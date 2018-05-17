@@ -4,18 +4,14 @@ package com.everhomes.rest.launchpadbase;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 
 /**
  * <ul>
  *     <li>moduleId: 模块id</li>
  *     <li>contentId: 内容Id。此处为String，因为可能某些业务的内容id是String，例如新闻快讯</li>
- *     <li>contentOne: 一级内容</li>
- *     <li>contentTwo: 二级内容</li>
- *     <li>contentThree: 三级内容</li>
- *     <li>contentFour: 四级内容</li>
- *     <li>contentFive: 五级内容</li>
- *     <li>contentSix: 六级内容</li>
- *     <li>contentSeven: 七级内容，要多于七级内容的话，恕运营板块容不下，请另找高就</li>
+ *     <li>properties: 需要展现的一些字段，需要和客户端预定字段和顺序，推荐按照显示的从上到下、从左到右显示放置properties</li>
  * </ul>
  */
 public class OPPushCard {
@@ -23,13 +19,7 @@ public class OPPushCard {
     private Long moduleId;
     private String contentId;
 
-    private String contentOne;
-    private String contentTwo;
-    private String contentThree;
-    private String contentFour;
-    private String contentFive;
-    private String contentSix;
-    private String contentSeven;
+    private List<Object> properties;
 
 
     public Long getModuleId() {
@@ -48,60 +38,12 @@ public class OPPushCard {
         this.contentId = contentId;
     }
 
-    public String getContentOne() {
-        return contentOne;
+    public List<Object> getProperties() {
+        return properties;
     }
 
-    public void setContentOne(String contentOne) {
-        this.contentOne = contentOne;
-    }
-
-    public String getContentTwo() {
-        return contentTwo;
-    }
-
-    public void setContentTwo(String contentTwo) {
-        this.contentTwo = contentTwo;
-    }
-
-    public String getContentThree() {
-        return contentThree;
-    }
-
-    public void setContentThree(String contentThree) {
-        this.contentThree = contentThree;
-    }
-
-    public String getContentFour() {
-        return contentFour;
-    }
-
-    public void setContentFour(String contentFour) {
-        this.contentFour = contentFour;
-    }
-
-    public String getContentFive() {
-        return contentFive;
-    }
-
-    public void setContentFive(String contentFive) {
-        this.contentFive = contentFive;
-    }
-
-    public String getContentSix() {
-        return contentSix;
-    }
-
-    public void setContentSix(String contentSix) {
-        this.contentSix = contentSix;
-    }
-
-    public String getContentSeven() {
-        return contentSeven;
-    }
-
-    public void setContentSeven(String contentSeven) {
-        this.contentSeven = contentSeven;
+    public void setProperties(List<Object> properties) {
+        this.properties = properties;
     }
 
     @Override

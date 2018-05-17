@@ -11,6 +11,7 @@ import java.util.List;
  *     <li>name: 模块应用名称</li>
  *     <li>moduleId: 模块id</li>
  *     <li>moduleName: 模块名称</li>
+ *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  *     <li>actionType: actionType</li>
  *     <li>instanceConfig: 参数json</li>
  *     <li>menuId: 关联的菜单id</li>
@@ -44,6 +45,7 @@ public class ServiceModuleAppDTO {
     private String name;
     private Long moduleId;
     private String moduleName;
+    private Byte clientHandlerType;
     private Byte actionType;
     private String instanceConfig;
     private Long menuId;
@@ -108,6 +110,14 @@ public class ServiceModuleAppDTO {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public Byte getClientHandlerType() {
+        return clientHandlerType;
+    }
+
+    public void setClientHandlerType(Byte clientHandlerType) {
+        this.clientHandlerType = clientHandlerType;
     }
 
     public Byte getActionType() {
