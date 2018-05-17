@@ -1,5 +1,7 @@
 package com.everhomes.rest.policy;
 
+import java.util.List;
+
 /**
  * <ul>
  * <li>namespaceId: 域空间</li>
@@ -16,7 +18,7 @@ public class CreatePolicyCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private Long[] categoryIds;
+    private List<Long> categoryIds;
     private String title;
     private String outline;
     private String content;
@@ -45,11 +47,11 @@ public class CreatePolicyCommand {
         this.ownerId = ownerId;
     }
 
-    public Long[] getCategoryIds() {
+    public List<Long> getCategoryIds() {
         return categoryIds;
     }
 
-    public void setCategoryIds(Long[] categoryIds) {
+    public void setCategoryIds(List<Long> categoryIds) {
         this.categoryIds = categoryIds;
     }
 

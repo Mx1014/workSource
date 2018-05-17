@@ -89,7 +89,7 @@ public class PolicyProviderImpl implements PolicyProvider {
     }
 
     @Override
-    public List<Policy> searchPoliciesByCategory(Integer namespaceId, String ownerType, Long ownerId, String category, Long pageAnchor, Integer pageSize) {
+    public List<Policy> searchPoliciesByIds(Integer namespaceId, String ownerType,Long ownerId, List<Long> ids, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicies.class));
         SelectQuery query = context.selectQuery(Tables.EH_POLICIES);
         if(null != namespaceId)
@@ -98,8 +98,8 @@ public class PolicyProviderImpl implements PolicyProvider {
             query.addConditions(Tables.EH_POLICIES.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
             query.addConditions(Tables.EH_POLICIES.OWNER_ID.in(ownerId));
-        if(null != category)
-            query.addConditions(Tables.EH_POLICIES.CATEGORY_ID.like("%" + category + "%"));
+        if(ids.size() > 0)
+            query.addConditions(Tables.EH_POLICIES.ID.in(ids));
         if(null != pageAnchor)
             query.addConditions(Tables.EH_POLICIES.ID.lt(pageAnchor));
         query.addOrderBy(Tables.EH_POLICIES.ID.desc());

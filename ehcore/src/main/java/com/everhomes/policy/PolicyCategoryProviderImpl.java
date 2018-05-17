@@ -12,9 +12,11 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class PolicyCategoryProviderImpl implements PolicyCategoryProvider{
 
     @Autowired
@@ -56,6 +58,17 @@ public class PolicyCategoryProviderImpl implements PolicyCategoryProvider{
         SelectQuery query = context.selectQuery(Tables.EH_POLICY_CATEGORIES);
         if(null != policyId)
             query.addConditions(Tables.EH_POLICY_CATEGORIES.POLICY_ID.eq(policyId));
+        List<PolicyCategory> results = query.fetch().map(r -> ConvertHelper.convert(r,PolicyCategory.class));
+        return results;
+    }
+
+    @Override
+    public List<PolicyCategory> searchPolicyByCategory(Long category) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicyCategories.class));
+        SelectQuery query = context.selectQuery(Tables.EH_POLICY_CATEGORIES);
+        if(null != category)
+            query.addConditions(Tables.EH_POLICY_CATEGORIES.CATEGORY_ID.eq(category));
+        query.addConditions(Tables.EH_POLICY_CATEGORIES.ACTIVE_FLAG.eq((byte)1));
         List<PolicyCategory> results = query.fetch().map(r -> ConvertHelper.convert(r,PolicyCategory.class));
         return results;
     }

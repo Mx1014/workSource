@@ -24,7 +24,7 @@ public class GetPolicyCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String categoryId;
+    private Long categoryId;
     private Long creatorId;
     private String creatorName;
     private String creatorPhone;
@@ -62,11 +62,11 @@ public class GetPolicyCommand {
         this.ownerId = ownerId;
     }
 
-    public String getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(String categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 

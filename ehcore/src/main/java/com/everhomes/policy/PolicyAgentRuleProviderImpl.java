@@ -10,11 +10,14 @@ import com.everhomes.server.schema.tables.daos.EhPolicyAgentRulesDao;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
+@Component
 public class PolicyAgentRuleProviderImpl implements PolicyAgentRuleProvider {
 
     @Autowired
@@ -57,7 +60,7 @@ public class PolicyAgentRuleProviderImpl implements PolicyAgentRuleProvider {
             query.addConditions(Tables.EH_POLICY_AGENT_RULES.OWNER_ID.eq(ownerId));
         if(null != id)
             query.addConditions(Tables.EH_POLICY_AGENT_RULES.ID.eq(id));
-        PolicyAgentRule result = query.fetchOne().map(r -> ConvertHelper.convert(r,PolicyAgentRule.class));
-        return result;
+        Record result = query.fetchOne();
+        return result == null ? null : ConvertHelper.convert(result,PolicyAgentRule.class);
     }
 }

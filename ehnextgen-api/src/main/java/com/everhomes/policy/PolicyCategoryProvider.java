@@ -7,4 +7,5 @@ public interface PolicyCategoryProvider {
     PolicyCategory updateCategory(PolicyCategory bean);
     void deleteCategory(PolicyCategory bean);
     List<PolicyCategory> searchCategoryByPolicyId(Long policyId);
+    List<PolicyCategory> searchPolicyByCategory(Long category);
 }

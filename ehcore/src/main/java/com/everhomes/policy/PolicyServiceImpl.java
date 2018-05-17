@@ -6,6 +6,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.policy.*;
+import com.everhomes.server.schema.tables.pojos.EhPolicyCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -48,7 +49,7 @@ public class PolicyServiceImpl implements PolicyService {
         Policy policy = ConvertHelper.convert(cmd,Policy.class);
         policy.setCreatorUid(user.getId());
         Policy result = policyProvider.createPolicy(policy);
-        policyCategoryService.setPolicyCategory(result.getId(),Arrays.asList(cmd.getCategoryIds()));
+        policyCategoryService.setPolicyCategory(result.getId(),cmd.getCategoryIds());
         return ConvertHelper.convert(result,PolicyDTO.class);
     }
 
@@ -69,7 +70,7 @@ public class PolicyServiceImpl implements PolicyService {
             policy.setContent(cmd.getContent());
         policy.setCreatorUid(user.getId());
         Policy result = policyProvider.updatePolicy(policy);
-        policyCategoryService.setPolicyCategory(result.getId(),Arrays.asList(cmd.getCategoryIds()));
+        policyCategoryService.setPolicyCategory(result.getId(),cmd.getCategoryIds());
         return ConvertHelper.convert(result,PolicyDTO.class);
     }
 
@@ -94,7 +95,7 @@ public class PolicyServiceImpl implements PolicyService {
         }
         PolicyDTO dto = ConvertHelper.convert(result,PolicyDTO.class);
         List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
-        dto.setCategoryIds(ctgs.stream().map(r->{return r.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+        dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
         return dto;
     }
 
@@ -110,7 +111,7 @@ public class PolicyServiceImpl implements PolicyService {
         resp.setDtos(results.stream().map(r -> {
             PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
             List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
-            dto.setCategoryIds(ctgs.stream().map(r1->{return r1.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+            dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
             return dto;
         }).collect(Collectors.toList()));
         return resp;
@@ -127,13 +128,14 @@ public class PolicyServiceImpl implements PolicyService {
         }
 
         PolicyResponse resp = new PolicyResponse();
-        List<Policy> results = policyProvider.searchPoliciesByCategory(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCategoryId(),cmd.getPageAnchor(),cmd.getPageSize());
+        List<Long> ids = policyCategoryService.searchPolicyByCategory(cmd.getCategoryId()).stream().map(PolicyCategory::getPolicyId).collect(Collectors.toList());
+        List<Policy> results = policyProvider.searchPoliciesByIds(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),ids,cmd.getPageAnchor(),cmd.getPageSize());
         if(results.size() > 0)
             resp.setNextPageAnchor(results.get(0).getId());
         resp.setDtos(results.stream().map(r -> {
             PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
             List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
-            dto.setCategoryIds(ctgs.stream().map(r1->{return r1.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+            dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
             return dto;
         }).collect(Collectors.toList()));
         return resp;
@@ -168,7 +170,7 @@ public class PolicyServiceImpl implements PolicyService {
 //			cmd.setAppId(cmd.getAppId());
             cmd.setOrganizationId(orgId);
             List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd);
-            ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
+            ownerIds.addAll(dtos.stream().map(elem -> elem.getProjectId()).collect(Collectors.toList()));
         } else {
             ownerIds.add(ownerId);
         }

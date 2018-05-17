@@ -2,6 +2,8 @@ package com.everhomes.policy;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPolicyRecords;
 import com.everhomes.server.schema.tables.daos.EhPolicyRecordsDao;
@@ -22,8 +24,15 @@ public class PolicyRecordProviderImpl implements PolicyRecordProvider {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
     @Override
     public PolicyRecord createPolicyRecord(PolicyRecord policyRecord) {
+        if(policyRecord.getId() == null) {
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPolicyRecords.class));
+            policyRecord.setId(id);
+        }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicyRecords.class));
         EhPolicyRecordsDao dao = new EhPolicyRecordsDao(context.configuration());
         policyRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

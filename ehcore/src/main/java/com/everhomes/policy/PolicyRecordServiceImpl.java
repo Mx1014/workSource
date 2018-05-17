@@ -17,7 +17,11 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +60,10 @@ public class PolicyRecordServiceImpl implements PolicyRecordService {
     @Override
     public PolicyRecordDTO createPolicyRecord(PolicyRecord policyRecord) {
         User user = UserContext.current().getUser();
-        policyRecord.setCreatorId(user.getId());
-        policyRecord.setCreatorOrgId(organizationService.getUserCurrentOrganization().getId());
+        if(null == policyRecord.getCreatorId())
+            policyRecord.setCreatorId(user.getId());
+        if(null == policyRecord.getCreatorOrgId())
+            policyRecord.setCreatorOrgId(organizationService.getUserCurrentOrganization().getId());
         if(null == policyRecord.getCreatorName())
             policyRecord.setCreatorName(user.getNickName());
         if(null == policyRecord.getCreatorOrgName())
@@ -124,7 +130,13 @@ public class PolicyRecordServiceImpl implements PolicyRecordService {
         for (PolicyRecordDTO bean : results) {
             Row tempRow = sheet.createRow(rownum);
             tempRow.createCell(0).setCellValue(rownum++);
-            tempRow.createCell(1).setCellValue(bean.getCreateTime());
+            Cell cell = tempRow.createCell(1);
+            //set date format
+            XSSFCellStyle cellStyle = wb.createCellStyle();
+            XSSFDataFormat format= wb.createDataFormat();
+            cellStyle.setDataFormat(format.getFormat("m/d/yy h:mm"));
+            cell.setCellStyle(cellStyle);
+            cell.setCellValue(bean.getCreateTime());
             tempRow.createCell(2).setCellValue(bean.getCreatorName());
             tempRow.createCell(3).setCellValue(bean.getCreatorPhone());
             tempRow.createCell(4).setCellValue(bean.getCreatorOrgName());

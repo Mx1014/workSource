@@ -6,4 +6,5 @@ public interface PolicyCategoryService {
     void setPolicyCategory(Long policyId,List<Long> categoryIds);
     void deletePolicyCategoryByPolicyId(Long policyId);
     List<PolicyCategory> searchPolicyCategoryByPolicyId(Long policyId);
+    List<PolicyCategory> searchPolicyByCategory(Long category);
 }

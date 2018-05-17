@@ -1,9 +1,11 @@
 package com.everhomes.policy;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class PolicyCategoryServiceImpl implements PolicyCategoryService {
 
     @Autowired
@@ -22,11 +24,13 @@ public class PolicyCategoryServiceImpl implements PolicyCategoryService {
             policyCategoryProvider.updateCategory(r);
         });
         categoryIds.forEach(r -> {
-            PolicyCategory bean = new PolicyCategory();
-            bean.setPolicyId(policyId);
-            bean.setCategoryId(r);
-            bean.setActiveFlag((byte)1);
-            policyCategoryProvider.createCategory(bean);
+            if (null != r){
+                PolicyCategory bean = new PolicyCategory();
+                bean.setPolicyId(policyId);
+                bean.setCategoryId(r);
+                bean.setActiveFlag((byte)1);
+                policyCategoryProvider.createCategory(bean);
+            }
         });
     }
 
@@ -39,5 +43,10 @@ public class PolicyCategoryServiceImpl implements PolicyCategoryService {
     @Override
     public List<PolicyCategory> searchPolicyCategoryByPolicyId(Long policyId) {
         return policyCategoryProvider.searchCategoryByPolicyId(policyId);
+    }
+
+    @Override
+    public List<PolicyCategory> searchPolicyByCategory(Long category) {
+        return policyCategoryProvider.searchPolicyByCategory(category);
     }
 }

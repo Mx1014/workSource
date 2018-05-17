@@ -8,7 +8,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PolicyAgentRuleServiceImpl implements PolicyAgentRuleService {
 
     @Autowired
