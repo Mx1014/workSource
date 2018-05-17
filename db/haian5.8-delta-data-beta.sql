@@ -27,4 +27,8 @@ VALUES((@payment_service_id := @payment_service_id + 1), '物业缴费', 'pmsy',
 -- 物业缴费
 INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
     VALUES((@payment_type_id := @payment_type_id + 1), 'pmsy', @namespace_id, 'EhOrganizations', @organization_id, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
-	
+    
+    
+update eh_payment_accounts set app_key='402bca3f-e1be-4c9a-a975-cfa28d9b9e12' where name='beta-zuolinAccount';
+update eh_payment_accounts set secret_key='566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==' where name='beta-zuolinAccount';   
+    
