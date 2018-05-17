@@ -1,5 +1,11 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>namespaceId</li>
+ * <li>companyName</li>
+ * </ul>
+ */
 public class ListDecorationCompaniesCommand {
 
     private Long namespaceId;

@@ -1,5 +1,12 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>namespaceId</li>
+ * <li>pageAnchor</li>
+ * <li>pageSize</li>
+ * </ul>
+ */
 public class ListUserRequestsCommand {
 
     private Long namespaceId;

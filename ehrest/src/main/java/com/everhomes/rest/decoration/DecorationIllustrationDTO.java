@@ -3,11 +3,14 @@ package com.everhomes.rest.decoration;
 import java.util.List;
 
 /**
- * <ul>装修说明
+ * <ul>
+ * <li>id</li>
+ * <li>communityId</li>
  * <li>content：说明</li>
  * <li>phone：联系电话</li>
  * <li>address：资料提交地址</li>
  * <li>ownerType：装修说明类型  参考{@link com.everhomes.rest.decoration.IllustrationType}</li>
+ * <li>ownerId：审批id</li>
  * <li>attachments：附件列表</li>
  * </ul>
  */

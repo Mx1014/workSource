@@ -3,6 +3,13 @@ package com.everhomes.rest.decoration;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>requestId</li>
+ * <li>refoundAmount</li>
+ * <li>refoundComment</li>
+ * </ul>
+ */
 public class ModifyRefoundAmountCommand {
 
     private Long requestId;

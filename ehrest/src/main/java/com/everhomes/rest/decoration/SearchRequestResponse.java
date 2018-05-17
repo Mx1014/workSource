@@ -3,6 +3,12 @@ package com.everhomes.rest.decoration;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor</li>
+ * <li>requests : List<DecorationRequestDTO> 参考{@link com.everhomes.rest.decoration.DecorationRequestDTO}</li>
+ * </ul>
+ */
 public class SearchRequestResponse {
 
     private Long nextPageAnchor;

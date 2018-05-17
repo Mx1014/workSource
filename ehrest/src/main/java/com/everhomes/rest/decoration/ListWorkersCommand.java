@@ -1,5 +1,13 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>requestId</li>
+ * <li>keyWord:关键字</li>
+ * <li>pageAnchor</li>
+ * <li>pageSize</li>
+ * </ul>
+ */
 public class ListWorkersCommand {
 
     private Long requestId;

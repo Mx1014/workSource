@@ -4,7 +4,10 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>companyChiefs：装修公司负责人</li>
+ * <li>companyChiefs：装修公司负责人 List<CompanyChiefDTO></li>
+ * <li>name：公司名</li>
+ * <li>organizationId：公司id</li>
+ * <li>id：装修公司id</li>
  * </ul>
  */
 public class DecorationCompanyDTO {

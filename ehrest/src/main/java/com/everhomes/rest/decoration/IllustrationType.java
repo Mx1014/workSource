@@ -1,5 +1,15 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>"basic","装修申请"</li>
+ * <li>"file","装修资料"</li>
+ * <li>"fee","缴费"</li>
+ * <li>"apply","施工申请"</li>
+ * <li>"complete","竣工验收"</li>
+ * <li>"refound","押金退回"</li>
+ * </ul>
+ */
 public enum IllustrationType {
     BASIC("basic","装修申请"),
     FILE("file","装修资料"),

@@ -2,7 +2,9 @@ package com.everhomes.rest.decoration;
 
 /**
  * <ul>
- * <li>status：审批状态 参考{@link com.everhomes.rest.flow}</li>
+ * <li>status：审批状态 参考{@link com.everhomes.rest.flow.FlowCaseStatus}</li>
+ * <li>approvalName</li>
+ * <li>flowCaseId</li>
  * </ul>
  */
 public class DecorationFlowCaseDTO {

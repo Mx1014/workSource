@@ -3,6 +3,7 @@ package com.everhomes.rest.decoration;
 /**
  * <ul>
  * <li>processorType：操作人类型 参考{@link com.everhomes.rest.decoration.ProcessorType}</li>
+ * <li>id</li>
  * </ul>
  */
 public class GetDecorationDetailCommand {

@@ -5,6 +5,9 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>name</li>
+ * <li>workerType</li>
+ * <li>phone</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
  * <li>address：门牌号</li>
@@ -14,7 +17,7 @@ import java.util.List;
  * <li>decoratorName：负责人姓名</li>
  * <li>decoratorPhone：负责人电话</li>
  * <li>decoratorCompany：负责人公司</li>
- * <li>flowCasees：工作流</li>
+ * <li>flowCasees：工作流 List<DecorationFlowCaseDTO> 参考{@link com.everhomes.rest.decoration.DecorationFlowCaseDTO}</li>
  * </ul>
  */
 public class QrDetailDTO {

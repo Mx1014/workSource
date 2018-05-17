@@ -3,6 +3,9 @@ package com.everhomes.rest.decoration;
 /**
  * <ul>
  * <li>attachmentType：附件类型  参考{@link com.everhomes.rest.decoration.DecorationAttachmentType}</li>
+ * <li>name</li>
+ * <li>size</li>
+ * <li>fileUrl</li>
  * </ul>
  */
 public class DecorationAttachmentDTO {

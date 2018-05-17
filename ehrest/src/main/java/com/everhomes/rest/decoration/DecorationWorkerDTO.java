@@ -3,6 +3,11 @@ package com.everhomes.rest.decoration;
 /**
  * <ul>
  * <li>workerType：工种</li>
+ * <li>id</li>
+ * <li>name</li>
+ * <li>phone</li>
+ * <li>imageUrl</li>
+ * <li>uid</li>
  * </ul>
  */
 public class DecorationWorkerDTO {

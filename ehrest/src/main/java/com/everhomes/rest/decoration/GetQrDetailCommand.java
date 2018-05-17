@@ -1,5 +1,11 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>uid：用户id</li>
+ *  <li>requestId</li>
+ * </ul>
+ */
 public class GetQrDetailCommand {
 
     private Long uid;

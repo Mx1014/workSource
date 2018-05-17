@@ -4,6 +4,7 @@ package com.everhomes.rest.decoration;
  * <ul>
  * <li>ownerType：装修说明类型  参考{@link com.everhomes.rest.decoration.IllustrationType}</li>
  * <li>ownerId：审批id</li>
+ * <li>communityId</li>
  * </ul>
  */
 public class GetIlluStrationCommand {

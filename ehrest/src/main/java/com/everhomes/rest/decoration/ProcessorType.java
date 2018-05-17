@@ -1,5 +1,13 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>0,"管理员"</li>
+ * <li>1,"租户"</li>
+ * <li>2,"负责人"</li>
+ * <li>3,"工人"</li>
+ * </ul>
+ */
 public enum ProcessorType {
     ROOT((byte)0,"管理员"),
     MASTER((byte)1,"租户"),

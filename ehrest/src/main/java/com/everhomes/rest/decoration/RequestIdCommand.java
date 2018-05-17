@@ -1,5 +1,10 @@
 package com.everhomes.rest.decoration;
 
+/**
+ * <ul>
+ * <li>requestId</li>
+ * </ul>
+ */
 public class RequestIdCommand {
 
     private Long requestId;

@@ -2,6 +2,12 @@ package com.everhomes.rest.decoration;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor</li>
+ * <li>workers:List<DecorationWorkerDTO> {@link com.everhomes.rest.decoration.DecorationWorkerDTO}</li>
+ * </ul>
+ */
 public class ListWorkersResponse {
 
     private Long nextPageAnchor;

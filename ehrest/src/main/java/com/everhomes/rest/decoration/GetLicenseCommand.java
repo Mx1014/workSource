@@ -4,6 +4,7 @@ package com.everhomes.rest.decoration;
  * <ul>
  * <li>processorType：操作人类型 参考{@link com.everhomes.rest.decoration.ProcessorType}</li>
  * <li>uid：查看自己的证明时不传 负责人查看工人时传工人uid</li>
+ *  <li>requestId</li>
  * </ul>
  */
 public class GetLicenseCommand {

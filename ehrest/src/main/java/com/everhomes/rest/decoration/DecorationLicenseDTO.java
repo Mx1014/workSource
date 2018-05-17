@@ -4,6 +4,7 @@ package com.everhomes.rest.decoration;
  * <ul>
  * <li>workerType：工种</li>
  * <li>qrUrl：二维码地址</li>
+ * <li>name</li>
  * </ul>
  */
 public class DecorationLicenseDTO {

@@ -2,6 +2,12 @@ package com.everhomes.rest.decoration;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>fee：List<DecorationFeeDTO> 参考{@link com.everhomes.rest.decoration.DecorationFeeDTO}</li>
+ * <li>address</li>
+ * </ul>
+ */
 public class GetDecorationFeeResponse {
 
     private List<DecorationFeeDTO> fee;

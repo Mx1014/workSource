@@ -1,9 +1,9 @@
 package com.everhomes.decoration;
 
-import com.everhomes.rest.decoration.DecorationIllustrationDTO;
+import com.everhomes.server.schema.tables.pojos.EhDecorationSetting;
 
 public interface DecorationProvider {
 
 
-    Long createDecorationSetting(DecorationIllustrationDTO setting);
+    Long createDecorationSetting(EhDecorationSetting setting);
 }
