@@ -1333,11 +1333,29 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param map
      */
     private void setVisitorFormValues(VisitorSysVisitor convert, Map<String, PostApprovalFormItem> map) {
-        convert.setInvalidTime(map.get("invalidTime").getFieldValue());
-        convert.setPlateNo(map.get("plateNo").getFieldValue());
-        convert.setIdNumber(map.get("idNumber").getFieldValue());
-        convert.setVisitFloor(map.get("visitFloor").getFieldValue());
-        convert.setVisitAddresses(map.get("visitAddresses").getFieldValue());
+        if(map==null){
+            return;
+        }
+        PostApprovalFormItem invalidTime = map.get("invalidTime");
+        if(invalidTime!=null) {
+            convert.setInvalidTime(invalidTime.getFieldValue());
+        }
+        PostApprovalFormItem plateNo = map.get("plateNo");
+        if(plateNo!=null) {
+            convert.setPlateNo(plateNo.getFieldValue());
+        }
+        PostApprovalFormItem idNumber = map.get("idNumber");
+        if(idNumber!=null) {
+            convert.setIdNumber(idNumber.getFieldValue());
+        }
+        PostApprovalFormItem visitFloor = map.get("visitFloor");
+        if(visitFloor!=null) {
+            convert.setVisitFloor(visitFloor.getFieldValue());
+        }
+        PostApprovalFormItem visitAddresses = map.get("visitAddresses");
+        if(visitAddresses!=null) {
+            convert.setVisitAddresses(visitAddresses.getFieldValue());
+        }
     }
 
     /**
