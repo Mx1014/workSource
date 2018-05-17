@@ -6,7 +6,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -20,24 +19,16 @@ import com.everhomes.query.QueryBuilder;
 import com.everhomes.query.QueryCondition;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.StringRestResponse;
-import com.everhomes.rest.group.GroupServiceErrorCode;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
-import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.rest.pay.controller.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -871,6 +862,33 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         return cmd;
+    }
+
+
+    @Override
+    public PayOrderRestResponse payOrder(PayOrderCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("payOrder-cmd=" + GsonUtil.toJson(cmd));}
+        PayOrderRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_PAYORDER_URL,
+                cmd,
+                PayOrderRestResponse.class);
+
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("payOrder-response=" + GsonUtil.toJson(response));}
+        return response;
+    }
+
+    @Override
+    public QueryOrderPaymentStatusRestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("queryOrderPaymentStatus-cmd=" + GsonUtil.toJson(cmd));}
+        QueryOrderPaymentStatusRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTSTATUS_URL,
+                cmd,
+                QueryOrderPaymentStatusRestResponse.class);
+
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("queryOrderPaymentStatus-response=" + GsonUtil.toJson(response));}
+        return response;
     }
     
     @Override

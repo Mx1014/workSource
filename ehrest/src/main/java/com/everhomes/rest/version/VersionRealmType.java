@@ -187,7 +187,19 @@ public enum VersionRealmType {
     ANDROID_SHUMIYUANPARK("Android_ShuMiYuanPark"),
     IOS_SHUMIYUANPARK("iOS_ShuMiYuanPark"),
     ANDROID_ZHIGUHUI("Android_ZhiGuHui"),
-    IOS_ZHIGUHUI("iOS_ZhiGuHui")
+    IOS_ZHIGUHUI("iOS_ZhiGuHui"),
+    ANDROID_BJWKZX("Android_Bjwkzx"),
+	IOS_BJWKZX("iOS_Bjwkzx"),
+	ANDROID_CHUANGJIHE("Android_ChuangJiHe"),
+	IOS_CHUANGJIHE("iOS_ChuangJiHe"),
+	ANDROID_COREDEMO("Android_CoreDemo"),
+	IOS_COREDEMO("iOS_CoreDemo"),
+	ANDROID_DINGFENGHUI("Android_DingFengHui"),
+	IOS_DINGFENGHUI("iOS_DingFengHui"),
+	ANDROID_TIANQIHUI("Android_TianQiHui"),
+	IOS_TIANQIHUI("iOS_TianQiHui"),
+	ANDROID_ZHIHUIYINGXING("ANDROID_ZHIHUIYINGXING"),
+	IOS_ZHIHUIYINGXING("iOS_ZhiHuiYinXing")
     ;
 
     private String code;

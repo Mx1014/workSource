@@ -1,24 +1,23 @@
 package com.everhomes.order;
 
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.PayOrderCommand;
+import com.everhomes.pay.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.pay.controller.PayOrderRestResponse;
+import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.GetPaymentBalanceCommand;
-import com.everhomes.rest.order.ListPaymentWithdrawOrderCommand;
-import com.everhomes.rest.order.ListPaymentWithdrawOrderResponse;
-import com.everhomes.rest.order.PaymentBalanceDTO;
-import com.everhomes.rest.order.PaymentWithdrawCommand;
-import com.everhomes.util.RequireAuthentication;
+import javax.validation.Valid;
 
 
 @RestController
@@ -120,8 +119,38 @@ public class PayController extends ControllerBase {
     @RestReturn(value=ListPaymentWithdrawOrderResponse.class)
     public RestResponse listPaymentWithdrawOrders(ListPaymentWithdrawOrderCommand cmd) {
         ListPaymentWithdrawOrderResponse cmdResponse = payService.listPaymentWithdrawOrders(cmd);
-        
+
         RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pay/payOrder</b>
+     * <p>转发支付订单接口</p>
+     */
+    @RequestMapping("payOrder")
+    @RestReturn(value=PayOrderRestResponse.class)
+    public RestResponse payOrder(PayOrderCommand cmd) {
+        PayOrderRestResponse cmdResponse = payService.payOrder(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pay/queryOrderPaymentStatus</b>
+     * <p>转发查询订单支付状态接口</p>
+     */
+    @RequestMapping("queryOrderPaymentStatus")
+    @RestReturn(value=QueryOrderPaymentStatusRestResponse.class)
+    public RestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
+        QueryOrderPaymentStatusRestResponse cmdResponse = payService.queryOrderPaymentStatus(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
