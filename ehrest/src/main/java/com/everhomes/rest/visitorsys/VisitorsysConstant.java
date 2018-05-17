@@ -58,6 +58,7 @@ public class VisitorsysConstant {
     public final static int ERROR_INBLACKLIST_PHONE_COMMUNITY = 1407;  //此手机号码已进入黑名单
     public final static int ERROR_INBLACKLIST_PHONE_ENTERPRISE= 1408;  //此手机号码已进入黑名单
     public final static int ERROR_REGISTED_IPAD= 1409;  //此ipad已被注册过
+    public final static int ERROR_PLANNED_VISITTIME= 1410;  //计划到访时间不能早于当前时间
 
     //常规常量
     public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id

@@ -280,11 +280,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                             return null;
                         }
                     }
-          );
+            );
+            sendVisitorSms(visitor);
         }else{
             VisitorSysVisitor visitor = checkUpdateVisitor(cmd);
             dbProvider.execute(r->updateVisitorSysVisitor(visitor,cmd));
+            sendVisitorSms(visitor);
         }
+
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(cmd, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
@@ -389,6 +392,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "unknow visitorid = " + cmd.getVisitorId());
         }
+        visitor.setSendSmsFlag(VisitorsysFlagType.YES.getCode());
+        sendVisitorSms(visitor);
+    }
+
+    /**
+     * 发送访客邀请函短信，条件为 预约访客，未到访，电话不为空，短信标识为YES
+     * @param visitor
+     */
+    private void sendVisitorSms(VisitorSysVisitor visitor) {
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         if(visitorType==VisitorsysVisitorType.TEMPORARY){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -400,9 +412,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "not support visitor status = "+visitor.getVisitStatus());
         }
         if(visitor.getVisitorPhone()==null){
-            return;
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "not support visitor phone = " + visitor.getVisitorPhone());
         }
 
+        VisitorsysFlagType sendSmsFlag = VisitorsysFlagType.fromCode(visitor.getSendSmsFlag());
+        if(sendSmsFlag == VisitorsysFlagType.NO) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "not support sendMessageInviterFlag = " + visitor.getSendSmsFlag());
+        }
         List<Tuple<String, Object>> variables =  new ArrayList();
         smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_APPNAME, "");
         smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_VISITENTERPRISENAME, visitor.getEnterpriseName());
@@ -1538,8 +1556,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitorsysVisitorType==VisitorsysVisitorType.BE_INVITED){
             checkMustFillParams(visitor, "plannedVisitTime");
             if(visitor.getPlannedVisitTime().getTime()<System.currentTimeMillis()){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                        , ErrorCodes.ERROR_INVALID_PARAMETER, "invalid passed plannedVisitTime "+visitor.getPlannedVisitTime());
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE
+                        , VisitorsysConstant.ERROR_PLANNED_VISITTIME, "invalid passed plannedVisitTime "+visitor.getPlannedVisitTime());
             }
             if(visitor.getId()==null) {
                 visitor.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());
