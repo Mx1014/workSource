@@ -186,3 +186,8 @@ ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL 
 ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
 ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `namespace_id`;
 
+-- 客户端处理方式0-native, 1-outside url, 2-inside url, 3-offline package  add by yanjun 201805171140
+ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
+
+
+
