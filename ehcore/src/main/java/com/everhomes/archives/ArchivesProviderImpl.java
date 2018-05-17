@@ -239,7 +239,20 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesOperationalConfiguration findOldConfiguration(Integer namespaceId, Long organizationId, Long detailId) {
+    public ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.eq(detailId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(type));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
+        return query.fetchAnyInto(ArchivesOperationalConfiguration.class);
+
+    }
+
+    @Override
+    public ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long organizationId, Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -251,7 +264,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType) {
+    public List<ArchivesOperationalConfiguration> listPendingConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -304,23 +317,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesConfigurations.class, configuration.getId());
     }*/
 
-    /*@Override
-    public List<ArchivesConfigurations> listArchivesConfigurations(Date date){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhArchivesConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_CONFIGURATIONS);
-//        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
-//        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
-        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.OPERATION_TIME.eq(date));
-        List<ArchivesConfigurations> results = new ArrayList<>();
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, ArchivesConfigurations.class));
-            return null;
-        });
-        if (null != results && 0 != results.size()) {
-            return results;
-        }
-        return null;
-    }
+    /*
 
     @Override
     public void createArchivesLogs(ArchivesLogs log){
@@ -420,4 +417,30 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         }
         return null;
     }
+
+    @Override
+    public List<ArchivesLogs> listAllArchivesLogs(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_LOGS);
+        List<ArchivesLogs> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesLogs.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ArchivesConfigurations> listAllPendingConfigs() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_CONFIGURATIONS);
+        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.OPERATION_TIME.gt(ArchivesUtil.currentDate()));
+        List<ArchivesConfigurations> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesConfigurations.class));
+            return null;
+        });
+        return results;
+    }
+
 }

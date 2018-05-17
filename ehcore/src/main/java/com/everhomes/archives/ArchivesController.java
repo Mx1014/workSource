@@ -452,4 +452,14 @@ public class ArchivesController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    @RequestMapping("syncArchivesConfigAndLogs")
+    @RestReturn(value = String.class)
+    public RestResponse syncArchivesConfigAndLogs(){
+        archivesService.syncArchivesConfigAndLogs();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

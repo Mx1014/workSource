@@ -43,17 +43,15 @@ public interface ArchivesProvider {
 
     void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    ArchivesOperationalConfiguration findOldConfiguration(Integer namespaceId, Long organizationId, Long detailId);
+    ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
 
-    List<ArchivesOperationalConfiguration> listOldConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType);
+    ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long organizationId, Long detailId);
+
+    List<ArchivesOperationalConfiguration> listPendingConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType);
 
     void createOperationalLog(ArchivesOperationalLog log);
 
-//    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
-
 //    void createArchivesLogs(ArchivesLogs log);
-
-//    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
 
     List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
 
@@ -64,4 +62,9 @@ public interface ArchivesProvider {
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
+
+    List<ArchivesLogs> listAllArchivesLogs();
+
+    List<ArchivesConfigurations> listAllPendingConfigs();
+
 }

@@ -40,30 +40,14 @@ public class test {
         System.out.println(0 == departmentId.longValue());
         Long yep = null;
         System.out.println(0 == yep);
-//        System.out.println(0 == yep.longValue());*/
-//        System.out.println(LocalDateTime.now().getDayOfWeek().getValue());
-
-        ZoneId zoneId = ZoneId.systemDefault();
-//        LocalDateTime nowDateTime = LocalDateTime.now();
-        LocalDateTime dateTime2 = LocalDateTime.of(2018,4,13,23,50);
-        System.out.println("++++++++++++++++++DATETIME2: " + dateTime2);
-//        LocalDateTime nextDateTime = LocalDateTime.of(dateTime2.getYear(), dateTime2.getMonthValue(), dateTime2.getDayOfMonth(), dateTime2.getHour() +1, 0);
-//        System.out.println("++++++++++++++++++NEXTDATETIME: " + nextDateTime);
-//        ZonedDateTime zdt = nextDateTime.atZone(zoneId);
-//        Date date = Date.from(zdt.toInstant());
-//        System.out.println("++++++++++++++++++DATE: " + date);
-
-        LocalDateTime dateTime3 = dateTime2.plusHours(1);
-        System.out.println("++++++++++++++++++DATETIME3: " + dateTime3);
-        dateTime3 = LocalDateTime.of(dateTime3.getYear(), dateTime3.getMonthValue(), dateTime3.getDayOfMonth(), dateTime3.getHour(), 0);
-        System.out.println("++++++++++++++++++DATETIME3: " + dateTime3);
-        ZonedDateTime zdt2 = dateTime3.atZone(zoneId);
-        Date date2 = Date.from(zdt2.toInstant());
-        System.out.println("++++++++++++++++++DATE2: " + date2);
-
+        */
         java.sql.Date date1 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
         java.sql.Date date3 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
+        System.out.println(date1);
+        System.out.println(date3);
         System.out.println(date3.after(date1));
+        System.out.println(date3.equals(date1));
+        System.out.println(date3.before(date1));
     }
 
 }

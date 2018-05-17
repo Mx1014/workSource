@@ -25,5 +25,5 @@ UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '外出
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '异常申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvNE9XSXpNbVEwWTJJMFkyVXdPVGxqTkRCbFpHWTNPRE5pTlRSak0yUmtNZw' WHERE `approval_attribute`='ABNORMAL_PUNCH';
 -- 审批3.0 end.
 
--- 人事2.7同步数据，需要先执行schema后执行此sql start
--- UPDATE `eh_archives_logs` SET `status` = 1 WHERE `operation_time` > NOW();
+-- 人事2.7同步数据，需要先执行schema后执行此接口
+-- 执行 /archives/syncArchivesConfigAndLogs 接口

@@ -1107,9 +1107,11 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private void addEmployLogs(EmployArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesOperationalLog log = new ArchivesOperationalLog();
+                log.setNamespaceId(namespaceId);
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
@@ -1127,9 +1129,11 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private void addTransferLogs(TransferArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesOperationalLog log = new ArchivesOperationalLog();
+                log.setNamespaceId(namespaceId);
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
@@ -1164,9 +1168,11 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private void addDismissLogs(DismissArchivesEmployeesCommand cmd) {
         Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesOperationalLog log = new ArchivesOperationalLog();
+                log.setNamespaceId(namespaceId);
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.DISMISS.getCode());
@@ -1634,7 +1640,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void createArchivesOperation(
             Integer namespaceId, Long organizationId, Long detailId, Byte operationType, Date date, String cmd) {
         //  1.若有上一次配置则先取消
-        ArchivesOperationalConfiguration oldConfig = archivesProvider.findOldConfiguration(namespaceId, organizationId, detailId);
+        ArchivesOperationalConfiguration oldConfig = archivesProvider.findPendingConfiguration(namespaceId, organizationId, detailId);
         if (oldConfig != null) {
             oldConfig.setStatus(ArchivesOperationStatus.CANCEL.getCode());
             archivesProvider.updateOperationalConfiguration(oldConfig);
@@ -1677,7 +1683,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd) {
         CheckOperationResponse response = new CheckOperationResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ArchivesOperationalConfiguration> results = archivesProvider.listOldConfigurations(namespaceId, cmd.getDetailIds(), cmd.getOperationType());
+        List<ArchivesOperationalConfiguration> results = archivesProvider.listPendingConfigurations(namespaceId, cmd.getDetailIds(), cmd.getOperationType());
         if (results.size() == 0) {
             response.setFlag(TrueOrFalseFlag.FALSE.getCode());
             return response;
@@ -2694,5 +2700,68 @@ public class ArchivesServiceImpl implements ArchivesService {
                 message,
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
+    }
+
+    @Override
+    public void syncArchivesConfigAndLogs() {
+        List<ArchivesLogs> results = archivesProvider.listAllArchivesLogs();
+        if (results.size() > 0) {
+            for (ArchivesLogs result : results) {
+                ArchivesOperationalLog log = ConvertHelper.convert(result, ArchivesOperationalLog.class);
+                switch (ArchivesOperationType.fromCode(result.getOperationType())) {
+                    case CHECK_IN:
+                        break;
+                    case EMPLOY:
+                        log.setStringTag1(result.getOperationReason());
+                        break;
+                    case TRANSFER:
+                        log.setStringTag1(result.getOperationRemark());
+                        log.setStringTag4(ArchivesUtil.resolveArchivesEnum(result.getOperationCategory(), ArchivesParameter.TRANSFER_TYPE));
+                        log.setStringTag5(result.getOperationReason());
+                        break;
+                    case DISMISS:
+                        log.setStringTag1(ArchivesUtil.resolveArchivesEnum(result.getOperationCategory(), ArchivesParameter.DISMISS_TYPE));
+                        log.setStringTag2(result.getOperationReason());
+                        log.setStringTag3(result.getOperationRemark());
+                        break;
+                }
+                archivesProvider.createOperationalLog(log);
+            }
+        }
+
+        List<ArchivesConfigurations> results2 = archivesProvider.listAllPendingConfigs();
+        if (results2.size() > 0) {
+            for (ArchivesConfigurations result2 : results2){
+                createConfig(result2);
+            }
+        }
+    }
+
+    private void createConfig(ArchivesConfigurations r) {
+        if (r.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
+            EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(r.getOperationInformation(), EmployArchivesEmployeesCommand.class);
+            if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0)
+                return;
+            for (Long detailId : cmd.getDetailIds()) {
+                ArchivesOperationalConfiguration oldConfig = archivesProvider.findConfigurationByDetailId(r.getNamespaceId(), r.getOrganizationId(), r.getOperationType(), detailId);
+                if(oldConfig != null){
+                    if(r.getOperationTime().before(oldConfig.getOperateDate()))
+                        continue;
+                    oldConfig.setOperateDate(r.getOperationTime());
+                    oldConfig.setAdditionalInfo(r.getOperationInformation());
+                    oldConfig.setCreateTime(r.getCreateTime());
+                    oldConfig.setOperatorUid(r.getOperatorUid());
+                    archivesProvider.updateOperationalConfiguration(oldConfig);
+                }else {
+                    ArchivesOperationalConfiguration newConfig = ConvertHelper.convert(r, ArchivesOperationalConfiguration.class);
+                    newConfig.setDetailId(detailId);
+                    newConfig.setOperateType(r.getOperationType());
+                    newConfig.setOperateDate(r.getOperationTime());
+                    newConfig.setStatus(ArchivesOperationStatus.PENDING.getCode());
+                    newConfig.setAdditionalInfo(r.getOperationInformation());
+                    archivesProvider.createOperationalConfiguration(newConfig);
+                }
+            }
+        }
     }
 }
