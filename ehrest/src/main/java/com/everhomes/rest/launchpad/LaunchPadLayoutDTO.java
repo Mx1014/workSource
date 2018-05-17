@@ -39,7 +39,7 @@ public class LaunchPadLayoutDTO {
     private String bgImageUrl;
 
     private Byte type;
-    private Long bgColor;
+    private String bgColor;
 
     public Long getId() {
         return id;
@@ -129,11 +129,11 @@ public class LaunchPadLayoutDTO {
         this.bgImageUrl = bgImageUrl;
     }
 
-    public Long getBgColor() {
+    public String getBgColor() {
         return bgColor;
     }
 
-    public void setBgColor(Long bgColor) {
+    public void setBgColor(String bgColor) {
         this.bgColor = bgColor;
     }
 

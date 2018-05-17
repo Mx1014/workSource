@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>moduleId: moduleId</li>
+ *     <li>actionType: actionType</li>
  *     <li>instanceConfig: instanceConfig</li>
  *     <li>cards: 卡片信息{@link OPPushCard}</li>
  * </ul>
@@ -17,6 +18,7 @@ import java.util.List;
 public class ListOPPushCardsResponse {
 
     private Long moduleId;
+    private Byte actionType;
     private String instanceConfig;
     private List<OPPushCard> cards;
 
@@ -26,6 +28,14 @@ public class ListOPPushCardsResponse {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public Byte getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
     }
 
     public String getInstanceConfig() {
