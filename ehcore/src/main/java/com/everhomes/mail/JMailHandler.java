@@ -19,12 +19,14 @@ import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 
 @Component(MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP)
-public class JMailHandler implements MailHandler {
+public class JMailHandler implements MailHandler, ApplicationListener<ContextRefreshedEvent> {
     public final static Logger LOGGER = LoggerFactory.getLogger(JMailHandler.class);
     
     @Autowired
@@ -32,7 +34,9 @@ public class JMailHandler implements MailHandler {
     
     private Session session;
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516    
+    //@PostConstruct
     public void init() {        
         Properties props = new Properties();
         props.setProperty("mail.smtp.auth", "true");
@@ -42,6 +46,10 @@ public class JMailHandler implements MailHandler {
 
         session = Session.getInstance(props);
         session.setDebug(true);
+    }
+    
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        init();
     }
     
     public void sendMail(Integer namespaceId, String from, String to, String subject, String body) {

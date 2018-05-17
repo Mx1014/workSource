@@ -124,7 +124,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -141,7 +143,7 @@ import java.util.stream.Collectors;
 
 @Component
 @DependsOn("platformContext")
-public class EquipmentProviderImpl implements EquipmentProvider {
+public class EquipmentProviderImpl implements EquipmentProvider, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 
     @Value("${equipment.ip}")
@@ -170,8 +172,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Autowired
     EquipmentStandardMapSearcher equipmentStandardMapSearcher;
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         //  String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
@@ -188,6 +192,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        init();
+    }
+    
     @Cacheable(value = "findEquipmentByIdAndOwner", key = "{#id, #ownerType, #ownerId}", unless = "#result == null")
     @Override
     public EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId) {

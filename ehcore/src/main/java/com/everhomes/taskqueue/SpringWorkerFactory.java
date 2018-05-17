@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("workerFactory")
-public class SpringWorkerFactory implements Callable<WorkerImpl>, ApplicationContextAware {
+public class SpringWorkerFactory implements Callable<WorkerImpl>, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
     private Logger logger = LoggerFactory.getLogger(SpringWorkerFactory.class);
     private Config config;
@@ -35,9 +37,16 @@ public class SpringWorkerFactory implements Callable<WorkerImpl>, ApplicationCon
     @Autowired
     private ApplicationContext applicationContext;
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         this.config = new ConfigBuilder().withHost(redisHost).withPort(redisPort).withNamespace("everhomesjes").build();
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        setup();
     }
 
     @Override

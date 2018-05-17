@@ -16,6 +16,8 @@ import javax.websocket.WebSocketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,7 +38,7 @@ import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
-public class ConnectionProviderImpl implements ConnectionProvider {
+public class ConnectionProviderImpl implements ConnectionProvider, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProviderImpl.class);
 
     private Map<String, WebSocketSession> sessionCache;
@@ -48,8 +50,10 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 
     @Autowired
     private LocalBusOneshotSubscriberBuilder subscriber;
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         sessionCache = new ConcurrentHashMap<String, WebSocketSession>();
         handlers = new ConcurrentHashMap<String, WebSocketHandler>();
@@ -66,7 +70,11 @@ public class ConnectionProviderImpl implements ConnectionProvider {
             }
         });
     }
-
+    
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        init();
+    }
+    
     @Override
     public void connect(String host, int port) throws Exception {
         String key = String.format("%s:%d", host, port);

@@ -111,7 +111,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -128,7 +130,7 @@ import java.util.Set;
 
 @Component
 @DependsOn("platformContext")
-public class QualityProviderImpl implements QualityProvider {
+public class QualityProviderImpl implements QualityProvider, ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityProviderImpl.class);
 	
@@ -156,7 +158,9 @@ public class QualityProviderImpl implements QualityProvider {
 	@Value("${equipment.ip}")
 	private String equipmentIp;
 	
-	@PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
 		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
@@ -186,6 +190,11 @@ public class QualityProviderImpl implements QualityProvider {
 //				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 
 	}
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        init();
+    }
 
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {

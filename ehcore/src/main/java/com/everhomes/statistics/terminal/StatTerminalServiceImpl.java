@@ -19,6 +19,8 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
  * Created by sfyan on 2016/11/29.
  */
 @Component
-public class StatTerminalServiceImpl implements StatTerminalService {
+public class StatTerminalServiceImpl implements StatTerminalService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalServiceImpl.class);
 
@@ -61,7 +63,9 @@ public class StatTerminalServiceImpl implements StatTerminalService {
     @Autowired
     private TaskService taskService;
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         String triggerName = StatTerminalScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
         String jobName = triggerName;
@@ -70,6 +74,11 @@ public class StatTerminalServiceImpl implements StatTerminalService {
         scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTerminalScheduleJob.class, null);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        setup();
+    }
+    
     @Override
     public LineChart getTerminalHourLineChart(List<String> dates, TerminalStatisticsType type) {
         LineChart lineChart = new LineChart();

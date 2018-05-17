@@ -89,6 +89,8 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -112,7 +114,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
-public class ContractServiceImpl implements ContractService {
+public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
 
@@ -242,8 +244,10 @@ public class ContractServiceImpl implements ContractService {
 //		}
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,communityId);
 	}
-
-	@PostConstruct
+	
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup(){
 		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
 		String jobName = triggerName;
@@ -252,6 +256,10 @@ public class ContractServiceImpl implements ContractService {
 		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
 	}
 
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        setup();
+    }
+	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
