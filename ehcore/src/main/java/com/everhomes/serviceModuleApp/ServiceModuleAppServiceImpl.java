@@ -394,12 +394,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
 
-				ServiceModuleAppDTO appDTO = new ServiceModuleAppDTO();
+				ServiceModuleAppDTO appDTO = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
 				appDTO.setName(app.getName());
 				if(app.getIconUri() != null){
 					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
 					appDTO.setIconUrl(url);
 				}
+
+				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
+
 				appDtos.add(appDTO);
 			}
 		}
