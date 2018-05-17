@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.aclink.admin;
 
 import com.everhomes.aclink.*;
@@ -5,10 +6,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RequireAuthentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -186,8 +190,8 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/aclink/syncDoorMessages</b>
-     * <p>删除授权</p>
+     * <b>URL: /admin/aclink/createAclinkFirmware</b>
+     * <p>新增版本包</p>
      * @return
      */
     @RequestMapping("createAclinkFirmware")
@@ -259,8 +263,8 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/aclink/createLingingVistor</b>
-     * <p>给令令访客授权</p>
+     * <b>URL: /admin/aclink/listDoorAccessGroup</b>
+     * <p>列出所有门禁列表</p>
      * @return OK 成功
      */
     @RequestMapping("listDoorAccessGroup")
@@ -334,7 +338,7 @@ public class AclinkAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/aclink/searchVisitorDoorAuth</b>
-     * <p>获取门禁列表</p>
+     * <p>获取门禁授权列表</p>
      * @return 门禁列表
      */
     @RequestMapping("searchVisitorDoorAuth")

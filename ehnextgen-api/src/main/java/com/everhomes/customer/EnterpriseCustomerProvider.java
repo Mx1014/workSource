@@ -1,9 +1,16 @@
 package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.customer.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -154,4 +161,22 @@ public interface EnterpriseCustomerProvider {
     String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
     List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);
+
+    void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
+
+    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken);
+
+    void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
+
+    void updateEnterpriseCustomerAdminRecord(String contacToken);
+
+    List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
+
+    List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long id);
+
+    List<Organization> listNoSyncOrganizations();
+
+    void deleteAllCustomerEntryInfo(Long customerId);
+
+    void deleteAllEnterpriseCustomerAdminRecord(Long id);
 }

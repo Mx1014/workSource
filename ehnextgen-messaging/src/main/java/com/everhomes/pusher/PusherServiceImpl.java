@@ -14,18 +14,14 @@ import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.messaging.ApnsServiceFactory;
-import com.everhomes.messaging.PushMessageResolver;
-import com.everhomes.messaging.PusherService;
-import com.everhomes.messaging.PusherVenderType;
-import com.everhomes.messaging.PusherVendorData;
-import com.everhomes.messaging.PusherVendorService;
+import com.everhomes.messaging.*;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
-import com.everhomes.queue.taskqueue.JesqueClientFactory;
-import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
@@ -36,14 +32,13 @@ import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
-import com.xiaomi.xmpush.server.Constants;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
-
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +49,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +63,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
-    
+    private final static String MESSAGE_INDEX_ID = "indexId";
+
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
 
@@ -442,7 +437,27 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 if(msgStr != null && !msgStr.isEmpty()) {
                     DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(msgStr, DeviceMessage.class);
                     if(msg != null) {
-                        deviceMsgs.add(msg);    
+                        deviceMsgs.add(msg);
+                        Map actionData = (Map)StringHelper.fromJsonString(msg.getExtra().get("actionData"), Map.class);
+                        MessageRecordDto record = new MessageRecordDto();
+                        record.setAppId(mb.getAppId());
+                        record.setNamespaceId(mb.getNamespaceId());
+                        record.setMessageSeq(mb.getMessageSequence());
+
+                        record.setSenderUid(Long.valueOf(Double.valueOf(actionData.get("senderUid").toString()).intValue()));
+                        record.setSenderTag(MessageRecordSenderTag.FETCH_NOTIFY_MESSAGES.getCode());
+                        record.setDstChannelType(actionData.get("dstChannel").toString());
+                        record.setDstChannelToken(Double.valueOf(actionData.get("dstChannelId").toString()).intValue()+ "");
+                        record.setBodyType(mb.getContextType());
+                        record.setBody(mb.getContent());
+                        record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                        record.setMeta(mb.getMeta());
+                        Map data_map = (Map) StringHelper.fromJsonString(mb.getContent(), Map.class);
+                        if(data_map.get("extra") != null){
+                            Map extraData = (Map)data_map.get("extra");
+                            record.setIndexId(extraData.get(MESSAGE_INDEX_ID) != null ? Long.valueOf(extraData.get(MESSAGE_INDEX_ID).toString()) : 0);
+                        }
+                        MessagePersistWorker.getQueue().offer(record);
                         }
                     }
                 

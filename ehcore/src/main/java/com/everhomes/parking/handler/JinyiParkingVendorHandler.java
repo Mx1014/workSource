@@ -43,7 +43,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String GET_TEMP_CARD_LOGS = "parkingjet.open.s2s.shorttermcard.apply.order.parkingrecord";
 	//赠送全免券
 	private static final String COUPON_FREE_SEND = "parkingjet.open.s2s.coupon.free.send";
-	
+
 	//获取七天范围的通讯记录,时间限制为半年
 	private static final String PARKING_RECORD_SEARCH = "parkingjet.open.s2s.parkingrecord.search";
 
@@ -173,7 +173,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return json;
 	}
-	
+
 //	public static void main(String[] args) {
 //		JinyiParkingVendorHandler handler = new JinyiParkingVendorHandler();
 //		ParkingClearanceLog log = new ParkingClearanceLog();
@@ -263,6 +263,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return false;
 	}
+
 
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -433,7 +434,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 //
 //		return json;
 //	}
-	
+
 	private JSONObject createParkingRecordSearch(ParkingClearanceLog log) {
 		JSONObject json = new JSONObject();
 		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");

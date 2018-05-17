@@ -27,6 +27,8 @@ public class ImportFieldExcelCommand {
     private Long communityId;
     private Long orgId;
     private Byte privilegeCode;
+    private Long ownerId;
+    private String ownerType;
 
     public Long getCustomerId() {
         return customerId;
@@ -82,6 +84,22 @@ public class ImportFieldExcelCommand {
 
     public void setPrivilegeCode(Byte privilegeCode) {
         this.privilegeCode = privilegeCode;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

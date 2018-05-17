@@ -314,6 +314,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             QueryCondition tempCondition = PaymentAttributes.USER_ID.eq(cmd.getUserId());
             condition = tempCondition;
         }
+        // payment status 默认为1，1就是成功支付。对应缺陷28409 by wentian the invoker upon the sky!! @ 3018.05.11
+        if(cmd.getPaymentStatus() == null) cmd.setPaymentStatus(1);
         if(cmd.getPaymentStatus() != null) {
             QueryCondition tempCondition = PaymentAttributes.PAYMENT_STATUS.eq(cmd.getPaymentStatus());
             if(condition == null) {

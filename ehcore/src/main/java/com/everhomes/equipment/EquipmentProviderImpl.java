@@ -2631,12 +2631,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.CLOSE.getCode());
+
+        Condition completeInspectionTask = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+                .in(EquipmentTaskStatus.CLOSE.getCode(),EquipmentTaskStatus.QUALIFIED.getCode());
         final Field<Byte> completeInspectionWaitingForApproval = DSL.decode()
                 .when(completeWaitingForApprovalCondition, EquipmentTaskStatus.CLOSE.getCode());
+        final Field<Byte> completeInspectionTasks = DSL.decode()
+                .when(completeInspectionTask, EquipmentTaskStatus.CLOSE.getCode());
 
         final Field<?>[] fields = {DSL.count().as("total"),
                 DSL.count(waitingForExecuting).as("waitingForExecuting"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
+                DSL.count(completeInspectionTasks).as("completeInspectionTasks"),
                 DSL.count(delayInpsectionTasks).as("delayInpsectionTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
@@ -2670,6 +2676,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.fetchAny().map((r) -> {
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+            resp.setCompleteInspectionTasks(r.getValue("completeInspectionTasks", Long.class));
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
