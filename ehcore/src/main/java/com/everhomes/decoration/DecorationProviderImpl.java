@@ -19,8 +19,6 @@ public class DecorationProviderImpl implements  DecorationProvider {
 
     @Override
     public Long createDecorationSetting(DecorationIllustrationDTO setting) {
-        long id = sequenceProvider.getNextSequence(NameMapper
-                .getSequenceDomainFromTablePojo(.class));
         return null;
     }
 }
