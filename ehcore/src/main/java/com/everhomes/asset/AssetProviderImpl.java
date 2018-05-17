@@ -2652,7 +2652,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         GetChargingStandardDTO dto = new GetChargingStandardDTO();
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE)
+        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE, t.PRICE_UNIT_TYPE)
                 .from(t)
                 .where(t.ID.eq(cmd.getChargingStandardId()))
                 .fetch()
@@ -2857,7 +2857,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t3 = Tables.EH_PAYMENT_VARIABLES.as("t3");
 //        com.everhomes.server.schema.tables.EhPaymentFormula t3 = Tables.EH_PAYMENT_FORMULA.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE, t.PRICE_UNIT_TYPE);
         query.addFrom(t,t1);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
