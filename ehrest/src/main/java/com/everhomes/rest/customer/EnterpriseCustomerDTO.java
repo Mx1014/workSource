@@ -1,7 +1,6 @@
 package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 
 /**
@@ -69,6 +68,7 @@ import java.sql.Timestamp;
  *     <li>remark: 备注</li>
  *     <li>trackingUid: 跟进人UID</li>
  *     <li>trackingName: 跟进人姓名</li>
+ *     <li>trackingPhone: 跟进人电话</li>
  *     <li>propertyArea: 资产面积</li>
  *     <li>propertyUnitPrice: 资产单价</li>
  *     <li>propertyType: 资产类型</li>
@@ -170,6 +170,10 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String serialEntrepreneurName;
     private BigDecimal riskInvestmentAmount;
     private Boolean thirdPartFlag = false;
+
+    private String trackingPhone;
+    private String deviceType;
+    private Integer trackingPeriod;
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -875,7 +879,31 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 		this.contactDuty = contactDuty;
 	}
 
-	@Override
+    public String getTrackingPhone() {
+        return trackingPhone;
+    }
+
+    public void setTrackingPhone(String trackingPhone) {
+        this.trackingPhone = trackingPhone;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Integer getTrackingPeriod() {
+        return trackingPeriod;
+    }
+
+    public void setTrackingPeriod(Integer trackingPeriod) {
+        this.trackingPeriod = trackingPeriod;
+    }
+
+    @Override
 	public int compareTo(EnterpriseCustomerDTO o) {
 		return o.getId() - this.getId() >= 0 ? 1 : -1;
 	}

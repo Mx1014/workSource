@@ -15,6 +15,7 @@ import java.util.List;
  * <li>targetType:客户type</li>
  * <li>targetName:客户名称</li>
  * <li>billGroupDTO:账单组，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>invoiceNum:发票编号</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -25,6 +26,15 @@ public class ModifyNotSettledBillCommand {
     private String targetName;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
+    private String invoiceNum;
+
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     @Override
     public String toString() {

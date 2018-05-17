@@ -75,6 +75,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         rentalResourceType.setPayMode(payMode);
         rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
+        rentalResourceType.setUnauthVisible((byte)0);
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }

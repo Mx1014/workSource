@@ -2698,7 +2698,8 @@ public class FlowServiceImpl implements FlowService {
     public FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd) {
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCaseCmd.getFlowMainId(), flowCaseCmd.getFlowVersion());
         if (snapshotFlow == null || snapshotFlow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER)) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow node error");
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow node error");
         }
 
         FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
@@ -2765,6 +2766,7 @@ public class FlowServiceImpl implements FlowService {
             flowCaseId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
         }
         flowCase.setId(flowCaseId);
+        flowCase.addPath(flowCaseId);
 
         flowListenerManager.onFlowCaseCreating(flowCase);
 
@@ -2828,6 +2830,7 @@ public class FlowServiceImpl implements FlowService {
             flowCaseId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
         }
         flowCase.setId(flowCaseId);
+        flowCase.addPath(flowCaseId);
 
         flowListenerManager.onFlowCaseCreating(flowCase);
 
@@ -3267,7 +3270,8 @@ public class FlowServiceImpl implements FlowService {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
         if (snapshotFlow == null || flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS,
+                    "flowcase noexists, flowCaseId=" + flowCase);
         }
 
         FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
@@ -3289,7 +3293,10 @@ public class FlowServiceImpl implements FlowService {
         }
 
         List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-        if (items == null || evaMap.size() != items.size()) {
+        List<FlowEvaluateItem> flowCaseItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowCase(flowCase.getRootFlowCaseId());
+        items.addAll(flowCaseItems);
+
+        if (evaMap.size() != items.size()) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "params error");
         }
 
@@ -3297,7 +3304,7 @@ public class FlowServiceImpl implements FlowService {
         for (FlowEvaluateItem item : items) {
             FlowEvaluate eva = new FlowEvaluate();
             eva.setEvaluateItemId(item.getId());
-            eva.setFlowCaseId(flowCase.getId());
+            eva.setFlowCaseId(flowCase.getRootFlowCaseId());
             eva.setFlowMainId(flowCase.getFlowMainId());
             eva.setFlowVersion(flowCase.getFlowVersion());
             eva.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -3319,8 +3326,6 @@ public class FlowServiceImpl implements FlowService {
         }
 
         ctx.setFlowEvas(flowEvas);
-
-        // flowEvaluateProvider.createFlowEvaluate(flowEvas);
 
         FlowEventLog tracker = new FlowEventLog();
 
@@ -3355,10 +3360,7 @@ public class FlowServiceImpl implements FlowService {
 
         ctx.getLogs().add(tracker);
 
-        // flowEventLogProvider.createFlowEventLog(tracker);
-
         flowCase.setEvaluateStatus(TrueOrFalseFlag.TRUE.getCode());
-        // flowCaseProvider.updateFlowCase(flowCase);
 
         FlowGraph flowGraph = ctx.getFlowGraph();
         FlowGraphLane graphLane = flowGraph.getGraphLane(flowCase.getCurrentLaneId());
@@ -4260,16 +4262,20 @@ public class FlowServiceImpl implements FlowService {
         dto.setResults(results);
 
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-
         dto.setNamespaceId(flowCase.getNamespaceId());
 
-        List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCaseId, flowCase.getFlowMainId(), flowCase.getFlowVersion());
+        List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(
+                flowCase.getRootFlowCaseId(), flowCase.getFlowMainId(), flowCase.getFlowVersion());
+
         Map<Long, FlowEvaluate> evaMap = new HashMap<>();
         if (evas != null && evas.size() > 0) {
             evas.forEach(ev -> evaMap.put(ev.getEvaluateItemId(), ev));
         }
 
         List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+        List<FlowEvaluateItem> flowCaseItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowCase(flowCase.getRootFlowCaseId());
+        items.addAll(flowCaseItems);
+
         for (FlowEvaluateItem item : items) {
             FlowEvaluateResultDTO rltDTO = new FlowEvaluateResultDTO();
             rltDTO.setEvaluateItemId(item.getId());

@@ -451,7 +451,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	// script.setScriptType(FlowScriptType.PROTOTYPE.getCode());
     	// script.setScriptCls(FlowScriptFireDummy.class.getName());
     	// script.setStepType(FlowActionStepType.STEP_ENTER.getCode());
-    	flowScriptProvider.createFlowScript(script);
+    	flowScriptProvider.createFlowScriptWithoutId(script);
     	
     	FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
     	FlowAction flowAction = new FlowAction();
@@ -464,8 +464,6 @@ public class FlowServiceTest extends LoginAuthTestCase {
 		} catch (FlowStepErrorException e) {
 			e.printStackTrace();
 		}
-    	
-    	flowScriptProvider.deleteFlowScript(script);
     }
     
     @Test 

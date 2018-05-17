@@ -39,7 +39,7 @@ public interface UserService {
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
 
-    User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
+    UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
@@ -60,6 +60,9 @@ public interface UserService {
     void setUserAccountInfo(SetUserAccountInfoCommand cmd);
     CommunityDTO setUserCurrentCommunity(long communityId);
     Long setDefaultCommunity(Long userId, Integer namespaceId);
+
+    Long setDefaultCommunityForWx(Long userId, Integer namespaceId);
+
     void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId);
 
     List<UserIdentifierDTO> listUserIdentifiers();

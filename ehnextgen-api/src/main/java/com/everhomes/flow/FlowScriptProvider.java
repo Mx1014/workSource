@@ -9,7 +9,7 @@ public interface FlowScriptProvider {
 
 	Long getNextId();
 
-	Long createFlowScriptWithoutId(FlowScript obj);
+	void createFlowScriptWithoutId(FlowScript obj);
 
 	void updateFlowScript(FlowScript obj);
 

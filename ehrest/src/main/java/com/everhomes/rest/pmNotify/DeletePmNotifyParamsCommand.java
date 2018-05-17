@@ -10,6 +10,8 @@ public class DeletePmNotifyParamsCommand {
 
     private Long communityId;
 
+    private String ownerType;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -32,5 +34,13 @@ public class DeletePmNotifyParamsCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 }

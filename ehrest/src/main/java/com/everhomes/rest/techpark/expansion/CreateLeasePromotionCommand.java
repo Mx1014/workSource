@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentAreas：招租面积</li>
  * <li>contacts：联系人</li>
  * <li>contactPhone：联系电话</li>
+ * <li>contactUid：客服id</li>
  * <li>description：随便写一点什么</li>
  * <li>enterTime：入住时间</li>
  * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
@@ -54,6 +55,7 @@ public class CreateLeasePromotionCommand {
 	private String rentAreas;
 	private String contacts;
 	private String contactPhone;
+	private Long contactUid;
 	private String description;
 	private String houseResourceType;
 
@@ -315,6 +317,14 @@ public class CreateLeasePromotionCommand {
 
 	public void setCommunityIds(List<Long> communityIds) {
 		this.communityIds = communityIds;
+	}
+
+	public Long getContactUid() {
+		return contactUid;
+	}
+
+	public void setContactUid(Long contactUid) {
+		this.contactUid = contactUid;
 	}
 
 	@Override

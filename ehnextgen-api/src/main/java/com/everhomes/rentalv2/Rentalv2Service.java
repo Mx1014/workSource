@@ -99,6 +99,8 @@ public interface Rentalv2Service {
 
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
+	ListRentalBillsCommandResponse listRentalBillsByOrdId(ListRentalBillsByOrdIdCommand cmd);
+
 	ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd);
 
 	void deleteRentalBill(DeleteRentalBillCommand cmd);
@@ -285,7 +287,12 @@ public interface Rentalv2Service {
 
 	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
 
+	QueryRentalStatisticsResponse queryRentalStatistics(QueryRentalStatisticsCommand cmd);
+
+	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
+
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();
+
 }

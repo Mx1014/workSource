@@ -44,18 +44,15 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
     }
 
     @Override
-    public Long createFlowScriptWithoutId(FlowScript obj) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowScripts.class));
+    public void createFlowScriptWithoutId(FlowScript obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowScripts.class));
 
-        obj.setId(id);
         obj.setCreateTime(DateUtils.currentTimestamp());
         obj.setCreatorUid(UserContext.currentUserId());
         prepareObj(obj);
 
         EhFlowScriptsDao dao = new EhFlowScriptsDao(context.configuration());
         dao.insert(obj);
-        return id;
     }
 
     @Override
@@ -182,6 +179,8 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
         Table<EhFlowScriptsRecord> table = context.selectFrom(t).orderBy(t.SCRIPT_VERSION.desc()).asTable();
         SelectQuery<EhFlowScriptsRecord> query = context.selectFrom(table).getQuery();
 
+        query.addConditions(table.field(t.SCRIPT_MAIN_ID).in(subQuery));
+
         query.addGroupBy(table.field(t.SCRIPT_MAIN_ID));
         query.addOrderBy(table.field(t.ID));
 
@@ -219,7 +218,7 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
             script.setUpdateTime(DateUtils.currentTimestamp());
             script.setUpdateUid(UserContext.currentUserId());
         }
-        dao.update(flowScripts.toArray(new EhFlowScripts[flowScripts.size()]));
+        dao.update(flowScripts.toArray(new EhFlowScripts[0]));
     }
 }
 

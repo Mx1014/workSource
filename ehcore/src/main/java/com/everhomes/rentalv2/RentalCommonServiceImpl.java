@@ -274,9 +274,11 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setAmount(orderAmount);
         rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
         rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+        if (UserContext.current().getUser()!=null)
+             rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
         rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+        if (UserContext.current().getUser()!=null)
+            rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
 
         this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
     }

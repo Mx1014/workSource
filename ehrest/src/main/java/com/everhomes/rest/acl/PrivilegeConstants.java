@@ -259,6 +259,7 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增加
     long ENTERPRISE_CUSTOMER_UPDATE = 21102L;//客户的修改
     long ENTERPRISE_CUSTOMER_IMPORT = 21103L;//客户的导入
+    long ENTERPRISE_CUSTOMER_EXPORT = 21114L;//客户的导出
     long ENTERPRISE_CUSTOMER_SYNC = 21104L;//客户的同步
     long ENTERPRISE_CUSTOMER_DELETE = 21105L;//客户的删
     long ENTERPRISE_CUSTOMER_LIST = 21106L;//客户的查
@@ -362,5 +363,5 @@ public interface PrivilegeConstants {
     long ORGANIZATION_SET_ADMIN = 33007L;
 
     // ------- 启动广告权限 --------
-    long LAUNCHAD_ALL = 33001L;
+    long LAUNCHAD_ALL = 1090010000L;
 }

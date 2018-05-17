@@ -56,7 +56,7 @@ CREATE TABLE `eh_flow_script_configs` (
 	`flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'flow version',
 
 	`owner_type` VARCHAR(64),
-	`owner_id` BIGINT NOT NULL DEFAULT 0,
+	`owner_id` BIGINT NOT NULL DEFAULT 0,:
 
 	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
 
@@ -86,3 +86,7 @@ CREATE TABLE `eh_flow_script_configs` (
 	`integral_tag5` BIGINT(20) NOT NULL DEFAULT '0',
 	PRIMARY KEY (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts config in dev mode';
+
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN flow_case_id BIGINT;
+
+ALTER TABLE eh_flow_cases ADD COLUMN path VARCHAR(1024) COMMENT 'flow case path';

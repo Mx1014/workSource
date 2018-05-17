@@ -1,7 +1,6 @@
 package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -153,6 +152,7 @@ public class CreateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+    private Byte  deviceType;
 
     public Long getOrgId() {
         return orgId;
@@ -772,7 +772,12 @@ public class CreateEnterpriseCustomerCommand {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	
-    
-    
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
+    }
 }

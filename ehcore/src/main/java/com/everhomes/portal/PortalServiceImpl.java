@@ -27,6 +27,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.AssociationActionData;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
 import com.everhomes.rest.common.ScopeType;
@@ -62,6 +63,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.lucene.util.UnicodeUtil;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1358,6 +1361,7 @@ public class PortalServiceImpl implements PortalService {
 
 					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
+					// 二楼：sb事务 + 1
 					sequenceService.syncSequence();
 
 					UserContext.setCurrentUser(user);
@@ -1939,15 +1943,42 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private void setItemLayoutActionData(LaunchPadItem item, String actionData){
-		item.setActionType(ActionType.NAVIGATION.getCode());
 		LayoutActionData data = (LayoutActionData)StringHelper.fromJsonString(actionData, LayoutActionData.class);
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
 		if(null != layout){
-			NavigationActionData navigationActionData = new NavigationActionData();
-			navigationActionData.setItemLocation(layout.getLocation());
-			navigationActionData.setLayoutName(layout.getName());
-			navigationActionData.setTitle(layout.getLabel());
-			item.setActionData(StringHelper.toJsonString(navigationActionData));
+
+			//tab widget have to use router way
+			boolean routerFlag = false;
+			List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroup(layout.getId());
+			if(portalItemGroups !=null) {
+				for (PortalItemGroup itemGroup: portalItemGroups){
+					if(Widget.fromCode(itemGroup.getWidget()) == Widget.TAB){
+						routerFlag = true;
+						break;
+					}
+				}
+			}
+
+			if(routerFlag){
+				PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
+				Integer versionCode =  releaseVersion.getDateVersion() * 100 + releaseVersion.getBigVersion();
+				item.setActionType(ActionType.ROUTER.getCode());
+				AssociationActionData associationActionData = new AssociationActionData();
+				String url = "zl://association/main?layoutName=" + layout.getName() +
+						"&itemLocation=" + layout.getLocation()+
+						"&versionCode=" + versionCode.toString()+
+						"&displayName=" + layout.getLabel();
+				associationActionData.setUrl(url);
+				item.setActionData(associationActionData.toString());
+			}else {
+				item.setActionType(ActionType.NAVIGATION.getCode());
+				NavigationActionData navigationActionData = new NavigationActionData();
+				navigationActionData.setItemLocation(layout.getLocation());
+				navigationActionData.setLayoutName(layout.getName());
+				navigationActionData.setTitle(layout.getLabel());
+				item.setActionData(StringHelper.toJsonString(navigationActionData));
+			}
+
 		}else{
 			LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), actionData);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

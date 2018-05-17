@@ -1,6 +1,7 @@
 package com.everhomes.rest.energy;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -37,6 +38,7 @@ import java.util.List;
  *     <li>maxReading: 最大量程</li>
  *     <li>startReading: 起始读数</li>
  *     <li>meterStatus: 表计状态 参考{@link com.everhomes.rest.energy.EnergyMeterStatus}</li>
+ *     <li>autoFlag: 0: no 1:yes 表计是否对接自动抄表 参考{@link com.everhomes.rest.energy.EnergyAutoReadingFlag}</li>
  * </ul>
  * Created by ying.xiong on 2017/10/23.
  */
@@ -72,6 +74,7 @@ public class EnergyMeterTaskDTO {
     private BigDecimal monthPrompt;
     private BigDecimal startReading;
     private BigDecimal maxReading;
+    private Byte autoFlag;
 
     private Long billCategoryId;
     private String billCategory;
@@ -342,5 +345,18 @@ public class EnergyMeterTaskDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Byte getAutoFlag() {
+        return autoFlag;
+    }
+
+    public void setAutoFlag(Byte autoFlag) {
+        this.autoFlag = autoFlag;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
