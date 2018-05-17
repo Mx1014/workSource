@@ -47,6 +47,7 @@ CREATE TABLE `eh_decoration_setting` (
 `content`  varchar(10000) NULL ,
 `address`  varchar(255) NULL COMMENT '收款地址或资料提交地址' ,
 `phone`  varchar(64) NULL COMMENT '咨询电话' ,
+`create_time`  datetime NULL  ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -67,6 +68,7 @@ CREATE TABLE `eh_decoration_fee` (
 `fee_price`  varchar(64) NULL ,
 `amount`  varchar(64) NULL ,
 `total_price`  decimal(16,2) NULL ,
+`create_time`  datetime NULL  ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -75,6 +77,7 @@ CREATE TABLE `eh_decoration_companies` (
 `namespace_id`  bigint(20) NOT NULL ,
 `organization_id`  bigint(20) NULL ,
 `name`  varchar(64) NULL ,
+`create_time`  datetime NULL  ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

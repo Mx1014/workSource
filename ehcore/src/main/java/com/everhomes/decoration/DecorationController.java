@@ -54,7 +54,7 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getBaseSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getBaseSetting(@Valid GetIlluStrationCommand cmd) {
-
+        cmd.setOwnerType(IllustrationType.BASIC.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -134,7 +134,7 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getFileSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getFileSetting(@Valid GetIlluStrationCommand cmd) {
-
+        cmd.setOwnerType(IllustrationType.FILE.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -199,6 +199,7 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getApplySetting(@Valid GetIlluStrationCommand cmd) {
 
+        cmd.setOwnerType(IllustrationType.APPLY.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -248,6 +249,7 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getCompleteSetting(@Valid GetIlluStrationCommand cmd) {
 
+        cmd.setOwnerType(IllustrationType.COMPLETE.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -263,7 +265,7 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getRefoundSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getRefoundSetting(@Valid GetIlluStrationCommand cmd) {
-
+        cmd.setOwnerType(IllustrationType.REFOUND.getCode());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
