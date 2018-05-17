@@ -1,6 +1,5 @@
 package com.everhomes.organization.pmsy;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -281,10 +280,10 @@ public class PmsyServiceImpl implements PmsyService{
 			params.put("p1", cmd.getCustomerId());
 			if(LOGGER.isDebugEnabled()) {
     			LOGGER.debug("siyuan->/pmsy/getPmsyBills->getMonthlyPmBill()-TimeToString(), billDateStr={}, TimeToString={}",
-    					cmd.getBillDateStr(), TimeToString(cmd.getBillDateStr()));
+    					cmd.getBillDateStr(), cmd.getBillDateStr());
     		}
-			params.put("p2", TimeToString(cmd.getBillDateStr()));
-			params.put("p3", TimeToString(cmd.getBillDateStr()));
+			params.put("p2", cmd.getBillDateStr());
+			params.put("p3", cmd.getBillDateStr());
 			params.put("p4", cmd.getProjectId());
 			params.put("p5", "01");
 			params.put("p6", "");
@@ -310,7 +309,7 @@ public class PmsyServiceImpl implements PmsyService{
 				if(!cmd.getResourceId().equals((String)map3.get("ResID")))
 					continue;
 				Long billDateStr = StringToTime((String)map3.get("RepYears"));
-				if(cmd.getBillDateStr().longValue() != billDateStr.longValue())
+				if(!cmd.getBillDateStr().equals((String)map3.get("RepYears")))
 					continue;
 				PmsyBillItemDTO dto = new PmsyBillItemDTO();
 				dto.setCustomerId(cmd.getCustomerId());
