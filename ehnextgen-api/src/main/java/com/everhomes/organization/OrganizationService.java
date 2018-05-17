@@ -731,4 +731,10 @@ public interface OrganizationService {
 	 */
 	void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd);
 
+	/**
+	 * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+	 * @param cmd
+	 */
+	void changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd);
+
 }

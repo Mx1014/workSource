@@ -13743,5 +13743,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    /**
+     * 根据公司Id、域空间Id、移动工作台状态来开启或者禁用移动工作台
+     * @param cmd
+     */
+    @Override
+    public void changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd){
+        //1.首先需要对参数进行非空校验
+        if(cmd.getOrganizationId() != null && cmd.getNamespaceId() != null && cmd.getWorkBenchFlag() != null){
+            //说明参数不为空，那么我们就根据该参数来进行修改eh_organizations表中的work_platform_flag字段的值，1-表示的是开启工作台，0-表示的是禁用工作台
+            //调用dao层进行修改数据
+            organizationProvider.updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(cmd.getOrganizationId(),cmd.getNamespaceId(),cmd.getWorkBenchFlag());
+        }
+    }
+
 }
 

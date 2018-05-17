@@ -6723,4 +6723,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .fetchAnyInto(Building.class);
         return building;
     }
+
+    /**
+     * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+     * @param organizationId
+     * @param namespaceId
+     * @param workBenchFlag
+     */
+    @Override
+    public void  updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(Long organizationId,Integer namespaceId,Byte workBenchFlag){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG,workBenchFlag)
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
 }

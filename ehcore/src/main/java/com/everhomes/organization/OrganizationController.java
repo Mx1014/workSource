@@ -1629,6 +1629,22 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/enterprise/closeOrOpenWorkBench</b>
+     * <p>禁用或者是开启移动工作台（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/enterprise/closeOrOpenWorkBench")
+    @RestReturn(value = String.class)
+    public RestResponse changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd){
+        RestResponse response = new RestResponse();
+        organizationService.changeWorkBenchFlag(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/enterprise/edit</b>
      * <p>编辑单个公司的具体属性(标准版)</p>
      */

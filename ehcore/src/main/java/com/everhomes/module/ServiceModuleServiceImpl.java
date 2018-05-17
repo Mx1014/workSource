@@ -798,9 +798,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
         //物业超级管理员拿所有项目
+        //这一步是校验是不是超级管理员，如果是超级管理员那么就将allProjectFlag状态置为true
         if(checkModuleManage(userId, organizationId, moduleId)){
+            //说明是超级管理员
             allProjectFlag = true;
         }else{
+            //说明不是超级管理员
             List<Target> targets = new ArrayList<>();
             targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
             //获取人员的所有相关机构
