@@ -5,7 +5,7 @@ package com.everhomes.rest.decoration;
  * <li>attachmentType：附件类型  参考{@link com.everhomes.rest.decoration.DecorationAttachmentType}</li>
  * <li>name</li>
  * <li>size</li>
- * <li>fileUrl</li>
+ * <li>fileUri</li>
  * </ul>
  */
 public class DecorationAttachmentDTO {
@@ -13,7 +13,7 @@ public class DecorationAttachmentDTO {
     private String name;
     private String attachmentType;
     private String size;
-    private String fileUrl;
+    private String fileUri;
 
     public String getName() {
         return name;
@@ -39,11 +39,11 @@ public class DecorationAttachmentDTO {
         this.size = size;
     }
 
-    public String getFileUrl() {
-        return fileUrl;
+    public String getFileUri() {
+        return fileUri;
     }
 
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
+    public void setFileUri(String fileUri) {
+        this.fileUri = fileUri;
     }
 }

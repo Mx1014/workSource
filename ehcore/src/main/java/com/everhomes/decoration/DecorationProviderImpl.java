@@ -13,14 +13,15 @@ import com.everhomes.server.schema.tables.pojos.EhDecorationSetting;
 import com.everhomes.server.schema.tables.records.EhDecorationSettingRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
+@Component
 public class DecorationProviderImpl implements  DecorationProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DecorationProviderImpl.class);
 
@@ -56,5 +57,20 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 setting.getId());
     }
 
-
+    @Override
+    public DecorationSetting getDecorationSetting(Integer namespaceId, Long communityId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_SETTING);
+        Condition condition = Tables.EH_DECORATION_SETTING.COMMUNITY_ID.eq(communityId);
+        if (null != namespaceId)
+            condition = condition.and(Tables.EH_DECORATION_SETTING.NAMESPACE_ID.eq(namespaceId));
+        if (null != ownerType)
+            condition = condition.and(Tables.EH_DECORATION_SETTING.OWNER_TYPE.eq(ownerType));
+        if (null != ownerId)
+            condition = condition.and(Tables.EH_DECORATION_SETTING.OWNER_ID.eq(ownerId));
+        step.where(condition);
+        DecorationSetting setting = step.fetchOne().map(r->ConvertHelper.convert(r,DecorationSetting.class));
+        return setting;
+    }
 }

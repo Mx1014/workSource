@@ -8,4 +8,6 @@ public interface DecorationProvider {
     Long createDecorationSetting(EhDecorationSetting setting);
 
     void updateDecorationSetting(EhDecorationSetting setting);
+
+    DecorationSetting getDecorationSetting(Integer namespaceId,Long communityId,String ownerType,Long ownerId);
 }

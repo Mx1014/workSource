@@ -1,7 +1,7 @@
 -- bu zheng 装修办理1.0
 CREATE TABLE `eh_decoration_requests` (
 `id`  bigint(20) NOT NULL ,
-`namespace_id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `community_id`  bigint(20) NOT NULL ,
 `create_time`  datetime NULL  ,
 `start_time`  datetime NULL  ,
@@ -40,7 +40,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_setting` (
 `id`  bigint(20) NOT NULL ,
-`namespace_id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `community_id`  bigint(20) NOT NULL ,
 `owner_type`  varchar(64) NOT NULL COMMENT '\'basic\' 基础设置 \'file\'装修资料 \'fee\'缴费 \'apply\'施工申请 \'complete\'竣工验收 \'refound\'押金退回' ,
 `owner_id`  bigint(20) NULL COMMENT '当owner_type为apply 时 表示审批id' ,
@@ -57,7 +57,7 @@ CREATE TABLE `eh_decoration_atttachment` (
 `name`  varchar(64) NULL ,
 `attachment_type`  varchar(64) NULL COMMENT '\'file\'文件 \'fee\'费用' ,
 `size`  varchar(32) NULL ,
-`file_url`  varchar(255) NULL ,
+`file_uri`  varchar(255) NULL ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -74,7 +74,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_companies` (
 `id`  bigint(20) NOT NULL ,
-`namespace_id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `organization_id`  bigint(20) NULL ,
 `name`  varchar(64) NULL ,
 `create_time`  datetime NULL  ,
