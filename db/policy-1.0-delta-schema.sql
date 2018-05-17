@@ -70,6 +70,14 @@ CREATE TABLE `eh_policies` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_policy_categories` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `policy_id` bigint(20) NOT NULL COMMENT 'id of the policy',
+  `category_id` bigint(20) NOT NULL COMMENT 'category of policy',
+	`active_flag` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `eh_policy_records` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',

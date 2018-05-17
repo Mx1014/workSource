@@ -33,7 +33,6 @@ public class PolicyProviderImpl implements PolicyProvider {
 
     @Override
     public Policy createPolicy(Policy policy) {
-
         if(policy.getId() == null) {
             long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPolicies.class));
             policy.setId(id);
