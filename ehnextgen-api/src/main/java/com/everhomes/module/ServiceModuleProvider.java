@@ -65,6 +65,8 @@ public interface ServiceModuleProvider {
 
     void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
 
+    List<ServiceModule> listServiceModulesByMenuAuthFlag(Byte menuAuthFlag);
+
     List<ServiceModule> listServiceModule(String path);
 
     void createServiceModule(ServiceModule serviceModule);

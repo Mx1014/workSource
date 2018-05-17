@@ -9,6 +9,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
@@ -16,6 +17,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
+import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.WebMenuType;
@@ -355,6 +357,19 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
+
+		//查询默认的应用
+		List<Long> defaultMenuOriginId = getNoAuthOriginId(UserContext.getCurrentNamespaceId());
+		if(defaultMenuOriginId != null){
+			appOriginIds.addAll(defaultMenuOriginId);
+		}
+
+		//去重
+		Set<Long> appOriginIdSet = new HashSet<>();
+		appOriginIdSet.addAll(appOriginIds);
+		appOriginIds.clear();
+		appOriginIds.addAll(appOriginIdSet);
+
 		// 根据应用id拿菜单
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
 
@@ -362,6 +377,23 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return webMenuDTOS;
 
 	}
+
+	private List<Long> getNoAuthOriginId(Integer namespaceId){
+
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModulesByMenuAuthFlag((byte)0);
+		if(serviceModules == null || serviceModules.size() == 0){
+			return null;
+		}
+		List<Long> moduleIds = serviceModules.stream().map(ServiceModule::getId).collect(Collectors.toList());
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(namespaceId, moduleIds);
+
+		if(apps == null || apps.size() == 0){
+			return  null;
+		}
+
+		return apps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+	}
+
 
 	private List<WebMenuDTO> listWebMenuByApp(String webMenuType, List<Long> appOriginIds){
 
