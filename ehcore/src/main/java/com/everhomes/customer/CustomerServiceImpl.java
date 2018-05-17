@@ -3795,10 +3795,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd,HttpServletResponse httpResponse) {
 
-        ListCustomerAnnualStatisticsCommand annualStatisticsCommand = ConvertHelper.convert(cmd, ListCustomerAnnualStatisticsCommand.class);
+//        ListCustomerAnnualStatisticsCommand annualStatisticsCommand = ConvertHelper.convert(cmd, ListCustomerAnnualStatisticsCommand.class);
         //各园区企业企业分布
         EnterpriseCustomerStatisticsDTO customerStatisticsDTO =  listEnterpriseCustomerStatistics(cmd);
-        ListCustomerAnnualStatisticsResponse annualStatisticsResponse =  listCustomerAnnualStatistics(annualStatisticsCommand);
+//        ListCustomerAnnualStatisticsResponse annualStatisticsResponse =  listCustomerAnnualStatistics(annualStatisticsCommand);
         //企业行业分布
         CustomerIndustryStatisticsResponse industryStatisticsResponse = listCustomerIndustryStatistics(cmd);
         //企业人才分布
@@ -3819,8 +3819,8 @@ public class CustomerServiceImpl implements CustomerService {
         }
         filePath = filePath + "enterprise_Customer_details" + System.currentTimeMillis() + ".xlsx";
         //  new file
-        this.createEquipmentStandardsBook(filePath, customerStatisticsDTO,annualStatisticsResponse.getStatisticDTOs(),
-                industryStatisticsResponse.getDtos(),talentStatisticsResponse.getDtos(),statisticsResponse.getDtos(),projectStatisticsResponse.getDtos(),sourceStatisticsResponse.getDtos());
+        this.createEquipmentStandardsBook(filePath, customerStatisticsDTO, null,
+                industryStatisticsResponse.getDtos(), talentStatisticsResponse.getDtos(), statisticsResponse.getDtos(), projectStatisticsResponse.getDtos(), sourceStatisticsResponse.getDtos());
 
         return download(filePath, httpResponse);
     }
@@ -3840,7 +3840,7 @@ public class CustomerServiceImpl implements CustomerService {
         projectSheet.setDefaultColumnWidth(20 * 256);
         sourceSheet.setDefaultColumnWidth(20 * 256);
         // 设置sheet页面表头和cell数据
-        setNewCustomerStatisticSheetHeadAndBookRow(customerStatisticSheet, statisticDTOs);
+        setNewCustomerStatisticSheetHeadAndBookRow(customerStatisticSheet, customerStatisticsDTO);
         setNewIndustrySheetHeadAndBookRow(industrySheet, dtos);
         setNewTalentSheetHeadAndBookRow(talentSheet, dtos1);
         setNewIntellectualPropertySheetHeadAndBookRow(intellectualPropertySheet, dtos2);
@@ -3945,23 +3945,23 @@ public class CustomerServiceImpl implements CustomerService {
         row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0L : dto.getCustomerCount());
     }
 
-    private void setNewCustomerStatisticSheetHeadAndBookRow(Sheet customerStatisticSheet, List<CustomerAnnualStatisticDTO> statisticDTOs) {
+    private void setNewCustomerStatisticSheetHeadAndBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO statisticDTO) {
         Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum());
         int i = -1;
-        row.createCell(++i).setCellValue("企业名称");
-        row.createCell(++i).setCellValue("营业额（元）本年度截止到当前");
-        row.createCell(++i).setCellValue("纳税额（元）本年度截止到当前");
-        if (statisticDTOs != null && statisticDTOs.size() > 0) {
-            statisticDTOs.forEach((r) -> setCustomerStatisticSheetBookRow(customerStatisticSheet, r));
-        }
+        row.createCell(++i).setCellValue("企业客户总数 单位：个");
+        row.createCell(++i).setCellValue("项目总企业人数 单位：人");
+        row.createCell(++i).setCellValue("截止到当前，项目总营业额  单位：万元");
+        row.createCell(++i).setCellValue("截止到当前，项目总纳税额  单位：万元");
+        setCustomerStatisticSheetBookRow(customerStatisticSheet, statisticDTO);
     }
 
-    private void setCustomerStatisticSheetBookRow(Sheet customerStatisticSheet, CustomerAnnualStatisticDTO dto) {
+    private void setCustomerStatisticSheetBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO dto) {
         Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getEnterpriseCustomerName());
-        row.createCell(++i).setCellValue(dto.getTurnover().toString());
-        row.createCell(++i).setCellValue(dto.getTaxPayment().toString());
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0 : dto.getCustomerCount());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0 : dto.getCustomerMemberCount());
+        row.createCell(++i).setCellValue(dto.getTotalTurnover().toString());
+        row.createCell(++i).setCellValue(dto.getTotalTaxAmount().toString());
     }
 
     public HttpServletResponse download(String path, HttpServletResponse response) {
