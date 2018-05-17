@@ -1345,8 +1345,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(cmd.getDescription() != null) {
             doorAccess.setDescription(cmd.getDescription());
         }
-        if(cmd.getDisplayName() != null) {
+        if(cmd.getDisplayName() != null && !cmd.getDisplayName().isEmpty() ) {
             doorAccess.setDisplayName(cmd.getDisplayName());
+        }
+		if (cmd.getEnableAmount() != null) {
+			if (cmd.getEnableAmount() == 1) {
+				if (doorAccess.getGroupid() != 0 || doorAccess.getDoorType().byteValue() > DoorAccessType.ACLINK_ZL_GROUP.getCode()) {
+					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "not a doorAccessGroup or not a zuolin divice");
+				}
+			}
+        	doorAccess.setEnableAmount(cmd.getEnableAmount());
         }
         
         doorAccess.setLatitude(cmd.getLatitude());
@@ -1501,6 +1509,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setStatus(AesUserKeyStatus.VALID.getCode());
             dto.setId(auth.getId());
             dto.setAuthId(auth.getId());
+            if(auth.getRightRemote() == 1){
+            	dto.setRightRemote((byte) 1);
+            }
             
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
@@ -2464,7 +2475,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setAddress(cmd.getAddress());
                 doorAcc.setAvatar(cmd.getAddress());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
-                doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                //edited by liuyilin
+                //doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                doorAcc.setDoorType(DoorAccessType.ACLINK_ZL_GROUP.getCode());
+                //---
                 doorAcc.setUuid(groupHardwareId);
                 doorAcc.setAesIv(aesKey);//save the original aesKey, TODO save it to aes server key?
                 doorAccessProvider.createDoorAccess(doorAcc);
@@ -2530,7 +2544,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setAddress(cmd.getAddress());
                 doorAcc.setAvatar(cmd.getAddress());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
-                doorAcc.setDoorType(cmd.getGroupType());
+                //edited by liuyilin
+//                doorAcc.setDoorType(cmd.getGroupType());
+                doorAcc.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
+                //--
                 doorAcc.setUuid(groupHardwareId);
                 doorAcc.setAesIv("");
                 doorAccessProvider.createDoorAccess(doorAcc);
@@ -2662,6 +2679,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resultStr;
     }
     
+    private String createZuolinQrByCount (Long authId){
+		byte[] type = new byte[] { 0, 1 };
+		byte[] cmdArr = new byte[] { 0x10, 0 };
+		byte[] qrArr = new byte[16];
+		byte[] idArr = DataUtil.longToByteArray(authId);
+		if (idArr.length > 4) {
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
+					AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "id larger than 4 Byte");
+		}
+		qrArr[0] = 0x1;
+		System.arraycopy(idArr, 0, qrArr, 5 - idArr.length, idArr.length);
+		byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
+//		long curTimeMill = System.currentTimeMillis();
+//		byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
+		byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length];// + timeArr.length
+		System.arraycopy(type, 0, resultArr, 0, type.length);
+		System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+		System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+		System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+//		System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
+		String resultStr = Base64.encodeBase64String(resultArr);
+
+		return resultStr;
+    }
+    
     //zuolin device qr. normal visitor auth
     private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
@@ -2694,19 +2736,41 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setLinglingUuid(uuid);
         auth.setCurrStorey(cmd.getDoorNumber());
         
-        if(cmd.getValidFromMs() == null) {
-        	auth.setValidFromMs(System.currentTimeMillis());	
-        } else {
-        	auth.setValidFromMs(cmd.getValidFromMs());
-        }
+        //按次开门只适用于左邻门禁 by liuyilin 20180509
+		if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
+			//TODO 访客授权,将以前的授权失效
+			List<DoorAuth> listAuthEX = doorAuthProvider.listValidDoorAuthByVisitorPhone(cmd.getDoorId(), cmd.getPhone());
+			if(listAuthEX != null && listAuthEX.size() > 0){
+				for(DoorAuth authEX : listAuthEX){
+					authEX.setStatus(DoorAuthStatus.INVALID.getCode());
+				}
+				
+				doorAuthProvider.updateDoorAuth(listAuthEX);
+			}
+			auth.setAuthRuleType(cmd.getAuthRuleType());
+			auth.setTotalAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+			auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+			auth.setValidFromMs(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+			auth.setKeyValidTime(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+			auth.setValidEndMs(cmd.getValidEndMs() == null ? (auth.getValidFromMs() + KEY_TICK_7_DAY) : cmd.getValidEndMs());
+			auth.setRightRemote((byte) 1);
+		} else {
+			auth.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+			if (cmd.getValidFromMs() == null) {
+				auth.setValidFromMs(System.currentTimeMillis());
+			} else {
+				auth.setValidFromMs(cmd.getValidFromMs());
+			}
+
+			if (cmd.getValidEndMs() == null) {
+				auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+				auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+			} else {
+				auth.setKeyValidTime(cmd.getValidEndMs());
+				auth.setValidEndMs(cmd.getValidEndMs());
+			}
+		}
         
-        if(cmd.getValidEndMs() == null) {
-        	auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        	auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        } else {
-        	auth.setKeyValidTime(cmd.getValidEndMs());
-        	auth.setValidEndMs(cmd.getValidEndMs());
-        }
         
         auth.setUserId(0l);
         auth.setOwnerType(doorAccess.getOwnerType());
@@ -2723,7 +2787,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
         
         //convert to qr, move it to CmdUtil ?
-        String resultStr = createZuolinQrV1(aesUserKey.getSecret()); 
+        //edited by liuyilin 20180315
+        //String resultStr = createZuolinQrV1(aesUserKey.getSecret()); 
+        String resultStr;
+        if(auth.getAuthRuleType() != null && auth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
+        	resultStr = createZuolinQrByCount(auth.getId()); 
+        }else{
+        	resultStr = createZuolinQrV1(aesUserKey.getSecret()); 
+        }
+        
         
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
@@ -4345,5 +4417,33 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             doorAuthLevelProvider.updateDoorAuthLevel(lvl);
         }
     }
-    
+
+	@Override
+	public void excuteMessage(String msg) {
+		byte[] msgArr = Base64.decodeBase64(msg);
+		byte cmdNumber = msgArr[0];
+		if(cmdNumber == 0x10){
+			byte[] testArr = Arrays.copyOfRange(msgArr, 3, 7);
+			Long authId =DataUtil.byteArrayToLong(testArr);
+			String keyName = "validateDoorAuthCount" + String.valueOf(authId);
+			String validResult = getCache(keyName);
+			if(!("true").equals(validResult)){
+				DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(authId);
+				if (doorAuth != null && doorAuth.getStatus().equals(DoorAuthStatus.VALID.getCode())
+						&& doorAuth.getValidAuthAmount() > 0 && doorAuth.getValidEndMs() > System.currentTimeMillis()) {
+					doorAuth.setValidAuthAmount(doorAuth.getValidAuthAmount() - 1);
+					doorAuthProvider.updateDoorAuth(doorAuth);
+					validResult = "true";
+					cacheTimeout(keyName, validResult, 60);
+				}
+			}
+			
+			if(("true").equals(validResult)){
+				LOGGER.info("validate auth count successed");
+				remoteOpenDoor(authId);
+			}else{
+				LOGGER.info("validate auth count failed");
+			}
+		}
+	}
 }

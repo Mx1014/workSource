@@ -1271,7 +1271,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
-        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME)
+        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1285,8 +1285,15 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
                     itemDTO.setBillItemId(f.getValue(o.ID));
                     itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
-                    itemDTO.setApartmentName(f.getValue(t1.APARTMENT_NAME));
-                    itemDTO.setBuildingName(f.getValue(t1.BUILDING_NAME));
+                    String apartFromAddr = f.getValue(t1.APARTMENT_NAME);
+                    String buildingFromAddr = f.getValue(t1.BUILDING_NAME);
+                    if(!org.jooq.tools.StringUtils.isBlank(apartFromAddr) || !org.jooq.tools.StringUtils.isBlank(buildingFromAddr)){
+                        itemDTO.setApartmentName(apartFromAddr);
+                        itemDTO.setBuildingName(buildingFromAddr);
+                    }else{
+                        itemDTO.setApartmentName(f.getValue(o.APARTMENT_NAME));
+                        itemDTO.setBuildingName(f.getValue(o.BUILDING_NAME));
+                    }
                     list1.add(itemDTO);
                     return null;
                 });
@@ -3584,18 +3591,17 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
+    public List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
         DSLContext context = getReadOnlyContext();
-        return context.select(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE)
-                .from(Tables.EH_PAYMENT_NOTICE_CONFIG)
+        return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
                 .where(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_TYPE.eq(ownerType))
-                .fetch(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE);
+                .fetchInto(PaymentNoticeConfig.class);
     }
 
     @Override
-    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays) {
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
         DSLContext writeContext = getReadWriteContext();
         EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
         EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
@@ -3605,17 +3611,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(noticeConfig.OWNER_TYPE.eq(ownerType))
                     .and(noticeConfig.OWNER_ID.eq(ownerId))
                     .execute();
-            if(configDays != null){
-                for(int i = 0; i < configDays.size(); i++){
-                    PaymentNoticeConfig config = new PaymentNoticeConfig();
-                    config.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig.class)));
-                    config.setNamespaceId(namespaceId);
-                    config.setOwnerId(ownerId);
-                    config.setOwnerType(ownerType);
-                    config.setNoticeDayBefore(configDays.get(i));
-                    noticeConfigDao.insert(config);
-                }
-            }
+            noticeConfigDao.insert(toSaveConfigs);
             return null;
         });
     }
@@ -3665,12 +3661,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentBills> getAllBillsByCommunity(Long key) {
+    public List<PaymentBills> getAllBillsByCommunity(Integer namespaceId, Long key) {
         DSLContext context = getReadOnlyContext();
-        return context.selectFrom(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"))
-                .fetchInto(PaymentBills.class);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_PAYMENT_BILLS.fields());
+        query.addFrom(Tables.EH_PAYMENT_BILLS);
+        query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key));
+        query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"));
+        if(namespaceId!=null){
+            query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addConditions(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1));
+        query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0));
+        return query.fetchInto(PaymentBills.class);
     }
 
     @Override
@@ -4145,6 +4148,37 @@ public class AssetProviderImpl implements AssetProvider {
                     return;
                 });
         return ret[0];
+    }
+
+    @Override
+    public List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_PAYMENT_APP_VIEWS);
+        query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.NAMESPACE_ID.eq(namespaceId));
+        if(communityId!=null){
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.COMMUNITY_ID.eq(communityId));
+        }
+        if(remarkCheckList[0]) {
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_TYPE.eq(targetType));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK1_IDENTIFIER.eq(ownerType));
+        }
+        if(remarkCheckList[1]){
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_TYPE.eq(billGroupName));
+            query.addConditions(Tables.EH_PAYMENT_APP_VIEWS.REMARK2_IDENTIFIER.eq(billGroupName1));
+        }
+        return query.fetchInto(PaymentAppView.class);
+    }
+
+    @Override
+    public List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId) {
+        DSLContext context = getReadOnlyContext();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_PAYMENT_NOTICE_CONFIG);
+        if(namespaceId!=null){
+            query.addConditions(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId));
+        }
+        return query.fetchInto(PaymentNoticeConfig.class);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

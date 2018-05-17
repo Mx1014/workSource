@@ -120,6 +120,7 @@ public interface SmsTemplateCode {
     //物业缴费催款
     int PAYMENT_NOTICE_CODE = 54;
 
+
     //任务消息提醒短信
     int PM_NOTIFY_BEFORE_TASK = 55;
     int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
@@ -141,4 +142,7 @@ public interface SmsTemplateCode {
     int SYSTEM_AUTO_UPDATE_SPACE_RESERVER = 65; //订单变更通知 给预约人发短信
 
     int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
+
+    //物业缴费自动催款模板SCOPE
+    static final String ASSET_MSG_SCOPE = "asset.sms";
 }

@@ -1,6 +1,10 @@
 package com.everhomes.customer;
 
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
@@ -120,6 +124,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
@@ -348,6 +353,14 @@ public interface CustomerService {
 
     String syncResultViewed(SyncResultViewedCommand cmd);
     Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd);
+
+    void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+
+    void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
+
+    List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
+
+    void syncOrganizationToCustomer();
 
     HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd,HttpServletResponse httpResponse);
 }
