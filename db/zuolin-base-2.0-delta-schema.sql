@@ -121,10 +121,10 @@ ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `default_order`  int(11) NOT 
 
 -- layout 类型、背景颜色
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  int(11) NULL ;
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  varchar(255) NULL ;
 -- layout 类型
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL;
-ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  int(11) NULL;
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  varchar(255) NULL;
 
 -- 功能模块入口列表
 CREATE TABLE `eh_service_module_entries` (
