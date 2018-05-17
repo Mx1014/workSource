@@ -16,7 +16,7 @@ public class CreatePolicyCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String[] categoryIds;
+    private Long[] categoryIds;
     private String title;
     private String outline;
     private String content;
@@ -45,11 +45,11 @@ public class CreatePolicyCommand {
         this.ownerId = ownerId;
     }
 
-    public String[] getCategoryIds() {
+    public Long[] getCategoryIds() {
         return categoryIds;
     }
 
-    public void setCategoryIds(String[] categoryIds) {
+    public void setCategoryIds(Long[] categoryIds) {
         this.categoryIds = categoryIds;
     }
 

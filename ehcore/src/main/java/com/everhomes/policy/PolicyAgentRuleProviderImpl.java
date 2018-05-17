@@ -13,7 +13,6 @@ import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 public class PolicyAgentRuleProviderImpl implements PolicyAgentRuleProvider {

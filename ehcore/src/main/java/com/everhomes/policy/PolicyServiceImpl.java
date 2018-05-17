@@ -10,7 +10,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,9 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Autowired
     private PolicyProvider policyProvider;
+
+    @Autowired
+    private PolicyCategoryService policyCategoryService;
 
     @Autowired
     private ServiceModuleService serviceModuleService;
@@ -45,6 +48,7 @@ public class PolicyServiceImpl implements PolicyService {
         Policy policy = ConvertHelper.convert(cmd,Policy.class);
         policy.setCreatorUid(user.getId());
         Policy result = policyProvider.createPolicy(policy);
+        policyCategoryService.setPolicyCategory(result.getId(),Arrays.asList(cmd.getCategoryIds()));
         return ConvertHelper.convert(result,PolicyDTO.class);
     }
 
@@ -65,6 +69,7 @@ public class PolicyServiceImpl implements PolicyService {
             policy.setContent(cmd.getContent());
         policy.setCreatorUid(user.getId());
         Policy result = policyProvider.updatePolicy(policy);
+        policyCategoryService.setPolicyCategory(result.getId(),Arrays.asList(cmd.getCategoryIds()));
         return ConvertHelper.convert(result,PolicyDTO.class);
     }
 
@@ -76,6 +81,7 @@ public class PolicyServiceImpl implements PolicyService {
                     "Invalid Id parameter.");
         }
         policyProvider.deletePolicyById(cmd.getId());
+        policyCategoryService.deletePolicyCategoryByPolicyId(cmd.getId());
     }
 
     @Override
@@ -86,7 +92,10 @@ public class PolicyServiceImpl implements PolicyService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid namespaceId parameter.");
         }
-        return ConvertHelper.convert(result,PolicyDTO.class);
+        PolicyDTO dto = ConvertHelper.convert(result,PolicyDTO.class);
+        List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+        dto.setCategoryIds(ctgs.stream().map(r->{return r.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+        return dto;
     }
 
     @Override
@@ -98,7 +107,12 @@ public class PolicyServiceImpl implements PolicyService {
         List<Policy> results = policyProvider.listPoliciesByTitle(cmd.getNamespaceId(),cmd.getOwnerType(), ownerIds, cmd.getTitle(), cmd.getPageAnchor(), cmd.getPageSize());
         if(results.size() > 0)
             resp.setNextPageAnchor(results.get(0).getId());
-        resp.setDtos(results.stream().map(r -> ConvertHelper.convert(r,PolicyDTO.class)).collect(Collectors.toList()));
+        resp.setDtos(results.stream().map(r -> {
+            PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
+            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+            dto.setCategoryIds(ctgs.stream().map(r1->{return r1.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+            return dto;
+        }).collect(Collectors.toList()));
         return resp;
     }
 
@@ -116,7 +130,12 @@ public class PolicyServiceImpl implements PolicyService {
         List<Policy> results = policyProvider.searchPoliciesByCategory(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCategoryId(),cmd.getPageAnchor(),cmd.getPageSize());
         if(results.size() > 0)
             resp.setNextPageAnchor(results.get(0).getId());
-        resp.setDtos(results.stream().map(r -> ConvertHelper.convert(r,PolicyDTO.class)).collect(Collectors.toList()));
+        resp.setDtos(results.stream().map(r -> {
+            PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
+            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+            dto.setCategoryIds(ctgs.stream().map(r1->{return r1.getCategoryId();}).collect(Collectors.toList()).toArray(new Long[0]));
+            return dto;
+        }).collect(Collectors.toList()));
         return resp;
     }
 

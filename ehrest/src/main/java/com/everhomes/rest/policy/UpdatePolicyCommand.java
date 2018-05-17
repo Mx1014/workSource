@@ -18,7 +18,7 @@ public class UpdatePolicyCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String categoryId;
+    private Long[] categoryIds;
     private String title;
     private String outline;
     private String content;
@@ -55,12 +55,12 @@ public class UpdatePolicyCommand {
         this.ownerId = ownerId;
     }
 
-    public String getCategoryId() {
-        return categoryId;
+    public Long[] getCategoryIds() {
+        return categoryIds;
     }
 
-    public void setCategoryId(String categoryId) {
-        this.categoryId = categoryId;
+    public void setCategoryIds(Long[] categoryIds) {
+        this.categoryIds = categoryIds;
     }
 
     public String getTitle() {
