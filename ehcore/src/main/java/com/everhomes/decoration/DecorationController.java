@@ -23,7 +23,7 @@ import static org.apache.poi.hslf.record.RecordTypes.List;
 public class DecorationController extends ControllerBase {
 
     public static final Integer moduleId = 43000;
-    public static final String moduleType = "DECORATION";
+    public static final String moduleType = "decoration";
     @Autowired
     private GeneralFormService generalFormService;
     @Autowired
