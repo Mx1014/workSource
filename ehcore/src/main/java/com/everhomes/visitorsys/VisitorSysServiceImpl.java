@@ -414,8 +414,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysStatus status = checkBookingStatus(visitor.getBookingStatus());
         if(VisitorsysStatus.NOT_VISIT!=status){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "not support visitor status = "+visitor.getVisitStatus());
+            return;
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "not support visitor status = "+visitor.getVisitStatus());
         }
         if(visitor.getVisitorPhone()==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1582,7 +1583,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitor.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
             }
             if(visitStatus == VisitorsysStatus.HAS_VISITED){//
-                visitor.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+                visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 //预约访客的状态，可以直接从未到访到确认到访，所以登记时间可能为空，这里设置一下
                 if(visitor.getVisitTime()==null) {
                     visitor.setVisitTime(new Timestamp(System.currentTimeMillis()));
@@ -1701,8 +1702,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //新建访客/预约
         if(relatedVisitor !=null){
             convert.setId(relatedVisitor.getId());
-            convert.setVisitStatus(convert.getVisitStatus());
-            convert.setBookingStatus(convert.getBookingStatus());
+            convert.setVisitStatus(relatedVisitor.getVisitStatus());
+            convert.setBookingStatus(relatedVisitor.getBookingStatus());
+            convert.setVisitTime(relatedVisitor.getVisitTime());
         }
         convert.setFormJsonValue(null);
         convert.setInvalidTime(null);
