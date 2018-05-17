@@ -173,7 +173,8 @@ public interface AssetProvider {
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId);
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
+            , Byte useUnitPrice);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 

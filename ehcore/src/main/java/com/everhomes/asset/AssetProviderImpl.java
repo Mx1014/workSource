@@ -46,9 +46,11 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 
+import com.everhomes.varField.*;
 import com.google.gson.Gson;
 import com.mysql.jdbc.StringUtils;
 import org.jooq.*;
+import org.jooq.Field;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -1542,7 +1544,13 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setFormula(r.getValue(standardT.FORMULA));
                     dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
                     dto.setChargingStandardId(r.getValue(standardT.ID));
-//                    formulaJsons.add(r.getValue(standardT.FORMULA_JSON));
+                    Byte priceUnitType = r.getValue(standard.PRICE_UNIT_TYPE);
+                    if(priceUnitType != null){
+                        //fixed as using day unit price
+                        dto.setUseUnitPrice((byte)1);
+                    }else{
+                        dto.setUseUnitPrice((byte)0);
+                    }
                     suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
                     list.add(dto);
                     return null;
@@ -2604,7 +2612,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId) {
+    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId, Byte useUnitPrice) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
         EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
@@ -2628,11 +2636,14 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
                     .or(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
                     .fetch(standardScope.CHARGING_STANDARD_ID);
-            context.update(t)
-                    .set(t.NAME,chargingStandardName)
-                    .set(t.INSTRUCTION,instruction)
-                    .where(t.ID.in(fetch))
-                    .execute();
+            UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
+            query.addValue(t.NAME, chargingStandardName);
+            if(useUnitPrice != null && useUnitPrice.byteValue() == 1){
+                query.addValue(t.PRICE_UNIT_TYPE, (byte)1);
+            }
+            query.addValue(t.INSTRUCTION, instruction);
+            query.addConditions(t.ID.in(fetch));
+            query.execute();
         }
     }
 
@@ -2653,6 +2664,12 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
                     dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
                     dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
+                    Byte priceUnitPrice = r.getValue(t.PRICE_UNIT_TYPE);
+                    if(priceUnitPrice != null){
+                        dto.setUseUnitPrice((byte)1);
+                    }else{
+                        dto.setUseUnitPrice((byte)0);
+                    }
                     return null;
                 });
         return dto;
@@ -2803,16 +2820,20 @@ public class AssetProviderImpl implements AssetProvider {
     public void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        Map updates = new HashMap<>();
+        updates.put(t.NAME,cmd.getBillGroupName());
+        updates.put(t.BILLS_DAY,cmd.getBillDay());
+        updates.put(t.BALANCE_DATE_TYPE,cmd.getBillingCycle());
+        updates.put(t.DUE_DAY,cmd.getDueDay());
+        updates.put(t.DUE_DAY_TYPE,cmd.getDueDayType());
+        if(cmd.getBillDayType()!= null){
+            updates.put(t.BILLS_DAY_TYPE, cmd.getBillDayType());
+        }
         if(deCouplingFlag == (byte)0){
-            context.update(t)
-                    .set(t.NAME,cmd.getBillGroupName())
-                    .set(t.BILLS_DAY,cmd.getBillDay())
-                    .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
-                    .set(t.DUE_DAY,cmd.getDueDay())
-                    .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
-                    .where(t.ID.eq(cmd.getBillGroupId()))
-                    .or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
-                    .execute();
+            UpdateQuery<EhPaymentBillGroupsRecord> query = context.updateQuery(t);
+            query.addValues(updates);
+            query.addConditions(t.ID.eq(cmd.getBillGroupId()).or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId())));
+            query.execute();
             return;
         }
         Long nullId = null;
@@ -2821,14 +2842,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.OWNER_ID.eq(cmd.getOwnerId()))
                 .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .execute();
-        context.update(t)
-                .set(t.NAME,cmd.getBillGroupName())
-                .set(t.BILLS_DAY,cmd.getBillDay())
-                .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
-                .set(t.DUE_DAY,cmd.getDueDay())
-                .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
-                .where(t.ID.eq(cmd.getBillGroupId()))
-                .execute();
+        UpdateQuery<EhPaymentBillGroupsRecord> query = context.updateQuery(t);
+        query.addValues(updates);
+        query.addConditions(t.ID.eq(cmd.getBillGroupId()));
+        query.execute();
     }
 
     @Override
@@ -2856,18 +2873,19 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
             dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
             dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
+            Byte priceUnitType = r.getValue(t.PRICE_UNIT_TYPE);
+            if(priceUnitType != null){
+                //fixed as using unit price of day
+                dto.setUseUnitPrice((byte)1);
+            }else{
+                dto.setUseUnitPrice((byte)0);
+            }
             list.add(dto);
             return null;
         });
-//        List<String> fetch = context.select(t3.NAME)
-//                .from(t3)
-////                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
-//                .fetch(t3.NAME);
-
         for(int i = 0; i < list.size(); i ++){
             ListChargingStandardsDTO dto = list.get(i);
             Long chargingStandardId = dto.getChargingStandardId();
-
             //获得标准
             com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
             Set<String> varIdens = new HashSet<>();
@@ -2978,6 +2996,13 @@ public class AssetProviderImpl implements AssetProvider {
 //            dto.setChargingStandardName(standard.getName());
             dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
             dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
+            if(rule.getBillItemMonthOffset() == null){
+                dto.setBillItemGenerationType((byte)3);
+            }else if(rule.getBillItemDayOffset() == null){
+                dto.setBillItemGenerationType((byte)1);
+            }else{
+                dto.setBillItemGenerationType((byte)2);
+            }
             list.add(dto);
         }
         return list;
@@ -3339,6 +3364,13 @@ public class AssetProviderImpl implements AssetProvider {
 //        dto.setChargingStandardId(standard.getId());
         dto.setDayOffset(rule.getBillItemDayOffset());
         dto.setMonthOffset(rule.getBillItemMonthOffset());
+         if(rule.getBillItemMonthOffset() == null){
+                dto.setBillItemGenerationType((byte)3);
+            }else if(rule.getBillItemDayOffset() == null){
+                dto.setBillItemGenerationType((byte)1);
+            }else{
+                dto.setBillItemGenerationType((byte)2);
+            }
 //        dto.setFormula(standard.getFormula());
         dto.setGroupChargingItemName(rule.getChargingItemName());
         return dto;
@@ -3435,22 +3467,22 @@ public class AssetProviderImpl implements AssetProvider {
     public Boolean checkContractInWork(Long contractId,String contractNum) {
         EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
         DSLContext context = getReadOnlyContext();
-        Byte aByte = context.select(contract.IN_WORK)
+        List<Byte> aByte = context.select(contract.IN_WORK)
                 .from(contract)
                 .where(contract.IS_RECORDER.eq((byte) 1))
                 .and(contract.CONTRACT_NUM.eq(contractNum))
-                .fetchOne(contract.IN_WORK);
-        if( aByte == null ){
+                .fetch(contract.IN_WORK);
+        if( aByte.size() == 0 ){
              aByte = context.select(contract.IN_WORK)
                     .from(contract)
                     .where(contract.IS_RECORDER.eq((byte) 1))
                     .and(contract.CONTRACT_ID.eq(contractId))
-                    .fetchOne(contract.IN_WORK);
+                    .fetch(contract.IN_WORK);
         }
-        if ( aByte == null) {
+        if ( aByte.size() == 0) {
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         }
-        if( aByte == (byte)0){
+        if( aByte.get(aByte.size()-1) == (byte)1){
             return false;
         }
         return true;

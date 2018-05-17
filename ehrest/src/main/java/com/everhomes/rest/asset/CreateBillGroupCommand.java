@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * <li>billGroupName:账单组名称</li>
  * <li>billingCycle:生成账单周期,参考{@link com.everhomes.rest.asset.BillingCycle}, 账单的周期只支持2及以上</li>
  * <li>billDay:出账单日</li>
- * <li>billDayType:出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日</li>
+ * <li>billDayType:出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日</li>
  * <li>dueDay:最晚还款日</li>
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
  *</ul>
