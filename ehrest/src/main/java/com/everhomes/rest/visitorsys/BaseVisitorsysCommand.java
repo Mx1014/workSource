@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
  * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
+ * <li>pmId: (选填)管理公司id</li>
  * </ul>
  */
 public class BaseVisitorsysCommand {
@@ -18,6 +19,7 @@ public class BaseVisitorsysCommand {
     private Long ownerId;
     private Long appId;
     private String ownerToken;
+    private Long pmId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -57,6 +59,14 @@ public class BaseVisitorsysCommand {
 
     public void setOwnerToken(String ownerToken) {
         this.ownerToken = ownerToken;
+    }
+
+    public Long getPmId() {
+        return pmId;
+    }
+
+    public void setPmId(Long pmId) {
+        this.pmId = pmId;
     }
 
     @Override

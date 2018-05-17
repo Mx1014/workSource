@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>endPlannedVisitTime: (选填)计划到访时间结束，预约管理用</li>
  * <li>officeLocationId: (选填)办公地点id，企业访客模块用</li>
  * <li>enterpriseId: (选填)公司id，园区访客模块用</li>
+ * <li>pmId: (选填)管理公司id</li>
  * <li>visitReasonId: (选填)事由id</li>
  * <li>startVisitTime: (选填)实际到访企业/公司时间开始，访客管理用</li>
  * <li>endVisitTime: (选填)实际到访企业/公司时间结束，访客管理用</li>

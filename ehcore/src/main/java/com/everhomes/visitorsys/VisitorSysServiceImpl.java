@@ -38,6 +38,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -129,8 +130,21 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private GeneralFormProvider generalFormProvider;
     @Autowired
     private DoorAccessService doorAccessService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
+        VisitorsysSearchFlagType searchFlagType = checkSearchFlag(cmd.getSearchFlag());
+        if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041810L, cmd.getAppId(), null, cmd.getOwnerId());
+        }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041820L, cmd.getAppId(), null, cmd.getOwnerId());
+        }
+        return listBookedVisitorsWithOutACL(cmd);
+    }
+
+    private ListBookedVisitorsResponse listBookedVisitorsWithOutACL(ListBookedVisitorsCommand cmd) {
         checkOwnerType(cmd.getOwnerType());
         checkSearchFlag(cmd.getSearchFlag());
 
@@ -499,6 +513,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private VisitorSysVisitor generateRejectVisitor(VisitorSysVisitor visitor) {
         visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        visitor.setBookingStatus(VisitorsysStatus.DELETED.getCode());
         visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
         User user = UserContext.current().getUser();
         visitor.setRefuseUid(user==null?-1:user.getId());
@@ -513,7 +528,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public AddDeviceResponse addDevice(AddDeviceCommand cmd) {
-        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        if(ownerType == VisitorsysOwnerType.COMMUNITY) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+        }
         if(cmd.getPairingCode()==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "unknown pairingCode "+cmd.getPairingCode());
@@ -587,7 +605,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListDevicesResponse listDevices(BaseVisitorsysCommand cmd) {
-        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        if(ownerType == VisitorsysOwnerType.COMMUNITY) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+        }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         ListDevicesResponse devicesResponse = new ListDevicesResponse();
@@ -890,7 +911,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         cmd.setSearchFlag(VisitorsysSearchFlagType.CLIENT_BOOKING.getCode());
         cmd.setVisitorType(VisitorsysVisitorType.BE_INVITED.getCode());
         checkBookingStatus(cmd.getBookingStatus());
-        return listBookedVisitors(cmd);
+        return listBookedVisitorsWithOutACL(cmd);
     }
 
     @Override
@@ -1683,6 +1704,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             convert.setVisitStatus(convert.getVisitStatus());
             convert.setBookingStatus(convert.getBookingStatus());
         }
+        convert.setFormJsonValue(null);
+        convert.setInvalidTime(null);
+        convert.setPlateNo(null);
+        convert.setIdNumber(null);
+        convert.setVisitFloor(null);
+        convert.setVisitAddresses(null);
         if(visitorsysOwnerType == visitorsysOwnerType.COMMUNITY) {
             convert.setParentId(relatedVisitor ==null?visitor.getId(): relatedVisitor.getParentId());
             convert.setOwnerId(visitor.getEnterpriseId());

@@ -24,41 +24,6 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class VisitorsysApprovalFormItem extends GeneralFormFieldDTO{
-	private String fieldType;
-	private String fieldValue;
-	private String fieldDisplayName;
-
-	private String fieldAttribute;
-
-	public String getFieldDisplayName() {
-		return fieldDisplayName;
-	}
-
-	public void setFieldDisplayName(String fieldDisplayName) {
-		this.fieldDisplayName = fieldDisplayName;
-	}
-
-	public String getFieldType() {
-		return fieldType;
-	}
-	public void setFieldType(String fieldType) {
-		this.fieldType = fieldType;
-	}
-	public String getFieldValue() {
-		return fieldValue;
-	}
-	public void setFieldValue(String fieldValue) {
-		this.fieldValue = fieldValue;
-	}
-
-	public String getFieldAttribute() {
-		return fieldAttribute;
-	}
-
-	public void setFieldAttribute(String fieldAttribute) {
-		this.fieldAttribute = fieldAttribute;
-	}
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

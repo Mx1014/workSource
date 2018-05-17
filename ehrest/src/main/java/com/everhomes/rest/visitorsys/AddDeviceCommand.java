@@ -11,6 +11,7 @@ import java.util.List;
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
+ * <li>pmId: (选填)管理公司id</li>
  * <li>pairingCode: (必填)配对码</li>
  * </ul>
  */
