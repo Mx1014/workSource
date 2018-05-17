@@ -13718,7 +13718,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //说明该公司下面存在管理公司，那么我们现在就报错给前端，提示"无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。"
                     LOGGER.error("there are communiyies under this organization");
                     throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-                            "User is not in the organization.");
+                            "there are communiyies under this organization");
                 }
                 //删除该公司下面的所有的应用
                 //// TODO: 2018/5/15 这个严军还没有实现暂时不调用
