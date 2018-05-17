@@ -6229,6 +6229,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
+        resp.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;
         
         try {
