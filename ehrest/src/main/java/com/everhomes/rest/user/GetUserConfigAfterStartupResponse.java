@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>smartCardId: 每一个密钥都对应一个 ID，以表示密钥是否被更新过</li>
  * <li>smartCardKey: 一卡通进行 base64 之后的密码</li>
  * <li>smartCardhandlers: 所有此用户相关的二维码处理回调</li>
+ * <li>smartCardDescLink: 描述链接文档</li>
  * </ul>
  * @author janson
  *
@@ -17,6 +18,7 @@ import com.everhomes.util.StringHelper;
 public class GetUserConfigAfterStartupResponse {
     private Long smartCardId;
     private String smartCardKey;
+    private String smartCardDescLink;
     
     @ItemType(SmartCardHandler.class)
     private List<SmartCardHandler> smartCardhandlers;
@@ -43,6 +45,14 @@ public class GetUserConfigAfterStartupResponse {
 
     public void setSmartCardhandlers(List<SmartCardHandler> smartCardhandlers) {
         this.smartCardhandlers = smartCardhandlers;
+    }
+
+    public String getSmartCardDescLink() {
+        return smartCardDescLink;
+    }
+
+    public void setSmartCardDescLink(String smartCardDescLink) {
+        this.smartCardDescLink = smartCardDescLink;
     }
 
     @Override
