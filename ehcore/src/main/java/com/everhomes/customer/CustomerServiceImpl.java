@@ -3472,7 +3472,7 @@ public class CustomerServiceImpl implements CustomerService {
             LOGGER.info("mkdier  excel file result :{}",mdkirResult);
         }
         filePath = filePath + "enterprise_Customer_details" + System.currentTimeMillis() + ".xlsx";
-        //新建了一个文件
+        //  new file
         this.createEquipmentStandardsBook(filePath, customerStatisticsDTO,annualStatisticsResponse.getStatisticDTOs(),
                 industryStatisticsResponse.getDtos(),talentStatisticsResponse.getDtos(),statisticsResponse.getDtos(),projectStatisticsResponse.getDtos(),sourceStatisticsResponse.getDtos());
 

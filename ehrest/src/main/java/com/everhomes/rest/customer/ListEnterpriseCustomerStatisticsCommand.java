@@ -8,7 +8,12 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 项目id</li>
  *     <li>beginDate: 开始时间</li>
  *     <li>endDate: 结束时间</li>
+ *     <li>turnoverMinimum: 营业额最低值</li>
+ *     <li>turnoverMaximum: 营业额最高值</li>
+ *     <li>taxPaymentMinimum: 纳税额最低值</li>
+ *     <li>taxPaymentMaximum: 纳税额最高值</li>
  *     <li>exportItems: 导出items列表</li>
+ *     <li>orgId: organizationId</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
