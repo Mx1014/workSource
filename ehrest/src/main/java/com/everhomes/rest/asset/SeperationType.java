@@ -14,7 +14,7 @@ public enum SeperationType {
     }
 
     public static SeperationType  fromCode(byte code) {
-        for( SeperationType  t : SeperationType.svalues()) {
+        for( SeperationType  t : SeperationType.values()) {
             if (t.code == code) {
                 return t;
             }
