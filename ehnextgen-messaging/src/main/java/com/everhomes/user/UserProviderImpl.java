@@ -1868,6 +1868,7 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+
     @Override
     public String findUserTokenOfUser(Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
@@ -1880,4 +1881,39 @@ public class UserProviderImpl implements UserProvider {
             return null;
         }
     }
+
+	@Override
+	/*
+	 * 根据用户id获得昵称和手机号，手机号有可能为空
+	 * */
+	public TargetDTO findUserTargetById(Long userId) {
+
+		if (null == userId || userId < 0) {
+			return null;
+		}
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
+		com.everhomes.server.schema.tables.EhUsers user = Tables.EH_USERS.as("user");
+
+		TargetDTO targetDTO = new TargetDTO();
+		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
+				.on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID))).where(user.ID.eq(userId))
+				.fetchOne().map(r -> {
+					targetDTO.setTargetName(r.getValue(user.NICK_NAME));
+					targetDTO.setTargetType("eh_user");
+					targetDTO.setTargetId(r.getValue(user.ID));
+					targetDTO.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
+					return null;
+				});
+
+		if (!userId.equals(targetDTO.getTargetId())) {
+			return null;
+		}
+
+		return targetDTO;
+	}
+
+    
+
 }

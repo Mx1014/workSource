@@ -70,6 +70,19 @@ public class ServiceAlliances extends EhServiceAlliances {
 	public void setJumpId(Long jumpId) {
 		NewServiceAllianceCustomField.JUMPID.setIntegralValue(this, jumpId);
 	}
+	
+	public Byte getEnableProvider() {
+		Long ret = NewServiceAllianceCustomField.ENABLEPROVIDER.getIntegralValue(this);
+		if (null == ret) {
+			return (byte)0;
+		}
+		
+		return ret.byteValue();
+	}
+
+	public void setEnableProvider(Byte enableProvider) {
+		NewServiceAllianceCustomField.ENABLEPROVIDER .setIntegralValue(this, enableProvider.longValue());
+	}
 
 	@Override
     public String toString() {

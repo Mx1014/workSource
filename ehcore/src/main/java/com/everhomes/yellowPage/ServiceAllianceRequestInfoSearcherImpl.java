@@ -538,13 +538,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+            		.field("creatorMobile", 1.3f)
                     .field("creatorName", 1.2f)
                     .field("serviceOrganization", 1.1f)
                     .field("creatorOrganization", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("creatorName").addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
+            builder.addHighlightedField("creatorMobile").addHighlightedField("creatorName")
+            .addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
             
         }
         FilterBuilder fb = null;
