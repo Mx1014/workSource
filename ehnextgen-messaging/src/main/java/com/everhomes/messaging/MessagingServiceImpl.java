@@ -166,6 +166,7 @@ public class MessagingServiceImpl implements MessagingService {
                 record.setBody(r.getContent());
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
                 record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                record.setMeta(r.getMeta());
                 MessagePersistWorker.getQueue().offer(record);
             }
         }
@@ -253,10 +254,10 @@ public class MessagingServiceImpl implements MessagingService {
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {
 
-                if(null == context) {
-                    //手动添加消息唯一索引
-                    message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
+                //手动添加消息唯一索引
+                message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
 
+                if(null == context) {
                     MessageRoutingContext newCtx = new MessageRoutingContext();
                     String inStr = null;
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.INCLUDE)))) {
@@ -266,12 +267,10 @@ public class MessagingServiceImpl implements MessagingService {
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.EXCLUDE)))) {
                         newCtx.setExcludeUsers(jsonToLongList(inStr));
                     }
-                    
                     handler.routeMessage(newCtx, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
                 } else {
                     handler.routeMessage(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);    
                 }
-                
             } else {
                 if(LOGGER.isDebugEnabled())
                     LOGGER.debug(String.format("Message to %s:%s is dropped due to filtering", dstChannelType, dstChannelToken));  

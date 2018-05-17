@@ -3693,22 +3693,24 @@ public class CustomerServiceImpl implements CustomerService {
                 List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
 //                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
                 OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
-                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+//                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
                 List<OrganizationAttachment> banners = organizationProvider.listOrganizationAttachments(organization.getId());
                 List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
                 if (addresses != null && addresses.size() > 0) {
                     addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
                 }
                 String avatar = "";
+                String postUri = "";
                 if (organizationDetail == null) {
                     organizationDetail = new OrganizationDetail();//坑
                     avatar = organizationDetail.getAvatar();
+                    postUri = organizationDetail.getPostUri();
                 }
                 Long communityId = 0L;
                 if (request != null) {
                     communityId = request.getCommunityId();
                 }
-                createEnterpriseCustomer(organization, avatar, banners, org.getPostUri(), organizationDetail, communityId, addressDTOs);
+                createEnterpriseCustomer(organization, avatar, banners, postUri, organizationDetail, communityId, addressDTOs);
             }));
         }
     }
