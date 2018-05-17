@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
@@ -34,6 +35,9 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -131,12 +135,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             query.addConditions(Tables.EH_DOOR_AUTH.ID.gt(locator.getAnchor()));
             }
 
-        query.addLimit(count);
+        if(count > 0) query.addLimit(count + 1);
         List<DoorAuth> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
 
-        if(objs.size() >= count) {
+        if(objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -156,13 +160,15 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
             }
-
-        query.addLimit(count);
+        // count<=0默认查全部
+        if(count > 0){
+        	query.addLimit(count + 1);
+        }
         List<DoorAuth> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
 
-        if(objs.size() >= count) {
+        if(count > 0 && objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
         } else {
             locator.setAnchor(null);
@@ -414,9 +420,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 if(status != null) {
                 	Long now = DateHelper.currentGMTTime().getTime();
                     if(status.equals(DoorAuthStatus.INVALID.getCode())) {
-                      query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
+//                       query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
+						query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status).or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now)
+								.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.le(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     } else {
-                    	query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
+						query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)).and((Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 0))
+										.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.gt(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     }
                 }
 
@@ -486,6 +495,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
         condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
         condition = condition.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
+        
+        //by liuyilin 20180328 目前授权是对门禁组授权，如果以后可以给组内单个门禁授权，则没有被统计
+        if(cmd.getDoorAccessGroupId() != null){
+        	condition = condition.and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorAccessGroupId()));
+        }
+        
         AuthVisitorStasticResponse resp = new AuthVisitorStasticResponse();
         resp.setDtos(new ArrayList<AuthVisitorStasticDTO>());
 
@@ -987,5 +1002,28 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         }
         return auths.get(0);
     }
+
+	@Override
+	public List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone) {
+		ListingLocator locator = new ListingLocator();
+        long now = DateHelper.currentGMTTime().getTime();
+
+        List<DoorAuth> auths = queryDoorAuthByTime(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()).
+                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+                query.addConditions(Tables.EH_DOOR_AUTH.PHONE.eq(phone));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(c1);
+                return query;
+            }
+        });
+        return auths;
+	}
 
 }

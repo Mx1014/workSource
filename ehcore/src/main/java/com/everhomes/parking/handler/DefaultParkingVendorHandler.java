@@ -293,7 +293,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
 
                 BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
                         .add(dto.getPrice().multiply(new BigDecimal(maxDay-today + 1))
-                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+                                .divide(new BigDecimal(maxDay), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
                 dto.setPayMoney(price);
             }
 

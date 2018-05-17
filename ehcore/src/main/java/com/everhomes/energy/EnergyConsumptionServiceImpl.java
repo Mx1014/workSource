@@ -237,7 +237,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -544,10 +546,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setCalculationType(cmd.getCalculationType());
             updateCmd.setConfigId(cmd.getConfigId());
             updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+            //this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
-            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
-            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
+           // this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+           // this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
             // 创建一条初始读表记录
             ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
@@ -561,7 +563,28 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         meterSearcher.feedDoc(meter);
+        if (cmd.getNamespaceId() == 999961 && EnergyAutoReadingFlag.TURE.equals(EnergyAutoReadingFlag.fromStatus(cmd.getAutoFlag()))) {
+            createMeterTask(meter);
+        }
         return toEnergyMeterDTO(meter, cmd.getNamespaceId());
+    }
+
+    private void createMeterTask(EnergyMeter meter) {
+        //task targetType null   planId 0
+        EnergyMeterTask task = new EnergyMeterTask();
+        task.setNamespaceId(meter.getNamespaceId());
+        task.setOwnerId(meter.getOwnerId());
+        task.setOwnerType(meter.getOwnerType());
+        task.setTargetId(meter.getCommunityId());
+        task.setPlanId(0L);
+        task.setMeterId(meter.getId());
+        task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
+        LocalDateTime dateTime = meter.getCreateTime().toLocalDateTime();
+        task.setExecutiveStartTime(Timestamp.valueOf(dateTime.format(dateSF)));
+        String endDayString = LocalDateTime.of(dateTime.toLocalDate().with(TemporalAdjusters.lastDayOfMonth()), LocalTime.MAX).format(dateSF);
+        task.setExecutiveExpireTime(Timestamp.valueOf(endDayString));
+        energyMeterTaskProvider.createEnergyMeterTask(task);
+        energyMeterTaskSearcher.feedDoc(task);
     }
 
     private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
@@ -2888,7 +2911,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //     * 每天早上5点10分刷自动读表
 //     */
 //    @Scheduled(cron = "0 10 5 L * ?")
-    public void readMeterRemote() {
+    private void readMeterRemote() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
             List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
@@ -2898,7 +2921,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
                     String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
                     EnergyAutoReadHandler handler = null;
-                    if (meter.getNamespaceId() == 999961 || meter.getNamespaceId() == 999992) {
+                    if (meter.getNamespaceId() == 999961) {
                          handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
                     }
                     if (handler != null) {
@@ -2911,10 +2934,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
                             log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
                             if (task != null) {
                                 log.setTaskId(task.getId());
+                                task.setReading(log.getReading());
+                                task.setStatus(EnergyTaskStatus.READ.getCode());
+                                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             }
-                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
                             log.setCommunityId(meter.getCommunityId());
                             log.setMeterId(meter.getId());
                             log.setNamespaceId(meter.getNamespaceId());
@@ -2928,6 +2954,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             }
                             dbProvider.execute(r -> {
                                 meterReadingLogProvider.createEnergyMeterReadingLog(log);
+                                if (task != null) {
+                                    energyMeterTaskProvider.updateEnergyMeterTask(task);
+                                    energyMeterTaskSearcher.feedDoc(task);
+                                }
                                 meter.setLastReading(log.getReading());
                                 meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
                                 meterProvider.updateEnergyMeter(meter);
@@ -2984,7 +3014,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         repeatSetting.setOwnerId(meters.get(0).getOwnerId());
                         repeatSetting.setOwnerType(meters.get(0).getOwnerType());
                         repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
-                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).format(autoDateSF)));
+                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
                         repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
                         repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
                         repeatSetting.setRepeatInterval(1);
@@ -3025,20 +3055,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
         String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+        if ("core.zuolin.com".equals(configurationProvider.getValue(0,"home.url", ""))) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+                 PrintStream stream = new PrintStream(out)) {
+                e.printStackTrace(stream);
+                String message = out.toString("UTF-8");
+                handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
+                // out.reset();
+                e.getCause().printStackTrace(stream);
+                message = out.toString("UTF-8");
+                handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
 
-        try (   ByteArrayOutputStream out = new ByteArrayOutputStream();
-                PrintStream stream = new PrintStream(out))
-        {
-            e.printStackTrace(stream);
-            String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
-            // out.reset();
-            e.getCause().printStackTrace(stream);
-            message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
-
-        } catch (Exception ignored) {
-            //
+            } catch (Exception ignored) {
+                //
+            }
         }
     }
 
@@ -4474,7 +4504,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void createTask(CreateEnergyTaskCommand cmd) {
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
-        if(plan == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+        if(plan == null || CommonStatus.INACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
             LOGGER.info("EnergyScheduleJob plan is not exist or active! planId = " + cmd.getPlanId());
             throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_PLAN_NOT_ACTIVE, "The energy meter plan is not exist or active");
         }
@@ -4533,7 +4563,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 Timestamp startTime = strToTimestamp(str);
                 Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
                 task.setExecutiveStartTime(startTime);
-                task.setExecutiveExpireTime(expiredTime);
+                LocalDateTime endTime = expiredTime.toLocalDateTime();
+                task.setExecutiveExpireTime(Timestamp.valueOf(LocalDateTime.of(endTime.toLocalDate(),LocalTime.MAX).format(dateSF)));
 
                 energyMeterTaskProvider.createEnergyMeterTask(task);
                 energyMeterTaskSearcher.feedDoc(task);
@@ -5078,9 +5109,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public void testAutoReading() {
+    public void meterAutoReading() {
         LOGGER.debug("starting auto reading manual...");
         readMeterRemote();
         LOGGER.debug("ending auto reading manual...");
+    }
+
+    @Override
+    public void addMeterPeriodTaskById(Long meterId) {
+        EnergyMeter meter = meterProvider.findById(999961, meterId);
+        createMeterTask(meter);
     }
 }
