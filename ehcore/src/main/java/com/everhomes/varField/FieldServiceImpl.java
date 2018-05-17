@@ -302,7 +302,7 @@ public class FieldServiceImpl implements FieldService {
         }
         List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
 
