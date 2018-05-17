@@ -1016,7 +1016,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     /**
-     * 获取serviceModule的树形目录（level  = 2）
+     * 获取serviceModule的树形目录（level  = 3）
      *
      * @param tempList
      * @param parentId
@@ -1027,7 +1027,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Iterator<ServiceModuleDTO> iter = tempList.iterator();
         while (iter.hasNext()) {
             ServiceModuleDTO current = iter.next();
-            if (current.getParentId().equals(parentId) && current.getLevel() < 3) {
+            if (current.getParentId().equals(parentId) && current.getLevel() <= 3) {
                 List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
                 results.add(current);
