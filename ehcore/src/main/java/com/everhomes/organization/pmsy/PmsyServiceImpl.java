@@ -454,9 +454,9 @@ public class PmsyServiceImpl implements PmsyService{
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(UserContext.currentUserId());
-		//preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-		preOrderCommand.setNamespaceId(999993);//杨崇鑫用于测试
-		preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//preOrderCommand.setNamespaceId(999993);//杨崇鑫用于测试
+		//preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
