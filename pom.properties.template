@@ -1,9 +1,9 @@
 ehapp.version=master-SNAPSHOT
 codegen.version=0.0.3-SNAPSHOT
-ehutil.version=1.0.0-SNAPSHOT
+ehutil.version=0.0.7-SNAPSHOT
 ehutil-common.version=1.0.0-SNAPSHOT
-ehplatform.version=1.0.1-SNAPSHOT
-ehplatform-persist.version=1.0.0-SNAPSHOT
+ehplatform.version=0.1.0-SNAPSHOT
+ehplatform-persist.version=0.1.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
 
 bluto.version=1.0.3
