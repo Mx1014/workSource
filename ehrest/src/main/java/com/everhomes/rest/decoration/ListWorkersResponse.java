@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor</li>
- * <li>workers:List<DecorationWorkerDTO> {@link com.everhomes.rest.decoration.DecorationWorkerDTO}</li>
+ * <li>workers:List{@link com.everhomes.rest.decoration.DecorationWorkerDTO}</li>
  * </ul>
  */
 public class ListWorkersResponse {

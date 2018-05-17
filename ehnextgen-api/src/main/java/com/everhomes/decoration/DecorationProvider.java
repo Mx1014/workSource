@@ -6,4 +6,6 @@ public interface DecorationProvider {
 
 
     Long createDecorationSetting(EhDecorationSetting setting);
+
+    void updateDecorationSetting(EhDecorationSetting setting);
 }

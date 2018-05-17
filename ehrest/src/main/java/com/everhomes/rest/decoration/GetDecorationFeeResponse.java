@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>fee：List<DecorationFeeDTO> 参考{@link com.everhomes.rest.decoration.DecorationFeeDTO}</li>
+ * <li>fee：List 参考{@link com.everhomes.rest.decoration.DecorationFeeDTO}</li>
  * <li>address</li>
  * </ul>
  */

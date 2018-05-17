@@ -17,7 +17,7 @@ import java.util.List;
  * <li>decoratorName：负责人姓名</li>
  * <li>decoratorPhone：负责人电话</li>
  * <li>decoratorCompany：负责人公司</li>
- * <li>flowCasees：工作流 List<DecorationFlowCaseDTO> 参考{@link com.everhomes.rest.decoration.DecorationFlowCaseDTO}</li>
+ * <li>flowCasees：工作流 List 参考{@link com.everhomes.rest.decoration.DecorationFlowCaseDTO}</li>
  * </ul>
  */
 public class QrDetailDTO {

@@ -8,6 +8,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.decoration.DecorationIllustrationDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhDecorationSettingDao;
 import com.everhomes.server.schema.tables.pojos.EhDecorationSetting;
 import com.everhomes.server.schema.tables.records.EhDecorationSettingRecord;
 import com.everhomes.util.ConvertHelper;
@@ -44,4 +45,16 @@ public class DecorationProviderImpl implements  DecorationProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationSetting.class, null);
         return null;
     }
+
+    @Override
+    public void updateDecorationSetting(EhDecorationSetting setting) {
+        assert (setting.getId() == null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationSettingDao dao = new EhDecorationSettingDao(context.configuration());
+        dao.update(setting);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDecorationSetting.class,
+                setting.getId());
+    }
+
+
 }

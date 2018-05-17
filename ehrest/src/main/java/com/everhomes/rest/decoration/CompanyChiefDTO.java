@@ -1,6 +1,15 @@
 package com.everhomes.rest.decoration;
 
 
+/**
+ * <ul>
+ * <li>id</li>
+ * <li>uid</li>
+ * <li>companyId</li>
+ * <li>name</li>
+ * <li>phone</li>
+ * </ul>
+ */
 public class CompanyChiefDTO {
 
     private Long id;
