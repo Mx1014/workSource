@@ -184,6 +184,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return response;
     }
 
+    /**
+     * 生成事件列表
+     * @param visitor
+     * @param relatedVisitor
+     * @return
+     */
     private List<BaseVisitorActionDTO> generateActionList(VisitorSysVisitor visitor, VisitorSysVisitor relatedVisitor) {
         List<BaseVisitorActionDTO> list = new ArrayList<>(6);
         VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
@@ -191,21 +197,38 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             addActionDto(list,visitor);
             addActionDto(list,relatedVisitor);
         }else{
-            addActionDto(list,visitor);
             addActionDto(list,relatedVisitor);
+            addActionDto(list,visitor);
         }
         return list;
     }
 
+    /**
+     * 将visitor中的时间发送组装到list中
+     * @param list
+     * @param visitor
+     */
     private void addActionDto(List<BaseVisitorActionDTO> list, VisitorSysVisitor visitor){
-        BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((byte)1,visitor.getVisitTime(),null,visitor.getInviterName());
-        BaseVisitorActionDTO dto2 = new BaseVisitorActionDTO((byte)2,visitor.getConfirmTime(),visitor.getConfirmUid(),visitor.getConfirmUname());
-        BaseVisitorActionDTO dto3 = new BaseVisitorActionDTO((byte)3,visitor.getRefuseTime(),visitor.getRefuseUid(),visitor.getRefuseUname());
-        list.add(dto1);
-        list.add(dto2);
-        list.add(dto3);
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        if(visitor.getVisitStatus()>VisitorsysStatus.NOT_VISIT.getCode()) {
+            BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 1 : (byte) 4), visitor.getVisitTime(), null, visitor.getInviterName());
+            list.add(dto1);
+        }
+        if(visitor.getVisitStatus()>VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()) {
+            BaseVisitorActionDTO dto2 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 2 : (byte) 5), visitor.getConfirmTime(), visitor.getConfirmUid(), visitor.getConfirmUname());
+            list.add(dto2);
+        }
+        if(visitor.getVisitStatus()>VisitorsysStatus.HAS_VISITED.getCode()) {
+            BaseVisitorActionDTO dto3 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 3 : (byte) 6), visitor.getRefuseTime(), visitor.getRefuseUid(), visitor.getRefuseUname());
+            list.add(dto3);
+        }
     }
 
+    /**
+     * 获取关联的访客预约
+     * @param visitor
+     * @return
+     */
     private VisitorSysVisitor getRelatedVisitor(VisitorSysVisitor visitor) {
         if(visitor.getParentId()==null)
             return null;
@@ -311,6 +334,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return convert;
     }
 
+    /**
+     * 检查黑名单
+     * @param namespaceId
+     * @param ownerType
+     * @param ownerId
+     * @param visitorPhone
+     * @param enterpriseId
+     */
     private void checkBlackList(Integer namespaceId, String ownerType, Long ownerId, String visitorPhone,Long enterpriseId) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
         VisitorSysBlackList blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, ownerType, ownerId, visitorPhone);
@@ -563,7 +594,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitorSysDeviceProvider.createVisitorSysDevice(sysDevice);
                 return ConvertHelper.convert(sysDevice,AddDeviceResponse.class);
             }
-            return null;
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_PAIRING_CODE,
+                    "unknown pairingCode "+cmd.getPairingCode());
         }finally {
             LOGGER.info("key = {}, jsonValue = {}", key, jsonValue);
             ExecutorUtil.submit(()->{
