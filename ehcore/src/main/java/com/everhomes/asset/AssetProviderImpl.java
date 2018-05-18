@@ -43,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.talent.Talent;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 
@@ -864,7 +865,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingDay(r.getValue(t.BILLS_DAY));
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
-                    dto.setBillingDayType(r.getValue(t.BILLS_DAY_TYPE));
+                    dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
                     list.add(dto);
                     return null;
                 });
@@ -1530,12 +1531,22 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
 
         List<Long> suggestPrices = new ArrayList<>();
+        //tododone 这里来限定billcycle， 收费项目所属的ownerType，ownerId，namespace下的账单组的billcycle，来进行约束
+        List<Byte> limitCyclses = context.select(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES, Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE);
+       // limiteCycles
         context.select()
                 .from(standardScopeT,standardT)
                 .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
                 .and(standardScopeT.OWNER_ID.eq(ownerId))
                 .and(standardScopeT.OWNER_TYPE.eq(ownerType))
                 .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                .and(standardT.BILLING_CYCLE.in(limitCyclses))
                 .fetch()
                 .map(r -> {
                     ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
