@@ -282,7 +282,6 @@ public interface PunchService {
 	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
 
 	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
-}
 
 	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd);
 
