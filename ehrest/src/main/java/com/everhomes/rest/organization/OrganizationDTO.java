@@ -5,6 +5,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -70,6 +71,8 @@ public class OrganizationDTO {
     private String avatarUri;
     private String avatarUrl;
     private String contact;
+
+	private Timestamp createTime;
 
     private String displayName;
 	
@@ -497,5 +500,13 @@ public class OrganizationDTO {
 
 	public void setProjectsCount(Integer projectsCount) {
 		this.projectsCount = projectsCount;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }
