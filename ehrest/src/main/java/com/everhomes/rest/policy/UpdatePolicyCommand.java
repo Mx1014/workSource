@@ -8,7 +8,7 @@ import java.util.List;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目id</li>
- * <li>categoryId: 企业类型</li>
+ * <li>categoryIds: 企业类型</li>
  * <li>title: 政策标题</li>
  * <li>outline: 政策概要</li>
  * <li>content: 政策详情</li>

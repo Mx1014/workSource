@@ -49,7 +49,7 @@ public class PolicyRecordProviderImpl implements PolicyRecordProvider {
     }
 
     @Override
-    public List<PolicyRecord> searchPolicyRecords(Integer namespaceId, String ownerType, List<Long> ownerIds, Long beginDate, Long endDate, String category, String keyword, Long pageAnchor, Integer pageSize) {
+    public List<PolicyRecord> searchPolicyRecords(Integer namespaceId, String ownerType, List<Long> ownerIds, Long beginDate, Long endDate, Long category, String keyword, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.pojos.EhPolicyRecords.class));
         SelectQuery query = context.selectQuery(Tables.EH_POLICY_RECORDS);
         if(null != namespaceId)
@@ -63,7 +63,7 @@ public class PolicyRecordProviderImpl implements PolicyRecordProvider {
         if(null != endDate)
             query.addConditions(Tables.EH_POLICY_RECORDS.CREATE_TIME.lt(new Timestamp(endDate)));
         if(null != category)
-            query.addConditions(Tables.EH_POLICY_RECORDS.CATEGORY_ID.like("%" + category + "%"));
+            query.addConditions(Tables.EH_POLICY_RECORDS.CATEGORY_ID.eq(category));
         if(null != keyword){
             query.addConditions(Tables.EH_POLICY_RECORDS.CREATOR_NAME.like("%" + keyword + "%").or(Tables.EH_POLICY_RECORDS.CREATOR_PHONE.like("%" + keyword + "%").or(Tables.EH_POLICY_RECORDS.CREATOR_ORG_NAME.like("%" + keyword + "%"))));
         }

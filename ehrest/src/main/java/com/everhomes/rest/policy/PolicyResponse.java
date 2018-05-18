@@ -5,6 +5,12 @@ import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor: 分页游标</li>
+ * <li>dtos: 政策列表 {@link com.everhomes.rest.policy.PolicyDTO}</li>
+ * </ul>
+ */
 public class PolicyResponse extends RestResponseBase {
     private Long nextPageAnchor;
     @ItemType(PolicyDTO.class)
