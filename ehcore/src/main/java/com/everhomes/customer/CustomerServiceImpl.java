@@ -4,6 +4,8 @@ import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -260,6 +262,8 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -278,6 +282,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -387,6 +392,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 
     @Override
@@ -3673,16 +3683,21 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void syncOrganizationToCustomer() {
-        List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
-        if (organizations != null && organizations.size() > 0) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()+System.currentTimeMillis()).tryEnter(()-> {
+        //防止执行两次  之前出现过
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+        String runningFlag = getEnergyTaskToken(redisTemplate);
+        if(StringUtils.isNotEmpty(runningFlag)) {
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
+            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
+            if (organizations != null && organizations.size() > 0) {
                 organizations.forEach((organization -> {
                     try {
                         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
                         List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
-      //                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
+                        //                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
                         OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
-      //                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+                        //                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
                         List<OrganizationAttachment> banners = organizationProvider.listOrganizationAttachments(organization.getId());
                         List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
                         if (addresses != null && addresses.size() > 0) {
@@ -3692,7 +3707,7 @@ public class CustomerServiceImpl implements CustomerService {
                         String postUri = "";
                         if (organizationDetail == null) {
                             organizationDetail = new OrganizationDetail();
-                        }else {
+                        } else {
                             avatar = organizationDetail.getAvatar();
                             postUri = organizationDetail.getPostUri();
                         }
@@ -3706,7 +3721,26 @@ public class CustomerServiceImpl implements CustomerService {
                         LOGGER.error("sync organziation to customer error :{}", e);
                     }
                 }));
-            });
+            }
+        }
+    }
+
+    private String getEnergyTaskToken(RedisTemplate redisTemplate) {
+        Map<String, String> map = makeEnergyTaskToken(redisTemplate);
+        if(map == null) {
+            return null;
+        }
+        return  map.get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+    }
+
+    private Map<String, String> makeEnergyTaskToken(RedisTemplate redisTemplate) {
+        Object o = redisTemplate.opsForValue().get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+        if(o != null) {
+            Map<String, String> keys = new HashMap<>();
+            keys.put(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), (String)o);
+            return keys;
+        } else {
+            return null;
         }
     }
 
