@@ -518,7 +518,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().map((e) -> {
                 String addressName = e.getAddressName();
                 if (addressName != null) {
-                    e.setAddressName(addressName.replace("-", "/"));
+                    e.setAddressName(addressName.replaceFirst("-", "/"));
                 }
                 return e;
             }).collect(Collectors.toList());
