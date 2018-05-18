@@ -849,7 +849,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        context.select()
+        context.select(t.ID, t.NAME, t.DEFAULT_ORDER, t.BILLS_DAY, t.DUE_DAY, t.DUE_DAY_TYPE, t.BILLS_DAY_TYPE, t.BALANCE_DATE_TYPE)
                 .from(t)
                 .where(t.OWNER_ID.eq(ownerId))
                 .and(t.OWNER_TYPE.eq(ownerType))
