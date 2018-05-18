@@ -842,6 +842,17 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
+        //查询该账单id是否存在对应的缴费凭证记录
+        Result<Record> fetch = dslContext.select()
+        		.from(Tables.EH_PAYMENT_BILL_CERTIFICATE)
+        		.where(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId))
+        		.fetch();
+        if(fetch.isNotEmpty()){
+        	response.setIsUploadCertificate((byte)1);
+        }else{
+        	response.setIsUploadCertificate((byte)0);
+        }
+        
         response.setAmountReceivable(amountReceivable[0]);
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStr[0]);

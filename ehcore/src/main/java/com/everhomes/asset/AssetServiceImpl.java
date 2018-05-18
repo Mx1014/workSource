@@ -4223,7 +4223,6 @@ public class AssetServiceImpl implements AssetService {
                                     sendMessageToUser(contact.getTargetId(), content);
                                 }
                             }
-
                         }
                     }
                 }
