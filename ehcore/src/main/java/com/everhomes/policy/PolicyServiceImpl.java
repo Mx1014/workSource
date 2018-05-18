@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,7 +70,10 @@ public class PolicyServiceImpl implements PolicyService {
         policy.setCreatorUid(user.getId());
         Policy result = policyProvider.updatePolicy(policy);
         policyCategoryService.setPolicyCategory(result.getId(),cmd.getCategoryIds());
-        return ConvertHelper.convert(result,PolicyDTO.class);
+        PolicyDTO dto = ConvertHelper.convert(result,PolicyDTO.class);
+        List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
+        dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
+        return dto;
     }
 
     @Override
@@ -94,7 +96,7 @@ public class PolicyServiceImpl implements PolicyService {
                     "Invalid namespaceId parameter.");
         }
         PolicyDTO dto = ConvertHelper.convert(result,PolicyDTO.class);
-        List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+        List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
         dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
         return dto;
     }
@@ -110,7 +112,7 @@ public class PolicyServiceImpl implements PolicyService {
             resp.setNextPageAnchor(results.get(0).getId());
         resp.setDtos(results.stream().map(r -> {
             PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
-            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
             dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
             return dto;
         }).collect(Collectors.toList()));
@@ -134,7 +136,7 @@ public class PolicyServiceImpl implements PolicyService {
             resp.setNextPageAnchor(results.get(0).getId());
         resp.setDtos(results.stream().map(r -> {
             PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
-            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId());
+            List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
             dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
             return dto;
         }).collect(Collectors.toList()));

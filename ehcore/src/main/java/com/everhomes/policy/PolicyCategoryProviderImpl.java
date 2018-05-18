@@ -53,11 +53,13 @@ public class PolicyCategoryProviderImpl implements PolicyCategoryProvider{
     }
 
     @Override
-    public List<PolicyCategory> searchCategoryByPolicyId(Long policyId) {
+    public List<PolicyCategory> searchCategoryByPolicyId(Long policyId,Byte actFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolicyCategories.class));
         SelectQuery query = context.selectQuery(Tables.EH_POLICY_CATEGORIES);
         if(null != policyId)
             query.addConditions(Tables.EH_POLICY_CATEGORIES.POLICY_ID.eq(policyId));
+        if(null != actFlag)
+            query.addConditions(Tables.EH_POLICY_CATEGORIES.ACTIVE_FLAG.eq(actFlag));
         List<PolicyCategory> results = query.fetch().map(r -> ConvertHelper.convert(r,PolicyCategory.class));
         return results;
     }

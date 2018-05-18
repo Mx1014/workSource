@@ -13,7 +13,7 @@ public class PolicyCategoryServiceImpl implements PolicyCategoryService {
 
     @Override
     public void setPolicyCategory(Long policyId,List<Long> categoryIds) {
-        List<PolicyCategory> ctgs = policyCategoryProvider.searchCategoryByPolicyId(policyId);
+        List<PolicyCategory> ctgs = policyCategoryProvider.searchCategoryByPolicyId(policyId,null);
         ctgs.forEach(r -> {
             if(!categoryIds.contains(r.getCategoryId())){
                 r.setActiveFlag((byte)0);
@@ -36,13 +36,13 @@ public class PolicyCategoryServiceImpl implements PolicyCategoryService {
 
     @Override
     public void deletePolicyCategoryByPolicyId(Long policyId) {
-        List<PolicyCategory> beans = policyCategoryProvider.searchCategoryByPolicyId(policyId);
+        List<PolicyCategory> beans = policyCategoryProvider.searchCategoryByPolicyId(policyId,null);
         beans.forEach(r->policyCategoryProvider.deleteCategory(r));
     }
 
     @Override
-    public List<PolicyCategory> searchPolicyCategoryByPolicyId(Long policyId) {
-        return policyCategoryProvider.searchCategoryByPolicyId(policyId);
+    public List<PolicyCategory> searchPolicyCategoryByPolicyId(Long policyId,Byte actFlag) {
+        return policyCategoryProvider.searchCategoryByPolicyId(policyId,actFlag);
     }
 
     @Override
