@@ -1,5 +1,6 @@
 package com.everhomes.launchpadbase;
 
+import com.everhomes.banner.BannerService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -10,6 +11,7 @@ import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +34,7 @@ public class LaunchPadBaseController extends ControllerBase {
      */
     @RequestMapping("getLaunchPadLayout")
     @RestReturn(value=LaunchPadLayoutDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
         LaunchPadLayoutDTO dto = launchPadService.getLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse(dto);
@@ -47,9 +50,10 @@ public class LaunchPadBaseController extends ControllerBase {
      */
     @RequestMapping("listBanners")
     @RestReturn(value=ListBannersResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listBanners(ListBannersCommand cmd) {
-        ListBannersResponse res = new ListBannersResponse();
-        RestResponse response =  new RestResponse(res);
+        ListBannersResponse listRes = launchPadService.listBanners(cmd);
+        RestResponse response =  new RestResponse(listRes);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -61,6 +65,7 @@ public class LaunchPadBaseController extends ControllerBase {
      */
     @RequestMapping("listLaunchPadApps")
     @RestReturn(value=ListLaunchPadAppsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
         ListLaunchPadAppsResponse res = serviceModuleAppService.listLaunchPadApps(cmd);
         RestResponse response =  new RestResponse(res);

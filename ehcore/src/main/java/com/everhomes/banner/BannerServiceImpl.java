@@ -38,6 +38,7 @@ import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
@@ -60,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
 import static com.everhomes.rest.banner.BannerStatus.CLOSE;
+import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 
 @Component
 public class BannerServiceImpl implements BannerService {
@@ -482,6 +484,28 @@ public class BannerServiceImpl implements BannerService {
         }
         return new ArrayList<>();
     }
+
+    @Override
+    public List<BannerDTO> listBannerByCommunityId(Long communityId){
+        Community community = communityProvider.findCommunityById(communityId);
+
+
+        SceneTokenDTO sceneToken = new SceneTokenDTO();
+        sceneToken.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+        sceneToken.setScene(PARK_TOURIST.getCode());
+        sceneToken.setEntityId(community.getId());
+        sceneToken.setNamespaceId(community.getNamespaceId());
+        sceneToken.setUserId(UserContext.currentUserId());
+
+        String sceneTokenStr = WebTokenGenerator.getInstance().toWebToken(sceneToken);
+
+        GetBannersBySceneCommand cmd = new GetBannersBySceneCommand();
+        cmd.setSceneToken(sceneTokenStr);
+        return getBannersBySceneNew(cmd);
+
+    }
+
+
 
     @Override
     public CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd) {

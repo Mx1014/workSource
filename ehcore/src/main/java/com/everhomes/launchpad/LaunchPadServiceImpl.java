@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import com.everhomes.banner.BannerService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
@@ -29,6 +30,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
+import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
@@ -148,6 +150,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Autowired
 	private LaunchPadIndexProvider launchPadIndexProvider;
+
+
+	@Autowired
+	private BannerService bannerService;
 	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -2806,4 +2812,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	}
 
+	@Override
+	public ListBannersResponse listBanners(ListBannersCommand cmd) {
+		List<BannerDTO> bannerDTOS = bannerService.listBannerByCommunityId(cmd.getContext().getCommunityId());
+		ListBannersResponse response = new ListBannersResponse();
+		response.setDtos(bannerDTOS);
+		return response;
+	}
 }
