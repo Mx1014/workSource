@@ -112,6 +112,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setDeliveryOption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
         record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ?Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+        record.setMeta(message.getMeta());
         MessagePersistWorker.getQueue().offer(record);
 
         long uid = Long.parseLong(dstChannelToken);
@@ -263,6 +264,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setDeliveryOption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
         record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+        record.setMeta(message.getMeta());
         MessagePersistWorker.getQueue().offer(record);
 
         //If not push only, send it by border server
@@ -329,6 +331,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setDeliveryOption(deliveryOption);
                     record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
                     record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                    record.setMeta(message.getMeta());
                     MessagePersistWorker.getQueue().offer(record);
 
                     borderConnection.sendMessage(null, forwardPdu);
