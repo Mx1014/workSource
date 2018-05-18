@@ -886,9 +886,12 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
-            DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
-            command.setId(customer.getOrganizationId());
-            organizationService.deleteEnterpriseById(command, false);
+            Organization org = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if (org != null && org.getId() != null) {
+                DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+                command.setId(customer.getOrganizationId());
+                organizationService.deleteEnterpriseById(command, false);
+            }
         }
 
     }
@@ -2183,7 +2186,7 @@ public class CustomerServiceImpl implements CustomerService {
             List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
             attachments.forEach((a) -> {
                 AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
-                bannerUrl.setContentType(a.getContentUri());
+                bannerUrl.setContentType(a.getContentType());
                 bannerUrl.setContentUri(a.getContentUri());
                 bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), customer.getId()));
                 bannerUrls.add(bannerUrl);
@@ -2249,7 +2252,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
-            if (organization != null) {
+            if (organization != null && organization.getId() != 0) {
                 organizationSearcher.deleteById(organization.getId());
                 organizationProvider.deleteOrganization(organization);
                 if (customer != null) {
