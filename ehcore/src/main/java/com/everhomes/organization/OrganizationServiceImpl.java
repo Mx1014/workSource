@@ -1211,8 +1211,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                     dto.setEnterpriseName(org.getDisplayName());
 
                 dto.setAvatarUri(org.getAvatar());
-                if (!StringUtils.isEmpty(org.getAvatar()))
+                dto.setPosturi(org.getPostUri());
+                if (!StringUtils.isEmpty(org.getAvatar())) {
                     dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+                }
+                if (!StringUtils.isEmpty(org.getPostUri())) {
+                    dto.setPosturl(contentServerService.parserUri(dto.getPosturi(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+                }
 
             }
 
