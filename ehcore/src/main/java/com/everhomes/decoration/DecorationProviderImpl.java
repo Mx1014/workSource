@@ -4,21 +4,26 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.decoration.DecorationAttachmentDTO;
 import com.everhomes.rest.decoration.DecorationIllustrationDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhDecorationAtttachment;
+import com.everhomes.server.schema.tables.pojos.EhDecorationRequests;
 import com.everhomes.server.schema.tables.pojos.EhDecorationWorkers;
 import com.everhomes.server.schema.tables.daos.EhDecorationSettingDao;
 import com.everhomes.server.schema.tables.daos.EhDecorationWorkersDao;
 import com.everhomes.server.schema.tables.pojos.EhDecorationSetting;
 import com.everhomes.server.schema.tables.records.EhDecorationAtttachmentRecord;
+import com.everhomes.server.schema.tables.records.EhDecorationRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhDecorationSettingRecord;
 import com.everhomes.server.schema.tables.records.EhDecorationWorkersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +44,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public Long createDecorationSetting(DecorationSetting setting) {
+    public void createDecorationSetting(DecorationSetting setting) {
         long id = sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhDecorationSetting.class));
         setting.setId(id);
@@ -51,7 +56,6 @@ public class DecorationProviderImpl implements  DecorationProvider {
         query.setRecord(record);
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationSetting.class, null);
-        return id;
     }
 
     @Override
@@ -148,17 +152,24 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
-    public List<DecorationWorker> listWorkersByRequestId(Long requestId) {
+    public List<DecorationWorker> listWorkersByRequestId(Long requestId, String keyWord, ListingLocator locator, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(
                 Tables.EH_DECORATION_WORKERS);
         Condition condition = Tables.EH_DECORATION_WORKERS.REQUEST_ID.eq(requestId);
+        if (!StringUtils.isBlank(keyWord))
+            condition = condition.and(Tables.EH_DECORATION_WORKERS.NAME.eq(keyWord).or(
+                    Tables.EH_DECORATION_WORKERS.PHONE.eq(keyWord)));
+        if(null!=locator && locator.getAnchor() != null)
+            condition = condition.and(Tables.EH_DECORATION_WORKERS.ID.gt(locator.getAnchor()));
+        if (pageSize!=null)
+            step.limit(pageSize);
         step.where(condition);
         return step.fetch().map(r->ConvertHelper.convert(r,DecorationWorker.class));
     }
 
     @Override
-    public Long createDecorationWorker(DecorationWorker worker) {
+    public void createDecorationWorker(DecorationWorker worker) {
         long id = sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhDecorationWorkers.class));
         worker.setId(id);
@@ -169,7 +180,6 @@ public class DecorationProviderImpl implements  DecorationProvider {
         query.setRecord(record);
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationWorkers.class, null);
-        return id;
     }
 
     @Override
@@ -189,5 +199,29 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 .delete(Tables.EH_DECORATION_WORKERS);
         Condition condition = Tables.EH_DECORATION_WORKERS.ID.eq(id);
         step.where(condition).execute();
+    }
+
+    @Override
+    public DecorationCompany getDecorationCompanyById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_COMPANIES);
+        Condition condition = Tables.EH_DECORATION_COMPANIES.ID.eq(id);
+        step.where(condition);
+        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationCompany.class));
+    }
+
+    @Override
+    public void createDecorationRequest(DecorationRequest request) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhDecorationRequests.class));
+        request.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationRequestsRecord record = ConvertHelper.convert(request,EhDecorationRequestsRecord.class);
+        InsertQuery<EhDecorationRequestsRecord> query = context
+                .insertQuery(Tables.EH_DECORATION_REQUESTS);
+        query.setRecord(record);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationRequests.class, null);
     }
 }

@@ -3,7 +3,7 @@ package com.everhomes.rest.decoration;
 /**
  * <ul>
  * <li>requestId</li>
- * <li>keyWord:关键字</li>
+ * <li>keyword:关键字</li>
  * <li>pageAnchor</li>
  * <li>pageSize</li>
  * </ul>
@@ -11,7 +11,7 @@ package com.everhomes.rest.decoration;
 public class ListWorkersCommand {
 
     private Long requestId;
-    private String keyWord;
+    private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -23,12 +23,12 @@ public class ListWorkersCommand {
         this.requestId = requestId;
     }
 
-    public String getKeyWord() {
-        return keyWord;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setKeyWord(String keyWord) {
-        this.keyWord = keyWord;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     public Long getPageAnchor() {

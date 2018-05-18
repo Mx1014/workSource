@@ -13,6 +13,7 @@ package com.everhomes.rest.decoration;
  * <li>decoratorPhone：负责人电话</li>
  * <li>decoratorCompany：负责人公司</li>
  * <li>decoratorCompanyId：装修公司id</li>
+ * <li>communityId：项目id</li>
  * </ul>
  */
 public class CreateRequestCommand {
@@ -23,6 +24,7 @@ public class CreateRequestCommand {
     private String address;
     private Long startTime;
     private Long endTime;
+    private Long communityId;
 
     private Long decoratorUid;
     private String decoratorName;
@@ -116,5 +118,13 @@ public class CreateRequestCommand {
 
     public void setDecoratorCompany(String decoratorCompany) {
         this.decoratorCompany = decoratorCompany;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 }

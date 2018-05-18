@@ -6,7 +6,6 @@ CREATE TABLE `eh_decoration_requests` (
 `create_time`  datetime NULL  ,
 `start_time`  datetime NULL  ,
 `end_time`  datetime NULL  ,
-`decoration_time`  varchar(64) NULL ,
 `apply_uid`  bigint(20) NULL ,
 `apply_name`  varchar(64) NULL ,
 `apply_phone`  varchar(64) NULL ,

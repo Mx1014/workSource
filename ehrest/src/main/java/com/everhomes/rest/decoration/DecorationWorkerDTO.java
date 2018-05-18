@@ -8,6 +8,7 @@ package com.everhomes.rest.decoration;
  * <li>phone</li>
  * <li>imageUrl</li>
  * <li>uid</li>
+ * <li>imageUri</li>
  * </ul>
  */
 public class DecorationWorkerDTO {
@@ -17,6 +18,7 @@ public class DecorationWorkerDTO {
     private String phone;
     private String workerType;
     private String imageUrl;
+    private String imageUri;
 
     public Long getId() {
         return id;
@@ -64,5 +66,13 @@ public class DecorationWorkerDTO {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getImageUri() {
+        return imageUri;
+    }
+
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
     }
 }

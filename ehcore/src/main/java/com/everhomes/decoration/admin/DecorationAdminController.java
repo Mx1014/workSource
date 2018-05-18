@@ -57,8 +57,8 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("listWorkers")
     @RestReturn(ListWorkersResponse.class)
     public RestResponse listWorkers(@Valid ListWorkersCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        ListWorkersResponse res =  decorationService.listWorkers(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

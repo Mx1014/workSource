@@ -2,28 +2,28 @@ package com.everhomes.rest.decoration;
 
 /**
  * <ul>
- * <li>uid：用户id</li>
- *  <li>requestId</li>
+ * <li>workerId：工人id</li>
+ *  <li>processorType：操作人类型 参考{@link com.everhomes.rest.decoration.ProcessorType}</li>
  * </ul>
  */
 public class GetQrDetailCommand {
 
-    private Long uid;
-    private Long requestId;
+    private Long workerId;
+    private Byte processorType;
 
-    public Long getUid() {
-        return uid;
+    public Long getWorkerId() {
+        return workerId;
     }
 
-    public void setUid(Long uid) {
-        this.uid = uid;
+    public void setWorkerId(Long workerId) {
+        this.workerId = workerId;
     }
 
-    public Long getRequestId() {
-        return requestId;
+    public Byte getProcessorType() {
+        return processorType;
     }
 
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
+    public void setProcessorType(Byte processorType) {
+        this.processorType = processorType;
     }
 }

@@ -1,5 +1,6 @@
 package com.everhomes.decoration;
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.decoration.DecorationAttachmentDTO;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 public interface DecorationProvider {
 
 
-    Long createDecorationSetting(DecorationSetting setting);
+    void createDecorationSetting(DecorationSetting setting);
 
     void updateDecorationSetting(DecorationSetting setting);
 
@@ -25,12 +26,16 @@ public interface DecorationProvider {
 
     DecorationWorker getDecorationWorkerById(Long id);
 
-    List<DecorationWorker> listWorkersByRequestId(Long requestId);
+    List<DecorationWorker> listWorkersByRequestId(Long requestId, String keyWord, ListingLocator locator, Integer pageSize);
 
-    Long createDecorationWorker(DecorationWorker worker);
+    void createDecorationWorker(DecorationWorker worker);
 
     void updateDecorationWorker(DecorationWorker worker);
 
     void deleteDecorationWorkerById(Long id);
+
+    DecorationCompany getDecorationCompanyById(Long id);
+
+    void createDecorationRequest(DecorationRequest request);
 
 }

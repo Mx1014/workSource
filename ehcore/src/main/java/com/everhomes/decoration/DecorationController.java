@@ -24,7 +24,7 @@ public class DecorationController extends ControllerBase {
 
     @Autowired
     private DecorationService decorationService;
-    public static final Integer moduleId = 43000;
+    public static final Long moduleId = 43000L;
     public static final String moduleType = "decoration";
     @Autowired
     private GeneralFormService generalFormService;
@@ -121,8 +121,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("listWorkers")
     @RestReturn(ListWorkersResponse.class)
     public RestResponse listWorkers(@Valid ListWorkersCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        ListWorkersResponse res =  decorationService.listWorkers(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -304,8 +304,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("updateWorker")
     @RestReturn(DecorationWorkerDTO.class)
     public RestResponse updateWorker(@Valid UpdateWorkerCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        DecorationWorkerDTO dto = decorationService.updateWorker(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -320,7 +320,7 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("deleteWorker")
     @RestReturn(String.class)
     public RestResponse deleteWorker(@Valid DeleteWorkerCommand cmd) {
-
+        decorationService.deleteWorker(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

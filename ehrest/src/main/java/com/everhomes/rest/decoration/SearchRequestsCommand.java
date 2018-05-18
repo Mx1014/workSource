@@ -7,7 +7,9 @@ package com.everhomes.rest.decoration;
  * <li>endTime：结束时间</li>
  * <li>address：门牌号</li>
  * <li>status：申请状态 参考{@link com.everhomes.rest.decoration.DecorationRequestStatus}</li>
- * <li>keyWord：关键字</li>
+ * <li>cancelFlag：是否取消 0未取消 1取消</li>
+ * <li>keyword：关键字</li>
+ * <li>cancelFlag：是否取消 </li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * <li>currentPMId: 当前管理公司ID</li>
@@ -21,7 +23,8 @@ public class SearchRequestsCommand {
     private Long endTime;
     private String address;
     private Byte status;
-    private String keyWord;
+    private String keyword;
+    private Byte cancelFlag;
 
     private Long pageAnchor;
     private Integer pageSize;
@@ -68,12 +71,20 @@ public class SearchRequestsCommand {
         this.status = status;
     }
 
-    public String getKeyWord() {
-        return keyWord;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setKeyWord(String keyWord) {
-        this.keyWord = keyWord;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public Byte getCancelFlag() {
+        return cancelFlag;
+    }
+
+    public void setCancelFlag(Byte cancelFlag) {
+        this.cancelFlag = cancelFlag;
     }
 
     public Long getPageAnchor() {

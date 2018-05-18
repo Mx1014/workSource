@@ -5,19 +5,20 @@ package com.everhomes.rest.decoration;
  * <li>1,"装修申请"</li>
  * <li>2,"资料审核"</li>
  * <li>3,"缴费"</li>
- * <li>4,"验收"</li>
- * <li>5,"押金退回"</li>
- * <li>6,"完成"</li>
+ * <li>4,"进场施工"</li>
+ * <li>5,"验收"</li>
+ * <li>6,"押金退回"</li>
+ * <li>7,"完成"</li>
  * </ul>
  */
 public enum DecorationRequestStatus {
     APPLY((byte)1,"装修申请","DECORATION_APPLY"),
     FILE_APPROVAL((byte)2,"资料审核","DECORATION_FILE_APPROVAL"),
     PAYMENT((byte)3,"缴费",""),
-    CONSTRACT((byte)3,"进场施工",""),
-    CHECK((byte)4,"验收","DECORATION_CHECK"),
-    REFOUND((byte)5,"押金退回",""),
-    COMPLETE((byte)6,"完成","");
+    CONSTRACT((byte)4,"进场施工",""),
+    CHECK((byte)5,"验收","DECORATION_CHECK"),
+    REFOUND((byte)6,"押金退回",""),
+    COMPLETE((byte)7,"完成","");
 
     private byte code;
     private String describe;
