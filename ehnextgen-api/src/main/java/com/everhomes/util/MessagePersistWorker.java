@@ -4,6 +4,8 @@ import com.everhomes.message.MessageRecord;
 import com.everhomes.message.MessageService;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagePersistType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.statistics.event.StatEventDeviceLogProvider;
 import org.apache.commons.lang.StringUtils;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
@@ -152,7 +155,20 @@ public class MessagePersistWorker {
                     record.setDstChannelType(ChannelType.USER.getCode());
                 }
             }
-            records.add(record);
+
+            MessagePersistType persistType = getMessagePersistType(dto.getMeta());
+            switch (persistType) {
+                case DB:
+                    records.add(record);
+                    break;
+                case LOG:
+                    LOGGER.info("{} {}", record, dto.getMeta());
+                    break;
+                case DISCARD:
+                    break;
+                default:
+                    break;
+            }
         }
         messageService.persistMessage(records);
 
@@ -170,6 +186,22 @@ public class MessagePersistWorker {
                 LOGGER.error("call core server error=", ex);
             }
         });*/
+    }
+
+    private MessagePersistType getMessagePersistType(Map<String, String> meta) {
+        MessagePersistType persistType = null;
+        if (meta != null) {
+            String persist = meta.get(MessageMetaConstant.PERSIST_TYPE);
+            if (persist != null) {
+                try {
+                    Byte persistByte = Byte.valueOf(persist);
+                    persistType = MessagePersistType.fromCode(persistByte);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return persistType != null ? persistType : MessagePersistType.DB;
     }
 
 
