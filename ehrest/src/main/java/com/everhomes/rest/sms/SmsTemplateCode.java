@@ -143,5 +143,6 @@ public interface SmsTemplateCode {
     int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
 
     int VISITORSYS_VERIFICATION_CODER = 67; //访客管理发送访客验证码
-    int VISITORSYS_INVITATION_LETTER = 68; //访客管理发送访客邀请函
+    int VISITORSYS_INVT_INVITATION_LETTER = 68; //预约访客发送访客邀请函
+    int VISITORSYS_TEMP_INVITATION_LETTER = 69; //临时访客发送访客邀请函
 }

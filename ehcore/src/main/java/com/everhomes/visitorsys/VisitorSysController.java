@@ -675,4 +675,39 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /visitorsys/sendSMSVerificationCodeForWeb</b>
+	 * <p>
+	 * 11.发送短信验证码-h5（客户端/微信端）
+	 * </p>
+	 */
+	@RequestMapping("sendSMSVerificationCodeForWeb")
+	@RestReturn(String.class)
+	public RestResponse sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd) {
+		visitorSysService.sendSMSVerificationCodeForWeb(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /visitorsys/confirmVerificationCodeForWeb</b>
+	 * <p>
+	 * 12.验证短信验证码(并返回预约列表)-h5（客户端/微信端）
+	 * </p>
+	 */
+	@RequestMapping("confirmVerificationCodeForWeb")
+	@RestReturn(ListBookedVisitorsResponse.class)
+	public RestResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd) {
+		ListBookedVisitorsResponse baseResponse = visitorSysService.confirmVerificationCodeForWeb(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

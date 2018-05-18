@@ -15,6 +15,8 @@ import java.util.List;
   *<li>ERROR_INBLACKLIST_PHONE_COMMUNITY (1407): 此手机号码已进入黑名单</li>
   *<li>ERROR_INBLACKLIST_PHONE_ENTERPRISE(1408): 此手机号码已进入黑名单</li>
   *<li>ERROR_REGISTED_IPAD(1409): 此ipad已被注册过</li>
+  *<li>ERROR_PLANNED_VISITTIME(1410): 计划到访时间不能早于当前时间</li>
+  *<li>ERROR_PAIRING_CODE(1411): 非法配对码</li>
   *</ul>
   */
 
@@ -23,8 +25,8 @@ public class VisitorsysConstant {
     public final static String VISITORSYS_RANDOMCODE_LENGTH = "visitorsys.RandomCode.length";//项目标识码长度，默认4
     public final static String VISITORSYS_SERIALCODE_LENGTH = "visitorsys.serialcode.length";//流水码码长度，默认4
     public final static String VISITORSYS_PAIRINGCODE_LENGTH = "visitorsys.pairingcode.length";//配对码码长度，默认6
-    public final static String VISITORSYS_INVITATION_LINK = "visitorsys.invitation.link";//访客管理邀请函地址模板 www.core.zuolin/visitorsys/invitation?id=dslfksdkfjdslfdsjlfasdjfl
-    public final static String VISITORSYS_SELFREGISTER_LINK = "visitorsys.selfregister.link";//访客管理自助登记上下文 %s/selfregister?token=%s
+    public final static String VISITORSYS_INVITATION_LINK = "visitorsys.invitation.link";//访客管理邀请函地址模板 %s/visitor-appointment/build/invitation.html?visitorToken=%s
+    public final static String VISITORSYS_SELFREGISTER_LINK = "visitorsys.selfregister.link";//访客管理自助登记上下文 %s/vsregister/dist/i.html?t=%s
     public static final String VISITORSYS_PAIRINGCODE_LIVE= "visitorsys.pairingcode.live";//配对码有效时长,默认60秒
     public static final String VISITORSYS_VERIFICATIONCODE_LIVE= "visitorsys.verificationcode.live";//验证码对码有效时长,默认900秒
     public final static String VISITORSYS_VERIFICATIONCODE_LENGTH = "visitorsys.verificationcode.length";//验证码码长度，默认6
@@ -32,12 +34,17 @@ public class VisitorsysConstant {
     public static final String VISITORSYS_QRCODE_HEIGHT= "visitorsys.qrcode.height";//二维码高度 300
     public static final String VISITORSYS_QRCODE_WIDTH= "visitorsys.qrcode.width";//二维码宽度 300
     public static final String VISITORSYS_IPAD_CONFIG = "visitorsys.ipad.config";//ipad左邻logo,welcome,button,version
+    public static final String VISITORSYS_MESSAGE_INVITER = "visitorsys.message.inviter";//发送消息给访客邀请者的内容
+    public static final String VISITORSYS_INVITER_ROUNTE = "visitorsys.inviter.route";//邀请者查看邀请详情路由 %s/detail/i.html?visitorToken=%s
+    public static final String VISITORSYS_INVITER_DETAIL = "visitorsys.inviter.detail";//邀请者查看邀请详情
+    public static final String VISITORSYS_INVITER_TITLE = "visitorsys.inviter.title";//邀请者查看邀请详情title
     //短信字段
     public static final String SMS_MODLUENAME_CN= "【左邻访客】";//短信发送模块名称
     public final static String SMS_MODLUENAME = "modlueName";
     public final static String SMS_VERIFICATIONCODE = "verificationCode";
     public final static String SMS_APPNAME = "appName";
     public final static String SMS_VISITENTERPRISENAME = "visitEnterpriseName";
+    public final static String SMS_ENTERPRISE_ORLOCATION_NAME = "name";
     public final static String SMS_INVITATIONLINK = "invitationLink";
 
     //redis缓存 前缀
@@ -62,5 +69,6 @@ public class VisitorsysConstant {
 
     //常规常量
     public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id
+    public static final long ENTERPRISE_MODULE_ID = 52100 ;//企业访客模块Id
 
 }

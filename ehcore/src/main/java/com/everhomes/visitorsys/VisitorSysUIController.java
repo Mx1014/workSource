@@ -71,9 +71,13 @@ public class VisitorSysUIController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("confirmPairingCode")
-	@RestReturn(ConfirmPairingCodeResponse.class)
-	public DeferredResult<RestResponse> confirmPairingCode(ConfirmPairingCodeCommand cmd) {
-		return visitorSysService.confirmPairingCode(cmd);
+	@RestReturn(String.class)
+	public RestResponse confirmPairingCode(ConfirmPairingCodeCommand cmd) {
+		visitorSysService.confirmPairingCode(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**

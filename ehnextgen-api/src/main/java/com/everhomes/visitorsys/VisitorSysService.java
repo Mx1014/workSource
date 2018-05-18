@@ -60,7 +60,7 @@ public interface VisitorSysService {
 
     GetPairingCodeResponse getPairingCode(GetPairingCodeCommand cmd);
 
-    DeferredResult<RestResponse> confirmPairingCode(ConfirmPairingCodeCommand cmd);
+    void confirmPairingCode(ConfirmPairingCodeCommand cmd);
 
     GetConfigurationResponse getUIConfiguration(BaseVisitorsysUICommand cmd);
 
@@ -111,4 +111,8 @@ public interface VisitorSysService {
     ListOfficeLocationsResponse listOfficeLocationsForWeb(ListOfficeLocationsCommand cmd);
 
     ListCommunityOrganizationsResponse listCommunityOrganizationsForWeb(ListCommunityOrganizationsCommand cmd);
+
+    ListBookedVisitorsResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd);
+
+    void sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd);
 }

@@ -190,6 +190,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 	public void deleteVisitorSysVisitorAppoint(Integer namespaceId, Long visitorId) {
 		getReadWriteContext().update(Tables.EH_VISITOR_SYS_VISITORS)
 				.set(Tables.EH_VISITOR_SYS_VISITORS.BOOKING_STATUS, VisitorsysStatus.DELETED.getCode())
+				.set(Tables.EH_VISITOR_SYS_VISITORS.VISIT_STATUS, VisitorsysStatus.DELETED.getCode())
 				.where(Tables.EH_VISITOR_SYS_VISITORS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.ID.eq(visitorId)).execute();
 	}
