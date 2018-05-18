@@ -449,6 +449,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
         }
+        checkDoorGuard(visitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         return null;
@@ -477,6 +478,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             related.setConfirmUid(null);
             related.setConfirmUname(null);
         }
+        checkDoorGuard(visitor);
         visitorSysVisitorProvider.updateVisitorSysVisitor(related);
         visitorsysSearcher.syncVisitor(related);
         return null;
@@ -1778,6 +1780,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(configuration,visitor);
     }
 
+    /**
+     * 设置门禁二维码
+     * @param visitor
+     */
+    private void checkDoorGuard(VisitorSysVisitor visitor) {
+        GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
+        checkDoorGuard(configuration,visitor);
+    }
     /**
      * 设置门禁二维码
      * @param configuration

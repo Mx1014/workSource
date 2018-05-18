@@ -683,6 +683,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("sendSMSVerificationCodeForWeb")
 	@RestReturn(String.class)
+	@RequireAuthentication(false)
 	public RestResponse sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd) {
 		visitorSysService.sendSMSVerificationCodeForWeb(cmd);
 
@@ -701,6 +702,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("confirmVerificationCodeForWeb")
 	@RestReturn(ListBookedVisitorsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd) {
 		ListBookedVisitorsResponse baseResponse = visitorSysService.confirmVerificationCodeForWeb(cmd);
 
