@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Map;
 
 /**
  *
@@ -49,6 +50,8 @@ public class MessageRecordDto implements Serializable {
     private String deviceId;
     private Long indexId;
     private Long num;
+
+    private Map<String, String> meta;
 
     public Long getId() {
         return this.id;
@@ -197,5 +200,13 @@ public class MessageRecordDto implements Serializable {
 
     public void setNum(Long num) {
         this.num = num;
+    }
+
+    public Map<String, String> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, String> meta) {
+        this.meta = meta;
     }
 }
