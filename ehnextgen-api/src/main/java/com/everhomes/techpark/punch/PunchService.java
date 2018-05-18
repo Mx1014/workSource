@@ -288,4 +288,7 @@ public interface PunchService {
 
 	public void updateMonthReport(UpdateMonthReportCommand cmd);
 
+
+	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd);
+
 }

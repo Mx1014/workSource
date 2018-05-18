@@ -477,4 +477,14 @@ public class PunchController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <p>刷新月报</p>
+	 * <b>URL: /techpark/punch/getMonthReportProcess</b>
+	 */
+	@RequestMapping("getMonthReportProcess")
+	@RestReturn(GetMonthReportProcessResponse.class)
+	public RestResponse getMonthReportProcess(GetMonthReportProcessCommand cmd){
+		return new RestResponse(punchService.getMonthReportProcess(cmd));
+	}
+
 }
