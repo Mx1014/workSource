@@ -5,7 +5,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.energy.EnergyTaskStatus;
 import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -123,7 +122,6 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
@@ -133,8 +131,11 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
             query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
                     .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.gt(lastUpdateTime)));
         }
+        //增加自动抄表的sql
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.eq(0L));
 
         query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
         query.addLimit(pageSize);
 
         if(LOGGER.isDebugEnabled()) {

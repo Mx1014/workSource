@@ -459,7 +459,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
         String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-        LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+        LOGGER.info("================================================energyTaskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
         if (taskServer.equals(equipmentIp)) {
             if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
                 scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
@@ -2911,7 +2911,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //     * 每天早上5点10分刷自动读表
 //     */
 //    @Scheduled(cron = "0 10 5 L * ?")
-    private void readMeterRemote() {
+    private void readMeterRemote(Boolean createPlansFlag) {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
             List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
@@ -2976,9 +2976,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             LOGGER.info("read energy meter reading  end...");
 
-            LOGGER.info("starting create  auto  meter plans ...");
-            createMonthAutoPlans(meters);
-            LOGGER.info("ending create  auto  meter plans ...");
+            if(createPlansFlag){
+                LOGGER.info("starting create  auto  meter plans ...");
+                createMonthAutoPlans(meters);
+                LOGGER.info("ending create  auto  meter plans ...");
+            }
         }
     }
 
@@ -3882,38 +3884,34 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
-        for(OrganizationMember member : members) {
+        for (OrganizationMember member : members) {
             Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
 
-            if(organization != null) {
-                if(LOGGER.isInfoEnabled()) {
+            if (organization != null) {
+                if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
                 }
-                if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                    //部门岗位
+                    ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+                    departmentGroup.setGroupId(organization.getParentId());
+                    departmentGroup.setPositionId(organization.getId());
+                    groupDtos.add(departmentGroup);
 
+                    //通用岗位
                     List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
                     }
 
-                    if(maps != null && maps.size() > 0) {
-                        for(OrganizationJobPositionMap map : maps) {
-                            ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-                            group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-                            group.setPositionId(map.getJobPositionId());
-                            groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+                    if (maps != null && maps.size() > 0) {
+                        for (OrganizationJobPositionMap map : maps) {
                             String[] path = organization.getPath().split("/");
                             Long organizationId = Long.valueOf(path[1]);
                             ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
                             topGroup.setGroupId(organizationId);
                             topGroup.setPositionId(map.getJobPositionId());
                             groupDtos.add(topGroup);
-//							}
-
                         }
 
                     }
@@ -3923,6 +3921,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     group.setPositionId(0L);
                     groupDtos.add(group);
                 }
+
             }
         }
 
@@ -4998,9 +4997,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 null, null, cmd.getCommunityId(), categoryUpdateTime);
         List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
         if(categoryMaps != null && categoryMaps.size() > 0) {
-            List<Long> categoryIds = categoryMaps.stream().map(map -> {
-                return map.getCategoryId();
-            }).collect(Collectors.toList());
+            List<Long> categoryIds = categoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
             List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
             if(categories != null && categories.size() > 0) {
                 categoryList.addAll(categories);
@@ -5034,9 +5031,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
         if (maps != null && maps.size() > 0) {
-            List<Long> planIds = maps.stream().map(map -> {
-                return map.getPlanId();
-            }).collect(Collectors.toList());
+            List<Long> planIds = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
                     cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
 
@@ -5108,13 +5103,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
 
         }
+        LOGGER.info("auto reading auto meter ......");
+        try {
+            readMeterRemote(false);
+        }catch (Exception e){
+            LOGGER.error("auto reading error:{}", e);
+        }
         return response;
     }
 
     @Override
-    public void meterAutoReading() {
+    public void meterAutoReading(Boolean createPlansFlag) {
         LOGGER.debug("starting auto reading manual...");
-        readMeterRemote();
+        readMeterRemote(createPlansFlag);
         LOGGER.debug("ending auto reading manual...");
     }
 
