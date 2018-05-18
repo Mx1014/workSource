@@ -3687,7 +3687,7 @@ public class CustomerServiceImpl implements CustomerService {
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
         String runningFlag = getEnergyTaskToken(redisTemplate);
-        if(StringUtils.isNotEmpty(runningFlag)) {
+        if(StringUtils.isEmpty(runningFlag)) {
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
             List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
             if (organizations != null && organizations.size() > 0) {
