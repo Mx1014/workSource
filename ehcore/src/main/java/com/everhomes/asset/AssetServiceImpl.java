@@ -1994,7 +1994,9 @@ public class AssetServiceImpl implements AssetService {
         long time1 = c1.getTimeInMillis();
         long time2 = c2.getTimeInMillis();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
-        return Integer.parseInt(String.valueOf(between_days))+1;
+//        return Integer.parseInt(String.valueOf(between_days))+1;
+        // 结束日为23：59：59时和00:00:00算出来的结果一样，这里不再加1 by wentian 2018/5/18
+        return Integer.parseInt(String.valueOf(between_days));
     }
     private int daysBetween_date(Date c1,Date c2)
     {
