@@ -106,6 +106,8 @@ import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
 import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
 import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
@@ -141,6 +143,7 @@ import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.PunchType;
 import com.everhomes.rest.techpark.punch.PunchUserStatus;
+import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
@@ -9701,5 +9704,18 @@ public class PunchServiceImpl implements PunchService {
         return org;
     }
 
+
+	@Override
+	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd) {
+	
+		return new ListPunchMonthReportsResponse();
+	}
+
+	@Override
+	public void updateMonthReport(UpdateMonthReportCommand cmd) {
+	
+
+	}
+ 
 
 }

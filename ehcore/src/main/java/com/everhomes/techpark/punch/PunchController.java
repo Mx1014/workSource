@@ -455,5 +455,26 @@ public class PunchController extends ControllerBase {
         return response;
     }
 
-    
+     
+	/**
+	 * <p>查看月报列表</p>
+	 * <b>URL: /techpark/punch/listPunchMonthReports</b>
+	 */
+	@RequestMapping("listPunchMonthReports")
+	@RestReturn(ListPunchMonthReportsResponse.class)
+	public RestResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd){
+		return new RestResponse(punchService.listPunchMonthReports(cmd));
+	}
+
+	/**
+	 * <p>刷新月报</p>
+	 * <b>URL: /techpark/punch/updateMonthReport</b>
+	 */
+	@RequestMapping("updateMonthReport")
+	@RestReturn(String.class)
+	public RestResponse updateMonthReport(UpdateMonthReportCommand cmd){
+		punchService.updateMonthReport(cmd);
+		return new RestResponse();
+	}
+
 }

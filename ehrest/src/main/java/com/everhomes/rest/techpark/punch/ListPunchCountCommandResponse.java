@@ -11,6 +11,10 @@ import com.everhomes.util.StringHelper;
  * <li>nextPageAnchor: 下页anchor</li>
  * <li>extColumns: String list 扩展列的列名集合</li>
  * <li>dateList: String list 日期的集合</li>
+ * <li>process: 创建更新进度百分比</li>
+ * <li>errorInfo: 如果更新出错这里显示错误信息</li>
+ * <li>status: 状态0-创建更新中 1-创建完成 2-已归档</li>
+ * <li>punchMonth: YYYYMM</li>
  * </ul>
  */
 
@@ -27,7 +31,11 @@ public class ListPunchCountCommandResponse{
     private List<String> extColumns;
 
     private List<String> dateList;
-    
+
+    private Integer process;
+    private String errorInfo;
+    private Byte status;
+    private String punchMonth;
     
 	public List<PunchCountDTO> getPunchCountList() {
 		return punchCountList;
@@ -73,4 +81,45 @@ public class ListPunchCountCommandResponse{
 	public void setDateList(List<String> dateList) {
 		this.dateList = dateList;
 	}
+
+
+	public Integer getProcess() {
+		return process;
+	}
+
+
+	public void setProcess(Integer process) {
+		this.process = process;
+	}
+
+
+	public String getErrorInfo() {
+		return errorInfo;
+	}
+
+
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
+	}
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+
+	public String getPunchMonth() {
+		return punchMonth;
+	}
+
+
+	public void setPunchMonth(String punchMonth) {
+		this.punchMonth = punchMonth;
+	}
+	
  }
