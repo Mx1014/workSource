@@ -1672,7 +1672,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum) {
+            ,String targetName, String invoiceNum, String noticeTel) {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -1759,6 +1759,7 @@ public class AssetProviderImpl implements AssetProvider {
             // 更新发票
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
+                    .set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             return null;
