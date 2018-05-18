@@ -3,9 +3,7 @@ package com.everhomes.launchpad;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
-import com.everhomes.rest.launchpadbase.IndexDTO;
-import com.everhomes.rest.launchpadbase.ListBannersCommand;
-import com.everhomes.rest.launchpadbase.ListBannersResponse;
+import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
@@ -91,4 +89,10 @@ public interface LaunchPadService {
     List<IndexDTO> listIndexDtos(Integer namespaceId, Long userId);
 
     ListBannersResponse listBanners(ListBannersCommand cmd);
+
+    ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd);
+
+    OPPushHandler getOPPushHandler(String itemGroup);
+
+    String getSceneTokenByCommunityId(Long communityId);
 }

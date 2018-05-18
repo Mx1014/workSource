@@ -9,26 +9,15 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>moduleId: 模块id</li>
  *     <li>contentId: 内容Id。此处为String，因为可能某些业务的内容id是String，例如新闻快讯</li>
  *     <li>properties: 需要展现的一些字段，需要和客户端预定字段和顺序，推荐按照显示的从上到下、从左到右显示放置properties</li>
  * </ul>
  */
 public class OPPushCard {
 
-    private Long moduleId;
     private String contentId;
 
     private List<Object> properties;
-
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
-    }
 
     public String getContentId() {
         return contentId;

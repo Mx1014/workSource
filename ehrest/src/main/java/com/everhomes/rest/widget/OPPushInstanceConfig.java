@@ -9,10 +9,13 @@ import java.io.Serializable;
  * <ul>
  *     <li>itemGroup: itemGroup</li>
  *     <li>entityCount: 之前用的，现在又不用了，暂时没有意义</li>
- *     <li>subjectHeight：标题显示行数</li>
- *     <li>descriptionHeight：描述显示行数</li>
- *     <li>newsSize：显示多少条</li>
- *     <li>recommendType：推荐类型</li>
+ *     <li>subjectHeight: 标题显示行数</li>
+ *     <li>descriptionHeight: 描述显示行数</li>
+ *     <li>newsSize: 显示多少条</li>
+ *     <li>recommendType: 推荐类型</li>
+ *     <li>moduleId: moduleId</li>
+ *     <li>actionType: actionType</li>
+ *     <li>serviceModuleAppInstanceConfig: serviceModuleAppInstanceConfig</li>
  * </ul>
  */
 public class OPPushInstanceConfig implements Serializable {
@@ -23,6 +26,9 @@ public class OPPushInstanceConfig implements Serializable {
     private Integer descriptionHeight;
     private Integer newsSize;
     private Byte recommendType;
+    private Long moduleId;
+    private Byte actionType;
+    private Object serviceModuleAppInstanceConfig;
 
     public String getItemGroup() {
         return itemGroup;
@@ -70,6 +76,30 @@ public class OPPushInstanceConfig implements Serializable {
 
     public void setRecommendType(Byte recommendType) {
         this.recommendType = recommendType;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Byte getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+
+    public Object getServiceModuleAppInstanceConfig() {
+        return serviceModuleAppInstanceConfig;
+    }
+
+    public void setServiceModuleAppInstanceConfig(Object serviceModuleAppInstanceConfig) {
+        this.serviceModuleAppInstanceConfig = serviceModuleAppInstanceConfig;
     }
 
     @Override

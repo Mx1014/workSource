@@ -16,6 +16,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -46,6 +47,7 @@ import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
@@ -58,12 +60,10 @@ import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdResponse;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
+import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
-import com.everhomes.rest.user.AddressUserType;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListAddressUsersCommand;
-import com.everhomes.rest.user.ListAddressUsersResponse;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
@@ -2814,9 +2814,66 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public ListBannersResponse listBanners(ListBannersCommand cmd) {
-		List<BannerDTO> bannerDTOS = bannerService.listBannerByCommunityId(cmd.getContext().getCommunityId());
+
+		String sceneToken = getSceneTokenByCommunityId(cmd.getContext().getCommunityId());
+
+		GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
+		bannerCmd.setSceneToken(sceneToken);
+		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(bannerCmd);
+
 		ListBannersResponse response = new ListBannersResponse();
 		response.setDtos(bannerDTOS);
 		return response;
+	}
+
+	@Override
+	public ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd) {
+		ListOPPushCardsResponse response = new ListOPPushCardsResponse();
+
+		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig().toString(), OPPush.class);
+		OPPushHandler opPushHandler = getOPPushHandler(oppush.getItemGroup());
+		if(opPushHandler != null){
+			response.setModuleId(opPushHandler.getModuleId());
+			response.setActionType(opPushHandler.getActionType());
+			response.setInstanceConfig(cmd.getInstanceConfig());
+			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
+			response.setCards(opPushCards);
+		}
+
+		return response;
+	}
+
+
+
+
+	@Override
+	public OPPushHandler getOPPushHandler(String itemGroup) {
+		OPPushHandler handler = null;
+
+		if(itemGroup != null) {
+			String handlerPrefix = OPPushHandler.OPPUSH_ITEMGROUP_TYPE;
+			try {
+				handler = PlatformContext.getComponent(handlerPrefix + itemGroup);
+			}catch (Exception ex){
+				LOGGER.info("OPPushHandler not exist itemGroup = {}", itemGroup);
+			}
+
+		}
+
+		return handler;
+	}
+
+
+	@Override
+	public String getSceneTokenByCommunityId(Long communityId){
+		Community community = communityProvider.findCommunityById(communityId);
+		SceneTokenDTO sceneToken = new SceneTokenDTO();
+		sceneToken.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+		sceneToken.setScene(PARK_TOURIST.getCode());
+		sceneToken.setEntityId(community.getId());
+		sceneToken.setNamespaceId(community.getNamespaceId());
+		sceneToken.setUserId(UserContext.currentUserId());
+
+		return WebTokenGenerator.getInstance().toWebToken(sceneToken);
 	}
 }

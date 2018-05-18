@@ -75,13 +75,15 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpad/listOPPushCards</b>
+     * <b>URL: /launchpadbase/listOPPushCards</b>
      * <p>获取运营板块信息</p>
      */
     @RequestMapping("listOPPushCards")
     @RestReturn(value=ListOPPushCardsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listOPPushCards(ListOPPushCardsCommand cmd) {
-        RestResponse response =  new RestResponse();
+        ListOPPushCardsResponse res = launchPadService.listOPPushCards(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -40,6 +40,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,7 +371,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
 			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
-			Card cardConfig = ConvertHelper.convert(cmd.getInstanceConfig(), Card.class);
+			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig().toString(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
 				orgId = cmd.getContext().getOrgId();
 				appType = ServiceModuleAppType.OA.getCode();
