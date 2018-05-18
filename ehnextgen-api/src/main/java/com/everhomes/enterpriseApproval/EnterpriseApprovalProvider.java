@@ -12,6 +12,8 @@ public interface EnterpriseApprovalProvider {
 
     GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
+    Integer countGeneralApprovalInTemplateIds(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, List<Long> templateIds);
+
     List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId);
 
     List<Long> listGeneralApprovalIdsByGroupId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long groupId);

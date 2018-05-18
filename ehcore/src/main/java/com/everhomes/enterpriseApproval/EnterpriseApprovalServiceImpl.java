@@ -373,13 +373,15 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
-        if (templates == null || templates.size() == 0) {
-            LOGGER.error("Approval templates not exist. Please check it.");
-            return response;
-        }
-        GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
+        if (templates.size() == 0)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_TEMPLATE_NOT_EXIST, "" +
+                    "Approval templates not exist. Please check it.");
+        Integer counts = enterpriseApprovalProvider.countGeneralApprovalInTemplateIds(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), templates.stream().map(EnterpriseApprovalTemplate::getId).collect(Collectors.toList()));
+/*        GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), templates.get(0).getId());
-        if (ga == null)
+        if (ga == null)*/
+        if (counts != templates.size())
             response.setResult(TrueOrFalseFlag.FALSE.getCode());
         return response;
     }

@@ -1,9 +1,12 @@
 package com.everhomes.rest.enterpriseApproval;
 
-public class EnterpriseApprovalServiceErrorCode {
-    public static final String SCOPE = "enterprise_approval";
+public interface EnterpriseApprovalServiceErrorCode {
 
-    public static final int ERROR_APPROVAL_GROUP_NOT_EXIST = 10001; //  审批分类不存在
+    String SCOPE = "enterprise_approval";
 
-    public static final int ERROR_DUPLICATE_NAME = 10002; //  重复的名称
+    int ERROR_APPROVAL_GROUP_NOT_EXIST = 10001; //  审批分类不存在
+
+    int ERROR_DUPLICATE_NAME = 10002; //  重复的名称
+
+    int ERROR_APPROVAL_TEMPLATE_NOT_EXIST = 10003;    //  审批模板不存在
 }

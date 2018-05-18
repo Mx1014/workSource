@@ -3,6 +3,7 @@ package com.everhomes.enterpriseApproval;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseApprovalGroupsDao;
@@ -60,12 +61,25 @@ public class EnterpriseApprovalProviderImpl implements EnterpriseApprovalProvide
     }
 
     @Override
+    public Integer countGeneralApprovalInTemplateIds(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, List<Long> templateIds){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_TEMPLATE_ID.in(templateIds));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        return query.fetchCount();
+    }
+
+    @Override
     public List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId) {
         List<EnterpriseApprovalTemplate> results = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
         SelectQuery<EhEnterpriseApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES);
         query.addConditions(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES.APPROVAL_ATTRIBUTE.ne(GeneralApprovalAttribute.CUSTOMIZE.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, EnterpriseApprovalTemplate.class));
             return null;
