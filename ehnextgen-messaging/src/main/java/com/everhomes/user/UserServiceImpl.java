@@ -6160,9 +6160,12 @@ public class UserServiceImpl implements UserService {
 					if(requests != null && requests.size() > 0){
 						for (OrganizationCommunityRequest request: requests){
 							Community community = communityProvider.findCommunityById(request.getCommunityId());
-							CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
-							communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
-							communityUserDtos.add(communityInfoDTO);
+							if(community != null){
+								CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
+								communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+								communityUserDtos.add(communityInfoDTO);
+							}
+
 						}
 					}
 
