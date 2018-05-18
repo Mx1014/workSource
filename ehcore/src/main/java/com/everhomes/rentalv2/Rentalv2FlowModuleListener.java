@@ -243,19 +243,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				"organization", RentalNotificationTemplateCode.locale, ""));
 
 		Long orgId = order.getUserEnterpriseId();
+		e.setValue("无");
 		if (null != orgId) {
 			Organization org = organizationProvider.findOrganizationById(orgId);
-			e.setValue(org.getName());
-		}else {
-			List<OrganizationSimpleDTO> organizationDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
-
-			for(OrganizationSimpleDTO org : organizationDTOs){
-				if (StringUtils.isNotBlank(e.getValue()))
-					e.setValue(e.getValue() + "、" + org.getName());
-				else
-					e.setValue(org.getName());
-			}
+			if (org!=null)
+				e.setValue(org.getName());
 		}
+
 		entities.add(e);
 
 		e = new FlowCaseEntity();

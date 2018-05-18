@@ -451,6 +451,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setBodyType(mb.getContextType());
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                        record.setMeta(mb.getMeta());
                         Map data_map = (Map) StringHelper.fromJsonString(mb.getContent(), Map.class);
                         if(data_map.get("extra") != null){
                             Map extraData = (Map)data_map.get("extra");

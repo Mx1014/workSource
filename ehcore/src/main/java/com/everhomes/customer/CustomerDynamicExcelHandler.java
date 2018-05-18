@@ -11,12 +11,14 @@ import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.dynamicExcel.DynamicField;
 import com.everhomes.dynamicExcel.DynamicRowDTO;
 import com.everhomes.dynamicExcel.DynamicSheet;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationAttachment;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -30,6 +32,7 @@ import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -138,7 +141,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
 
     @Override
-    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
+    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData) {
         FieldGroup group = new FieldGroup();
         //用名字搜会有问题
         if (isContainChinese(sheetName)) {
@@ -185,23 +188,27 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    if (!fieldDTO.getFieldParam().contains("image") && !fieldDTO.getFieldParam().contains("richText")) {//导出时 非图片字段可导出 fix 26791
-                        DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                        df.setDisplayName(fieldDTO.getFieldDisplayName());
-                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
-                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                    if (!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                        if (withData && fieldDTO.getFieldParam().contains("richText")) {
+                            LOGGER.info("remove richText cell whern export data!");
+                        } else {
+                            DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                            df.setDisplayName(fieldDTO.getFieldDisplayName());
+                            if ("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                                df.setDateFormat("yyyy-MM-dd HH:mm");
+                            }
+                            //boolean isMandatory 数据库是0和1 默认false
+                            if (fieldDTO.getMandatoryFlag() == 1) {
+                                df.setMandatory(true);
+                            }
+                            if (fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                                List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                                    return item.getItemDisplayName();
+                                }).collect(Collectors.toList());
+                                df.setAllowedValued(allowedValued);
+                            }
+                            dynamicFields.add(df);
                         }
-                        //boolean isMandatory 数据库是0和1 默认false
-                        if(fieldDTO.getMandatoryFlag() == 1) {
-                            df.setMandatory(true);
-                        }
-                        if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                                return item.getItemDisplayName();
-                            }).collect(Collectors.toList());
-                            df.setAllowedValued(allowedValued);
-                        }
-                        dynamicFields.add(df);
                     }
                 }
             });
@@ -333,7 +340,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                             customerAddressString = column.getValue();
                                     }
                                 } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
+                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed:{}",e);
                                     failedNumber ++;
                                     flag = false;
                                     break;
@@ -864,6 +871,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
+            if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
+                syncCustomerInfoIntoOrganization(exist);
+            }
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
@@ -891,6 +901,37 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
                 if (organization != null)
                     organizationSearcher.feedDoc(organization);
+            }
+        }
+    }
+
+    private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
+        //这里增加入驻信息后自动同步到企业管理
+        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
+            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
+        }
+    }
+
+    private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
+        this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
+        if (attachments != null && attachments.size() > 0) {
+            for (AttachmentDescriptor attachmentDescriptor : attachments) {
+                OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+                attachment.setCreatorUid(userId);
+                attachment.setOrganizationId(id);
+                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                this.organizationProvider.createOrganizationAttachment(attachment);
             }
         }
     }
