@@ -1478,11 +1478,11 @@ public class AssetServiceImpl implements AssetService {
                 // for a cycle, use 'days method' may not come out 1 as people expected, so if it obvious is a cycle,
                 // just keep r as one
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
+                float divided = daysBetween(dWithoutLimit,a);
+                days = new Float(divided).intValue();
                 if(!b){
                     // period of this cycle
                     float divider = daysBetween(d, a);
-                    float divided = daysBetween(dWithoutLimit,a);
-                    days = new Float(divided).intValue();
                     r = String.valueOf(divider+"/" + divided);
                 }
             }
@@ -2489,6 +2489,7 @@ public class AssetServiceImpl implements AssetService {
                     if(AssetVariable.UNIT_PRICE.getIdentifier().equals(variable.toString())){
                         variable.append("*");
                         variable.append(String.valueOf(days));
+                        sb.append(variable);
                     }else{
                         sb.append(variable.toString());
                     }
@@ -2505,12 +2506,6 @@ public class AssetServiceImpl implements AssetService {
                         sb.append(variable.toString());
                     }
                 }
-            }
-        }
-        formula = sb.toString();
-        for(char i : formula.toCharArray()){
-            if ((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')){
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
        return sb.toString();
