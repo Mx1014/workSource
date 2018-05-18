@@ -4110,11 +4110,12 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifySettledBill(Long billId, String invoiceNum) {
+    public void modifySettledBill(Long billId, String invoiceNum, String noticeTel) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        // 更新发票
+        // 更新发票，更新催缴手机号码
         dslContext.update(Tables.EH_PAYMENT_BILLS)
                 .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
+                .set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
                 .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                 .execute();
     }

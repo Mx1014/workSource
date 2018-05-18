@@ -307,7 +307,7 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
-    void modifySettledBill(Long billId, String invoiceNum);
+    void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
 
     boolean checkBillExistById(Long billId);
 

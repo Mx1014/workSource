@@ -3153,7 +3153,7 @@ public class AssetServiceImpl implements AssetService {
     }
     @Override
     public void modifySettledBill(ModifySettledBillCommand cmd) {
-        assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum());
+        assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum(), cmd.getNoticeTel());
     }
 
 
