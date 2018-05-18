@@ -3613,15 +3613,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             //删除企业管理中的管理员权限
             rolePrivilegeService.deleteOrganizationAdministrators(cmd);
-            List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
-            if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
-                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            }else {
-                customer.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-            }
-            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-            enterpriseCustomerSearcher.feedDoc(customer);
         }
+        List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
+        if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            customer.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     @Override
@@ -3688,7 +3688,8 @@ public class CustomerServiceImpl implements CustomerService {
                         String avatar = "";
                         String postUri = "";
                         if (organizationDetail == null) {
-                            organizationDetail = new OrganizationDetail();//坑
+                            organizationDetail = new OrganizationDetail();
+                        }else {
                             avatar = organizationDetail.getAvatar();
                             postUri = organizationDetail.getPostUri();
                         }
@@ -3722,6 +3723,8 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
             customer.setPostUri(postUri);
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3740,6 +3743,8 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
             customer.setPostUri(postUri);
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
