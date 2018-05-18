@@ -195,7 +195,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
 			return null;
 		}
-		ParkingRechargeRateDTO rate = parkingRechargeRates.get(0);
+		ParkingRechargeRateDTO rate = parkingRechargeRates.get(configProvider.getIntValue("parking.recharge.rateseq",0));
 		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(rate,ParkingExpiredRechargeInfoDTO.class);
 		dto.setCardTypeName(rate.getCardType());
 		ZhongBaiChangCardInfo<ZhongBaiChangData> card = getCardInfo(cmd.getPlateNumber());
@@ -208,7 +208,6 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			dto.setStartPeriod(newStartTime);
 			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThisMonth(newStartTime, rate.getMonthCount().intValue());
 			dto.setEndPeriod(rechargeEndTimestamp.getTime());
-//			dto.setEndPeriod(newStartTime);
 		}
 		return dto;
 	}
