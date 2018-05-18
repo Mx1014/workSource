@@ -18,7 +18,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
     @Autowired
     private FlowService flowService;
 
-    private Long moduleId = 40100L;
+    private Long moduleId = 20100L;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -58,6 +58,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
                                     scope = FlowServiceErrorCode.SCOPE,
                                     code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
             },
+            id = 1111L,
             version = 1
     )
     public void testExportFlowFunction(FlowCaseState ctx, Map<String, String> param) {

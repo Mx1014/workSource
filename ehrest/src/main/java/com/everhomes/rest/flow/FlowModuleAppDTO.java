@@ -6,16 +6,16 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId: namespaceId</li>
  *     <li>moduleId: moduleId</li>
- *     <li>appId: appId</li>
- *     <li>appName: appName</li>
+ *     <li>originId: originId</li>
+ *     <li>name: name</li>
  * </ul>
  */
 public class FlowModuleAppDTO {
 
     private Integer namespaceId;
     private Long moduleId;
-    private Long appId;
-    private String appName;
+    private Long originId;
+    private String name;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -33,21 +33,20 @@ public class FlowModuleAppDTO {
         this.moduleId = moduleId;
     }
 
-    public Long getAppId() {
-        return appId;
+    public Long getOriginId() {
+        return originId;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 
-    public String getAppName() {
-
-        return appName;
+    public String getName() {
+        return name;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

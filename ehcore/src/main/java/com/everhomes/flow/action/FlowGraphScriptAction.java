@@ -32,7 +32,7 @@ public class FlowGraphScriptAction extends FlowGraphAction {
         switch (scriptType) {
             case JAVA:
                 try {
-                    flowFunctionService.invoke(ctx, Integer.valueOf(this.getFlowAction().getScriptId()+""));
+                    flowFunctionService.invoke(ctx, this.getFlowAction().getScriptId());
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_FUNCTION_INVOKE_ERROR,
                             "flow function invoke error, functionId = %s", this.getFlowAction().getScriptId());

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface FlowFunctionService {
 
-    void invoke(FlowCaseState ctx, Integer functionId) throws InvocationTargetException, IllegalAccessException;
+    void invoke(FlowCaseState ctx, Long functionId) throws InvocationTargetException, IllegalAccessException;
 
     List<FlowScriptDTO> listFlowFunctions(Long moduleId, String keyword);
 

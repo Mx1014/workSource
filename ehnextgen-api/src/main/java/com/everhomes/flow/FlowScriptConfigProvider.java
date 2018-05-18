@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowScriptType;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface FlowScriptConfigProvider {
     void createFlowScriptConfigs(List<FlowScriptConfig> scriptConfigs);
 
     List<FlowScriptConfig> listByFlow(Long flowMainId, Integer flowVersion);
+
+    List<FlowScriptConfig> listByModule(Long moduleId, FlowScriptType scriptType);
 }

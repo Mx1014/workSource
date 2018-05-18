@@ -198,6 +198,9 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
+	/**
+	 * 获取当前任务的处理人列表
+	 */
     FlowCaseProcessorsResolver getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
@@ -512,7 +515,9 @@ public interface FlowService {
 
 	ListFlowScriptsResponse listFlowScripts(ListFlowScriptsCommand cmd);
 
-	// DeferredResult<RestResponse> listFlowScriptConfigs(ListFlowScriptConfigsCommand cmd);
-
     void updateNeedAllProcessorComplete(UpdateNeedAllProcessorCompleteCommand cmd);
+
+    ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd);
+
+	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
 }

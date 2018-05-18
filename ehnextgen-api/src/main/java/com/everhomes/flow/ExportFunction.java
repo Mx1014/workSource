@@ -26,4 +26,9 @@ public @interface ExportFunction {
      * 版本
      */
     int version();
+
+    /**
+     * id
+     */
+    long id();
 }

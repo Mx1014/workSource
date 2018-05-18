@@ -4,6 +4,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.flow.FlowScriptInfo;
 import com.everhomes.rest.flow.FlowScriptConfigDTO;
 import com.everhomes.rest.flow.FlowScriptDTO;
+import com.everhomes.rest.flow.FlowScriptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -35,36 +36,53 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
             return;
         }
         for (FlowFunctionListener listener : functionListeners) {
-            try {
-                Method[] methods = listener.getClass().getDeclaredMethods();
+            Method[] methods = listener.getClass().getDeclaredMethods();
 
-                Map<Integer, Method> identifierToMethodMap = Stream.of(methods)
-                        .peek(r -> r.setAccessible(true))
-                        .filter(r -> r.getAnnotation(ExportFunction.class) != null)
-                        .collect(Collectors.toMap(r -> {
-                            StringBuilder id = new StringBuilder(r.getName());
-                            for (Class<?> paramType : r.getParameterTypes()) {
-                                id.append(":").append(paramType.getName());
-                            }
-                            return id.toString().hashCode();
-                        }, r -> r));
+            Set<Method> methodSet = Stream.of(methods)
+                    .peek(r -> r.setAccessible(true))
+                    .filter(r -> r.getAnnotation(ExportFunction.class) != null)
+                    .collect(Collectors.toSet());
 
-                FlowFunctionInfo functionInfo = new FlowFunctionInfo();
-                functionInfo.setListener(listener);
-                functionInfo.setMethodMap(identifierToMethodMap);
-
-                FlowModuleInfo moduleInfo = listener.initModule();
-                functionInfo.setModuleInfo(moduleInfo);
-
-                moduleIdToFunctionMap.put(moduleInfo.getModuleId(), functionInfo);
-            } catch (Exception e) {
-                e.printStackTrace();
+            Map<Long, Method> methodMap = new HashMap<>();
+            for (Method method : methodSet) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes.length != 2) {
+                    throw new FlowFunctionException("flow function parameter length invalid " + method);
+                }
+                if (parameterTypes[0] != FlowCaseState.class) {
+                    throw new FlowFunctionException("flow function parameter 0 should be FlowCaseState " + method);
+                }
+                if (parameterTypes[1] != Map.class) {
+                    throw new FlowFunctionException("flow function parameter 1 should be Map " + method);
+                }
+                ExportFunction annotation = method.getAnnotation(ExportFunction.class);
+                if (methodMap.get(annotation.id()) != null) {
+                    throw new FlowFunctionException("flow function id duplicate " + method);
+                }
+                methodMap.put(annotation.id(), method);
             }
+
+            FlowModuleInfo moduleInfo = listener.initModule();
+
+            // 检查已经使用的函数是否还在
+            List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByModule(moduleInfo.getModuleId(), FlowScriptType.JAVA);
+            List<Long> functionIdList = scriptConfigs.stream().map(FlowScriptConfig::getId).collect(Collectors.toList());
+            for (Long funcId : functionIdList) {
+                if (methodMap.get(funcId) == null) {
+                    throw new FlowFunctionException("configured flow function disappeared, id = " + funcId);
+                }
+            }
+
+            FlowFunctionInfo functionInfo = new FlowFunctionInfo();
+            functionInfo.setListener(listener);
+            functionInfo.setMethodMap(methodMap);
+            functionInfo.setModuleInfo(moduleInfo);
+            moduleIdToFunctionMap.put(moduleInfo.getModuleId(), functionInfo);
         }
     }
 
     @Override
-    public void invoke(FlowCaseState ctx, Integer functionId) throws InvocationTargetException, IllegalAccessException {
+    public void invoke(FlowCaseState ctx, Long functionId) throws InvocationTargetException, IllegalAccessException {
         FlowFunctionInfo functionInfo = moduleIdToFunctionMap.get(ctx.getModuleId());
         if (functionInfo != null) {
             Method method = functionInfo.getMethodMap().get(functionId);
@@ -92,14 +110,14 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
     @Override
     public void validateJavaConfigs(Long moduleId, FlowScriptInfo cmd) {
         FlowFunctionInfo functionInfo = moduleIdToFunctionMap.get(moduleId);
-        functionInfo.validateParams(Integer.valueOf(cmd.getId()+""), cmd.getConfigs());
+        functionInfo.validateParams(cmd.getId(), cmd.getConfigs());
     }
 
     @Override
     public Method getExportFlowFunction(Long moduleId, Long functionId) {
         FlowFunctionInfo functionInfo = moduleIdToFunctionMap.get(moduleId);
         if (functionInfo != null) {
-            return functionInfo.getFunctionMethod(Integer.valueOf(functionId+""));
+            return functionInfo.getFunctionMethod(functionId);
         }
         return null;
     }

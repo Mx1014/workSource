@@ -25,7 +25,7 @@ import java.util.List;
  * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>remindCount: ??</li>
  * <li>description: 描述</li>
- * <li>params: 参数</li>
+ * <li>param: 参数</li>
  * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>conditionNodeId: 下一个条件节点id</li>
  * <li>evaluateStep: 评价跳转 no_step:不跳转</li>
@@ -51,7 +51,7 @@ public class FlowButtonDTO {
     private Integer remindCount;
     private String description;
     private String evaluateStep;
-    private String params;
+    private String param;
     private Integer defaultOrder;
 
     private Byte needSelectBranch;
@@ -195,12 +195,12 @@ public class FlowButtonDTO {
         this.subjectRequiredFlag = subjectRequiredFlag;
     }
 
-    public String getParams() {
-        return params;
+    public String getParam() {
+        return param;
     }
 
-    public void setParams(String params) {
-        this.params = params;
+    public void setParam(String param) {
+        this.param = param;
     }
 
     public Long getConditionNodeId() {

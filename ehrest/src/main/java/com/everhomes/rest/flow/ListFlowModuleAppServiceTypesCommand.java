@@ -2,20 +2,26 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
  *     <li>moduleId: moduleId</li>
  *     <li>originId: originId</li>
- *     <li>appName: appName</li>
+ *     <li>name: name</li>
  * </ul>
  */
 public class ListFlowModuleAppServiceTypesCommand {
 
+    @NotNull
     private Integer namespaceId;
+    @NotNull
     private Long moduleId;
+    @NotNull
     private Long originId;
-    private String appName;
+    @NotNull
+    private String name;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -41,12 +47,12 @@ public class ListFlowModuleAppServiceTypesCommand {
         this.originId = originId;
     }
 
-    public String getAppName() {
-        return appName;
+    public String getName() {
+        return name;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

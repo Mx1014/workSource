@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowScriptConfigsDao;
@@ -107,7 +108,7 @@ public class FlowScriptConfigProviderImpl implements FlowScriptConfigProvider {
         }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhFlowScriptConfigsDao dao = new EhFlowScriptConfigsDao(context.configuration());
-        dao.insert(scriptConfigs.toArray(new EhFlowScriptConfigs[scriptConfigs.size()]));
+        dao.insert(scriptConfigs.toArray(new EhFlowScriptConfigs[0]));
     }
 
     @Override
@@ -116,6 +117,16 @@ public class FlowScriptConfigProviderImpl implements FlowScriptConfigProvider {
         return this.queryFlowScriptConfig(new ListingLocator(), 100, (locator, query) -> {
             query.addConditions(t.FLOW_MAIN_ID.eq(flowMainId));
             query.addConditions(t.FLOW_VERSION.eq(flowVersion));
+            return query;
+        });
+    }
+
+    @Override
+    public List<FlowScriptConfig> listByModule(Long moduleId, FlowScriptType scriptType) {
+        com.everhomes.server.schema.tables.EhFlowScriptConfigs t = Tables.EH_FLOW_SCRIPT_CONFIGS;
+        return this.queryFlowScriptConfig(new ListingLocator(), 10000, (locator, query) -> {
+            query.addConditions(t.MODULE_ID.eq(moduleId));
+            query.addConditions(t.SCRIPT_TYPE.eq(scriptType.getCode()));
             return query;
         });
     }

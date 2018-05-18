@@ -10,9 +10,10 @@ public class FlowGraphNodeStart extends FlowGraphNode {
 	public FlowGraphNodeStart() {
 		this(null);
 	}
-	
+
 	public FlowGraphNodeStart(FlowNode flowNode) {
 		this.setFlowNode(flowNode);
+		flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
 	}
 	
 	@Override

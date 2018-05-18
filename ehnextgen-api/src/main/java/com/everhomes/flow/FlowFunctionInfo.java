@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class FlowFunctionInfo {
 
-    private Map<Integer, Method> methodMap;
+    private Map<Long, Method> methodMap;
     private FlowModuleInfo moduleInfo;
     private FlowFunctionListener listener;
 
@@ -61,11 +61,11 @@ public class FlowFunctionInfo {
         return string != null && string.trim().length() > 0;
     }
 
-    public Map<Integer, Method> getMethodMap() {
+    public Map<Long, Method> getMethodMap() {
         return methodMap;
     }
 
-    public void setMethodMap(Map<Integer, Method> methodMap) {
+    public void setMethodMap(Map<Long, Method> methodMap) {
         this.methodMap = methodMap;
     }
 
@@ -85,7 +85,7 @@ public class FlowFunctionInfo {
         this.moduleInfo = moduleInfo;
     }
 
-    public void validateParams(Integer methodId, List<FlowScriptConfigInfo> configs) {
+    public void validateParams(Long methodId, List<FlowScriptConfigInfo> configs) {
         Method method = methodMap.get(methodId);
 
         Map<String, String> kvMap = configs.stream()
@@ -103,7 +103,7 @@ public class FlowFunctionInfo {
         }
     }
 
-    public Method getFunctionMethod(Integer methodId) {
+    public Method getFunctionMethod(Long methodId) {
         return methodMap.get(methodId);
     }
 }
