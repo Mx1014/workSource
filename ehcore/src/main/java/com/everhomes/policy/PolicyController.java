@@ -73,8 +73,9 @@ public class PolicyController extends ControllerBase {
      */
     @RequestMapping("listPolicies")
     @RestReturn(value=PolicyResponse.class)
-    public PolicyResponse listPoliciesByTitle(listPoliciesCommand cmd) {
-        PolicyResponse response = policyService.listPoliciesByTitle(cmd);
+    public RestResponse listPoliciesByTitle(listPoliciesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(policyService.listPoliciesByTitle(cmd));
         return response;
     }
 
@@ -98,8 +99,9 @@ public class PolicyController extends ControllerBase {
      */
     @RequestMapping("searchPolicies")
     @RestReturn(value=PolicyResponse.class)
-    public PolicyResponse searchPolicies(GetPolicyCommand cmd) {
-        PolicyResponse response = policyService.searchPolicies(cmd);
+    public RestResponse searchPolicies(GetPolicyCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(policyService.searchPolicies(cmd));
         return response;
     }
 
@@ -109,8 +111,9 @@ public class PolicyController extends ControllerBase {
      */
     @RequestMapping("searchPolicyRecords")
     @RestReturn(value=PolicyRecordResponse.class)
-    public PolicyRecordResponse searchPolicyRecords(GetPolicyRecordCommand cmd) {
-        PolicyRecordResponse response = policyRecordService.searchPolicyRecords(cmd);
+    public RestResponse searchPolicyRecords(GetPolicyRecordCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(policyRecordService.searchPolicyRecords(cmd));
         return response;
     }
 
