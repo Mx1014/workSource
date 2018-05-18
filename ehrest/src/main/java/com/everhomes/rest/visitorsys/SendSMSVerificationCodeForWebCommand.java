@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>appId: (必填)应用Id</li>
  * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>pmId: (选填)管理公司id</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>visitorPhone: (必填)电话号码</li>
  * </ul>
  */

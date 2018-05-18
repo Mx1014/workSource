@@ -1193,13 +1193,22 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_VISITOR_NOT_FIND,
 //                    "visitor not find.");
 //        }
-        List<Tuple<String, Object>> variables =  new ArrayList();
-        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_MODLUENAME, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_MODLUENAME, VisitorsysConstant.SMS_MODLUENAME_CN));
-        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_VERIFICATIONCODE, generateVerificationCode(cmd.getVisitorPhone()));
-        String templateLocale = UserContext.current().getUser().getLocale();
-        smsProvider.sendSms(device.getNamespaceId(), cmd.getVisitorPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_VERIFICATION_CODER, templateLocale, variables);
+        sendSMSVerificationCode(device.getNamespaceId(),cmd.getVisitorPhone());
     }
 
+
+    /**
+     * 发送验证码短信
+     * @param namespaceId
+     * @param visitorPhone
+     */
+    private void sendSMSVerificationCode(Integer namespaceId, String visitorPhone) {
+        List<Tuple<String, Object>> variables =  new ArrayList();
+        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_MODLUENAME, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_MODLUENAME, VisitorsysConstant.SMS_MODLUENAME_CN));
+        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_VERIFICATIONCODE, generateVerificationCode(visitorPhone));
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(namespaceId, visitorPhone, SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_VERIFICATION_CODER, templateLocale, variables);
+    }
     /**
      * 生成验证码,并存储在redis
      * @param visitorPhone
@@ -1234,16 +1243,35 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "unknown verificatcode "+cmd.getVerificationCode());
         }
-        String key = generateVerificationKey(cmd.getVerificationCode(),cmd.getVisitorPhone());
+        return confirmVerificationCode(device.getNamespaceId(),device.getOwnerType(),device.getOwnerId(),cmd.getVerificationCode(),cmd.getVisitorPhone());
+
+    }
+
+
+    /**
+     * 确认验证码,并返回数据
+     * @param namespaceId
+     * @param ownerType
+     * @param ownerId
+     * @param vCode
+     * @param vPhone
+     * @return
+     */
+    private ListBookedVisitorsResponse confirmVerificationCode(Integer namespaceId,String ownerType,Long ownerId,String vCode,String vPhone) {
+        if(vCode==null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "unknown verificatcode "+vCode);
+        }
+        String key = generateVerificationKey(vCode,vPhone);
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         String value = valueOperations.get(key);
         if(value==null){
             throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_ILLEGAL_VERIFICATIONCODE,
-                    "unknown verificatcode "+cmd.getVerificationCode());
+                    "unknown verificatcode "+vCode);
         }
         long now = System.currentTimeMillis();
         List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
-                (device.getNamespaceId(),device.getOwnerType(),device.getOwnerId(),cmd.getVisitorPhone()
+                (namespaceId,ownerType,ownerId,vPhone
                         ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
         ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
         response.setVisitorDtoList(list.stream().map(r->ConvertHelper.convert(r,BaseVisitorDTO.class)).collect(Collectors.toList()));
@@ -1424,12 +1452,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListBookedVisitorsResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd) {
-        return null;
+        beforePostForWeb(cmd);
+        return confirmVerificationCode(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVerificationCode(),cmd.getVisitorPhone());
     }
 
     @Override
     public void sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd) {
-
+        beforePostForWeb(cmd);
+        sendSMSVerificationCode(cmd.getNamespaceId(),cmd.getVisitorPhone());
     }
 
     /**

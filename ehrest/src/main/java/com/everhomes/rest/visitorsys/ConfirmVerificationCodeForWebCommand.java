@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>appId: (必填)应用Id</li>
  * <li>visitorPhone: (必填)手机号码</li>
+ * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>verificationCode: (必填)验证码</li>
  * </ul>
  */
