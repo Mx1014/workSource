@@ -76,7 +76,7 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Override
     public void deletePolicy(GetPolicyByIdCommand cmd) {
-        if(null != cmd.getId()){
+        if(null == cmd.getId()){
             LOGGER.error("Invalid Id parameter.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid Id parameter.");
