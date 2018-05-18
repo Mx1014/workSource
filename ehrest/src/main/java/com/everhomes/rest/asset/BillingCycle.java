@@ -9,9 +9,10 @@ public enum BillingCycle {
     NATURAL_MONTH((byte)2, 0, false),
     NATURAL_QUARTER((byte)3, 2, false),
     NATURAL_YEAR((byte)4, 11, false),
-    CONTRACT_MONTH((byte)5, 0, true),
-    CONTRACT_QUARTER((byte)6, 2, true),
-    CONTRACT_YEAR((byte)7, 11, true);
+    ONE_DEAL((byte)5, null, false),
+    CONTRACT_MONTH((byte)6, 0, true),
+    CONTRACT_QUARTER((byte)7, 2, true),
+    CONTRACT_YEAR((byte)8, 11, true);
     private byte code;
     private Integer monthOffset;
     private boolean isContract;

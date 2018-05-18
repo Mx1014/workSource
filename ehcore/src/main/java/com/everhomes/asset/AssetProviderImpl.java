@@ -3493,7 +3493,7 @@ public class AssetProviderImpl implements AssetProvider {
         if ( aByte.size() == 0) {
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         }
-        if( aByte.get(aByte.size()-1) == (byte)1){
+        if( aByte.get(aByte.size()-1) == (byte)0){
             return false;
         }
         return true;
