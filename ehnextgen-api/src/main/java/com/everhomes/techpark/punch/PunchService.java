@@ -291,4 +291,7 @@ public interface PunchService {
 
 	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd);
 
+
+	public void fileMonthReport(FileMonthReportCommand cmd);
+
 }

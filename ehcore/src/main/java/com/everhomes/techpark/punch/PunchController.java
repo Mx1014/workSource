@@ -478,13 +478,24 @@ public class PunchController extends ControllerBase {
 	}
 
 	/**
-	 * <p>刷新月报</p>
+	 * <p>获取月报进度</p>
 	 * <b>URL: /techpark/punch/getMonthReportProcess</b>
 	 */
 	@RequestMapping("getMonthReportProcess")
 	@RestReturn(GetMonthReportProcessResponse.class)
 	public RestResponse getMonthReportProcess(GetMonthReportProcessCommand cmd){
 		return new RestResponse(punchService.getMonthReportProcess(cmd));
+	}
+
+	/**
+	 * <p>归档月报</p>
+	 * <b>URL: /techpark/punch/fileMonthReport</b>
+	 */
+	@RequestMapping("fileMonthReport")
+	@RestReturn(String.class)
+	public RestResponse fileMonthReport(FileMonthReportCommand cmd){
+		punchService.fileMonthReport(cmd);
+		return new RestResponse();
 	}
 
 }

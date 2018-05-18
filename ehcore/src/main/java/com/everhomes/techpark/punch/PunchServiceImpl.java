@@ -90,6 +90,7 @@ import com.everhomes.rest.techpark.punch.DayStatusDTO;
 import com.everhomes.rest.techpark.punch.ExceptionProcessStatus;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
+import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
@@ -9724,6 +9725,12 @@ public class PunchServiceImpl implements PunchService {
 	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd) {
 	
 		return new GetMonthReportProcessResponse();
+	}
+
+	@Override
+	public void fileMonthReport(FileMonthReportCommand cmd) {
+	
+
 	}
 
 }
