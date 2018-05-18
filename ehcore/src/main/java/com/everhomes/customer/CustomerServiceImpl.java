@@ -3686,7 +3686,7 @@ public class CustomerServiceImpl implements CustomerService {
         //防止执行两次  之前出现过
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        String runningFlag = getEnergyTaskToken(redisTemplate);
+        String runningFlag = getSyncTaskToken(redisTemplate);
         if(StringUtils.isEmpty(runningFlag)) {
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
             List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
@@ -3725,15 +3725,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    private String getEnergyTaskToken(RedisTemplate redisTemplate) {
-        Map<String, String> map = makeEnergyTaskToken(redisTemplate);
+    private String getSyncTaskToken(RedisTemplate redisTemplate) {
+        Map<String, String> map = makeSyncTaskToken(redisTemplate);
         if(map == null) {
             return null;
         }
         return  map.get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
     }
 
-    private Map<String, String> makeEnergyTaskToken(RedisTemplate redisTemplate) {
+    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate) {
         Object o = redisTemplate.opsForValue().get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
         if(o != null) {
             Map<String, String> keys = new HashMap<>();
