@@ -84,8 +84,12 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import scala.annotation.varargs;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.jooq.DAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -559,9 +563,30 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public String generateContractNumber() {
-		String num = "HT_" + DateHelper.currentGMTTime().getTime() + RandomUtils.nextInt(10);
-		return num;
+	public String generateContractNumber(GenerateContractNumberCommand cmd) {
+		
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
+		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
+		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
+		
+		StringBuffer contractNumber = new StringBuffer();
+		String Sparefield = contractNumberRulejson.getSparefield();
+		contractNumber.append(contractNumberRulejson.getConstantVar());
+		
+		Calendar cal=Calendar.getInstance();
+		if (ContractNumberDataType.YEAR.equals(ContractNumberDataType.fromStatus(contractNumberRulejson.getDateVar()))) {
+			contractNumber.append("-").append(cal.get(Calendar.YEAR));
+		}
+		if (ContractNumberDataType.MONTH.equals(ContractNumberDataType.fromStatus(contractNumberRulejson.getDateVar()))) {
+			contractNumber.append("-").append(cal.get(Calendar.MONTH)+1);
+		}
+		if (Sparefield!=null && !"".equals(Sparefield)) {
+			contractNumber.append("-").append(Sparefield);
+		}
+		
+		String currentTime = (System.currentTimeMillis()+"").substring(9, 13);
+		return contractNumber.append("-").append(cal.get(Calendar.DATE))+currentTime;
 	}
 
 	@Override
@@ -579,7 +604,9 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getContractNumber() != null) {
 			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
 		} else {
-			contract.setContractNumber(generateContractNumber());
+			//创建合同为啥没有 合同号？
+			/*cmd.getGenerateContractNumberRule();
+			contract.setContractNumber(generateContractNumber(cmd));*/
 		}
 
 		if(cmd.getContractStartDate() != null) {
@@ -623,6 +650,7 @@ public class ContractServiceImpl implements ContractService {
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 
 		contract.setRentSize(totalSize);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 //		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
@@ -650,7 +678,7 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getContractNumber() != null) {
 			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
 		} else {
-			contract.setContractNumber(generateContractNumber());
+			/*contract.setContractNumber(generateContractNumber());*/
 		}
 
 		if(cmd.getContractStartDate() != null) {
@@ -676,6 +704,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 
@@ -708,6 +737,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setCreateTime(exist.getCreateTime());
 		contract.setPaymentFlag((byte)1);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
@@ -957,6 +987,7 @@ public class ContractServiceImpl implements ContractService {
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 							addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+							addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 						}
 
@@ -976,6 +1007,7 @@ public class ContractServiceImpl implements ContractService {
 					//26058  已售的状态不变
 					if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 					}
 				}
@@ -1013,6 +1045,7 @@ public class ContractServiceImpl implements ContractService {
 					ContractChargingItem exist = contractChargingItemProvider.findById(item.getId());
 					contractChargingItem.setCreateUid(exist.getCreateUid());
 					contractChargingItem.setCreateTime(exist.getCreateTime());
+					contractChargingItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractChargingItemProvider.updateContractChargingItem(contractChargingItem);
 					map.remove(item.getId());
 				}
@@ -1363,6 +1396,7 @@ public class ContractServiceImpl implements ContractService {
 							//26058  已售的状态不变
 							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
 								mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+								mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 								propertyMgrProvider.updateOrganizationAddressMapping(mapping);
 							}
 						});
@@ -1395,6 +1429,7 @@ public class ContractServiceImpl implements ContractService {
 					"contract is not approve qualitied!");
 		}
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
@@ -1439,6 +1474,7 @@ public class ContractServiceImpl implements ContractService {
 							//26058  已售的状态不变
 							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
 								mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+								mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 								propertyMgrProvider.updateOrganizationAddressMapping(mapping);
 							}
 
@@ -1455,9 +1491,15 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+		
+		String contractNumberRulejson = StringHelper.toJsonString(cmd.getGenerateContractNumberRule());
+		
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
+		param.setContractNumberRulejson(contractNumberRulejson);
+		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
 		if(cmd.getId() == null && communityExist == null) {
+			
 			contractProvider.createContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
@@ -1514,12 +1556,11 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
-
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
 		if(communityExist != null) {
 			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null);
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType());
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}
@@ -1568,12 +1609,16 @@ public class ContractServiceImpl implements ContractService {
 		ContractParamDTO dto = ConvertHelper.convert(param, ContractParamDTO.class);
 		List<ContractParamGroupMap> notifyGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
 		List<ContractParamGroupMap> paidGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.PAY_GROUP.getCode());
-
 		if(notifyGroups != null && notifyGroups.size() > 0) {
 			dto.setNotifyGroups(notifyGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
 		}
 		if(paidGroups != null && paidGroups.size() > 0) {
 			dto.setPaidGroups(paidGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
+		}
+		if (param.getContractNumberRulejson()!= null) {
+			String contractNumberRulejson = param.getContractNumberRulejson();
+			GenerateContractNumberRule guize = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejson, GenerateContractNumberRule.class);
+			dto.setGenerateContractNumberRule(guize);
 		}
 		return dto;
 	}
