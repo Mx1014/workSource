@@ -16,6 +16,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1108,6 +1109,7 @@ public class AssetController extends ControllerBase {
      *
      * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
      */
+    @RequireAuthentication(false)//不用登陆就可以用
     @RequestMapping("doctor")
     @RestReturn(String.class)
     public String hi(@RequestBody PaymentExpectanciesCommand cmd){
