@@ -121,6 +121,26 @@ public class CreateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
 
+    private Byte payorreceiveContractType;
+
+	private String generateContractNumberRule;
+
+	public String getGenerateContractNumberRule() {
+		return generateContractNumberRule;
+	}
+
+	public void setGenerateContractNumberRule(String generateContractNumberRule) {
+		this.generateContractNumberRule = generateContractNumberRule;
+	}
+
+	public Byte getPayorreceiveContractType() {
+		return payorreceiveContractType;
+	}
+
+	public void setPayorreceiveContractType(Byte payorreceiveContractType) {
+		this.payorreceiveContractType = payorreceiveContractType;
+	}
+    
     public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
