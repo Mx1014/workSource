@@ -183,4 +183,6 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
+    
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
 }

@@ -1267,7 +1267,19 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
-
+    
+    /**
+     * <b>URL: /asset/judgeAppShowPay</b>
+     * <p>取出配置项，用于判断APP多账单组的缴费方式：全部缴费/部分缴费/单个缴费</p>
+     */
+    @RequestMapping("judgeAppShowPay")
+    public RestResponse judgeAppShowPay(JudgeAppShowPayCommand cmd){
+    	JudgeAppShowPayResponse judgeAppShowPayResponse = assetService.judgeAppShowPay(cmd);
+        RestResponse restResponse = new RestResponse(judgeAppShowPayResponse);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
 }
 

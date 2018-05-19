@@ -10,6 +10,7 @@ import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -4382,4 +4383,16 @@ public class AssetServiceImpl implements AssetService {
         }
         return fieldMap;
     }
+
+	public JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd) {
+		JudgeAppShowPayResponse judgeAppShowPayResponse = new JudgeAppShowPayResponse();
+		String appShowPay = configurationProvider.getValue(cmd.getNamespaceId(), ConfigConstants.ASSET_DINGFENGHUI_APPSHOWPAY,""); 
+		//如果根据域空间找不到，那么默认为2：全部缴
+		if(appShowPay.isEmpty()) {
+			judgeAppShowPayResponse.setAppShowPay(new Byte("2"));
+		}else {
+			judgeAppShowPayResponse.setAppShowPay(new Byte(appShowPay));
+		}
+		return judgeAppShowPayResponse;
+	}
 }
