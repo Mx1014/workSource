@@ -1225,7 +1225,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 		return functionIds;
 	}
 
-	@Override
+	/*@Override
 	public void deleteServiceModuleFromBlack(ListServiceModuleExcludeFunctionsCommand cmd) {
 		
 		//获取ID
@@ -1233,14 +1233,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 		
 		//ServiceModuleExcludeFunction module = checkServiceModule(cmd.getNamespaceId());
         serviceModuleProvider.deleteServiceModuleFromBlack(serviceModuleExcludeFunctionId);
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public void addServiceModuleFromBlack(ListServiceModuleExcludeFunctionsCommand cmd) {
 		
 		ServiceModuleExcludeFunction serviceModuleExcludeFunction = ConvertHelper.convert(cmd, ServiceModuleExcludeFunction.class);
 
 		serviceModuleProvider.createServiceModuleExcludeFunction(serviceModuleExcludeFunction);
 		
-	}
+	}*/
 }
