@@ -883,8 +883,9 @@ public class AssetProviderImpl implements AssetProvider {
         final BigDecimal[] amountReceivable = {new BigDecimal("0")};
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");//账单收费细项
+        EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");//滞纳金
+        EhPaymentExemptionItems exemption = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("exemption");//减免/增收项
 
         dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
                 .from(t)
@@ -925,6 +926,19 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
+        //后台设置了减免增收后，APP端需作为一个费项展现出来
+        dslContext.select(exemption.AMOUNT,exemption.REMARKS)
+		    .from(exemption)
+		    .where(exemption.BILL_ID.eq(billId))
+		    .fetch()
+		    .map(r -> {
+		        ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+		        dto.setAmountOwed(r.getValue(exemption.AMOUNT));
+		        dto.setBillItemName(r.getValue(exemption.REMARKS));
+		        dtos.add(dto);
+		        amountOwed[0] = amountOwed[0].add(r.getValue(exemption.AMOUNT));
+		        return null;
+        });
         response.setAmountReceivable(amountReceivable[0]);
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStr[0]);
