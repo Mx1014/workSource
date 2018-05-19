@@ -90,32 +90,32 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         queryBuilder.select(
                 PaymentAttributes.ID.spec(),
                 PaymentAttributes.ACCOUNT_ID.spec(),
-                PaymentAttributes.USER_ID.spec(),
-                PaymentAttributes.BIZ_SYSTEM_ID.spec(),
-                PaymentAttributes.CLIENT_APP_ID.spec(),
-                PaymentAttributes.PAYMENT_TYPE.spec(),
-                PaymentAttributes.PAYMENT_STATUS.spec(),
-                PaymentAttributes.PAYMENT_STATUS_UPDATE_TIME.spec(),
-                PaymentAttributes.SETTLEMENT_TYPE.spec(),
-                PaymentAttributes.SETTLEMENT_STATUS.spec(),
-                PaymentAttributes.SETTLEMENT_TIME.spec(),
-                PaymentAttributes.ORDER_ID.spec(),
-                PaymentAttributes.ORDER_AMOUNT.spec(),
-                PaymentAttributes.PAYER_USER_ID.spec(),
-                PaymentAttributes.PAYEE_USER_ID.spec(),
-                PaymentAttributes.AMOUNT.spec(),
-                PaymentAttributes.TRASACTION_TYPE.spec(),
+                PaymentAttributes.USER_ID.spec(),//支付系统用户id
+                PaymentAttributes.BIZ_SYSTEM_ID.spec(),//子系统id
+                PaymentAttributes.CLIENT_APP_ID.spec(),//客户端id
+                PaymentAttributes.PAYMENT_TYPE.spec(),//支付类型
+                PaymentAttributes.PAYMENT_STATUS.spec(),//支付状态: 3rd plat :0-fail 1-unpay 2-success
+                PaymentAttributes.PAYMENT_STATUS_UPDATE_TIME.spec(),//状态更新时间
+                PaymentAttributes.SETTLEMENT_TYPE.spec(),//结算类型 0 ，7
+                PaymentAttributes.SETTLEMENT_STATUS.spec(),//结算状态0，1
+                PaymentAttributes.SETTLEMENT_TIME.spec(),//结算时间
+                PaymentAttributes.ORDER_ID.spec(),//订单id
+                PaymentAttributes.ORDER_AMOUNT.spec(),//实际收入支出订单金额
+                PaymentAttributes.PAYER_USER_ID.spec(),//付款方
+                PaymentAttributes.PAYEE_USER_ID.spec(),//收款方
+                PaymentAttributes.AMOUNT.spec(),//订单金额
+                PaymentAttributes.TRASACTION_TYPE.spec(),//事物类型 ：订单类型+手续费
                 PaymentAttributes.TRANSACTION_TIME.spec(),
-                PaymentAttributes.BIZ_ORDER_NUM.spec(),
-                PaymentAttributes.REMARK1.spec(),
+                PaymentAttributes.BIZ_ORDER_NUM.spec(),//第三方订单id，业务系统订单id
+                PaymentAttributes.REMARK1.spec(),//业务系统自定义字段
                 PaymentAttributes.REMARK2.spec(),
                 PaymentAttributes.REMARK3.spec(),
                 PaymentAttributes.REMARK4.spec(),
                 PaymentAttributes.REMARK5.spec(),
-                PaymentAttributes.DISTRIBUTION_USER_ID.spec(),
+                PaymentAttributes.DISTRIBUTION_USER_ID.spec(),//请求通联的用户id
                 PaymentAttributes.DISTRIBUTION_REMARK.spec(),
-                PaymentAttributes.SUPPORTING_ORDER_NUM.spec(),
-                PaymentAttributes.CREATE_TIME.spec()
+                PaymentAttributes.SUPPORTING_ORDER_NUM.spec(),//通联返回的订单编号
+                PaymentAttributes.CREATE_TIME.spec()//订单创建时间
         );
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
@@ -130,7 +130,10 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
 
-        if(response.getResponse() != null && !response.getResponse().isEmpty()) {
+        
+        
+        //杨崇鑫暂时注释掉，远程调用取不到数据，一定要记得注释回去
+        /*if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
@@ -139,7 +142,30 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     result.getList().add(paymentBillDTO);
                 }
             }
-        }
+        }*/
+        //杨崇鑫用于测试 开始
+        PaymentBillResp paymentBillDTO = new PaymentBillResp();
+        paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
+        paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
+        paymentBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
+        paymentBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
+        paymentBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
+        paymentBillDTO.setOrderRemark2("1098");
+        paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));//订单的实际数据库ID？？？
+        paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号
+        paymentBillDTO.setPaymentStatus(2);//支付状态: 3rd plat :0-fail 1-unpay 2-success？？？？
+        paymentBillDTO.setPaymentType(8);//支付方式，微信/支付宝/对公转账
+        paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
+        paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
+        paymentBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
+        paymentBillDTO.setUserId(Long.parseLong("1210"));
+        putOrderInfo(paymentBillDTO);
+        result.getList().add(paymentBillDTO);
+        //杨崇鑫用于测试 结束
+        
+        
+        
+        
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
             result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
             result.getList().remove(result.getList().size()-1);

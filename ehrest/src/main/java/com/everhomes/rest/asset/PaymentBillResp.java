@@ -8,6 +8,31 @@ import java.util.Date;
  * Created by Wentian Wang on 2017/9/28.
  */
 
+/**
+ * @author change by yangcx
+ * @date 2018年5月19日----下午8:18:48
+ */
+/**
+ *<ul>
+ * <li>userId:用户ID</li>
+ * <li>orderNo: 支付流水号，如：WUF00000000000001098</li> 
+ * <li>paymentOrderNum:订单编号，如：954650447962984448</li>
+ * <li>payTime:交易时间</li>
+ * <li>paymentType:支付方式，微信/支付宝/对公转账</li>
+ * <li>transactionType:交易类型，如：手续费/充值/提现/退款等</li>
+ * <li>orderAmount:交易金额</li>
+ * <li>amount:入账金额</li>
+ * <li>feeAmount:手续费</li>
+ * <li>paymentStatus:paymentStatus:支付状态: 3rd plat :0-fail 1-unpay 2-success？？？？？
+ * 		转换为业务系统的订单状态：已完成/订单异常</li>
+ * <li>settlementStatus:结算状态：已结算/待结算</li> 
+ * <li>orderRemark1:业务系统自定义字段（要求传订单来源）：wuyeCode</li>
+ * <li>orderRemark2:</li>
+ * <li>paymentOrderId:订单的实际数据库ID？？？</li>
+ * <li>payerName[String]:缴费人</li>
+ * <li>payerTel[String]:缴费人电话</li>	
+ *</ul>
+ */
 public class PaymentBillResp {
     private Long userId;
     private String orderNo;

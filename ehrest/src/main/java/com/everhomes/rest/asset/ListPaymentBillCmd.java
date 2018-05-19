@@ -10,6 +10,30 @@ import java.util.List;
  * Created by Wentian Wang on 2017/9/28.
  */
 
+/**
+ * @author change by yangcx
+ * @date 2018年5月19日----下午8:18:48
+ */
+/**
+ *<ul>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 显示数量</li>
+ * <li>dateStrBegin: 账期开始时间</li>
+ * <li>dateStrEnd: 账期结束时间</li>
+ * <li>startPayTime: 缴费开始时间</li>
+ * <li>endPayTime: 缴费结束时间</li>
+ * <li>paymentStatus:支付状态: 3rd plat :0-fail 1-unpay 2-success？？？？？
+ * 		转换为业务系统的订单状态：已完成/订单异常</li>
+ * <li>paymentType:支付方式，微信/支付宝/对公转账</li>
+ * <li>userType:用户类型，如：EhOrganizations</li>
+ * <li>userId:用户ID</li>
+ * <li>namespaceId:域空间</li>
+ * <li>communityId:园区ID</li>
+ * <li>organizationId:客户id，客户类型为企业时，organizationId为企业id</li>
+ * <li>orderType:账单类型，如：wuyeCode</li>
+ * <li>targetName:客户名称</li>
+ *</ul>
+*/
 public class ListPaymentBillCmd {
     private Long pageAnchor;
     private Long pageSize;
@@ -54,12 +78,12 @@ public class ListPaymentBillCmd {
     private String paymentOrderNum;
     //支付类型
     private Integer paymentType;
-    //交易类型
+    //交易类型，如：手续费/充值/提现/退款等
     private Integer transactionType;
     @ItemType(Integer.class)
     private List<Integer> transactionTypes;
     private Integer paymentStatus;
-    //结算状态
+    //结算状态：已结算/待结算
     private Integer settlementStatus;
     private Boolean distributionRemarkIsNull;
     //账单类型
@@ -70,6 +94,9 @@ public class ListPaymentBillCmd {
     private Long userId;
     @ItemType(ReSortCmd.class)
     private List<ReSortCmd> sorts;
+    
+    //客户名称
+    private String targetName;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -195,4 +222,12 @@ public class ListPaymentBillCmd {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
 }
