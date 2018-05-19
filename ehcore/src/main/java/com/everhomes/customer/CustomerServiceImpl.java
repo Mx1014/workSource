@@ -3866,9 +3866,9 @@ public class CustomerServiceImpl implements CustomerService {
         File file = new File(filePath);
         if (!file.exists()){
             boolean mdkirResult =   file.mkdirs();
-            LOGGER.info("mkdier  excel file result :{}",mdkirResult);
+            LOGGER.info("mkdir  excel file result :{}",mdkirResult);
         }
-        filePath = filePath + "enterprise_Customer_details" + System.currentTimeMillis() + ".xlsx";
+        filePath = filePath + "enterprise_customer_details" + System.currentTimeMillis() + ".xlsx";
         //  new file
         this.createEquipmentStandardsBook(filePath, customerStatisticsDTO, null,
                 industryStatisticsResponse.getDtos(), talentStatisticsResponse.getDtos(), statisticsResponse.getDtos(), projectStatisticsResponse.getDtos(), sourceStatisticsResponse.getDtos());
@@ -3941,7 +3941,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void setNewProjectSheetBookRow(Sheet projectSheet, CustomerProjectStatisticsDTO dto) {
         Row row = projectSheet.createRow(projectSheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
         row.createCell(++i).setCellValue(dto.getProjectCount());
     }
 
@@ -3958,7 +3958,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void setNewIntellectualPropertySheetBookRow(Sheet intellectualPropertySheet, CustomerIntellectualPropertyStatisticsDTO dto) {
         Row row = intellectualPropertySheet.createRow(intellectualPropertySheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getPropertyType());
+        row.createCell(++i).setCellValue(dto.getPropertyType() == null ? "未知" : dto.getPropertyType());
         row.createCell(++i).setCellValue(dto.getPropertyCount());
     }
 
