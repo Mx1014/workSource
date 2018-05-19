@@ -34,6 +34,30 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class ParkingTestServiceImpl implements ParkingTestService {
+
+	@Override
+	public ParkingLotTestResponse listParkingLotsTest(ListParkingLotsTestCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void listParkingLotsTestUpdate(SetListParkingLotsTestCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ParkingLotTestDTO listParkingLotsTestAdd(AddListParkingLotsTestCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void listParkingLotsTestDelete(DeleteListParkingLotsTestCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}/*
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingTestServiceImpl.class);
 	@Autowired
 	private ParkingTestProvider parkingTestProvider;
@@ -73,10 +97,10 @@ public class ParkingTestServiceImpl implements ParkingTestService {
 		
 
 		
-	/*	List<ContractDTO> resultList = list.stream().map(c->{
+		List<ContractDTO> resultList = list.stream().map(c->{
 			ContractDTO contractDTO = organizationService.processContract(c, namespaceId);
 			return contractDTO;
-		}).collect(Collectors.toList());*/
+		}).collect(Collectors.toList());
 		
 		
 		
@@ -99,7 +123,7 @@ public class ParkingTestServiceImpl implements ParkingTestService {
 	public void listParkingLotsTestUpdate(SetListParkingLotsTestCommand cmd) {
 		
 		
-		/*ParkingLotTest parkingLot = checkParkingLot(cmd.getAge(), cmd.getId(), cmd.getName());
+		ParkingLotTest parkingLot = checkParkingLot(cmd.getAge(), cmd.getId(), cmd.getName());
 		
 		
 		ParkingRechargeTestConfig config = ConvertHelper.convert(cmd, ParkingRechargeTestConfig.class);
@@ -108,13 +132,13 @@ public class ParkingTestServiceImpl implements ParkingTestService {
 		
 		//parkingLot.setRechargeJson(JSONObject.toJSONString(config));
 
-		parkingTestProvider.updateParkingLotTest(parkingLot);*/
+		parkingTestProvider.updateParkingLotTest(parkingLot);
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        /*int count = context.update(Tables.EH_TEST_INFOS).set(Tables.EH_TEST_INFOS.NAME, cmd.getName())
+        int count = context.update(Tables.EH_TEST_INFOS).set(Tables.EH_TEST_INFOS.NAME, cmd.getName())
                 .set(Tables.EH_TEST_INFOS.AGE, cmd.getAge())
-                .where(Tables.EH_TEST_INFOS.ID.in(cmd.getId())).execute();*/
+                .where(Tables.EH_TEST_INFOS.ID.in(cmd.getId())).execute();
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, cmd.getId());
 	}
@@ -153,4 +177,4 @@ public class ParkingTestServiceImpl implements ParkingTestService {
 		parkingTestProvider.DeleteListParkingLotsTest(verification);
 	}
 
-}
+*/}
