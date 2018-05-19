@@ -481,6 +481,9 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
+        String buildingName = cmd.getBuildingName();//楼栋名称
+        String apartmentName = cmd.getApartmentName();//门牌名称
+        String customerTel = cmd.getCustomerTel();//客户手机号
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -518,6 +521,15 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
+            query.addConditions(t.BUILDING_NAME.eq(buildingName));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(apartmentName)){
+            query.addConditions(t.APARTMENT_NAME.eq(apartmentName));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(customerTel)){
+            query.addConditions(t.CUSTOMER_TEL.like("%"+customerTel+"%"));
+        }
         query.addOrderBy(t.DATE_STR.desc());
 //        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
@@ -548,6 +560,11 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setContractId(String.valueOf(r.getContractId()));
             // 增加发票编号
             dto.setInvoiceNum(r.getInvoiceNumber());
+            //增加账单时间
+            dto.setDateStrBegin(r.getDateStrBegin());
+            dto.setDateStrEnd(r.getDateStrEnd());
+            //增加客户手机号
+            dto.setCustomerTel(r.getCustomerTel());
             list.add(dto);
             return null;});
         return list;

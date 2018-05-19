@@ -25,7 +25,9 @@ import javax.validation.constraints.NotNull;
  * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
- * <li>contractNum:合同编号</li>
+ * <li>contractNum: 合同编号</li>
+ * <li>organizationId: 企业id</li>
+ * <li>customerTel: 客户手机号</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -51,6 +53,8 @@ public class ListBillsCommand {
     private String targetType;
     private String contractNum;
     private Long organizationId;
+    
+    private String customerTel;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -214,4 +218,12 @@ public class ListBillsCommand {
     public ListBillsCommand() {
 
     }
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
 }
