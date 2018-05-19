@@ -39,9 +39,10 @@ public interface DynamicExcelHandler {
      * @param sheetName sheet的名字
      * @param params 在dynamicaService.exportDynamicExcel()和importDynamicExcel() 传递的调用者的参数,导出时dynamicField的前提参数
      * @param headers 导入时，获取dynamicField的前提参数
+     * @param withData
      * @Return Dynamic实例对象集合
      */
-    List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport);
+    List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData);
 
     /**
      * 标题行和返回的数据的list的下表必须保持对应
