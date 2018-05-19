@@ -1055,8 +1055,8 @@ public class AssetServiceImpl implements AssetService {
 
         LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-        Long contractId = cmd.getContractId();
-        String contractNum = cmd.getContractNum();
+        Long contractId = cmd.getContractId();//合同号
+        String contractNum = cmd.getContractNum();//合同编号
 
         assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
 
