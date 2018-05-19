@@ -494,6 +494,7 @@ public class AssetProviderImpl implements AssetProvider {
 //        }
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        //status[Byte]:账单属性，0:未出账单;1:已出账单
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
         }
