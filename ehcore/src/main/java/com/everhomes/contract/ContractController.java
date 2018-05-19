@@ -8,6 +8,8 @@ import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,10 +91,13 @@ public class ContractController extends ControllerBase {
 	 */
 	@RequestMapping("generateContractNumber")
 	@RestReturn(String.class)
-	public RestResponse generateContractNumber(){
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+	public RestResponse generateContractNumber(GenerateContractNumberCommand cmd){
+		/*Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.generateContractNumber());
+		return new RestResponse(contractService.generateContractNumber());*/
+		
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.generateContractNumber(cmd));
 	}
 
 	/**
@@ -228,6 +233,8 @@ public class ContractController extends ControllerBase {
 	public RestResponse setContractParam(SetContractParamCommand cmd) {
 //		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(cmd.getNamespaceId());
+		//cmd.setPayorreceiveContractType((byte)0); //收款合同
+		//cmd.setPayorreceiveContractType((byte)1);//付款合同
 		contractService.setContractParam(cmd);
 		return new RestResponse();
 	}
@@ -241,6 +248,8 @@ public class ContractController extends ControllerBase {
 	public RestResponse getContractParam(GetContractParamCommand cmd){
 //		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(cmd.getNamespaceId());
+		//cmd.setPayorreceiveContractType((byte)0); //收款合同
+		//cmd.setPayorreceiveContractType((byte)1);//付款合同
 		return new RestResponse(contractService.getContractParam(cmd));
 	}
 
