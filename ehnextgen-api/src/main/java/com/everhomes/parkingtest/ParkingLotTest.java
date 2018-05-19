@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.parkingtest;
 
-import com.everhomes.server.schema.tables.pojos.EhParkingLots;
-import com.everhomes.server.schema.tables.pojos.EhTestInfos;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ParkingLotTest extends EhTestInfos {
+public class ParkingLotTest /*extends EhTestInfos*/ {
     private static final long serialVersionUID = 4551895615872424333L;
 
     public ParkingLotTest() {
