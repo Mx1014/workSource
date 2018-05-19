@@ -3004,6 +3004,8 @@ public class AssetServiceImpl implements AssetService {
         Integer namespaceId = cmd.getNamespaceId();
         Byte hasContractView = 1;
         Byte hasPay = 1;
+        //是否显示上传凭证按钮（add by tangcen）
+        Byte hasUploadCertificate = 0;
         if(namespaceId==null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
@@ -3029,11 +3031,16 @@ public class AssetServiceImpl implements AssetService {
                 hasContractView = 0;
                 hasPay = 0;
                 break;
+            case 999944:
+                //天企汇（中天）要求能够显示上传凭证按钮
+            	hasUploadCertificate = 1;
+                break;
             default:
                 break;
         }
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
+        dto.setHasUploadCertificate(hasUploadCertificate);
         return dto;
     }
 
