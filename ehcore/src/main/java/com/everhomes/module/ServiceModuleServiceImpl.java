@@ -17,6 +17,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.parkingtest.ParkingLotTest;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
@@ -48,6 +49,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
+import com.mysql.jdbc.log.Log;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1207,4 +1210,37 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         return handler;
     }
+    
+	@Override
+	public List<Long> findServiceModuleBtnList(Long moduleId) {
+		List<Long> functionIds = new ArrayList<>();
+
+		List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(moduleId, null);
+		if (moduleFunctions != null && moduleFunctions.size() > 0) {
+			moduleFunctions.forEach(moduleFunction -> {
+				functionIds.add(moduleFunction.getId());
+			});
+		}
+
+		return functionIds;
+	}
+
+	@Override
+	public void deleteServiceModuleFromBlack(ListServiceModuleExcludeFunctionsCommand cmd) {
+		
+		//获取ID
+		Long serviceModuleExcludeFunctionId = serviceModuleProvider.getServiceModuleFromBlackId(cmd.getNamespaceId(),cmd.getFunctionId());
+		
+		//ServiceModuleExcludeFunction module = checkServiceModule(cmd.getNamespaceId());
+        serviceModuleProvider.deleteServiceModuleFromBlack(serviceModuleExcludeFunctionId);
+	}
+
+	@Override
+	public void addServiceModuleFromBlack(ListServiceModuleExcludeFunctionsCommand cmd) {
+		
+		ServiceModuleExcludeFunction serviceModuleExcludeFunction = ConvertHelper.convert(cmd, ServiceModuleExcludeFunction.class);
+
+		serviceModuleProvider.createServiceModuleExcludeFunction(serviceModuleExcludeFunction);
+		
+	}
 }
