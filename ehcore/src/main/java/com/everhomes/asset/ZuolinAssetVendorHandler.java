@@ -921,15 +921,16 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         List<String> headList = new ArrayList<>();
         List<Integer> mandatoryIndex = new ArrayList<>();
         Integer cur = -1;
-        headList.add("账期");
-        cur++;
-        mandatoryIndex.add(1);
+        //批量导入的字段去掉账期
+        //headList.add("账期");
+        //cur++;
+        //mandatoryIndex.add(1);
         headList.add("账单开始时间");
         cur++;
-        mandatoryIndex.add(0);
+        mandatoryIndex.add(1);//账期开始时间置为必填
         headList.add("账单结束时间");
         cur++;
-        mandatoryIndex.add(0);
+        mandatoryIndex.add(1);//账期结束时间置为必填
         headList.add("客户属性");
         cur++;
         mandatoryIndex.add(1);
@@ -1164,9 +1165,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         cmd.setCustomerTel(data[j]);
                     }
                 }
-                else if(headers[j].equals("账单开始时间")){
+                else if(headers[j].equals("*账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("账单结束时间")){
+                }else if(headers[j].equals("*账单结束时间")){
                     cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
                 }else if(headers[j].equals("合同编号")){
                     cmd.setContractNum(data[j]);

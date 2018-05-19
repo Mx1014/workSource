@@ -746,13 +746,19 @@ public class AssetServiceImpl implements AssetService {
             detail.setDateStr(dto.getDateStr());
             // 增加发票单号 by wentian 2018/4/27
             detail.setInvoiceNum(dto.getInvoiceNum());
+            // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
+            detail.setDateStrBegin(dto.getDateStrBegin());
+            detail.setDateStrEnd(dto.getDateStrEnd());
+            detail.setBuildingName(dto.getBuildingName());
+            detail.setApartmentName(dto.getApartmentName());
+            detail.setCustomerTel(dto.getCustomerTel());
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
+        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","buildingName","apartmentName","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
+        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋名称","门牌名称","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
                 , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
