@@ -51,4 +51,5 @@ public interface FieldProvider {
     Field findField(Long groupId, String fieldName);
     Field findField(String moduleName, String name, String groupPath);
 
+    List<Field> listMandatoryFields(String moduleName, String s);
 }

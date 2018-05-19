@@ -1738,6 +1738,8 @@ public class FieldServiceImpl implements FieldService {
                 if(scopeFieldGroup.getId() == null) {
                     scopeFieldGroup.setCreatorUid(userId);
                     fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                    //add default fileds and items
+                    updateFieldGroupWithDefaultFieldsAndItems(scopeFieldGroup);
                 } else {
                     ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
                     if(exist != null) {
@@ -1764,6 +1766,20 @@ public class FieldServiceImpl implements FieldService {
                 //删除组下的字段和选项
                 Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
                 inactiveScopeField(scopeFieldMap);
+            });
+        }
+    }
+
+    private void updateFieldGroupWithDefaultFieldsAndItems(ScopeFieldGroup scopeFieldGroup) {
+        List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId().toString());
+        if(systemFields!=null && systemFields.size()>0){
+            systemFields.forEach((field) -> {
+                ScopeField scopeField = new ScopeField();
+                scopeField = ConvertHelper.convert(field, ScopeField.class);
+                scopeField.setNamespaceId(scopeFieldGroup.getNamespaceId());
+                scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
+                scopeField.setCreatorUid(UserContext.currentUserId());
+                fieldProvider.createScopeField(scopeField);
             });
         }
     }
