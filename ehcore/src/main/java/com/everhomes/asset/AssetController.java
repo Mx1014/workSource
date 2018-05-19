@@ -1296,7 +1296,20 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
-
+    
+    /**
+     * <p>展示未缴费但是上传了缴费凭证的已出账单</p>
+     * <b>URL: /asset/listSettledBillWithCertificate</b>
+     */
+    @RequestMapping("listSettledBillWithCertificate")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBillWithCertificate(ListBillsCommand cmd) {
+        ListBillsResponse listBillsResponse = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 

@@ -483,6 +483,7 @@ public class AssetProviderImpl implements AssetProvider {
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
         Integer paymentType = cmd.getPaymentType();
+        Byte isUploadCertificate = cmd.getIsUploadCertificate();
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -522,6 +523,10 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(paymentType!=null){
             query.addConditions(t.PAYMENT_TYPE.eq(paymentType));
+        }
+        //只查询上传了缴费凭证的记录
+        if(isUploadCertificate!=null && isUploadCertificate == 1){
+        	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
         }
         query.addOrderBy(t.DATE_STR.desc());
 //        query.addGroupBy(t.TARGET_NAME);
@@ -4254,6 +4259,7 @@ public class AssetProviderImpl implements AssetProvider {
     		//更新上传凭证时附带的留言
             dslContext.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE, certificateNote)
+                    .set(Tables.EH_PAYMENT_BILLS.IS_UPLOAD_CERTIFICATE, (byte)1)
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             //删除之前EH_PAYMENT_BILL_CERTIFICATE表中与该billId相关联的缴费凭证的记录
