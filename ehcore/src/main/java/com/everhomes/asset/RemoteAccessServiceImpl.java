@@ -150,20 +150,41 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
         paymentBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
         paymentBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
-        paymentBillDTO.setOrderRemark2("1098");
+        paymentBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
         paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));
-        paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号
+        paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
         paymentBillDTO.setPaymentStatus(1);//支付状态: 0未支付,1支付成功,2挂起,3失败
         paymentBillDTO.setPaymentType(8);//支付方式，微信/支付宝/对公转账
         paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
         paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
         paymentBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
         paymentBillDTO.setUserId(Long.parseLong("1210"));
-        putOrderInfo(paymentBillDTO);
-        result.getList().add(paymentBillDTO);
+        //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
+        putOrderInfo(paymentBillDTO, listBillDetailVOs);//组装订单信息
+        for(int i = 0;i < listBillDetailVOs.size();i++) {
+        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
+        	if(listBillDetailVO != null) {
+        		PaymentBillResp p2 = new PaymentBillResp();
+        		p2 = (PaymentBillResp) paymentBillDTO.clone();
+        		p2.setBillId(listBillDetailVO.getBillId());
+        		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
+        		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
+        		p2.setTargetName(listBillDetailVO.getTargetName());
+        		p2.setTargetType(listBillDetailVO.getTargetType());
+        		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
+        		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
+        		p2.setBuildingName(listBillDetailVO.getBuildingName());
+        		p2.setApartmentName(listBillDetailVO.getApartmentName());
+        		if(listBillDetailVO.getBillGroupDTO() != null) {
+        			p2.setBillGroupName(listBillDetailVO.getBillGroupDTO().getBillGroupName());
+        			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
+        			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
+        		}
+        		result.getList().add(p2);
+        	}
+        }
         //杨崇鑫用于测试 结束
-        
-        
         
         
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
@@ -176,7 +197,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         return result;
     }
 
-    private void putOrderInfo(PaymentBillResp dto) {
+    private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs) {
         String orderRemark2 = dto.getOrderRemark2();
         Long orderId = null;
         try{
@@ -207,6 +228,17 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         User userById = userProvider.findUserById(order.getUid());
         dto.setPayerName(userById.getNickName());
         dto.setPayerTel(userById.getAccountName());
+        //获取账单信息：若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+        for( int i = 0; i < orderBills.size(); i ++){
+            AssetPaymentOrderBills orderBill = orderBills.get(i);
+            try{
+                Long billId = Long.parseLong(orderBill.getBillId());
+                ListBillDetailVO listBillDetailVO = assetProvider.listBillDetailForPayment(billId);
+                listBillDetailVOs.add(listBillDetailVO);
+            }catch(Exception e){
+                continue;
+            }
+        }
     }
 
     private void processAmount(PaymentBillResp paymentBill, ListPaymentBillCmd cmd) {

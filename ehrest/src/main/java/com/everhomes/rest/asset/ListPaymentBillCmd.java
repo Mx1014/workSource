@@ -32,6 +32,8 @@ import java.util.List;
  * <li>organizationId:客户id，客户类型为企业时，organizationId为企业id</li>
  * <li>orderType:账单类型，如：wuyeCode</li>
  * <li>targetName:客户名称</li>
+ * <li>paymentOrderNum:订单编号，如：954650447962984448，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。</li>
+ * <li>billId:账单id</li>
  *</ul>
 */
 public class ListPaymentBillCmd {
@@ -97,6 +99,8 @@ public class ListPaymentBillCmd {
     
     //客户名称
     private String targetName;
+    //账单id
+    private Long billId;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -229,5 +233,13 @@ public class ListPaymentBillCmd {
 
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
+	}
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
 	}
 }

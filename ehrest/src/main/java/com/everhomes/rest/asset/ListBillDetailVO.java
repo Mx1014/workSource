@@ -3,16 +3,36 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/8/18.
  */
-
+/**
+ *<ul>
+ * <li>billId:账单id</li>
+ * <li>dateStr:账期</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
+ * <li>contractNum:合同编号</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>apartmentName: 门牌名称</li>
+ * <li>noticeTel:催缴电话</li>
+ * <li>targetName:客户名称</li>
+ * <li>targetId:客户id</li>
+ * <li>targetType:客户type</li>
+ * <li>amountReceivable:应收(元)</li>
+ * <li>amountReceived:实收(元)</li>
+ * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ *</ul>
+ */
 public class ListBillDetailVO {
     private Long billId;
     private Long billGroupId;
     private String dateStr;
+    private String dateStrBegin;
+    private String dateStrEnd;
     private String noticeTel;
     private String targetName;
     private String targetType;
@@ -23,7 +43,10 @@ public class ListBillDetailVO {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
-
+    
+    private BigDecimal amountReceivable;
+    private BigDecimal amountReceived;
+    
     public String getInvoiceNum() {
         return invoiceNum;
     }
@@ -121,4 +144,36 @@ public class ListBillDetailVO {
     public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
         this.billGroupDTO = billGroupDTO;
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public BigDecimal getAmountReceivable() {
+		return amountReceivable;
+	}
+
+	public void setAmountReceivable(BigDecimal amountReceivable) {
+		this.amountReceivable = amountReceivable;
+	}
+
+	public BigDecimal getAmountReceived() {
+		return amountReceived;
+	}
+
+	public void setAmountReceived(BigDecimal amountReceived) {
+		this.amountReceived = amountReceived;
+	}
 }

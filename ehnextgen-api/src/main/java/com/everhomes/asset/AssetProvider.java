@@ -312,4 +312,6 @@ public interface AssetProvider {
     boolean checkBillExistById(Long billId);
 
     String getAddressByBillId(Long id);
+    
+    ListBillDetailVO listBillDetailForPayment(Long billId);
 }
