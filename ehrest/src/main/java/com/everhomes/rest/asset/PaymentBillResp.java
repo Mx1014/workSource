@@ -23,12 +23,12 @@ import java.util.Date;
  * <li>orderAmount:交易金额</li>
  * <li>amount:入账金额</li>
  * <li>feeAmount:手续费</li>
- * <li>paymentStatus:paymentStatus:支付状态: 3rd plat :0-fail 1-unpay 2-success？？？？？
+ * <li>paymentStatus:支付状态: 0未支付,1支付成功,2挂起,3失败
  * 		转换为业务系统的订单状态：已完成/订单异常</li>
  * <li>settlementStatus:结算状态：已结算/待结算</li> 
  * <li>orderRemark1:业务系统自定义字段（要求传订单来源）：wuyeCode</li>
  * <li>orderRemark2:</li>
- * <li>paymentOrderId:订单的实际数据库ID？？？</li>
+ * <li>paymentOrderId:</li>
  * <li>payerName[String]:缴费人</li>
  * <li>payerTel[String]:缴费人电话</li>	
  *</ul>

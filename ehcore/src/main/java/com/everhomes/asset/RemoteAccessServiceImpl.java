@@ -151,9 +151,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
         paymentBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
         paymentBillDTO.setOrderRemark2("1098");
-        paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));//订单的实际数据库ID？？？
+        paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));
         paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号
-        paymentBillDTO.setPaymentStatus(2);//支付状态: 3rd plat :0-fail 1-unpay 2-success？？？？
+        paymentBillDTO.setPaymentStatus(1);//支付状态: 0未支付,1支付成功,2挂起,3失败
         paymentBillDTO.setPaymentType(8);//支付方式，微信/支付宝/对公转账
         paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
         paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
