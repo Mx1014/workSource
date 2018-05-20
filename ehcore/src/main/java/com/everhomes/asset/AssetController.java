@@ -1287,7 +1287,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("exportOrders")
     public HttpServletResponse exportOrders(ListPaymentBillCmd cmd,HttpServletResponse response) {
-        //assetService.exportPaymentBills(cmd,response);
+        assetService.exportOrders(cmd,response);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);

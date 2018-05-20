@@ -24,6 +24,8 @@ import java.util.List;
  * <li>targetType:客户type</li>
  * <li>amountReceivable:应收(元)</li>
  * <li>amountReceived:实收(元)</li>
+ * <li>amoutExemption:减免(元)</li>
+ * <li>amountSupplement:增收(元)</li>
  * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  *</ul>
  */
@@ -46,6 +48,8 @@ public class ListBillDetailVO {
     
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
+    private BigDecimal amoutExemption;
+    private BigDecimal amountSupplement;
     
     public String getInvoiceNum() {
         return invoiceNum;
@@ -175,5 +179,21 @@ public class ListBillDetailVO {
 
 	public void setAmountReceived(BigDecimal amountReceived) {
 		this.amountReceived = amountReceived;
+	}
+
+	public BigDecimal getAmoutExemption() {
+		return amoutExemption;
+	}
+
+	public void setAmoutExemption(BigDecimal amoutExemption) {
+		this.amoutExemption = amoutExemption;
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
 	}
 }

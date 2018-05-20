@@ -42,6 +42,8 @@ import com.everhomes.discover.ItemType;
  * <li>targetType:客户类型</li>
  * <li>amountReceivable:应收(元),应收=应收-减免+增收</li>
  * <li>amountReceived:实收(元)</li>
+ * <li>amoutExemption:减免(元)</li>
+ * <li>amountSupplement:增收(元)</li>
  * <li>buildingName[String]:楼栋名称</li>
  * <li>apartmentName[String]:门牌名称</li>
  * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
@@ -76,6 +78,8 @@ public class PaymentBillResp implements Cloneable{
     private String targetType;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
+    private BigDecimal amoutExemption;
+    private BigDecimal amountSupplement;
     private String buildingName;
     private String apartmentName;
     @ItemType(BillItemDTO.class)
@@ -295,5 +299,21 @@ public class PaymentBillResp implements Cloneable{
 
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+
+	public BigDecimal getAmoutExemption() {
+		return amoutExemption;
+	}
+
+	public void setAmoutExemption(BigDecimal amoutExemption) {
+		this.amoutExemption = amoutExemption;
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
 	}
 }

@@ -1461,6 +1461,8 @@ public class AssetProviderImpl implements AssetProvider {
                     	vo.setAmountReceivable(BigDecimal.ZERO);
                     }
                     vo.setAmountReceived(f.getValue(r.AMOUNT_RECEIVED));//实收
+                    vo.setAmoutExemption(amoutExemption);//减免
+                    vo.setAmountSupplement(amountSupplement);//增收
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME)

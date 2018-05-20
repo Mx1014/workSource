@@ -185,4 +185,6 @@ public interface AssetService {
     void modifySettledBill(ModifySettledBillCommand cmd);
     
     JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 }

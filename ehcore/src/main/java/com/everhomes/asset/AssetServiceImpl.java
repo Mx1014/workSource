@@ -763,6 +763,68 @@ public class AssetServiceImpl implements AssetService {
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
+    
+    public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(Long.parseLong("5000"));
+        }
+        ListPaymentBillResp result;
+		try {
+			result = paymentService.listPaymentBill(cmd);
+			List<PaymentBillResp> dtos = result.getList();
+	        Calendar c = newClearedCalendar();
+	        int year = c.get(Calendar.YEAR);
+	        int month = c.get(Calendar.MONTH);
+	        int date = c.get(Calendar.DATE);
+	        int hour = c.get(Calendar.HOUR_OF_DAY);
+	        int minute = c.get(Calendar.MINUTE);
+	        int second = c.get(Calendar.SECOND);
+	        String fileName = "payment"+year+month+date+hour+minute+ second;
+
+	        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
+	        //组装datalist来确定propertyNames的值
+	        for(int i = 0; i < dtos.size(); i++) {
+	        	PaymentBillResp dto = dtos.get(i);
+	        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+	            //detail.setAmountReceivable(dto.getAmountReceivable().toString());
+	            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+	            detail.setBillGroupName(dto.getBillGroupName());
+	            //组装所有的收费项信息
+	            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+	            String billItemListMsg = "";
+	            if(billItemDTOList != null) {
+	            	for(int j = 0; j < billItemDTOList.size();j++) {
+	            		BillItemDTO billItemDTO = billItemDTOList.get(j);
+	            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "，";
+	            	}
+	            }
+	            detail.setBillItemListMsg(billItemListMsg);
+	            detail.setTargetName(dto.getTargetName());
+	            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+	            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+	            detail.setPaymentType("微信/支付宝/对公转账");//？？？？？
+	            detail.setAmountReceived(dto.getAmountReceived());
+	            detail.setAmountReceivable(dto.getAmountReceivable());
+	            detail.setAmoutExemption(dto.getAmoutExemption());
+	            detail.setAmountSupplement(dto.getAmountSupplement());
+	            detail.setPayTime(dto.getPayTime());
+	            detail.setPayerTel(dto.getPayerTel());
+	            detail.setPayerName(dto.getPayerName());
+	            //组装楼栋门牌
+	            detail.setBuildingApartmentName(dto.getBuildingName() + "/" + dto.getApartmentName());
+	            dataList.add(detail);
+	        }
+	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
+	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","payTime","payerTel","payerName","buildingApartmentName"};
+	        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
+	        		"实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
+	        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+		} catch (Exception e) {
+			LOGGER.error("exportOrders cmd={}, Exception={}", cmd, e);
+		}
+    }
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {

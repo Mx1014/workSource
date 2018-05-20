@@ -174,6 +174,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		p2.setTargetType(listBillDetailVO.getTargetType());
         		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
         		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
+        		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
+        		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
         		p2.setBuildingName(listBillDetailVO.getBuildingName());
         		p2.setApartmentName(listBillDetailVO.getApartmentName());
         		if(listBillDetailVO.getBillGroupDTO() != null) {
