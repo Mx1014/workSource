@@ -3,6 +3,7 @@ package com.everhomes.rest.asset;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/9/28.
@@ -17,7 +18,7 @@ import java.util.Date;
  * <li>userId:用户ID</li>
  * <li>orderNo: 支付流水号，如：WUF00000000000001098</li> 
  * <li>paymentOrderNum:订单编号，如：954650447962984448</li>
- * <li>payTime:交易时间</li>
+ * <li>payTime:交易时间（缴费时间）</li>
  * <li>paymentType:支付方式，微信/支付宝/对公转账</li>
  * <li>transactionType:交易类型，如：手续费/充值/提现/退款等</li>
  * <li>orderAmount:交易金额</li>
@@ -29,8 +30,20 @@ import java.util.Date;
  * <li>orderRemark1:业务系统自定义字段（要求传订单来源）：wuyeCode</li>
  * <li>orderRemark2:</li>
  * <li>paymentOrderId:</li>
- * <li>payerName[String]:缴费人</li>
- * <li>payerTel[String]:缴费人电话</li>	
+ * <li>payerName:缴费人</li>
+ * <li>payerTel:缴费人电话</li>
+ * 
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
+ * <li>billGroupName:账单组名称</li>
+ * <li>targetName:客户名称</li>
+ * <li>targetType:客户类型</li>
+ * <li>amountReceivable:应收(元),应收=实收+减免-增收</li>
+ * <li>amountReceived:实收(元)</li>
+ * <li>buildingName[String]:楼栋名称</li>
+ * <li>apartmentName[String]:门牌名称</li>
+ * <li>billDTOS:账单的收费项目的集合，参考{@link BillDTO}</li>
+ * <li>listBillExemptionItemsDTOs: 账单的增减免项，参考{@link ListBillExemptionItemsDTO}</li>
  *</ul>
  */
 public class PaymentBillResp {
@@ -52,7 +65,19 @@ public class PaymentBillResp {
     private String orderSource;
     private String payerName;
     private String payerTel;
-
+    
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String billGroupName;
+    private String targetName;
+    private String targetType;
+    private BigDecimal amountReceivable;
+    private BigDecimal amountReceived;
+    private String buildingName;
+    private String apartmentName;
+    private List<BillDTO> billDTOS;
+    private List<ListBillExemptionItemsDTO> listBillExemptionItemsDTOs;
+    
     public String getPayerTel() {
         return payerTel;
     }
@@ -166,4 +191,92 @@ public class PaymentBillResp {
     public void setPaymentOrderId(Long paymentOrderId) {
         this.paymentOrderId = paymentOrderId;
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public BigDecimal getAmountReceivable() {
+		return amountReceivable;
+	}
+
+	public void setAmountReceivable(BigDecimal amountReceivable) {
+		this.amountReceivable = amountReceivable;
+	}
+
+	public BigDecimal getAmountReceived() {
+		return amountReceived;
+	}
+
+	public void setAmountReceived(BigDecimal amountReceived) {
+		this.amountReceived = amountReceived;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public List<BillDTO> getBillDTOS() {
+		return billDTOS;
+	}
+
+	public void setBillDTOS(List<BillDTO> billDTOS) {
+		this.billDTOS = billDTOS;
+	}
+
+	public List<ListBillExemptionItemsDTO> getListBillExemptionItemsDTOs() {
+		return listBillExemptionItemsDTOs;
+	}
+
+	public void setListBillExemptionItemsDTOs(List<ListBillExemptionItemsDTO> listBillExemptionItemsDTOs) {
+		this.listBillExemptionItemsDTOs = listBillExemptionItemsDTOs;
+	}
 }

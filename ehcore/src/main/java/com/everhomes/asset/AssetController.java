@@ -1281,5 +1281,18 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
     
+    /**
+     * <p>导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrders</b>
+     */
+    @RequestMapping("exportOrders")
+    public HttpServletResponse exportOrders(ListPaymentBillCmd cmd,HttpServletResponse response) {
+        //assetService.exportPaymentBills(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
 }
 
