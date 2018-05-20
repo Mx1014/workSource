@@ -1773,6 +1773,7 @@ public class FieldServiceImpl implements FieldService {
     private void updateFieldGroupWithDefaultFieldsAndItems(ScopeFieldGroup scopeFieldGroup) {
         List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId().toString());
         if(systemFields!=null && systemFields.size()>0){
+            // auto init default fields and items
             systemFields.forEach((field) -> {
                 ScopeField scopeField = new ScopeField();
                 scopeField = ConvertHelper.convert(field, ScopeField.class);
@@ -1780,6 +1781,17 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
                 scopeField.setCreatorUid(UserContext.currentUserId());
                 fieldProvider.createScopeField(scopeField);
+                if(field.getFieldParam().contains("select")){
+                    List<FieldItem> systemItems = fieldProvider.listFieldItems(field.getId());
+                    if(systemItems!=null && systemItems.size()>0){
+                        systemItems.forEach((r)->{
+                            ScopeFieldItem scopeFieldItem = ConvertHelper.convert(r, ScopeFieldItem.class);
+                            scopeFieldItem.setCommunityId(scopeFieldGroup.getCommunityId());
+                            scopeFieldItem.setNamespaceId(scopeFieldGroup.getNamespaceId());
+                            fieldProvider.createScopeFieldItem(scopeFieldItem);
+                        });
+                    }
+                }
             });
         }
     }
