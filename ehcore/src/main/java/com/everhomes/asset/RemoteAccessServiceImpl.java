@@ -93,7 +93,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 PaymentAttributes.USER_ID.spec(),//支付系统用户id
                 PaymentAttributes.BIZ_SYSTEM_ID.spec(),//子系统id
                 PaymentAttributes.CLIENT_APP_ID.spec(),//客户端id
-                PaymentAttributes.PAYMENT_TYPE.spec(),//支付类型
+                //支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+                //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+                PaymentAttributes.PAYMENT_TYPE.spec(),
                 PaymentAttributes.PAYMENT_STATUS.spec(),//支付状态: 0未支付,1支付成功,2挂起,3失败
                 PaymentAttributes.PAYMENT_STATUS_UPDATE_TIME.spec(),//状态更新时间
                 PaymentAttributes.SETTLEMENT_TYPE.spec(),//结算类型 0 ，7
@@ -407,14 +409,31 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             QueryCondition tempCondition = PaymentAttributes.USER_ID.eq(cmd.getUserId());
             condition = tempCondition;
         }
+        //订单状态为已完成与订单异常，订单异常为已付款但接口返回异常等特殊情况。付款中途终止的情况不会出现在交易明细记录中
+        //业务系统：paymentStatus订单状态：1：已完成，0：订单异常
+        //电商系统：paymentStatus支付状态: 0未支付,1支付成功,2挂起,3失败
+        //订单异常：2挂起,3失败
+        //付款中途终止的情况不会出现在交易明细记录中;
+        if(condition == null) {
+            condition = PaymentAttributes.PAYMENT_STATUS.neq("0");
+        } else {
+            condition = condition.and(PaymentAttributes.PAYMENT_STATUS.neq("0"));
+        }
         if(cmd.getPaymentStatus() != null) {
-            QueryCondition tempCondition = PaymentAttributes.PAYMENT_STATUS.eq(cmd.getPaymentStatus());
+        	QueryCondition tempCondition = null;
+        	if(cmd.getPaymentStatus() == 1) {//1：已完成
+        		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq(cmd.getPaymentStatus());
+        	}else {//0：订单异常，对应电商系统的：2挂起,3失败
+        		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq("2");
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_STATUS.eq("3"));
+        	}
             if(condition == null) {
                 condition = tempCondition;
             } else {
                 condition = condition.and(tempCondition);
             }
         }
+        
         if(cmd.getSettlementStatus() != null) {
             QueryCondition tempCondition = PaymentAttributes.SETTLEMENT_STATUS.eq(cmd.getSettlementStatus());
             if(condition == null) {
@@ -423,27 +442,28 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
-//        if(cmd.getStartPayTime() != null) {
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//            Date start = sdf.parse(cmd.getStartPayTime());
-//            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
-//            if(condition == null) {
-//                condition = tempCondition;
-//            } else {
-//                condition = condition.and(tempCondition);
-//            }
-//        }
-//        if(cmd.getEndPayTime() != null) {
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//            Date end = sdf.parse(cmd.getEndPayTime());
-//            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
-//            if(condition == null) {
-//                condition = tempCondition;
-//            } else {
-//                condition = condition.and(tempCondition);
-//            }
-//        }
-        if(cmd.getPayTime() != null) {
+        //缴费时间字段精确到时分，筛选缴费时间到天即可
+        if(cmd.getStartPayTime() != null) {
+        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+            Date start = sdf.parse(cmd.getStartPayTime());
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
+            if(condition == null) {
+                condition = tempCondition;
+            } else {
+                condition = condition.and(tempCondition);
+            }
+        }
+        if(cmd.getEndPayTime() != null) {
+        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+            Date end = sdf.parse(cmd.getEndPayTime());
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
+            if(condition == null) {
+                condition = tempCondition;
+            } else {
+                condition = condition.and(tempCondition);
+            }
+        }
+        /*if(cmd.getPayTime() != null) {
 //            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
             SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date time = sdf.parse(cmd.getPayTime());
@@ -472,7 +492,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             } else {
                 condition = condition.and(tempCondition1);
             }
-        }
+        }*/
         if(StringUtils.isNotBlank(cmd.getOrderNo())) {
             QueryCondition tempCondition = PaymentAttributes.BIZ_ORDER_NUM.eq(cmd.getOrderNo());
             if(condition == null) {
@@ -489,8 +509,24 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
+        //业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
         if(cmd.getPaymentType() != null) {
-            QueryCondition tempCondition = PaymentAttributes.PAYMENT_TYPE.eq(cmd.getPaymentType());
+        	QueryCondition tempCondition = null;
+        	if(cmd.getPaymentType() == 0) {//微信
+        		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("1");
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("7"));
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("9"));
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("12"));
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("21"));
+        	}else if(cmd.getPaymentType() == 1) {//支付宝
+        		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("8");
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("10"));
+        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("13"));
+        	}else {//对公转账
+        		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("2");
+        	}
             if(condition == null) {
                 condition = tempCondition;
             } else {
