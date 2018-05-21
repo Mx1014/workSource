@@ -15,6 +15,14 @@ public class BaseVisitorEnterpriseDTO {
     private Long enterpriseId;
     private String enterpriseName;
 
+    public BaseVisitorEnterpriseDTO(Long enterpriseId, String enterpriseName) {
+        this.enterpriseId = enterpriseId;
+        this.enterpriseName = enterpriseName;
+    }
+
+    public BaseVisitorEnterpriseDTO() {
+    }
+
     public Long getEnterpriseId() {
         return enterpriseId;
     }

@@ -2,33 +2,32 @@
 package com.everhomes.rest.visitorsys;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
   *<ul>
- * <li>formConfig: (选填)表单配置列表，{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formConfig: (选填)表单配置列表，{@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
   *</ul>
   */
 
 public class GetFormForWebResponse {
-    @ItemType(GeneralFormFieldDTO.class)
-    private List<GeneralFormFieldDTO> formConfig;
+    @ItemType(VisitorsysApprovalFormItem.class)
+    private List<VisitorsysApprovalFormItem> formConfig;
 
-    public GetFormForWebResponse(List<GeneralFormFieldDTO> formConfig) {
+    public GetFormForWebResponse(List<VisitorsysApprovalFormItem> formConfig) {
         this.formConfig = formConfig;
     }
 
     public GetFormForWebResponse() {
     }
 
-    public List<GeneralFormFieldDTO> getFormConfig() {
+    public List<VisitorsysApprovalFormItem> getFormConfig() {
         return formConfig;
     }
 
-    public void setFormConfig(List<GeneralFormFieldDTO> formConfig) {
+    public void setFormConfig(List<VisitorsysApprovalFormItem> formConfig) {
         this.formConfig = formConfig;
     }
 

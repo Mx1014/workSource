@@ -32,7 +32,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
@@ -252,7 +251,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
-        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 
 //        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
 //        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
@@ -263,11 +262,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //        }
 //        response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
         List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
-        Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        if(organization!=null) {
+        if(ownerType.ENTERPRISE==ownerType){
+            Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+            if(organization!=null) {
+                BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
+                dto.setId(cmd.getOwnerId());
+                dto.setOfficeLocationName(organization.getName());
+                officeLocationList.add(dto);
+            }
+        }else {
+            Community community = communityProvider.findCommunityById(cmd.getOwnerId());
             BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
             dto.setId(cmd.getOwnerId());
-            dto.setOfficeLocationName(organization.getName());
+            dto.setOfficeLocationName(community==null?"":community.getName());
             officeLocationList.add(dto);
         }
         response.setOfficeLocationList(officeLocationList);
@@ -278,7 +285,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListCommunityOrganizationsResponse listCommunityOrganizations(ListCommunityOrganizationsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(visitorsysOwnerType==VisitorsysOwnerType.ENTERPRISE){
-            return null;
+            Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+            return new ListCommunityOrganizationsResponse(0L,
+                    new ArrayList(Arrays.asList(new BaseVisitorEnterpriseDTO(cmd.getOwnerId(),organization.getName()))));
         }
         SearchOrganizationCommand orgCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
         orgCmd.setKeyword(cmd.getKeyWords());
@@ -837,8 +846,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         GetConfigurationResponse response = new GetConfigurationResponse();
         GeneralForm forms = generalFormProvider.getActiveGeneralFormByName(VisitorsysConstant.COMMUNITY_MODULE_ID, 0L, "visitorsys", "visitorsys");
         if(forms!=null) {
-            List<GeneralFormFieldDTO> formConfig = JSONObject.parseObject(forms.getTemplateText(),
-                    new TypeReference<List<GeneralFormFieldDTO>>() {
+            List<VisitorsysApprovalFormItem> formConfig = JSONObject.parseObject(forms.getTemplateText(),
+                    new TypeReference<List<VisitorsysApprovalFormItem>>() {
                     });
             response.setFormConfig(formConfig);
         }
@@ -1695,7 +1704,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "form value is null");
         }
         Map<String, VisitorsysApprovalFormItem> map = formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x));
-        for (GeneralFormFieldDTO dto : owner.getFormConfig()) {
+        for (VisitorsysApprovalFormItem dto : owner.getFormConfig()) {
             if(dto.getRequiredFlag() ==null) {
                 continue;
             }

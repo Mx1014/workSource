@@ -2,7 +2,6 @@
 package com.everhomes.rest.visitorsys;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
  * <li>welcomePicUri: (选填)欢迎图片uri</li>
  * <li>secrecyAgreement: (选填)保密协议富文本</li>
  * <li>baseConfig: (选填)基本配置（配置中所有的是否配置和门禁配置），{@link com.everhomes.rest.visitorsys.VisitorsysBaseConfig}</li>
- * <li>formConfig: (选填)表单配置，{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formConfig: (选填)表单配置，{@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
  * <li>passCardConfig: (选填)通行证配置，{@link com.everhomes.rest.visitorsys.VisitorsysPassCardConfig}</li>
  * </ul>
  */
@@ -44,8 +43,8 @@ public class UpdateConfigurationCommand {
 
     private VisitorsysBaseConfig baseConfig;
 //    private VisitorsysFormConfig formConfig;
-    @ItemType(GeneralFormFieldDTO.class)
-    private List<GeneralFormFieldDTO> formConfig;
+    @ItemType(VisitorsysApprovalFormItem.class)
+    private List<VisitorsysApprovalFormItem> formConfig;
     private VisitorsysPassCardConfig passCardConfig;
 
     public Integer getNamespaceId() {
@@ -136,11 +135,11 @@ public class UpdateConfigurationCommand {
         this.baseConfig = baseConfig;
     }
 
-    public List<GeneralFormFieldDTO> getFormConfig() {
+    public List<VisitorsysApprovalFormItem> getFormConfig() {
         return formConfig;
     }
 
-    public void setFormConfig(List<GeneralFormFieldDTO> formConfig) {
+    public void setFormConfig(List<VisitorsysApprovalFormItem> formConfig) {
         this.formConfig = formConfig;
     }
 

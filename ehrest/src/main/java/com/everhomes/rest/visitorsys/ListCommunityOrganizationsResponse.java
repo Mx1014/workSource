@@ -17,6 +17,14 @@ public class ListCommunityOrganizationsResponse {
     @ItemType(BaseVisitorEnterpriseDTO.class)
     private List<BaseVisitorEnterpriseDTO> visitorEnterpriseList;
 
+    public ListCommunityOrganizationsResponse(Long nextPageAnchor, List<BaseVisitorEnterpriseDTO> visitorEnterpriseList) {
+        this.nextPageAnchor = nextPageAnchor;
+        this.visitorEnterpriseList = visitorEnterpriseList;
+    }
+
+    public ListCommunityOrganizationsResponse() {
+    }
+
     public Long getNextPageAnchor() {
         return nextPageAnchor;
     }

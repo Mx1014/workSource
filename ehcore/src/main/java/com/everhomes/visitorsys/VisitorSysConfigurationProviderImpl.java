@@ -6,8 +6,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem;
 import com.everhomes.rest.visitorsys.VisitorsysBaseConfig;
 import com.everhomes.rest.visitorsys.VisitorsysPassCardConfig;
 import org.jooq.DSLContext;
@@ -128,7 +127,7 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 			configuration.setBaseConfig(JSONObject.parseObject(configuration.getConfigJson(), VisitorsysBaseConfig.class));
 		}
 		if(configuration.getConfigFormJson()!=null) {
-			configuration.setFormConfig(JSONObject.parseObject(configuration.getConfigFormJson(), new TypeReference<List<GeneralFormFieldDTO>>(){}));
+			configuration.setFormConfig(JSONObject.parseObject(configuration.getConfigFormJson(), new TypeReference<List<VisitorsysApprovalFormItem>>(){}));
 		}
 		if(configuration.getConfigPassCardJson()!=null) {
 			configuration.setPassCardConfig(JSONObject.parseObject(configuration.getConfigPassCardJson(), VisitorsysPassCardConfig.class));

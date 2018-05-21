@@ -1,8 +1,8 @@
 package com.everhomes.rest.visitorsys.ui;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.visitorsys.BaseVisitorDTO;
+import com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem;
 import com.everhomes.rest.visitorsys.VisitorsysStatus;
 import com.everhomes.util.StringHelper;
 
@@ -33,8 +33,8 @@ import java.util.List;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
- * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
- * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
+ * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
  * <li>visitorPicUri: (选填)访客头像url</li>
  * <li>formJsonValue: (选填)表单提交json值</li>
  * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
@@ -48,10 +48,10 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
     private Long timestamp;
     private String deviceType;
     private String deviceId;
-    @ItemType(PostApprovalFormItem.class)
-    private List<PostApprovalFormItem> communityFormValues;
-    @ItemType(PostApprovalFormItem.class)
-    private List<PostApprovalFormItem> enterpriseFormValues;
+    @ItemType(VisitorsysApprovalFormItem.class)
+    private List<VisitorsysApprovalFormItem> communityFormValues;
+    @ItemType(VisitorsysApprovalFormItem.class)
+    private List<VisitorsysApprovalFormItem> enterpriseFormValues;
 
     private String visitorPicUri;
     private String visitorSignUri;
@@ -105,19 +105,19 @@ public class CreateOrUpdateVisitorUICommand extends BaseVisitorDTO {
         this.deviceId = deviceId;
     }
 
-    public List<PostApprovalFormItem> getCommunityFormValues() {
+    public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
         return communityFormValues;
     }
 
-    public void setCommunityFormValues(List<PostApprovalFormItem> communityFormValues) {
+    public void setCommunityFormValues(List<VisitorsysApprovalFormItem> communityFormValues) {
         this.communityFormValues = communityFormValues;
     }
 
-    public List<PostApprovalFormItem> getEnterpriseFormValues() {
+    public List<VisitorsysApprovalFormItem> getEnterpriseFormValues() {
         return enterpriseFormValues;
     }
 
-    public void setEnterpriseFormValues(List<PostApprovalFormItem> enterpriseFormValues) {
+    public void setEnterpriseFormValues(List<VisitorsysApprovalFormItem> enterpriseFormValues) {
         this.enterpriseFormValues = enterpriseFormValues;
     }
 
