@@ -132,42 +132,42 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
         
-        /*if(response.getResponse() != null && !response.getResponse().isEmpty()) {
+        if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
                     processAmount(paymentBillDTO, cmd);
                     //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
-			        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-			        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
-			        for(int i = 0;i < listBillDetailVOs.size();i++) {
-			        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
-			        	if(listBillDetailVO != null) {
-			        		PaymentBillResp p2 = new PaymentBillResp();
-			        		p2 = (PaymentBillResp) paymentBillDTO.clone();
-			        		p2.setBillId(listBillDetailVO.getBillId());
-			        		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
-			        		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
-			        		p2.setTargetName(listBillDetailVO.getTargetName());
-			        		p2.setTargetType(listBillDetailVO.getTargetType());
-			        		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
-			        		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
-			        		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
-			        		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
-			        		p2.setBuildingName(listBillDetailVO.getBuildingName());
-			        		p2.setApartmentName(listBillDetailVO.getApartmentName());
-			        		if(listBillDetailVO.getBillGroupDTO() != null) {
-			        			p2.setBillGroupName(listBillDetailVO.getBillGroupDTO().getBillGroupName());
-			        			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
-			        			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
-			        		}
-			        		result.getList().add(p2);
-			        	}
-			        }
+                    List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
+                    putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+                    for(int i = 0;i < listBillDetailVOs.size();i++) {
+                    	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
+                    	if(listBillDetailVO != null) {
+                    		PaymentBillResp p2 = new PaymentBillResp();
+                    		p2 = (PaymentBillResp) paymentBillDTO.clone();
+                    		p2.setBillId(listBillDetailVO.getBillId());
+                    		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
+                    		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
+                    		p2.setTargetName(listBillDetailVO.getTargetName());
+                    		p2.setTargetType(listBillDetailVO.getTargetType());
+                    		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
+                    		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
+                    		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
+                    		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
+                    		p2.setBuildingName(listBillDetailVO.getBuildingName());
+                    		p2.setApartmentName(listBillDetailVO.getApartmentName());
+                    		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
+                    		if(listBillDetailVO.getBillGroupDTO() != null) {
+                    			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
+                    			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
+                    		}
+                    		result.getList().add(p2);
+                    	}
+                    }
                 }
             }
-        }*/
-        //杨崇鑫用于测试 开始
+        }
+        /*//杨崇鑫用于测试 开始
         PaymentBillResp paymentBillDTO = new PaymentBillResp();
         paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
         paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
@@ -210,9 +210,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		result.getList().add(p2);
         	}
         }
-        //杨崇鑫用于测试 结束
-        
-        
+        //杨崇鑫用于测试 结束*/
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
             result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
             result.getList().remove(result.getList().size()-1);
