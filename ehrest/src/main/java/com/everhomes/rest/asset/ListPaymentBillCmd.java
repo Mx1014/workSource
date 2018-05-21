@@ -100,6 +100,8 @@ public class ListPaymentBillCmd {
     private String targetName;
     //账单id
     private Long billId;
+    private String dateStrBegin;
+    private String dateStrEnd;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -240,5 +242,21 @@ public class ListPaymentBillCmd {
 
 	public void setBillId(Long billId) {
 		this.billId = billId;
+	}
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
 	}
 }

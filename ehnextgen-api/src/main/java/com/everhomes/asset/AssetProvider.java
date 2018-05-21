@@ -313,5 +313,5 @@ public interface AssetProvider {
 
     String getAddressByBillId(Long id);
     
-    ListBillDetailVO listBillDetailForPayment(Long billId);
+    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 }

@@ -72,6 +72,7 @@ import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
@@ -1420,7 +1421,10 @@ public class AssetProviderImpl implements AssetProvider {
         return vo;
     }
     
-    public ListBillDetailVO listBillDetailForPayment(Long billId) {
+    public ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd) {
+    	if(cmd.getBillId() != null && !cmd.getBillId().equals(billId)) {
+    		return null;
+    	}
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
@@ -1431,12 +1435,22 @@ public class AssetProviderImpl implements AssetProvider {
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
-
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT)
-                .from(r)
-                .where(r.ID.eq(billId))
-                .fetch()
+        
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
+        		, r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT);
+        query.addFrom(r);
+        query.addConditions(r.ID.eq(billId));
+        if(cmd.getDateStrBegin() != null) {
+        	query.addConditions(r.DATE_STR_BEGIN.greaterOrEqual(cmd.getDateStrBegin()));
+        }
+        if(cmd.getDateStrEnd() != null) {
+        	query.addConditions(r.DATE_STR_END.lessOrEqual(cmd.getDateStrEnd()));
+        }
+        if(cmd.getTargetName() != null) {
+        	query.addConditions(r.TARGET_NAME.like("%"+cmd.getTargetName()+"%"));
+        }
+        query.fetch()
                 .map(f -> {
                     vo.setBillId(f.getValue(r.ID));
                     vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));

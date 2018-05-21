@@ -137,7 +137,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     processAmount(paymentBillDTO, cmd);
                     //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
 			        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-			        putOrderInfo(paymentBillDTO, listBillDetailVOs);//组装订单信息
+			        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
 			        for(int i = 0;i < listBillDetailVOs.size();i++) {
 			        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
 			        	if(listBillDetailVO != null) {
@@ -183,7 +183,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBillDTO.setUserId(Long.parseLong("1210"));
         //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-        putOrderInfo(paymentBillDTO, listBillDetailVOs);//组装订单信息
+        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
         for(int i = 0;i < listBillDetailVOs.size();i++) {
         	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
         	if(listBillDetailVO != null) {
@@ -220,7 +220,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         return result;
     }
 
-    private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs) {
+    private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
         String orderRemark2 = dto.getOrderRemark2();
         Long orderId = null;
         try{
@@ -256,8 +256,20 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             AssetPaymentOrderBills orderBill = orderBills.get(i);
             try{
                 Long billId = Long.parseLong(orderBill.getBillId());
-                ListBillDetailVO listBillDetailVO = assetProvider.listBillDetailForPayment(billId);
-                listBillDetailVOs.add(listBillDetailVO);
+                if(cmd.getBillId() != null) {
+                	//如果命令中有传billId，则要根据billId进行查询
+                	if(cmd.getBillId().equals(billId)) {
+                		ListBillDetailVO listBillDetailVO = assetProvider.listBillDetailForPayment(billId, cmd);
+                		if(listBillDetailVO != null && listBillDetailVO.getBillId() != null) {
+                			listBillDetailVOs.add(listBillDetailVO);
+                		}
+                	}
+                }else {
+                	ListBillDetailVO listBillDetailVO = assetProvider.listBillDetailForPayment(billId, cmd);
+                	if(listBillDetailVO != null && listBillDetailVO.getBillId() != null) {
+            			listBillDetailVOs.add(listBillDetailVO);
+            		}
+                }
             }catch(Exception e){
                 continue;
             }
