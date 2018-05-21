@@ -1330,6 +1330,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //表明该公司是否是管理公司 1-是 0-否
             if(cmd.getPmFlag() != null){
                 organization.setPmFlag(cmd.getPmFlag().byteValue());
+                organization.setOrganizationType(OrganizationType.PM.getCode());
             }
             //表明该公司是否是服务商，1-服务商 0-否
             if(cmd.getServiceSupportFlag() != null){
