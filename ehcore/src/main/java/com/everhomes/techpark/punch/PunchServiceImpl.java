@@ -369,6 +369,8 @@ public class PunchServiceImpl implements PunchService {
     private GeneralApprovalService generalApprovalService;
 
     @Autowired
+    private PunchMonthReportProvider punchMonthReportProvider;
+    @Autowired
     private SequenceProvider sequenceProvider;
 
     @Autowired
@@ -9710,7 +9712,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd) {
-	
+		ListPunchMonthReportsResponse resp = new ListPunchMonthReportsResponse();
 		return new ListPunchMonthReportsResponse();
 	}
 
