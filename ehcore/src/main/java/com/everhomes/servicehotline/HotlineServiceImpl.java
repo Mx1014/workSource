@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -580,7 +581,7 @@ public class HotlineServiceImpl implements HotlineService {
 		// 获取聊天记录
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, servicerDto, customerDto);
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, cmd.getNamespaceId(), servicerDto, customerDto);
 
 		// 设置返回数据
 		GetChatRecordListResponse rsp = new GetChatRecordListResponse();
@@ -635,26 +636,70 @@ public class HotlineServiceImpl implements HotlineService {
 	/**
 	 * 获取聊天记录的逻辑处理
 	 */
-	private List<ChatRecordDTO> getChatRecordList(Integer pageSize, ListingLocator locator, TargetDTO servicerDto,
+	private List<ChatRecordDTO> getChatRecordList(Integer inputPageSize, ListingLocator locator, Integer namespaceId, TargetDTO servicerDto,
 			TargetDTO customerDto) {
 
 		// 判空
-		if (null == servicerDto || null == customerDto) {
+		if (null == servicerDto || null == customerDto || null == servicerDto.getTargetId()
+				|| null == customerDto.getTargetId()) {
 			return null;
 		}
 
-		// 获取会话列表
-		int finalPageSize = null == pageSize ? 0 : pageSize;
-		List<MessageRecord> msgRecList = messageProvider.listMessageRecords(finalPageSize, locator, (l, q) -> {
-			return buildChatRecordQuery(l, q, pageSize, servicerDto.getTargetId(), customerDto.getTargetId());
+		// 获取客服发送列表
+		Long anchor = locator.getAnchor();
+		int pageSize = null == inputPageSize ? 0 : inputPageSize;
+		List<MessageRecord> servicerList = messageProvider.listMessageRecords(pageSize + 1, locator, (l, q) -> {
+			return buildChatRecordQuery(l, q, pageSize + 1, namespaceId, servicerDto.getTargetId(), customerDto.getTargetId());
 		});
-
+		
+		// 获取用户发送列表
+		List<MessageRecord> customerList = null;
+		locator.setAnchor(anchor);
+		if (!servicerDto.getTargetId().equals(customerDto.getTargetId())) {
+			customerList = messageProvider.listMessageRecords(pageSize + 1, locator, (l, q) -> {
+				return buildChatRecordQuery(l, q, pageSize + 1, namespaceId, customerDto.getTargetId(), servicerDto.getTargetId());
+			});
+		}
+		
+		// 合并记录
+		List<MessageRecord> totalMsgList = new ArrayList<>();
+		if (!CollectionUtils.isEmpty(servicerList)) {
+			totalMsgList.addAll(servicerList);
+		}
+		
+		if (!CollectionUtils.isEmpty(customerList)) {
+			totalMsgList.addAll(customerList);
+		}
+		
+		// 判空
+		if (CollectionUtils.isEmpty(totalMsgList)) {
+			return null;
+		}
+		
+		
+		// 以index_id倒叙排
+		Collections.sort(totalMsgList, (cmpA, cmpB) -> {
+			return (int) (cmpB.getIndexId() - cmpA.getIndexId());
+		});
+		
+		
+		// 设置Anchor
+		int finalMsgSize = totalMsgList.size();
+        if (pageSize > 0 && totalMsgList.size() > pageSize) {
+            locator.setAnchor(totalMsgList.get(pageSize).getId());
+            finalMsgSize = pageSize;
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        
 		ChatRecordDTO dto = null;
-		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(finalPageSize);
-		for (MessageRecord msg : msgRecList) {
+		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(50);
+		for (int i = 0; i < finalMsgSize; i++) {
 			dto = new ChatRecordDTO();
+
 			// 填充查询结果
-			setChatRecord(dto, msg, servicerDto, customerDto);
+			setChatRecord(dto, totalMsgList.get(i), servicerDto, customerDto);
 			chatRecordDtos.add(dto);
 		}
 
@@ -696,7 +741,7 @@ public class HotlineServiceImpl implements HotlineService {
 		// 获取聊天记录
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, servicerDto, customerDto);
+		List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, locator, cmd.getNamespaceId(), servicerDto, customerDto);
 		if (CollectionUtils.isEmpty(chatRecordList)) {
 			return;
 		}
@@ -769,7 +814,7 @@ public class HotlineServiceImpl implements HotlineService {
 		List<String> dataList = new ArrayList<String>(1000);
 		for (ChatGroupDTO group : dtoList) {
 			// 获取聊天记录
-			List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, new ListingLocator(), group.getServicer(), group.getCustomer());
+			List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, new ListingLocator(), namespaceId, group.getServicer(), group.getCustomer());
 			if (CollectionUtils.isEmpty(chatRecordList)) {
 				continue;
 			}
@@ -809,27 +854,29 @@ public class HotlineServiceImpl implements HotlineService {
 	 * @return
 	 */
 	private SelectQuery<? extends Record> buildChatRecordQuery(ListingLocator locator,
-			SelectQuery<? extends Record> query, Integer pageSize, Long servicerId, Long customerId) {
+			SelectQuery<? extends Record> query,  Integer pageSize, Integer namespaceId, Long senderUserId, Long receiverUserId) {
 
 		final String TYPE_USER = "user";
 
 		// 对当前表取别名
 		EhMessageRecords records = Tables.EH_MESSAGE_RECORDS;
+		
+		// 增加域空间条件
+		if (null != namespaceId) {
+			query.addConditions(records.NAMESPACE_ID.eq(namespaceId));
+		}
 
-		// 条件1 客服发送的
-		Condition sendByServicer = records.SENDER_UID.eq(servicerId)
-				.and(records.DST_CHANNEL_TYPE.eq(TYPE_USER).and(records.DST_CHANNEL_TOKEN.eq("" + customerId)));
+		// 构建发送者和接收者条件
+		Condition sendCon = records.SENDER_UID.eq(senderUserId)
+				.and(records.DST_CHANNEL_TYPE.eq(TYPE_USER).and(records.DST_CHANNEL_TOKEN.eq("" + receiverUserId)));
 
-		// 条件2 用户发送的
-		Condition sendByCustomer = records.SENDER_UID.eq(customerId)
-				.and(records.DST_CHANNEL_TYPE.eq(TYPE_USER).and(records.DST_CHANNEL_TOKEN.eq("" + servicerId)));
 
-		// 条件3 固定条件: status = 'CORE_HANDLE', sender_tag = 'ROUTE MESSAGE'
+		// 固定条件: status = 'CORE_HANDLE', sender_tag = 'ROUTE MESSAGE'
 		Condition fixedCond = records.STATUS.eq(MessageRecordStatus.CORE_HANDLE.getCode())
 				.and(records.SENDER_TAG.eq(MessageRecordSenderTag.ROUTE_MESSAGE.getCode()));
 
 		// 添加条件
-		query.addConditions(sendByServicer.or(sendByCustomer));
+		query.addConditions(sendCon);
 		query.addConditions(fixedCond);
 
 		// 做分组，排序，分页
@@ -877,6 +924,9 @@ public class HotlineServiceImpl implements HotlineService {
 						return i + "";
 					}))));
 			sendByCustomer = sendByCustomer.and(records.SENDER_UID.in(customerIds));
+		} else {
+			// 去除系统用户 坑啊!
+			sendByCustomer = sendByCustomer.and(records.SENDER_UID.greaterThan(User.MAX_SYSTEM_USER_ID));
 		}
 
 		// 条件3 固定条件: status = 'CORE_HANDLE', sender_tag = 'ROUTE MESSAGE'
@@ -969,8 +1019,8 @@ public class HotlineServiceImpl implements HotlineService {
 		
 		String keyword = inputKeyword.trim();
 
-		// 1.先对手机号进行搜索
-		if (HotlineUtils.isPhoneNumber(keyword)) {
+		// 1.只要是数字，就先进行手机号搜索
+		if (HotlineUtils.isNumber(keyword)) {
 			TargetDTO target = userProvider.findUserByToken(keyword, namespaceId);
 			if (null != target) {
 				List<TargetDTO> targetList = new ArrayList<TargetDTO>(1);

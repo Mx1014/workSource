@@ -197,6 +197,7 @@ import com.everhomes.rest.customer.YearQuarter;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
@@ -3661,6 +3662,8 @@ public class CustomerServiceImpl implements CustomerService {
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
                 result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken()));
+                customer.setAdminFlag(AdminFlag.YES.getCode());
+                enterpriseCustomerSearcher.feedDoc(customer);
             }
         } else {
             result = customerAdminContacts;

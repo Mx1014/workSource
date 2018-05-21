@@ -60,7 +60,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
         for( int i = 0; i < sheetNames.size(); i++){
-            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false,true );
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false,withData );
             LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
             for(DynamicSheet sheet: sheets){
                 List<DynamicField> fields = sheet.getDynamicFields();

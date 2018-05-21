@@ -33,4 +33,23 @@ public class HotlineUtils {
 		return matcher.matches();
 	}
 	
+	/**
+	 * 判断该字符串是否数字
+	 * @param keyword
+	 * @return
+	 */
+	static boolean isNumber(String inputStr) {
+		if (null == inputStr) {
+			return false;
+		}
+		
+		for (int i = 0; i < inputStr.length(); i++) {
+            if (!Character.isDigit(inputStr.charAt(i))) {
+                return false;
+            }
+        }
+		
+        return true;
+	}
+	
 }

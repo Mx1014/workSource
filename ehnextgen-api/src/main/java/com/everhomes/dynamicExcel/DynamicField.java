@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.dynamicExcel;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class DynamicField {
     private List<String> allowedValued;
     //字段的日期格式
     private String dateFormat = "yyyy-MM-dd";
+
+    private Long groupId;
 
     public String getDateFormat() {
         return dateFormat;
@@ -90,5 +94,18 @@ public class DynamicField {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
