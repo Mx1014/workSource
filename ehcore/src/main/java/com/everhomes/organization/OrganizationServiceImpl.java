@@ -81,6 +81,7 @@ import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.*;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
@@ -8767,6 +8768,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                             return null;
                         });
 
+                    }else{
+                        //说明在该域空间下面不存在该项目，所以我们需要向前端给出提示错误
+                        LOGGER.error("community is not exists, data = {}", importEnterpriseDataDTO);
+                        throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                                "community is not exists");
                     }
                 }
             }
