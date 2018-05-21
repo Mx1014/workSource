@@ -17,7 +17,9 @@ public interface EnterpriseApprovalService {
 
     OutputStream getEnterpriseApprovalOutputStream(ListApprovalFlowRecordsCommand cmd, Long taskId);
 
-    ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd);
+    ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd);
+
+    void stopActiveApprovalFlows(ApprovalFlowIdCommand cmd);
 
     List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups();
 

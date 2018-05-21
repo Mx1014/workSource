@@ -52,14 +52,28 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterpriseApproval/listApprovalFlowMonitors</b>
+     * <b>URL: /enterpriseApproval/listActiveApprovalFlowRecords</b>
      * <p>OA 流程监控</p>
      */
     @RequestMapping("listApprovalFlowMonitors")
     @RestReturn(value = ListApprovalFlowRecordsResponse.class)
-    public RestResponse listApprovalFlowMonitors(@Valid ListApprovalFlowRecordsCommand cmd){
-        ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listApprovalFlowMonitors(cmd);
+    public RestResponse listActiveApprovalFlowRecords(@Valid ListApprovalFlowRecordsCommand cmd){
+        ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listActiveApprovalFlowRecords(cmd);
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/stopActiveApprovalFlows</b>
+     * <p>终止流程</p>
+     */
+    @RequestMapping("stopApprovalFlows")
+    @RestReturn(value = String.class)
+    public RestResponse stopActiveApprovalFlows(@Valid ApprovalFlowIdCommand cmd){
+        enterpriseApprovalService.stopActiveApprovalFlows(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

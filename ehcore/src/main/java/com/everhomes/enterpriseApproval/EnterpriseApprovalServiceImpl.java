@@ -362,8 +362,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public ListApprovalFlowRecordsResponse listApprovalFlowMonitors(ListApprovalFlowRecordsCommand cmd) {
+    public ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
         return null;
+    }
+
+    @Override
+    public void stopActiveApprovalFlows(ApprovalFlowIdCommand cmd) {
+
     }
 
     //  Whether the approval template has already been existed, check it.
