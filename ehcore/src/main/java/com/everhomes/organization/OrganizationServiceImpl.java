@@ -8349,18 +8349,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                 for(ImportEnterpriseDataDTO importEnterpriseDataDTO : list){
                     Community community = communityProvider.findCommunityByNameAndNamespaceId(importEnterpriseDataDTO.getCommunityName(),namespaceId);
 
+                    ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
                     if(community != null ){
                         //创建公司Organization类的对象
                         Organization organization = new Organization();
-                        ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
                         if (StringUtils.isEmpty(importEnterpriseDataDTO.getName())) {
                             LOGGER.error("enterprise name is null, data = {}", importEnterpriseDataDTO);
                             log.setData(importEnterpriseDataDTO);
                             log.setErrorLog("enterprise name is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY,
-                                    "enterprise name is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY,
+//                                    "enterprise name is null");
                         }
 
                         if (CollectionUtils.isEmpty(importEnterpriseDataDTO.getSiteDtos())) {
@@ -8369,8 +8370,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("buildingName and apartmentName are null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY,
-                                    "buildingName and apartmentName are null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY,
+//                                    "buildingName and apartmentName are null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getAdminToken())){
@@ -8380,8 +8382,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("adminToken is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL,
-                                    "adminToken is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL,
+//                                    "adminToken is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getAdminName())){
@@ -8391,8 +8394,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("adminName is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_ADMINNAME_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ADMINNAME_ISNULL,
-                                    "adminName is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ADMINNAME_ISNULL,
+//                                    "adminName is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getWorkPlaceName())){
@@ -8402,8 +8406,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("workPlaceName is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_WORKPLACENAME_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_WORKPLACENAME_ISNULL,
-                                    "workPlaceName is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_WORKPLACENAME_ISNULL,
+//                                    "workPlaceName is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getCommunityName())){
@@ -8413,8 +8418,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("communityName is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_COMMUNITYNAME_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_COMMUNITYNAME_ISNULL,
-                                    "communityName is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_COMMUNITYNAME_ISNULL,
+//                                    "communityName is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getPmFlag())){
@@ -8424,8 +8430,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("PmFlag is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_PMFLAG_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PMFLAG_ISNULL,
-                                    "PmFlag is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PMFLAG_ISNULL,
+//                                    "PmFlag is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getServiceSupportFlag())){
@@ -8435,8 +8442,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("serviceSupportFlag is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_SERVICESUPPORT_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SERVICESUPPORT_ISNULL,
-                                    "serviceSupportFlag is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SERVICESUPPORT_ISNULL,
+//                                    "serviceSupportFlag is null");
                         }
 
                         if(StringUtils.isEmpty(importEnterpriseDataDTO.getWorkPlatFormFlag())){
@@ -8446,8 +8454,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             log.setErrorLog("workPlatformFlag is null");
                             log.setCode(OrganizationServiceErrorCode.ERROR_WORKPLATFORM_ISNULL);
                             errorDataLogs.add(log);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_WORKPLATFORM_ISNULL,
-                                    "workPlatformFlag is null");
+                            continue;
+//                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_WORKPLATFORM_ISNULL,
+//                                    "workPlatformFlag is null");
                         }
 
                         dbProvider.execute((TransactionStatus status) -> {
@@ -8573,8 +8582,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         log.setErrorLog("building Non-existent");
                                         log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NOT_EXIST);
                                         errorDataLogs.add(log);
-                                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_BUILDING_NOT_EXIST,
-                                           "building Non-existent");
+                                        continue;
+//                                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_BUILDING_NOT_EXIST,
+//                                           "building Non-existent");
                                     }
                                     //接下来根据communityId和namespaceId和buildingName和apartmentName来查询eh_addresses表中的信息
                                     //// TODO: 2018/5/14
@@ -8586,8 +8596,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         log.setErrorLog("address Non-existent");
                                         log.setCode(OrganizationServiceErrorCode.ERROR_APARTMENT_NOT_EXIST);
                                         errorDataLogs.add(log);
-                                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_APARTMENT_NOT_EXIST,
-                                           "address Non-existent");
+                                        continue;
+//                                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_APARTMENT_NOT_EXIST,
+//                                           "address Non-existent");
                                     }
                                     //能进行到这里说明楼栋和门牌都查询到了，那么我们将该信息封装在对象OrganizationSiteApartmentDTO中
                                     organizationSiteApartmentDTO.setBuildingId(building.getId());
@@ -8775,8 +8786,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }else{
                         //说明在该域空间下面不存在该项目，所以我们需要向前端给出提示错误
                         LOGGER.error("community is not exists, data = {}", importEnterpriseDataDTO);
-                        throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
-                                "community is not exists");
+                        log.setErrorLog("community is not exists");
+                        log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST);
+                        errorDataLogs.add(log);
+                        continue;
+//                        throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+//                                "community is not exists");
                     }
                 }
             }
