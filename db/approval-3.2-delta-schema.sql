@@ -122,7 +122,7 @@ CREATE TABLE `eh_flow_script_configs` (
 	`flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'flow version',
 
 	`owner_type` VARCHAR(64),
-	`owner_id` BIGINT NOT NULL DEFAULT 0,:
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
 
 	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
 
