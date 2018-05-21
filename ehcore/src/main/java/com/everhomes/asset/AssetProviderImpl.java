@@ -1463,6 +1463,9 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setAmountReceived(f.getValue(r.AMOUNT_RECEIVED));//实收
                     vo.setAmoutExemption(amoutExemption);//减免
                     vo.setAmountSupplement(amountSupplement);//增收
+                    String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS)
+                    		.where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(f.getValue(r.BILL_GROUP_ID))).fetchOne(0,String.class);
+                    vo.setBillGroupName(billGroupNameFound);
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME)

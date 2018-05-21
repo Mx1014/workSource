@@ -1,8 +1,4 @@
 -- 为鼎峰汇增加查看交易明细功能
-set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
-INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`) 
-VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '物业缴费', 'wuyeCode', 999951, 'EhOrganizations', 1039065, NULL, NULL, NULL, 2, 3777, UTC_TIMESTAMP(), NULL);
-
 set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`, `bank_name`, `bank_number`, `bank_card_number`, `enterprise_name`, `enterprise_business_licence`, `enterprise_business_licence_uri`, `enterprise_account_licence_uri`, `legal_person_name`, `legal_person_phone`, `legal_person_identity_type`, `legal_person_identity_number`, `legal_person_identity_front_uri`, `legal_person_identity_back_uri`, `status`, `creator_uid`, `operator_uid`, `update_time`, `settlement_type`) 
 VALUES (@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 1041502, 2, 1177, '2018-01-12 08:32:57', '中国工商银行', NULL, '1204064019888086678', '嘉兴创新园发展有限公司', '91330411685597259U', 'cs://1/image/aW1hZ2UvTVRvellXTTJZbUppWWpCalptTXlNREJrTWpGaU0yWXlaak01TkdWa05tTXlaZw', 'cs://1/image/aW1hZ2UvTVRvd01XSTVabVkxTlRCaFpETmhZemM1T1dReFltVmhZV1JsTldNMFlUQmhZUQ', '王会军', '18057302360', 'identification', '132927197105163431', 'cs://1/image/aW1hZ2UvTVRwaU16RmhZVEpoT0dJME5qRTBOMlUxTVRFM1l6UmxaR00zTTJKak1UWmlZZw', 'cs://1/image/aW1hZ2UvTVRwbVltVXdNR0UzWXpZelkyTTVNR1JrWXpWaU9HVXhPVFkzTVRBMFpETXlZZw', 2, NULL, NULL, NULL, 7);

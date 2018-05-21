@@ -4,7 +4,6 @@ package com.everhomes.rest.asset;
 import com.everhomes.discover.ItemType;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/8/18.
@@ -27,11 +26,13 @@ import java.util.List;
  * <li>amoutExemption:减免(元)</li>
  * <li>amountSupplement:增收(元)</li>
  * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>billGroupName:账单组名称</li>
  *</ul>
  */
 public class ListBillDetailVO {
     private Long billId;
     private Long billGroupId;
+    private String billGroupName;
     private String dateStr;
     private String dateStrBegin;
     private String dateStrEnd;
@@ -195,5 +196,13 @@ public class ListBillDetailVO {
 
 	public void setAmountSupplement(BigDecimal amountSupplement) {
 		this.amountSupplement = amountSupplement;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
 	}
 }

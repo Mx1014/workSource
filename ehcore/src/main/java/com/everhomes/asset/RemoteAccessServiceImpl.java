@@ -94,7 +94,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 PaymentAttributes.BIZ_SYSTEM_ID.spec(),//子系统id
                 PaymentAttributes.CLIENT_APP_ID.spec(),//客户端id
                 PaymentAttributes.PAYMENT_TYPE.spec(),//支付类型
-                PaymentAttributes.PAYMENT_STATUS.spec(),//支付状态: 3rd plat :0-fail 1-unpay 2-success
+                PaymentAttributes.PAYMENT_STATUS.spec(),//支付状态: 0未支付,1支付成功,2挂起,3失败
                 PaymentAttributes.PAYMENT_STATUS_UPDATE_TIME.spec(),//状态更新时间
                 PaymentAttributes.SETTLEMENT_TYPE.spec(),//结算类型 0 ，7
                 PaymentAttributes.SETTLEMENT_STATUS.spec(),//结算状态0，1
@@ -129,17 +129,39 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
-
         
-        
-        //杨崇鑫暂时注释掉，远程调用取不到数据，一定要记得注释回去
         /*if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
                     processAmount(paymentBillDTO, cmd);
-                    putOrderInfo(paymentBillDTO);
-                    result.getList().add(paymentBillDTO);
+                    //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+			        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
+			        putOrderInfo(paymentBillDTO, listBillDetailVOs);//组装订单信息
+			        for(int i = 0;i < listBillDetailVOs.size();i++) {
+			        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
+			        	if(listBillDetailVO != null) {
+			        		PaymentBillResp p2 = new PaymentBillResp();
+			        		p2 = (PaymentBillResp) paymentBillDTO.clone();
+			        		p2.setBillId(listBillDetailVO.getBillId());
+			        		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
+			        		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
+			        		p2.setTargetName(listBillDetailVO.getTargetName());
+			        		p2.setTargetType(listBillDetailVO.getTargetType());
+			        		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
+			        		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
+			        		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
+			        		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
+			        		p2.setBuildingName(listBillDetailVO.getBuildingName());
+			        		p2.setApartmentName(listBillDetailVO.getApartmentName());
+			        		if(listBillDetailVO.getBillGroupDTO() != null) {
+			        			p2.setBillGroupName(listBillDetailVO.getBillGroupDTO().getBillGroupName());
+			        			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
+			        			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
+			        		}
+			        		result.getList().add(p2);
+			        	}
+			        }
                 }
             }
         }*/
@@ -153,8 +175,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
         paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));
         paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
-        paymentBillDTO.setPaymentStatus(1);//支付状态: 0未支付,1支付成功,2挂起,3失败
-        paymentBillDTO.setPaymentType(8);//支付方式，微信/支付宝/对公转账
+        paymentBillDTO.setPaymentStatus(1);//订单状态：1：已完成，0：订单异常
+        paymentBillDTO.setPaymentType(1);//支付方式，0:微信，1：支付宝，2：对公转账
         paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
         paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
         paymentBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
@@ -178,8 +200,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
         		p2.setBuildingName(listBillDetailVO.getBuildingName());
         		p2.setApartmentName(listBillDetailVO.getApartmentName());
+        		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
         		if(listBillDetailVO.getBillGroupDTO() != null) {
-        			p2.setBillGroupName(listBillDetailVO.getBillGroupDTO().getBillGroupName());
         			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
         			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
         		}
@@ -195,7 +217,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }else{
             result.setNextPageAnchor(null);
         }
-
         return result;
     }
 

@@ -22,9 +22,8 @@ import java.util.List;
  * <li>dateStrEnd: 账期结束时间</li>
  * <li>startPayTime: 缴费开始时间</li>
  * <li>endPayTime: 缴费结束时间</li>
- * <li>paymentStatus:支付状态: 0未支付,1支付成功,2挂起,3失败
- * 		转换为业务系统的订单状态：已完成/订单异常</li>
- * <li>paymentType:支付方式，微信/支付宝/对公转账</li>
+ * <li>paymentStatus:订单状态：1：已完成，0：订单异常</li>
+ * <li>paymentType:支付方式，0:微信，1：支付宝，2：对公转账</li>
  * <li>userType:用户类型，如：EhOrganizations</li>
  * <li>userId:用户ID</li>
  * <li>namespaceId:域空间</li>
