@@ -102,3 +102,7 @@ UPDATE `eh_var_fields` SET `field_param`='{\"fieldParamType\": \"richText\", \"l
 
 UPDATE eh_var_field_scopes set mandatory_flag = 1 where  field_id in (10966,10965);
 UPDATE  eh_enterprise_customers set tracking_uid = NULL  WHERE  tracking_uid = -1;
+
+-- issue-28517 越空间门禁二维码防截图 by liuyilin 20180521
+SET @var_id = (SELECT MAX(`id`) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@var_id:=@var_id+1, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver', '999957', NULL);
