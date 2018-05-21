@@ -1713,7 +1713,7 @@ public class FlowServiceImpl implements FlowService {
 
             if (isOk) {
                 // 把config工作流状态设置为RUNNING
-                //running now
+                // running now
                 flow.setId(flowId);
                 flow.setFlowMainId(0L);
                 flow.setRunTime(now);
@@ -1722,6 +1722,8 @@ public class FlowServiceImpl implements FlowService {
 
                 // 把snapshot的flowGraph放到缓存中
                 getFlowGraph(flowId, flow.getFlowVersion());
+
+                flowListenerManager.onFlowStateChanged(flow);
             }
             return isOk;
         });
@@ -2661,7 +2663,8 @@ public class FlowServiceImpl implements FlowService {
     public void disableFlow(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
         if (flow == null /* || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER) */) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exists");
         }
 
         if (flow.getStatus() != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
@@ -2680,6 +2683,8 @@ public class FlowServiceImpl implements FlowService {
                 flowProvider.updateFlow(snapshotFlow);
                 return true;
             });
+
+            flowListenerManager.onFlowStateChanged(flow);
         }
     }
 
@@ -3075,6 +3080,22 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public FlowLane getFlowCaseCurrentLane(Long flowCaseId) {
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+        return getFlowCaseCurrentLane(flowCase);
+    }
+
+    @Override
+    public FlowLane getFlowCaseCurrentLane(FlowCase flowCase) {
+        FlowLane flowLane = flowLaneProvider.findById(flowCase.getCurrentLaneId());
+        if (flowLane != null
+                && FlowCaseStatus.fromCode(flowCase.getStatus()) == FlowCaseStatus.ABSORTED) {
+            flowLane.setDisplayName(flowLane.getDisplayNameAbsort());
+        }
+        return flowLane;
+    }
+
+    @Override
     public FlowCaseProcessorsResolver getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag) {
         List<FlowCase> allFlowCase = new ArrayList<>();
         if (allFlowCaseFlag) {
@@ -3369,6 +3390,8 @@ public class FlowServiceImpl implements FlowService {
         }
 
         flushState(ctx);
+
+        flowListenerManager.onFlowCaseEvaluate(ctx, flowEvas);
 
         if (snapshotFlow.getEvaluateStep() != null
                 && snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())
@@ -5865,7 +5888,7 @@ public class FlowServiceImpl implements FlowService {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
 
-        List<FlowServiceTypeDTO> dtoList = (List<FlowServiceTypeDTO>) template.opsForHash().get("flow-service-type", namespaceId);
+        List<FlowServiceTypeDTO> dtoList = (List<FlowServiceTypeDTO>) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
 
         Stream<FlowServiceTypeDTO> stream = dtoList.stream();
         if (cmd.getOrganizationId() != null) {
@@ -5874,7 +5897,7 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getModuleId() != null) {
             stream = stream.filter(r -> Objects.equals(cmd.getModuleId(), r.getModuleId()));
         }
-        dtoList = stream.collect(Collectors.toList());
+        dtoList = stream.filter(r -> r.getServiceName() != null && r.getServiceName().trim().length() > 0).collect(Collectors.toList());
 
         ListFlowServiceTypeResponse response = new ListFlowServiceTypeResponse();
         response.setServiceTypes(dtoList);
@@ -6650,7 +6673,9 @@ public class FlowServiceImpl implements FlowService {
         for (Namespace ns : namespaces) {
             try {
                 List<FlowCase> flowCases = flowCaseProvider.listFlowCaseGroupByServiceTypes(ns.getId());
-                List<FlowServiceTypeDTO> dtoList = flowCases.stream().map(r -> {
+                List<FlowServiceTypeDTO> dtoList = flowCases.stream()
+                        .filter(r -> r.getServiceType() != null && r.getServiceType().trim().length() > 0)
+                        .map(r -> {
                     FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                     dto.setNamespaceId(r.getNamespaceId());
                     dto.setServiceName(r.getServiceType());

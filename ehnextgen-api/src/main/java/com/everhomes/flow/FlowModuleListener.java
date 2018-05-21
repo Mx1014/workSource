@@ -8,7 +8,7 @@ import com.everhomes.util.Tuple;
 import java.util.List;
 
 /**
- * 对接工作流业务模块必须实现的接口
+ * 对接工作流的业务模块需要实现的接口
  * @author janson
  */
 public interface FlowModuleListener {
@@ -133,4 +133,21 @@ public interface FlowModuleListener {
      * 需要在工作流里使用表单功能，需要实现此方法
      */
     default List<FlowFormDTO> listFlowForms(Flow flow) {return null;}
+
+    /**
+     * 给任务发表评价时触发该方法调用
+     * @param ctx   上下文
+     * @param evaluates 评价列表
+     */
+    default void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+
+    }
+
+    /**
+     * 工作流的状态改变时触发该方法调用
+     * @param flow  工作流
+     */
+    default void onFlowStateChanged(Flow flow) {
+
+    }
 }

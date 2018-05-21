@@ -6,6 +6,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -315,6 +316,10 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         return null;
     }
 
+    public static void main(String[] args) {
+        System.out.println(GeoHashUtils.encode(30.2674132448, 119.8349786884));
+    }
+
     @Override
     public List<FlowFormDTO> listFlowForms(Flow flow) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
@@ -329,6 +334,32 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             return flowForms;
         }
         return null;
+    }
+
+    @Override
+    public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onFlowCaseEvaluate(ctx, evaluates);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+        }
+    }
+
+    @Override
+    public void onFlowStateChanged(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onFlowStateChanged(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+        }
     }
 
     @Override

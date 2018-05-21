@@ -88,4 +88,8 @@ public interface FlowListenerManager {
     FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
 
     List<FlowFormDTO> listFlowForms(Flow flow);
+
+    void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates);
+
+	void onFlowStateChanged(Flow flow);
 }

@@ -198,6 +198,10 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
+    FlowLane getFlowCaseCurrentLane(Long flowCaseId);
+
+	FlowLane getFlowCaseCurrentLane(FlowCase flowCase);
+
 	/**
 	 * 获取当前任务的处理人列表
 	 */
