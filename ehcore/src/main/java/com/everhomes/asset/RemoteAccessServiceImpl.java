@@ -409,7 +409,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             QueryCondition tempCondition = PaymentAttributes.USER_ID.eq(cmd.getUserId());
             condition = tempCondition;
         }
-<<<<<<< HEAD
         //订单状态为已完成与订单异常，订单异常为已付款但接口返回异常等特殊情况。付款中途终止的情况不会出现在交易明细记录中
         //业务系统：paymentStatus订单状态：1：已完成，0：订单异常
         //电商系统：paymentStatus支付状态: 0未支付,1支付成功,2挂起,3失败
@@ -420,10 +419,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         } else {
             condition = condition.and(PaymentAttributes.PAYMENT_STATUS.neq("0"));
         }
-=======
-        // payment status 默认为1，1就是成功支付。对应缺陷28409 by wentian the invoker upon the sky!! @ 3018.05.11
-        if(cmd.getPaymentStatus() == null) cmd.setPaymentStatus(1);
->>>>>>> 5.5.0
         if(cmd.getPaymentStatus() != null) {
         	QueryCondition tempCondition = null;
         	if(cmd.getPaymentStatus() == 1) {//1：已完成

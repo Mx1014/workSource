@@ -179,7 +179,8 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
 
-
+    @Autowired
+    private PaymentService paymentService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
