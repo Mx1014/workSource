@@ -38,8 +38,14 @@ public class OPPushActivityHandler implements OPPushHandler {
 
         ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(config.getServiceModuleAppInstanceConfig().toString(), ActivityEntryConfigulation.class);
-        listCmd.setCategoryId(configulation.getCategoryId());
+        Long categoryId = 1L;
+        if(config.getServiceModuleAppInstanceConfig() != null){
+            ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(config.getServiceModuleAppInstanceConfig().toString(), ActivityEntryConfigulation.class);
+            if(configulation != null){
+                categoryId = configulation.getCategoryId();
+            }
+        }
+        listCmd.setCategoryId(categoryId);
 
         String scenetoken = launchPadService.getSceneTokenByCommunityId(context.getCommunityId());
         listCmd.setSceneToken(scenetoken);
