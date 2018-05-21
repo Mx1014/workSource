@@ -75,6 +75,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -221,6 +222,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 }).collect(Collectors.toList());
                                 df.setAllowedValued(allowedValued);
                             }
+                            df.setGroupId(fieldDTO.getGroupId());
                             dynamicFields.add(df);
                         }
                     }
@@ -238,11 +240,23 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private List<DynamicField> sortDynamicFields(DynamicSheet ds,List<DynamicField> dynamicFields) {
         List<DynamicField> fields = new ArrayList<>();
         if(dynamicFields!=null && dynamicFields.size()>0){
+            //按照groupId 分类
+            Map<Long, List<DynamicField>> fieldMap = new HashMap<>();
             for (DynamicField field : dynamicFields) {
-                fields.add(field);
-                //产品要求 企业管理员和楼栋门牌放在excel的前面
-                if(field.getFieldName().equals("contactAddress")){
-                    if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
+                if (fieldMap.get(field.getGroupId()) == null) {
+                    List<DynamicField> fieldList = new ArrayList<>();
+                    fieldList.add(field);
+                    fieldMap.put(field.getGroupId(), fieldList);
+                } else {
+                    fieldMap.get(field.getGroupId()).add(field);
+                }
+            }
+            fieldMap.forEach((k, v) -> {
+                fields.addAll(v);
+                // 基本信息 groupId 10
+                if (k == 10L) {
+                    //产品要求 企业管理员和楼栋门牌放在excel的前面
+                    if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
                         DynamicField df = new DynamicField();
                         df.setFieldName("enterpriseAdmins");
                         df.setDisplayName("企业管理员");
@@ -255,7 +269,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         fields.add(df1);
                     }
                 }
-            }
+            });
         }
         return fields;
     }
