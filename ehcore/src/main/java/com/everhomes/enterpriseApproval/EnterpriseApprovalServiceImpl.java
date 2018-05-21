@@ -331,7 +331,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
 
         //  5. the current operator
-        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        FlowCaseProcessorsResolver processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
         if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             StringBuilder processors = new StringBuilder();
             for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {
