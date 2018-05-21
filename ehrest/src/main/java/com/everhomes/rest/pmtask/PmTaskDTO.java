@@ -342,4 +342,8 @@ public class PmTaskDTO {
 		return false;
 	}
 
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
 }
