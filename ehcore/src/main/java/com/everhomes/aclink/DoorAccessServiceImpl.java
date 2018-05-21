@@ -465,7 +465,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(door == null){
     		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
     	}
-    	if(door.getOwnerType() == DoorAccessOwnerType.COMMUNITY.getCode()){//communityId暂时查doorAccess.ownerId,以后还是应该由前端传
+    	if(DoorAccessOwnerType.COMMUNITY.getCode() == door.getOwnerType()){//communityId暂时查doorAccess.ownerId,以后还是应该由前端传
     		//小区,运营后台,0
     		community = communityProvider.findCommunityById(door.getOwnerId());
     	}
