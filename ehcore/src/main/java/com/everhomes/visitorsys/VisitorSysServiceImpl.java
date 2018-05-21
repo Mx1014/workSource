@@ -2036,6 +2036,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private VisitorsysFlagType checkVisitorsysFlag(Byte flag) {
+        if(flag==null){
+            return null;
+        }
         VisitorsysFlagType flagType = VisitorsysFlagType.fromCode(flag);
         if(flagType ==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
