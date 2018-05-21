@@ -126,6 +126,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -452,6 +453,7 @@ public class FieldServiceImpl implements FieldService {
     private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
         Map<Long, ScopeField> scopeFields = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
             if(scopeFields != null && scopeFields.size() > 0) {
@@ -460,6 +462,12 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
+            globalFlag = false;
+        }
+        // add general scope fields version 3.5
+        if(globalFlag) {
+            scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath());
+            globalFlag = false;
         }
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
@@ -496,18 +504,14 @@ public class FieldServiceImpl implements FieldService {
                             }
                         });
                         //按default order排序
-                        Collections.sort(items, (a,b) -> {
-                            return a.getDefaultOrder() - b.getDefaultOrder();
-                        });
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
                         dto.setItems(items);
                     }
                     dtos.add(dto);
                 });
 
                 //按default order排序
-                Collections.sort(dtos, (a,b) -> {
-                    return a.getDefaultOrder() - b.getDefaultOrder();
-                });
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
                 return dtos;
             }
         }
@@ -518,6 +522,7 @@ public class FieldServiceImpl implements FieldService {
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
         Map<Long, ScopeFieldItem> fieldItems = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         List<Long> fieldIds = new ArrayList<>();
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
@@ -528,6 +533,10 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
+            globalFlag = false;
+        }
+        if(globalFlag) {
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
         }
         if(fieldItems != null && fieldItems.size() > 0) {
             List<FieldItemDTO> dtos = new ArrayList<>();
@@ -535,11 +544,8 @@ public class FieldServiceImpl implements FieldService {
                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
                 dtos.add(fieldItem);
             });
-
             //按default order排序
-            Collections.sort(dtos, (a,b) -> {
-                return a.getDefaultOrder() - b.getDefaultOrder();
-            });
+            dtos.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
             return dtos;
         }
 
@@ -1916,6 +1922,7 @@ public class FieldServiceImpl implements FieldService {
     private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
         Map<Long, ScopeFieldGroup> groups = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             if(groups != null && groups.size() > 0) {
@@ -1924,6 +1931,11 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
+            globalFlag = false;
+        }
+        //add global general scope groups version 3.5
+        if(globalFlag){
+            groups = fieldProvider.listScopeFieldGroups(0, null, cmd.getModuleName());
         }
 
         if(groups != null && groups.size() > 0) {
@@ -1951,9 +1963,7 @@ public class FieldServiceImpl implements FieldService {
             List<FieldGroupDTO> groupDTOs = fieldGroupDTO.getChildrenGroup();
             LOGGER.info("groupDTOs: {}", groupDTOs);
             //按default order排序
-            Collections.sort(groupDTOs, (a,b) -> {
-                return a.getDefaultOrder() - b.getDefaultOrder();
-            });
+            Collections.sort(groupDTOs, Comparator.comparingInt(FieldGroupDTO::getDefaultOrder));
 
             return groupDTOs;
         }
