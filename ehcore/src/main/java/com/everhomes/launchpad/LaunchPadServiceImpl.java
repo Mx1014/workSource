@@ -2835,8 +2835,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		if(opPushHandler != null){
 			response.setModuleId(opPushHandler.getModuleId());
 			response.setActionType(opPushHandler.getActionType());
-			response.setInstanceConfig(cmd.getInstanceConfig());
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
+			String instanceConfig = opPushHandler.getInstanceConfig(cmd.getInstanceConfig());
+			response.setInstanceConfig(instanceConfig);
 			response.setCards(opPushCards);
 		}
 
