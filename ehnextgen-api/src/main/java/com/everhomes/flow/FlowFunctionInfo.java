@@ -88,8 +88,11 @@ public class FlowFunctionInfo {
     public void validateParams(Long methodId, List<FlowScriptConfigInfo> configs) {
         Method method = methodMap.get(methodId);
 
-        Map<String, String> kvMap = configs.stream()
-                .collect(Collectors.toMap(FlowScriptConfigInfo::getFieldName, FlowScriptConfigInfo::getFieldValue));
+        Map<String, String> kvMap = configs.stream().peek(r -> {
+            if (r.getFieldValue() == null) {
+                r.setFieldValue("");
+            }
+        }).collect(Collectors.toMap(FlowScriptConfigInfo::getFieldName, FlowScriptConfigInfo::getFieldValue));
 
         if (method != null) {
             ExportFunction annotation = method.getAnnotation(ExportFunction.class);

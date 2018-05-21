@@ -451,11 +451,11 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	// script.setScriptType(FlowScriptType.PROTOTYPE.getCode());
     	// script.setScriptCls(FlowScriptFireDummy.class.getName());
     	// script.setStepType(FlowActionStepType.STEP_ENTER.getCode());
-    	flowScriptProvider.createFlowScriptWithoutId(script);
+    	flowScriptProvider.createFlowScriptWithId(script);
     	
     	FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
     	FlowAction flowAction = new FlowAction();
-    	flowAction.setScriptId(script.getId());
+    	flowAction.setScriptMainId(script.getId());
     	scriptAction.setFlowAction(flowAction);
     	
     	FlowCaseState ctx = new FlowCaseState();

@@ -585,7 +585,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 if (currentNode.getTrackRejectEnter() != null) {
                     FlowActionStatus status = FlowActionStatus.fromCode(currentNode.getTrackRejectEnter().getFlowAction().getStatus());
                     if (status == FlowActionStatus.ENABLED) {
-                        currentNode.getTrackApproveEnter().fireAction(ctx, null);
+                        currentNode.getTrackRejectEnter().fireAction(ctx, null);
                     }
                 }
                 break;

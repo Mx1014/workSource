@@ -17,7 +17,7 @@ public class NashornScriptMain implements NashornScript<FlowNashornEngineService
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    public NashornScriptMain(FlowCaseState state, FlowScript script) {
+    public NashornScriptMain(FlowCaseState state, FlowScript script, FlowAction flowAction) {
         this.ctx = new FlowCaseStateBrief();
 
         ifNotNull(state.getCurrentLane(), o -> ctx.setCurrentLane(o.getFlowLane()));
@@ -26,12 +26,14 @@ public class NashornScriptMain implements NashornScript<FlowNashornEngineService
         ifNotNull(state.getNextNode(), o -> ctx.setNextNode(o.getFlowNode()));
         ifNotNull(state.getPrefixNode(), o -> ctx.setPrefixNode(o.getFlowNode()));
         ifNotNull(state.getCurrentEvent(), o -> ctx.setSubject(o.getSubject()));
+        ifNotNull(state.getCurrentEvent(), o -> ctx.setFiredButtonId(o.getFiredButtonId()));
 
         ctx.setModule(state.getModule());
         ctx.setExtra(state.getExtra());
         ctx.setOperator(state.getOperator());
         ctx.setStepType(state.getStepType());
         ctx.setFlowCase(state.getFlowCase());
+        ctx.setAction(flowAction);
 
         this.script = script;
     }
