@@ -132,7 +132,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
         
-        if(response.getResponse() != null && !response.getResponse().isEmpty()) {
+        /*if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
@@ -157,6 +157,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     		p2.setBuildingName(listBillDetailVO.getBuildingName());
                     		p2.setApartmentName(listBillDetailVO.getApartmentName());
                     		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
+                    		p2.setAddresses(listBillDetailVO.getAddresses());
                     		if(listBillDetailVO.getBillGroupDTO() != null) {
                     			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
                     			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
@@ -166,8 +167,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     }
                 }
             }
-        }
-        /*//杨崇鑫用于测试 开始
+        }*/
+        //杨崇鑫用于测试 开始
         PaymentBillResp paymentBillDTO = new PaymentBillResp();
         paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
         paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
@@ -202,6 +203,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
         		p2.setBuildingName(listBillDetailVO.getBuildingName());
         		p2.setApartmentName(listBillDetailVO.getApartmentName());
+        		p2.setAddresses(listBillDetailVO.getAddresses());
         		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
         		if(listBillDetailVO.getBillGroupDTO() != null) {
         			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
@@ -210,7 +212,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		result.getList().add(p2);
         	}
         }
-        //杨崇鑫用于测试 结束*/
+        //杨崇鑫用于测试 结束
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
             result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
             result.getList().remove(result.getList().size()-1);
@@ -419,7 +421,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         if(cmd.getPaymentStatus() != null) {
         	QueryCondition tempCondition = null;
-        	if(cmd.getPaymentStatus() == 1) {//1：已完成
+        	if(cmd.getPaymentStatus().equals(1)) {//1：已完成
         		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq(cmd.getPaymentStatus());
         	}else {//0：订单异常，对应电商系统的：2挂起,3失败
         		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq("2");
@@ -512,13 +514,13 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
         if(cmd.getPaymentType() != null) {
         	QueryCondition tempCondition = null;
-        	if(cmd.getPaymentType() == 0) {//微信
+        	if(cmd.getPaymentType().equals(0)) {//微信
         		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("1");
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("7"));
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("9"));
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("12"));
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("21"));
-        	}else if(cmd.getPaymentType() == 1) {//支付宝
+        	}else if(cmd.getPaymentType().equals(1)) {//支付宝
         		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("8");
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("10"));
         		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("13"));

@@ -32,6 +32,7 @@ import java.math.BigDecimal;
  * <li>dateStrBegin:账单开始时间，参与排序</li>
  * <li>dateStrEnd:账单结束时间，参与排序</li>
  * <li>customerTel:客户手机号</li>
+ * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -61,6 +62,7 @@ public class ListBillsDTO {
     private String dateStrBegin;
     private String dateStrEnd;
     private String customerTel;
+    private String addresses;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -268,5 +270,13 @@ public class ListBillsDTO {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
 	}
 }

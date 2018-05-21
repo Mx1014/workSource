@@ -47,6 +47,7 @@ public class ListBillsCommand {
     private String billGroupName;
 
     private Long billGroupId;
+    
     private String buildingName;
     private String apartmentName;
     private Byte status;

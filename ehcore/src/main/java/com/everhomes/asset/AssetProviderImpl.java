@@ -595,12 +595,13 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
+        //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
+        /*if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
             query.addConditions(t.BUILDING_NAME.eq(buildingName));
         }
         if(!org.springframework.util.StringUtils.isEmpty(apartmentName)){
             query.addConditions(t.APARTMENT_NAME.eq(apartmentName));
-        }
+        }*/
         if(!org.springframework.util.StringUtils.isEmpty(customerTel)){
             query.addConditions(t.CUSTOMER_TEL.like("%"+customerTel+"%"));
         }
@@ -609,6 +610,34 @@ public class AssetProviderImpl implements AssetProvider {
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();
+            //根据账单id查找所有的收费细项，并且拼装楼栋门牌
+            dto.setAddresses("");//初始化
+            EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
+            SelectQuery<Record> queryAddr = context.selectQuery();
+            queryAddr.addSelect(o.BUILDING_NAME,o.APARTMENT_NAME);
+            queryAddr.addFrom(o);
+            queryAddr.addConditions(o.BILL_ID.eq(r.getValue(t.ID)));
+            queryAddr.fetch()
+            	.map(f -> {
+            		String newAddr = f.getValue(o.BUILDING_NAME) + "/" + f.getValue(o.APARTMENT_NAME);
+            		if(f.getValue(o.BUILDING_NAME) != null && f.getValue(o.APARTMENT_NAME) != null && !dto.getAddresses().contains(newAddr)) {
+            			String addresses = dto.getAddresses() + newAddr + ",";
+            			dto.setAddresses(addresses);
+            		}
+            		return null;
+            });
+            String addresses = dto.getAddresses();
+            if(addresses != null && addresses.length() > 0) {
+            	addresses = addresses.substring(0, addresses.length() - 1);//去掉最后一个逗号 
+            	dto.setAddresses(addresses);
+            }
+            //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
+            if(!org.springframework.util.StringUtils.isEmpty(buildingName) && !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
+            	String queryAddress = buildingName + "/" + apartmentName;
+            	if(!addresses.contains(queryAddress)) {
+            		return null;
+            	}
+            }
             dto.setBuildingName(r.getBuildingName());
             dto.setApartmentName(r.getApartmentName());
             dto.setAmountOwed(r.getAmountOwed());
@@ -1442,7 +1471,36 @@ public class AssetProviderImpl implements AssetProvider {
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
-        
+        //根据账单id查找所有的收费细项，并且拼装楼栋门牌
+        vo.setAddresses("");//初始化
+        EhPaymentBillItems o2 = Tables.EH_PAYMENT_BILL_ITEMS.as("o2");
+        SelectQuery<Record> queryAddr = context.selectQuery();
+        queryAddr.addSelect(o2.BUILDING_NAME,o2.APARTMENT_NAME);
+        queryAddr.addFrom(o2);
+        queryAddr.addConditions(o2.BILL_ID.eq(billId));
+        queryAddr.fetch()
+        	.map(f -> {
+        		String newAddr = f.getValue(o2.BUILDING_NAME) + "/" + f.getValue(o2.APARTMENT_NAME);
+        		if(f.getValue(o2.BUILDING_NAME) != null && f.getValue(o2.APARTMENT_NAME) != null && !vo.getAddresses().contains(newAddr)) {
+        			String addresses = vo.getAddresses() + newAddr + ",";
+        			vo.setAddresses(addresses);
+        		}
+        		return null;
+        });
+        String addresses = vo.getAddresses();
+        if(addresses != null && addresses.length() > 0) {
+        	addresses = addresses.substring(0, addresses.length() - 1);//去掉最后一个逗号 
+        	vo.setAddresses(addresses);
+        }
+        //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
+        String buildingName = cmd.getBuildingName();
+        String apartmentName = cmd.getApartmentName();
+        if(!org.springframework.util.StringUtils.isEmpty(buildingName) && !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
+        	String queryAddress = buildingName + "/" + apartmentName;
+        	if(!addresses.contains(queryAddress)) {
+        		return null;
+        	}
+        }
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
         		, r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT);

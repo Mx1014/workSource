@@ -17,6 +17,7 @@ import java.math.BigDecimal;
  * <li>contractNum:合同编号</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
+ * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  * <li>noticeTel:催缴电话</li>
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
@@ -41,6 +42,7 @@ public class ListBillDetailVO {
     private String targetType;
     private String buildingName;
     private String apartmentName;
+    private String addresses;
     private Long targetId;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
@@ -204,5 +206,13 @@ public class ListBillDetailVO {
 
 	public void setBillGroupName(String billGroupName) {
 		this.billGroupName = billGroupName;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
 	}
 }

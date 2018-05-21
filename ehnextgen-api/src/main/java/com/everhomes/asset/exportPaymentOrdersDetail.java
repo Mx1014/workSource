@@ -27,7 +27,7 @@ import com.everhomes.rest.asset.ExemptionItemDTO;
  * <li>amountReceived:实收(元)</li>
  * <li>amoutExemption:减免(元)</li>
  * <li>amountSupplement:增收(元)</li>
- * <li>buildingApartmentName:楼栋门牌</li>
+ * <li>addresses[String]:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  * <li>billItemListMsg:组装所有的收费项信息，如：物业费：100元</li>
  * <li>paymentOrderNum[String]:订单编号，如：954650447962984448，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。</li>
  *</ul>
@@ -46,7 +46,7 @@ public class exportPaymentOrdersDetail {
     private BigDecimal amountReceived;
     private BigDecimal amoutExemption;
     private BigDecimal amountSupplement;
-    private String buildingApartmentName;
+    private String addresses;
     private String billItemListMsg;
     private String paymentOrderNum;
     
@@ -116,12 +116,6 @@ public class exportPaymentOrdersDetail {
 	public void setAmountSupplement(BigDecimal amountSupplement) {
 		this.amountSupplement = amountSupplement;
 	}
-	public String getBuildingApartmentName() {
-		return buildingApartmentName;
-	}
-	public void setBuildingApartmentName(String buildingApartmentName) {
-		this.buildingApartmentName = buildingApartmentName;
-	}
 	public String getBillItemListMsg() {
 		return billItemListMsg;
 	}
@@ -145,6 +139,12 @@ public class exportPaymentOrdersDetail {
 	}
 	public void setPaymentOrderNum(String paymentOrderNum) {
 		this.paymentOrderNum = paymentOrderNum;
+	}
+	public String getAddresses() {
+		return addresses;
+	}
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
 	}
     
 }

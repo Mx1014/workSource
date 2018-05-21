@@ -24,6 +24,9 @@ import java.util.List;
  * <li>endPayTime: 缴费结束时间</li>
  * <li>paymentStatus:订单状态：1：已完成，0：订单异常</li>
  * <li>paymentType:支付方式，0:微信，1：支付宝，2：对公转账</li>
+ * <li>addressId: 楼栋门牌id</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
  * <li>userType:用户类型，如：EhOrganizations</li>
  * <li>userId:用户ID</li>
  * <li>namespaceId:域空间</li>
@@ -102,6 +105,9 @@ public class ListPaymentBillCmd {
     private Long billId;
     private String dateStrBegin;
     private String dateStrEnd;
+    private Long addressId;
+    private String buildingName;
+    private String apartmentName;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -258,5 +264,29 @@ public class ListPaymentBillCmd {
 
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
 	}
 }

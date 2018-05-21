@@ -784,16 +784,17 @@ public class AssetServiceImpl implements AssetService {
             // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
             detail.setDateStrBegin(dto.getDateStrBegin());
             detail.setDateStrEnd(dto.getDateStrEnd());
-            detail.setBuildingName(dto.getBuildingName());
-            detail.setApartmentName(dto.getApartmentName());
+            //detail.setBuildingName(dto.getBuildingName());
+            //detail.setApartmentName(dto.getApartmentName());
+            detail.setAddresses(dto.getAddresses());
             detail.setCustomerTel(dto.getCustomerTel());
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","buildingName","apartmentName","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋名称","门牌名称","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
+        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
+        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
                 , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -856,15 +857,14 @@ public class AssetServiceImpl implements AssetService {
 	            detail.setPayTime(dto.getPayTime());
 	            detail.setPayerTel(dto.getPayerTel());
 	            detail.setPayerName(dto.getPayerName());
-	            //组装楼栋门牌
-	            detail.setBuildingApartmentName(dto.getBuildingName() + "/" + dto.getApartmentName());
+	            detail.setAddresses(dto.getAddresses());
 	            dataList.add(detail);
 	        }
 	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
-	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","buildingApartmentName"};
+	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
 	        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
 	        		"实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
-	        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,20};
+	        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
 	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
 	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
 		} catch (Exception e) {

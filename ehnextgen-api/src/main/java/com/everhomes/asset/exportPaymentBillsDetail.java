@@ -23,6 +23,7 @@ public class exportPaymentBillsDetail {
     private String buildingName;
     private String apartmentName;
     private String customerTel;
+    private String addresses;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -151,4 +152,13 @@ public class exportPaymentBillsDetail {
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
 	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
+
 }
