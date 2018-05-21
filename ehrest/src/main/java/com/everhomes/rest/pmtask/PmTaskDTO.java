@@ -327,4 +327,19 @@ public class PmTaskDTO {
 	public void setOrganizationName(String organizationName) {
 		this.organizationName = organizationName;
 	}
+
+	@Override
+	public boolean equals(Object obj){
+		if (obj == null) return false ;
+		else{
+			if (obj instanceof PmTaskDTO){
+				PmTaskDTO o = (PmTaskDTO) obj;
+				if(o.id == this.id){
+					return true ;
+				}
+			}
+		}
+		return false;
+	}
+
 }
