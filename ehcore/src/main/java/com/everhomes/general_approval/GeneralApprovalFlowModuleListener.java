@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
-    protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
+    protected static List<String> DEFAULT_FIELDS = new ArrayList<String>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalFlowModuleListener.class);
     @Autowired
@@ -61,7 +61,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
-            DEFUALT_FIELDS.add(value.getCode());
+            DEFAULT_FIELDS.add(value.getCode());
         }
     }
 
@@ -144,7 +144,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
             e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
-            if (!DEFUALT_FIELDS.contains(value.getFieldName())) {
+            if (!DEFAULT_FIELDS.contains(value.getFieldName())) {
                 // 不在默认fields的就是自定义字符串，组装这些
                 switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
                     case SINGLE_LINE_TEXT:
@@ -324,7 +324,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
         for (GeneralApprovalVal val : vals) {
             try {
-                if (!DEFUALT_FIELDS.contains(val.getFieldName())) {
+                if (!DEFAULT_FIELDS.contains(val.getFieldName())) {
                     // 不在默认fields的就是自定义字符串，组装这些
                     FlowCaseEntity e = new FlowCaseEntity();
                     GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
