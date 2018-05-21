@@ -1,24 +1,19 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowTemplateCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @Component
-public class FlowModuleListenerDummy1 implements FlowFunctionListener {
+public class FlowModuleListenerDummy4 implements FlowFunctionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy1.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy4.class);
 
-    @Autowired
-    private FlowService flowService;
-
-    private Long moduleId = 20100L;
+    private Long moduleId = 52000L;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -53,10 +48,42 @@ public class FlowModuleListenerDummy1 implements FlowFunctionListener {
                                     scope = FlowServiceErrorCode.SCOPE,
                                     code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
             },
-            id = 1111L,
+            id = 1234567L,
             version = 1
     )
     public void testExportFlowFunction(FlowCaseState ctx, Map<String, String> param) {
+        LOGGER.debug("testExportFlowFunction: param = {}", param);
+    }
+
+    @ExportFunction(
+            desc = @LocaleText(
+                    value = "When enter in end node, trigger this function.",
+                    scope = FlowServiceErrorCode.SCOPE,
+                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""),
+            params = {
+                    @FuncParam(
+                            name = "vendorName1",
+                            desc = @LocaleText(
+                                    value = "Vendor name",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
+                    @FuncParam(
+                            name = "vendorURL1",
+                            desc = @LocaleText(
+                                    value = "Vendor server url",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + "")),
+                    @FuncParam(
+                            name = "appKey1",
+                            desc = @LocaleText(
+                                    value = "Vendor app key",
+                                    scope = FlowServiceErrorCode.SCOPE,
+                                    code = FlowTemplateCode.COMMENT_STEP_CONTENT_WITH_APPLIER + ""))
+            },
+            id = 1234567111111L,
+            version = 1
+    )
+    public void testExportFlowFunction1(FlowCaseState ctx, Map<String, String> param) {
         LOGGER.debug("testExportFlowFunction: param = {}", param);
     }
 }

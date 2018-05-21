@@ -1,6 +1,7 @@
 var configService = require("configService");
 var apiService = require("apiService");
-var http = require("httpService");
+var fetch = require("fetch");
+var log = require("log");
 
 var app = {};
 
@@ -32,17 +33,29 @@ app.main = function (ctx) {
     var vendorURL = config.getObject("vendorURL");
     var vendorKey = config.getInt("vendorKey");
 
-    fetch('http://www.baidu.com')
-        .then(function(response) {
-            print(response.text());
-            return response.text()
-        }).then(function(body) {
-        print(body);
+    fetch("http://www.baidu.com", {
+        param: {
+            a: 1,
+            b: 2,
+            c: "ccccc",
+            d: {
+                d1:"d1"
+            },
+            e: [1,2,3]
+        },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "xxx-header": "xxxqqq"
+        }
+    }, function (result) {
+        log.info(new java.lang.String(result.getBody()));
+    }, function (reason) {
+        log.warn(reason, "aaaa", "bbbb");
     });
 
-    print(vendor);
-    print(vendorURL);
-    print(vendorKey);
+    log.debug(vendor);
+    log.debug(vendorURL);
+    log.debug(vendorKey);
 
     flowService.testDummyCall();
 

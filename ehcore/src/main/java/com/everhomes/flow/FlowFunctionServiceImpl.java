@@ -66,7 +66,7 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
 
             // 检查已经使用的函数是否还在
             List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByModule(moduleId, FlowScriptType.JAVA);
-            Set<Long> functionIdSet = scriptConfigs.stream().map(FlowScriptConfig::getId).collect(Collectors.toSet());
+            Set<Long> functionIdSet = scriptConfigs.stream().map(FlowScriptConfig::getScriptMainId).collect(Collectors.toSet());
             for (Long funcId : functionIdSet) {
                 if (methodMap.get(funcId) == null) {
                     throw new FlowFunctionException(

@@ -26,6 +26,7 @@ public class NashornScriptMain implements NashornScript<FlowNashornEngineService
         ifNotNull(state.getNextNode(), o -> ctx.setNextNode(o.getFlowNode()));
         ifNotNull(state.getPrefixNode(), o -> ctx.setPrefixNode(o.getFlowNode()));
         ifNotNull(state.getCurrentEvent(), o -> ctx.setSubject(o.getSubject()));
+        ifNotNull(state.getCurrentEvent(), o -> ctx.setFiredButtonId(o.getFiredButtonId()));
 
         ctx.setModule(state.getModule());
         ctx.setExtra(state.getExtra());

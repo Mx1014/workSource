@@ -1,16 +1,13 @@
 package com.everhomes.flow;
 
+import com.everhomes.util.StringHelper;
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.runtime.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +18,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
@@ -43,17 +42,22 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
     @Autowired
     private FlowScriptProvider flowScriptProvider;
 
-    // @Override
-    // public void onApplicationEvent(ContextRefreshedEvent event) {
-    //     if (event.getApplicationContext().getParent() == null) {
-    //         start(N);
-    //     }
-    // }
-
     private class MyClassFilter implements ClassFilter {
+
+        private List<Pattern> patterns;
+
+        MyClassFilter(List<Pattern> patterns) {
+            this.patterns = patterns;
+        }
+
         @Override
         public boolean exposeToScripts(String clzName) {
-            return includeClass.contains(clzName);
+            for (Pattern pattern : patterns) {
+                if (pattern.matcher(clzName).matches()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -65,29 +69,20 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
         scriptHolderThreadLocal = ThreadLocal.withInitial(() -> {
             try {
                 NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-                ScriptEngine engine = factory.getScriptEngine(new MyClassFilter());
+                List<Pattern> patterns = includeClass.stream()
+                        .map(Pattern::compile).collect(Collectors.toList());
+                ScriptEngine engine = factory.getScriptEngine(new MyClassFilter(patterns));
 
-                // ScriptEngine engine = manager.getEngineByName("nashorn");
                 engine.put("nashornObjs", this);
                 engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
 
-                // Resource js = new ClassPathResource("/flow/jvm-npm.js");
-                // reader = new InputStreamReader(js.getInputStream(), "UTF-8");
-                // engine.eval(reader);
-
-                // js = new ClassPathResource("/flow/init.js");
-                // reader = new InputStreamReader(js.getInputStream(), "UTF-8");
                 CompliedScriptHolder scriptHolder = new CompliedScriptHolder();
                 InputStream in = this.getClass().getResourceAsStream("/flow/jvm-npm.js");
 
-
-                // engine.eval("load('http://10.1.10.79:5000/file/ZmlsZS9Nem95Wm1NM1kyVTVaV1poTVRRNFptTXlOV0U0TURGa1pEVm1NbUU0TlRCalln?token=2Xw4X4S_Q0IOG79Qv8VHlb7ubpE243rjq-xVRBZo3Zus_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVvWRDMii4vUoU6JKOPlk3fQ')");
-
                 engine.eval(new Scanner(in).useDelimiter("\\A").next());
-                //
+
                 in = this.getClass().getResourceAsStream("/flow/apiService.js");
                 engine.eval(new Scanner(in).useDelimiter("\\A").next());
-                // engine.eval("load('flow/configService.js')");
 
                 in = this.getClass().getResourceAsStream("/flow/configService.js");
                 engine.eval(new Scanner(in).useDelimiter("\\A").next());
@@ -108,12 +103,12 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
     }
 
     public String getResourceAsStream(String fileName) {
-        InputStream in = this.getClass().getResourceAsStream("/flow/"+fileName);
+        InputStream in = this.getClass().getResourceAsStream("/flow/" + fileName);
         return new Scanner(in).useDelimiter("\\A").next();
     }
 
     public String getResource(String fileName) {
-        InputStream in = this.getClass().getResourceAsStream("/flow/"+fileName);
+        InputStream in = this.getClass().getResourceAsStream("/flow/" + fileName);
         return new Scanner(in).useDelimiter("\\A").next();
     }
 
@@ -181,21 +176,32 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
         queue.add(obj);
     }
 
-    /*@Override
-    public void putJob(NashornScript obj) {
-        if (!started.get()) {
-            throw new IllegalStateException("service hasn't be started or was closed");
+    public void log(String level, String... args) {
+        switch (level) {
+            case "info":
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("JS LOG >> " + StringHelper.join(" ", args));
+                }
+                break;
+            case "debug":
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("JS LOG >> " + StringHelper.join(" ", args));
+                }
+                break;
+            case "error":
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("JS LOG >> " + StringHelper.join(" ", args));
+                }
+                break;
+            case "warn":
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("JS LOG >> " + StringHelper.join(" ", args));
+                }
+                break;
+            default:
+                break;
         }
-
-        for (int i = 0; i < N; i++) {
-            synchronized (this.threads[i]) {
-                // this.threadJobs[i].add(obj);
-            }
-        }
-
-        // run at lease once
-        queue.add(NashornNothingObject.NOTHING);
-    }*/
+    }
 
     @Override
     public void stop() {

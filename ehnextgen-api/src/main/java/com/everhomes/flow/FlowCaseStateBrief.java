@@ -4,10 +4,11 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.StringHelper;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FlowCaseStateBrief {
+public class FlowCaseStateBrief implements Serializable {
 
     private Flow flow;
     private FlowModuleInfo module;
@@ -20,6 +21,8 @@ public class FlowCaseStateBrief {
     private FlowSubject subject;
     private FlowLane currentLane;
     private Map<String, Object> extra;
+
+    private Long firedButtonId;
 
     public FlowCaseStateBrief() {
         extra = new ConcurrentHashMap<>();
@@ -125,6 +128,14 @@ public class FlowCaseStateBrief {
 
     public void setFlow(Flow flow) {
         this.flow = flow;
+    }
+
+    public Long getFiredButtonId() {
+        return firedButtonId;
+    }
+
+    public void setFiredButtonId(Long firedButtonId) {
+        this.firedButtonId = firedButtonId;
     }
 
     @Override

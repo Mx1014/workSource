@@ -56,7 +56,7 @@ CREATE TABLE `eh_flow_script_configs` (
 	`flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'flow version',
 
 	`owner_type` VARCHAR(64),
-	`owner_id` BIGINT NOT NULL DEFAULT 0,:
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
 
 	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
 
@@ -88,6 +88,10 @@ CREATE TABLE `eh_flow_script_configs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts config in dev mode';
 
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN flow_case_id BIGINT;
+
+ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_type VARCHAR(64);
+ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_id BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_version INTEGER NOT NULL DEFAULT 0;
 
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag6` VARCHAR(128) DEFAULT NULL;
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag7` VARCHAR(128) DEFAULT NULL;

@@ -316,10 +316,6 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         return null;
     }
 
-    public static void main(String[] args) {
-        System.out.println(GeoHashUtils.encode(30.2674132448, 119.8349786884));
-    }
-
     @Override
     public List<FlowFormDTO> listFlowForms(Flow flow) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
