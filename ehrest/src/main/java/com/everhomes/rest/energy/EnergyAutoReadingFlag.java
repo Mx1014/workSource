@@ -18,7 +18,7 @@ public enum EnergyAutoReadingFlag {
         return code;
     }
 
-    EnergyAutoReadingFlag fromStatus(Byte code) {
+   public static EnergyAutoReadingFlag fromStatus(Byte code) {
         for (EnergyAutoReadingFlag val : EnergyAutoReadingFlag.values()) {
             if (val.getCode().equals(code)) {
                 return val;

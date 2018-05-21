@@ -10,6 +10,7 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -282,6 +283,7 @@ public class ModuleController extends ControllerBase {
      */
     @RequestMapping("findServiceModuleApp")
     @RestReturn(value = ServiceModuleAppDTO.class)
+    @RequireAuthentication(false)
     public RestResponse findServiceModuleApp(@Valid FindServiceModuleAppCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setResponseObject(serviceModuleService.findServiceModuleAppById(cmd.getId()));

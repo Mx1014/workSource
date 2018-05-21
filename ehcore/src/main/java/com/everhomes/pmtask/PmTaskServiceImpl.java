@@ -2848,11 +2848,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		构建响应数据对象
 		PmTaskStatDTO pmTaskStatDTO = new PmTaskStatDTO();
 		result.entrySet().forEach(elem ->{
-			if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem.getKey().byteValue())
+			if(FlowCaseStatus.PROCESS.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setProcessing(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem.getKey().byteValue())
+			if(FlowCaseStatus.ABSORTED.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setClose(elem.getValue().intValue());
-			if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem.getKey().byteValue())
+			if(FlowCaseStatus.FINISHED.getCode() == elem.getKey().byteValue())
 				pmTaskStatDTO.setComplete(elem.getValue().intValue());
 		});
 		pmTaskStatDTO.setTotal(pmTaskStatDTO.getProcessing() + pmTaskStatDTO.getClose() + pmTaskStatDTO.getComplete());
@@ -2963,11 +2963,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 			bean.setOwnerName(null != community ? community.getName() : "");
 			for (Map.Entry<Byte,List<PmTask>> elem1 : elem.getValue().entrySet()
 				 ) {
-				if(OfficeOrderWorkFlowStatus.PROCESSING.getCode() == elem1.getKey().byteValue())
+				if(FlowCaseStatus.PROCESS.getCode() == elem1.getKey().byteValue())
 					bean.setProcessing(elem1.getValue().size());
-				if(OfficeOrderWorkFlowStatus.INVALID.getCode() == elem1.getKey().byteValue())
+				if(FlowCaseStatus.ABSORTED.getCode() == elem1.getKey().byteValue())
 					bean.setClose(elem1.getValue().size());
-				if(OfficeOrderWorkFlowStatus.RESIDED_IN.getCode() == elem1.getKey().byteValue())
+				if(FlowCaseStatus.FINISHED.getCode() == elem1.getKey().byteValue())
 					bean.setComplete(elem1.getValue().size());
 
 			}

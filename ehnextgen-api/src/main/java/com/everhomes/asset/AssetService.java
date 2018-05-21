@@ -156,8 +156,6 @@ public interface AssetService {
 
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
-	void activeAutoBillNotice();
-
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
 	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
@@ -187,4 +185,6 @@ public interface AssetService {
     JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
     
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
+
+    void noticeTrigger(Integer namespaceId);
 }

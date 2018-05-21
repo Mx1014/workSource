@@ -1269,6 +1269,19 @@ public class AssetController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(NoticeTriggerCommand cmd){
+        assetService.noticeTrigger(cmd.getNamespaceId());
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
      * <b>URL: /asset/judgeAppShowPay</b>
      * <p>取出配置项，用于判断APP多账单组的缴费方式：全部缴费/部分缴费/单个缴费</p>
      */

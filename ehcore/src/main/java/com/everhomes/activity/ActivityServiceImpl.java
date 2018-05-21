@@ -1735,12 +1735,14 @@ public class ActivityServiceImpl implements ActivityService {
     	}
     	roster.setGender(signupInfoDTO.getGender());
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
-    	if(roster.getOrganizationName() == null){
-    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
-    	}
-    	if(roster.getPosition() == null){
-    		roster.setPosition(signupInfoDTO.getPosition());
-    	}
+
+    	//产品沟通不默认设置公司和职位，因为小区场景默认是没有公司和职位的  add by yanjun 20180515
+//    	if(roster.getOrganizationName() == null){
+//    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+//    	}
+//    	if(roster.getPosition() == null){
+//    		roster.setPosition(signupInfoDTO.getPosition());
+//    	}
     	if(roster.getEmail() == null){
     		roster.setEmail(signupInfoDTO.getEmail());
     	}

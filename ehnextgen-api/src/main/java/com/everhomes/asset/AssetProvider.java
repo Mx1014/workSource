@@ -80,7 +80,7 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel);
+            ,String targetName, String invoiceNum);
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
@@ -235,9 +235,9 @@ public interface AssetProvider {
 
     PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
 
-    List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
+    List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
 
-    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays);
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
 
     AssetPaymentOrder getOrderById(Long orderId);
 
@@ -245,7 +245,7 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
-    List<PaymentBills> getAllBillsByCommunity(Long key);
+    List<PaymentBills> getAllBillsByCommunity(Integer namespaceId, Long key);
 
 
     List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId);
@@ -307,11 +307,13 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
-    void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
+    void modifySettledBill(Long billId, String invoiceNum);
 
     boolean checkBillExistById(Long billId);
 
     String getAddressByBillId(Long id);
-    
-    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+
+    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
+
+    List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 }
