@@ -1427,6 +1427,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (serviceUserId == null) {
             return null;
         }
+
         //1. 找到企业入驻的园区
         OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
         if (organizationCommunityRequest == null) {
