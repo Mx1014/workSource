@@ -1904,17 +1904,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysVisitor convert = ConvertHelper.convert(visitor, VisitorSysVisitor.class);
         //新建访客/预约
         if(relatedVisitor !=null){
-            convert.setId(relatedVisitor.getId());
-            convert.setVisitStatus(relatedVisitor.getVisitStatus());
-            convert.setBookingStatus(relatedVisitor.getBookingStatus());
-            convert.setVisitTime(relatedVisitor.getVisitTime());
+            convert = relatedVisitor;
+//            convert.setId(relatedVisitor.getId());
+//            convert.setVisitStatus(relatedVisitor.getVisitStatus());
+//            convert.setBookingStatus(relatedVisitor.getBookingStatus());
+//            convert.setVisitTime(relatedVisitor.getVisitTime());
         }
-        convert.setFormJsonValue(null);
-        convert.setInvalidTime(null);
-        convert.setPlateNo(null);
-        convert.setIdNumber(null);
-        convert.setVisitFloor(null);
-        convert.setVisitAddresses(null);
+//        convert.setFormJsonValue(null);
+//        convert.setInvalidTime(null);
+//        convert.setPlateNo(null);
+//        convert.setIdNumber(null);
+//        convert.setVisitFloor(null);
+//        convert.setVisitAddresses(null);
         if(visitorsysOwnerType == visitorsysOwnerType.COMMUNITY) {
             convert.setParentId(relatedVisitor ==null?visitor.getId(): relatedVisitor.getParentId());
             convert.setOwnerId(visitor.getEnterpriseId());
