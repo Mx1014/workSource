@@ -20,6 +20,7 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
@@ -49,6 +50,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -768,6 +770,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
         return serviceModule;
     }
+    
+    // Added by janson, TODO for administrator in zuolin admin
+    private boolean checkZuolinRoot(long userId) {
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+        
+        return false;
+    }
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -797,6 +809,22 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId, Long appId){
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
+        
+        if(checkZuolinRoot(userId)) {
+            //如果是左邻运营后台的项目导航，则左邻后台管理员可以拿到此域空间下所有的项目，与管理公司或者普通公司无关。
+            ListingLocator locator = new ListingLocator();
+            List<Community> communities = this.communityProvider.listCommunities(UserContext.getCurrentNamespaceId() , null, null, null, CommunityAdminStatus.ACTIVE.getCode(), null, locator, 100);
+            for (Community community: communities) {
+                ProjectDTO dto = new ProjectDTO();
+                dto.setProjectId(community.getId());
+                dto.setProjectName(community.getName());
+                dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                dto.setCommunityType(community.getCommunityType());
+                dtos.add(dto);
+            }
+            return dtos;
+        }
+        
         //物业超级管理员拿所有项目
         //这一步是校验是不是超级管理员，如果是超级管理员那么就将allProjectFlag状态置为true
         if(checkModuleManage(userId, organizationId, moduleId)){
