@@ -526,6 +526,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 dto.setIsPlus((byte)1);
             }
         }
+        //返回时增加缴费凭证留言和缴费凭证图片的信息（add by tangcen）
+        ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+        listUploadCertificatesCommand.setBillId(cmd.getBillId());
+        UploadCertificateInfoDTO uploadCertificateInfoDTO = assetService.listUploadCertificates(listUploadCertificatesCommand);
+        response.setCertificateNote(uploadCertificateInfoDTO.getCertificateNote());
+        response.setUploadCertificateDTOList(uploadCertificateInfoDTO.getUploadCertificateDTOList());
         return response;
     }
 
