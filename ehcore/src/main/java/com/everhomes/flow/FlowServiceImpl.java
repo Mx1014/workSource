@@ -6641,7 +6641,7 @@ public class FlowServiceImpl implements FlowService {
         return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 
-    @Scheduled(cron = "0 0 * * * ?", fixedDelay = 5 * 1000)
+    @Scheduled(fixedRate = 10 * 1000L)
     public void refreshFlowServiceType() {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
@@ -6659,7 +6659,7 @@ public class FlowServiceImpl implements FlowService {
                     return dto;
                 }).collect(Collectors.toList());
 
-                template.opsForHash().put("flow-service-type", ns.getId(), dtoList);
+                template.opsForHash().put("flow-service-type", String.valueOf(ns.getId()), dtoList);
             } catch (Exception e) {
                 e.printStackTrace();
             }

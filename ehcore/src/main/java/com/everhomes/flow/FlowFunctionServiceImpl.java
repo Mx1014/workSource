@@ -1,9 +1,8 @@
 package com.everhomes.flow;
 
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.flow.FlowScriptInfo;
-import com.everhomes.rest.flow.FlowScriptConfigDTO;
 import com.everhomes.rest.flow.FlowScriptDTO;
+import com.everhomes.rest.flow.FlowScriptInfo;
 import com.everhomes.rest.flow.FlowScriptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -63,13 +62,15 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
             }
 
             FlowModuleInfo moduleInfo = listener.initModule();
+            Long moduleId = moduleInfo.getModuleId();
 
             // 检查已经使用的函数是否还在
-            List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByModule(moduleInfo.getModuleId(), FlowScriptType.JAVA);
-            List<Long> functionIdList = scriptConfigs.stream().map(FlowScriptConfig::getId).collect(Collectors.toList());
-            for (Long funcId : functionIdList) {
+            List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByModule(moduleId, FlowScriptType.JAVA);
+            Set<Long> functionIdSet = scriptConfigs.stream().map(FlowScriptConfig::getId).collect(Collectors.toSet());
+            for (Long funcId : functionIdSet) {
                 if (methodMap.get(funcId) == null) {
-                    throw new FlowFunctionException("configured flow function disappeared, id = " + funcId);
+                    throw new FlowFunctionException(
+                            String.format("configured flow function disappeared, moduleId = %s, functionId = %s", moduleId, funcId));
                 }
             }
 
@@ -77,7 +78,7 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
             functionInfo.setListener(listener);
             functionInfo.setMethodMap(methodMap);
             functionInfo.setModuleInfo(moduleInfo);
-            moduleIdToFunctionMap.put(moduleInfo.getModuleId(), functionInfo);
+            moduleIdToFunctionMap.put(moduleId, functionInfo);
         }
     }
 
