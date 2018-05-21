@@ -33,6 +33,7 @@ import java.util.List;
  *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
  *     <li>processButtons: processButtons {@link com.everhomes.rest.flow.FlowButtonDetailDTO}</li>
  *     <li>conditions: conditions {@link com.everhomes.rest.flow.FlowConditionDTO}</li>
+ *     <li>script: 脚本 {@link com.everhomes.rest.flow.FlowNodeScriptDTO}</li>
  * </ul>
  */
 public class FlowNodeDetailDTO {
@@ -54,6 +55,7 @@ public class FlowNodeDetailDTO {
 
     private FlowNodeReminderDTO reminder;
     private FlowNodeTrackerDTO tracker;
+    private FlowNodeScriptDTO script;
 
     private Long flowLaneId;
     private String nodeType;
@@ -261,6 +263,14 @@ public class FlowNodeDetailDTO {
 
     public void setConditions(List<FlowConditionDTO> conditions) {
         this.conditions = conditions;
+    }
+
+    public FlowNodeScriptDTO getScript() {
+        return script;
+    }
+
+    public void setScript(FlowNodeScriptDTO script) {
+        this.script = script;
     }
 
     @Override

@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
+import org.springframework.web.context.request.async.DeferredResult;
 
 public interface FlowService {
 	
@@ -196,7 +198,14 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
-    FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
+    FlowLane getFlowCaseCurrentLane(Long flowCaseId);
+
+	FlowLane getFlowCaseCurrentLane(FlowCase flowCase);
+
+	/**
+	 * 获取当前任务的处理人列表
+	 */
+    FlowCaseProcessorsResolver getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
 
@@ -501,4 +510,18 @@ public interface FlowService {
                                                  Long userId, String referType, Long referId, boolean needFlowButton);
 
     GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd);
+
+    FlowScriptDTO createFlowScript(CreateFlowScriptCommand cmd);
+
+    void deleteFlowScript(DeleteFlowScriptCommand cmd);
+
+	FlowScriptDTO updateFlowScript(UpdateFlowScriptCommand cmd);
+
+	ListFlowScriptsResponse listFlowScripts(ListFlowScriptsCommand cmd);
+
+    void updateNeedAllProcessorComplete(UpdateNeedAllProcessorCompleteCommand cmd);
+
+    ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd);
+
+	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
 }

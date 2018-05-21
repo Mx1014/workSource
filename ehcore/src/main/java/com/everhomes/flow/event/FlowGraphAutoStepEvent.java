@@ -90,18 +90,6 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
-			/*next = null;
-	    	FlowButton flowBtn = flowButtonProvider.findFlowButtonByStepType(stepDTO.getFlowNodeId()
-	    			, stepDTO.getFlowVersion(), stepType.getCode(), FlowUserType.PROCESSOR.getCode());
-			
-			if(!flowBtn.getGotoNodeId().equals(0L)) {
-				next = ctx.getFlowGraph().getGraphNode(flowBtn.getGotoNodeId());
-			}
-			if(next == null) {
-				//get next level
-				next = ctx.getFlowGraph().getNodes().get(currentNode.getFlowNode().getNodeLevel()+1);
-			}*/
-
             next = currentNode.getLinksOut().get(0).getToNode(ctx, this);
 
             boolean isConditionNode = FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT;
@@ -183,20 +171,6 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "flow node step error");
 			}
 
-			/*tracker = new FlowEventLog();
-			tracker.setLogContent(flowService.getFireButtonTemplate(stepType, templateMap));
-			tracker.setStepCount(ctx.getFlowCase().getStepCount());
-
-			next = ctx.getFlowGraph().getNodes().get(currentNode.getFlowNode().getNodeLevel()-1);
-			ctx.setNextNode(next);
-			if(subject == null) {
-				subject = new FlowSubject();
-			}
-
-			flowCase.setRejectNodeId(currentNode.getFlowNode().getId());
-			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
-			flowCase.setStepCount(flowCase.getStepCount() + 1L);*/
-
             tracker = new FlowEventLog();
             tracker.setLogContent(flowService.getFireButtonTemplate(stepType, templateMap));
             tracker.setStepCount(ctx.getFlowCase().getStepCount());
@@ -217,6 +191,55 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
             flowCase.setStepCount(flowCase.getStepCount() + 1);
 
 			break;
+        case TRANSFER_STEP:
+            next = currentNode;
+            ctx.setNextNode(next);
+
+            if (currentNode.getTrackTransferLeave() != null) {
+                currentNode.getTrackTransferLeave().fireAction(ctx, ctx.getCurrentEvent());
+            }
+
+            if (stepDTO instanceof FlowAutoStepTransferDTO) {
+                FlowAutoStepTransferDTO stepDTO = (FlowAutoStepTransferDTO) this.stepDTO;
+
+                // 转入
+                if (stepDTO.getTransferIn() != null) {
+                    for (FlowEntitySel sel : stepDTO.getTransferIn()) {
+                        log = new FlowEventLog();
+                        log.setId(flowEventLogProvider.getNextId());
+                        log.setFlowMainId(flowGraph.getFlow().getFlowMainId());
+                        log.setFlowVersion(flowGraph.getFlow().getFlowVersion());//get real version
+                        log.setNamespaceId(flowGraph.getFlow().getNamespaceId());
+                        if (ctx.getCurrentEvent() != null) {
+                            log.setFlowButtonId(ctx.getCurrentEvent().getFiredButtonId());
+                        }
+                        log.setFlowNodeId(next.getFlowNode().getId());
+                        log.setParentId(0L);
+                        log.setFlowCaseId(ctx.getFlowCase().getId());
+                        log.setFlowUserId(sel.getEntityId());
+                        log.setStepCount(ctx.getFlowCase().getStepCount());
+                        log.setLogType(FlowLogType.NODE_ENTER.getCode());
+                        log.setLogTitle("");
+                        log.setButtonFiredStep(stepType.getCode());//mark as transfer log
+                        ctx.getLogs().add(log);
+                    }
+                    log = null;
+                }
+
+                // 转出
+                if (stepDTO.getTransferOut() != null) {
+                    for (FlowEntitySel sel : stepDTO.getTransferOut()) {
+                        //Remove the old logs
+                        log = flowEventLogProvider.getValidEnterStep(sel.getEntityId(), ctx.getFlowCase());
+                        if (null != log) {
+                            log.setStepCount(-1L); // mark as invalid
+                            ctx.getUpdateLogs().add(log);
+                        }
+                    }
+                    log = null;
+                }
+            }
+            break;
 		case END_STEP:
 		case ABSORT_STEP:
             tracker = new FlowEventLog();
@@ -240,6 +263,28 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
             }
 
 			break;
+        case SUSPEND_STEP:
+            next = currentNode;
+            ctx.setNextNode(next);
+
+            tracker = new FlowEventLog();
+            tracker.setStepCount(ctx.getFlowCase().getStepCount());
+
+            for (FlowCase aCase : ctx.getAllFlowCases()) {
+                aCase.setStatus(FlowCaseStatus.SUSPEND.getCode());
+            }
+            break;
+        case ABORT_SUSPEND_STEP:
+            next = currentNode;
+            ctx.setNextNode(next);
+
+            tracker = new FlowEventLog();
+            tracker.setStepCount(ctx.getFlowCase().getStepCount());
+
+            for (FlowCase aCase : ctx.getAllFlowCases()) {
+                aCase.setStatus(FlowCaseStatus.PROCESS.getCode());
+            }
+            break;
 		default:
 			break;
 		}

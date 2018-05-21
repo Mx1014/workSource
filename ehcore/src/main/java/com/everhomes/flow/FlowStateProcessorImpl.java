@@ -332,6 +332,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         return allComplete;
     }
 
+    @Override
+    public void startStepEnter(FlowCaseState ctx, FlowGraphNode from) {
+        normalStepEnter(ctx, from);
+    }
+
     private Map<FlowEventLog, FlowCaseState> getFlowEventLog(FlowCaseState ctx, FlowGraphLink link) {
         Map<FlowEventLog, FlowCaseState> map = new HashMap<>();
         FlowEventLog log = flowEventLogProvider.findNodeLastStepTrackerLog(link.getFlowLink().getFromNodeId(), ctx.getFlowCase().getId());
@@ -689,7 +694,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         FlowEventLog tracker = null;
 
         boolean logStep = false;
-        flowListenerManager.onFlowCaseStateChanged(ctx);
         switch (fromStep) {
             case NO_STEP:
                 break;
@@ -706,6 +710,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 tracker = new FlowEventLog();
                 tracker.setLogContent(flowService.getStepMessageTemplate(fromStep, FlowCaseStatus.FINISHED, ctx.getCurrentEvent(), null));
                 tracker.setStepCount(ctx.getFlowCase().getStepCount());
+
+                flowListenerManager.onFlowCaseEnd(ctx);
                 break;
             case EVALUATE_STEP:
                 break;
@@ -717,7 +723,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     flowCase.setCurrentLaneId(curr.getFlowNode().getFlowLaneId());
                     flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
                 }
-                flowListenerManager.onFlowCaseAbsorted(ctx);
 
                 tracker = new FlowEventLog();
                 Map<String, Object> templateMap = new HashMap<>();
@@ -731,10 +736,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 if (subject != null) {
                     tracker.setSubjectId(subject.getId());
                 }
+
+                flowListenerManager.onFlowCaseAbsorted(ctx);
                 break;
             default:
                 break;
         }
+
+        flowListenerManager.onFlowCaseStateChanged(ctx);
 
         if (tracker != null) {
             FlowGraph flowGraph = ctx.getFlowGraph();
@@ -758,8 +767,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             tracker.setTrackerProcessor(1L);
             ctx.getLogs().add(tracker);
         }
-
-        flowListenerManager.onFlowCaseEnd(ctx);
 
         if (logStep) {
             UserInfo firedUser = ctx.getOperator();

@@ -16,6 +16,22 @@ public class FlowAction extends EhFlowActions {
 		FlowActionCustomField.SCRIPT_ID.setIntegralValue(this, scriptId);
 	}
 
+	public Integer getScriptVersion() {
+		return Math.toIntExact(FlowActionCustomField.SCRIPT_VERSION.getIntegralValue(this));
+	}
+
+	public void setScriptVersion(Integer scriptId) {
+		FlowActionCustomField.SCRIPT_VERSION.setIntegralValue(this, Long.valueOf(scriptId));
+	}
+
+	public String getScriptType() {
+		return FlowActionCustomField.SCRIPT_TYPE.getStringValue(this);
+	}
+
+	public void setScriptType(String scriptType) {
+		FlowActionCustomField.SCRIPT_TYPE.setStringValue(this, scriptType);
+	}
+
 	public Long getReminderAfterMinute() {
 		return FlowActionCustomField.REMINDER_AFTER_MINUTE.getIntegralValue(this);
 	}

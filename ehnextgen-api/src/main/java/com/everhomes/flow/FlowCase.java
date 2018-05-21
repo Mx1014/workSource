@@ -47,6 +47,21 @@ public class FlowCase extends EhFlowCases {
 	    this.setStepCount(this.getStepCount() + 1);
     }
 
+    public void addPath(Long flowCaseId) {
+        if (this.getPath() == null) {
+            this.setPath(String.valueOf(flowCaseId));
+        } else {
+            this.setPath(String.format("%s/%s", this.getPath(), flowCaseId));
+        }
+    }
+
+    public Long getRootFlowCaseId() {
+        if (this.getPath() == null) {
+            return this.getId();
+        }
+        return Long.valueOf(this.getPath().split("/")[0]);
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
