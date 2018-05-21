@@ -1,11 +1,9 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.GetFormCommand;
 import com.everhomes.rest.visitorsys.ui.*;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -115,4 +113,8 @@ public interface VisitorSysService {
     ListBookedVisitorsResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd);
 
     void sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd);
+
+    GetUploadFileTokenResponse getUploadFileToken(GetUIUploadFileTokenCommand cmd);
+
+    GetUploadFileTokenResponse getUploadFileTokenForWeb(GetUploadFileTokenCommand cmd);
 }

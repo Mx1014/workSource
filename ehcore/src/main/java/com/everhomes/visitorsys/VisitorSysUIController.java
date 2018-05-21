@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.sql.Timestamp;
 
@@ -227,6 +226,23 @@ public class VisitorSysUIController extends ControllerBase {
 	@RestReturn(GetBookedVisitorByIdResponse.class)
 	public RestResponse getBookedVisitorById(GetUIBookedVisitorByIdCommand cmd) {
 		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getUIBookedVisitorById(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL:  /ui/visitorsys/getUploadFileToken</b>
+	 * <p>
+	 * 13.获取上传文件token和contentserver-原生客户端
+	 * </p>
+	 */
+	@RequestMapping("getUploadFileToken")
+	@RestReturn(GetUploadFileTokenResponse.class)
+	public RestResponse getUploadFileToken(GetUIUploadFileTokenCommand cmd) {
+		GetUploadFileTokenResponse baseResponse = visitorSysService.getUploadFileToken(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

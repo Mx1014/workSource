@@ -9,6 +9,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.GetUIFormCommand;
 import com.everhomes.rest.visitorsys.ui.GetFormResponse;
+import com.everhomes.rest.visitorsys.ui.GetUploadFileTokenResponse;
 import com.everhomes.rest.visitorsys.ui.TransferQrcodeCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -705,6 +706,25 @@ public class VisitorSysController extends ControllerBase {
 	@RequireAuthentication(false)
 	public RestResponse confirmVerificationCodeForWeb(ConfirmVerificationCodeForWebCommand cmd) {
 		ListBookedVisitorsResponse baseResponse = visitorSysService.confirmVerificationCodeForWeb(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /visitorsys/getUploadFileTokenForWeb</b>
+	 * <p>
+	 * 13.获取上传文件token和contentserver-h5（客户端/微信端）
+	 * </p>
+	 */
+	@RequestMapping("getUploadFileTokenForWeb")
+	@RestReturn(GetUploadFileTokenResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getUploadFileTokenForWeb(GetUploadFileTokenCommand cmd) {
+		GetUploadFileTokenResponse baseResponse = visitorSysService.getUploadFileTokenForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

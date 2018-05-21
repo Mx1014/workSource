@@ -38,6 +38,7 @@ import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
@@ -1462,6 +1463,29 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public void sendSMSVerificationCodeForWeb(SendSMSVerificationCodeForWebCommand cmd) {
         beforePostForWeb(cmd);
         sendSMSVerificationCode(cmd.getNamespaceId(),cmd.getVisitorPhone());
+    }
+
+    @Override
+    public GetUploadFileTokenResponse getUploadFileToken(GetUIUploadFileTokenCommand cmd) {
+        checkDevice(cmd.getDeviceType(),cmd.getDeviceId());
+        return getUploadFileToken();
+    }
+
+    private GetUploadFileTokenResponse getUploadFileToken() {
+        LoginToken token = new LoginToken(Long.valueOf(VisitorSysUtils.generateNumCode(6)),
+                Integer.valueOf(VisitorSysUtils.generateNumCode(6)),
+                Integer.valueOf(VisitorSysUtils.generateNumCode(6)),
+                Long.valueOf(VisitorSysUtils.generateNumCode(6)));
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+        return new GetUploadFileTokenResponse(contentServerService.getContentServer(),tokenString);
+    }
+
+    @Override
+    public GetUploadFileTokenResponse getUploadFileTokenForWeb(GetUploadFileTokenCommand cmd) {
+        beforePostForWeb(cmd);
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        return getUploadFileToken();
     }
 
     /**
