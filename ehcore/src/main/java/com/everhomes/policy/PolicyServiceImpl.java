@@ -61,7 +61,7 @@ public class PolicyServiceImpl implements PolicyService {
                     "Invalid Id parameter.");
         }
         Policy policy = policyProvider.searchPolicyById(cmd.getId());
-        if(null != cmd.getTitle())
+        if(StringUtils.isNotEmpty(cmd.getTitle()))
             policy.setTitle(cmd.getTitle());
         if(StringUtils.isNotEmpty(cmd.getOutline()))
             policy.setOutline(cmd.getOutline());
