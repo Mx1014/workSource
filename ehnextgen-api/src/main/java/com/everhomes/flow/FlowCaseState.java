@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
 
@@ -223,12 +224,12 @@ public class FlowCaseState {
     }
 
     public List<FlowCase> getAllFlowCases() {
-        FlowCaseState tempParentState = getGrantParentState();
+        FlowCaseState tempParentState = getRootState();
         return getChildFlowCases(tempParentState);
     }
 
     public List<FlowCaseState> getAllFlowState() {
-        FlowCaseState tempParentState = getGrantParentState();
+        FlowCaseState tempParentState = getRootState();
         return getChildFlowState(tempParentState);
     }
 
@@ -243,7 +244,7 @@ public class FlowCaseState {
         return states;
     }
 
-    public FlowCaseState getGrantParentState() {
+    public FlowCaseState getRootState() {
         FlowCaseState tempParentState = this;
         while (tempParentState.getParentState() != null) {
             tempParentState = tempParentState.getParentState();
@@ -271,5 +272,19 @@ public class FlowCaseState {
             return parentState.getChildStates().stream().map(FlowCaseState::getFlowCase).collect(Collectors.toList());
         }
         return null;
+    }
+
+    public void flushCurrentNode(FlowGraphNode currentNode) {
+        this.currentNode = currentNode;
+        this.flowCase.flushCurrentNode(currentNode.getFlowNode());
+    }
+
+    public void flushCurrentLane(FlowGraphLane currentLane) {
+        this.currentLane = currentLane;
+        this.flowCase.flushCurrentLane(currentLane.getFlowLane());
+    }
+
+    public void setFlowCaseStatus(FlowCaseStatus status) {
+        this.flowCase.setStatus(status.getCode());
     }
 }

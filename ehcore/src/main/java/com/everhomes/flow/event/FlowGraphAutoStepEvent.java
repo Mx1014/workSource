@@ -101,7 +101,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                 FlowGraphBranch thisBranch = flowGraph.getBranchByOriginalAndConvNode(flowCase.getStartNodeId(), next.getFlowNode().getId());
                 // 先把当前分支判断是否完成
                 if (thisBranch != null) {
-                    flowCase.setCurrentNodeId(next.getFlowNode().getId());
+                    flowCase.flushCurrentNode(next.getFlowNode());
                     List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
                     boolean allFinish = siblingFlowCase.stream().allMatch(
                             r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
@@ -331,10 +331,12 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 	}
 
     private void stepParentState(FlowCaseState ctx, FlowGraphNode nextNode) {
+        FlowGraph flowGraph = ctx.getFlowGraph();
+
         FlowCaseState parentState = ctx.getParentState();
-        if (parentState != null && parentState.getFlowCase().getEndNodeId().equals(nextNode.getFlowNode().getId())) {
-            parentState.getFlowCase().setCurrentNodeId(nextNode.getFlowNode().getId());
-            parentState.getFlowCase().setCurrentLaneId(nextNode.getFlowNode().getFlowLaneId());
+        if (parentState != null && parentState.getFlowCase().getEndNodeId().equals(nextNode.getFlowNodeId())) {
+            parentState.flushCurrentNode(nextNode);
+            parentState.flushCurrentLane(flowGraph.getGraphLane(nextNode.getFlowLaneId()));
             stepParentState(parentState, nextNode);
         }
     }
