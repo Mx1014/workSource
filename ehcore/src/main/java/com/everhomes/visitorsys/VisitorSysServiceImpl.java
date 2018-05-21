@@ -353,12 +353,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param visitor
      */
     private void sendMessageInviter(VisitorSysVisitor visitor) {
-        //不知道产品要怎么发，暂时就不发
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
         VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
-        if(ownerType == VisitorsysOwnerType.ENTERPRISE ||
-                visitorType == VisitorsysVisitorType.TEMPORARY
+        VisitorsysFlagType sendInviterFlag = checkVisitorsysFlag(visitor.getSendMessageInviterFlag());
+        if(sendInviterFlag == null
+                || sendInviterFlag == VisitorsysFlagType.NO
+                || ownerType == VisitorsysOwnerType.ENTERPRISE
+                || visitorType == VisitorsysVisitorType.TEMPORARY
                 || VisitorsysStatus.WAIT_CONFIRM_VISIT != visitStatus
                 || VisitorsysStatus.HAS_VISITED != visitStatus){
             return;
@@ -518,7 +520,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "not support visitor phone = " + visitor.getVisitorPhone());
         }
 
-        if(sendSmsFlag == VisitorsysFlagType.NO) {
+        if(sendSmsFlag == VisitorsysFlagType.NO || sendSmsFlag==null) {
            return;
         }
 
@@ -1758,6 +1760,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                             , VisitorsysConstant.ERROR_PLANNED_VISITTIME, "invalid passed plannedVisitTime "+visitor.getPlannedVisitTime());
                 }
                 visitor.setVisitStatus(VisitorsysStatus.NOT_VISIT.getCode());//创建预约必须是未到访状态
+                visitStatus = VisitorsysStatus.NOT_VISIT;
             }
             if(visitStatus == VisitorsysStatus.NOT_VISIT) {//预约访客未到访,设置邀请人
                 User user = UserContext.current().getUser();
