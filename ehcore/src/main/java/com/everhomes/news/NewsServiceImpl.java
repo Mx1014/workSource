@@ -1951,7 +1951,10 @@ public class NewsServiceImpl implements NewsService {
 	 * @date: 2018年4月20日 下午3:45:54
 	 *
 	 */
-	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long categoryId) {
+	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long inputCategoryId) {
+		
+		//旧版本可能传空
+		Long categoryId = inputCategoryId == null ? 0L : inputCategoryId;
 		
 		//旧版本无法获得groupId
 		if (null == groupId) {

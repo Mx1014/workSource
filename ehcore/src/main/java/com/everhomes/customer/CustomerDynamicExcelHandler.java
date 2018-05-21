@@ -11,12 +11,14 @@ import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.dynamicExcel.DynamicField;
 import com.everhomes.dynamicExcel.DynamicRowDTO;
 import com.everhomes.dynamicExcel.DynamicSheet;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationAttachment;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -30,6 +32,7 @@ import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -40,6 +43,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
@@ -71,8 +75,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -138,7 +144,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
 
     @Override
-    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
+    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData) {
         FieldGroup group = new FieldGroup();
         //用名字搜会有问题
         if (isContainChinese(sheetName)) {
@@ -146,10 +152,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         } else {
             group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
         }
+        ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+        List<FieldGroupDTO> groups = fieldService.listFieldGroups(groupCommand);
+        String groupDisplayName = "";
+        if (groups != null && groups.size() > 0) {
+            Long groupId = group.getId();
+            List<FieldGroupDTO> scopeGroups = groups.stream().filter((r) -> Objects.equals(r.getGroupId(), groupId)).collect(Collectors.toList());
+            if (scopeGroups != null && scopeGroups.size() > 0) {
+                groupDisplayName = scopeGroups.get(0).getGroupDisplayName();
+            } else {
+                groupDisplayName = group.getTitle();
+            }
+        }
         List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
-        ds.setDisplayName(group.getTitle());
+        ds.setDisplayName(groupDisplayName);
         ds.setGroupId(group.getId());
 
         List<DynamicField> dynamicFields = new ArrayList<>();
@@ -185,23 +203,28 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    if (!fieldDTO.getFieldParam().contains("image") && !fieldDTO.getFieldParam().contains("richText")) {//导出时 非图片字段可导出 fix 26791
-                        DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                        df.setDisplayName(fieldDTO.getFieldDisplayName());
-                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
-                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                    if (!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                        if (withData && fieldDTO.getFieldParam().contains("richText")) {
+                            LOGGER.info("remove richText cell whern export data!");
+                        } else {
+                            DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                            df.setDisplayName(fieldDTO.getFieldDisplayName());
+                            if ("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                                df.setDateFormat("yyyy-MM-dd HH:mm");
+                            }
+                            //boolean isMandatory 数据库是0和1 默认false
+                            if (fieldDTO.getMandatoryFlag() == 1) {
+                                df.setMandatory(true);
+                            }
+                            if (fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                                List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                                    return item.getItemDisplayName();
+                                }).collect(Collectors.toList());
+                                df.setAllowedValued(allowedValued);
+                            }
+                            df.setGroupId(fieldDTO.getGroupId());
+                            dynamicFields.add(df);
                         }
-                        //boolean isMandatory 数据库是0和1 默认false
-                        if(fieldDTO.getMandatoryFlag() == 1) {
-                            df.setMandatory(true);
-                        }
-                        if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                                return item.getItemDisplayName();
-                            }).collect(Collectors.toList());
-                            df.setAllowedValued(allowedValued);
-                        }
-                        dynamicFields.add(df);
                     }
                 }
             });
@@ -217,11 +240,23 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private List<DynamicField> sortDynamicFields(DynamicSheet ds,List<DynamicField> dynamicFields) {
         List<DynamicField> fields = new ArrayList<>();
         if(dynamicFields!=null && dynamicFields.size()>0){
+            //按照groupId 分类
+            Map<Long, List<DynamicField>> fieldMap = new HashMap<>();
             for (DynamicField field : dynamicFields) {
-                fields.add(field);
-                //产品要求 企业管理员和楼栋门牌放在excel的前面
-                if(field.getFieldName().equals("contactAddress")){
-                    if(CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))){
+                if (fieldMap.get(field.getGroupId()) == null) {
+                    List<DynamicField> fieldList = new ArrayList<>();
+                    fieldList.add(field);
+                    fieldMap.put(field.getGroupId(), fieldList);
+                } else {
+                    fieldMap.get(field.getGroupId()).add(field);
+                }
+            }
+            fieldMap.forEach((k, v) -> {
+                fields.addAll(v);
+                // 基本信息 groupId 10
+                if (k == 10L) {
+                    //产品要求 企业管理员和楼栋门牌放在excel的前面
+                    if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
                         DynamicField df = new DynamicField();
                         df.setFieldName("enterpriseAdmins");
                         df.setDisplayName("企业管理员");
@@ -234,7 +269,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         fields.add(df1);
                     }
                 }
-            }
+            });
         }
         return fields;
     }
@@ -333,7 +368,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                             customerAddressString = column.getValue();
                                     }
                                 } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
+                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed:{}",e);
                                     failedNumber ++;
                                     flag = false;
                                     break;
@@ -864,6 +899,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
+            if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
+                syncCustomerInfoIntoOrganization(exist);
+            }
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
@@ -883,14 +921,51 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             } catch (Exception e) {
                 //todo:接口过时 没有批量删除
+                LOGGER.error("create enterprise admin error :{}", e);
             }
             customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
             createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
             if (StringUtils.isEmpty(customerAddressString)) {
                 organizationProvider.deleteOrganizationById(exist.getOrganizationId());
                 Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
-                if (organization != null)
+                if (organization != null){
                     organizationSearcher.feedDoc(organization);
+                }
+                enterpriseCustomer.setOrganizationId(0L);
+                //there is no need to feedDoc
+                customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            }
+        }
+    }
+
+    private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
+        //这里增加入驻信息后自动同步到企业管理
+        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        exist.setOrganizationId(organizationDTO.getId());
+        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
+            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
+        }
+    }
+
+    private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
+        this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
+        if (attachments != null && attachments.size() > 0) {
+            for (AttachmentDescriptor attachmentDescriptor : attachments) {
+                OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+                attachment.setCreatorUid(userId);
+                attachment.setOrganizationId(id);
+                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                this.organizationProvider.createOrganizationAttachment(attachment);
             }
         }
     }
@@ -980,16 +1055,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
         if (cmds.size() > 0) {
             cmds.forEach((c) -> {
-                rolePrivilegeService.createOrganizationAdmin(c);
-                //增加record
-                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
-                String contactType = null;
-                if (null != userIdentifier) {
-                    contactType = OrganizationMemberTargetType.USER.getCode();
-                } else {
-                    contactType = OrganizationMemberTargetType.UNTRACK.getCode();
-                }
-                customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
+               try {
+                   //增加record
+                   UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
+                   String contactType = null;
+                   if (null != userIdentifier) {
+                       contactType = OrganizationMemberTargetType.USER.getCode();
+                   } else {
+                       contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+                   }
+                   customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
+                   if(c.getOrganizationId()!=null && c.getOrganizationId()!=0){
+                       rolePrivilegeService.createOrganizationAdmin(c);
+                   }
+               }catch (Exception e ){
+                   LOGGER.error("create organization admin erro :{}", e);
+               }
             });
         }
     }
