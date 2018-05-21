@@ -45,7 +45,6 @@ import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.redis.JsonStringRedisSerializer;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
@@ -3033,22 +3032,22 @@ public class FlowServiceImpl implements FlowService {
         }
 
         // 老版本
-        if (flowCase.getCurrentLaneId() == null || flowCase.getCurrentLaneId() == 0L) {
-            if ("END".equals(flowNode.getNodeName())) {
-                FlowStepType stepType = FlowStepType.END_STEP;
-                if (FlowCaseStatus.ABSORTED.getCode().equals(flowCase.getStatus())) {
-                    stepType = FlowStepType.ABSORT_STEP;
-                }
-                flowNode.setNodeName(buttonDefName(flowCase.getNamespaceId(), stepType));
-            }
-            dto.setCurrentLane(flowNode.getNodeName());
-        } else {
-            FlowLane currentLane = flowLaneProvider.findById(flowCase.getCurrentLaneId());
-            dto.setCurrentLane(currentLane.getDisplayName());
-            if (flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-                dto.setCurrentLane(currentLane.getDisplayNameAbsort());
-            }
-        }
+        // if (flowCase.getCurrentLaneId() == null || flowCase.getCurrentLaneId() == 0L) {
+        //     if ("END".equals(flowNode.getNodeName())) {
+        //         FlowStepType stepType = FlowStepType.END_STEP;
+        //         if (FlowCaseStatus.ABSORTED.getCode().equals(flowCase.getStatus())) {
+        //             stepType = FlowStepType.ABSORT_STEP;
+        //         }
+        //         flowNode.setNodeName(buttonDefName(flowCase.getNamespaceId(), stepType));
+        //     }
+        //     dto.setCurrentLane(flowNode.getNodeName());
+        // } else {
+        //     FlowLane currentLane = flowLaneProvider.findById(flowCase.getCurrentLaneId());
+        //     dto.setCurrentLane(currentLane.getDisplayName());
+        //     if (flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
+        //         dto.setCurrentLane(currentLane.getDisplayNameAbsort());
+        //     }
+        // }
 
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 
@@ -3077,22 +3076,6 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowCase getFlowCaseById(Long flowCaseId) {
         return flowCaseProvider.getFlowCaseById(flowCaseId);
-    }
-
-    @Override
-    public FlowLane getFlowCaseCurrentLane(Long flowCaseId) {
-        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        return getFlowCaseCurrentLane(flowCase);
-    }
-
-    @Override
-    public FlowLane getFlowCaseCurrentLane(FlowCase flowCase) {
-        FlowLane flowLane = flowLaneProvider.findById(flowCase.getCurrentLaneId());
-        if (flowLane != null
-                && FlowCaseStatus.fromCode(flowCase.getStatus()) == FlowCaseStatus.ABSORTED) {
-            flowLane.setDisplayName(flowLane.getDisplayNameAbsort());
-        }
-        return flowLane;
     }
 
     @Override
@@ -4925,7 +4908,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
-        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+        FlowCase flowCase = ctx.getRootState().getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
@@ -5606,9 +5589,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         // 详情信息
-        List<FlowCaseEntity> entities = getFlowCaseEntities(userTypes, ctx.getGrantParentState().getFlowCase());
+        List<FlowCaseEntity> entities = getFlowCaseEntities(userTypes, ctx.getRootState().getFlowCase());
         dto.setEntities(entities);
-        dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
+        dto.setCustomObject(ctx.getRootState().getFlowCase().getCustomObject());
 
         if (needFlowButton) {
             // 按钮，在这里只要处理人的按钮，只有处理人会看到这个界面
@@ -5768,9 +5751,9 @@ public class FlowServiceImpl implements FlowService {
         dto.setButtons(tuple.first());
         dto.setMoreButtons(tuple.second());
 
-        List<FlowCaseEntity> entities = getFlowCaseEntities(userTypes, ctx.getGrantParentState().getFlowCase());
+        List<FlowCaseEntity> entities = getFlowCaseEntities(userTypes, ctx.getRootState().getFlowCase());
         dto.setEntities(entities);
-        dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
+        dto.setCustomObject(ctx.getRootState().getFlowCase().getCustomObject());
 
         List<FlowLaneLogDTO> list = getFlowLaneLogDTOList(flowGraph, userTypes, flowCase, allFlowCase, laneList);
         for (int i = list.size() - 1; i >= 0; i--) {

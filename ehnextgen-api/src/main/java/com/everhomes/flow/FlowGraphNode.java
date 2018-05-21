@@ -247,4 +247,12 @@ public abstract class FlowGraphNode implements Serializable {
         }
         return idToLink.get(linkId);
     }
+
+    public Long getFlowNodeId() {
+        return flowNode.getId();
+    }
+
+    public Long getFlowLaneId() {
+        return flowNode.getFlowLaneId();
+    }
 }

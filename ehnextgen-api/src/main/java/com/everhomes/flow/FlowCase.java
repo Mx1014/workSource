@@ -1,4 +1,5 @@
 package com.everhomes.flow;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.util.StringHelper;
 
@@ -31,6 +32,22 @@ public class FlowCase extends EhFlowCases {
         FlowCaseCustomField.PROJECT_TYPE_A.setStringValue(this, projectTypeA);
     }
 
+    public String getCurrentLane() {
+        return FlowCaseCustomField.CURRENT_LANE.getStringValue(this);
+    }
+
+    public void setCurrentLane(String currentLane) {
+        FlowCaseCustomField.CURRENT_LANE.setStringValue(this, currentLane);
+    }
+
+    public String getCurrentNode() {
+        return FlowCaseCustomField.CURRENT_NODE.getStringValue(this);
+    }
+
+    public void setCurrentNode(String currentNode) {
+        FlowCaseCustomField.CURRENT_NODE.setStringValue(this, currentNode);
+    }
+
     public String getProjectTypeA() {
         return FlowCaseCustomField.PROJECT_TYPE_A.getStringValue(this);
     }
@@ -60,6 +77,19 @@ public class FlowCase extends EhFlowCases {
             return this.getId();
         }
         return Long.valueOf(this.getPath().split("/")[0]);
+    }
+
+    public void flushCurrentNode(FlowNode currentNode) {
+        this.setCurrentNodeId(currentNode.getId());
+        this.setCurrentNode(currentNode.getNodeName());
+    }
+
+    public void flushCurrentLane(FlowLane currentLane) {
+        this.setCurrentLaneId(currentLane.getId());
+        this.setCurrentLane(currentLane.getDisplayName());
+        if (FlowCaseStatus.fromCode(this.getStatus()) == FlowCaseStatus.ABSORTED) {
+            this.setCurrentLane(currentLane.getDisplayNameAbsort());
+        }
     }
 
     @Override
