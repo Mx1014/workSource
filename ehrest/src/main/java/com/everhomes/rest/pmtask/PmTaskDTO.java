@@ -334,7 +334,7 @@ public class PmTaskDTO {
 		else{
 			if (obj instanceof PmTaskDTO){
 				PmTaskDTO o = (PmTaskDTO) obj;
-				if(o.id == this.id){
+				if(o.id.equals(this.id)){
 					return true ;
 				}
 			}
