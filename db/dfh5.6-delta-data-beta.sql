@@ -1,7 +1,7 @@
 -- 用于鼎峰汇测试支付功能
--- 999951(鼎峰汇) 1000631 深圳市海岸物业管理有限公司   ZL-4443(release)
+-- 999951(鼎峰汇) 1041502 
 set @namespace_id=999951;
-set @organization_id=1000631;
+set @organization_id=1041502;
 set @biz_user_id=2327;  -- 1210(beta)  2368(release) 2327(for tets)
 set @user_type=2;
 set @configuration_id = (select max(id) from eh_configurations);
@@ -9,7 +9,10 @@ set @payment_user_id = (select max(id) from eh_payment_users);
 set @payment_service_id = (select max(id) from eh_payment_service_configs);
 set @payment_type_id = (select max(id) from eh_payment_types);
 set @menu_scope_id = (select max(id) from eh_web_menu_scopes);
- 
+
+INSERT INTO `eh_payment_users`(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `settlement_type`, `status`, `create_time`)
+VALUES ((@payment_user_id := @payment_user_id + 1), 'EhOrganizations', @organization_id, @user_type, @biz_user_id, 0, 2, UTC_TIMESTAMP());
+
 INSERT INTO `eh_payment_service_configs`(id, name, order_type, namespace_id, owner_type, owner_id, resource_type, resource_id, payment_split_rule_id, payment_user_type, payment_user_id, create_time, update_time)
 VALUES((@payment_service_id := @payment_service_id + 1), '物业缴费', 'wuyeCode', @namespace_id, 'EhOrganizations', @organization_id, NULL, NULL, NULL, @user_type, @biz_user_id, UTC_TIMESTAMP(), NULL);
 

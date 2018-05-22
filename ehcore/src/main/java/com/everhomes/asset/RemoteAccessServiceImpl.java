@@ -425,7 +425,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq(cmd.getPaymentStatus());
         	}else {//0：订单异常，对应电商系统的：2挂起,3失败
         		tempCondition = PaymentAttributes.PAYMENT_STATUS.eq("2");
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_STATUS.eq("3"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_STATUS.eq("3"));
         	}
             if(condition == null) {
                 condition = tempCondition;
@@ -463,36 +463,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
-        /*if(cmd.getPayTime() != null) {
-//            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
-            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
-            Date time = sdf.parse(cmd.getPayTime());
-            Calendar todayStart = Calendar.getInstance();
-            todayStart.setTime(time);
-            todayStart.set(Calendar.HOUR_OF_DAY, 0);
-            todayStart.set(Calendar.MINUTE, 0);
-            todayStart.set(Calendar.SECOND, 0);
-            todayStart.set(Calendar.MILLISECOND, 0);
-            Calendar todayEnd = Calendar.getInstance();
-            todayEnd.setTime(time);
-            todayEnd.set(Calendar.HOUR_OF_DAY, 23);
-            todayEnd.set(Calendar.MINUTE, 59);
-            todayEnd.set(Calendar.SECOND, 59);
-            todayEnd.set(Calendar.MILLISECOND, 999);
-            todayStart.setTime(time);
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(todayEnd.getTime().getTime());
-            QueryCondition tempCondition1 = PaymentAttributes.CREATE_TIME.gt(todayStart.getTime().getTime());
-            if(condition == null) {
-                condition = tempCondition;
-            } else {
-                condition = condition.and(tempCondition);
-            }
-            if(condition == null) {
-                condition = tempCondition1;
-            } else {
-                condition = condition.and(tempCondition1);
-            }
-        }*/
         if(StringUtils.isNotBlank(cmd.getOrderNo())) {
             QueryCondition tempCondition = PaymentAttributes.BIZ_ORDER_NUM.eq(cmd.getOrderNo());
             if(condition == null) {
@@ -516,14 +486,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         	QueryCondition tempCondition = null;
         	if(cmd.getPaymentType().equals(0)) {//微信
         		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("1");
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("7"));
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("9"));
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("12"));
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("21"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("7"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("9"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("12"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("21"));
         	}else if(cmd.getPaymentType().equals(1)) {//支付宝
         		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("8");
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("10"));
-        		tempCondition = tempCondition.and(PaymentAttributes.PAYMENT_TYPE.eq("13"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("10"));
+        		tempCondition = tempCondition.or(PaymentAttributes.PAYMENT_TYPE.eq("13"));
         	}else {//对公转账
         		tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("2");
         	}
