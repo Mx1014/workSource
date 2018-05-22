@@ -1790,6 +1790,7 @@ public class FieldServiceImpl implements FieldService {
             systemFields.forEach((field) -> {
                 ScopeField scopeField = new ScopeField();
                 scopeField = ConvertHelper.convert(field, ScopeField.class);
+                scopeField.setFieldId(field.getId());
                 scopeField.setNamespaceId(scopeFieldGroup.getNamespaceId());
                 scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
                 scopeField.setCreatorUid(UserContext.currentUserId());
@@ -1801,6 +1802,7 @@ public class FieldServiceImpl implements FieldService {
                             ScopeFieldItem scopeFieldItem = ConvertHelper.convert(r, ScopeFieldItem.class);
                             scopeFieldItem.setCommunityId(scopeFieldGroup.getCommunityId());
                             scopeFieldItem.setNamespaceId(scopeFieldGroup.getNamespaceId());
+                            scopeFieldItem.setItemId(r.getId());
                             fieldProvider.createScopeFieldItem(scopeFieldItem);
                         });
                     }
