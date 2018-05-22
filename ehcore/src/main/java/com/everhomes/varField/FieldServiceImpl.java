@@ -458,16 +458,18 @@ public class FieldServiceImpl implements FieldService {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
             if(scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
-            globalFlag = false;
+            if(scopeFields!=null && scopeFields.size()>0){
+                globalFlag = false;
+            }
         }
         // add general scope fields version 3.5
         if(globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath());
-            globalFlag = false;
         }
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
@@ -482,8 +484,10 @@ public class FieldServiceImpl implements FieldService {
             List<Field> fields = fieldProvider.listFields(fieldIds);
 
             Map<Long, ScopeFieldItem> scopeItems = new HashMap<>();
-            if(namespaceFlag) {
-                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
+            if (globalFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
+            } else if (namespaceFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             }
@@ -529,11 +533,14 @@ public class FieldServiceImpl implements FieldService {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
-            globalFlag = false;
+            if(fieldItems!=null && fieldItems.size()>0){
+                globalFlag = false;
+            }
         }
         if(globalFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
@@ -1869,14 +1876,23 @@ public class FieldServiceImpl implements FieldService {
     public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
         ScopeFieldItem fieldItem = null;
         Boolean namespaceFlag = true;
-        if(communityId != null) {
+        Boolean globalFlag = true;
+        if (communityId != null) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
-            if(fieldItem != null) {
+            if (fieldItem != null) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
-        if(namespaceFlag) {
+        if (namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+            if (fieldItem != null) {
+                globalFlag = false;
+            }
+        }
+
+        if (globalFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
         }
 
         return fieldItem;
@@ -1886,14 +1902,22 @@ public class FieldServiceImpl implements FieldService {
     public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
         ScopeFieldItem fieldItem = null;
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(communityId != null) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
             if(fieldItem != null) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
+            if(fieldItem!=null){
+                globalFlag = false;
+            }
+        }
+        if(globalFlag){
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
         }
 
         return fieldItem;
@@ -1927,11 +1951,14 @@ public class FieldServiceImpl implements FieldService {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             if(groups != null && groups.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
-            globalFlag = false;
+            if(groups!=null && groups.size()>0){
+                globalFlag = false;
+            }
         }
         //add global general scope groups version 3.5
         if(globalFlag){
