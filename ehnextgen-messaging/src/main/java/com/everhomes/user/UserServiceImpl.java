@@ -127,6 +127,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -6163,6 +6164,17 @@ public class UserServiceImpl implements UserService {
 							if(community != null){
 								CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
 								communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+								//根据公司id和项目id查询公司所属项目表eh_organization_workplaces表中的信息，并且将该表中的workplace_name字段组装到communityInfoDTO对象中
+								List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgIdAndCommunityId(org.getId(),community.getId());
+								//创建一个集合List<String>来承载办公地点名称的集合
+								List<String> siteNameList = Lists.newArrayList();
+								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
+								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+									//将每一个办公地点名称都保存在集合siteNameList中
+									siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+								}
+								//将siteNameList集合封装在对象communityInfoDTO中
+								communityInfoDTO.setSiteNameList(siteNameList);
 								communityUserDtos.add(communityInfoDTO);
 							}
 

@@ -607,6 +607,14 @@ public interface OrganizationProvider {
 	List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgId(Long organizationId);
 
 	/**
+	 * 根据organizationId和communityId来查询eh_organization_workplaces表中的信息
+	 * @param organizationId
+	 * @param communityId
+	 * @return
+	 */
+	List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgIdAndCommunityId(Long organizationId,Long communityId);
+
+	/**
 	 * 根据项目Id来查询项目名称
 	 * @param communityId
 	 * @return

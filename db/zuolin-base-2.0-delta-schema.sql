@@ -189,8 +189,6 @@ ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `names
 -- 客户端处理方式0-native, 1-outside url, 2-inside url, 3-offline package  add by yanjun 201805171140
 ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
 
--- 标准版 add by yuanlei 地址认证那块需要关联办公地点名称
-ALTER TABLE eh_organization_community_requests ADD COLUMN workplace_name VARCHAR(50) DEFAULT NULL COMMENT '办公地点名称';
 
 
 

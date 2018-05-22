@@ -6315,6 +6315,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     /**
+     * 根据organizationId和communityId来查询eh_organization_workplaces表中的信息
+     * @param organizationId
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgIdAndCommunityId(Long organizationId,Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+        SelectQuery<EhOrganizationWorkplacesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_WORKPLACES);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
+        List<OrganizationWorkPlaces> list = query.fetch().map( r -> ConvertHelper.convert(r, OrganizationWorkPlaces.class));
+        return list;
+    }
+
+    /**
      * 根据项目Id来查询项目名称
      * @param communityId
      * @return
@@ -6347,6 +6366,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
        return list;
     }
+
 
     /**
      * 根据communityId来查询eh_communityAndBuilding_relationes表中的address_id字段
@@ -6739,4 +6759,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
                 .execute();
     }
+
+
 }
