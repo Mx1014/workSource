@@ -503,14 +503,21 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
-        if(cmd.getTransactionType() != null) {
+        /*if(cmd.getTransactionType() != null) {
             QueryCondition tempCondition = PaymentAttributes.TRASACTION_TYPE.eq(cmd.getTransactionType());
             if(condition == null) {
                 condition = tempCondition;
             } else {
                 condition = condition.and(tempCondition);
             }
+        }*/
+        //transactionType ： 0代表手续费，交易明细不展示手续费
+        if(condition == null) {
+            condition = PaymentAttributes.TRASACTION_TYPE.neq("0");
+        } else {
+            condition = condition.and(PaymentAttributes.TRASACTION_TYPE.neq("0"));
         }
+        
         if(cmd.getOrderType() != null) {
             QueryCondition tempCondition = PaymentAttributes.REMARK1.eq(cmd.getOrderType());
             if(condition == null) {
