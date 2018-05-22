@@ -1791,7 +1791,7 @@ public class AssetServiceImpl implements AssetService {
         long time1 = c1.getTime();
         long time2 = c2.getTime();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
-        return Integer.parseInt(String.valueOf(between_days));
+        return Integer.parseInt(String.valueOf(between_days) + 1);
     }
 
     private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
