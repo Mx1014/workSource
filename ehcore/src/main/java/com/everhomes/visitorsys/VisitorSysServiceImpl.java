@@ -959,10 +959,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public ListDoorGuardsResponse listDoorGuards(ListDoorGuardsCommand cmd) {
-        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         ListDoorAccessGroupCommand doorcmd = ConvertHelper.convert(cmd,ListDoorAccessGroupCommand.class);
         doorcmd.setSearch(cmd.getKeyWords());
-        doorcmd.setOwnerType((byte)0);
+        if(ownerType==VisitorsysOwnerType.COMMUNITY) {
+            doorcmd.setOwnerType((byte) 0);
+        }else if(ownerType==VisitorsysOwnerType.ENTERPRISE){
+            doorcmd.setOwnerType((byte) 1);
+        }
         ListDoorAccessResponse listDoorAccessResponse = doorAccessService.listDoorAccessGroup(doorcmd);
         if(listDoorAccessResponse==null || listDoorAccessResponse.getDoors()==null){
             return null;
@@ -1957,21 +1961,46 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(datetimeSF);
         VisitorSysCoding visitorSysCoding = visitorSysCodingProvider.findVisitorSysCodingByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
         VisitorSysOwnerCode visitorSysOwnerCode = visitorSysOwnerCodeProvider.findVisitorSysCodeByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        if(visitorSysOwnerCode==null){
+            visitorSysOwnerCode = createSysOwnerCode(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        }
         if(visitorSysCoding==null){
             visitorSysCoding = createNewVisitorSysCoding(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         }
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        String currentPoint = format.format(System.currentTimeMillis());
-        String updatePoint = format.format(visitorSysCoding.getOperateTime());
-        if(!currentPoint.equals(updatePoint)){//如果邀请码配置的更新时间（按天）不是今天了，流水码从0开始计算
-            visitorSysCoding.setOperateTime(new Timestamp(System.currentTimeMillis()));
-            visitorSysCoding.setSerialCode(0);
-        }
+//        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//        String currentPoint = format.format(System.currentTimeMillis());
+//        String updatePoint = format.format(visitorSysCoding.getOperateTime());
+//        if(!currentPoint.equals(updatePoint)){//如果邀请码配置的更新时间（按天）不是今天了，流水码从0开始计算
+//            visitorSysCoding.setOperateTime(new Timestamp(System.currentTimeMillis()));
+//            visitorSysCoding.setSerialCode(0);
+//        }
         visitorSysCoding.setSerialCode(visitorSysCoding.getSerialCode()+1);
         String serialCode = generateSerialCode(visitorSysCoding.getSerialCode()+"");
-        String invitationNo = "RG"+visitorSysOwnerCode.getRandomCode()+currentPoint+serialCode;
+        String invitationNo = "RG"+visitorSysOwnerCode.getRandomCode()+visitorSysCoding.getDayMark()+serialCode;
         visitorSysCodingProvider.updateVisitorSysCoding(visitorSysCoding);
         return invitationNo;
+    }
+
+    /**
+     * 构建owner的标识吗，用于生成邀请编码
+     * @param namespaceId
+     * @param ownerType
+     * @param ownerId
+     * @return
+     */
+    private VisitorSysOwnerCode createSysOwnerCode(Integer namespaceId, String ownerType, Long ownerId) {
+        VisitorSysOwnerCode ownerCode = new VisitorSysOwnerCode();
+        int length = configurationProvider.getIntValue(VisitorsysConstant.VISITORSYS_RANDOMCODE_LENGTH,4);
+        String randomCode = VisitorSysUtils.generateLetterNumCode(length);
+        ownerCode.setNamespaceId(namespaceId);
+        ownerCode.setOwnerType(ownerType);
+        ownerCode.setOwnerId(ownerId);
+        while(visitorSysOwnerCodeProvider.findVisitorSysCodingByRandomCode(randomCode)!=null){
+            randomCode = VisitorSysUtils.generateLetterNumCode(length);
+        }
+        ownerCode.setRandomCode(randomCode);
+        visitorSysOwnerCodeProvider.createVisitorSysOwnerCode(ownerCode);
+        return ownerCode;
     }
 
     /**
@@ -1986,12 +2015,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysCoding.setNamespaceId(namespaceId);
         visitorSysCoding.setOwnerId(ownerId);
         visitorSysCoding.setOwnerType(ownerType);
-        int length = configurationProvider.getIntValue(VisitorsysConstant.VISITORSYS_RANDOMCODE_LENGTH,4);
-        String randomCode = VisitorSysUtils.generateLetterNumCode(length);
-        while(visitorSysCodingProvider.findVisitorSysCodingByRandomCode(randomCode)!=null){
-            randomCode = VisitorSysUtils.generateLetterNumCode(length);
-        }
-        visitorSysCoding.setRandomCode(randomCode);
         visitorSysCoding.setSerialCode(0);
         visitorSysCoding.setStatus((byte)2);
         visitorSysCodingProvider.createVisitorSysCoding(visitorSysCoding);

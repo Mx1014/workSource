@@ -63,7 +63,31 @@ public class VisitorSysOwnerCodeProviderImpl implements VisitorSysOwnerCodeProvi
 				.orderBy(Tables.EH_VISITOR_SYS_OWNER_CODE.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOwnerCode.class));
 	}
-	
+
+	@Override
+	public VisitorSysOwnerCode findVisitorSysCodeByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		List<VisitorSysOwnerCode> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_OWNER_CODE)
+				.where(Tables.EH_VISITOR_SYS_OWNER_CODE.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_OWNER_CODE.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_OWNER_CODE.OWNER_ID.eq(ownerId))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOwnerCode.class));
+		if(list==null||list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
+	@Override
+	public VisitorSysOwnerCode findVisitorSysCodingByRandomCode(String randomCode) {
+		List<VisitorSysOwnerCode> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_OWNER_CODE)
+				.where(Tables.EH_VISITOR_SYS_OWNER_CODE.RANDOM_CODE.eq(randomCode))
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysOwnerCode.class));
+		if(list==null||list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
 	private EhVisitorSysOwnerCodeDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

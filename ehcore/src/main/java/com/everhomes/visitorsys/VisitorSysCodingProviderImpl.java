@@ -66,7 +66,7 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 	}
 
 	@Override
-	public VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId,Long dayRemark) {
+	public VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId,String dayRemark) {
 		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
 				.where(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))

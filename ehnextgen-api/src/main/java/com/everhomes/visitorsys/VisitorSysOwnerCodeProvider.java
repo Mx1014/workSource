@@ -14,4 +14,6 @@ public interface VisitorSysOwnerCodeProvider {
 	List<VisitorSysOwnerCode> listVisitorSysOwnerCode();
 
     VisitorSysOwnerCode findVisitorSysCodeByOwner(Integer namespaceId, String ownerType, Long ownerId);
+
+	VisitorSysOwnerCode findVisitorSysCodingByRandomCode(String randomCode);
 }
