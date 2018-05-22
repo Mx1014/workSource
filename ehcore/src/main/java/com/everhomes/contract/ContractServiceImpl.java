@@ -566,11 +566,13 @@ public class ContractServiceImpl implements ContractService {
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
-		
 		if(communityExist == null && cmd.getCommunityId() != null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType());
 		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null);
+		}
+		if (communityExist == null) {
+			return "HT_" + DateHelper.currentGMTTime().getTime() + RandomUtils.nextInt(10);
 		}
 		
 		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
