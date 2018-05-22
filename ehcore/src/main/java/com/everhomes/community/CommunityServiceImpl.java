@@ -2912,8 +2912,19 @@ public class CommunityServiceImpl implements CommunityService {
 		//创建社区
 		Community community = ConvertHelper.convert(cmd, Community.class);
 		community.setAptCount(0);
-		community.setDefaultForumId(1L);
-		community.setFeedbackForumId(2L);
+
+
+		//设置默认的forumId，要使用原有的项目里的forumId
+		ListingLocator locator = new ListingLocator();
+		List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+		if(communities != null && communities.size() > 0){
+			community.setDefaultForumId(communities.get(0).getDefaultForumId());
+			community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
+		}else {
+			community.setDefaultForumId(1L);
+			community.setFeedbackForumId(2L);
+		}
+
 
 		if(cmd.getStatus() != null){
 			community.setStatus(cmd.getStatus());
