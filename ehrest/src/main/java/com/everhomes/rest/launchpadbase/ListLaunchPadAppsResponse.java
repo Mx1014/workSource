@@ -12,13 +12,13 @@ import java.util.List;
  */
 public class ListLaunchPadAppsResponse {
 
-    private List<ServiceModuleAppDTO> apps;
+    private List<AppDTO> apps;
 
-    public List<ServiceModuleAppDTO> getApps() {
+    public List<AppDTO> getApps() {
         return apps;
     }
 
-    public void setApps(List<ServiceModuleAppDTO> apps) {
+    public void setApps(List<AppDTO> apps) {
         this.apps = apps;
     }
 

@@ -2830,7 +2830,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	public ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd) {
 		ListOPPushCardsResponse response = new ListOPPushCardsResponse();
 
-		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig().toString(), OPPush.class);
+		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPush.class);
 		OPPushHandler opPushHandler = getOPPushHandler(oppush.getItemGroup());
 		if(opPushHandler != null){
 			response.setModuleId(opPushHandler.getModuleId());
