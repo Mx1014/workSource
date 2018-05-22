@@ -1787,13 +1787,16 @@ public class FieldServiceImpl implements FieldService {
         List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId());
         if(systemFields!=null && systemFields.size()>0){
             // auto init default fields and items
-            systemFields.forEach((field) -> {
+            Integer defaultOrder = 0;
+            for (Field field: systemFields) {
                 ScopeField scopeField = new ScopeField();
                 scopeField = ConvertHelper.convert(field, ScopeField.class);
                 scopeField.setFieldId(field.getId());
+                scopeField.setFieldDisplayName(field.getDisplayName());
                 scopeField.setNamespaceId(scopeFieldGroup.getNamespaceId());
                 scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
                 scopeField.setCreatorUid(UserContext.currentUserId());
+                scopeField.setDefaultOrder(defaultOrder++);
                 fieldProvider.createScopeField(scopeField);
                 if(field.getFieldParam().contains("select")){
                     List<FieldItem> systemItems = fieldProvider.listFieldItems(field.getId());
@@ -1803,11 +1806,12 @@ public class FieldServiceImpl implements FieldService {
                             scopeFieldItem.setCommunityId(scopeFieldGroup.getCommunityId());
                             scopeFieldItem.setNamespaceId(scopeFieldGroup.getNamespaceId());
                             scopeFieldItem.setItemId(r.getId());
+                            scopeFieldItem.setItemDisplayName(r.getDisplayName());
                             fieldProvider.createScopeFieldItem(scopeFieldItem);
                         });
                     }
                 }
-            });
+            }
         }
     }
 
