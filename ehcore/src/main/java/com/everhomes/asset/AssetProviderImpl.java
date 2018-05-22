@@ -908,7 +908,9 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        final String[] dateStr = {""};
+        //final String[] dateStr = {""};
+        final String[] dateStrBegin = {""};
+        final String[] dateStrEnd = {""};
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
         final BigDecimal[] amountReceivable = {new BigDecimal("0")};
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
@@ -932,7 +934,9 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dtos.add(dto);
-                    dateStr[0] = r.getValue(t.DATE_STR);
+                    //dateStr[0] = r.getValue(t.DATE_STR);
+                    dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
+                    dateStrEnd[0] = r.getValue(t.DATE_STR_END);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
@@ -951,7 +955,9 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dtos.add(dto);
-                    dateStr[0] = r.getValue(t.DATE_STR);
+                    //dateStr[0] = r.getValue(t.DATE_STR);
+                    dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
+                    dateStrEnd[0] = r.getValue(t.DATE_STR_END);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
@@ -971,7 +977,7 @@ public class AssetProviderImpl implements AssetProvider {
         });
         response.setAmountReceivable(amountReceivable[0]);
         response.setAmountOwed(amountOwed[0]);
-        response.setDatestr(dateStr[0]);
+        response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
         return response;
     }
@@ -1564,6 +1570,20 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
                     itemDTO.setApartmentName(f.getValue(t1.APARTMENT_NAME));
                     itemDTO.setBuildingName(f.getValue(t1.BUILDING_NAME));
+                    //包括滞纳金
+                    getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                        .from(Tables.EH_PAYMENT_LATE_FINE)
+                        .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(itemDTO.getBillItemId()))
+                        .fetch()
+                        .forEach(rrr ->{
+                            BigDecimal value = rrr.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT);
+                            if(value != null){
+                            	itemDTO.setLateFineAmount(value);
+                            }
+                    });
+                    if(itemDTO.getLateFineAmount() == null) {
+                    	itemDTO.setLateFineAmount(BigDecimal.ZERO);
+                    }
                     list1.add(itemDTO);
                     return null;
                 });
