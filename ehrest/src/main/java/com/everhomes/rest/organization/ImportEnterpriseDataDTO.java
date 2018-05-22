@@ -19,6 +19,10 @@ public class ImportEnterpriseDataDTO {
 	private String adminToken = "";
 
 	private String email = "";
+
+	private String buildingNameAndApartmentName;
+
+	private String communityNames;
 /*
 	//办公地点楼栋
 	private String buildingName = "";
@@ -209,6 +213,22 @@ public class ImportEnterpriseDataDTO {
 
 	public void setSiteDtos(List<OrganizationSiteApartmentDTO> siteDtos) {
 		this.siteDtos = siteDtos;
+	}
+
+	public String getBuildingNameAndApartmentName() {
+		return buildingNameAndApartmentName;
+	}
+
+	public void setBuildingNameAndApartmentName(String buildingNameAndApartmentName) {
+		this.buildingNameAndApartmentName = buildingNameAndApartmentName;
+	}
+
+	public String getCommunityNames() {
+		return communityNames;
+	}
+
+	public void setCommunityNames(String communityNames) {
+		this.communityNames = communityNames;
 	}
 
 	@Override

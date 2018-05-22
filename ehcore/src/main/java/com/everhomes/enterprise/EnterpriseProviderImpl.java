@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationWorkPlaces;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -41,13 +43,6 @@ import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCommunityMap;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
@@ -726,6 +721,23 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         enterpriseCommunityMap.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
         dao.insert(enterpriseCommunityMap);
+    }
+
+    /**
+     * 向eh_organization_community_requests表中添加数据
+     * @param organizationCommunityRequest
+     */
+    @Override
+    public void insertIntoOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //获取一个最大的id值
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunityRequests.class));
+        organizationCommunityRequest.setId(id);
+        organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhOrganizationCommunityRequestsDao dao = new EhOrganizationCommunityRequestsDao(context.configuration());
+        dao.insert(organizationCommunityRequest);
     }
 
     /**

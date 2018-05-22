@@ -1404,6 +1404,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
                     //表eh_enterprise_community_map中
                     enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
+
+
+                    //在这里我们还需要维护eh_organization_community_requests这张表
+                    //创建OrganizationCommunityRequest类的对象
+                    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                    //将数据封装在对象OrganizationCommunityRequest对象中
+                    organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationCommunityRequest.setMemberId(organization.getId());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //// TODO: 2018/5/22
+                    enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
+
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
@@ -1699,6 +1713,18 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
                     //表eh_enterprise_community_map中
                     enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
+
+                    //在这里我们还需要维护eh_organization_community_requests这张表
+                    //创建OrganizationCommunityRequest类的对象
+                    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                    //将数据封装在对象OrganizationCommunityRequest对象中
+                    organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //// TODO: 2018/5/22
+                    enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
@@ -8121,6 +8147,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile file, Long userId) {
 //        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_IMPORT, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+
+        //创建楼栋和门牌的集合
+        List<OrganizationSiteApartmentDTO> siteDtos = Lists.newArrayList();
+        //创建OrganizationApartDTO类的对象
+//        OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
+
+        //创建CommunityDTO类的对象
+//        CommunityDTO communityDTO = new CommunityDTO();
+
         Long communityId = cmd.getCommunityId();
         ImportFileTask task = new ImportFileTask();
         try {
@@ -8141,10 +8176,90 @@ public class OrganizationServiceImpl implements OrganizationService {
                 List<ImportEnterpriseDataDTO> datas = handleImportEnterpriseData(resultList);
                 if (datas.size() > 0) {
                     //设置导出报错的结果excel的标题
-//                    response.setTitle(datas.get(0));
-//                    datas.remove(0);
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
+                    datas.remove(0);
                 }
-                List<ImportFileResultLog<ImportEnterpriseDataDTO>> results = importEnterprise(datas, userId, cmd);
+                //开始拆包
+                List<ImportEnterpriseDataDTO> dataNew = Lists.newArrayList();
+                for (int i = 0; i < datas.size(); i++) {
+                    ImportEnterpriseDataDTO importEnterpriseDataDTO = datas.get(i);
+                    ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+
+                    if(importEnterpriseDataDTO.getName() != null){
+                        //说明公司的名称不为空，那么取出公司的名称
+                        data.setName(importEnterpriseDataDTO.getName());
+                    }
+                    if(importEnterpriseDataDTO.getDisplayName() != null){
+                        //说明公司的简称不为空，那么取出公司的简称
+                        data.setDisplayName(importEnterpriseDataDTO.getDisplayName());
+                    }
+                    if(importEnterpriseDataDTO.getMemberRange() != null){
+                        //说明人员规模不为空，那么取出人员规模
+                        data.setMemberRange(importEnterpriseDataDTO.getMemberRange());
+                    }
+                    if(importEnterpriseDataDTO.getAdminToken() != null){
+                        //说明管理员手机号不为空，那么取出管理员手机号
+                        data.setAdminToken(importEnterpriseDataDTO.getAdminToken());
+                    }
+                    if(importEnterpriseDataDTO.getAdminName() != null){
+                        //说明管理员姓名不为空，那么取出管理员姓名
+                        data.setAdminName(importEnterpriseDataDTO.getAdminName());
+                    }
+                    if(importEnterpriseDataDTO.getWorkPlaceName() != null){
+                        //说明办公地点名称不为空，那么取出办公地点名称
+                        data.setWorkPlaceName(importEnterpriseDataDTO.getWorkPlaceName());
+                    }
+                    if(importEnterpriseDataDTO.getCommunityName() != null){
+                        //说明办公地点所属项目不为空，那么将办公地点所属项目取出来
+                        data.setCommunityName(importEnterpriseDataDTO.getCommunityName());
+                    }
+                    if(importEnterpriseDataDTO.getPmFlag() != null){
+                        //说明管理公司标志不为空，那么取出管理公司标志
+                        data.setPmFlag(importEnterpriseDataDTO.getPmFlag());
+                    }
+                    if(importEnterpriseDataDTO.getServiceSupportFlag() != null){
+                        //说明服务商标志不为空，那么将服务商标志取出来
+                        data.setServiceSupportFlag(importEnterpriseDataDTO.getServiceSupportFlag());
+                    }
+                    if(importEnterpriseDataDTO.getWorkPlatFormFlag() != null){
+                        //说明是否开启移动工作台标志不为空，那么将其取出来
+                        data.setWorkPlatFormFlag(importEnterpriseDataDTO.getWorkPlatFormFlag());
+                    }
+
+
+
+
+                    if(importEnterpriseDataDTO.getBuildingNameAndApartmentName() != null){
+                        for(String str : importEnterpriseDataDTO.getBuildingNameAndApartmentName().split(",")){
+                            //创建OrganizationApartDTO类的对象
+                            OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
+                            if(str.split("-")[0] != null){
+                                organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
+                            }
+                            if(str.split("-")[1] != null){
+                                organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
+                            }
+                            siteDtos.add(organizationSiteApartmentDTO);
+                        }
+                        data.setSiteDtos(siteDtos);
+                    }
+                    if(importEnterpriseDataDTO.getCommunityNames() != null){
+                        //创建管理的项目的集合
+                        List<CommunityDTO> communityDTOList = Lists.newArrayList();
+                        for(String str : importEnterpriseDataDTO.getCommunityNames().split(",")){
+                            //创建CommunityDTO类的对象
+                            CommunityDTO communityDTO = new CommunityDTO();
+                            communityDTO.setName(str);
+                            communityDTOList.add(communityDTO);
+                        }
+                        data.setCommunityDTOList(communityDTOList);
+                    }
+//                    datas.add(data);
+                    dataNew.add(data);
+                }
+
+                List<ImportFileResultLog<ImportEnterpriseDataDTO>> results = importEnterprise(dataNew, userId, cmd);
 
                 response.setFailCount((long) results.size());
                 response.setTotalCount((long) datas.size());
@@ -8233,16 +8348,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list) {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
-        //创建楼栋和门牌的集合
+/*        //创建楼栋和门牌的集合
         List<OrganizationSiteApartmentDTO> siteDtos = Lists.newArrayList();
         //创建OrganizationApartDTO类的对象
         OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
         //创建管理的项目的集合
         List<CommunityDTO> communityDTOList = Lists.newArrayList();
         //创建CommunityDTO类的对象
-        CommunityDTO communityDTO = new CommunityDTO();
-        for (int i = 1; i < list.size()-1; i++) {
-            RowResult r = (RowResult) list.get(i+1);
+        CommunityDTO communityDTO = new CommunityDTO();*/
+        for (int i = 0; i < list.size(); i++) {
+            RowResult r = (RowResult) list.get(i);
             if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
@@ -8272,7 +8387,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //设置办公地点所属项目名称
                     data.setCommunityName(r.getG().trim());
                 if (null != r.getH()){
-                    for(String str : r.getH().split(",")){
+                    /*for(String str : r.getH().split(",")){
                         if(str.split("-")[0] != null){
                             organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
                         }
@@ -8281,16 +8396,18 @@ public class OrganizationServiceImpl implements OrganizationService {
                         }
                         siteDtos.add(organizationSiteApartmentDTO);
                     }
-                    data.setSiteDtos(siteDtos);
+                    data.setSiteDtos(siteDtos);*/
+                    data.setBuildingNameAndApartmentName(r.getH().trim());
                 }
                 if (null != r.getI())
                     data.setPmFlag(r.getI().trim());
                 if (null != r.getJ()){
-                    for(String str : r.getJ().split(",")){
+                    /*for(String str : r.getJ().split(",")){
                         communityDTO.setName(str);
                         communityDTOList.add(communityDTO);
                     }
-                    data.setCommunityDTOList(communityDTOList);
+                    data.setCommunityDTOList(communityDTOList);*/
+                    data.setCommunityNames(r.getJ().trim());
                 }
                 if (null != r.getK())
                     data.setServiceSupportFlag(r.getK().trim());
@@ -8662,6 +8779,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                                             //调用enterpriseProvider中的insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap)方法，将数据封装在
                                             //表eh_enterprise_community_map中
                                             enterpriseProvider.insertIntoEnterpriseCommunityMap(enterpriseCommunityMap);
+
+
+                                            //在这里我们还需要维护eh_organization_community_requests这张表
+                                            //创建OrganizationCommunityRequest类的对象
+                                            OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                                            //将数据封装在对象OrganizationCommunityRequest对象中
+                                            organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                                            organizationCommunityRequest.setMemberId(organization.getId());
+                                            organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                                            organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                                            //// TODO: 2018/5/22
+                                            enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
+
                                             //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
                                             //首先进行遍历楼栋集合
                                             if(createOfficeSite.getSiteDtos() != null){
