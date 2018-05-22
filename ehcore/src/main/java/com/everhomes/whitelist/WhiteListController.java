@@ -11,6 +11,9 @@ import com.everhomes.rest.whitelist.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestDoc(value="WhiteList controller", site="whiteList")
 @RestController
 @RequestMapping("/whitelist")
@@ -66,7 +69,12 @@ public class WhiteListController extends ControllerBase{
     @RequestMapping("getWhiteList")
     @RestReturn(value = WhiteListDTO.class)
     public RestResponse getWhiteList(GetWhiteListCommand cmd) {
-        RestResponse response = new RestResponse();
+        WhiteListDTO whiteListDTO = new WhiteListDTO();
+        whiteListDTO.setId(1L);
+        whiteListDTO.setNamespaceId(1);
+        whiteListDTO.setPhoneNumber("123456789");
+
+        RestResponse response = new RestResponse(whiteListDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -79,7 +87,23 @@ public class WhiteListController extends ControllerBase{
     @RequestMapping("listWhiteList")
     @RestReturn(value = ListWhiteListResponse.class)
     public RestResponse listWhiteList(ListWhiteListCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<WhiteListDTO> list = new ArrayList<>();
+        WhiteListDTO whiteListDTO = new WhiteListDTO();
+        whiteListDTO.setId(1L);
+        whiteListDTO.setNamespaceId(1);
+        whiteListDTO.setPhoneNumber("123456789");
+        WhiteListDTO whiteListDTO2 = new WhiteListDTO();
+        whiteListDTO2.setId(1L);
+        whiteListDTO2.setNamespaceId(1);
+        whiteListDTO2.setPhoneNumber("123456789");
+        list.add(whiteListDTO);
+        list.add(whiteListDTO2);
+
+        ListWhiteListResponse listWhiteListResponse = new ListWhiteListResponse();
+        listWhiteListResponse.setNextAnchor(null);
+        listWhiteListResponse.setWhiteListDTOList(list);
+
+        RestResponse response = new RestResponse(listWhiteListResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
