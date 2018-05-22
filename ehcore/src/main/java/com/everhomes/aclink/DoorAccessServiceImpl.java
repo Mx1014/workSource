@@ -470,6 +470,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     		community = communityProvider.findCommunityById(door.getOwnerId());
     	}
         
+    	List<GroupMember> groupMembers = new ArrayList<GroupMember>();
         if(!StringUtils.isEmpty(cmd.getKeyword())){
             users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
         }else if(null != cmd.getOrganizationId()){
@@ -483,6 +484,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         } else {
         	if(community != null ){
         		users = doorAuthProvider.listCommunityAclinkUsers(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), community.getCommunityType(), door.getOwnerId(), locator, pageSize, namespaceId);
+        		groupMembers = listGroupMemberByCommunityId(community.getId());
         	}else{
         		//community为空,ownerType可能是1或者2,按照以前的方法处理
         		users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
@@ -491,7 +493,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
 
-        List<GroupMember> groupMembers = listGroupMemberByCommunityId(community.getId());
         for (User user: users) {
             List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
             AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
@@ -513,17 +514,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     dto.setPhone(identifier.getIdentifierToken());
                 }
             }
-            if(community != null && user.getStatus() != null){
-            	dto.setIsAuth(user.getStatus());
-            }else{
-            	if(community.getCommunityType() == 0){
-            		dto.setIsAuth(checkResidentialUserIsAuth(user.getId(), groupMembers));
-            	}else if(community.getCommunityType() == 1){
-            		dto.setIsAuth(checkCommercialUserIsAuth(user.getId(), community.getId()));
-            	}else{
-            		dto.setIsAuth((byte) 0);
-            	}
+            if(community != null){
+            	if(user.getStatus() != null){
+                	dto.setIsAuth(user.getStatus());
+                }else{
+                	if(community.getCommunityType() == 0){
+                		dto.setIsAuth(checkResidentialUserIsAuth(user.getId(), groupMembers));
+                	}else if(community.getCommunityType() == 1){
+                		dto.setIsAuth(checkCommercialUserIsAuth(user.getId(), community.getId()));
+                	}else{
+                		dto.setIsAuth((byte) 0);
+                	}
+                }
             }
+            
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
                 dto.setRightOpen(doorAuth.getRightOpen());

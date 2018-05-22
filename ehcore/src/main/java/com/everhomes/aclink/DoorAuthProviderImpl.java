@@ -437,6 +437,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 								.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.le(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     } else {
 						query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)).and((Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 0))
+								.or(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.isNull())
 										.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.gt(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     }
                 }
