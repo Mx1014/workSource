@@ -17946,7 +17946,7 @@ CREATE TABLE `eh_contract_categories` (
   `show_name` varchar(64) DEFAULT NULL,
   `all_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_test_infos` (
    `id` BIGINT(20) NOT NULL,
