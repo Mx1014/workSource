@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>nextAnchor: 下一页锚点</li>
- *     <li>whiteListDTOList: 白名单列表</li>
+ *     <li>whiteListDTOList: 白名单列表{@link com.everhomes.rest.whitelist.WhiteListDTO}</li>
  * </ul>
  */
 public class ListWhiteListResponse {

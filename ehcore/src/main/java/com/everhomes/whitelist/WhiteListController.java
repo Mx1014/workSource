@@ -20,7 +20,7 @@ import java.util.List;
 public class WhiteListController extends ControllerBase{
 
     /**
-     * <b>URL: /whitelist/createWhiteList<b/>
+     * <b>URL: /whitelist/createWhiteList</b>
      * <p>新增白名单中的手机号码</p>
      *
      */
