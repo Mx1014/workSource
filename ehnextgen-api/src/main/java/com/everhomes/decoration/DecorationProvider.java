@@ -33,6 +33,8 @@ public interface DecorationProvider {
 
     void deleteDecorationWorkerById(Long id);
 
+    void createDecorationCompany(DecorationCompany company);
+
     DecorationCompany getDecorationCompanyById(Long id);
 
     void createDecorationRequest(DecorationRequest request);
@@ -44,4 +46,15 @@ public interface DecorationProvider {
     void deleteDecorationFeeByRequestId(Long requestId);
 
     void createDecorationFee(DecorationFee fee);
+
+    void createApprovalVals(DecorationApprovalVal val);
+
+    void deleteApprovalValByRequestId(Long requestId);
+
+    void updateApprovalVals(DecorationApprovalVal val);
+
+    DecorationApprovalVal getApprovalValById(Long id);
+
+    List<DecorationApprovalVal> listApprovalValsByRequestId(Long requestId);
+
 }

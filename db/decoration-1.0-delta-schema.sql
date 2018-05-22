@@ -27,6 +27,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_workers` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `request_id`  bigint(20) NOT NULL ,
 `worker_type`  varchar(64) NULL ,
 `uid`  bigint(20) NULL ,
@@ -54,6 +55,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_atttachment` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `setting_id`  bigint(20) NOT NULL ,
 `name`  varchar(64) NULL ,
 `attachment_type`  varchar(64) NULL COMMENT '\'file\'文件 \'fee\'费用' ,
@@ -64,6 +66,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_fee` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `request_id`  bigint(20) NOT NULL ,
 `fee_name`  varchar(64) NULL ,
 `fee_price`  varchar(64) NULL ,
@@ -84,6 +87,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_company_chiefs` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `company_id`  bigint(20) NOT NULL COMMENT '装修公司的id',
 `name`  varchar(64) NULL ,
 `phone`  varchar(64) NULL ,
@@ -93,11 +97,14 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `eh_decoration_approval_vals` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
 `request_id`  bigint(20) NULL ,
 `approval_id`  bigint(20) NULL ,
+`approval_name`  varchar(64) NULL ,
 `flow_case_id`  bigint(20) NULL ,
 `form_origin_id`  bigint(20) NULL ,
 `form_version`  bigint(20) NULL ,
+`delete_flag`  tinyint NULL COMMENT '0未取消 1取消' ,
 `create_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

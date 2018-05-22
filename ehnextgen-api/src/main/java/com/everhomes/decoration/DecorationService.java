@@ -34,4 +34,6 @@ public interface DecorationService {
 
     void postApprovalForm(PostApprovalFormCommand cmd);
 
+    void DecorationApplySuccess(Long requestId);
+
 }

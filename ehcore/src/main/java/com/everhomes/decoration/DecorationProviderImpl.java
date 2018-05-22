@@ -7,9 +7,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.decoration.DecorationAttachmentDTO;
-import com.everhomes.rest.decoration.DecorationIllustrationDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhDecorationApprovalValsDao;
 import com.everhomes.server.schema.tables.daos.EhDecorationRequestsDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.daos.EhDecorationSettingDao;
@@ -17,7 +17,6 @@ import com.everhomes.server.schema.tables.daos.EhDecorationWorkersDao;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -119,7 +118,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
 
     @Override
     public void deleteDecorationBySettingId(Long settingId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteWhereStep<EhDecorationAtttachmentRecord> step = context
                 .delete(Tables.EH_DECORATION_ATTTACHMENT);
         Condition condition = Tables.EH_DECORATION_ATTTACHMENT.SETTING_ID.eq(settingId);
@@ -189,11 +188,26 @@ public class DecorationProviderImpl implements  DecorationProvider {
 
     @Override
     public void deleteDecorationWorkerById(Long id) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteWhereStep<EhDecorationWorkersRecord> step = context
                 .delete(Tables.EH_DECORATION_WORKERS);
         Condition condition = Tables.EH_DECORATION_WORKERS.ID.eq(id);
         step.where(condition).execute();
+    }
+
+    @Override
+    public void createDecorationCompany(DecorationCompany company) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhDecorationCompanies.class));
+        company.setId(id);
+        company.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationCompaniesRecord record = ConvertHelper.convert(company,EhDecorationCompaniesRecord.class);
+        InsertQuery<EhDecorationCompaniesRecord> query = context
+                .insertQuery(Tables.EH_DECORATION_COMPANIES);
+        query.setRecord(record);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationCompanies.class, null);
     }
 
     @Override
@@ -242,7 +256,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
 
     @Override
     public void deleteDecorationFeeByRequestId(Long requestId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteWhereStep<EhDecorationFeeRecord> step = context
                 .delete(Tables.EH_DECORATION_FEE);
         Condition condition = Tables.EH_DECORATION_FEE.REQUEST_ID.eq(requestId);
@@ -262,5 +276,59 @@ public class DecorationProviderImpl implements  DecorationProvider {
         query.setRecord(record);
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationRequests.class, null);
+    }
+
+    @Override
+    public void createApprovalVals(DecorationApprovalVal val) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhDecorationApprovalVals.class));
+        val.setId(id);
+        val.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationApprovalValsRecord record = ConvertHelper.convert(val,EhDecorationApprovalValsRecord.class);
+        InsertQuery<EhDecorationApprovalValsRecord> query = context
+                .insertQuery(Tables.EH_DECORATION_APPROVAL_VALS);
+        query.setRecord(record);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationApprovalVals.class, null);
+    }
+
+    @Override
+    public void deleteApprovalValByRequestId(Long requestId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_DECORATION_APPROVAL_VALS).set(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG.eq((byte)1))
+                .where(Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId))
+                .execute();
+    }
+
+    @Override
+    public void updateApprovalVals(DecorationApprovalVal val) {
+        assert (val.getId() == null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationApprovalValsDao dao = new EhDecorationApprovalValsDao(context.configuration());
+        dao.update(val);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDecorationApprovalVals.class,
+                val.getId());
+    }
+
+    @Override
+    public DecorationApprovalVal getApprovalValById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_APPROVAL_VALS);
+        Condition condition = Tables.EH_DECORATION_APPROVAL_VALS.ID.eq(id);
+        step.where(condition);
+        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationApprovalVal.class));
+    }
+
+    @Override
+    public List<DecorationApprovalVal> listApprovalValsByRequestId(Long requestId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_APPROVAL_VALS);
+        Condition condition = Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId);
+        condition = condition.and(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG.ne((byte)1));
+        step.where(condition);
+        return step.fetch().map(r->ConvertHelper.convert(r,DecorationApprovalVal.class));
     }
 }

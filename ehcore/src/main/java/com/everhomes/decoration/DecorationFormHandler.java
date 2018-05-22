@@ -16,7 +16,7 @@ public class DecorationFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
-        DecorationRequest request = this.decorationProvider.getRequestById(cmd.getSourceId());
+
 
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd,PostGeneralFormDTO.class);
         return dto;

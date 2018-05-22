@@ -6,20 +6,27 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalService;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.decoration.*;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -62,9 +69,14 @@ public class DecorationServiceImpl implements  DecorationService {
     @Autowired
     private FlowService flowService;
     @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
     private PortalService portalService;
     @Autowired
-    private GeneralApprovalService generalApprovalService;
+    private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
+    private GeneralFormService generalFormService;
+
 
     private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat sdfMd = new SimpleDateFormat("MM-dd");
@@ -245,6 +257,13 @@ public class DecorationServiceImpl implements  DecorationService {
         request.setApplyUid(UserContext.currentUserId());
         request.setCancelFlag((byte)0);
         request.setStatus(DecorationRequestStatus.APPLY.getCode());
+
+        if (request.getDecoratorCompanyId() == null){
+            Organization org = organizationProvider.findOrganizationByName(request.getDecoratorCompany(), UserContext.getCurrentNamespaceId());
+            if (org!=null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER, "公司名已被占用");
+        }
         this.dbProvider.execute((TransactionStatus status) -> {
             decorationProvider.createDecorationRequest(request);
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),cmd.getCommunityId(),
@@ -260,15 +279,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setReferType(DecorationRequestStatus.APPLY.getFlowOwnerType());
             cmd2.setProjectId(request.getCommunityId());
             cmd2.setProjectType(EntityType.COMMUNITY.getCode());
-
-            ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-            listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-            listServiceModuleAppsCommand.setModuleId(FlowConstants.DECORATION_MODULE);
-            ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-            if (apps!=null && apps.getServiceModuleApps().size()>0)
-                cmd2.setTitle(apps.getServiceModuleApps().get(0).getName());
-            else
-                cmd2.setTitle("装修办理");
+            cmd2.setTitle(getAppName());
 
             cmd2.setServiceType(cmd2.getTitle());
             cmd2.setTitle(cmd2.getTitle()+"("+parseRequestStatus(DecorationRequestStatus.APPLY.getCode())+")");
@@ -285,6 +296,17 @@ public class DecorationServiceImpl implements  DecorationService {
         });
 
         return convertRequest(request,ProcessorType.MASTER.getCode());
+    }
+
+    private String getAppName(){
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        listServiceModuleAppsCommand.setModuleId(FlowConstants.DECORATION_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        if (apps!=null && apps.getServiceModuleApps().size()>0)
+            return(apps.getServiceModuleApps().get(0).getName());
+        else
+            return ("装修办理");
     }
 
     private DecorationRequestDTO convertRequest(DecorationRequest request, Byte processorType){
@@ -325,7 +347,39 @@ public class DecorationServiceImpl implements  DecorationService {
             dto.setRefoundComment(request.getRefoundComment());
         }
 
-        //TODO 工作流
+        FlowCase flowCase;
+        DecorationFlowCaseDTO flowCaseDTO;
+        DecorationRequestStatus status = DecorationRequestStatus.fromCode(request.getStatus());
+        switch (status){
+            case APPLY:
+            case FILE_APPROVAL:
+            case CHECK:
+                 flowCase = this.flowCaseProvider.findFlowCaseByReferId(request.getId(),status.getFlowOwnerType(),
+                        DecorationController.moduleId);
+                dto.setFlowCasees(new ArrayList<>());
+                flowCaseDTO = new DecorationFlowCaseDTO();
+                flowCaseDTO.setFlowCaseId(flowCase.getId());
+                flowCaseDTO.setStatus(flowCase.getStatus());
+                dto.getFlowCasees().add(flowCaseDTO);
+                break;
+            case CONSTRACT:
+                List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalValsByRequestId(request.getId());
+                if (vals != null && vals.size()>0){
+                    dto.setFlowCasees(new ArrayList<>());
+                    for (DecorationApprovalVal val:vals){
+                        flowCaseDTO = new DecorationFlowCaseDTO();
+                        flowCaseDTO.setApprovalName(val.getApprovalName());
+                        flowCase = this.flowCaseProvider.findFlowCaseByReferId(val.getId(),status.getFlowOwnerType(),
+                                DecorationController.moduleId);
+                        flowCaseDTO.setStatus(flowCase.getStatus());
+                        flowCaseDTO.setFlowCaseId(flowCase.getId());
+                        dto.getFlowCasees().add(flowCaseDTO);
+                    }
+                    break;
+                }
+            default :
+                break;
+        }
 
         return dto;
     }
@@ -442,7 +496,91 @@ public class DecorationServiceImpl implements  DecorationService {
     public void postApprovalForm(PostApprovalFormCommand cmd) {
         GetTemplateByApprovalIdCommand cmd2 = new GetTemplateByApprovalIdCommand();
         cmd2.setApprovalId(cmd.getApprovalId());
-        GetTemplateByApprovalIdResponse res1 = this.generalApprovalService.getTemplateByApprovalId(cmd2);
+        //获取审批
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            //先删除旧的审批
+            this.decorationProvider.deleteApprovalValByRequestId(cmd.getRequestId());
+            //保存审批数据
+            DecorationApprovalVal val = new DecorationApprovalVal();
+            val.setApprovalId(cmd.getApprovalId());
+            val.setApprovalName(ga.getApprovalName());
+            val.setDeleteFlag((byte)0);
+            val.setRequestId(cmd.getRequestId());
+            val.setFormOriginId(ga.getFormOriginId());
+            val.setFormVersion(ga.getFormVersion());
+            this.decorationProvider.createApprovalVals(val);
 
+            //创建工作流
+            Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
+                    ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+            if (flow == null) {
+                LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
+                throw RuntimeErrorException.errorWith("decoration",
+                        10001, "请开启工作流后重试");
+            }
+            DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+            CreateFlowCaseCommand cfcc = new CreateFlowCaseCommand();
+            cfcc.setApplyUserId(UserContext.currentUserId());
+            cfcc.setReferId(val.getId());
+            cfcc.setReferType(DecorationRequestStatus.CONSTRACT.getFlowOwnerType());
+            cfcc.setProjectId(request.getCommunityId());
+            cfcc.setProjectType(EntityType.COMMUNITY.getCode());
+            cfcc.setTitle(ga.getApprovalName());
+
+            cfcc.setServiceType(getAppName());
+            StringBuilder content = new StringBuilder();
+            content.append("装修公司:" + request.getDecoratorCompany() + "\n");
+            content.append("装修地点:" + convertAddress(request.getAddress()) + "\n");
+            content.append("装修人日期:" + sdfyMd.format(new Date(request.getStartTime().getTime())) + "至" +
+                    sdfyMd.format(new Date(request.getEndTime().getTime())));
+            cfcc.setContent(content.toString());
+            cfcc.setFlowMainId(flow.getFlowMainId());
+            cfcc.setFlowVersion(flow.getFlowVersion());
+            FlowCase flowCase = flowService.createFlowCase(cfcc);
+            val.setFlowCaseId(flowCase.getId());
+            this.decorationProvider.updateApprovalVals(val);
+            //将表单数据存起来
+            addGeneralFormValuesCommand cmd3 = new addGeneralFormValuesCommand();
+            cmd3.setValues(cmd.getValues());
+            cmd3.setGeneralFormId(ga.getFormOriginId());
+            cmd3.setSourceId(val.getId());
+            cmd3.setSourceType("EhDecorationApprovalVals");
+            this.generalFormService.addGeneralFormValues(cmd3);
+
+            return null;
+        });
+    }
+
+    @Override
+    public void DecorationApplySuccess(Long requestId) {
+        DecorationRequest request = this.decorationProvider.getRequestById(requestId);
+        try{
+            //注册公司
+            if (request.getDecoratorCompanyId() == null){
+                CreateEnterpriseCommand cmd = new CreateEnterpriseCommand();
+                cmd.setName(request.getDecoratorCompany());
+                cmd.setAddress("待补充");
+                cmd.setCommunityId(request.getCommunityId());
+                cmd.setLatitude("0.00");
+                cmd.setLongitude("0.00");
+                OrganizationDTO org = this.organizationService.createEnterprise(cmd);
+                request.setDecoratorCompanyId(org.getId());
+                //新建装修公司
+                DecorationCompany company = new DecorationCompany();
+                company.setName(request.getDecoratorCompany());
+                company.setNamespaceId(UserContext.getCurrentNamespaceId());
+                company.setOrganizationId(org.getId());
+                this.decorationProvider.createDecorationCompany(company);
+            }
+            //
+
+
+        }catch (Exception e){
+            LOGGER.error("DecorationApplySuccess error e:",e);
+            request.setCancelFlag((byte)1);
+            this.decorationProvider.updateDecorationRequest(request);
+        }
     }
 }
