@@ -8,6 +8,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.whitelist.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +20,9 @@ import java.util.List;
 @RequestMapping("/whitelist")
 public class WhiteListController extends ControllerBase{
 
+    @Autowired
+    private WhiteListSerivce whiteListSerivce;
+
     /**
      * <b>URL: /whitelist/createWhiteList</b>
      * <p>新增白名单中的手机号码</p>
@@ -27,7 +31,22 @@ public class WhiteListController extends ControllerBase{
     @RequestMapping("createWhiteList")
     @RestReturn(value = String.class)
     public RestResponse createWhiteList(CreateWhiteListCommand cmd) {
+        whiteListSerivce.createWhiteList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /whitelist/batchCreateWhiteList</b>
+     * <p>批量新增白名单中的手机号码</p>
+     *
+     */
+    @RequestMapping("batchCreateWhiteList")
+    @RestReturn(value = String.class)
+    public RestResponse batchCreateWhiteList(BatchCreateWhiteListCommand cmd) {
+        whiteListSerivce.batchCreateWhiteList(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -37,12 +56,25 @@ public class WhiteListController extends ControllerBase{
     /**
      * <b>URL: /whitelist/deleteWhiteList</b>
      * <p>删除白名单中的手机号码</p>
-     *
-     *
      */
     @RequestMapping("deleteWhiteList")
     @RestReturn(value = String.class)
     public RestResponse deleteWhiteList(DeleteWhiteListCommand cmd) {
+        whiteListSerivce.deleteWhiteList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /whitelist/batchDeleteWhiteList</b>
+     * <p>批量删除白名单中的手机号码</p>
+     */
+    @RequestMapping("batchDeleteWhiteList")
+    @RestReturn(value = String.class)
+    public RestResponse batchDeleteWhiteList(BatchDeleteWhiteListCommand cmd) {
+        whiteListSerivce.batchDeleteWhiteList(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -54,8 +86,9 @@ public class WhiteListController extends ControllerBase{
      * <p>修改白名单中的手机号码</p>
      */
     @RequestMapping("updateWhiteList")
-    @RestReturn(value = WhiteListDTO.class)
+    @RestReturn(value = String.class)
     public RestResponse updateWhiteList(UpdateWhiteListCommand cmd) {
+        whiteListSerivce.updateWhiteList(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -69,11 +102,7 @@ public class WhiteListController extends ControllerBase{
     @RequestMapping("getWhiteList")
     @RestReturn(value = WhiteListDTO.class)
     public RestResponse getWhiteList(GetWhiteListCommand cmd) {
-        WhiteListDTO whiteListDTO = new WhiteListDTO();
-        whiteListDTO.setId(1L);
-        whiteListDTO.setNamespaceId(1);
-        whiteListDTO.setPhoneNumber("123456789");
-
+        WhiteListDTO  whiteListDTO = whiteListSerivce.getWhiteList(cmd);
         RestResponse response = new RestResponse(whiteListDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -87,22 +116,7 @@ public class WhiteListController extends ControllerBase{
     @RequestMapping("listWhiteList")
     @RestReturn(value = ListWhiteListResponse.class)
     public RestResponse listWhiteList(ListWhiteListCommand cmd) {
-        List<WhiteListDTO> list = new ArrayList<>();
-        WhiteListDTO whiteListDTO = new WhiteListDTO();
-        whiteListDTO.setId(1L);
-        whiteListDTO.setNamespaceId(1);
-        whiteListDTO.setPhoneNumber("123456789");
-        WhiteListDTO whiteListDTO2 = new WhiteListDTO();
-        whiteListDTO2.setId(1L);
-        whiteListDTO2.setNamespaceId(1);
-        whiteListDTO2.setPhoneNumber("123456789");
-        list.add(whiteListDTO);
-        list.add(whiteListDTO2);
-
-        ListWhiteListResponse listWhiteListResponse = new ListWhiteListResponse();
-        listWhiteListResponse.setNextAnchor(null);
-        listWhiteListResponse.setWhiteListDTOList(list);
-
+        ListWhiteListResponse listWhiteListResponse = whiteListSerivce.listWhiteList(cmd);
         RestResponse response = new RestResponse(listWhiteListResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
