@@ -2652,12 +2652,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dataMap.put("organizationName", "");
 		}
 
-		Category category = categoryProvider.findCategoryById(dto.getCategoryId());
+		if(null != dto.getCategoryId()){
+			Category category = categoryProvider.findCategoryById(dto.getCategoryId());
 
-		if(category != null) {
-			dataMap.put("categoryName",category.getName());
-		} else {
-			dataMap.put("categoryName","");
+			if(category != null) {
+				dataMap.put("categoryName",category.getName());
+			} else {
+				dataMap.put("categoryName","");
+			}
 		}
 
 		dataMap.put("content",dto.getContent());
