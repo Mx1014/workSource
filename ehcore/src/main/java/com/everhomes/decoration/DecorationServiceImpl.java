@@ -8,14 +8,22 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.decoration.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -29,8 +37,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,6 +61,13 @@ public class DecorationServiceImpl implements  DecorationService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private FlowService flowService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
+
+    private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat sdfMd = new SimpleDateFormat("MM-dd");
     @Override
     public DecorationIllustrationDTO getIllustration(GetIlluStrationCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -70,6 +85,26 @@ public class DecorationServiceImpl implements  DecorationService {
         }
         dto.setAttachments(attachment);
         return dto;
+    }
+
+    @Override
+    public DecorationIllustrationDTO getRefundInfo(RequestIdCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        if (request == null || request.getRefoundAmount()==null)
+            return null;
+        GetIlluStrationCommand cmd2 = new GetIlluStrationCommand();
+        cmd2.setCommunityId(request.getCommunityId());
+        cmd2.setOwnerType(IllustrationType.REFOUND.getCode());
+        DecorationIllustrationDTO dto = this.getIllustration(cmd2);
+        dto.setRefundAmount(request.getRefoundAmount());
+        return dto;
+    }
+
+    @Override
+    public GetDecorationFeeResponse getFeeInfo(RequestIdCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+
+        return null;
     }
 
     @Override
@@ -202,20 +237,212 @@ public class DecorationServiceImpl implements  DecorationService {
     }
 
     @Override
-    public DecorationIllustrationDTO createRequest(CreateRequestCommand cmd) {
+    public DecorationRequestDTO createRequest(CreateRequestCommand cmd) {
         DecorationRequest request = ConvertHelper.convert(cmd,DecorationRequest.class);
         request.setNamespaceId(UserContext.getCurrentNamespaceId());
         request.setStartTime(new Timestamp(cmd.getStartTime()));
         request.setEndTime(new Timestamp(cmd.getEndTime()));
         request.setApplyUid(UserContext.currentUserId());
         request.setCancelFlag((byte)0);
+        request.setStatus(DecorationRequestStatus.APPLY.getCode());
         this.dbProvider.execute((TransactionStatus status) -> {
             decorationProvider.createDecorationRequest(request);
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),cmd.getCommunityId(),
-            DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.APPLY.getFlowOwnerType());
+                DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.APPLY.getFlowOwnerType());
+            if (flow == null) {
+                LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
+                throw RuntimeErrorException.errorWith("decoration",
+                        10001, "请开启工作流后重试");
+            }
+            CreateFlowCaseCommand cmd2 = new CreateFlowCaseCommand();
+            cmd2.setApplyUserId(UserContext.currentUserId());
+            cmd2.setReferId(request.getId());
+            cmd2.setReferType(DecorationRequestStatus.APPLY.getFlowOwnerType());
+            cmd2.setProjectId(request.getCommunityId());
+            cmd2.setProjectType(EntityType.COMMUNITY.getCode());
+
+            ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+            listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+            listServiceModuleAppsCommand.setModuleId(FlowConstants.DECORATION_MODULE);
+            ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+            if (apps!=null && apps.getServiceModuleApps().size()>0)
+                cmd2.setTitle(apps.getServiceModuleApps().get(0).getName());
+            else
+                cmd2.setTitle("装修办理");
+
+            cmd2.setServiceType(cmd2.getTitle());
+            cmd2.setTitle(cmd2.getTitle()+"("+parseRequestStatus(DecorationRequestStatus.APPLY.getCode())+")");
+            StringBuilder content = new StringBuilder();
+            content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+            content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
+            content.append("装修人日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
+                    sdfyMd.format(new Date(request.getEndTime().getTime())));
+            cmd2.setContent(content.toString());
+            cmd2.setFlowMainId(flow.getFlowMainId());
+            cmd2.setFlowVersion(flow.getFlowVersion());
+            flowService.createFlowCase(cmd2);
            return null;
         });
 
-        return null;
+        return convertRequest(request,ProcessorType.MASTER.getCode());
+    }
+
+    private DecorationRequestDTO convertRequest(DecorationRequest request, Byte processorType){
+        DecorationRequestDTO dto = new DecorationRequestDTO();
+        dto.setApplyName(request.getApplyName());
+        dto.setApplyPhone(request.getApplyPhone());
+        dto.setApplyCompany(request.getApplyCompany());
+        dto.setAddress(convertAddress(request.getAddress()));
+        dto.setStartTime(request.getStartTime().getTime());
+        dto.setEndTime(request.getEndTime().getTime());
+
+        dto.setDecoratorName(request.getDecoratorName());
+        dto.setDecoratorPhone(request.getDecoratorPhone());
+        dto.setDecoratorCompany(request.getDecoratorCompany());
+
+        //装修费用
+        if (ProcessorType.ROOT.getCode() == processorType ||
+                ((ProcessorType.MASTER.getCode() == processorType || ProcessorType.CHIEF.getCode() == processorType) &&
+                        (request.getStatus()> DecorationRequestStatus.PAYMENT.getCode()||request.getCancelFlag() != (byte)0))){
+            List<DecorationFee> fees = decorationProvider.listDecorationFeeByRequestId(request.getId());
+            if (fees!=null && fees.size()>0){
+                dto.setDecorationFee(new ArrayList<>());
+                for (DecorationFee fee:fees)
+                    if (fee.getTotalPrice()!=null)
+                        dto.setTotalAmount(fee.getTotalPrice());
+                    else{
+                        DecorationFeeDTO dto2 = ConvertHelper.convert(fee,DecorationFeeDTO.class);
+                        dto.getDecorationFee().add(dto2);
+                    }
+            }
+        }
+
+        //退款
+        if (ProcessorType.ROOT.getCode() == processorType ||
+                ((ProcessorType.MASTER.getCode() == processorType || ProcessorType.CHIEF.getCode() == processorType) &&
+                        (request.getStatus()== DecorationRequestStatus.COMPLETE.getCode()||request.getCancelFlag() != (byte)0))){
+            dto.setRefoundAmount(request.getRefoundAmount());
+            dto.setRefoundComment(request.getRefoundComment());
+        }
+
+        //TODO 工作流
+
+        return dto;
+    }
+
+    private String convertAddress(String address) {
+        if (StringUtils.isBlank(address))
+            return "";
+        String[] addresses = address.split(";");
+        Map<String,List<String>> map = new HashMap<>();
+        StringBuilder finalAddress = new StringBuilder();
+        for(String ad1 : addresses){
+            String [] adSplit = ad1.split("&");
+            if (adSplit.length == 2){
+                if (map.get(adSplit[0])!=null)
+                    map.get(adSplit[0]).add(adSplit[1]);
+                else{
+                    map.put(adSplit[0],new ArrayList<>());
+                    map.get(adSplit[0]).add(adSplit[1]);
+                }
+            }
+        }
+
+        Iterator<String> iterator = map.keySet().iterator();
+        while(iterator.hasNext()){
+            StringBuilder builder = new StringBuilder();
+            String building = iterator.next();
+            builder.append(building);
+            List<String> ads = map.get(building);
+            builder.append(ads.get(0));
+            if (ads.size()>1){
+                for (int i=1;i<ads.size();i++)
+                    builder.append(ads.get(i));
+            }
+            builder.append(";");
+            finalAddress.append(builder.toString());
+        }
+        if (finalAddress.length()<0)
+            return "";
+        finalAddress.deleteCharAt(finalAddress.length()-1);
+        return finalAddress.toString();
+    }
+
+    private String parseRequestStatus(Byte status){
+        DecorationRequestStatus ds = DecorationRequestStatus.fromCode(status);
+        switch (ds){
+            case APPLY: return "装修申请";
+            case FILE_APPROVAL: return "资料审核";
+            case PAYMENT : return "缴费";
+            case CONSTRACT : return "进场施工";
+            case CHECK : return "验收";
+            case REFOUND : return "押金退回";
+            case COMPLETE : return "完成";
+        }
+        return "";
+    }
+
+    @Override
+    public void modifyFee(ModifyFeeCommand cmd) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            this.decorationProvider.deleteDecorationFeeByRequestId(cmd.getRequestId());
+            DecorationFee fee = new DecorationFee();
+            fee.setRequestId(cmd.getRequestId());
+            fee.setTotalPrice(cmd.getTotalAmount());
+            this.decorationProvider.createDecorationFee(fee);
+            if (cmd.getDecorationFee()!=null)
+                for (DecorationFeeDTO dto : cmd.getDecorationFee()){
+                    fee = new DecorationFee();
+                    fee.setRequestId(cmd.getRequestId());
+                    fee.setAmount(dto.getAmount());
+                    fee.setFeeName(dto.getFeeName());
+                    fee.setFeePrice(dto.getFeePrice());
+                    this.decorationProvider.createDecorationFee(fee);
+                }
+            return null;
+        });
+    }
+
+    @Override
+    public void modifyRefoundAmount(ModifyRefoundAmountCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        request.setRefoundAmount(cmd.getRefoundAmount());
+        request.setRefoundComment(cmd.getRefoundComment());
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void confirmRefound(RequestIdCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        if (request.getStatus() != DecorationRequestStatus.REFOUND.getCode())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+        request.setStatus(DecorationRequestStatus.COMPLETE.getCode());
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void confirmFee(RequestIdCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        if (request.getStatus() != DecorationRequestStatus.PAYMENT.getCode())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+        request.setStatus(DecorationRequestStatus.CONSTRACT.getCode());
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void cancelRequest(RequestIdCommand cmd) {
+        DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        request.setStatus((byte)2);
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void postApprovalForm(PostApprovalFormCommand cmd) {
+        GetTemplateByApprovalIdCommand cmd2 = new GetTemplateByApprovalIdCommand();
+        cmd2.setApprovalId(cmd.getApprovalId());
+        GetTemplateByApprovalIdResponse res1 = this.generalApprovalService.getTemplateByApprovalId(cmd2);
+
     }
 }

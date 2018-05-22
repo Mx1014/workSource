@@ -1,5 +1,6 @@
 package com.everhomes.rest.decoration;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -12,6 +13,8 @@ import java.util.List;
  * <li>ownerType：装修说明类型  参考{@link com.everhomes.rest.decoration.IllustrationType}</li>
  * <li>ownerId：审批id</li>
  * <li>attachments：附件列表</li>
+ * <li>refundAmount：退款金额</li>
+ * <li>latitude longitude：经纬度</li>
  * </ul>
  */
 public class DecorationIllustrationDTO {
@@ -21,9 +24,12 @@ public class DecorationIllustrationDTO {
     private String content;
     private String phone;
     private String address;
+    private Double longitude;
+    private Double latitude;
     private String ownerType;
     private Long ownerId;
     private List<DecorationAttachmentDTO> attachments;
+    private BigDecimal refundAmount;
 
 
     public Long getId() {
@@ -88,5 +94,29 @@ public class DecorationIllustrationDTO {
 
     public void setAttachments(List<DecorationAttachmentDTO> attachments) {
         this.attachments = attachments;
+    }
+
+    public BigDecimal getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(BigDecimal refundAmount) {
+        this.refundAmount = refundAmount;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 }

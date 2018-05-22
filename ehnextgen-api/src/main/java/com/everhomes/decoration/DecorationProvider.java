@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface DecorationProvider {
 
-
     void createDecorationSetting(DecorationSetting setting);
 
     void updateDecorationSetting(DecorationSetting setting);
@@ -38,4 +37,11 @@ public interface DecorationProvider {
 
     void createDecorationRequest(DecorationRequest request);
 
+    void updateDecorationRequest(DecorationRequest request);
+
+    List<DecorationFee> listDecorationFeeByRequestId(Long requestId);
+
+    void deleteDecorationFeeByRequestId(Long requestId);
+
+    void createDecorationFee(DecorationFee fee);
 }

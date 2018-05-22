@@ -8,6 +8,10 @@ public interface DecorationService {
 
     DecorationIllustrationDTO getIllustration(GetIlluStrationCommand cmd);
 
+    DecorationIllustrationDTO getRefundInfo(RequestIdCommand cmd);
+
+    GetDecorationFeeResponse getFeeInfo(RequestIdCommand cmd);
+
     void setIllustration(UpdateIllustrationCommand cmd);
 
     DecorationWorkerDTO updateWorker(UpdateWorkerCommand cmd);
@@ -16,6 +20,18 @@ public interface DecorationService {
 
     void deleteWorker(DeleteWorkerCommand cmd);
 
-    DecorationIllustrationDTO createRequest(CreateRequestCommand cmd);
+    DecorationRequestDTO createRequest(CreateRequestCommand cmd);
+
+    void cancelRequest(RequestIdCommand cmd);
+
+    void modifyFee(ModifyFeeCommand cmd);
+
+    void modifyRefoundAmount(ModifyRefoundAmountCommand cmd);
+
+    void confirmRefound(RequestIdCommand cmd);
+
+    void confirmFee(RequestIdCommand cmd);
+
+    void postApprovalForm(PostApprovalFormCommand cmd);
 
 }

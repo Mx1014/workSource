@@ -100,7 +100,7 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("cancelRequest")
     @RestReturn(String.class)
     public RestResponse cancelRequest(@Valid RequestIdCommand cmd) {
-
+        this.decorationService.cancelRequest(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -116,7 +116,7 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("modifyRefoundAmount")
     @RestReturn(String.class)
     public RestResponse modifyRefoundAmount(@Valid ModifyRefoundAmountCommand cmd) {
-
+        this.decorationService.modifyRefoundAmount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -132,7 +132,7 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("confirmRefound")
     @RestReturn(String.class)
     public RestResponse confirmRefound(@Valid RequestIdCommand cmd) {
-
+        this.decorationService.confirmRefound(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -148,7 +148,7 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("modifyFee")
     @RestReturn(String.class)
     public RestResponse modifyFee(@Valid ModifyFeeCommand cmd) {
-
+        this.decorationService.modifyFee(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -164,7 +164,7 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("confirmFee")
     @RestReturn(String.class)
     public RestResponse confirmFee(@Valid RequestIdCommand cmd) {
-
+        this.decorationService.confirmFee(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

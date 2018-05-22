@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerType：装修说明类型  参考{@link com.everhomes.rest.decoration.IllustrationType}</li>
  * <li>ownerId：审批id</li>
  * <li>attachments：附件列表 参考{@link com.everhomes.rest.decoration.DecorationAttachmentDTO}</li>
+ * <li>latitude longitude：经纬度</li>
  * </ul>
  */
 public class UpdateIllustrationCommand {
@@ -21,6 +22,8 @@ public class UpdateIllustrationCommand {
     private String content;
     private String phone;
     private String address;
+    private Double longitude;
+    private Double latitude;
     private String ownerType;
     private Long ownerId;
     private List<DecorationAttachmentDTO> attachments;
@@ -87,5 +90,21 @@ public class UpdateIllustrationCommand {
 
     public void setAttachments(List<DecorationAttachmentDTO> attachments) {
         this.attachments = attachments;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 }

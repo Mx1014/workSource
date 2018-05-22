@@ -17,7 +17,7 @@ import java.util.List;
  * <li>applyCompany：申请人公司</li>
  * <li>status：申请状态 参考{@link com.everhomes.rest.decoration.DecorationRequestStatus}</li>
  * <li>processorType：操作人类型 参考{@link com.everhomes.rest.decoration.ProcessorType}</li>
- * <li>cancelFlag：是否取消 0未取消 1取消</li>
+ * <li>cancelFlag：是否取消 0未取消 1工作流取消 2后台取消</li>
  * <li>decoratorName：负责人姓名</li>
  * <li>decoratorPhone：负责人电话</li>
  * <li>decoratorCompany：负责人公司</li>

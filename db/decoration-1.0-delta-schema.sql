@@ -20,7 +20,7 @@ CREATE TABLE `eh_decoration_requests` (
 `status`  tinyint NULL ,
 `cancel_flag`  tinyint NULL COMMENT '0未取消 1工作流取消 2后台取消' ,
 `cancel_reason`  varchar(1024) NULL ,
-`refound_amount`  decimal NULL COMMENT '退款金额' ,
+`refound_amount`  DECIMAL(18,2) NULL COMMENT '退款金额' ,
 `refound_comment`  varchar(1024) NULL COMMENT '退款备注',
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -45,6 +45,8 @@ CREATE TABLE `eh_decoration_setting` (
 `owner_id`  bigint(20) NULL COMMENT '当owner_type为apply 时 表示审批id' ,
 `content`  varchar(10000) NULL ,
 `address`  varchar(255) NULL COMMENT '收款地址或资料提交地址' ,
+`longitude` DOUBLE,
+`latitude` DOUBLE,
 `phone`  varchar(64) NULL COMMENT '咨询电话' ,
 `create_time`  datetime NULL  ,
 PRIMARY KEY (`id`)
@@ -88,3 +90,15 @@ CREATE TABLE `eh_decoration_company_chiefs` (
 `uid`   bigint(20) NULL ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_approval_vals` (
+`id`  bigint(20) NOT NULL ,
+`request_id`  bigint(20) NULL ,
+`approval_id`  bigint(20) NULL ,
+`flow_case_id`  bigint(20) NULL ,
+`form_origin_id`  bigint(20) NULL ,
+`form_version`  bigint(20) NULL ,
+`create_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

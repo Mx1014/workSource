@@ -71,9 +71,9 @@ public class DecorationController extends ControllerBase {
      * </p>
      */
     @RequestMapping("createRequest")
-    @RestReturn(DecorationIllustrationDTO.class)
+    @RestReturn(DecorationRequestDTO.class)
     public RestResponse createRequest(@Valid CreateRequestCommand cmd) {
-
+        DecorationRequestDTO dto = this.decorationService.createRequest(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -270,9 +270,8 @@ public class DecorationController extends ControllerBase {
      */
     @RequestMapping("getRefoundSetting")
     @RestReturn(DecorationIllustrationDTO.class)
-    public RestResponse getRefoundSetting(@Valid GetIlluStrationCommand cmd) {
-        cmd.setOwnerType(IllustrationType.REFOUND.getCode());
-        DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
+    public RestResponse getRefoundSetting(@Valid RequestIdCommand cmd) {
+        DecorationIllustrationDTO dto = this.decorationService.getRefundInfo(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
