@@ -1,6 +1,7 @@
 
 -- 合同动态表单修改  by jiarui
 UPDATE  eh_var_field_groups set title = '收款合同' WHERE  module_name ='contract' and title ='合同信息' AND  parent_id =0;
+UPDATE `eh_var_fields`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE `module_name`='contract' AND `name`='contractType';
 
 -- 表单default  by jiarui
 
