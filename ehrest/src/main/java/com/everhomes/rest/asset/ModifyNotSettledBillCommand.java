@@ -17,6 +17,7 @@ import java.util.List;
  * <li>billGroupDTO:账单组，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  * <li>invoiceNum:发票编号</li>
  * <li>noticeTel:催缴联系号码</li>
+ * <li>customerTel:客户手机号</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -29,6 +30,7 @@ public class ModifyNotSettledBillCommand {
     private BillGroupDTO billGroupDTO;
     private String invoiceNum;
     private String noticeTel;
+    private String customerTel;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -101,5 +103,13 @@ public class ModifyNotSettledBillCommand {
 
 	public void setNoticeTel(String noticeTel) {
 		this.noticeTel = noticeTel;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
 	}
 }

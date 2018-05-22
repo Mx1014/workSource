@@ -17,6 +17,7 @@ import java.util.List;
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
  * <li>noticeTel:催缴电话</li>
+ * <li>customerTel:客户手机号</li>
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
@@ -32,6 +33,7 @@ public class ListBillDetailResponse {
     private String buildingName;
     private String apartmentName;
     private String noticeTel;
+    private String customerTel;
     private String targetName;
     private String targetType;
     private Long targetId;
@@ -160,5 +162,13 @@ public class ListBillDetailResponse {
 
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
 	}
 }

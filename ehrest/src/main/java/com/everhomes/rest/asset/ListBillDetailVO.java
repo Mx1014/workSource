@@ -19,6 +19,7 @@ import java.math.BigDecimal;
  * <li>apartmentName: 门牌名称</li>
  * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  * <li>noticeTel:催缴电话</li>
+ * <li>customerTel:客户手机号</li>
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
@@ -38,6 +39,7 @@ public class ListBillDetailVO {
     private String dateStrBegin;
     private String dateStrEnd;
     private String noticeTel;
+    private String customerTel;
     private String targetName;
     private String targetType;
     private String buildingName;
@@ -214,5 +216,13 @@ public class ListBillDetailVO {
 
 	public void setAddresses(String addresses) {
 		this.addresses = addresses;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
 	}
 }

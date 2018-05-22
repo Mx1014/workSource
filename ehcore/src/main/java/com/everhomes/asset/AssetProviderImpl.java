@@ -1390,7 +1390,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
         , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
@@ -1399,7 +1399,8 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBillId(f.getValue(r.ID));
                     vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
                     vo.setTargetId(f.getValue(r.TARGET_ID));
-                    vo.setNoticeTel(f.getValue(r.NOTICETEL));
+                    vo.setNoticeTel(f.getValue(r.NOTICETEL));//催缴联系号码
+                    vo.setCustomerTel(f.getValue(r.CUSTOMER_TEL));//客户手机号
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setDateStrBegin(f.getValue(r.DATE_STR_BEGIN));//账单开始时间
                     vo.setDateStrEnd(f.getValue(r.DATE_STR_END));//账单结束时间
