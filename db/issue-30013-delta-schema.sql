@@ -5,4 +5,4 @@ CREATE TABLE `eh_phone_white_list` (
 	`creator_uid` BIGINT COMMENT '记录创建人userID',
 	`creator_time` DATETIME COMMENT '记录创建时间',
 	PRIMARY KEY(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb64 COMMENT '短信白名单';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '短信白名单';
