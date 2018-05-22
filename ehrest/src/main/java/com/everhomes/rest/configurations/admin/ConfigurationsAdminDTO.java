@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>
-* <li>request: List<ConfigurationsIdAdminDTO> ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
+* <li>request: 后台返回数组 ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
 * <li>pageSize: 页数据量</li>
 * <li>pageAnchor: 开始页码</li>
 * </ul>
