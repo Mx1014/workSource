@@ -1025,21 +1025,30 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetInvitationLetterForWebResponse getInvitationLetterForWeb(GetInvitationLetterForWebCommand cmd) {
+        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
         Long visitorId = checkInviationToken(cmd.getVisitorToken());
 
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(visitorId);
+        VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            response.setQrcode(visitor.getDoorGuardQrcode());
+        }else{
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            response.setQrcode(relatedVisitor==null?null:relatedVisitor.getDoorGuardQrcode());
+        }
         if(visitor==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "unknown visitorToken "+cmd.getVisitorToken());
         }
 
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
-        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
+
         response = VisitorSysUtils.copyAllNotNullProperties(configuration, response);
         response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
         VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(visitor.getOfficeLocationId());
         response.setOfficeLocationDTO(ConvertHelper.convert(location,BaseOfficeLocationDTO.class));
         response.setVisitorInfoDTO(ConvertHelper.convert(visitor,BaseVisitorInfoDTO.class));
+        response.setIpadThemeRgb(configuration.getIpadThemeRgb());
         return response;
     }
 
