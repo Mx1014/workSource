@@ -17921,6 +17921,33 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   KEY `i_eh_namespaceid_data_type` (`namespace_id`,`update_community`,`data_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+DROP TABLE IF EXISTS `eh_contract_categories`;
+
+CREATE TABLE `eh_contract_categories` (
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `entry_id` bigint(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace',
+  `parent_id` bigint(20) NOT NULL DEFAULT '0',
+  `name` varchar(64) NOT NULL,
+  `path` varchar(128) DEFAULT NULL,
+  `default_order` int(11) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+  `create_time` datetime DEFAULT NULL,
+  `delete_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
+  `delete_time` datetime DEFAULT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `default_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: no , 1: yes',
+  `enabled` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
+  `show_name` varchar(64) DEFAULT NULL,
+  `all_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
 CREATE TABLE `eh_test_infos` (
    `id` BIGINT(20) NOT NULL,
    `name` VARCHAR(200) DEFAULT NULL,
