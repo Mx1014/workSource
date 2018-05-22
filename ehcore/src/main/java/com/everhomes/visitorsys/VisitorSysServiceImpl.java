@@ -19,11 +19,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
@@ -34,7 +32,6 @@ import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.LoginToken;
@@ -71,7 +68,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,7 +83,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * 检查必填参数
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(VisitorSysServiceImpl.class);
-    private static final DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.ofPattern("yyyyMMdd");
     public static final String[] checkMustFillField = {"visitorName","visitorPhone",
             "enterpriseId","enterpriseName","officeLocationId","officeLocationName",
             "visitReasonId","visitReason"};
@@ -330,33 +326,48 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
         if(cmd.getId()==null) {
-            //检查参数，生成访客实体
-            VisitorSysVisitor visitor = checkCreateVisitor(cmd);
-            //这里上锁的目的是，生成唯一的邀请码
-            coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()+visitor.getOwnerType()+visitor.getOwnerId()).enter(
-                    new Callable<Object>() {
-                        @Override
-                        public Object call() throws Exception {
-                            visitor.setInvitationNo(generateInvitationNo(visitor));
-                            //这里上事务的原因是，需要同时创建园区下公司的访客/预约记录和同步es
-                            dbProvider.execute(action ->createVisitorSysVisitor(visitor,cmd));
-                            return null;
-                        }
-                    }
-            );
-            sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
-            sendMessageInviter(visitor);//发送消息给邀请者
+            createVisitor(cmd);
         }else{
-            VisitorSysVisitor visitor = checkUpdateVisitor(cmd);
-            dbProvider.execute(r->updateVisitorSysVisitor(visitor,cmd));
-            sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
-            sendMessageInviter(visitor);//发送消息给邀请者
+            updateVisitor(cmd);
         }
-
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(cmd, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    private void updateVisitor(CreateOrUpdateVisitorCommand cmd) {
+        VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
+        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
+        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+        String newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        String oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
+        if(type == VisitorsysVisitorType.BE_INVITED && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
+            coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
+                    +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
+                visitor.setInvitationNo(generateInvitationNo(visitor));
+                return null;
+            });
+        }
+        dbProvider.execute(r->updateVisitorSysVisitor(visitor,cmd));
+        sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
+        sendMessageInviter(visitor);//发送消息给邀请者
+    }
+
+    private void createVisitor(CreateOrUpdateVisitorCommand cmd) {
+        //检查参数，生成访客实体
+        VisitorSysVisitor visitor = checkCreateVisitor(cmd);
+        //这里上锁的目的是，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
+        coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
+                +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
+            visitor.setInvitationNo(generateInvitationNo(visitor));
+            return null;
+        });
+        //这里上事务的原因是，需要同时创建园区下公司的访客/预约记录和同步es
+        dbProvider.execute(action ->createVisitorSysVisitor(visitor,cmd));
+        sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
+        sendMessageInviter(visitor);//发送消息给邀请者
     }
 
     /**
@@ -1730,21 +1741,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param cmd
      * @return
      */
-    private VisitorSysVisitor checkUpdateVisitor(CreateOrUpdateVisitorCommand cmd) {
-        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
-        if(visitor==null){
+    private VisitorSysVisitor checkUpdateVisitor(CreateOrUpdateVisitorCommand cmd,VisitorSysVisitor oldVisitor) {
+        if(oldVisitor==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor id = "+cmd.getId()+", namespaceId = "+cmd.getNamespaceId()+"");
         }
-        if(visitor.getOwnerId().longValue()!=cmd.getOwnerId()
-                || !visitor.getOwnerType().equals(cmd.getOwnerType())
-                || visitor.getVisitorType().byteValue()!=cmd.getVisitorType().byteValue()){
+        if(oldVisitor.getOwnerId().longValue()!=cmd.getOwnerId()
+                || !oldVisitor.getOwnerType().equals(cmd.getOwnerType())
+                || oldVisitor.getVisitorType().byteValue()!=cmd.getVisitorType().byteValue()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor "+cmd);
         }
-        visitor = VisitorSysUtils.copyNotNullProperties(cmd, visitor);
-        checkVisitor(visitor);
-        return visitor;
+        oldVisitor = VisitorSysUtils.copyNotNullProperties(cmd, oldVisitor);
+        checkVisitor(oldVisitor);
+        return oldVisitor;
     }
 
     /**
@@ -1958,7 +1968,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(type == VisitorsysVisitorType.TEMPORARY){
             return null;
         }
-        String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(yyyyMMdd);
+        String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
         VisitorSysCoding visitorSysCoding = visitorSysCodingProvider.findVisitorSysCodingByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
         VisitorSysOwnerCode visitorSysOwnerCode = visitorSysOwnerCodeProvider.findVisitorSysCodeByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         if(visitorSysOwnerCode==null){
@@ -1967,7 +1977,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitorSysCoding==null){
             visitorSysCoding = createNewVisitorSysCoding(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
         }
-//        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//        SimpleDateFormat format = new SimpleDateFormat("YYYYMMDD");
 //        String currentPoint = format.format(System.currentTimeMillis());
 //        String updatePoint = format.format(visitorSysCoding.getOperateTime());
 //        if(!currentPoint.equals(updatePoint)){//如果邀请码配置的更新时间（按天）不是今天了，流水码从0开始计算
