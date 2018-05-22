@@ -1774,7 +1774,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(visitStatus == VisitorsysStatus.NOT_VISIT) {//预约访客未到访,设置邀请人
                 User user = UserContext.current().getUser();
                 visitor.setInviterId((user==null?-1:user.getId()));
-                visitor.setInviterName(user==null?"anonymous":user.getAccountName());
+                visitor.setInviterName(user==null?"anonymous":user.getNickName());
                 visitor.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
             }
             if(visitStatus == VisitorsysStatus.HAS_VISITED){//
