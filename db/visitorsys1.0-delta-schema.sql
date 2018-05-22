@@ -55,22 +55,38 @@ CREATE TABLE `eh_visitor_sys_visitors` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理访客表 ';
 
 -- 访客管理预约编码表 , add by dengs, 20180425
+-- DROP TABLE IF EXISTS `eh_visitor_sys_owner_code`;
+CREATE TABLE `eh_visitor_sys_owner_code` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
+	`random_code` VARCHAR(16) NOT NULL UNIQUE COMMENT '随机码',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
+
+-- 访客管理预约流水码表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_coding`;
 CREATE TABLE `eh_visitor_sys_coding` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-	`random_code` VARCHAR(16) NOT NULL UNIQUE COMMENT '随机码',
+  `day_mark` BIGINT COMMENT 'yyyymmdd 形式的字符串,日标识',
 	`serial_code` INTEGER NOT NULL DEFAULT 0 COMMENT '流水码',
   `status` TINYINT  DEFAULT 2 COMMENT '0:未使用状态,2:使用状态',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
-  `operate_time` DATETIME COMMENT '更新时间，每天更新',
+  `operate_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约流水码表';
 
 -- 访客管理设备表(ipad,printer) , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_devices`;
