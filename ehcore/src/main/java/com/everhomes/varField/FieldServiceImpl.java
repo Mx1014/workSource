@@ -463,7 +463,11 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
-            if(scopeFields!=null && scopeFields.size()>0){
+            if (scopeFields != null && scopeFields.size() > 0) {
+                globalFlag = false;
+            }
+            // don't read general configutations when choose all scope
+            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
                 globalFlag = false;
             }
         }
@@ -539,6 +543,9 @@ public class FieldServiceImpl implements FieldService {
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
             if(fieldItems!=null && fieldItems.size()>0){
+                globalFlag = false;
+            }
+            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
                 globalFlag = false;
             }
         }
@@ -1963,6 +1970,9 @@ public class FieldServiceImpl implements FieldService {
         if(namespaceFlag) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
             if(groups!=null && groups.size()>0){
+                globalFlag = false;
+            }
+            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
                 globalFlag = false;
             }
         }
