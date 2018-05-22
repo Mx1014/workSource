@@ -804,6 +804,21 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+    
+    // this is for 企业 按照账单组展示已出账单
+    /**
+     * <p>按照账单组展示已出账单</p>
+     * <b>URL: /asset/listSettledBillForEnt</b>
+     */
+    @RequestMapping("listSettledBillForEnt")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
+    	ListBillsResponseForEnt listBillsResponse = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
     // this is for 展示账单的收费项       4
     /**
