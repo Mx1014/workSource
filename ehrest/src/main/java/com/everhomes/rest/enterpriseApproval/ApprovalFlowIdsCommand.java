@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
-/**
+/**listOrganizationPersonnelWi
  * <ul>
  * <li>flowCaseIds: 工作流id列表</li>
  * </ul>

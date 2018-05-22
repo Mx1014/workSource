@@ -8,6 +8,7 @@ import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,6 +75,20 @@ public class EnterpriseApprovalController extends ControllerBase{
     public RestResponse stopApprovalFlows(@Valid ApprovalFlowIdsCommand cmd){
         enterpriseApprovalService.stopApprovalFlows(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/listApprovalProcessors</b>
+     * <p>获取原始审批人</p>
+     */
+    @RequestMapping("listApprovalProcessors")
+    @RestReturn(value = OrganizationMemberDTO.class, collection = true)
+    public RestResponse listApprovalProcessors(@Valid ApprovalFlowIdCommand cmd){
+        List<OrganizationMemberDTO> res = enterpriseApprovalService.listApprovalProcessors(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

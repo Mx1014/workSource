@@ -3,6 +3,7 @@ package com.everhomes.enterpriseApproval;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -20,6 +21,8 @@ public interface EnterpriseApprovalService {
     ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd);
 
     void stopApprovalFlows(ApprovalFlowIdsCommand cmd);
+
+    List<OrganizationMemberDTO> listApprovalProcessors(ApprovalFlowIdCommand cmd);
 
     void deliverApprovalFlow(DeliverApprovalFlowCommand cmd);
 

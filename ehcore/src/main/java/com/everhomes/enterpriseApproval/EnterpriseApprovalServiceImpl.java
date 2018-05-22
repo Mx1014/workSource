@@ -17,6 +17,7 @@ import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
@@ -387,13 +388,62 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public void deliverApprovalFlow(DeliverApprovalFlowCommand cmd) {
+    public List<OrganizationMemberDTO> listApprovalProcessors(ApprovalFlowIdCommand cmd) {
+        List<OrganizationMemberDTO> results = new ArrayList<>();
+        FlowCaseProcessorsResolver processorRes = flowService.getCurrentProcessors(cmd.getFlowCaseId(), true);
+        if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
+            results = processorRes.getProcessorsInfoList().stream().map(r -> {
+                OrganizationMemberDTO dto = new OrganizationMemberDTO();
+                dto.setTargetId(r.getId());
+                dto.setContactName(r.getNickName());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return results;
+    }
 
+    @Override
+    public void deliverApprovalFlow(DeliverApprovalFlowCommand cmd) {
+        if(cmd.getInnerIds() == null || cmd.getInnerIds().size() == 0 || cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
+            return;
+        FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
+        if (flowCase == null)
+            return;
+        FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
+        stepDTO.setFlowCaseId(flowCase.getId());
+        stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+        stepDTO.setStepCount(flowCase.getStepCount());
+        stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
+        stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+        List<FlowEntitySel> transferIn = cmd.getInnerIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
+        List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
+        stepDTO.setTransferIn(transferIn);
+        stepDTO.setTransferOut(transferOut);
+        flowService.processAutoStep(stepDTO);
     }
 
     @Override
     public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
-
+        if(cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
+            return;
+        List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
+        for(Long flowCaseId : cmd.getFlowCaseIds()){
+            FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
+            if (flowCase == null)
+                return;
+            FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
+            stepDTO.setFlowCaseId(flowCase.getId());
+            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+            stepDTO.setStepCount(flowCase.getStepCount());
+            stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
+            stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+            List<OrganizationMemberDTO> processors = listApprovalProcessors(new ApprovalFlowIdCommand(flowCaseId));
+            if(processors == null || processors.size() == 0)
+                continue;
+            stepDTO.setTransferIn(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
+            stepDTO.setTransferOut(transferOut);
+            flowService.processAutoStep(stepDTO);
+        }
     }
 
     //  Whether the approval template has already been existed, check it.
