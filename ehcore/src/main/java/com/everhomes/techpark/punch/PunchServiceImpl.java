@@ -76,78 +76,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
-import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
-import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.ApprovalStatus;
-import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
-import com.everhomes.rest.techpark.punch.ClockCode;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.DayStatusDTO;
-import com.everhomes.rest.techpark.punch.ExceptionProcessStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
-import com.everhomes.rest.techpark.punch.HommizationType;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.MonthDayStatusDTO;
-import com.everhomes.rest.techpark.punch.NormalFlag;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchClockResponse;
-import com.everhomes.rest.techpark.punch.PunchCountDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
-import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
-import com.everhomes.rest.techpark.punch.PunchHommizationType;
-import com.everhomes.rest.techpark.punch.PunchIntevalLogDTO;
-import com.everhomes.rest.techpark.punch.PunchLogDTO;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.PunchLogsMonthList;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleStatus;
-import com.everhomes.rest.techpark.punch.PunchRuleType;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
-import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
-import com.everhomes.rest.techpark.punch.PunchType;
-import com.everhomes.rest.techpark.punch.PunchUserStatus;
-import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
-import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
@@ -211,7 +140,6 @@ import com.everhomes.rest.uniongroup.UniongroupConfiguresDTO;
 import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.uniongroup.UniongroupType;
-import com.everhomes.rest.user.GetUserByUuidResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.RunningFlag;
@@ -234,16 +162,9 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Version;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -305,6 +226,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -335,7 +258,7 @@ public class PunchServiceImpl implements PunchService {
 
     private ThreadLocal<SimpleDateFormat> dayStatusSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("MM月dd");
+            return new SimpleDateFormat("MM-dd EEE");
         }
     };
     private ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
@@ -2707,7 +2630,11 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private void addPunchStatistics(OrganizationMemberDTO member, Long orgId, Calendar startCalendar, Calendar endCalendar) {
-
+        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
+        if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
+            LOGGER.error("filed report dont add punch statistic");
+            return;
+        }
         PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, member.getTargetId());
         if (null == pr)
             throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -4672,6 +4599,7 @@ public class PunchServiceImpl implements PunchService {
         Long organizationId = getTopEnterpriseId(cmd.getOwnerId());
 
         //2017-8-2 加入了时间区间
+        //2018-05-21 加入了reportId
         List<String> months = new ArrayList<>();
         if (null != cmd.getStartDay()) {
             if (cmd.getStartDay() > cmd.getEndDay()) {
@@ -4687,8 +4615,17 @@ public class PunchServiceImpl implements PunchService {
                 months.add(monthSF.get().format(start.getTime()));
                 start.add(Calendar.MONTH, 1);
             }
-        } else {
+        } else if(null !=cmd.getMonth()){
             months.add(cmd.getMonth());
+        } else if (null != cmd.getMonthReportId()) {
+            PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+            if (null != report) {
+                months.add(report.getPunchMonth());
+                response.setProcess(report.getProcess());
+                response.setErrorInfo(report.getErrorInfo());
+                response.setStatus(report.getStatus());
+            }
+        } else{
         }
 
         List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
@@ -9712,27 +9649,152 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd) {
-		ListPunchMonthReportsResponse resp = new ListPunchMonthReportsResponse();
-		return new ListPunchMonthReportsResponse();
+        ListPunchMonthReportsResponse resp = new ListPunchMonthReportsResponse(null, new ArrayList<>());
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        List<PunchMonthReport> results = punchMonthReportProvider.listPunchMonthReport(cmd.getOwnerType(), cmd.getOwnerId(), pageSize + 1, locator);
+        if (null != results && results.size() > 0) {
+            Long nextPageAnchor = null;
+            if (results != null && results.size() > pageSize) {
+                results.remove(results.size() - 1);
+                nextPageAnchor = results.get(results.size() - 1).getId();
+            }
+            resp.setNextPageAnchor(nextPageAnchor);
+            for (PunchMonthReport report : results) {
+                PunchMonthReportDTO dto = ConvertHelper.convert(report, PunchMonthReportDTO.class);
+                resp.getMonthReports().add(dto);
+            }
+        }else{
+            PunchMonthReport report = createNewReport(cmd.getOwnerType(), cmd.getOwnerId(), monthSF.get().format(DateHelper.currentGMTTime()));
+            PunchMonthReportDTO dto = ConvertHelper.convert(report, PunchMonthReportDTO.class);
+            resp.getMonthReports().add(dto);
+        }
+        return resp;
 	}
 
-	@Override
+    private PunchMonthReport createNewReport(String ownerType, Long ownerId, String month) {
+        PunchMonthReport report = new PunchMonthReport();
+        report.setOwnerType(ownerType);
+        report.setOwnerId(ownerId);
+        report.setPunchMonth(month);
+        report.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        report.setCreatorUid(UserContext.currentUserId());
+        report.setStatus(PunchMonthReportStatus.CREATED.getCode());
+        punchMonthReportProvider.createPunchMonthReport(report);
+        return report;
+    }
+
+    /**
+     * 处理更新月报的线程池,预设最大值是10(同时又10个线程进行)
+     */
+    private static ExecutorService monthReportExecutorPool = Executors.newFixedThreadPool(5);
+    @Override
 	public void updateMonthReport(UpdateMonthReportCommand cmd) {
-	
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+            PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+            if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "当前状态不可更新");
+            }
+            report1.setStatus(PunchMonthReportStatus.UPDATING.getCode());
+            punchMonthReportProvider.updatePunchMonthReport(report1);
+            Tuple<PunchMonthReport, Boolean> tuple = new Tuple<PunchMonthReport, Boolean>(report1,true);
+            return tuple;
+        }).first().first();
+
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        try {
+            start.setTime(monthSF.get().parse(report.getPunchMonth()));
+        } catch (ParseException e) {
+            LOGGER.error("punch month is not YYYYMM",e);
+
+            report.setStatus(PunchMonthReportStatus.CREATED.getCode());
+            punchMonthReportProvider.updatePunchMonthReport(report);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "report id error : punch month is not YYYYMM");
+        }
+        setCalendarMonthBegin(start);
+        end.setTime(start.getTime());
+        end.add(Calendar.MONTH, 1);
+        List<OrganizationMemberDTO> members = listMembers(cmd.getOwnerId(), report.getPunchMonth());
+        monthReportExecutorPool.execute(() -> {
+            try {
+                setMonthReportProcess(report, 5);
+                for (int i = 0; i < members.size(); i++) {
+                    addPunchStatistics(members.get(i), cmd.getOwnerId(), start, end);
+                    if (i % 10 == 0) {
+                        setMonthReportProcess(report, 5 + (int) (i / (Double.valueOf(members.size()) / 94.00)));
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
+            } finally {
+                report.setProcess(100);
+                report.setStatus(PunchMonthReportStatus.CREATED.getCode());
+                punchMonthReportProvider.updatePunchMonthReport(report);
+            }
+        });
 
 	}
- 
+
+    private void setMonthReportProcess(PunchMonthReport report, int i) {
+        report.setProcess(i);
+        punchMonthReportProvider.updatePunchMonthReport(report);
+
+    }
+
+    private List<OrganizationMemberDTO> listMembers(Long ownerId, String punchMonth) {
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, null, (locator, query) -> {
+            //月底之后离职或者未离职
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.isNull()
+                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.gt(socialSecurityService.getTheLastDate(punchMonth))));
+            //月底之前入职
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lt(socialSecurityService.getTheLastDate(punchMonth)));
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            return query;
+        });
+
+        List<OrganizationMemberDTO> results = new ArrayList<>();
+        records.forEach(r -> {
+            OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+            results.add(dto);
+        });
+        return results;
+    }
 
 	@Override
 	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd) {
-	
-		return new GetMonthReportProcessResponse();
+        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+        if (PunchMonthReportStatus.fromCode(report.getStatus()) != PunchMonthReportStatus.CREATED) {
+            return new GetMonthReportProcessResponse(100);
+        }
+        return new GetMonthReportProcessResponse(report.getProcess());
 	}
 
 	@Override
 	public void fileMonthReport(FileMonthReportCommand cmd) {
-	
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+            PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+            if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "当前状态不可归档");
+            }
+            report1.setStatus(PunchMonthReportStatus.FILED.getCode());
+            report1.setFilerUid(UserContext.currentUserId());
+            report1.setFileTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            report1.setFilerName(socialSecurityService.findNameByOwnerAndUser(cmd.getOwnerId(), report1.getFilerUid()));
 
+            punchMonthReportProvider.updatePunchMonthReport(report1);
+            Tuple<PunchMonthReport, Boolean> tuple = new Tuple<PunchMonthReport, Boolean>(report1,true);
+            return tuple;
+        }).first().first();
 	}
 
 }

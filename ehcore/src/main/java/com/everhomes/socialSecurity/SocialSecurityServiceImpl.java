@@ -2939,8 +2939,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
         }
     }
-
-    private java.sql.Date getTheLastDate(String m) {
+    @Override
+    public java.sql.Date getTheLastDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {

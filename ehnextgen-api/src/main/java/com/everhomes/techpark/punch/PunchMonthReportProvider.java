@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.techpark.punch;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.util.List;
 
 public interface PunchMonthReportProvider {
@@ -13,4 +15,7 @@ public interface PunchMonthReportProvider {
 
 	List<PunchMonthReport> listPunchMonthReport();
 
+	List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, Integer pageSize, CrossShardListingLocator locator);
+
+	PunchMonthReport findPunchMonthReportByOwnerMonth(Long orgId, String format);
 }

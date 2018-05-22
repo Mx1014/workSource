@@ -4,7 +4,10 @@ package com.everhomes.techpark.punch;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +37,8 @@ public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
 	public void createPunchMonthReport(PunchMonthReport punchMonthReport) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchMonthReports.class));
 		punchMonthReport.setId(id);
-		punchMonthReport.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		punchMonthReport.setCreatorUid(UserContext.current().getUser().getId()); 
+//		punchMonthReport.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		punchMonthReport.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(punchMonthReport);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchMonthReports.class, null);
 	}
@@ -59,7 +62,31 @@ public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
 				.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
 	}
-	
+
+	@Override
+	public List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, Integer pageSize, CrossShardListingLocator locator) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_PUNCH_MONTH_REPORTS)
+				.where(Tables.EH_PUNCH_MONTH_REPORTS.OWNER_ID.eq(ownerId));
+		if (null != locator && locator.getAnchor() != null) {
+			step = step.and(Tables.EH_PUNCH_MONTH_REPORTS.ID.lt(locator.getAnchor()));
+		}
+		if (null != pageSize) {
+			step.limit(pageSize);
+		}
+		return step.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
+	}
+
+	@Override
+	public PunchMonthReport findPunchMonthReportByOwnerMonth(Long ownerId, String punchMonth) {
+
+		return getReadOnlyContext().select().from(Tables.EH_PUNCH_MONTH_REPORTS)
+				.where(Tables.EH_PUNCH_MONTH_REPORTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.eq(punchMonth))
+				.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.asc())
+				.fetchAny().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
+	}
+
 	private EhPunchMonthReportsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

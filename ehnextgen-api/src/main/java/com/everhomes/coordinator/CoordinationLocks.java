@@ -14,6 +14,7 @@ public enum CoordinationLocks {
     CREATE_F_BILL_ACCOUNT("family.bill.account.create"),
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
+    UPDATE_PUNCH_MONTH_REPORT("punch.month.report.update"),
     REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
