@@ -828,11 +828,11 @@ public class AssetServiceImpl implements AssetService {
 
     /**
      * @author wentian
-     * 费用计算方法(重构过，老的方法不再使用或支持，在5.6.0版本删除）
+     * 费用计算方法(重构过，老的方法不再使用或支持，在5.6.0版本删除; 建议下一个重构时使用jodatime或者localDateTime代替Calendar）
      * 数据来源 1：公式和日期期限的数字来自于调用者； 2：日期的设置来自于rule，公式设置来自于standard
      */
     @Override
-    public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+    public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
@@ -1939,18 +1939,6 @@ public class AssetServiceImpl implements AssetService {
         dtos1.addAll(dtos2);
     }
 
-    @Override
-    public void generateBillsOnContractSigned(String contractNum) {
-        //保存合同，改变状态
-//        List<PaymentContractReceiver> materials = assetProvider.findContractReceiverByContractNumAndTimeLimit(contractNum);
-//        for(int i = 0; i < materials.size(); i++) {
-//            PaymentContractReceiver p = materials.get(i);
-//
-//        }
-//        String variablesJsonString = m_1.getVariablesJsonString();
-//        String formula = assetProvider.findFormulaByChargingStandardId();
-//        calculateFee()
-    }
 
     @Override
     public void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus) {
@@ -2406,7 +2394,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
-    @Override
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
@@ -2588,10 +2575,7 @@ public class AssetServiceImpl implements AssetService {
             });
         }
     }
-    @Override
-    public void activeAutoBillNotice() {
-        autoBillNotice();
-    }
+
 
     @Override
     public CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd) {
@@ -2709,33 +2693,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void syncCustomer(Integer namespaceId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Community> communities = context.selectFrom(Tables.EH_COMMUNITIES)
-                .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(999971))
-                .fetchInto(Community.class);
-        for(int i = 0; i < communities.size(); i++){
-            Community c = communities.get(i);
-            SyncCustomersCommand cmd = new SyncCustomersCommand();
-            cmd.setCommunityId(c.getId());
-            cmd.setNamespaceId(999971);
-            customerService.syncIndividualCustomers(cmd);
-            customerService.syncEnterpriseCustomers(cmd, false);
-        }
-    }
-
-    @Override
     public List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd) {
         Long ownerId = cmd.getOwnerId();
         String ownerType = cmd.getOwnerType();
         Integer namespaceId = cmd.getNamespaceId();
         checkNullProhibit("communityId",cmd.getOwnerId());
         return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId);
-    }
-
-    @Override
-    public void activeLateFine() {
-        lateFineCal();
     }
 
     /**

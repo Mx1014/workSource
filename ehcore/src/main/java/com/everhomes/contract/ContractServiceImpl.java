@@ -45,11 +45,9 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
-import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -70,8 +68,6 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -102,12 +98,6 @@ import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import org.springframework.transaction.TransactionStatus;
-
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -772,7 +762,7 @@ public class ContractServiceImpl implements ContractService {
 //		assetService.paymentExpectancies(command);
 
 		command.setIsEffectiveImmediately((byte)0);
-		assetService.paymentExpectancies_re_struct(command);
+		assetService.paymentExpectanciesCalculate(command);
 	}
 
 
