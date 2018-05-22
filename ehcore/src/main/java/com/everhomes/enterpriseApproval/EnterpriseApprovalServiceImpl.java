@@ -713,12 +713,21 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public void enableEnterpriseApproval(EnterpriseApprovalIdCommand cmd) {
-
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(), ga.getModuleType(), ga.getId(),
+                FlowOwnerType.GENERAL_APPROVAL.getCode());
+        if (flow == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW,
+                    "The approval flow is off !");
+        ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        updateGeneralApproval(ga);
     }
 
     @Override
     public void disableEnterpriseApproval(EnterpriseApprovalIdCommand cmd) {
-
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        updateGeneralApproval(ga);
     }
 
     //  find approvals, In order to be reused by other function
