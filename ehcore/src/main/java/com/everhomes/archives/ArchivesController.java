@@ -443,7 +443,7 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
-    @RequestMapping("testNotification")
+    /*@RequestMapping("testNotification")
     @RestReturn(value = String.class)
     public RestResponse testNotification(){
         archivesService.executeArchivesNotification(6, 9, LocalDateTime.now());
@@ -451,7 +451,7 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     @RequestMapping("syncArchivesConfigAndLogs")
     @RestReturn(value = String.class)

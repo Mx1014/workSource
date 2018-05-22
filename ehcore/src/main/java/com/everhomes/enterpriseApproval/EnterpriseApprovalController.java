@@ -270,7 +270,7 @@ public class EnterpriseApprovalController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
-
+    
     /**
      * <b>URL: /enterpriseApproval/listAvailableEnterpriseApprovals</b>
      * <p>OA 可见的审批列表</p>
