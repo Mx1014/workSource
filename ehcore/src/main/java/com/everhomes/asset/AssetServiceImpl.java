@@ -826,227 +826,9 @@ public class AssetServiceImpl implements AssetService {
         return result;
     }
 
-    @Override
-    public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
-        Calendar now = newClearedCalendar();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        //calculate the details of payment expectancies
-        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
-        List<PaymentExpectancyDTO> dtos = new ArrayList<>();
-        List<FeeRules> feesRules = cmd.getFeesRules();
-        HashMap<BillIdentity,PaymentBills> map = new HashMap<>();
-        String json = "";
-        List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-        List<EhPaymentBills> billList = new ArrayList<>();
-        List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
-        for(int i = 0; i < feesRules.size(); i++) {
-            List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
-            FeeRules rule = feesRules.get(i);
-            List<ContractProperty> var1 = rule.getProperties();
-            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
-            coverVariables(var2,variableIdAndValueList);
-            String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
-            String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
-            Byte billingCycle = assetProvider.findBillyCycleById(rule.getChargingStandardId());
-            List<Object> billConf = assetProvider.getBillDayAndCycleByChargingItemId(rule.getChargingStandardId(),rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
-            Integer billDay = (Integer)billConf.get(0);
-            Byte balanceType = (Byte)billConf.get(1);
-            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-            Long billGroupId = groupRule.getBillGroupId();
-            for(int j = 0; j < var1.size(); j ++){
-                List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
-                ContractProperty property = var1.get(j);
-                //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
-                if(billingCycle== AssetPaymentConstants.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
-                    FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }
-                //自然月的计费方式
-                else if(billingCycle == AssetPaymentConstants.NATRUAL_MONTH){
-                    NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }else{
-                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
-                }
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
-                long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
-                if(currentBillItemSeq == 0){
-                    currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
-                }
-                for(int g = 0; g< dtos2.size(); g++) {
-                    PaymentExpectancyDTO dto = dtos2.get(g);
-                    BillIdentity identity = new BillIdentity();
-                    identity.setBillGroupId(groupRule.getBillGroupId());
-
-                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
-                    identity.setDateStr(dateStr);
-                    // define a billId for billItem and bill to set
-                    long nextBillId = 0l;
-                    if(map.containsKey(identity)){
-                        nextBillId = map.get(identity).getId();
-                    }else{
-                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        if(nextBillId == 0){
-                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        }
-                    }
-                    // build a billItem
-                    PaymentBillItems item = new PaymentBillItems();
-                    item.setAddressId(property.getAddressId());
-                    item.setBuildingName(property.getBuldingName());
-                    item.setApartmentName(property.getApartmentName());
-                    item.setPropertyIdentifer(property.getPropertyName());
-                    item.setAmountOwed(dto.getAmountReceivable());
-                    item.setAmountReceivable(dto.getAmountReceivable());
-                    item.setAmountReceived(new BigDecimal("0"));
-                    item.setBillGroupId(billGroupId);
-                    item.setBillId(nextBillId);
-                    item.setChargingItemName(groupRule.getChargingItemName());
-//                    item.setChargingItemsId(rule.getChargingItemId());
-                    item.setChargingItemsId(groupRule.getChargingItemId());
-                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dateStr);
-                    item.setDateStrBegin(dto.getDateStrBegin());
-                    item.setDateStrEnd(dto.getDateStrEnd());
-                    item.setDateStrDue(dto.getDueDateStr());
-                    item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
-                    item.setNamespaceId(cmd.getNamesapceId());
-                    item.setOwnerType(cmd.getOwnerType());
-                    item.setOwnerId(cmd.getOwnerId());
-                    item.setTargetType(cmd.getTargetType());
-                    item.setTargetId(cmd.getTargetId());
-                    if(cmd.getContractIdType().byteValue() == (byte)1){
-                        item.setContractId(cmd.getContractId());
-                    }
-                    item.setContractNum(cmd.getContractNum());
-                    item.setTargetName(cmd.getTargetName());
-                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    billItemsList.add(item);
-                    if(balanceType == AssetPaymentConstants.BALANCE_ON_MONTH) {
-                        // create a new bill or update a bean according to whether the corresponding contract bill exists
-                        if(map.containsKey(identity)){
-                            PaymentBills bill = map.get(identity);
-                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
-                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
-                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
-                        }else{
-                            PaymentBills newBill = new PaymentBills();
-                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
-                            //一是直接查账单表，二是确定用户信息，拿到targetId
-                            newBill.setAddressId(property.getAddressId());
-                            newBill.setBuildingName(property.getBuldingName());
-                            newBill.setApartmentName(property.getApartmentName());
-                            newBill.setAmountOwed(item.getAmountOwed());
-                            newBill.setAmountReceivable(item.getAmountReceivable());
-                            newBill.setAmountReceived(item.getAmountReceived());
-                            newBill.setAmountSupplement(new BigDecimal("0"));
-                            newBill.setAmountExemption(new BigDecimal("0"));
-                            newBill.setBillGroupId(billGroupId);
-                            // identity中最小的那个设置为datestr
-                            try {
-                                Date parse = sdf.parse(item.getDateStrEnd());
-                                if(parse.compareTo(now.getTime()) != 1){
-                                    newBill.setStatus((byte)1);
-                                }else{
-                                    newBill.setStatus((byte)0);
-                                }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                                newBill.setStatus((byte)0);
-                            }
-                            newBill.setDateStr(item.getDateStr());
-                            newBill.setId(nextBillId);
-                            newBill.setNamespaceId(cmd.getNamesapceId());
-                            newBill.setNoticetel(cmd.getNoticeTel());
-                            newBill.setOwnerId(cmd.getOwnerId());
-                            if(cmd.getContractIdType().byteValue() == (byte)1){
-                                newBill.setContractId(cmd.getContractId());
-                            }
-                            newBill.setContractNum(cmd.getContractNum());
-                            newBill.setTargetName(cmd.getTargetName());
-                            newBill.setOwnerType(cmd.getOwnerType());
-                            newBill.setTargetType(cmd.getTargetType());
-                            newBill.setTargetId(cmd.getTargetId());
-                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setCreatorId(UserContext.currentUserId());
-                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setNoticeTimes(0);
-
-                            newBill.setSwitch((byte)3);
-                            map.put(identity,newBill);
-                        }
-                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
-                    }else{
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
-                    }
-                }
-
-            }
-            dtos.addAll(dtos1);
-            // contract receiver added with status being set as 0 i.e. inactive
-            Gson gson = new Gson();
-            Map<String,String> variableMap = new HashMap<>();
-            for(int k = 0; k< variableIdAndValueList.size(); k++){
-                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                variableMap.put((String)variableIdAndValue.getVaribleIdentifier(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
-            }
-            json = gson.toJson(variableMap, Map.class);
-            PaymentContractReceiver entity = new PaymentContractReceiver();
-            StringBuilder addressIds = new StringBuilder();
-            for(int l =0 ; l < var1.size(); l++) {
-                Long addressId = var1.get(l).getAddressId();
-                if(addressId!=null){
-                    if(l == var1.size()-1){
-                        addressIds.append(var1.get(l).getPropertyName());
-                        break;
-                    }
-                    addressIds.append(var1.get(l).getPropertyName()+",");
-                }
-            }
-//            entity.setApartmentName(property.getApartmentName());
-//            entity.setBuildingName(property.getBuldingName());
-            entity.setAddressIdsJson(addressIds.toString());
-            entity.setContractId(cmd.getContractId());
-            entity.setContractNum(cmd.getContractNum());
-            entity.setEhPaymentChargingItemId(rule.getChargingItemId());
-            entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
-            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            if(nextSequence==0l){
-                nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            }
-            entity.setId(nextSequence);
-            entity.setNamespaceId(cmd.getNamesapceId());
-            entity.setNoticeTel(cmd.getNoticeTel());
-            entity.setOwnerId(cmd.getOwnerId());
-            entity.setOwnerType(cmd.getOwnerType());
-            entity.setStatus((byte)0);
-            entity.setTargetId(cmd.getTargetId());
-            entity.setTargetType(cmd.getTargetType());
-            entity.setTargetName(cmd.getTargetName());
-            entity.setVariablesJsonString(json);
-            contractDateList.add(entity);
-        }
-        for(Map.Entry entry : map.entrySet()){
-            billList.add((PaymentBills)entry.getValue());
-        }
-        this.dbProvider.execute((TransactionStatus status) -> {
-            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                return null;
-            }
-            assetProvider.saveBillItems(billItemsList);
-            assetProvider.saveBills(billList);
-            assetProvider.saveContractVariables(contractDateList);
-            return null;
-        });
-        response.setList(dtos);
-        return response;
-    }
-
-
     /**
-     * 重构费用计算方法
+     * @author wentian
+     * 费用计算方法(重构过，老的方法不再使用或支持，在5.6.0版本删除）
      * 数据来源 1：公式和日期期限的数字来自于调用者； 2：日期的设置来自于rule，公式设置来自于standard
      */
     @Override
@@ -1422,6 +1204,7 @@ public class AssetServiceImpl implements AssetService {
             Calendar d = newClearedCalendar();
              // without limit, a full cycle should have a end of time - dWithoutLimit
             Calendar dWithoutLimit = newClearedCalendar();
+            Calendar aWithoutLimit = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
                 d.setTime(dateStrEnd.getTime());
@@ -1429,8 +1212,9 @@ public class AssetServiceImpl implements AssetService {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
                 dWithoutLimit.setTime(a.getTime());
+                aWithoutLimit.setTime(a.getTime());
                 if(!cycle.isContract()){
-                    dWithoutLimit.set(Calendar.DAY_OF_MONTH, dWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
+                    aWithoutLimit.set(Calendar.DAY_OF_MONTH, aWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
@@ -1479,7 +1263,7 @@ public class AssetServiceImpl implements AssetService {
                 // for a cycle, use 'days method' may not come out 1 as people expected, so if it obvious is a cycle,
                 // just keep r as one
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
-                float divided = daysBetween(dWithoutLimit,a);
+                float divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = new Float(divided).intValue();
                 if(!b){
                     // period of this cycle
@@ -1518,7 +1302,7 @@ public class AssetServiceImpl implements AssetService {
             switch (billsDayType){
                 case FIRST_MONTH_NEXT_PERIOD:
                     due.setTime(d.getTime());
-                    due.add(Calendar.DAY_OF_MONTH,group.getBillsDay()+1);
+                    due.add(Calendar.DAY_OF_MONTH,group.getBillsDay());
                     break;
                 case BEFORE_THIS_PERIOD:
                     due.setTime(a.getTime());
@@ -1526,7 +1310,7 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 case AFTER_THIS_PERIOD:
                     due.setTime(a.getTime());
-                    due.add(Calendar.DAY_OF_MONTH, group.getBillsDay());
+                    due.add(Calendar.DAY_OF_MONTH, group.getBillsDay() - 1);
                     break;
                 case END_THIS_PERIOD:
                     due.setTime(d.getTime());
@@ -1975,7 +1759,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private boolean checkCycle(Calendar end, Calendar start, Integer cycle) {
-        Calendar a_assist = newClearedCalendar(Calendar.DATE);
+        Calendar a_assist = newClearedCalendar();
         a_assist.setTime(start.getTime());
         a_assist.add(Calendar.MONTH,cycle);
         a_assist.add(Calendar.DAY_OF_MONTH,-1);
@@ -1993,14 +1777,21 @@ public class AssetServiceImpl implements AssetService {
 
     private int daysBetween(Calendar c1,Calendar c2)
     {
-        return daysBetween_date(c1.getTime(), c2.getTime());
+        SimpleDateFormat ez = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            ez.parse(ez.format(c2.getTime()));
+            return daysBetween_date(ez.parse(ez.format(c2.getTime())), ez.parse(ez.format(c1.getTime())));
+        }catch (Exception e){
+
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, "no way to lose");
+        }
     }
     private int daysBetween_date(Date c1,Date c2)
     {
         long time1 = c1.getTime();
         long time2 = c2.getTime();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
-        return Integer.parseInt(String.valueOf(between_days))+1;
+        return Integer.parseInt(String.valueOf(between_days));
     }
 
     private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
