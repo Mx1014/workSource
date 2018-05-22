@@ -58,7 +58,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
@@ -88,6 +87,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * 检查必填参数
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(VisitorSysServiceImpl.class);
+    private static final DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
     public static final String[] checkMustFillField = {"visitorName","visitorPhone",
             "enterpriseId","enterpriseName","officeLocationId","officeLocationName",
             "visitReasonId","visitReason"};
@@ -463,7 +463,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
         }
-        checkDoorGuard(visitor);
+        checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         return null;
@@ -479,22 +479,22 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
-        VisitorSysVisitor related = null;
+        VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
-            related = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
+            relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
-            related = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
+            relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
         }
         VisitorsysStatus visitorsysStatus = checkVisitStatus(visitor.getVisitStatus());
         //如果是确认到访，那么不能更新关联访客记录的状态，因为需要两次到访，首先是到访园区，然后到访是公司。
         if(visitorsysStatus == VisitorsysStatus.HAS_VISITED){
-            related.setConfirmTime(null);
-            related.setConfirmUid(null);
-            related.setConfirmUname(null);
+            relatedVisitor.setConfirmTime(null);
+            relatedVisitor.setConfirmUid(null);
+            relatedVisitor.setConfirmUname(null);
         }
-        checkDoorGuard(visitor);
-        visitorSysVisitorProvider.updateVisitorSysVisitor(related);
-        visitorsysSearcher.syncVisitor(related);
+        checkDoorGuard(relatedVisitor);
+        visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
+        visitorsysSearcher.syncVisitor(relatedVisitor);
         return null;
     }
 
@@ -1702,13 +1702,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param formValues
      * @return
      */
-    private boolean checkFormConfiguration(GetConfigurationResponse owner, List<VisitorsysApprovalFormItem> formValues) {
+    private void checkFormConfiguration(GetConfigurationResponse owner, List<VisitorsysApprovalFormItem> formValues) {
         if(owner==null || owner.getFormConfig()==null){
-            return false;
+            return ;
         }
         if(formValues==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "form value is null");
+            return ;
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                    , ErrorCodes.ERROR_INVALID_PARAMETER, "form value is null");
         }
         Map<String, VisitorsysApprovalFormItem> map = formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x));
         for (VisitorsysApprovalFormItem dto : owner.getFormConfig()) {
@@ -1721,7 +1722,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
 
         }
-        return true;
+        return ;
     }
 
     /**
@@ -1957,8 +1958,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(type == VisitorsysVisitorType.TEMPORARY){
             return null;
         }
-        DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyyMMdd");
-        String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(datetimeSF);
+        String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(yyyyMMdd);
         VisitorSysCoding visitorSysCoding = visitorSysCodingProvider.findVisitorSysCodingByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
         VisitorSysOwnerCode visitorSysOwnerCode = visitorSysOwnerCodeProvider.findVisitorSysCodeByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         if(visitorSysOwnerCode==null){
