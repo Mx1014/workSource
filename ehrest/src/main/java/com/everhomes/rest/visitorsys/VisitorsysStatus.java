@@ -80,7 +80,7 @@ public enum VisitorsysStatus {
 	 * @return
 	 */
 	public static List<VisitorsysStatus> getBookingStatus() {
-		return new ArrayList<>(Arrays.asList(DELETED,NOT_VISIT,HAS_VISITED));
+		return new ArrayList<>(Arrays.asList(DELETED,NOT_VISIT,HAS_VISITED,REJECTED_VISIT));
 	}
 
     public String getDesc() {

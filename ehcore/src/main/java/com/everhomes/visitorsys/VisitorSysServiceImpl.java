@@ -106,6 +106,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     public VisitorSysCodingProvider visitorSysCodingProvider;
     @Autowired
+    public VisitorSysOwnerCodeProvider visitorSysOwnerCodeProvider;
+    @Autowired
     public VisitorSysConfigurationProvider visitorSysConfigurationProvider;
     @Autowired
     public ConfigurationProvider configurationProvider;
@@ -335,7 +337,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
-                            visitor.setInvitationNo(generateInvitationNo(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId()));
+                            visitor.setInvitationNo(generateInvitationNo(visitor));
                             //这里上事务的原因是，需要同时创建园区下公司的访客/预约记录和同步es
                             dbProvider.execute(action ->createVisitorSysVisitor(visitor,cmd));
                             return null;
@@ -634,6 +636,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private VisitorSysVisitor generateRejectVisitor(VisitorSysVisitor visitor) {
+        visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
         visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
         visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
         User user = UserContext.current().getUser();
@@ -1942,15 +1945,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     /**
      * 生成邀请码 RG+项目辨识码+预约日期+四位流水号
-     * @param namespaceId
-     * @param ownerType
-     * @param ownerId
+     * @param visitor
      * @return
      */
-    private String generateInvitationNo(Integer namespaceId, String ownerType, Long ownerId) {
-        VisitorSysCoding visitorSysCoding = visitorSysCodingProvider.findVisitorSysCodingByOwner(namespaceId,ownerType,ownerId);
+    private String generateInvitationNo(VisitorSysVisitor visitor) {
+        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+        if(type == VisitorsysVisitorType.TEMPORARY){
+            return null;
+        }
+        DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String dayRemark = visitor.getPlannedVisitTime().toLocalDateTime().format(datetimeSF);
+        VisitorSysCoding visitorSysCoding = visitorSysCodingProvider.findVisitorSysCodingByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
+        VisitorSysOwnerCode visitorSysOwnerCode = visitorSysOwnerCodeProvider.findVisitorSysCodeByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         if(visitorSysCoding==null){
-            visitorSysCoding = createNewVisitorSysCoding(namespaceId,ownerType,ownerId);
+            visitorSysCoding = createNewVisitorSysCoding(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         String currentPoint = format.format(System.currentTimeMillis());
@@ -1961,7 +1969,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         visitorSysCoding.setSerialCode(visitorSysCoding.getSerialCode()+1);
         String serialCode = generateSerialCode(visitorSysCoding.getSerialCode()+"");
-        String invitationNo = "RG"+visitorSysCoding.getRandomCode()+currentPoint+serialCode;
+        String invitationNo = "RG"+visitorSysOwnerCode.getRandomCode()+currentPoint+serialCode;
         visitorSysCodingProvider.updateVisitorSysCoding(visitorSysCoding);
         return invitationNo;
     }

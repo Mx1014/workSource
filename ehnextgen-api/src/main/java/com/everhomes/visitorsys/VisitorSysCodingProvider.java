@@ -13,7 +13,7 @@ public interface VisitorSysCodingProvider {
 
 	List<VisitorSysCoding> listVisitorSysCoding();
 
-	VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId);
+	VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId,String dayRemark);
 
-	VisitorSysCoding findVisitorSysCodingByRandomCode(String randomCode);
+//	VisitorSysCoding findVisitorSysCodingByRandomCode(String randomCode);
 }

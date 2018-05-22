@@ -35,7 +35,7 @@ import java.util.List;
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
  * <li>communityFormValues: (选填) 园区表单值 {@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
  * <li>enterpriseFormValues: (选填) 公司表单值 {@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
- * <li>visitorPicUri: (选填)访客头像url</li>
+ * <li>visitorPicUri: (选填)访客头像uri</li>
  * <li>formJsonValue: (选填)表单提交json值</li>
  * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
  * <li>visitorSignCharacter: (选填)访客签名字符串</li>

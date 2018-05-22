@@ -77,7 +77,7 @@ CREATE TABLE `eh_visitor_sys_coding` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `day_mark` BIGINT COMMENT 'yyyymmdd 形式的字符串,日标识',
+  `day_mark` VARCHAR(16) COMMENT 'yyyymmdd 形式的字符串,日标识',
 	`serial_code` INTEGER NOT NULL DEFAULT 0 COMMENT '流水码',
   `status` TINYINT  DEFAULT 2 COMMENT '0:未使用状态,2:使用状态',
   `creator_uid` BIGINT,

@@ -66,11 +66,12 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 	}
 
 	@Override
-	public VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+	public VisitorSysCoding findVisitorSysCodingByOwner(Integer namespaceId, String ownerType, Long ownerId,Long dayRemark) {
 		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
 				.where(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_VISITOR_SYS_CODING.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_CODING.DAY_MARK.eq(dayRemark))
 				.and(Tables.EH_VISITOR_SYS_CODING.STATUS.eq((byte)2))
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
 		if(list==null||list.size()==0){
@@ -79,17 +80,17 @@ public class VisitorSysCodingProviderImpl implements VisitorSysCodingProvider {
 		return list.get(0);
 	}
 
-	@Override
-	public VisitorSysCoding findVisitorSysCodingByRandomCode(String randomCode) {
-		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
-				.where(Tables.EH_VISITOR_SYS_CODING.RANDOM_CODE.eq(randomCode))
-				.and(Tables.EH_VISITOR_SYS_CODING.STATUS.eq((byte)2))
-				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
-		if(list==null||list.size()==0){
-			return null;
-		}
-		return list.get(0);
-	}
+//	@Override
+//	public VisitorSysCoding findVisitorSysCodingByRandomCode(String randomCode) {
+//		List<VisitorSysCoding> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_CODING)
+//				.where(Tables.EH_VISITOR_SYS_CODING.RANDOM_CODE.eq(randomCode))
+//				.and(Tables.EH_VISITOR_SYS_CODING.STATUS.eq((byte)2))
+//				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysCoding.class));
+//		if(list==null||list.size()==0){
+//			return null;
+//		}
+//		return list.get(0);
+//	}
 
 	private EhVisitorSysCodingDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
