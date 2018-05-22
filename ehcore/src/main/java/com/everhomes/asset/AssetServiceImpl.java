@@ -1428,6 +1428,7 @@ public class AssetServiceImpl implements AssetService {
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
+                dWithoutLimit.setTime(a.getTime());
                 if(!cycle.isContract()){
                     dWithoutLimit.set(Calendar.DAY_OF_MONTH, dWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
@@ -1763,6 +1764,7 @@ public class AssetServiceImpl implements AssetService {
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
+                d.setTime(a.getTime());
                 if(!cycle.isContract()){
                     dWithoutLimit.set(Calendar.DAY_OF_MONTH, dWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
@@ -1803,7 +1805,7 @@ public class AssetServiceImpl implements AssetService {
             switch (billsDayType){
                 case FIRST_MONTH_NEXT_PERIOD:
                     due.setTime(d.getTime());
-                    due.add(Calendar.DAY_OF_MONTH,group.getBillsDay()+1);
+                    due.add(Calendar.DAY_OF_MONTH,group.getBillsDay());
                     break;
                 case BEFORE_THIS_PERIOD:
                     due.setTime(a.getTime());
@@ -1811,7 +1813,7 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 case AFTER_THIS_PERIOD:
                     due.setTime(a.getTime());
-                    due.add(Calendar.DAY_OF_MONTH, group.getBillsDay());
+                    due.add(Calendar.DAY_OF_MONTH, group.getBillsDay() - 1);
                     break;
                 case END_THIS_PERIOD:
                     due.setTime(d.getTime());
@@ -1975,8 +1977,8 @@ public class AssetServiceImpl implements AssetService {
     private boolean checkCycle(Calendar end, Calendar start, Integer cycle) {
         Calendar a_assist = newClearedCalendar(Calendar.DATE);
         a_assist.setTime(start.getTime());
-        a_assist.set(Calendar.MONTH,a_assist.get(Calendar.MONTH)+cycle);
-        a_assist.set(Calendar.DAY_OF_MONTH,a_assist.get(Calendar.DAY_OF_MONTH)-1);
+        a_assist.add(Calendar.MONTH,cycle);
+        a_assist.add(Calendar.DAY_OF_MONTH,-1);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.format(a_assist.getTime());
         sdf.format(start.getTime());
@@ -1991,12 +1993,7 @@ public class AssetServiceImpl implements AssetService {
 
     private int daysBetween(Calendar c1,Calendar c2)
     {
-        long time1 = c1.getTimeInMillis();
-        long time2 = c2.getTimeInMillis();
-        long between_days=Math.abs(time2-time1)/(1000*3600*24);
-//        return Integer.parseInt(String.valueOf(between_days))+1;
-        // 结束日为23：59：59时和00:00:00算出来的结果一样，这里不再加1 by wentian 2018/5/18
-        return Integer.parseInt(String.valueOf(between_days));
+        return daysBetween_date(c1.getTime(), c2.getTime());
     }
     private int daysBetween_date(Date c1,Date c2)
     {
