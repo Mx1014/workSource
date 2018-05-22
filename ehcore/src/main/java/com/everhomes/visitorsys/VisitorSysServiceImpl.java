@@ -1965,7 +1965,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             visitorSysOwnerCode = createSysOwnerCode(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         }
         if(visitorSysCoding==null){
-            visitorSysCoding = createNewVisitorSysCoding(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+            visitorSysCoding = createNewVisitorSysCoding(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),dayRemark);
         }
 //        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 //        String currentPoint = format.format(System.currentTimeMillis());
@@ -2010,13 +2010,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param ownerId
      * @return
      */
-    private VisitorSysCoding createNewVisitorSysCoding(Integer namespaceId, String ownerType, Long ownerId) {
+    private VisitorSysCoding createNewVisitorSysCoding(Integer namespaceId, String ownerType, Long ownerId,String dayRemark) {
         VisitorSysCoding visitorSysCoding = new VisitorSysCoding();
         visitorSysCoding.setNamespaceId(namespaceId);
         visitorSysCoding.setOwnerId(ownerId);
         visitorSysCoding.setOwnerType(ownerType);
         visitorSysCoding.setSerialCode(0);
         visitorSysCoding.setStatus((byte)2);
+        visitorSysCoding.setDayMark(dayRemark);
         visitorSysCodingProvider.createVisitorSysCoding(visitorSysCoding);
         return visitorSysCoding;
     }
