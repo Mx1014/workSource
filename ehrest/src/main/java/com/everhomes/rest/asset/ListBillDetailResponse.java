@@ -11,6 +11,8 @@ import java.util.List;
  *<ul>
  * <li>billId:账单id</li>
  * <li>dateStr:账期</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
  * <li>contractNum:合同编号</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
@@ -25,6 +27,8 @@ public class ListBillDetailResponse {
     private Long billId;
     private Long billGroupId;
     private String dateStr;
+    private String dateStrBegin;
+    private String dateStrEnd;
     private String buildingName;
     private String apartmentName;
     private String noticeTel;
@@ -141,4 +145,20 @@ public class ListBillDetailResponse {
     public ListBillDetailResponse() {
 
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
 }
