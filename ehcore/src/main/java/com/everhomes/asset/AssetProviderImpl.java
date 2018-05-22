@@ -590,10 +590,10 @@ public class AssetProviderImpl implements AssetProvider {
             query.addOrderBy(t.STATUS);
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
-            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
-            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+            query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
         //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
         /*if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
