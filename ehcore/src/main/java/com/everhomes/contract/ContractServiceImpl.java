@@ -564,22 +564,30 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
-		
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
+		
+		if(communityExist == null && cmd.getCommunityId() != null) {
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType());
+		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null) {
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null);
+		}
+		
 		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
 		
 		StringBuffer contractNumber = new StringBuffer();
 		String Sparefield = contractNumberRulejson.getSparefield();
 		contractNumber.append(contractNumberRulejson.getConstantVar());
-		
+
 		Calendar cal=Calendar.getInstance();
 		if (ContractNumberDataType.YEAR.equals(ContractNumberDataType.fromStatus(contractNumberRulejson.getDateVar()))) {
 			contractNumber.append("-").append(cal.get(Calendar.YEAR));
 		}
 		if (ContractNumberDataType.MONTH.equals(ContractNumberDataType.fromStatus(contractNumberRulejson.getDateVar()))) {
-			contractNumber.append("-").append(cal.get(Calendar.MONTH)+1);
+			SimpleDateFormat sdf = new SimpleDateFormat("MM");
+			java.util.Date month  = Calendar.getInstance().getTime();
+			contractNumber.append("-").append(cal.get(Calendar.YEAR)).append("-").append(sdf.format(month));
 		}
 		if (Sparefield!=null && !"".equals(Sparefield)) {
 			contractNumber.append("-").append(Sparefield);
@@ -1491,18 +1499,19 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
-		
 		String contractNumberRulejson = StringHelper.toJsonString(cmd.getGenerateContractNumberRule());
-		
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType());
 		if(cmd.getId() == null && communityExist == null) {
-			
 			contractProvider.createContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
-		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
+		} else if(cmd.getId() != null && communityExist == null){
+			contractProvider.createContractParam(param);
+			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
+		} 
+		else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
 			contractProvider.updateContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else {
@@ -1561,6 +1570,11 @@ public class ContractServiceImpl implements ContractService {
 			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType());
+			if(communityExist != null) {
+				return toContractParamDTO(communityExist);
+			}
+		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null) {
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null);
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}
