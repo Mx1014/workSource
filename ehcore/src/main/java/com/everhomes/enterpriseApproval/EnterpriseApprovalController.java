@@ -66,13 +66,41 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterpriseApproval/stopActiveApprovalFlows</b>
+     * <b>URL: /enterpriseApproval/stopApprovalFlows</b>
      * <p>终止流程</p>
      */
     @RequestMapping("stopApprovalFlows")
     @RestReturn(value = String.class)
-    public RestResponse stopActiveApprovalFlows(@Valid ApprovalFlowIdCommand cmd){
-        enterpriseApprovalService.stopActiveApprovalFlows(cmd);
+    public RestResponse stopApprovalFlows(@Valid ApprovalFlowIdsCommand cmd){
+        enterpriseApprovalService.stopApprovalFlows(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/deliverApprovalFlow</b>
+     * <p>移交单个流程</p>
+     */
+    @RequestMapping("deliverApprovalFlow")
+    @RestReturn(value = String.class)
+    public RestResponse deliverApprovalFlow(@Valid DeliverApprovalFlowCommand cmd){
+        enterpriseApprovalService.deliverApprovalFlow(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/deliverApprovalFlows</b>
+     * <p>批量移交流程</p>
+     */
+    @RequestMapping("deliverApprovalFlows")
+    @RestReturn(value = String.class)
+    public RestResponse deliverApprovalFlows(@Valid DeliverApprovalFlowsCommand cmd){
+        enterpriseApprovalService.deliverApprovalFlows(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

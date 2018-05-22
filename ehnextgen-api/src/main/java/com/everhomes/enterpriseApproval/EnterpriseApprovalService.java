@@ -19,7 +19,11 @@ public interface EnterpriseApprovalService {
 
     ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd);
 
-    void stopActiveApprovalFlows(ApprovalFlowIdCommand cmd);
+    void stopApprovalFlows(ApprovalFlowIdsCommand cmd);
+
+    void deliverApprovalFlow(DeliverApprovalFlowCommand cmd);
+
+    void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd);
 
     List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups();
 

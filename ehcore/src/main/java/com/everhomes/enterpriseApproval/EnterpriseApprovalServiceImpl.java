@@ -22,7 +22,6 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -368,19 +367,33 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public void stopActiveApprovalFlows(ApprovalFlowIdCommand cmd) {
-        Long userId = UserContext.currentUserId();
-        FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
-        if(flowCase == null)
+    public void stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
+        if (cmd.getFlowCaseIds() == null || cmd.getFlowCaseIds().size() == 0)
             return;
-        FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-        stepDTO.setFlowCaseId(flowCase.getId());
-        stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-        stepDTO.setStepCount(flowCase.getStepCount());
-        stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-        stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
-        stepDTO.setOperatorId(userId);
-        flowService.processAutoStep(stepDTO);
+        Long userId = UserContext.currentUserId();
+        for (Long flowCaseId : cmd.getFlowCaseIds()) {
+            FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
+            if (flowCase == null)
+                continue;
+            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+            stepDTO.setFlowCaseId(flowCase.getId());
+            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+            stepDTO.setStepCount(flowCase.getStepCount());
+            stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+            stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+            stepDTO.setOperatorId(userId);
+            flowService.processAutoStep(stepDTO);
+        }
+    }
+
+    @Override
+    public void deliverApprovalFlow(DeliverApprovalFlowCommand cmd) {
+
+    }
+
+    @Override
+    public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
+
     }
 
     //  Whether the approval template has already been existed, check it.
