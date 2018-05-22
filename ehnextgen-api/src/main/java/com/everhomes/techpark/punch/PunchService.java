@@ -283,6 +283,8 @@ public interface PunchService {
 
 	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
 
+	void refreshMonthReport(String month);
+
 	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd);
 
 

@@ -9646,6 +9646,35 @@ public class PunchServiceImpl implements PunchService {
         return org;
     }
 
+    /**
+     * 每月1日早上1点50,新建当月的月报数据
+     */
+    @Scheduled(cron = "1 50 1 1 * ?")
+    public void refreshMonthReport() {
+        refreshMonthReport(monthSF.get().format(DateHelper.currentGMTTime()));
+    }
+    @Override
+    public void refreshMonthReport(String month) {
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode()).enter(() -> {
+                List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(null, null);
+                if(null != enterpriseIds) {
+                    for (Long enterpriseId : enterpriseIds) {
+
+                        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + enterpriseId).enter(() -> {
+                            PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(enterpriseId, month);
+                            if (null == report) {
+                                createNewReport(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, month);
+                            }
+                            return null;
+                        });
+
+                    }
+                }
+                return null;
+            });
+        }
+    }
 
 	@Override
 	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd) {
@@ -9654,24 +9683,26 @@ public class PunchServiceImpl implements PunchService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-
-        List<PunchMonthReport> results = punchMonthReportProvider.listPunchMonthReport(cmd.getOwnerType(), cmd.getOwnerId(), pageSize + 1, locator);
-        if (null != results && results.size() > 0) {
-            Long nextPageAnchor = null;
-            if (results != null && results.size() > pageSize) {
-                results.remove(results.size() - 1);
-                nextPageAnchor = results.get(results.size() - 1).getId();
-            }
-            resp.setNextPageAnchor(nextPageAnchor);
-            for (PunchMonthReport report : results) {
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+            List<PunchMonthReport> results = punchMonthReportProvider.listPunchMonthReport(cmd.getOwnerType(), cmd.getOwnerId(), pageSize + 1, locator);
+            if (null != results && results.size() > 0) {
+                Long nextPageAnchor = null;
+                if (results != null && results.size() > pageSize) {
+                    results.remove(results.size() - 1);
+                    nextPageAnchor = results.get(results.size() - 1).getId();
+                }
+                resp.setNextPageAnchor(nextPageAnchor);
+                for (PunchMonthReport report : results) {
+                    PunchMonthReportDTO dto = ConvertHelper.convert(report, PunchMonthReportDTO.class);
+                    resp.getMonthReports().add(dto);
+                }
+            } else {
+                PunchMonthReport report = createNewReport(cmd.getOwnerType(), cmd.getOwnerId(), monthSF.get().format(DateHelper.currentGMTTime()));
                 PunchMonthReportDTO dto = ConvertHelper.convert(report, PunchMonthReportDTO.class);
                 resp.getMonthReports().add(dto);
             }
-        }else{
-            PunchMonthReport report = createNewReport(cmd.getOwnerType(), cmd.getOwnerId(), monthSF.get().format(DateHelper.currentGMTTime()));
-            PunchMonthReportDTO dto = ConvertHelper.convert(report, PunchMonthReportDTO.class);
-            resp.getMonthReports().add(dto);
-        }
+            return null;
+        });
         return resp;
 	}
 
@@ -9690,7 +9721,7 @@ public class PunchServiceImpl implements PunchService {
     /**
      * 处理更新月报的线程池,预设最大值是10(同时又10个线程进行)
      */
-    private static ExecutorService monthReportExecutorPool = Executors.newFixedThreadPool(5);
+    private static ExecutorService monthReportExecutorPool = Executors.newFixedThreadPool(10);
     @Override
 	public void updateMonthReport(UpdateMonthReportCommand cmd) {
         PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {

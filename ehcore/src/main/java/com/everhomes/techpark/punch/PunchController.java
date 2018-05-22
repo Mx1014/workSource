@@ -497,5 +497,15 @@ public class PunchController extends ControllerBase {
 		punchService.fileMonthReport(cmd);
 		return new RestResponse();
 	}
+	/**
+	 * <p>刷新月报-每月1日的模拟</p>
+	 * <b>URL: /techpark/punch/refreshMonthReport</b>
+	 */
+	@RequestMapping("refreshMonthReport")
+	@RestReturn(String.class)
+	public RestResponse refreshMonthReport(RefreshMonthReportCommand cmd){
+		punchService.refreshMonthReport(cmd.getMonth());
+		return new RestResponse();
+	}
 
 }
