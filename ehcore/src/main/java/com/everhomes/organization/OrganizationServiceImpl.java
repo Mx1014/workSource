@@ -1501,7 +1501,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember1.setContactToken(cmd.getEntries());
                         organizationMember1.setTargetType(OrganizationMemberTargetType.USER.getCode());
                         organizationMember1.setTargetId(userIdentifier.getOwnerUid());
-                        organizationMember1.setGroupType(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationMember1.setGroupType("ENTERPRISE");
                         organizationMember1.setCreatorUid(user.getId());
                         //持久化到数据库中
                         //// TODO: 2018/4/28
@@ -1546,7 +1546,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember2.setContactToken(cmd.getEntries());
                         organizationMember2.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
                         organizationMember2.setTargetId(0L);
-                        organizationMember2.setGroupType(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationMember2.setGroupType("ENTERPRISE");
                         organizationMember2.setCreatorUid(user.getId());
                         //持久化到数据库中
                         //// TODO: 2018/4/28
@@ -8500,6 +8500,16 @@ public class OrganizationServiceImpl implements OrganizationService {
                             continue;
 //                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY,
 //                                    "enterprise name is null");
+                        }
+
+                        if(importEnterpriseDataDTO.getName().getBytes().length > 100){
+                            //说明公司的名称的长度大于50个字，那么就不允许
+                            LOGGER.error("enterprise name is over than 100 bytes, data = {}", importEnterpriseDataDTO);
+                            log.setData(importEnterpriseDataDTO);
+                            log.setErrorLog("enterprise name is over than 100 bytes");
+                            log.setCode(OrganizationServiceErrorCode.ERROR_ORGANIZATION_NAME_OVERFLOW);
+                            errorDataLogs.add(log);
+                            continue;
                         }
 
                         if (CollectionUtils.isEmpty(importEnterpriseDataDTO.getSiteDtos())) {

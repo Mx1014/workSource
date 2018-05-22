@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,11 +172,20 @@ public class ImportFileServiceImpl implements ImportFileService{
 
                 for (ImportFileResultLog log: logs) {
                     cellNum = 0;
-                    Map<String, String> data = (Map<String, String>) log.getData();
+                    Map<String, Object> data = (Map<String, Object>) log.getData();
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
-                    for (Map.Entry<String, String> entry : data.entrySet()) {
-                        row.createCell(cellNum ++).setCellValue(entry.getValue());
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if(entry.getValue() instanceof List){
+                            String value = "";
+                            for(int i= 0; i < ((List) entry.getValue()).size(); i++){
+                                value += ((List) entry.getValue()).get(i);
+                            }
+                            row.createCell(cellNum ++).setCellValue(value);
+                        }else{
+                            row.createCell(cellNum ++).setCellValue(String.valueOf(entry.getValue()));
+
+                        }
                     }
                     LOGGER.debug("title size ={} .title:{}",titleMap.size(),StringHelper.toJsonString(titleMap));
                     if (StringUtils.isNotBlank(log.getErrorDescription())) {

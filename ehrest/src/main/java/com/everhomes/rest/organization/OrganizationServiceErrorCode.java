@@ -104,5 +104,6 @@ public interface OrganizationServiceErrorCode {
     int ERROR_PMFLAG_ISNULL = 900035;//是否属于管理公司标志为空
     int ERROR_SERVICESUPPORT_ISNULL = 900036;//是否属于服务商标志为空
     int ERROR_WORKPLATFORM_ISNULL = 900037;//是否开启工作台标志为空
+    int ERROR_ORGANIZATION_NAME_OVERFLOW = 900038;//公司的名称长度超过50个汉字
 
 }
