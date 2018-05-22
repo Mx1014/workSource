@@ -16,7 +16,7 @@ public class ListOPPushCardsCommand {
 
     private Long layoutId;
 
-    private Object instanceConfig;
+    private String instanceConfig;
 
     private ContextDTO context;
 
@@ -28,11 +28,11 @@ public class ListOPPushCardsCommand {
         this.layoutId = layoutId;
     }
 
-    public Object getInstanceConfig() {
+    public String getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(Object instanceConfig) {
+    public void setInstanceConfig(String instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 

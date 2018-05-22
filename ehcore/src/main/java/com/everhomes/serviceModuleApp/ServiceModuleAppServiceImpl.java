@@ -22,6 +22,7 @@ import com.everhomes.rest.acl.ServiceModuleEntryConstans;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
+import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
@@ -360,7 +361,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
 
-		List<ServiceModuleAppDTO> appDtos = new ArrayList<>();
+		List<AppDTO> appDtos = new ArrayList<>();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
@@ -371,7 +372,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
 			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
-			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig().toString(), Card.class);
+			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
 				orgId = cmd.getContext().getOrgId();
 				appType = ServiceModuleAppType.OA.getCode();
@@ -395,7 +396,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
 
-				ServiceModuleAppDTO appDTO = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+				AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
 				appDTO.setName(app.getName());
 				if(app.getIconUri() != null){
 					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
