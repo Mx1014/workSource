@@ -132,7 +132,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
         
-        /*if(response.getResponse() != null && !response.getResponse().isEmpty()) {
+        if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
@@ -152,7 +152,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     		p2.setTargetType(listBillDetailVO.getTargetType());
                     		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
                     		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
-                    		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
+                    		p2.setAmountExemption(listBillDetailVO.getAmoutExemption());
                     		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
                     		p2.setBuildingName(listBillDetailVO.getBuildingName());
                     		p2.setApartmentName(listBillDetailVO.getApartmentName());
@@ -167,8 +167,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     }
                 }
             }
-        }*/
-        //杨崇鑫用于测试 开始
+        }
+        /*//杨崇鑫用于测试 开始
         PaymentBillResp paymentBillDTO = new PaymentBillResp();
         paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
         paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
@@ -199,7 +199,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         		p2.setTargetType(listBillDetailVO.getTargetType());
         		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
         		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
-        		p2.setAmoutExemption(listBillDetailVO.getAmoutExemption());
+        		p2.setAmountExemption(listBillDetailVO.getAmoutExemption());
         		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
         		p2.setBuildingName(listBillDetailVO.getBuildingName());
         		p2.setApartmentName(listBillDetailVO.getApartmentName());
@@ -213,7 +213,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         	}
         }
         //杨崇鑫用于测试 结束
-        if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
+*/        if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
             result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
             result.getList().remove(result.getList().size()-1);
         }else{

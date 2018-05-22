@@ -851,7 +851,7 @@ public class AssetServiceImpl implements AssetService {
 				}
 	            detail.setAmountReceived(dto.getAmountReceived());
 	            detail.setAmountReceivable(dto.getAmountReceivable());
-	            detail.setAmoutExemption(dto.getAmoutExemption());
+	            detail.setAmoutExemption(dto.getAmountExemption());
 	            detail.setAmountSupplement(dto.getAmountSupplement());
 	            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
 	            detail.setPayTime(dto.getPayTime());
