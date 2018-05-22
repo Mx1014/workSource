@@ -55,7 +55,7 @@ public class EnterpriseApprovalController extends ControllerBase{
      * <b>URL: /enterpriseApproval/listActiveApprovalFlowRecords</b>
      * <p>OA 流程监控</p>
      */
-    @RequestMapping("listApprovalFlowMonitors")
+    @RequestMapping("listActiveApprovalFlowRecords")
     @RestReturn(value = ListApprovalFlowRecordsResponse.class)
     public RestResponse listActiveApprovalFlowRecords(@Valid ListApprovalFlowRecordsCommand cmd){
         ListApprovalFlowRecordsResponse res = enterpriseApprovalService.listActiveApprovalFlowRecords(cmd);
