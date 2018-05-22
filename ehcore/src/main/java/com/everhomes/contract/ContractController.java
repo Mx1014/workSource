@@ -92,10 +92,6 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("generateContractNumber")
 	@RestReturn(String.class)
 	public RestResponse generateContractNumber(GenerateContractNumberCommand cmd){
-		/*Integer namespaceId = UserContext.getCurrentNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.generateContractNumber());*/
-		
 		ContractService contractService = getContractService(cmd.getNamespaceId());
 		return new RestResponse(contractService.generateContractNumber(cmd));
 	}
