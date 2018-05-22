@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>flowCaseId: 工作流id</li>
  * <li>approvalId: 所属审批id</li>
  * <li>approvalGroupId: 所属审批组id</li>
- * <li>approvalNode: 当前结点(类型暂未确定,待对接工作流)</li>
+ * <li>currentLane: 当前结点</li>
  * </ul>
  */
 public class EnterpriseApprovalRecordDTO {
@@ -51,7 +51,7 @@ public class EnterpriseApprovalRecordDTO {
 
     private Long approvalGroupId;
 
-    private String approvalNode;
+    private String currentLane;
 
     public EnterpriseApprovalRecordDTO() {
     }
@@ -176,12 +176,12 @@ public class EnterpriseApprovalRecordDTO {
         this.approvalGroupId = approvalGroupId;
     }
 
-    public String getApprovalNode() {
-        return approvalNode;
+    public String getCurrentLane() {
+        return currentLane;
     }
 
-    public void setApprovalNode(String approvalNode) {
-        this.approvalNode = approvalNode;
+    public void setCurrentLane(String currentLane) {
+        this.currentLane = currentLane;
     }
 
     @Override

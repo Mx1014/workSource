@@ -125,6 +125,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             //  申请人部门
             if (cmd.getCreatorDepartmentId() != null)
                 query.addConditions(EnterpriseApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
+            //  activeFlag
+            if(TrueOrFalseFlag.TRUE.getCode().equals(cmd.getActiveFlag()))
+                query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
             return query;
         });
 
@@ -155,6 +158,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         dto.setApprovalStatus(r.getStatus());
         dto.setFlowCaseId(flowCase.getId());
         dto.setApprovalId(r.getReferId());
+        dto.setCurrentLane(r.getCurrentLane());
         return dto;
     }
 
@@ -364,7 +368,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
-        return null;
+        cmd.setActiveFlag(TrueOrFalseFlag.TRUE.getCode());
+        return listApprovalFlowRecords(cmd);
     }
 
     @Override

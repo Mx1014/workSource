@@ -44,6 +44,8 @@ public class ListApprovalFlowRecordsCommand {
 
     private Integer pageSize;
 
+    private Byte activeFlag;    //  the flag to ensure that only needs active flow cases
+
     public ListApprovalFlowRecordsCommand() {
     }
 
@@ -141,6 +143,14 @@ public class ListApprovalFlowRecordsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(Byte activeFlag) {
+        this.activeFlag = activeFlag;
     }
 
     @Override
