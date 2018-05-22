@@ -560,12 +560,12 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<Field> listMandatoryFields(String moduleName, String groupPath) {
+    public List<Field> listMandatoryFields(String moduleName, Long groupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
        return context.select().from(Tables.EH_VAR_FIELDS)
                 .where(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName))
-                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath + "/%"))
+                .and(Tables.EH_VAR_FIELDS.GROUP_ID.eq(groupId))
                 .and(Tables.EH_VAR_FIELDS.MANDATORY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
                 .fetchInto(Field.class);
 

@@ -1784,7 +1784,7 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private void updateFieldGroupWithDefaultFieldsAndItems(ScopeFieldGroup scopeFieldGroup) {
-        List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId().toString());
+        List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId());
         if(systemFields!=null && systemFields.size()>0){
             // auto init default fields and items
             systemFields.forEach((field) -> {
