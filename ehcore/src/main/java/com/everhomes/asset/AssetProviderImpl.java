@@ -8,10 +8,13 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -82,6 +85,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private ContractProvider contractProvider;
 
 
     @Override
@@ -3204,36 +3210,52 @@ public class AssetProviderImpl implements AssetProvider {
     }
     @Override
     public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule) {
+        // todo change the way to examine bill group validation, if not bill and not valid contract, work flag should be false
+        boolean workFlag = true;
         DSLContext context = getReadOnlyContext();
         EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
         EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
         //看是否关联了合同
-        List<Long> fetch1 = context.select(t.ID)
+        // 合同的状态需要限定 by wentian 2018/5/22
+        List<Long> fetch1 = context.select(t.CONTRACT_ID)
                 .from(t)
                 .where(t.OWNER_ID.eq(rule.getOwnerid()))
                 .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
                 .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
                 .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
-                .fetch(t.ID);
+                .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
-            return true;
+            Long correlatedContractId = fetch1.get(0);
+            Byte contractStatus = contractProvider.findContractById(correlatedContractId).getStatus();
+            ContractStatus status = ContractStatus.fromStatus(contractStatus);
+            switch (status){
+                case INVALID:
+                   workFlag = false;
+                case INACTIVE:
+                    workFlag = false;
+                case DENUNCIATION:
+                    workFlag = false;
+                case EXPIRED:
+                    workFlag = false;
+                case HISTORY:
+                    workFlag = false;
+            }
+        }else{
+            workFlag = false;
         }
         //先看是否产生了账单
         List<Long> fetch = context.select(bills.ID)
                 .from(bills)
                 .where(bills.BILL_GROUP_ID.eq(rule.getBillGroupId()))
+                .and(bills.SWITCH.notEqual((byte)3))
+                //todo 限定条件应该排除已经缴纳的账单，但已经缴纳的账单的需要增加一个账单组历史名称,且兼容历史数据，即数据迁移
                 .fetch(bills.ID);
-
         if(fetch.size()>0){
-            List<Long> fetch2 = context.select(Tables.EH_PAYMENT_BILL_ITEMS.ID)
-                    .from(Tables.EH_PAYMENT_BILL_ITEMS)
-                    .where(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID.eq(rule.getChargingItemId()))
-                    .fetch(Tables.EH_PAYMENT_BILL_ITEMS.ID);
-            if(fetch2.size()>0){
-                return true;
-            }
+            workFlag = true;
+        }else{
+            workFlag = false;
         }
-        return false;
+        return workFlag;
     }
 
     @Override
