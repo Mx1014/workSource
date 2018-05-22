@@ -1416,7 +1416,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationCommunityRequest.setMemberId(organization.getId());
                     organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
                     organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
-                    organizationCommunityRequest.setWorkplaceName(createOfficeSiteCommand.getSiteName());
                     //// TODO: 2018/5/22
                     enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
 
@@ -1725,7 +1724,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
                     organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
                     organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
-                    organizationCommunityRequest.setWorkplaceName(createOfficeSiteCommand.getSiteName());
                     //// TODO: 2018/5/22
                     enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
 
@@ -8793,7 +8791,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                                             organizationCommunityRequest.setMemberId(organization.getId());
                                             organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
                                             organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
-                                            organizationCommunityRequest.setWorkplaceName(createOfficeSiteCommand.getSiteName());
                                             //// TODO: 2018/5/22
                                             enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
 
