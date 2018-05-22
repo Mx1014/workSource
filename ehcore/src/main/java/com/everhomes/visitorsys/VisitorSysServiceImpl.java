@@ -338,10 +338,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     private void updateVisitor(CreateOrUpdateVisitorCommand cmd) {
         VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
-        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
-        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
-        String newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
         String oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
+        String newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
         //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
         if(type == VisitorsysVisitorType.BE_INVITED && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
             coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
@@ -1832,6 +1832,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         //设置门禁相关的二维码，门禁的id
         checkDoorGuard(configuration,visitor);
+        visitor.setSendSmsFlag(null);
     }
 
     /**
