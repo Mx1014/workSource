@@ -103,7 +103,7 @@ public class VisitorSysUtils {
                 Method targetMethod = target.getClass().getMethod(targetSetMethodName, sourceSetMethod.getParameterTypes());
                 targetMethod.invoke(target, result);
             } catch (Exception e) {
-                LOGGER.info("source Method = {}, targetMethod = {}, failed", sourceGetMethodName, targetSetMethodName,e);
+                LOGGER.trace("source Method = {}, targetMethod = {}, failed", sourceGetMethodName, targetSetMethodName,e);
             }
         }
         return target;

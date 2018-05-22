@@ -219,8 +219,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private void addActionDto(List<BaseVisitorActionDTO> list, VisitorSysVisitor visitor){
         VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
-        if(visitor.getVisitStatus()>VisitorsysStatus.NOT_VISIT.getCode()) {
-            BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 1 : (byte) 4), visitor.getVisitTime(), null, visitor.getInviterName());
+        if(visitor.getVisitStatus()>VisitorsysStatus.NOT_VISIT.getCode()
+                 && visitor.getVisitTime()!=null) {
+            BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 1 : (byte) 4), visitor.getVisitTime(), null, visitor.getVisitorName());
             list.add(dto1);
         }
         if(visitor.getVisitStatus()>VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()) {
@@ -637,7 +638,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitor.setConfirmTime(new Timestamp(System.currentTimeMillis()));
         User user = UserContext.current().getUser();
         visitor.setConfirmUid(user==null?-1:user.getId());
-        visitor.setConfirmUname(user==null?"anonymous":user.getAccountName());
+        visitor.setConfirmUname(user==null?"anonymous":user.getNickName());
         return visitor;
     }
 
@@ -652,7 +653,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
         User user = UserContext.current().getUser();
         visitor.setRefuseUid(user==null?-1:user.getId());
-        visitor.setRefuseUname(user==null?"anonymous":user.getAccountName());
+        visitor.setRefuseUname(user==null?"anonymous":user.getNickName());
         return visitor;
     }
 
@@ -1798,9 +1799,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(visitStatus == VisitorsysStatus.HAS_VISITED){//
                 visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 //预约访客的状态，可以直接从未到访到确认到访，所以登记时间可能为空，这里设置一下
-                if(visitor.getVisitTime()==null) {
-                    visitor.setVisitTime(new Timestamp(System.currentTimeMillis()));
-                }
+//                if(visitor.getVisitTime()==null) {
+//                    visitor.setVisitTime(new Timestamp(System.currentTimeMillis()));
+//                }
             }
         }else{
             if(visitStatus == VisitorsysStatus.NOT_VISIT){//临时访客是未到访状态
