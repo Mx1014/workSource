@@ -188,4 +188,6 @@ public interface AssetService {
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
+    void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response);
+    
 }

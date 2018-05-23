@@ -177,7 +177,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
-
+    @Autowired
+    private PaymentService paymentService;
 
 
     @Override
@@ -839,6 +840,63 @@ public class AssetServiceImpl implements AssetService {
         int[] titleSize = {20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+    }
+    
+    public void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response){
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(Long.parseLong("5000"));
+        }
+        List<PaymentBillRespForEnt> dtos = new ArrayList<>();
+		try {
+			ListPaymentBillRespForEnt result = paymentService.listPaymentBillForEnt(cmd);
+			dtos.addAll(result.getList());
+	        Calendar c = newClearedCalendar();
+	        int year = c.get(Calendar.YEAR);
+	        int month = c.get(Calendar.MONTH);
+	        int date = c.get(Calendar.DATE);
+	        int hour = c.get(Calendar.HOUR_OF_DAY);
+	        int minute = c.get(Calendar.MINUTE);
+	        int second = c.get(Calendar.SECOND);
+	        String fileName = "bill"+year+month+date+hour+minute+ second;
+
+	        List<exportOrdersDetail> dataList = new ArrayList<>();
+	        //组装datalist来确定propertyNames的值
+	        for(int i = 0; i < dtos.size(); i++) {
+	        	PaymentBillRespForEnt dto = dtos.get(i);
+	        	exportOrdersDetail detail = new exportOrdersDetail();
+	            detail.setDateStr(dto.getDateStr());
+	            detail.setBillGroupName(dto.getBillGroupName());
+	            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+	            detail.setOrderAmount(String.valueOf(dto.getOrderAmount()));
+	            detail.setPayerName(dto.getPayerName());
+	            //订单状态:0未支付,1已完成,2挂起,3失败
+	            switch (dto.getPaymentStatus()) {
+					case 0:
+						detail.setPaymentStatus("未支付");
+						break;
+					case 1:
+						detail.setPaymentStatus("已完成");
+						break;
+					case 2:
+						detail.setPaymentStatus("挂起");
+						break;
+					case 3:
+						detail.setPaymentStatus("失败");
+						break;
+					default:
+						break;
+				}
+	            detail.setPayTime(dto.getPayTime());
+	            dataList.add(detail);
+	        }
+	        String[] propertyNames = {"dateStr","billGroupName","paymentOrderNum","orderAmount","payerName","paymentStatus","payTime"};
+	        String[] titleName ={"账期","账单组","订单编号","交易金额","缴费人","订单状态","缴费时间"};
+	        int[] titleSize = {20,20,20,20,20,20,20};
+	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+		} catch (Exception e) {
+			LOGGER.error("exportOrdersForEnt cmd={},error={}",cmd,e);
+		}
     }
 
     @Override
