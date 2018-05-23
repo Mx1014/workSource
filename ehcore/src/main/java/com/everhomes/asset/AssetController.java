@@ -1342,6 +1342,7 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/publicTransferBill</b>
      */
     @RequestMapping("publicTransferBill")
+    @RestReturn(value = PublicTransferBillRespForEnt.class)
     public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
     	//PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
         //RestResponse restResponse = new RestResponse(listPaymentBillResp);

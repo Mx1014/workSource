@@ -1,22 +1,21 @@
 //@formatter:off
 package com.everhomes.rest.asset;
+import java.util.List;
 /**
  * @author created by yangcx
  * @date 2018年5月23日----上午11:03:53
  */
+
 /**
  *<ul>
-* <li>ownerType:所属者类型</li>
+ * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者id</li>
  * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
  * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
  * <li>namespaceId:域空间</li>
-** <li>billList:勾选的要转账的账单集合，参考{@link PaymentBillRequest}</li>
+ * <li>billList:勾选的要转账的账单集合，参考{@link PaymentBillRequest}</li>
  *</ul>
  */
-
-import java.util.List;
-
 public class PublicTransferBillCmdForEnt {
 	private String ownerType;
 	private Long ownerId;

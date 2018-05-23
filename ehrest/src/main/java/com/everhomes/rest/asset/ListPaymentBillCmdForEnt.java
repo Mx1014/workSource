@@ -4,6 +4,7 @@ package com.everhomes.rest.asset;
  * @author created by yangcx
  * @date 2018年5月23日----上午11:03:53
  */
+
 /**
  *<ul>
  * <li>pageAnchor: 锚点</li>
@@ -18,7 +19,7 @@ package com.everhomes.rest.asset;
  * <li>payTime: 缴费时间</li>
  * <li>paymentOrderNum: 订单编号</li>
  * <li>orderType:账单类型，如：wuyeCode</li>
- * <li>userType:用户类型，如：EhOrganizations
+ * <li>userType:用户类型，如：EhOrganizations</li>
  * <li>userId:用户ID</li>
  *</ul>
  */
