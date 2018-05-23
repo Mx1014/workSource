@@ -166,8 +166,8 @@ public class PolicyServiceImpl implements PolicyService {
 
     private List<Long> getOwnerIds(Long ownerId,Long orgId){
         List<Long> ownerIds = new ArrayList<>();
+        ownerIds.add(-1L);
         if(null == ownerId || -1L == ownerId){
-            ownerIds.add(-1L);
             ListUserRelatedProjectByModuleCommand cmd = new ListUserRelatedProjectByModuleCommand();
             cmd.setModuleId(41900L);
 //			cmd.setAppId(cmd.getAppId());
