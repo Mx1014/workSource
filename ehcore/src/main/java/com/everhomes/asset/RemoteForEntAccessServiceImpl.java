@@ -62,6 +62,7 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
     private UserProvider userProvider;
 
     public ListPaymentBillRespForEnt listOrderPaymentForEnt(ListPaymentBillCmdForEnt cmd) throws Exception {
+    	cmd.setDistributionRemarkIsNull(true);
     	QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
         QueryBuilder queryBuilder = payCmd.builder();
         queryBuilder.select(
@@ -315,6 +316,39 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
         }
         if(cmd.getPaymentOrderNum() != null) {
             QueryCondition tempCondition = PaymentAttributes.SUPPORTING_ORDER_NUM.eq(Long.valueOf(cmd.getPaymentOrderNum()));
+            if(condition == null) {
+                condition = tempCondition;
+            } else {
+                condition = condition.and(tempCondition);
+            }
+        }
+        if(cmd.getTransactionType() != null) {
+            QueryCondition tempCondition = PaymentAttributes.TRASACTION_TYPE.eq(cmd.getTransactionType());
+            if(condition == null) {
+                condition = tempCondition;
+            } else {
+                condition = condition.and(tempCondition);
+            }
+        }
+        if(cmd.getTransactionTypes() != null && !cmd.getTransactionTypes().isEmpty()) {
+            QueryCondition subCondition = null;
+            for(Integer transactionType : cmd.getTransactionTypes()) {
+                QueryCondition tempCondition = PaymentAttributes.TRASACTION_TYPE.eq(transactionType);
+                if(subCondition == null) {
+                    subCondition = tempCondition;
+                } else {
+                    subCondition = subCondition.or(tempCondition);
+                }
+            }
+            condition = condition.and(subCondition);
+        }
+        if(cmd.getDistributionRemarkIsNull() != null) {
+            QueryCondition tempCondition = null;
+            if(cmd.getDistributionRemarkIsNull()) {
+                tempCondition = PaymentAttributes.DISTRIBUTION_REMARK.isNull();
+            } else {
+                tempCondition = PaymentAttributes.DISTRIBUTION_REMARK.notNull();
+            }
             if(condition == null) {
                 condition = tempCondition;
             } else {

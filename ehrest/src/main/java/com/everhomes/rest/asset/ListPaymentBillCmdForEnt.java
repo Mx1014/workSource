@@ -5,6 +5,8 @@ package com.everhomes.rest.asset;
  * @date 2018年5月23日----上午11:03:53
  */
 
+import java.util.List;
+
 /**
  *<ul>
  * <li>pageAnchor: 锚点</li>
@@ -21,6 +23,8 @@ package com.everhomes.rest.asset;
  * <li>orderType:账单类型，如：wuyeCode</li>
  * <li>userType:用户类型，如：EhOrganizations</li>
  * <li>userId:用户ID</li>
+ * <li>transactionType:交易类型，如：手续费/充值/提现/退款等</li>
+ * <li>transactionTypes:交易类型集合，如：手续费/充值/提现/退款等</li>
  *</ul>
  */
 public class ListPaymentBillCmdForEnt {
@@ -38,6 +42,9 @@ public class ListPaymentBillCmdForEnt {
     private String orderType;
     private String userType;
     private Long userId;
+    private Integer transactionType;
+    private List<Integer> transactionTypes;
+    private Boolean distributionRemarkIsNull;
     
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -122,5 +129,23 @@ public class ListPaymentBillCmdForEnt {
 	}
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+	public Integer getTransactionType() {
+		return transactionType;
+	}
+	public void setTransactionType(Integer transactionType) {
+		this.transactionType = transactionType;
+	}
+	public List<Integer> getTransactionTypes() {
+		return transactionTypes;
+	}
+	public void setTransactionTypes(List<Integer> transactionTypes) {
+		this.transactionTypes = transactionTypes;
+	}
+	public Boolean getDistributionRemarkIsNull() {
+		return distributionRemarkIsNull;
+	}
+	public void setDistributionRemarkIsNull(Boolean distributionRemarkIsNull) {
+		this.distributionRemarkIsNull = distributionRemarkIsNull;
 	}
 }

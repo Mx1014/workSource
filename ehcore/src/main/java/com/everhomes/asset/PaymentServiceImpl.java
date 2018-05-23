@@ -131,6 +131,15 @@ public class PaymentServiceImpl implements PaymentService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
+        if (cmd.getTransactionType() == null) {
+            List<Integer> transactionTypes = new ArrayList<Integer>();
+            transactionTypes.add(TransactionType.ORDERPAYMENT.getCode());
+            transactionTypes.add(TransactionType.REFUND.getCode());
+            // 增加手续费
+            transactionTypes.add(TransactionType.FEECHARGE.getCode());
+            transactionTypes.add(TransactionType.REFUND_FEECHARGE.getCode());
+            cmd.setTransactionTypes(transactionTypes);
+        }
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
         if(paymentUser == null) {
             return new ListPaymentBillRespForEnt(null, cmd.getPageSize());
