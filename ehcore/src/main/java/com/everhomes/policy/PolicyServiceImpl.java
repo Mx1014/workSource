@@ -90,11 +90,11 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     public PolicyDTO searchPolicyById(GetPolicyByIdCommand cmd) {
         Policy result = policyProvider.searchPolicyById(cmd.getId());
-        if(null == cmd.getNamespaceId() && result.getNamespaceId() != cmd.getNamespaceId()){
-            LOGGER.error("Invalid namespaceId parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid namespaceId parameter.");
-        }
+//        if(null == cmd.getNamespaceId() && result.getNamespaceId() != cmd.getNamespaceId()){
+//            LOGGER.error("Invalid namespaceId parameter.");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid namespaceId parameter.");
+//        }
         PolicyDTO dto = ConvertHelper.convert(result,PolicyDTO.class);
         List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
         dto.setCategoryIds(ctgs.stream().map(EhPolicyCategories::getCategoryId).collect(Collectors.toList()));
