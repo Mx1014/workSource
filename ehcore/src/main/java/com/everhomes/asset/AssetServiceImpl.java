@@ -1263,11 +1263,11 @@ public class AssetServiceImpl implements AssetService {
                 // for a cycle, use 'days method' may not come out 1 as people expected, so if it obvious is a cycle,
                 // just keep r as one
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
-                float divided = daysBetween(dWithoutLimit,aWithoutLimit);
+                int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = new Float(divided).intValue();
                 if(!b){
                     // period of this cycle
-                    float divider = daysBetween(d, a);
+                    int divider = daysBetween(d, a);
                     r = String.valueOf(divider+"/" + divided);
                 }
             }
