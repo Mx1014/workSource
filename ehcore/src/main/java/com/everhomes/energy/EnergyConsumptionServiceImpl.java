@@ -3880,7 +3880,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
         if(members == null || members.size() == 0) {
-            return new ArrayList<ExecuteGroupAndPosition>();
+            return new ArrayList<>();
         }
 
         List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
