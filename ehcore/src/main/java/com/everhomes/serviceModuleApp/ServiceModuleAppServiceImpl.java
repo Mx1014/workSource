@@ -274,7 +274,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Long id = organizationAppProvider.createOrganizationApp(orgapps);
 
 		//给自己添加自己园区的所有授权
-		serviceModuleAppAuthorizationService.addAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getOriginId());
+		serviceModuleAppAuthorizationService.addAllCommunityAppAuthorizations(serviceModuleApp.getNamespaceId(), cmd.getOrganizationId(), cmd.getOriginId());
 
 		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
 		dto.setStatus(orgapps.getStatus());
