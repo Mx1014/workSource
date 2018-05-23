@@ -88,7 +88,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             "enterpriseId","enterpriseName","officeLocationId","officeLocationName",
             "visitReasonId","visitReason"};
     //提取字符串前的数字
-    final Pattern numExtract = Pattern.compile("^([\\d]*).*$");
+    final Pattern numExtract = Pattern.compile("^([\\d]*).*");
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -248,9 +248,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         return visitorSysVisitorProvider.findVisitorSysVisitorById(visitor.getNamespaceId(), visitor.getParentId());
     }
-
     @Override
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
+        return listOfficeLocations(cmd,false);
+    }
+
+    private ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd,boolean isDefaultId) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 
         Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
@@ -266,14 +269,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
                 if (organization != null) {
                     BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
-//                    dto.setId(cmd.getOwnerId());
+                    if(isDefaultId) {
+                        dto.setId(cmd.getOwnerId());
+                    }
                     dto.setOfficeLocationName(organization.getName());
                     officeLocationList.add(dto);
                 }
             } else {
                 Community community = communityProvider.findCommunityById(cmd.getOwnerId());
                 BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
-//                dto.setId(cmd.getOwnerId());
+                if(isDefaultId) {
+                    dto.setId(cmd.getOwnerId());
+                }
                 dto.setOfficeLocationName(community == null ? "" : community.getName());
                 officeLocationList.add(dto);
             }
@@ -355,12 +362,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private VisitorSysVisitor updateVisitor(CreateOrUpdateVisitorCommand cmd) {
         VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
-        String oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        String oldFormatVisitorTime = null;
+        if(oldVisitor !=null && oldVisitor.getPlannedVisitTime()!=null) {
+            oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        }
         VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
-        String newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        String newFormatVisitorTime = null;
+        if(visitor !=null && visitor.getPlannedVisitTime()!=null) {
+            newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        }
         VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
         //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
-        if(type == VisitorsysVisitorType.BE_INVITED && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
+        if(type == VisitorsysVisitorType.BE_INVITED
+                && newFormatVisitorTime!=null
+                && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
             coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
                     +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
                 visitor.setInvitationNo(generateInvitationNo(visitor));
@@ -1267,7 +1282,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         locationsCommand.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
         locationsCommand.setOwnerId(cmd.getEnterpriseId());
         locationsCommand.setKeyWords(cmd.getKeyWords());
-        ListOfficeLocationsResponse response = listOfficeLocations(locationsCommand);
+        ListOfficeLocationsResponse response = listOfficeLocations(locationsCommand,true);
         return ConvertHelper.convert(response,ListUIOfficeLocationsResponse.class);
     }
 
@@ -1953,7 +1968,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         doorCmd.setValidFromMs(now);
         if(visitor.getInvalidTime()!=null) {
             Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
-            if (matcher.find(1)) {
+            if (matcher.find()) {
                 instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
                 doorCmd.setValidEndMs(instance.getTimeInMillis());
             }
