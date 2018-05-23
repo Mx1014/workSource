@@ -263,9 +263,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private DefaultChargingItemProvider defaultChargingItemProvider;
-	
-	@Autowired
-	private ContractService contractService;
     
     private String queueName = "property-mgr-push";
 
