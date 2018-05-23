@@ -367,4 +367,6 @@ public interface PunchProvider {
 	public List<Long> listPunchLogEnterprise(String startDayString, String endDayString);
 
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
+
+	Integer countpunchStatistic(String punchMonth, Long ownerId);
 }

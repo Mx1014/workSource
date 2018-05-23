@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.punch;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -15,6 +16,8 @@ import com.everhomes.util.StringHelper;
  * <li>errorInfo: 如果更新出错这里显示错误信息</li>
  * <li>status: 状态0-创建更新中 1-创建完成 2-已归档</li>
  * <li>punchMonth: YYYYMM</li>
+ * <li>punchMemberNumber: 考勤人数</li>
+ * <li>updateTime: 更新时间-数据截止时间</li>
  * </ul>
  */
 
@@ -36,7 +39,10 @@ public class ListPunchCountCommandResponse{
     private String errorInfo;
     private Byte status;
     private String punchMonth;
-    
+	private Long updateTime;
+	private Integer punchMemberNumber;
+
+
 	public List<PunchCountDTO> getPunchCountList() {
 		return punchCountList;
 	}
@@ -121,5 +127,20 @@ public class ListPunchCountCommandResponse{
 	public void setPunchMonth(String punchMonth) {
 		this.punchMonth = punchMonth;
 	}
-	
- }
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public Integer getPunchMemberNumber() {
+		return punchMemberNumber;
+	}
+
+	public void setPunchMemberNumber(Integer punchMemberNumber) {
+		this.punchMemberNumber = punchMemberNumber;
+	}
+}
