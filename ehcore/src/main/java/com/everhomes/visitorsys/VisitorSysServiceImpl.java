@@ -88,7 +88,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             "enterpriseId","enterpriseName","officeLocationId","officeLocationName",
             "visitReasonId","visitReason"};
     //提取字符串前的数字
-    final Pattern numExtract = Pattern.compile("^([\\d]*).*");
+    final Pattern numExtract = Pattern.compile("^([\\d]*).*$");
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -326,22 +326,34 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return response;
     }
 
+    /**
+     * 创建或者更新访客
+     * @param cmd
+     * @return
+     */
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitor(CreateOrUpdateVisitorCommand cmd) {
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
+        VisitorSysVisitor visitor = null;
         if(cmd.getId()==null) {
-            createVisitor(cmd);
+            visitor = createVisitor(cmd);
         }else{
-            updateVisitor(cmd);
+            visitor = updateVisitor(cmd);
         }
-        GetBookedVisitorByIdResponse convert = ConvertHelper.convert(cmd, GetBookedVisitorByIdResponse.class);
+        sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
+        sendMessageInviter(visitor);//发送消息给邀请者
+        GetBookedVisitorByIdResponse convert = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
     }
 
-    private void updateVisitor(CreateOrUpdateVisitorCommand cmd) {
+    /**
+     * 更新访客
+     * @param cmd
+     */
+    private VisitorSysVisitor updateVisitor(CreateOrUpdateVisitorCommand cmd) {
         VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
         String oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
         VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
@@ -355,12 +367,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 return null;
             });
         }
-        dbProvider.execute(r->updateVisitorSysVisitor(visitor,cmd));
-        sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
-        sendMessageInviter(visitor);//发送消息给邀请者
+        dbProvider.execute(r -> updateVisitorSysVisitor(visitor, cmd));
+        return visitor;
     }
 
-    private void createVisitor(CreateOrUpdateVisitorCommand cmd) {
+    /**
+     * 创建预约/访客
+     * @param cmd
+     */
+    private VisitorSysVisitor createVisitor(CreateOrUpdateVisitorCommand cmd) {
         //检查参数，生成访客实体
         VisitorSysVisitor visitor = checkCreateVisitor(cmd);
         //这里上锁的目的是，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
@@ -371,8 +386,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         });
         //这里上事务的原因是，需要同时创建园区下公司的访客/预约记录和同步es
         dbProvider.execute(action ->createVisitorSysVisitor(visitor,cmd));
-        sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
-        sendMessageInviter(visitor);//发送消息给邀请者
+        return visitor;
     }
 
     /**
@@ -491,7 +505,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param cmd
      * @return
      */
-    private Object updateVisitorSysVisitor(VisitorSysVisitor visitor, CreateOrUpdateVisitorCommand cmd) {visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
+    private Object updateVisitorSysVisitor(VisitorSysVisitor visitor, CreateOrUpdateVisitorCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
