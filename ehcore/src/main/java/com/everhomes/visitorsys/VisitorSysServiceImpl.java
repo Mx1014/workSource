@@ -1029,24 +1029,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public GetInvitationLetterForWebResponse getInvitationLetterForWeb(GetInvitationLetterForWebCommand cmd) {
-        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
         Long visitorId = checkInviationToken(cmd.getVisitorToken());
-
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(visitorId);
-        VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
-        if(ownerType == VisitorsysOwnerType.COMMUNITY){
-            response.setQrcode(visitor.getDoorGuardQrcode());
-        }else{
-            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
-            response.setQrcode(relatedVisitor==null?null:relatedVisitor.getDoorGuardQrcode());
-        }
         if(visitor==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "unknown visitorToken "+cmd.getVisitorToken());
         }
 
-        GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
+        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
 
+        GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
+        //
+        setVisitorQrcode(configuration,visitor,response);
         response = VisitorSysUtils.copyAllNotNullProperties(configuration, response);
         response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
         VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(visitor.getOfficeLocationId());
@@ -1054,6 +1048,46 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         response.setVisitorInfoDTO(ConvertHelper.convert(visitor,BaseVisitorInfoDTO.class));
         response.setIpadThemeRgb(configuration.getIpadThemeRgb());
         return response;
+    }
+
+    /**
+     * 设置response.qrcode 访客二维码
+     * @param configuration 访客配置
+     * @param visitor 访客信息
+     * @param response 访客邀请函实体
+     */
+    private void setVisitorQrcode(GetConfigurationResponse configuration, VisitorSysVisitor visitor, GetInvitationLetterForWebResponse response) {
+        VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
+        boolean canSetQrcode = false;
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            VisitorsysBaseConfig baseConfig = configuration.getBaseConfig();
+            VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsFlag());
+            VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsValidAfterConfirmedFlag());
+            VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+            if(((doorGuardsFlag == VisitorsysFlagType.YES
+                    && validAfterConfirmedFlag == VisitorsysFlagType.YES
+                    && visitStatus==VisitorsysStatus.HAS_VISITED)
+                    || (doorGuardsFlag == VisitorsysFlagType.YES &&
+                    validAfterConfirmedFlag == VisitorsysFlagType.NO))
+                    && visitStatus!=VisitorsysStatus.DELETED
+                    && visitStatus!=VisitorsysStatus.REJECTED_VISIT){
+                response.setQrcode(visitor.getDoorGuardQrcode());
+            }
+        }else{
+            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+            GetConfigurationResponse relatedConfiguration = getConfiguration(ConvertHelper.convert(relatedVisitor, GetConfigurationCommand.class));
+            VisitorsysBaseConfig baseConfig = relatedConfiguration.getBaseConfig();
+            VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsFlag());
+            VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsValidAfterConfirmedFlag());
+            VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+            if((doorGuardsFlag == VisitorsysFlagType.YES
+                    && validAfterConfirmedFlag == VisitorsysFlagType.YES
+                    && visitStatus==VisitorsysStatus.HAS_VISITED)
+                    || (doorGuardsFlag == VisitorsysFlagType.YES &&
+                    validAfterConfirmedFlag == VisitorsysFlagType.NO)){
+                response.setQrcode(relatedVisitor==null?null:relatedVisitor.getDoorGuardQrcode());
+            }
+        }
     }
 
     @Override
