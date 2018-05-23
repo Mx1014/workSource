@@ -36,4 +36,9 @@ public interface DecorationService {
 
     void DecorationApplySuccess(Long requestId);
 
+    void FileApprovalSuccess(Long requestId);
+
+    void DecorationCheckSuccess(Long requestId);
+
+
 }

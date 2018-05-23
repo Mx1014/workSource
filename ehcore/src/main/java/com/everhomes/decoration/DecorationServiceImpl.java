@@ -184,25 +184,26 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
             cmd1.setPhone(worker.getPhone());
             worker.setUid(0l);//注册未登陆
-            try {
+
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(dc.getOrganizationId(),
+                    worker.getPhone());
+            if (member == null) {
                 VerifyPersonnelByPhoneCommandResponse res1 = organizationService.verifyPersonnelByPhone(cmd1);
-               if (res1.getDto()!=null)
-                   worker.setUid(res1.getDto().getTargetId());
+                if (res1.getDto() != null)
+                    worker.setUid(res1.getDto().getTargetId());
                 AddArchivesContactCommand cmd2 = new AddArchivesContactCommand();
                 cmd2.setContactName(worker.getName());
-                cmd2.setGender((byte)1);
+                cmd2.setGender((byte) 1);
                 cmd2.setRegionCode("86");
-                cmd2.setVisibleFlag((byte)0);
+                cmd2.setVisibleFlag((byte) 0);
                 cmd2.setContactToken(worker.getPhone());
                 cmd2.setOrganizationId(dc.getOrganizationId());
                 cmd2.setDepartmentIds(new ArrayList<>());
                 cmd2.getDepartmentIds().add(dc.getOrganizationId());
                 archivesService.addArchivesContact(cmd2);//加入企业
-            }catch (RuntimeErrorException re){ //已经加入企业 忽略报错
-                OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(dc.getOrganizationId(), worker.getPhone());
+            } else { //已经加入企业
                 worker.setUid(member.getTargetId());
             }
-
             decorationProvider.createDecorationWorker(worker);
             worker.setQrid(createQrCode(worker.getId(),ProcessorType.WORKER.getCode()));
             decorationProvider.updateDecorationWorker(worker);
@@ -282,11 +283,11 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setTitle(getAppName());
 
             cmd2.setServiceType(cmd2.getTitle());
-            cmd2.setTitle(cmd2.getTitle()+"("+parseRequestStatus(DecorationRequestStatus.APPLY.getCode())+")");
+            cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.APPLY.getDescribe()+")");
             StringBuilder content = new StringBuilder();
             content.append("装修公司:"+request.getDecoratorCompany()+"\n");
             content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
-            content.append("装修人日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
+            content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
                     sdfyMd.format(new Date(request.getEndTime().getTime())));
             cmd2.setContent(content.toString());
             cmd2.setFlowMainId(flow.getFlowMainId());
@@ -556,6 +557,9 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public void DecorationApplySuccess(Long requestId) {
         DecorationRequest request = this.decorationProvider.getRequestById(requestId);
+        if (DecorationRequestStatus.APPLY.getCode() != request.getStatus())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         try{
             //注册公司
             if (request.getDecoratorCompanyId() == null){
@@ -566,21 +570,85 @@ public class DecorationServiceImpl implements  DecorationService {
                 cmd.setLatitude("0.00");
                 cmd.setLongitude("0.00");
                 OrganizationDTO org = this.organizationService.createEnterprise(cmd);
-                request.setDecoratorCompanyId(org.getId());
                 //新建装修公司
                 DecorationCompany company = new DecorationCompany();
                 company.setName(request.getDecoratorCompany());
                 company.setNamespaceId(UserContext.getCurrentNamespaceId());
                 company.setOrganizationId(org.getId());
                 this.decorationProvider.createDecorationCompany(company);
+                request.setDecoratorCompanyId(company.getId());
             }
-            //
+            // 注册装修公司负责人
+            DecorationCompany decorationCompany = this.decorationProvider.getDecorationCompanyById(request.getDecoratorCompanyId());
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(decorationCompany.getOrganizationId(),
+                    request.getDecoratorPhone());
+            if (member == null) {
+                AddArchivesContactCommand cmd2 = new AddArchivesContactCommand();
+                cmd2.setContactName(request.getDecoratorName());
+                cmd2.setGender((byte) 1);
+                cmd2.setRegionCode("86");
+                cmd2.setVisibleFlag((byte) 0);
+                cmd2.setContactToken(request.getDecoratorPhone());
+                cmd2.setOrganizationId(decorationCompany.getOrganizationId());
+                cmd2.setDepartmentIds(new ArrayList<>());
+                cmd2.getDepartmentIds().add(decorationCompany.getOrganizationId());
+                archivesService.addArchivesContact(cmd2);//加入企业
+            }
+            //工作流
+            Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
+                    DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.FILE_APPROVAL.getFlowOwnerType());
+            if (flow == null) {
+                LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
+                throw RuntimeErrorException.errorWith("decoration",
+                        10001, "请开启工作流后重试");
+            }
+            CreateFlowCaseCommand cmd2 = new CreateFlowCaseCommand();
+            cmd2.setApplyUserId(request.getApplyUid());
+            cmd2.setReferId(request.getId());
+            cmd2.setReferType(DecorationRequestStatus.FILE_APPROVAL.getFlowOwnerType());
+            cmd2.setProjectId(request.getCommunityId());
+            cmd2.setProjectType(EntityType.COMMUNITY.getCode());
+            cmd2.setTitle(getAppName());
 
+            cmd2.setServiceType(cmd2.getTitle());
+            cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.FILE_APPROVAL.getDescribe()+")");
+            StringBuilder content = new StringBuilder();
+            content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+            content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
+            content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
+                    sdfyMd.format(new Date(request.getEndTime().getTime())));
+            cmd2.setContent(content.toString());
+            cmd2.setFlowMainId(flow.getFlowMainId());
+            cmd2.setFlowVersion(flow.getFlowVersion());
+            flowService.createFlowCase(cmd2);
 
+            request.setStatus(DecorationRequestStatus.FILE_APPROVAL.getCode());
+            this.decorationProvider.updateDecorationRequest(request);
         }catch (Exception e){
             LOGGER.error("DecorationApplySuccess error e:",e);
             request.setCancelFlag((byte)1);
             this.decorationProvider.updateDecorationRequest(request);
+            throw e;
         }
+    }
+
+    @Override
+    public void FileApprovalSuccess(Long requestId) {
+        DecorationRequest request = this.decorationProvider.getRequestById(requestId);
+        if (DecorationRequestStatus.FILE_APPROVAL.getCode() != request.getStatus())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+        request.setStatus(DecorationRequestStatus.PAYMENT.getCode());
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void DecorationCheckSuccess(Long requestId) {
+        DecorationRequest request = this.decorationProvider.getRequestById(requestId);
+        if (DecorationRequestStatus.CHECK.getCode() != request.getStatus())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+        request.setStatus(DecorationRequestStatus.REFOUND.getCode());
+        this.decorationProvider.updateDecorationRequest(request);
     }
 }
