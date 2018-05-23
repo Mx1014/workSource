@@ -736,11 +736,11 @@ public class AssetServiceImpl implements AssetService {
             detail.setContractNum(dto.getContractNum());
             detail.setBillGroupName(dto.getBillGroupName());
             detail.setNoticeTel(dto.getNoticeTel());
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
-            }else{
-                detail.setNoticeTimes("");
-            }
+//            if(UserContext.getCurrentNamespaceId()!=999971){
+//                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+//            }else{
+//                detail.setNoticeTimes("");
+//            }
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
             detail.setDateStr(dto.getDateStr());
@@ -749,10 +749,10 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status", "invoiceNum"};
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态"
                 , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
