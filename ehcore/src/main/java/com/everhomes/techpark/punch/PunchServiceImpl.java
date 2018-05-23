@@ -4593,7 +4593,15 @@ public class PunchServiceImpl implements PunchService {
         //2017-8-2 加入了时间区间
         //2018-05-21 加入了reportId
         List<String> months = new ArrayList<>();
-        if (null != cmd.getStartDay()) {
+        if (null != cmd.getMonthReportId()) {
+            PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+            if (null != report) {
+                months.add(report.getPunchMonth());
+                response.setProcess(report.getProcess());
+                response.setErrorInfo(report.getErrorInfo());
+                response.setStatus(report.getStatus());
+            }
+        } else if (null != cmd.getStartDay()) {
             //这里早晚注释掉,4.2版本上线吼就没用了
             if (cmd.getStartDay() > cmd.getEndDay()) {
                 LOGGER.error("Invalid  parameter in the command : startDay > end day");
@@ -4608,16 +4616,8 @@ public class PunchServiceImpl implements PunchService {
                 months.add(monthSF.get().format(start.getTime()));
                 start.add(Calendar.MONTH, 1);
             }
-        } else if(null !=cmd.getMonth()){
+        } else  if(null !=cmd.getMonth()){
             months.add(cmd.getMonth());
-        } else if (null != cmd.getMonthReportId()) {
-            PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
-            if (null != report) {
-                months.add(report.getPunchMonth());
-                response.setProcess(report.getProcess());
-                response.setErrorInfo(report.getErrorInfo());
-                response.setStatus(report.getStatus());
-            }
         } else{
         }
         if (months.size() == 0) {
