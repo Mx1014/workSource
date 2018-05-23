@@ -11,7 +11,7 @@ CREATE TABLE `eh_punch_month_reports` (
   `status` TINYINT COMMENT '状态:0-创建更新中 1-创建完成 2-已归档',
   `creator_uid` BIGINT DEFAULT NULL COMMENT '创建者',
   `create_time` DATETIME DEFAULT NULL,
-  `punch_member_number` INT COMMENT '考勤人数'.
+  `punch_member_number` INT COMMENT '考勤人数',
   `filer_uid` BIGINT DEFAULT NULL COMMENT '创建者',
   `file_time` DATETIME DEFAULT NULL,
   `update_time` DATETIME DEFAULT NULL,
