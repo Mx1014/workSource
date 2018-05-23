@@ -19,7 +19,7 @@ public interface ConfigurationsService {
 	 * @param cmd
 	 * @return ConfigurationsAdminDTO
 	 */
-	ConfigurationsAdminDTO getConfigurations(ConfigurationsAdminCommand cmd);
+	ConfigurationsAdminDTO listConfigurations(ConfigurationsAdminCommand cmd);
 	
 	/**
 	 * 通过主键查询配置项信息，主键不能为空

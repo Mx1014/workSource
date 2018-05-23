@@ -27,14 +27,14 @@ public class ConfigurationsAdminController extends ControllerBase{
 	
 
 	/**
-     * <b>URL: /admin/configurations/getConfigurations</b>
+     * <b>URL: /admin/configurations/listConfigurations</b>
      * <p>查询配置项信息</p>
      */
-	@RequestMapping("getConfigurations")
+	@RequestMapping("listConfigurations")
     @RestReturn(value=ConfigurationsAdminDTO.class)
-	public RestResponse getConfigurations(ConfigurationsAdminCommand cmd) {
+	public RestResponse listConfigurations(ConfigurationsAdminCommand cmd) {
 		
-		ConfigurationsAdminDTO resultDTO = configurationsService.getConfigurations(cmd);
+		ConfigurationsAdminDTO resultDTO = configurationsService.listConfigurations(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
         return response;

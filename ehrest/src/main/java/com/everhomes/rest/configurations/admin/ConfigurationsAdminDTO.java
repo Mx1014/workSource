@@ -6,44 +6,35 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>
-* <li>request: 后台返回数组 ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
-* <li>pageSize: 页数据量</li>
-* <li>pageAnchor: 开始页码</li>
+* <li>dtoList: 后台返回数组 ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
+* <li>nextPageAnchor: 下一页开始锚点</li>
 * </ul>
 */
 public class ConfigurationsAdminDTO {
-	private List<ConfigurationsIdAdminDTO> request;
+	private List<ConfigurationsIdAdminDTO> dtoList;
 	
-	private String  pageSize;    
-    private String pageOffset;
+
+    private Long nextPageAnchor;
     
-    
-	public List<ConfigurationsIdAdminDTO> getRequest() {
-		return request;
+
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
 
 
-	public void setRequest(List<ConfigurationsIdAdminDTO> request) {
-		this.request = request;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 
-	public String getPageSize() {
-		return pageSize;
+	public List<ConfigurationsIdAdminDTO> getDtoList() {
+		return dtoList;
 	}
 
 
-	public void setPageSize(String pageSize) {
-		this.pageSize = pageSize;
-	}
-
-	public String getPageOffset() {
-		return pageOffset;
-	}
-
-
-	public void setPageOffset(String pageOffset) {
-		this.pageOffset = pageOffset;
+	public void setDtoList(List<ConfigurationsIdAdminDTO> dtoList) {
+		this.dtoList = dtoList;
 	}
 
 

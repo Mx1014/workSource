@@ -13,7 +13,7 @@ import com.everhomes.rest.configurations.admin.ConfigurationsUpdateAdminCommand;
 public class ConfigurationsServiceImpl implements  ConfigurationsService{
 
 	@Override
-	public ConfigurationsAdminDTO getConfigurations(
+	public ConfigurationsAdminDTO listConfigurations(
 			ConfigurationsAdminCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;

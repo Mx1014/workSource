@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 * <li>name: 配置项名称</li>
 * <li>value: 配置项值</li>
 * <li>pageSize: 页数据量</li>
-* <li>pageOffset: 开始页码</li>
+* <li>pageAnchor: 本页开始的锚点</li>
 * </ul>
 */
 public class ConfigurationsAdminCommand {
@@ -17,7 +17,7 @@ public class ConfigurationsAdminCommand {
     private String name;
     private String value;
     private Integer  pageSize;    
-    private Integer pageOffset;
+    private Long pageAnchor;
     
     public Integer getNamespaceId() {
         return namespaceId;
@@ -51,12 +51,13 @@ public class ConfigurationsAdminCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Integer getPageOffset() {
-		return pageOffset;
+
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	@Override
