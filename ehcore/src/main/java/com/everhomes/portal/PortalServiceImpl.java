@@ -1765,6 +1765,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
+	//暂时没有用到
 	private void publishNavigationBar(Long versionId, Byte publishType){
 
 		PortalVersionDTO portalVersion = findPortalVersionById(versionId);
