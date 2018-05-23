@@ -4140,7 +4140,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//登录的话找加入的家庭和公司
 		if(user != null && user.getId() != null){
-			orgCommunityIdSet = getOrgCommunityIdsByUserId(user.getId());
+			orgCommunityIdSet = getWorkPlaceCommunityIdsByUserId(user.getId());
 			familyCommunityIdSet = getFamilyCommunityIdsByUserId(user.getId());
 		}
 
@@ -4189,7 +4189,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	private Set<Long> getOrgCommunityIdsByUserId(Long userId){
+	private Set<Long> getWorkPlaceCommunityIdsByUserId(Long userId){
 
 
 		Set<Long> orgCommunityIdSet = new HashSet<>();
@@ -4198,10 +4198,11 @@ public class CommunityServiceImpl implements CommunityService {
 		if(members != null){
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
-					List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
-					if(organizationCommunitys != null && organizationCommunitys.size() > 0){
-						for (OrganizationCommunity orgcom: organizationCommunitys){
-							orgCommunityIdSet.add(orgcom.getCommunityId());
+
+					List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
+					if(workPlaces != null && workPlaces.size() > 0){
+						for (OrganizationWorkPlaces workPlace: workPlaces){
+							orgCommunityIdSet.add(workPlace.getCommunityId());
 						}
 					}
 				}
@@ -4234,7 +4235,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 					//登录的话找加入的家庭和公司
 					if(user != null && user.getId() != null){
-						orgCommunityIdSet = getOrgCommunityIdsByUserId(user.getId());
+						orgCommunityIdSet = getWorkPlaceCommunityIdsByUserId(user.getId());
 						if(orgCommunityIdSet.contains(community.getId())){
 							dto.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
 						}
