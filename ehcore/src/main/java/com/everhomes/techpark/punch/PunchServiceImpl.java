@@ -5468,7 +5468,11 @@ public class PunchServiceImpl implements PunchService {
 
         // TODO 导出
         Map<String, Object> params = new HashMap();
-
+        if(null != cmd.getMonthReportId()){
+        	PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+        	cmd.setStartDay(socialSecurityService.getTheFirstDate(report.getPunchMonth()).getTime());
+        	cmd.setEndDay(socialSecurityService.getTheLastDate(report.getPunchMonth()).getTime());
+        }
         //如果是null的话会被传成“null”
         params.put("ownerType", cmd.getOwnerType());
         params.put("ownerId", cmd.getOwnerId());
