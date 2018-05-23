@@ -1478,7 +1478,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     OrganizationMember organizationMember = organizationProvider.findOrganizationMemberSigned(cmd.getEntries(),
                             cmd.getNamespaceId());
                     if(organizationMember != null){
-                        //说明已经加入了公司，那么我们就将新建的公司的admin_target_id值更改为organizationMember中的id值
+                        //说明已经加入了公司，那么我们就将新建的公司的admin_target_id值更改为organizationMember中的id值,并且将其对应的organizationMembers表中的member_group字段变更为manager表示的是管理员
+                        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationProvider.updateOrganizationMember(organizationMember);
                         //// TODO: 2018/4/28
                         //创建Organization类的对象
                         Organization organization1 = new Organization();
@@ -1501,6 +1503,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember1.setContactToken(cmd.getEntries());
                         organizationMember1.setTargetType(OrganizationMemberTargetType.USER.getCode());
                         organizationMember1.setTargetId(userIdentifier.getOwnerUid());
+                        organizationMember1.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
                         organizationMember1.setGroupType("ENTERPRISE");
                         organizationMember1.setCreatorUid(user.getId());
                         //持久化到数据库中
@@ -1522,7 +1525,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     OrganizationMember organizationMember = organizationProvider.findOrganizationMemberNoSigned(cmd.getEntries(),cmd.getNamespaceId());
                     //判断
                     if(organizationMember != null){
-                        //说明已经加入了公司，但是没有注册信息
+                        //说明已经加入了公司，但是没有注册信息,那么我们需要将该organizationMembers表中的member_group字段设置为manager,表示的是管理员
+                        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+                        organizationProvider.updateOrganizationMember(organizationMember);
                         //更新eh_organizations表中的admin_target_id字段信息
                         //创建Organization类的对象
                         Organization organization3 = new Organization();
@@ -1546,6 +1551,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember2.setContactToken(cmd.getEntries());
                         organizationMember2.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
                         organizationMember2.setTargetId(0L);
+                        organizationMember2.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
                         organizationMember2.setGroupType("ENTERPRISE");
                         organizationMember2.setCreatorUid(user.getId());
                         //持久化到数据库中
