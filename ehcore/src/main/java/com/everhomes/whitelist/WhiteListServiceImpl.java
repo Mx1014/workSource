@@ -53,28 +53,32 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
 
     @Override
     public void batchCreateWhiteList(BatchCreateWhiteListCommand cmd) {
-        List<PhoneWhiteList> list = new ArrayList<>();
-        for (CreateWhiteListCommand createWhiteListCommand :cmd.getCreateWhiteListCommandList()) {
-            if (createWhiteListCommand != null) {
-                if (null == createWhiteListCommand.getPhoneNumber() || "".equals(createWhiteListCommand.getPhoneNumber())) {
-                    LOGGER.error("PhoneNumber cannot be null.");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                            "PhoneNumber cannot be null.");
-                }
-                if (null == createWhiteListCommand.getNamespaceId()) {
-                    LOGGER.error("namespaceId cannot be null.");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                            "namespaceId cannot be null.");
-                }
+        if (null == cmd.getPhoneNumbers()) {
+            throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
+        }
 
-                User user = UserContext.current().getUser();
-                PhoneWhiteList phoneWhiteList = new PhoneWhiteList();
-                phoneWhiteList.setPhoneNumber(createWhiteListCommand.getPhoneNumber());
-                phoneWhiteList.setNamespaceId(createWhiteListCommand.getNamespaceId());
-                phoneWhiteList.setCreatorUid(user.getId());
-                phoneWhiteList.setCreatorTime(new Timestamp(System.currentTimeMillis()));
-                list.add(phoneWhiteList);
+        List<PhoneWhiteList> list = new ArrayList<>();
+
+        String[] phoneNumbers = cmd.getPhoneNumbers().split(",");
+        for (String phone :phoneNumbers) {
+            if (null == phone || "".equals(phone)) {
+                LOGGER.error("PhoneNumber cannot be null.");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "PhoneNumber cannot be null.");
             }
+            if (null == cmd.getNamespaceId()) {
+                LOGGER.error("namespaceId cannot be null.");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "namespaceId cannot be null.");
+            }
+
+            User user = UserContext.current().getUser();
+            PhoneWhiteList phoneWhiteList = new PhoneWhiteList();
+            phoneWhiteList.setPhoneNumber(phone);
+            phoneWhiteList.setNamespaceId(cmd.getNamespaceId());
+            phoneWhiteList.setCreatorUid(user.getId());
+            phoneWhiteList.setCreatorTime(new Timestamp(System.currentTimeMillis()));
+            list.add(phoneWhiteList);
         }
         whiteListProvider.batchCreateWhiteList(list);
     }

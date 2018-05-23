@@ -9,21 +9,31 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>createWhiteListCommandList: 新增白名单列表{@link com.everhomes.rest.whitelist.CreateWhiteListCommand}</li>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>phoneNumbers: 白名单手机号码组,英文逗号分隔</li>
  * </ul>
  */
 public class BatchCreateWhiteListCommand {
 
     @NotNull
-    @ItemType(CreateWhiteListCommand.class)
-    private List<CreateWhiteListCommand> createWhiteListCommandList;
+    private Integer namespaceId;
+    @NotNull
+    private String phoneNumbers;
 
-    public List<CreateWhiteListCommand> getCreateWhiteListCommandList() {
-        return createWhiteListCommandList;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setCreateWhiteListCommandList(List<CreateWhiteListCommand> createWhiteListCommandList) {
-        this.createWhiteListCommandList = createWhiteListCommandList;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(String phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
     }
 
     @Override
