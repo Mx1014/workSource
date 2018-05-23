@@ -183,4 +183,6 @@ public interface AssetService {
     void modifySettledBill(ModifySettledBillCommand cmd);
 
     void noticeTrigger(Integer namespaceId);
+    
+    ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd);
 }

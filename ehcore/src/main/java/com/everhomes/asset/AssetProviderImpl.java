@@ -552,6 +552,79 @@ public class AssetProviderImpl implements AssetProvider {
             return null;});
         return list;
     }
+    
+    public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd) {
+        //卸货
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String targetType = cmd.getTargetType();
+        Long targetId = cmd.getTargetId();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        Byte status = 1;//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        //卸货结束
+        List<ListBillsDTOForEnt> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
+        	query.addConditions(t.OWNER_ID.eq(ownerId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
+        	query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        query.addConditions(t.SWITCH.eq(status));//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
+            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {// 账单状态,0:未缴;1:已缴
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+            query.addConditions(t.TARGET_TYPE.eq(targetType));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetId)){
+            query.addConditions(t.TARGET_ID.eq(targetId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
+            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
+            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        query.addOrderBy(t.DATE_STR.desc());
+        query.addLimit(pageOffSet,pageSize+1);
+        query.fetch().map(r -> {
+        	ListBillsDTOForEnt dto = new ListBillsDTOForEnt();
+        	dto.setDateStr(r.getDateStr());
+        	dto.setDateStrBegin(r.getDateStrBegin());
+        	dto.setDateStrEnd(r.getDateStrEnd());
+        	dto.setBillId(String.valueOf(r.getValue(t.ID)));
+        	if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
+                dto.setBillGroupName(billGroupName);
+            }else{
+                String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
+                dto.setBillGroupName(billGroupNameFound);
+            }
+        	dto.setTargetName(r.getTargetName());
+        	dto.setTargetId(String.valueOf(r.getTargetId()));
+            dto.setTargetType(r.getTargetType());
+            dto.setContractNum(r.getContractNum());
+            dto.setContractId(String.valueOf(r.getContractId()));
+            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            dto.setAmountOwed(r.getAmountOwed());
+            dto.setAmountReceivable(r.getAmountReceivable());
+            dto.setAmountReceived(r.getAmountReceived());
+            dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
+            dto.setOwnerType(r.getOwnerType());
+            list.add(dto);
+            return null;});
+        return list;
+    }
 
     @Override
     public List<BillDTO> listBillItems(Long billId, String targetName, int pageNum, Integer pageSize) {

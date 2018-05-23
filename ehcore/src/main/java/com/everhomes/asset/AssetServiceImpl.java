@@ -234,6 +234,19 @@ public class AssetServiceImpl implements AssetService {
         response.setListBillsDTOS(list);
         return response;
     }
+    
+    public ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd) {
+    	ListBillsResponseForEnt response = new ListBillsResponseForEnt();
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+
+        List<ListBillsDTOForEnt> list = handler.listBillsForEnt(UserContext.getCurrentNamespaceId(),response, cmd);
+
+        response.setListBillsDTOS(list);
+        return response;
+    }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
 //        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();

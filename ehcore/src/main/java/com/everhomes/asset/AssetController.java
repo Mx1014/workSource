@@ -813,8 +813,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listSettledBillForEnt")
     @RestReturn(value = ListBillsResponse.class)
     public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
-    	ListBillsResponseForEnt listBillsResponse = assetService.listBills(cmd);
-        RestResponse response = new RestResponse(listBillsResponse);
+    	ListBillsResponseForEnt listBillsResponseForEnt = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponseForEnt);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
