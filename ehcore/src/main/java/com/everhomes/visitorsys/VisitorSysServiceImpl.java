@@ -261,41 +261,26 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         if(visitorSysOfficeLocations.size()==0) {
             List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
+            VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
             if (ownerType.ENTERPRISE == ownerType) {
                 Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
-                if (organization != null) {
-                    Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
-                            + cmd.getOwnerType()
-                            + cmd.getOwnerId()).enter(() -> {
-                        List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
-                        if(locations.size()==0) {
-                            VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
-                            location.setOfficeLocationName(organization.getName());
-                            location.setStatus(CommonStatus.ACTIVE.getCode());
-                            visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
-                            return location;
-                        }
-                        return locations.get(0);
-                    });
-                    officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
-                }
+                location.setOfficeLocationName(organization.getName());
             } else {
                 Community community = communityProvider.findCommunityById(cmd.getOwnerId());
-                Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
-                        + cmd.getOwnerType()
-                        + cmd.getOwnerId()).enter(() -> {
-                    List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
-                    if(locations.size()==0) {
-                        VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
-                        location.setOfficeLocationName(community.getName());
-                        location.setStatus(CommonStatus.ACTIVE.getCode());
-                        visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
-                        return location;
-                    }
-                    return locations.get(0);
-                });
-                officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
+                location.setOfficeLocationName(community.getName());
             }
+            Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
+                    + cmd.getOwnerType()
+                    + cmd.getOwnerId()).enter(() -> {
+                List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+                if(locations.size()==0) {
+                    location.setStatus(CommonStatus.ACTIVE.getCode());
+                    visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+                    return location;
+                }
+                return locations.get(0);
+            });
+            officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
             response.setOfficeLocationList(officeLocationList);
         }else {
             response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
