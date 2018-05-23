@@ -1414,7 +1414,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //将数据封装在对象OrganizationCommunityRequest对象中
                     organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
                     organizationCommunityRequest.setMemberId(organization.getId());
-                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
                     organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
                     //// TODO: 2018/5/22
                     enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
@@ -1724,7 +1724,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //将数据封装在对象OrganizationCommunityRequest对象中
                     organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
                     organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
-                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
                     organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
                     //// TODO: 2018/5/22
                     enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
@@ -8801,7 +8801,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                             //将数据封装在对象OrganizationCommunityRequest对象中
                                             organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
                                             organizationCommunityRequest.setMemberId(organization.getId());
-                                            organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+                                            organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
                                             organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
                                             //// TODO: 2018/5/22
                                             enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);

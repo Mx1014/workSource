@@ -1,7 +1,8 @@
 package com.everhomes.rest.enterprise;
 
 public enum EnterpriseCommunityMapType {
-    Enterprise("enterprise");
+    Enterprise("enterprise"),
+    Organization("organization");
     
     private String code;
     
