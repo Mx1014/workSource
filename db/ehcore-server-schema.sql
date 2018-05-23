@@ -17926,25 +17926,20 @@ DROP TABLE IF EXISTS `eh_contract_categories`;
 
 CREATE TABLE `eh_contract_categories` (
   `id` bigint(20) NOT NULL,
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `entry_id` bigint(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace',
+  `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT '域空间id',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT '所属类型 the type of who own the category, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '所属ID',
   `parent_id` bigint(20) NOT NULL DEFAULT '0',
   `name` varchar(64) NOT NULL,
   `path` varchar(128) DEFAULT NULL,
-  `default_order` int(11) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
-  `create_time` datetime DEFAULT NULL,
   `delete_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
+  `logo_uri` varchar(1024) DEFAULT NULL COMMENT 'default cover uri',
+  `category_id` bigint(20) DEFAULT '0' COMMENT 'activity category id',
+  `default_order` int(11) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `default_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: no , 1: yes',
-  `enabled` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
-  `icon_uri` varchar(1024) DEFAULT NULL,
-  `selected_icon_uri` varchar(1024) DEFAULT NULL,
-  `show_name` varchar(64) DEFAULT NULL,
-  `all_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
