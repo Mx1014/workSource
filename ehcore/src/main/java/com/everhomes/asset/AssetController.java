@@ -811,7 +811,7 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listSettledBillForEnt</b>
      */
     @RequestMapping("listSettledBillForEnt")
-    @RestReturn(value = ListBillsResponse.class)
+    @RestReturn(value = ListBillsResponseForEnt.class)
     public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
     	ListBillsResponseForEnt listBillsResponseForEnt = assetService.listBillsForEnt(cmd);
         RestResponse response = new RestResponse(listBillsResponseForEnt);
