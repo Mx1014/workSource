@@ -4636,7 +4636,8 @@ public class PunchServiceImpl implements PunchService {
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId(), months.get(0), pageSize, cmd.getPageAnchor());
+        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
+        		months.get(0), pageSize, cmd.getPageAnchor());
         if (members == null || members.size() == 0) {
             return response;
         }
