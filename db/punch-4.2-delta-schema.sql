@@ -18,5 +18,5 @@ CREATE TABLE `eh_punch_month_reports` (
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '考勤月报表' ;
 
-ALTER TABLE `eh_punch_statistics` ADD COLUMN month_report_id BIGINT COMMENT 'eh_punch_month_reports id';
-ALTER TABLE `eh_punch_statistics` ADD INDEX i_eh_report_id(`month_report_id`)  ;
+-- ALTER TABLE `eh_punch_statistics` ADD COLUMN month_report_id BIGINT COMMENT 'eh_punch_month_reports id';
+-- ALTER TABLE `eh_punch_statistics` ADD INDEX i_eh_report_id(`month_report_id`)  ;
