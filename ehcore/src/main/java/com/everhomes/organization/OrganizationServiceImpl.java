@@ -1567,7 +1567,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
             // 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
-            createActiveOrganizationCommunityRequest(user.getId(), organizationDetail.getOrganizationId(), cmd.getCommunityId());
+            //在这里谁有给organization_Community_requests表中添加了新的数据，这个现在是不需要的
+            //所以我将其进行注释 modify by yuanlei
+//            createActiveOrganizationCommunityRequest(user.getId(), organizationDetail.getOrganizationId(), cmd.getCommunityId());
 //			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
 //			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
 //			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
