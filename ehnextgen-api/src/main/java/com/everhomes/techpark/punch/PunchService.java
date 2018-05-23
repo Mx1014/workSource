@@ -280,4 +280,6 @@ public interface PunchService {
 	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
 
 	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
+
+	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
 }

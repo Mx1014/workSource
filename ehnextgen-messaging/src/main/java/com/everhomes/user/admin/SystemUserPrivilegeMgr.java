@@ -466,7 +466,7 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
             if(null != currentOrgId){
                 Organization organization = organizationProvider.findOrganizationById(currentOrgId);
                 //子公司的时候 需要获取root 总公司的id
-                if(0L != organization.getParentId()){
+                if(null != organization && 0L != organization.getParentId()){
                     currentOrgId = Long.valueOf(organization.getPath().split("/")[1]);
                 }
                 if(null != organization){
