@@ -2025,6 +2025,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             convert.setOwnerId(visitor.getEnterpriseId());
             convert.setOwnerType(visitorsysOwnerType.ENTERPRISE.getCode());
             convert.setEnterpriseName(visitor.getEnterpriseName());
+            convert.setVisitTime(null);
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
@@ -2035,6 +2036,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             convert.setOwnerId(communityId==null?0L:communityId);
             convert.setOwnerType(visitorsysOwnerType.COMMUNITY.getCode());
             convert.setEnterpriseName(visitor.getEnterpriseName());
+            convert.setVisitTime(null);
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
