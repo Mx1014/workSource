@@ -1217,7 +1217,7 @@ public class AssetServiceImpl implements AssetService {
                     aWithoutLimit.set(Calendar.DAY_OF_MONTH, aWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    dWithoutLimit.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    dWithoutLimit.setTime(d.getTime());
                  }else{
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
                     dWithoutLimit.setTime(d.getTime());
