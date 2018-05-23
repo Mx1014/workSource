@@ -9818,7 +9818,11 @@ public class PunchServiceImpl implements PunchService {
                 for (int i = 0; i < members.size(); i++) {
                     OrganizationMemberDTO dto = ConvertHelper.convert(members.get(i),OrganizationMemberDTO.class);
                     dto.setDetailId(members.get(i).getId());
-                    addPunchStatistics(dto, cmd.getOwnerId(), start, end);
+                    try{
+                    	addPunchStatistics(dto, cmd.getOwnerId(), start, end);
+                    }catch(Exception e){
+                    	LOGGER.error("update punch month report error ",e);
+                    }
                     if (i % 10 == 0) {
                         setMonthReportProcess(report, 5 + (int) (i / (Double.valueOf(members.size()) / 94.00)));
                     }
