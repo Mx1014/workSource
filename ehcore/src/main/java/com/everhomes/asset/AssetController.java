@@ -1344,12 +1344,11 @@ public class AssetController extends ControllerBase {
     @RequestMapping("publicTransferBill")
     @RestReturn(value = PublicTransferBillRespForEnt.class)
     public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
-    	//PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
-        //RestResponse restResponse = new RestResponse(listPaymentBillResp);
-    	RestResponse restResponse = new RestResponse();
+    	PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        return null;
+        return restResponse;
     }
 
 }

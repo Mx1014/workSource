@@ -320,4 +320,6 @@ public interface AssetProvider {
     List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmdForEnt cmd);
+    
+    AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
 }

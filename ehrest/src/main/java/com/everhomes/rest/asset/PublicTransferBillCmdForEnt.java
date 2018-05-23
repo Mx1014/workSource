@@ -12,7 +12,9 @@ import java.util.List;
  * <li>ownerId:所属者id</li>
  * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
  * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
+ * <li>payerName：缴费人</li>
  * <li>namespaceId:域空间</li>
+ * <li>contractNum:合同编号</li>
  * <li>billList:勾选的要转账的账单集合，参考{@link PaymentBillRequest}</li>
  *</ul>
  */
@@ -21,8 +23,11 @@ public class PublicTransferBillCmdForEnt {
 	private Long ownerId;
 	private String targetType;
 	private Long targetId;
+	private String payerName;
 	private Integer namespaceId;
+	private String contractNum;
 	private List<PaymentBillRequest> billList;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -58,6 +63,18 @@ public class PublicTransferBillCmdForEnt {
 	}
 	public void setBillList(List<PaymentBillRequest> billList) {
 		this.billList = billList;
+	}
+	public String getContractNum() {
+		return contractNum;
+	}
+	public void setContractNum(String contractNum) {
+		this.contractNum = contractNum;
+	}
+	public String getPayerName() {
+		return payerName;
+	}
+	public void setPayerName(String payerName) {
+		this.payerName = payerName;
 	}
 	
 }

@@ -190,4 +190,6 @@ public interface AssetService {
     
     void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response);
     
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
+    
 }

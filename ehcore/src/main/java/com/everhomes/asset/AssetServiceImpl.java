@@ -5,6 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -26,6 +27,7 @@ import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -45,6 +47,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -179,6 +183,8 @@ public class AssetServiceImpl implements AssetService {
     private LocaleTemplateProvider localeTemplateProvider;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PayService payService;
 
 
     @Override
@@ -4788,5 +4794,50 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         return fieldMap;
+    }
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
+    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
+    	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        StringBuffer orderExplain = new StringBuffer();//订单说明，如：2017-06物业费、2017-06租金
+        for(PaymentBillRequest paymentBillRequest : paymentBillRequests){
+            billIds.add(String.valueOf(paymentBillRequest.getBillId()));
+            String amountOwed = String.valueOf(paymentBillRequest.getAmountOwed());
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+            orderExplain.append(paymentBillRequest.getDateStr() + paymentBillRequest.getBillGroupName() + "、");
+        }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
+        //如果账单为新的，则进行存储
+        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
+        String clientAppName = "Web对公转账";
+        Long communityId = null;
+        String contactNum = cmd.getContractNum();
+        String openid = null;
+        String payerName = cmd.getPayerName();
+        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
+        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        assetProvider.saveOrderBills(bills,order.getId());
+        
+        PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
+        publicTransferBillRespForEnt.setOrderCreateTime(String.valueOf(order.getCreateTime()));
+        //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
+        publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
+        publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
+        publicTransferBillRespForEnt.setOrderSource("对公转账");
+        if(orderExplain != null && orderExplain.length() != 0) {
+        	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
+        }
+        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents));
+        return publicTransferBillRespForEnt;
+    }
+    
+    private void checkHasPaidBills(List<String> billIds) {
+        List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
+        if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
     }
 }
