@@ -224,7 +224,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 1 : (byte) 4), visitor.getVisitTime(), null, visitor.getVisitorName());
             list.add(dto1);
         }
-        if(visitor.getVisitStatus()>VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()) {
+        if(visitor.getVisitStatus()>VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()
+                && visitor.getConfirmTime()!=null) {
             BaseVisitorActionDTO dto2 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 2 : (byte) 5), visitor.getConfirmTime(), visitor.getConfirmUid(), visitor.getConfirmUname());
             list.add(dto2);
         }
@@ -252,31 +253,34 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 
-//        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
-//        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
-//        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
+        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
+        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
         ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
-//        if(visitorSysOfficeLocations!=null && visitorSysOfficeLocations.size()==pageSize){
-//            response.setNextPageAnchor(visitorSysOfficeLocations.get(pageSize-1).getId());
-//        }
-//        response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
-        List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
-        if(ownerType.ENTERPRISE==ownerType){
-            Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
-            if(organization!=null) {
+        if(visitorSysOfficeLocations!=null && visitorSysOfficeLocations.size()==pageSize){
+            response.setNextPageAnchor(visitorSysOfficeLocations.get(pageSize-1).getId());
+        }
+        if(visitorSysOfficeLocations.size()==0) {
+               List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
+            if (ownerType.ENTERPRISE == ownerType) {
+                Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+                if (organization != null) {
+                    BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
+//                    dto.setId(cmd.getOwnerId());
+                    dto.setOfficeLocationName(organization.getName());
+                    officeLocationList.add(dto);
+                }
+            } else {
+                Community community = communityProvider.findCommunityById(cmd.getOwnerId());
                 BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
-                dto.setId(cmd.getOwnerId());
-                dto.setOfficeLocationName(organization.getName());
+//                dto.setId(cmd.getOwnerId());
+                dto.setOfficeLocationName(community == null ? "" : community.getName());
                 officeLocationList.add(dto);
             }
+            response.setOfficeLocationList(officeLocationList);
         }else {
-            Community community = communityProvider.findCommunityById(cmd.getOwnerId());
-            BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
-            dto.setId(cmd.getOwnerId());
-            dto.setOfficeLocationName(community==null?"":community.getName());
-            officeLocationList.add(dto);
+            response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
         }
-        response.setOfficeLocationList(officeLocationList);
         return response;
     }
 
@@ -1102,7 +1106,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetConfigurationResponse getConfigurationForWeb(GetConfigurationForWebCommand cmd) {
         beforePostForWeb(cmd);
-        return getConfiguration(ConvertHelper.convert(cmd,GetConfigurationCommand.class));
+        GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(cmd, GetConfigurationCommand.class));
+        setConfigurationEnterpriseName(configuration);//enterprise情况下，设置公司名称
+        return configuration;
     }
 
     @Override
@@ -1171,7 +1177,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public GetConfigurationResponse getUIConfiguration(BaseVisitorsysUICommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(),cmd.getDeviceId());
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(device, GetConfigurationCommand.class));
+        setConfigurationEnterpriseName(configuration);
         return configuration;
+    }
+
+    private void setConfigurationEnterpriseName(GetConfigurationResponse configuration) {
+        VisitorsysOwnerType ownerType = checkOwnerType(configuration.getOwnerType());
+        if(ownerType==VisitorsysOwnerType.ENTERPRISE){
+            Organization organization = organizationProvider.findOrganizationById(configuration.getOwnerId());
+            configuration.setEnterpriseName(organization==null?"":organization.getName());
+        }
     }
 
     private VisitorSysDevice checkDevice(String deviceType, String deviceId) {

@@ -13,6 +13,7 @@ import java.util.List;
  * <li>ownerType: (必填)归属的类型，{@link com.everhomes.rest.visitorsys.VisitorsysOwnerType}</li>
  * <li>ownerId: (必填)归属的ID,园区/公司的ID</li>
  * <li>configVersion: (必填)配置版本</li>
+ * <li>enterpriseName: (选填)ownerType为enterprise的时候，为此enterprise的名称</li>
  * <li>logoUrl: (选填)客户端logourl地址</li>
  * <li>logoUri: (选填)客户端logouri地址</li>
  * <li>ipadThemeRgb: (选填)客户端主题色</li>
@@ -35,6 +36,7 @@ public class GetConfigurationResponse {
     private Long ownerId;
 
     private Long configVersion=0L;
+    private String enterpriseName;
     private String logoUrl;
     private String logoUri;
     private String ipadThemeRgb;
@@ -83,6 +85,14 @@ public class GetConfigurationResponse {
 
     public void setConfigVersion(Long configVersion) {
         this.configVersion = configVersion;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
     }
 
     public String getLogoUrl() {
