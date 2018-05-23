@@ -20,6 +20,8 @@ import java.util.List;
 @RequestMapping("/enterpriseApproval")
 public class EnterpriseApprovalController extends ControllerBase{
     public static final Long MODULE_ID = 52000L;
+    public static final String MODULE_TYPE = "any-module";
+    public static final String APPROVAL_OWNER_TYPE = "GENERAL_APPROVAL";
 
     @Autowired
     private EnterpriseApprovalService enterpriseApprovalService;

@@ -11,4 +11,9 @@ public interface EnterpriseApprovalServiceErrorCode {
     int ERROR_APPROVAL_TEMPLATE_NOT_EXIST = 10003;    //  审批模板不存在
 
     int ERROR_DISABLE_APPROVAL_FLOW = 10004;    //  工作流未启用
+
+
+    int ERROR_FORM_NOT_FOUND = 10001;   //  表单未找到(客户端使用)
+    int ERROR_ILLEGAL_APPROVAL = 20001;     //  审批状态异常
+
 }
