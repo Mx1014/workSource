@@ -2923,7 +2923,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private java.sql.Date getTheFirstDate(String m) {
+    @Override
+    public java.sql.Date getTheFirstDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {

@@ -2647,23 +2647,23 @@ public class PunchServiceImpl implements PunchService {
                 statistic.setPunchOrgName(punchOrg.getName());
             }
             //对于已离职和未入职的判断
-            statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
-            if (!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
-                //找不到就是已离职
-                statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
-            } else {
-                //查找是否未入职 --通过log的时间
-                List<Long> orgIds = new ArrayList<>();
-                orgIds.add(member.getOrganizationId());
-                List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(), orgIds, OperationType.JOIN.getCode());
-                if (null != memberLogs) {
-                    if (memberLogs.get(0).getOperateTime().after(endCalendar.getTime())) {
-
-                        statistic.setUserStatus(PunchUserStatus.NONENTRY.getCode());
-                    }
-                }
-
-            }
+//            statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
+//            if (!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
+//                //找不到就是已离职
+//                statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
+//            } else {
+//                //查找是否未入职 --通过log的时间
+//                List<Long> orgIds = new ArrayList<>();
+//                orgIds.add(member.getOrganizationId());
+//                List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(), orgIds, OperationType.JOIN.getCode());
+//                if (null != memberLogs) {
+//                    if (memberLogs.get(0).getOperateTime().after(endCalendar.getTime())) {
+//
+//                        statistic.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+//                    }
+//                }
+//
+//            }
 
             statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
                     .getTime()));
@@ -3156,6 +3156,7 @@ public class PunchServiceImpl implements PunchService {
         cmd1.setEndDay(cmd.getEndDay());
         cmd1.setOwnerId(cmd.getOwnerId());
         cmd1.setOwnerType(cmd.getOwnerType());
+        cmd1.setUserName(cmd.getUserName());
         ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
         taskService.updateTaskProcess(taskId, 50);
         Integer minusPer = 30;
@@ -4583,25 +4584,17 @@ public class PunchServiceImpl implements PunchService {
         List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
 
         Organization org = this.checkOrganization(cmd.getOwnerId());
+        Long organizationId = getTopEnterpriseId(cmd.getOwnerId());
 
-        List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
-        if (null == userIds)
-            return response;
-        //分页查询
-        if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(0L);
-        int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
 //		Long organizationId = org.getDirectlyEnterpriseId();
 //		if(organizationId.equals(0L))
 //			organizationId = org.getId();
-        Long organizationId = getTopEnterpriseId(cmd.getOwnerId());
 
         //2017-8-2 加入了时间区间
         //2018-05-21 加入了reportId
         List<String> months = new ArrayList<>();
         if (null != cmd.getStartDay()) {
+            //这里早晚注释掉,4.2版本上线吼就没用了
             if (cmd.getStartDay() > cmd.getEndDay()) {
                 LOGGER.error("Invalid  parameter in the command : startDay > end day");
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4627,7 +4620,35 @@ public class PunchServiceImpl implements PunchService {
             }
         } else{
         }
+        if (months.size() == 0) {
+            return response;
+        }
+//        List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
+//        if (null == userIds)
+//            return response;
+        //分页查询
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+        int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId(), months.get(0), pageSize, cmd.getPageAnchor());
+        if (members == null || members.size() == 0) {
+            return response;
+        }
+        Long nextPageAnchor = null;
+        if (members != null && members.size() > pageSize) {
+            members.remove(members.size() - 1);
+            nextPageAnchor = members.get(members.size() - 1).getId();
+        }
 
+        List<Long> userIds = new ArrayList<>();
+        for (OrganizationMemberDetails member : members) {
+            if (member.getTargetId() > 0) {
+                userIds.add(member.getTargetId());
+            }
+
+        }
         List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
                 organizationId, months,
                 cmd.getExceptionStatus(), userIds, locator, pageSize + 1);
@@ -4646,111 +4667,115 @@ public class PunchServiceImpl implements PunchService {
         response.setDateList(new ArrayList<>());
         Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
-        start.setTime(new Date(cmd.getStartDay()));
+        start.setTime(socialSecurityService.getTheFirstDate(months.get(0)));
         setCalendarMonthBegin(start);
         end.setTime(start.getTime());
         end.add(Calendar.MONTH, 1);
         Calendar today = Calendar.getInstance();
         setCalendarDateBegin(today);
         while (start.before(end)) {
-            if (!start.before(today)) {
-                break;
-            }
+//            if (!start.before(today)) {
+//                break;
+//            }
             response.getDateList().add(dayStatusSF.get().format(start.getTime()));
             start.add(Calendar.DAY_OF_MONTH, 1);
         }
-        if (null == results)
-            return response;
-        Long nextPageAnchor = null;
-        if (results != null && results.size() > pageSize) {
-            results.remove(results.size() - 1);
-            nextPageAnchor = results.get(results.size() - 1).getId();
-        }
 
         List<Long> absenceUserIdList = new ArrayList<>();
-        for (PunchStatistic statistic : results) {
-            PunchCountDTO dto = ConvertHelper.convert(statistic, PunchCountDTO.class);
+        for (OrganizationMemberDetails member : members) {
+            PunchStatistic statistic = findPunchStatisticByUserId(results, member.getTargetId());
+            if(null != statistic) {
+                PunchCountDTO dto = ConvertHelper.convert(statistic, PunchCountDTO.class);
 
-            if (null != statistic.getStatusList()) {
-                dto.setStatusList(JSON.parseArray(statistic.getStatusList(), DayStatusDTO.class));
-            }
-
-            if (dto.getExceptionDayCount() == null) {
-                dto.setExceptionDayCount((int) ((dto.getWorkDayCount() == null ? 0 : dto.getWorkDayCount())
-                        - (dto.getWorkCount() == null ? 0 : dto.getWorkCount())));
-                if (dto.getExceptionDayCount() < 0) {
-                    dto.setExceptionDayCount(0);
+                if (null != statistic.getStatusList()) {
+                    dto.setStatusList(JSON.parseArray(statistic.getStatusList(), DayStatusDTO.class));
                 }
-            }
-            //2018年05月03日: 使用月报的punchorgName,减少查询
-//            dto.setPunchOrgName(null);
-//            PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), statistic.getOwnerId(), statistic.getUserId());
-//            if (null != pr) {
-//                Organization punchorg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
-//                if (null != punchorg) {
-//
-//                    dto.setPunchOrgName(punchorg.getName());
-//                }
-//            }
-            if (null != dto.getUnpunchCount()) {
-                dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
-            }
-            if (null != statistic.getBelateTime()) {
-                dto.setBelateTime(new BigDecimal(statistic.getBelateTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
-            }
-            if (null != statistic.getLeaveEarlyTime()) {
-                dto.setLeaveEarlyTime(new BigDecimal(statistic.getLeaveEarlyTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
-            }
-            punchCountDTOList.add(dto);
-            dto.setExceptionRequestCount(0);
-            if (null != exceptionRequests) {
-                for (PunchExceptionRequest request : exceptionRequests) {
-                    if (null != request) {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                        java.sql.Date beginDate;
-                        try {
-                            beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(beginDate);
-                            calendar.add(Calendar.MONTH, 1);
-                            java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
-                            if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getPunchDate().before(beginDate)
-                                    && !request.getPunchDate().after(endDate)) {
-                                dto.setExceptionRequestCount(dto.getExceptionRequestCount() + 1);
+
+                if (dto.getExceptionDayCount() == null) {
+                    dto.setExceptionDayCount((int) ((dto.getWorkDayCount() == null ? 0 : dto.getWorkDayCount())
+                            - (dto.getWorkCount() == null ? 0 : dto.getWorkCount())));
+                    if (dto.getExceptionDayCount() < 0) {
+                        dto.setExceptionDayCount(0);
+                    }
+                }
+                //2018年05月03日: 使用月报的punchorgName,减少查询
+                //            dto.setPunchOrgName(null);
+                //            PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), statistic.getOwnerId(), statistic.getUserId());
+                //            if (null != pr) {
+                //                Organization punchorg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
+                //                if (null != punchorg) {
+                //
+                //                    dto.setPunchOrgName(punchorg.getName());
+                //                }
+                //            }
+                if (null != dto.getUnpunchCount()) {
+                    dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                }
+                if (null != statistic.getBelateTime()) {
+                    dto.setBelateTime(new BigDecimal(statistic.getBelateTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
+                }
+                if (null != statistic.getLeaveEarlyTime()) {
+                    dto.setLeaveEarlyTime(new BigDecimal(statistic.getLeaveEarlyTime()).divide(new BigDecimal(8 * 3600 * 1000), 3, BigDecimal.ROUND_HALF_UP).toString());
+                }
+                punchCountDTOList.add(dto);
+                dto.setExceptionRequestCount(0);
+                if (null != exceptionRequests) {
+                    for (PunchExceptionRequest request : exceptionRequests) {
+                        if (null != request) {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                            java.sql.Date beginDate;
+                            try {
+                                beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(beginDate);
+                                calendar.add(Calendar.MONTH, 1);
+                                java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
+                                if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getPunchDate().before(beginDate)
+                                        && !request.getPunchDate().after(endDate)) {
+                                    dto.setExceptionRequestCount(dto.getExceptionRequestCount() + 1);
+                                }
+                            } catch (ParseException e) {
+                                LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                             }
-                        } catch (ParseException e) {
-                            LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                         }
                     }
                 }
-            }
-            dto.setOverTimeSum(0.0);
-            if (null != overTimeRequests) {
-                for (PunchExceptionRequest request : overTimeRequests) {
-                    if (null != request) {
+                dto.setOverTimeSum(0.0);
+                if (null != overTimeRequests) {
+                    for (PunchExceptionRequest request : overTimeRequests) {
+                        if (null != request) {
 
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                        java.sql.Date beginDate;
-                        try {
-                            beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(beginDate);
-                            calendar.add(Calendar.MONTH, 1);
-                            java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
-                            //请假结束时间在开始时间之后 请假开始时间 在结束时间之前
-                            if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getEndTime().before(beginDate)
-                                    && !request.getBeginTime().after(endDate)) {
-                                dto.setOverTimeSum(new BigDecimal(dto.getOverTimeSum()).add(new BigDecimal(request.getDuration())).doubleValue());
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                            java.sql.Date beginDate;
+                            try {
+                                beginDate = new java.sql.Date(dateFormat.parse(statistic.getPunchMonth() + "01").getTime());
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(beginDate);
+                                calendar.add(Calendar.MONTH, 1);
+                                java.sql.Date endDate = new java.sql.Date(calendar.getTimeInMillis());
+                                //请假结束时间在开始时间之后 请假开始时间 在结束时间之前
+                                if (statistic.getUserId().equals(request.getCreatorUid()) && !request.getEndTime().before(beginDate)
+                                        && !request.getBeginTime().after(endDate)) {
+                                    dto.setOverTimeSum(new BigDecimal(dto.getOverTimeSum()).add(new BigDecimal(request.getDuration())).doubleValue());
+                                }
+                            } catch (ParseException e) {
+                                LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                             }
-                        } catch (ParseException e) {
-                            LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
                         }
                     }
                 }
+                List<ExtDTO> extDTOs = punchProvider.listAskForLeaveExtDTOs(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth());
+                dto.setExts(extDTOs);
+                absenceUserIdList.add(statistic.getUserId());
             }
-            List<ExtDTO> extDTOs = punchProvider.listAskForLeaveExtDTOs(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth());
-            dto.setExts(extDTOs);
-            absenceUserIdList.add(statistic.getUserId());
+            else{
+                PunchCountDTO dto = ConvertHelper.convert(member, PunchCountDTO.class);
+                dto.setPunchMonth(months.get(0));
+                dto.setUserName(member.getContactName());
+                String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getId()));
+                dto.setDeptName(depName);
+                punchCountDTOList.add(dto);
+            }
         }
         response.setNextPageAnchor(nextPageAnchor);
         response.setPunchCountList(punchCountDTOList);
@@ -4857,6 +4882,22 @@ public class PunchServiceImpl implements PunchService {
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
         return response;
+    }
+
+    private PunchStatistic findPunchStatisticByUserId(List<PunchStatistic> results, Long targetId) {
+        if (null == results) {
+            return null;
+
+        }
+
+        for (PunchStatistic statistic : results) {
+            if (statistic.getUserId().equals(targetId)) {
+                return statistic;
+            }
+        }
+
+
+        return null;
     }
 
     private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId) {
@@ -9753,12 +9794,14 @@ public class PunchServiceImpl implements PunchService {
         setCalendarMonthBegin(start);
         end.setTime(start.getTime());
         end.add(Calendar.MONTH, 1);
-        List<OrganizationMemberDTO> members = listMembers(cmd.getOwnerId(), report.getPunchMonth());
+        List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null);
         monthReportExecutorPool.execute(() -> {
             try {
                 setMonthReportProcess(report, 5);
                 for (int i = 0; i < members.size(); i++) {
-                    addPunchStatistics(members.get(i), cmd.getOwnerId(), start, end);
+                    OrganizationMemberDTO dto = ConvertHelper.convert(members.get(i),OrganizationMemberDTO.class);
+                    dto.setDetailId(members.get(i).getId());
+                    addPunchStatistics(dto, cmd.getOwnerId(), start, end);
                     if (i % 10 == 0) {
                         setMonthReportProcess(report, 5 + (int) (i / (Double.valueOf(members.size()) / 94.00)));
                     }
@@ -9780,23 +9823,29 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
-    private List<OrganizationMemberDTO> listMembers(Long ownerId, String punchMonth) {
-        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, null, (locator, query) -> {
+    private List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, String punchMonth, Integer pageSize,
+        Long anchor) {
+//        ListingLocator listingLocator = new ListingLocator();
+//        listingLocator.setAnchor(anchor);
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.isNull()
                     .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.gt(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lt(socialSecurityService.getTheLastDate(punchMonth)));
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+
             query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            query.addLimit( pageSize + 1);
+            if (null != anchor) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(anchor));
+            }
             return query;
         });
-
-        List<OrganizationMemberDTO> results = new ArrayList<>();
-        records.forEach(r -> {
-            OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
-            results.add(dto);
-        });
-        return results;
+        if (records == null || records.size() == 0) {
+            return null;
+        }
+        return records;
     }
 
 	@Override
