@@ -1,10 +1,7 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
-import com.everhomes.discover.ItemType;
-
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author created by yangcx
@@ -12,56 +9,56 @@ import java.util.List;
  */
 /**
  *<ul>
-* <li>billId:账单id</li>
-* <li>billGroupName:账单组名称</li>
- * <li>dateStr:账期</li>
-* <li>dateStrBegin:账期开始时间</li>
- * <li>dateStrEnd:账期结束时间</li>
-* <li>amountOwed:欠收(元)</li>
+ * <li>orderCreateTime:订单创建时间</li>
+ * <li>paymentOrderNum:订单编号，如：954650447962984448，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。</li>
+ * <li>businessType: 业务类型【参数不知道咋定义，待产品决定，预留】</li>
+ * <li>orderSource:订单来源，如：物业缴费</li>
+ * <li>orderExplain: 订单说明，如：2017-06物业费、2017-06租金</li>
+ * <li>orderAmount: 订单金额</li>
  *</ul>
  */
 public class PublicTransferBillRespForEnt {
-	private Long billId;
-	private String billGroupName;
-	private String dateStr;
-	private String dateStrBegin;
-	private String dateStrEnd;
-	private BigDecimal amountOwed;
+	private String orderCreateTime;
+	private String paymentOrderNum;
+	private String businessType;
+	private String orderSource;
+	private String orderExplain;
+	private BigDecimal orderAmount;
 	
-	public Long getBillId() {
-		return billId;
+	public String getOrderCreateTime() {
+		return orderCreateTime;
 	}
-	public void setBillId(Long billId) {
-		this.billId = billId;
+	public void setOrderCreateTime(String orderCreateTime) {
+		this.orderCreateTime = orderCreateTime;
 	}
-	public String getBillGroupName() {
-		return billGroupName;
+	public String getPaymentOrderNum() {
+		return paymentOrderNum;
 	}
-	public void setBillGroupName(String billGroupName) {
-		this.billGroupName = billGroupName;
+	public void setPaymentOrderNum(String paymentOrderNum) {
+		this.paymentOrderNum = paymentOrderNum;
 	}
-	public String getDateStr() {
-		return dateStr;
+	public String getBusinessType() {
+		return businessType;
 	}
-	public void setDateStr(String dateStr) {
-		this.dateStr = dateStr;
+	public void setBusinessType(String businessType) {
+		this.businessType = businessType;
 	}
-	public String getDateStrBegin() {
-		return dateStrBegin;
+	public String getOrderSource() {
+		return orderSource;
 	}
-	public void setDateStrBegin(String dateStrBegin) {
-		this.dateStrBegin = dateStrBegin;
+	public void setOrderSource(String orderSource) {
+		this.orderSource = orderSource;
 	}
-	public String getDateStrEnd() {
-		return dateStrEnd;
+	public String getOrderExplain() {
+		return orderExplain;
 	}
-	public void setDateStrEnd(String dateStrEnd) {
-		this.dateStrEnd = dateStrEnd;
+	public void setOrderExplain(String orderExplain) {
+		this.orderExplain = orderExplain;
 	}
-	public BigDecimal getAmountOwed() {
-		return amountOwed;
+	public BigDecimal getOrderAmount() {
+		return orderAmount;
 	}
-	public void setAmountOwed(BigDecimal amountOwed) {
-		this.amountOwed = amountOwed;
+	public void setOrderAmount(BigDecimal orderAmount) {
+		this.orderAmount = orderAmount;
 	}
 }
