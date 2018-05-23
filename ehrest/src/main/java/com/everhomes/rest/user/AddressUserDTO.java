@@ -23,7 +23,7 @@ import java.util.List;
  *     <li>capitalPinyin: capitalPinyin</li>
  *     <li>status: status  {@link GroupMemberStatus}</li>
  *     <li>workPlatformFlag: 是否开启工作台标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>communityUserDtos: 公司加入的园区，或者家庭所在的园区</li>
+ *     <li>addressSiteDtos: 公司办公点或者家庭对应的园区信息参考{@link AddressSiteDTO}</li>
  * </ul>
  */
 public class AddressUserDTO {
@@ -37,7 +37,7 @@ public class AddressUserDTO {
     private String capitalPinyin;
     private Byte status;
     private Byte workPlatformFlag;
-    private List<CommunityInfoDTO> communityUserDtos;
+    private List<AddressSiteDTO> addressSiteDtos;
 
     public Long getId() {
         return id;
@@ -119,12 +119,12 @@ public class AddressUserDTO {
         this.workPlatformFlag = workPlatformFlag;
     }
 
-    public List<CommunityInfoDTO> getCommunityUserDtos() {
-        return communityUserDtos;
+    public List<AddressSiteDTO> getAddressSiteDtos() {
+        return addressSiteDtos;
     }
 
-    public void setCommunityUserDtos(List<CommunityInfoDTO> communityUserDtos) {
-        this.communityUserDtos = communityUserDtos;
+    public void setAddressSiteDtos(List<AddressSiteDTO> addressSiteDtos) {
+        this.addressSiteDtos = addressSiteDtos;
     }
 
     @Override

@@ -34,7 +34,6 @@ public class CommunityInfoDTO {
     private String siteAddress;
     private Byte apartmentFlag;
     private String apartmentAddress;
-    private List<String> siteNameList;
 
     public Long getId() {
         return id;
@@ -130,14 +129,6 @@ public class CommunityInfoDTO {
 
     public void setApartmentAddress(String apartmentAddress) {
         this.apartmentAddress = apartmentAddress;
-    }
-
-    public List<String> getSiteNameList() {
-        return siteNameList;
-    }
-
-    public void setSiteNameList(List<String> siteNameList) {
-        this.siteNameList = siteNameList;
     }
 
     @Override

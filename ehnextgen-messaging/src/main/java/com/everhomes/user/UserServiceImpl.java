@@ -6157,7 +6157,7 @@ public class UserServiceImpl implements UserService {
 
 					//办公地点（公司加入的园区）
 					List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(org.getId());
-					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
+					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
 					if(requests != null && requests.size() > 0){
 						for (OrganizationCommunityRequest request: requests){
 							Community community = communityProvider.findCommunityById(request.getCommunityId());
@@ -6167,21 +6167,22 @@ public class UserServiceImpl implements UserService {
 								//根据公司id和项目id查询公司所属项目表eh_organization_workplaces表中的信息，并且将该表中的workplace_name字段组装到communityInfoDTO对象中
 								List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgIdAndCommunityId(org.getId(),community.getId());
 								//创建一个集合List<String>来承载办公地点名称的集合
-								List<String> siteNameList = Lists.newArrayList();
+								//List<String> siteNameList = Lists.newArrayList();
 								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
 								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
 									//将每一个办公地点名称都保存在集合siteNameList中
-									siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+									addressSiteDtos.add(addressSiteDTO);
 								}
-								//将siteNameList集合封装在对象communityInfoDTO中
-								communityInfoDTO.setSiteNameList(siteNameList);
-								communityUserDtos.add(communityInfoDTO);
+
 							}
 
 						}
 					}
 
-					dto.setCommunityUserDtos(communityUserDtos);
+					dto.setAddressSiteDtos(addressSiteDtos);
 					dtos.add(dto);
 				}
 			}
@@ -6212,15 +6213,14 @@ public class UserServiceImpl implements UserService {
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
 					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
-					CommunityInfoDTO communityInfoDTO = new CommunityInfoDTO();
-					communityInfoDTO.setId(family.getCommunityId());
-					communityInfoDTO.setName(family.getCommunityName());
-					communityInfoDTO.setAliasName(family.getCommunityAliasName());
-					communityInfoDTO.setCommunityType(family.getCommunityType());
-					communityInfoDTO.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
-					communityUserDtos.add(communityInfoDTO);
 
-					dto.setCommunityUserDtos(communityUserDtos);
+					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
+					Community community = communityProvider.findCommunityById(family.getCommunityId());
+					if(community !=null){
+						AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
+					}
+
+					dto.setAddressSiteDtos(addressSiteDtos);
 
 					dtos.add(dto);
 				}
