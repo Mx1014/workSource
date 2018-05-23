@@ -188,6 +188,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.AutoConfigurationReportEndpoint.Report;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -3152,8 +3153,11 @@ public class PunchServiceImpl implements PunchService {
 
         ListPunchDetailsCommand cmd1 = new ListPunchDetailsCommand();
         cmd1.setPageSize(Integer.MAX_VALUE - 1);
-        cmd1.setStartDay(cmd.getStartDay());
-        cmd1.setEndDay(cmd.getEndDay());
+        if(null != cmd.getMonthReportId()){
+        	PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
+            cmd1.setStartDay(socialSecurityService.getTheFirstDate(report.getPunchMonth()).getTime());
+            cmd1.setEndDay(socialSecurityService.getTheLastDate(report.getPunchMonth()).getTime());
+        }
         cmd1.setOwnerId(cmd.getOwnerId());
         cmd1.setOwnerType(cmd.getOwnerType());
         cmd1.setUserName(cmd.getUserName());
@@ -5423,7 +5427,8 @@ public class PunchServiceImpl implements PunchService {
     };
     
     @Override
-    public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId) {
+    public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId
+    		,Long monthReportId) {
 
         ListPunchCountCommand cmd = new ListPunchCountCommand();
         cmd.setPageSize(Integer.MAX_VALUE - 1);
@@ -5433,6 +5438,7 @@ public class PunchServiceImpl implements PunchService {
         cmd.setUserName(userName);
         cmd.setOwnerId(ownerId);
         cmd.setOwnerType(ownerType);
+        cmd.setMonthReportId(monthReportId);
         taskService.updateTaskProcess(taskId, 2);
         ListPunchCountCommandResponse resp = listPunchCount(cmd);
 
@@ -5468,6 +5474,7 @@ public class PunchServiceImpl implements PunchService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("startDay", cmd.getStartDay());
         params.put("endDay", cmd.getEndDay());
+        params.put("monthReportId", cmd.getMonthReportId());
         params.put("exceptionStatus", cmd.getExceptionStatus());
         params.put("userName", cmd.getUserName());
         params.put("reportType", "exportPunchStatistics");

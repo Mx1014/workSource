@@ -265,7 +265,7 @@ public interface PunchService {
 			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId);
+			String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId);
 
 	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
 
