@@ -4600,6 +4600,10 @@ public class PunchServiceImpl implements PunchService {
                 response.setProcess(report.getProcess());
                 response.setErrorInfo(report.getErrorInfo());
                 response.setStatus(report.getStatus());
+                if(null != report.getUpdateTime()){
+                	response.setUpdateTime(report.getUpdateTime().getTime());
+                }
+                response.setPunchMemberNumber(report.getPunchMemberNumber());
             }
         } else if (null != cmd.getStartDay()) {
             //这里早晚注释掉,4.2版本上线吼就没用了
@@ -4617,7 +4621,7 @@ public class PunchServiceImpl implements PunchService {
                 start.add(Calendar.MONTH, 1);
             }
         } else  if(null !=cmd.getMonth()){
-            months.add(cmd.getMonth());
+            months.add(cmd.getMonth()); 
         } else{
         }
         if (months.size() == 0) {
@@ -9772,6 +9776,7 @@ public class PunchServiceImpl implements PunchService {
                         ErrorCodes.ERROR_INVALID_PARAMETER,
                         "当前状态不可更新");
             }
+            report1.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             report1.setStatus(PunchMonthReportStatus.UPDATING.getCode());
             punchMonthReportProvider.updatePunchMonthReport(report1);
             Tuple<PunchMonthReport, Boolean> tuple = new Tuple<PunchMonthReport, Boolean>(report1,true);
@@ -9809,6 +9814,8 @@ public class PunchServiceImpl implements PunchService {
             } catch (Exception e) {
                 LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
             } finally {
+                Integer count = punchProvider.countpunchStatistic(report.getPunchMonth(), report.getOwnerId());
+                report.setPunchMemberNumber(count);
                 report.setProcess(100);
                 report.setStatus(PunchMonthReportStatus.CREATED.getCode());
                 punchMonthReportProvider.updatePunchMonthReport(report);
