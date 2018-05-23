@@ -185,4 +185,7 @@ public interface AssetService {
     void noticeTrigger(Integer namespaceId);
     
     ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd);
+    
+    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    
 }

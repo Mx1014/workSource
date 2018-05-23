@@ -893,6 +893,20 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return null;
     }
+    
+    // this is for 导出所有账单 （普通企业）
+    /**
+     * <p>导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
+        assetService.exportSettledBillsForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
 
     // this is for 展示账单的减免项           4
     /**

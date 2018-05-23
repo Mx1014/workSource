@@ -802,6 +802,44 @@ public class AssetServiceImpl implements AssetService {
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
+    
+    public void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(5000);
+        }
+        List<ListBillsDTOForEnt> dtos = new ArrayList<>();
+        dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
+        Calendar c = newClearedCalendar();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+        String fileName = "bill"+year+month+date+hour+minute+ second;
+
+        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+        	ListBillsDTOForEnt dto = dtos.get(i);
+            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
+            detail.setDateStr(dto.getDateStr());
+            detail.setBillGroupName(dto.getBillGroupName());
+            detail.setTargetName(dto.getTargetName());
+            detail.setContractNum(dto.getContractNum());
+            detail.setNoticeTel(dto.getNoticeTel());
+            detail.setAmountOwed(dto.getAmountOwed().toString());
+            detail.setAmountReceivable(dto.getAmountReceivable().toString());
+            //detail.setAmountReceived(dto.getAmountReceived().toString());
+            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
+            dataList.add(detail);
+        }
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountOwed","status"};
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","待收(元)","缴费状态"};
+        int[] titleSize = {20,20,20,20,20,20,20,20};
+        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+    }
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
