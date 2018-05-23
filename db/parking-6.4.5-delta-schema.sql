@@ -1,1 +1,0 @@
-ALTER TABLE `eh_configurations` modify `value` varchar(1024);
