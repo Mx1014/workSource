@@ -296,7 +296,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
     @Override
     public void deleteApprovalValByRequestId(Long requestId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        context.update(Tables.EH_DECORATION_APPROVAL_VALS).set(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG.eq((byte)1))
+        context.update(Tables.EH_DECORATION_APPROVAL_VALS).set(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG,(byte)1)
                 .where(Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId))
                 .execute();
     }
