@@ -40,5 +40,6 @@ public interface DecorationService {
 
     void DecorationCheckSuccess(Long requestId);
 
+    void completeDecoration(RequestIdCommand cmd);
 
 }

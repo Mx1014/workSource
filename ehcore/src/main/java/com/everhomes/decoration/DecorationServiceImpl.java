@@ -31,6 +31,7 @@ import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -115,8 +116,30 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public GetDecorationFeeResponse getFeeInfo(RequestIdCommand cmd) {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        if (request == null)
+            return null;
+        GetDecorationFeeResponse response = new GetDecorationFeeResponse();
+        GetIlluStrationCommand cmd2 = new GetIlluStrationCommand();
+        cmd2.setOwnerType(IllustrationType.FEE.getCode());
+        DecorationIllustrationDTO dto = this.getIllustration(cmd2);
+        response.setAddress(dto.getAddress());
+        response.setLatitude(dto.getLatitude());
+        response.setLongitude(dto.getLongitude());
 
-        return null;
+        List<DecorationFee> list = this.decorationProvider.listDecorationFeeByRequestId(request.getId());
+        if(list == null || list.size()==0)
+            return null;
+        for (int i=0;i<list.size();i++)
+            if (list.get(i).getTotalPrice() != null){
+                response.setTotalPrice(list.get(i).getTotalPrice());
+                list.remove(i);
+                break;
+            }
+        response.setFee(list.stream().map(r->{
+            DecorationFeeDTO feeDTO = ConvertHelper.convert(r,DecorationFeeDTO.class);
+            return feeDTO;
+        }).collect(Collectors.toList()));
+        return response;
     }
 
     @Override
@@ -547,7 +570,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd3.setValues(cmd.getValues());
             cmd3.setGeneralFormId(ga.getFormOriginId());
             cmd3.setSourceId(val.getId());
-            cmd3.setSourceType("EhDecorationApprovalVals");
+            cmd3.setSourceType(EhDecorationApprovalVals.class.getSimpleName());
             this.generalFormService.addGeneralFormValues(cmd3);
 
             return null;
@@ -649,6 +672,43 @@ public class DecorationServiceImpl implements  DecorationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.REFOUND.getCode());
+        this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public void completeDecoration(RequestIdCommand cmd) {
+        DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+        if (DecorationRequestStatus.CONSTRACT.getCode() != request.getStatus())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+        Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
+                DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.CHECK.getFlowOwnerType());
+        if (flow == null) {
+            LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
+            throw RuntimeErrorException.errorWith("decoration",
+                    10001, "请开启工作流后重试");
+        }
+        CreateFlowCaseCommand cmd2 = new CreateFlowCaseCommand();
+        cmd2.setApplyUserId(request.getApplyUid());
+        cmd2.setReferId(request.getId());
+        cmd2.setReferType(DecorationRequestStatus.CHECK.getFlowOwnerType());
+        cmd2.setProjectId(request.getCommunityId());
+        cmd2.setProjectType(EntityType.COMMUNITY.getCode());
+        cmd2.setTitle(getAppName());
+
+        cmd2.setServiceType(cmd2.getTitle());
+        cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.CHECK.getDescribe()+")");
+        StringBuilder content = new StringBuilder();
+        content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+        content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
+        content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
+                sdfyMd.format(new Date(request.getEndTime().getTime())));
+        cmd2.setContent(content.toString());
+        cmd2.setFlowMainId(flow.getFlowMainId());
+        cmd2.setFlowVersion(flow.getFlowVersion());
+        flowService.createFlowCase(cmd2);
+
+        request.setStatus(DecorationRequestStatus.CHECK.getCode());
         this.decorationProvider.updateDecorationRequest(request);
     }
 }

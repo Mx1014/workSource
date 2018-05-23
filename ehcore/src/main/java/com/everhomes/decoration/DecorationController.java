@@ -154,8 +154,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getFee")
     @RestReturn(GetDecorationFeeResponse.class)
     public RestResponse getFee(@Valid RequestIdCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        GetDecorationFeeResponse res = this.decorationService.getFeeInfo(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -253,7 +253,6 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getCompleteSetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getCompleteSetting(@Valid GetIlluStrationCommand cmd) {
-
         cmd.setOwnerType(IllustrationType.COMPLETE.getCode());
         DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
         RestResponse response = new RestResponse(dto);

@@ -21,7 +21,7 @@ import java.util.List;
  * <li>decoratorName：负责人姓名</li>
  * <li>decoratorPhone：负责人电话</li>
  * <li>decoratorCompany：负责人公司</li>
- * <li>flowCasees：工作流</li>
+ * <li>flowCasees：工作流 参考{@link com.everhomes.rest.decoration.DecorationFlowCaseDTO}</li>
  * <li>decorationFee：装修费用明细</li>
  * <li>totalAmount：装修费用</li>
  * <li>refoundAmount：退款</li>

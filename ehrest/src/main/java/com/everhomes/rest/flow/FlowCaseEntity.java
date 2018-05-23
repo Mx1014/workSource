@@ -4,6 +4,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>entityType: {@link com.everhomes.rest.flow.FlowCaseEntityType}</li>
+ * <li>key</li>
+ * <li>value</li>
  * </ul>
  * @author janson
  *
