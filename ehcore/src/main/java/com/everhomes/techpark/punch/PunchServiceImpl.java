@@ -4631,8 +4631,8 @@ public class PunchServiceImpl implements PunchService {
 //        if (null == userIds)
 //            return response;
         //分页查询
-        if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(0L);
+//        if (cmd.getPageAnchor() == null)
+//            cmd.setPageAnchor(0L);
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
