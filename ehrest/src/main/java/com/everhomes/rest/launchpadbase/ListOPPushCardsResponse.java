@@ -19,7 +19,7 @@ public class ListOPPushCardsResponse {
 
     private Long moduleId;
     private Byte actionType;
-    private Object instanceConfig;
+    private String instanceConfig;
     private List<OPPushCard> cards;
 
     public Long getModuleId() {
@@ -38,11 +38,11 @@ public class ListOPPushCardsResponse {
         this.actionType = actionType;
     }
 
-    public Object getInstanceConfig() {
+    public String getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(Object instanceConfig) {
+    public void setInstanceConfig(String instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 

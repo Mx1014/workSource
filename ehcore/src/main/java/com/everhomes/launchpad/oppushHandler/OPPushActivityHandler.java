@@ -9,6 +9,7 @@ import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.launchpadbase.ContextDTO;
 import com.everhomes.rest.launchpadbase.OPPushCard;
+import com.everhomes.rest.launchpadbase.routerjson.ActivityContentRouterJson;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.util.ConvertHelper;
@@ -60,7 +61,10 @@ public class OPPushActivityHandler implements OPPushHandler {
 
             for (ActivityDTO dto: activityReponse.getActivities()){
                 OPPushCard card = new OPPushCard();
-                card.setContentId(dto.getPostId().toString());
+                ActivityContentRouterJson contentRouterJson = new ActivityContentRouterJson();
+                contentRouterJson.setForumId(dto.getForumId());
+                contentRouterJson.setTopicId(dto.getPostId());
+                card.setRouterJson(contentRouterJson.toString());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());
