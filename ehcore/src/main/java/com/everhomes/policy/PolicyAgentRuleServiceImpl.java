@@ -27,7 +27,7 @@ public class PolicyAgentRuleServiceImpl implements PolicyAgentRuleService {
                 result.setAgentInfo(cmd.getAgentInfo());
             if(null != cmd.getAgentFlag()){
                 result.setAgentFlag(cmd.getAgentFlag());
-                if(((byte) 0) == cmd.getAgentFlag().byteValue()){
+                if(cmd.getAgentFlag().equals((byte) 0)){
                     result.setAgentPhone("");
                     result.setAgentInfo("");
                 }
