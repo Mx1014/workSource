@@ -52,6 +52,8 @@ public interface EnterpriseApprovalService {
 
     ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
+    CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd);
+
     ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
 }
