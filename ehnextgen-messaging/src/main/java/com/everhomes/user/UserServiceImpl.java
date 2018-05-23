@@ -6138,7 +6138,7 @@ public class UserServiceImpl implements UserService {
 					if(org == null || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
 					}
-					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(org.getStatus())){
+					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(member.getStatus())){
 						continue;
 					}
 					if(cmd.getWorkPlatformFlag() != null && TrueOrFalseFlag.fromCode(cmd.getWorkPlatformFlag()) != TrueOrFalseFlag.fromCode(org.getWorkPlatformFlag())){
