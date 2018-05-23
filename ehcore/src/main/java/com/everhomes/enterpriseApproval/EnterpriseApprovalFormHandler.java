@@ -1,7 +1,6 @@
 package com.everhomes.enterpriseApproval;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.energy.EnergyConsumptionController;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
@@ -41,9 +40,6 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private OrganizationProvider organizationProvider;
 
-    //  The symbol of the approval is 'GENERAL_APPROVAL' because of the history
-
-
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         //  get the basic data
@@ -69,8 +65,7 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
         command.setOrganizationId(cmd.getCurrentOrganizationId());
         generalApprovalService.postApprovalForm(command);
         //  return
-        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
-        return dto;
+        return ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
     }
 
     @Override
@@ -92,6 +87,7 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
                     EnterpriseApprovalServiceErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
         //  organizationId is still needed
         GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
         organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());

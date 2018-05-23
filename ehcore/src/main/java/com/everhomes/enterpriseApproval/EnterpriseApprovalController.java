@@ -19,8 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/enterpriseApproval")
 public class EnterpriseApprovalController extends ControllerBase{
+
     public static final Long MODULE_ID = 52000L;
+
     public static final String MODULE_TYPE = "any-module";
+
+    //  The symbol of the approval is 'GENERAL_APPROVAL' because of the history
     public static final String APPROVAL_OWNER_TYPE = "GENERAL_APPROVAL";
 
     @Autowired

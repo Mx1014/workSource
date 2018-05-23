@@ -610,7 +610,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     }
                 });
         ListGeneralFormResponse resp = new ListGeneralFormResponse();
-        resp.setForms(forms.stream().map((r) -> processGeneralFormDTO(r)).collect(Collectors.toList()));
+        resp.setForms(forms.stream().map(this::processGeneralFormDTO).collect(Collectors.toList()));
         return resp;
     }
 

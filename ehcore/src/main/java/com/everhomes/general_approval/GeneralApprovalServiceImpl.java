@@ -160,7 +160,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
             GetTemplateByApprovalIdCommand cmd) {
-        //
+
+        //  此接口疑似未使用 23/05/2018
+
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,

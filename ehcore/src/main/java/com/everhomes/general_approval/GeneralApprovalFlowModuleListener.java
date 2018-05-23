@@ -5,9 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.enterpriseApproval.EnterpriseApprovalController;
 import com.everhomes.enterpriseApproval.EnterpriseApprovalFlowCase;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import com.alibaba.fastjson.JSON;
@@ -48,6 +50,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     protected GeneralApprovalProvider generalApprovalProvider;
     @Autowired
     protected GeneralApprovalValProvider generalApprovalValProvider;
+    @Autowired
+    protected GeneralFormService generalFormService;
     @Autowired
     protected GeneralFormProvider generalFormProvider;
     @Autowired
@@ -104,13 +108,13 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
 
-    public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
+    private GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
 
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
         return getGeneralApprovalHandler(ga.getApprovalAttribute());
     }
 
-    public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
+    private GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
         if (generalApprovalAttribute != null) {
             GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
                     + generalApprovalAttribute);
@@ -125,7 +129,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-        String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
+        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n");
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
@@ -133,10 +137,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
             String key = entities.get(i).getKey();
             //  将"null"屏蔽为空字符串
             String value = StringUtils.isEmpty(entities.get(i).getValue()) ? "无" : entities.get(i).getValue();
-            content += (key + " : " + value + "\n");
+            content.append(key).append(" : ").append(value).append("\n");
         }
-        content = content.substring(0, content.length() - 1);
-        flowCase.setContent(content);
+        content = new StringBuilder(content.substring(0, content.length() - 1));
+        flowCase.setContent(content.toString());
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
@@ -234,45 +238,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
         //  姓名
-        FlowCaseEntity e = new FlowCaseEntity();
-        /*GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-                GeneralFormDataSourceType.USER_NAME.getCode());
-        //  根据需求去除了默认字段的存储
-        if (val != null) {
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-                    val.getFormOriginId(), val.getFormVersion());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-            GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-            e.setKey(dto.getFieldDisplayName());
-            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-            e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-            entities.add(e);
-
-            //电话
-            e = new FlowCaseEntity();
-            val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-                    GeneralFormDataSourceType.USER_PHONE.getCode());
-            if (val != null) {
-                dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-                e.setKey(dto.getFieldDisplayName());
-                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-                entities.add(e);
-            }
-
-            //企业
-            e = new FlowCaseEntity();
-            val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-                    GeneralFormDataSourceType.USER_COMPANY.getCode());
-            if (val != null) {
-                dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-                e.setKey(dto.getFieldDisplayName());
-                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-                entities.add(e);
-            }
-        }*/
-
+        FlowCaseEntity e;
         //  approval-1.6 added by R
         EnterpriseApprovalFlowCase gf = ConvertHelper.convert(flowCase, EnterpriseApprovalFlowCase.class);
         e = new FlowCaseEntity();
@@ -303,7 +269,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         return entities;
     }
 
-    public List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+    protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
         if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
             List<GeneralApprovalVal> vals = this.generalApprovalValProvider
@@ -647,7 +613,6 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-        ListGeneralApprovalCommand command = new ListGeneralApprovalCommand();
         List<GeneralApproval> ga = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
                 Integer.MAX_VALUE - 1, (locator, query) -> {
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
@@ -661,14 +626,13 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                     return query;
                 });
         if (ga != null) {
-            List<FlowServiceTypeDTO> result = ga.stream().map(r -> {
+            return ga.stream().map(r -> {
                 FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                 dto.setId(r.getId());
                 dto.setNamespaceId(r.getNamespaceId());
                 dto.setServiceName(r.getApprovalName());
                 return dto;
             }).collect(Collectors.toList());
-            return result;
         }
         return null;
     }
@@ -678,15 +642,30 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<FlowFormDTO> flowFormDTOS = new ArrayList<>();
         if (flow.getOwnerType().equals(FlowOwnerType.GENERAL_APPROVAL.getCode())) {
             GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(flow.getOwnerId());
-
-            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(approval.getFormOriginId());
-            if (form != null) {
-                FlowFormDTO dto = new FlowFormDTO();
-                dto.setName(form.getFormName());
-                dto.setFormVersion(form.getFormVersion());
-                dto.setFormOriginId(form.getFormOriginId());
-
-                flowFormDTOS.add(dto);
+            if (approval.getApprovalAttribute().equals(GeneralApprovalAttribute.CUSTOMIZE.getCode())) {
+                ListGeneralFormsCommand command = new ListGeneralFormsCommand();
+                command.setOwnerId(flow.getOrganizationId());
+                command.setOwnerType("EhOrganizations");
+                command.setModuleId(EnterpriseApprovalController.MODULE_ID);
+                command.setModuleType(EnterpriseApprovalController.MODULE_TYPE);
+                ListGeneralFormResponse response = generalFormService.listGeneralForms(command);
+                if (response.getForms() != null && response.getForms().size() > 0)
+                    response.getForms().forEach(r -> {
+                        FlowFormDTO dto = new FlowFormDTO();
+                        dto.setName(r.getFormName());
+                        dto.setFormVersion(r.getFormVersion());
+                        dto.setFormOriginId(r.getFormOriginId());
+                        flowFormDTOS.add(dto);
+                    });
+            } else {
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(approval.getFormOriginId());
+                if (form != null) {
+                    FlowFormDTO dto = new FlowFormDTO();
+                    dto.setName(form.getFormName());
+                    dto.setFormVersion(form.getFormVersion());
+                    dto.setFormOriginId(form.getFormOriginId());
+                    flowFormDTOS.add(dto);
+                }
             }
         }
         return flowFormDTOS;
