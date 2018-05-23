@@ -23,7 +23,11 @@ CREATE TABLE `eh_message_records` (
   `session_token` VARCHAR(128),
   `device_id` VARCHAR(2048),
   `index_id` BIGINT(20),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `i_eh_index_id_index` (`index_id`) USING BTREE,
+  INDEX `i_eh_sender_uid_index` (`sender_uid`) USING BTREE,
+  INDEX `i_eh_dst_channel_token_index` (`dst_channel_token`) USING BTREE,
+  INDEX `i_en_namespace_id_index` (`namespace_id`) USING BTREE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
