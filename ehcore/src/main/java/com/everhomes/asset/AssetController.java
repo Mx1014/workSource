@@ -1336,6 +1336,20 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return null;
     }
+    
+    /**
+     * <p>对公转账信息列表</p>
+     * <b>URL: /asset/publicTransferBill</b>
+     */
+    @RequestMapping("publicTransferBill")
+    public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
+    	//PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
+        //RestResponse restResponse = new RestResponse(listPaymentBillResp);
+    	RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
 
 }
 
