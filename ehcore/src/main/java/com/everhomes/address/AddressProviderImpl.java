@@ -10,6 +10,9 @@ import java.util.UUID;
 
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
@@ -44,8 +47,11 @@ import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
+import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -65,6 +71,9 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Autowired
     private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private ContractProvider contractProvider;
     
     @Override
     public void createAddress(Address address) {
@@ -687,4 +696,39 @@ public class AddressProviderImpl implements AddressProvider {
 
         return result.get(0).getVersion();
     }
+
+	@Override
+	public Contract findContractByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Long contractId = context.select()
+								.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+								.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+								.fetchOneInto(Long.class);
+		
+		Contract contract = contractProvider.findContractById(contractId);		
+		
+		return contract;
+	}
+
+	@Override
+	public ContractBuildingMapping findContractBuildingMappingByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		ContractBuildingMapping contractBuildingMapping = context.select()
+														.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+														.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+														.fetchOneInto(ContractBuildingMapping.class);
+		return contractBuildingMapping;
+	}
+
+	@Override
+	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractBuildingMappings.class, contractBuildingMapping.getId()));
+        
+        EhContractBuildingMappingsDao dao = new EhContractBuildingMappingsDao(context.configuration());
+        dao.update(contractBuildingMapping);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
+	}
 }

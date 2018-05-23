@@ -15,6 +15,8 @@ import org.jooq.Result;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 
@@ -78,4 +80,8 @@ public interface AddressProvider {
     List<AddressAttachment> listAddressAttachments(Long addressId);
 
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
+    
+	Contract findContractByAddressId(Long addressId);
+	ContractBuildingMapping findContractBuildingMappingByAddressId(Long addressId);
+	void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
 }

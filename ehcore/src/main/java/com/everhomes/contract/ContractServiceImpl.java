@@ -1314,6 +1314,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
+		
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {

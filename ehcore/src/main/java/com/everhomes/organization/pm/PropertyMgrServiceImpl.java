@@ -11,12 +11,14 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -34,6 +36,7 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
@@ -49,7 +52,12 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -255,6 +263,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private DefaultChargingItemProvider defaultChargingItemProvider;
+	
+	@Autowired
+	private ContractService contractService;
     
     private String queueName = "property-mgr-push";
 
@@ -2246,6 +2257,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			address.setApartmentName(cmd.getApartmentName());
 			address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+			//update EH_Contract_Building_Mapping
+			ContractBuildingMapping contractBuildingMapping = addressProvider.findContractBuildingMappingByAddressId(address.getId());
+			if(contractBuildingMapping != null) {
+				contractBuildingMapping.setApartmentName(cmd.getApartmentName());
+				addressProvider.updateContractBuildingMapping(contractBuildingMapping);
+			}
 		}
 
 		if (cmd.getAreaSize() != null) {
@@ -2325,7 +2342,71 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		communityProvider.updateBuilding(building);
 		communityProvider.updateCommunity(community);
+		
+		//更新es搜索引擎中的受影响的document
+		//updateDocInES(cmd);
+	}
 
+	//更新es搜索引擎中的受影响的document(比如与合同绑定的资产名称)
+	private void updateDocInES(UpdateApartmentCommand cmd) {
+		Address address = addressProvider.findAddressById(cmd.getId());
+		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
+			Contract contract = addressProvider.findContractByAddressId(cmd.getId());
+			if(contract == null) {
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
+						"contract is not exit");
+			}
+		FindContractCommand findContractCommand = ConvertHelper.convert(contract, FindContractCommand.class);
+		Integer namespaceId = contract.getNamespaceId()==null? UserContext.getCurrentNamespaceId():contract.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ContractDetailDTO detail = contractService.findContract(findContractCommand);
+		
+		UpdateContractCommand updateContractCommand = new UpdateContractCommand();
+		updateContractCommand.setNamespaceId(contract.getNamespaceId());
+		updateContractCommand.setId(contract.getId());
+		updateContractCommand.setCommunityId(contract.getCommunityId());
+		
+		updateContractCommand.setCustomerId(detail.getCustomerId());
+		updateContractCommand.setCustomerName(detail.getCustomerName());
+		updateContractCommand.setContractNumber(detail.getContractNumber());
+		updateContractCommand.setContractEndDate(detail.getContractEndDate().getTime());
+		updateContractCommand.setContractStartDate(detail.getContractStartDate().getTime());
+		updateContractCommand.setName(detail.getName());
+		updateContractCommand.setContractType(detail.getContractType());
+		updateContractCommand.setPartyAType(detail.getPartyAType());
+		updateContractCommand.setPartyAId(detail.getPartyAId());
+		updateContractCommand.setCustomerType(detail.getCustomerType());
+		updateContractCommand.setCategoryItemId(detail.getCategoryItemId());
+		updateContractCommand.setRentSize(detail.getRentSize());
+		updateContractCommand.setCreateUid(detail.getCreateUid());
+		updateContractCommand.setStatus(detail.getStatus());
+		//更新apartment信息
+		//updateContractCommand.setApartments(detail.getApartments());
+		List<BuildingApartmentDTO> apartments = detail.getApartments();
+		Long addressId = address.getId();
+		
+		
+		
+		updateContractCommand.setChargingItems(detail.getChargingItems());
+		updateContractCommand.setOrgId(null);
+		
+		contractService.updateContract(updateContractCommand);
+		
+//		FindContractCommand findContractCommand = new FindContractCommand();
+//		findContractCommand.setNamespaceId(contract.getNamespaceId());
+//		findContractCommand.setId(contract.getId());
+//		findContractCommand.setPartyAId(contract.getPartyAId());
+//		findContractCommand.setCommunityId(contract.getCommunityId());
+//		findContractCommand.setContractNumber(contract.getContractNumber());
+		
+		//address.setApartmentName(cmd.getApartmentName());
+		//address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+		}
+	}
+	
+	private ContractService getContractService(Integer namespaceId) {
+		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 	}
 
 	@Override
