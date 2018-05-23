@@ -23,6 +23,7 @@ public class ListBillDetailVO {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
+    private String billGroupName;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -121,4 +122,12 @@ public class ListBillDetailVO {
     public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
         this.billGroupDTO = billGroupDTO;
     }
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
 }

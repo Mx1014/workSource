@@ -46,6 +46,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private RemoteAccessService remoteAccessService;
     @Autowired
+    private RemoteForEntAccessServiceImpl remoteForEntAccessServiceImpl;
+    @Autowired
     private PortalService portalService;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
@@ -105,6 +107,37 @@ public class PaymentServiceImpl implements PaymentService {
         cmd.setUserId(paymentUser.getPaymentUserId());
         LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());
         return remoteAccessService.listOrderPayment(cmd);
+    }
+    
+    public ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd) throws Exception {
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        //没有拿到orderType，直接返回
+        if(cmd.getOrderType() == null ) return new ListPaymentBillRespForEnt(cmd.getPageAnchor(), cmd.getPageSize());
+        //如果是物业缴费这方面，由于是多个orderType，用域空间筛选下，如果该域空间下没有配置新支付，则直接返回
+        if(cmd.getOrderType()!=null && (cmd.getOrderType().equals(OrderType.OrderTypeEnum.WUYE_CODE.getPycode()) || cmd.getOrderType().equals(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode())))
+        {
+            String realOrderType = getRealOrderType(cmd.getNamespaceId());
+            //没有拿到orderType，直接返回
+            if(realOrderType == null ) return new ListPaymentBillRespForEnt(cmd.getPageAnchor(), cmd.getPageSize());
+            cmd.setOrderType(realOrderType);
+        }
+        if (cmd.getPageSize() == null) {
+            cmd.setPageSize(21l);
+        }else{
+            cmd.setPageSize(cmd.getPageSize()+1l);
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0l);
+        }
+        PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
+        if(paymentUser == null) {
+            return new ListPaymentBillRespForEnt(null, cmd.getPageSize());
+        }
+        cmd.setUserId(paymentUser.getPaymentUserId());
+        LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());
+        return remoteForEntAccessServiceImpl.listOrderPaymentForEnt(cmd);
     }
 
     private String getRealOrderType(Integer namespaceId) {

@@ -1141,6 +1141,19 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(result);
         return response;
     }
+    
+    //this is for 普通企业
+    /**
+     * <b>URL: /asset/listPaymentBillForEnt</b>
+     * <p>结算-账单明细</p>
+     */
+    @RequestMapping(value = "listPaymentBillForEnt")
+    @RestReturn(ListPaymentBillRespForEnt.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillRespForEnt result = paymentService.listPaymentBillForEnt(cmd);
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
 
 
     /**
