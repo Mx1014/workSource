@@ -590,10 +590,10 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.TARGET_ID.eq(targetId));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
-            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
-            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+            query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
         query.addOrderBy(t.DATE_STR.desc());
         query.addLimit(pageOffSet,pageSize+1);
