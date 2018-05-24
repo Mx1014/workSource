@@ -6782,12 +6782,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cell.setPrice(cmd.getPrice());
 			cell.setInitiatePrice(cmd.getInitiatePrice());
 			cell.setOriginalPrice(cmd.getOriginalPrice());
-			cell.setOrgMemberPrice(cmd.getOrgMemberPrice());
-			cell.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
-			cell.setOrgMemberOriginalPrice(cmd.getOrgMemberOriginalPrice());
-			cell.setApprovingUserPrice(cmd.getApprovingUserPrice());
-			cell.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
-			cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
+			if (RentalUserPriceType.UNIFICATION.getCode() == cmd.getUserPriceType()){
+				cell.setOrgMemberPrice(cmd.getPrice());
+				cell.setOrgMemberInitiatePrice(cmd.getInitiatePrice());
+				cell.setOrgMemberOriginalPrice(cmd.getOriginalPrice());
+				cell.setApprovingUserPrice(cmd.getPrice());
+				cell.setApprovingUserInitiatePrice(cmd.getInitiatePrice());
+				cell.setApprovingUserOriginalPrice(cmd.getOriginalPrice());
+			}else {
+				cell.setOrgMemberPrice(cmd.getOrgMemberPrice());
+				cell.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
+				cell.setOrgMemberOriginalPrice(cmd.getOrgMemberOriginalPrice());
+				cell.setApprovingUserPrice(cmd.getApprovingUserPrice());
+				cell.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
+				cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
+			}
 			cell.setStatus(cmd.getStatus());
 			cell.setCounts(cmd.getCounts());
 			cell.setPricePackageId(cmd.getSitePackageId());
