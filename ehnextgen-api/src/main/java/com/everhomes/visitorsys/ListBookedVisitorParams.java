@@ -55,6 +55,7 @@ public class ListBookedVisitorParams{
     private Long endRankingTime;
     private Long rankingPageAnchor;
     private Integer rankingPageSize;
+    private String visitorPhone;
 
     public Byte getSearchFlag() {
         return searchFlag;
@@ -270,6 +271,14 @@ public class ListBookedVisitorParams{
 
     public void setRankingPageSize(Integer rankingPageSize) {
         this.rankingPageSize = rankingPageSize;
+    }
+
+    public String getVisitorPhone() {
+        return visitorPhone;
+    }
+
+    public void setVisitorPhone(String visitorPhone) {
+        this.visitorPhone = visitorPhone;
     }
 
     @Override

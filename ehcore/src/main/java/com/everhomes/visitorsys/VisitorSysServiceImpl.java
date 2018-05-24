@@ -1132,8 +1132,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsFlag());
         VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
         boolean showQrcode =
-                enterpriseConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
-                && enterpriseConfig.getBaseConfig().getDoorGuardId().equals(enterpriseVisitor.getDoorGuardId())
+                communityConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
+                && communityConfig.getBaseConfig().getDoorGuardId().equals(communityVisitor.getDoorGuardId())
                 && (
                         (
                                 doorGuardsFlag == VisitorsysFlagType.YES //园区开启门禁对接
@@ -1451,12 +1451,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "unknown verificatcode "+vCode);
         }
         long now = System.currentTimeMillis();
+        ListBookedVisitorParams params = new ListBookedVisitorParams();
+        params.setNamespaceId(namespaceId);
+        params.setOwnerType(ownerType);
+        params.setOwnerId(ownerId);
+        params.setVisitorPhone(vPhone);
+        params.setStartPlannedVisitTime(VisitorSysUtils.getStartOfDay(now).getTime());
+        params.setEndPlannedVisitTime(VisitorSysUtils.getEndOfDay(now).getTime());
         List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
                 (namespaceId,ownerType,ownerId,vPhone
                         ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
-        ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
-        response.setVisitorDtoList(list.stream().map(r->ConvertHelper.convert(r,BaseVisitorDTO.class)).collect(Collectors.toList()));
-        return response;
+//        ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
+//        response.setVisitorDtoList(list.stream().map(r->ConvertHelper.convert(r,BaseVisitorDTO.class)).collect(Collectors.toList()));
+        return visitorsysSearcher.searchVisitors(params);
     }
 
     @Override
