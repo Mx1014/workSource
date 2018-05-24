@@ -13,4 +13,8 @@ public class FlowScript extends EhFlowScripts {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    public Long getTopId() {
+        return this.getScriptMainId() != 0L ? this.getScriptMainId() : this.getId();
+    }
 }

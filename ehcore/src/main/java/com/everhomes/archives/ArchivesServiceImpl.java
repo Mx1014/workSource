@@ -237,6 +237,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
+                //  1.置顶表删除
+                archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
+                //  2.人事删除
+                DeleteArchivesEmployeesCommand command = ConvertHelper.convert(cmd, DeleteArchivesEmployeesCommand.class);
+                deleteArchivesEmployees(command);
+            }
+            return null;
+        });
+        /*Integer namespaceId = UserContext.getCurrentNamespaceId();
+        dbProvider.execute((TransactionStatus status) -> {
+            if (cmd.getDetailIds() != null) {
                 for (Long detailId : cmd.getDetailIds()) {
                     //  1.组织架构删除
                     OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -262,7 +273,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dismissArchivesEmployeesLogs(dismissCommand);
             }
             return null;
-        });
+        });*/
     }
 
     //  通讯录成员置顶接口
@@ -1792,7 +1803,6 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //  添加事务
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.将员工添加到离职人员表
@@ -2647,7 +2657,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return results;
     }
 
-    @PostConstruct
+    /*@PostConstruct
     @Override
     public void initArchivesNotification() {
         if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
@@ -2666,7 +2676,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesNotificationJob.class,
                 new HashMap<>());
         LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + date);
-    }
+    }*/
 
     @Override
     public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {
@@ -2678,7 +2688,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime nowDateTime){
+    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime){
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
         if(company == null) {
             LOGGER.error("Company not found!");
@@ -2693,7 +2703,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  2.get employee's names
-        Date firstOfWeek = Date.valueOf(nowDateTime.toLocalDate());
+        Date firstOfWeek = Date.valueOf(dateTime.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();

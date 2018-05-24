@@ -110,7 +110,7 @@ public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHa
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+		FlowCase flowCase = ctx.getRootState().getFlowCase();
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
 		if (null == request) {

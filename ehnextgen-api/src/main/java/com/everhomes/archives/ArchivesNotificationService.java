@@ -2,5 +2,5 @@ package com.everhomes.archives;
 
 import java.util.List;
 
-public interface ArchivesConfigurationService {
+public interface ArchivesNotificationService {
 }
