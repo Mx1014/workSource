@@ -130,8 +130,8 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
             condition.and(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
                     .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.gt(lastUpdateTime)));
         }
-        // add for auto reading meters
-        condition.or(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.eq(0L));
+//        // add for auto reading meters
+//        condition.or(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.eq(0L));
 
         query.addConditions(condition);
         query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);

@@ -2911,10 +2911,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //     * 每天早上5点10分刷自动读表
 //     */
 //    @Scheduled(cron = "0 10 5 L * ?")
-    private void readMeterRemote(Boolean createPlansFlag) {
+    private void readMeterRemote(Boolean createPlansFlag,Long communityId) {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
-            List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
+            List<EnergyMeter> meters = new ArrayList<>();
+            if (communityId != null) {
+                meters = meterProvider.listAutoReadingMetersByCommunityId(communityId);
+            } else {
+                meters = meterProvider.listAutoReadingMeters();
+            }
             if (meters != null && meters.size() > 0) {
                 meters.forEach((meter) -> {
                     String serverUrl = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.server", "");
@@ -2934,7 +2939,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
                             log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
+                            log.setReading(new BigDecimal(result.get("this_read")));
                             if (task != null) {
                                 log.setTaskId(task.getId());
                                 task.setReading(log.getReading());
@@ -5109,7 +5114,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         LOGGER.info("auto reading auto meter ......");
         try {
-            readMeterRemote(false);
+            readMeterRemote(false ,cmd.getCommunityId());
         }catch (Exception e){
             LOGGER.error("auto reading error:{}", e);
         }
@@ -5119,7 +5124,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void meterAutoReading(Boolean createPlansFlag) {
         LOGGER.debug("starting auto reading manual...");
-        readMeterRemote(createPlansFlag);
+        readMeterRemote(createPlansFlag,null);
         LOGGER.debug("ending auto reading manual...");
     }
 
