@@ -1388,6 +1388,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationWorkPlaces.setCommunityId(createOfficeSiteCommand.getCommunityId());
                     organizationWorkPlaces.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
+                    organizationWorkPlaces.setProvinceId(createOfficeSiteCommand.getProvinceId());
+                    organizationWorkPlaces.setCityId(createOfficeSiteCommand.getCityId());
+                    organizationWorkPlaces.setAreaId(createOfficeSiteCommand.getAreaId());
+                    organizationWorkPlaces.setWholeAddressName(createOfficeSiteCommand.getWholeAddressName());
                     //将上面的organization对象中的id也封装在对象中
                     organizationWorkPlaces.setOrganizationId(organization.getId());
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
@@ -8540,7 +8544,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                                    "enterprise name is null");
                         }
 
-                        if(importEnterpriseDataDTO.getName().getBytes().length > 100){
+                        if(importEnterpriseDataDTO.getName().getBytes().length > 200){
                             //说明公司的名称的长度大于50个字，那么就不允许
                             LOGGER.error("enterprise name is over than 100 bytes, data = {}", importEnterpriseDataDTO);
                             log.setData(importEnterpriseDataDTO);

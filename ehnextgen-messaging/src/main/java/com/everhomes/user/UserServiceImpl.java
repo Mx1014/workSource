@@ -6148,7 +6148,11 @@ public class UserServiceImpl implements UserService {
 					dto.setId(org.getId());
 					dto.setType(AddressUserType.ORGANIZATION.getCode());
 					dto.setName(org.getName());
-					dto.setAliasName(org.getName());
+					//根据公司id来查询eh_organization_details表中的信息，拿到公司的简称
+					OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
+					if(organizationDetail != null){
+						dto.setAliasName(organizationDetail.getDisplayName());
+					}
 					dto.setStatus(member.getStatus());
 					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
 					String pinyin = PinYinHelper.getPinYin(dto.getName());
