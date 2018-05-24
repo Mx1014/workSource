@@ -30,7 +30,7 @@ CREATE TABLE `eh_visitor_sys_visitors` (
 --   `refuse_uname` VARCHAR(256) COMMENT '后台拒绝人员名称',
 --   `delete_time` DATETIME COMMENT '后台删除时间',
   `visit_status` TINYINT COMMENT '访客状态，0，已删除; 1，未到访;2，等待确认; 3，已到访; 4，已拒绝; ',
-  `booking_status` TINYINT COMMENT '预约状态，0，已删除; 1，未到访; 3，已到访;',
+  `booking_status` TINYINT COMMENT '预约状态，0，已删除; 1，未到访;2，等待确认; 3，已到访;',
   `send_message_inviter_flag` TINYINT COMMENT '确认到访时是否发送消息给邀请人，0，不发送; 1，发送',
   `send_sms_Flag` TINYINT COMMENT '是否发送访客邀请函给邀请人，0，不发送; 1，发送',
   `office_location_id` BIGINT COMMENT '办公地点ID',

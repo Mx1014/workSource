@@ -96,6 +96,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
     @Autowired
+    public VisitorSysActionProvider visitorSysActionProvider;
+    @Autowired
     public VisitorSysOfficeLocationProvider visitorSysOfficeLocationProvider;
     @Autowired
     public VisitorSysVisitReasonProvider visitorSysVisitReasonProvider;
@@ -218,21 +220,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param visitor
      */
     private void addActionDto(List<BaseVisitorActionDTO> list, VisitorSysVisitor visitor){
-        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
-        if(visitor.getVisitStatus()>VisitorsysStatus.NOT_VISIT.getCode()
-                 && visitor.getVisitTime()!=null) {
-            BaseVisitorActionDTO dto1 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 1 : (byte) 4), visitor.getVisitTime(), null, visitor.getVisitorName());
-            list.add(dto1);
-        }
-        if(visitor.getVisitStatus()>VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode()
-                && visitor.getConfirmTime()!=null) {
-            BaseVisitorActionDTO dto2 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 2 : (byte) 5), visitor.getConfirmTime(), visitor.getConfirmUid(), visitor.getConfirmUname());
-            list.add(dto2);
-        }
-        if(visitor.getVisitStatus()>VisitorsysStatus.HAS_VISITED.getCode()) {
-            BaseVisitorActionDTO dto3 = new BaseVisitorActionDTO((ownerType == VisitorsysOwnerType.COMMUNITY ? (byte) 3 : (byte) 6), visitor.getRefuseTime(), visitor.getRefuseUid(), visitor.getRefuseUname());
-            list.add(dto3);
-        }
+        List<VisitorSysAction> actionList = visitorSysActionProvider.listVisitorSysActionByVisitorId(visitor.getId());
+        list.addAll(actionList.stream().map(r->{
+            BaseVisitorActionDTO dto = new BaseVisitorActionDTO();
+            dto.setActionType(r.getActionType());
+            dto.setTime(r.getCreateTime());
+            dto.setUid(r.getCreatorUid());
+            dto.setUname(r.getCreatorName());
+            return dto;
+        }).collect(Collectors.toList()));
     }
 
     /**
@@ -498,6 +494,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
+        createVisitorActions(visitor);
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
@@ -507,7 +504,46 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
+        createVisitorActions(relatedVisitor);
         return null;
+    }
+
+    /**
+     * 创建事件
+     * @param visitor
+     */
+    private void createVisitorActions(VisitorSysVisitor visitor) {
+        VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        VisitorSysAction action = null;
+        Byte actionFlag = null;
+        switch (visitStatus){
+            case WAIT_CONFIRM_VISIT:
+                actionFlag = ownerType==VisitorsysOwnerType.COMMUNITY?(byte)1:(byte)4;
+                action = visitorSysActionProvider.findVisitorSysActionByAction(visitor.getId(),actionFlag);
+                break;
+            case HAS_VISITED:
+                actionFlag = ownerType==VisitorsysOwnerType.COMMUNITY?(byte)2:(byte)5;
+                action = visitorSysActionProvider.findVisitorSysActionByAction(visitor.getId(),actionFlag);
+                break;
+            case REJECTED_VISIT:
+                actionFlag = ownerType==VisitorsysOwnerType.COMMUNITY?(byte)3:(byte)6;
+                action = visitorSysActionProvider.findVisitorSysActionByAction(visitor.getId(),actionFlag);
+                break;
+            default:
+                return;
+        }
+        if(action == null){
+            action = new VisitorSysAction();
+            action.setActionType(actionFlag);
+            User user = UserContext.current().getUser();
+            action.setCreatorUid(user==null?-1:user.getId());
+            action.setCreatorName(user==null?visitor.getVisitorName():user.getNickName());
+            action.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            action.setNamespaceId(visitor.getNamespaceId());
+            action.setVisitorId(visitor.getId());
+            visitorSysActionProvider.createVisitorSysAction(action);
+        }
     }
 
     /**
@@ -520,22 +556,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
+        createVisitorActions(visitor);
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
         }
-//        VisitorsysStatus visitorsysStatus = checkVisitStatus(visitor.getVisitStatus());
-//        //如果是确认到访，那么不能更新关联访客记录的状态，因为需要两次到访，首先是到访园区，然后到访是公司。
-//        if(visitorsysStatus == VisitorsysStatus.HAS_VISITED){
-//            relatedVisitor.setConfirmTime(null);
-//            relatedVisitor.setConfirmUid(null);
-//            relatedVisitor.setConfirmUname(null);
-//        }
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
+        createVisitorActions(relatedVisitor);
         return null;
     }
 
@@ -611,12 +642,26 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         dbProvider.execute(r->{
             visitorSysVisitorProvider.deleteVisitorSysVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
             visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            createVisitorActions(cmd.getNamespaceId(),cmd.getVisitorId());
 //            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
 //            visitorSysVisitorProvider.deleteVisitorSysVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
 //            visitorsysSearcher.syncVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
             return null;
         });
 
+    }
+
+    /**
+     * 创建事件
+     * @param namespaceId
+     * @param visitorId
+     */
+    private void createVisitorActions(Integer namespaceId, Long visitorId) {
+        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(namespaceId, visitorId);
+        if(visitor==null) {
+            return;
+        }
+        createVisitorActions(visitor);
     }
 
     /**
@@ -638,9 +683,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         dbProvider.execute(r->{
             visitorSysVisitorProvider.deleteVisitorSysVisitorAppoint(cmd.getNamespaceId(),cmd.getVisitorId());
             visitorsysSearcher.syncVisitor(cmd.getNamespaceId(),cmd.getVisitorId());
+            createVisitorActions(cmd.getNamespaceId(),cmd.getVisitorId());
             VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
             visitorSysVisitorProvider.deleteVisitorSysVisitorAppoint(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
             visitorsysSearcher.syncVisitor(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
+            createVisitorActions(relatedVisitor.getNamespaceId(),relatedVisitor.getId());
             return null;
         });
     }
@@ -666,10 +713,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
         }
         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
-        visitor.setConfirmTime(new Timestamp(System.currentTimeMillis()));
-        User user = UserContext.current().getUser();
-        visitor.setConfirmUid(user==null?-1:user.getId());
-        visitor.setConfirmUname(user==null?"anonymous":user.getNickName());
+//        visitor.setConfirmTime(new Timestamp(System.currentTimeMillis()));
+//        User user = UserContext.current().getUser();
+//        visitor.setConfirmUid(user==null?-1:user.getId());
+//        visitor.setConfirmUname(user==null?"anonymous":user.getNickName());
         return visitor;
     }
 
@@ -681,10 +728,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorSysVisitor generateRejectVisitor(VisitorSysVisitor visitor) {
         visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
         visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-        visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
-        User user = UserContext.current().getUser();
-        visitor.setRefuseUid(user==null?-1:user.getId());
-        visitor.setRefuseUname(user==null?"anonymous":user.getNickName());
+//        visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
+//        User user = UserContext.current().getUser();
+//        visitor.setRefuseUid(user==null?-1:user.getId());
+//        visitor.setRefuseUname(user==null?"anonymous":user.getNickName());
         return visitor;
     }
 
@@ -1043,6 +1090,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             generateRejectVisitor(visitor);
             visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
             visitorsysSearcher.syncVisitor(visitor);
+            createVisitorActions(visitor);
 //            visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
 //            visitorsysSearcher.syncVisitor(relatedVisitor);
             return null;
@@ -1898,10 +1946,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
             if(visitStatus == VisitorsysStatus.HAS_VISITED){//
                 visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                //预约访客的状态，可以直接从未到访到确认到访，所以登记时间可能为空，这里设置一下
-//                if(visitor.getVisitTime()==null) {
-//                    visitor.setVisitTime(new Timestamp(System.currentTimeMillis()));
-//                }
             }
         }else{
             if(visitStatus == VisitorsysStatus.NOT_VISIT){//临时访客是未到访状态
@@ -2075,13 +2119,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             convert.setVisitTime(relatedVisitor == null ? null : relatedVisitor.getVisitTime());
         }
-        convert.setConfirmTime(relatedVisitor ==null?null:relatedVisitor.getConfirmTime());
-        convert.setConfirmUid(relatedVisitor ==null?null:relatedVisitor.getConfirmUid());
-        convert.setConfirmUname(relatedVisitor ==null?null:relatedVisitor.getConfirmUname());
-        convert.setRefuseUid(relatedVisitor ==null?null:relatedVisitor.getRefuseUid());
-        convert.setRefuseUname(relatedVisitor ==null?null:relatedVisitor.getRefuseUname());
-        convert.setRefuseTime(relatedVisitor ==null?null:relatedVisitor.getRefuseTime());
-        convert.setDeleteTime(relatedVisitor ==null?null:relatedVisitor.getDeleteTime());
+//        convert.setConfirmTime(relatedVisitor ==null?null:relatedVisitor.getConfirmTime());
+//        convert.setConfirmUid(relatedVisitor ==null?null:relatedVisitor.getConfirmUid());
+//        convert.setConfirmUname(relatedVisitor ==null?null:relatedVisitor.getConfirmUname());
+//        convert.setRefuseUid(relatedVisitor ==null?null:relatedVisitor.getRefuseUid());
+//        convert.setRefuseUname(relatedVisitor ==null?null:relatedVisitor.getRefuseUname());
+//        convert.setRefuseTime(relatedVisitor ==null?null:relatedVisitor.getRefuseTime());
+//        convert.setDeleteTime(relatedVisitor ==null?null:relatedVisitor.getDeleteTime());
 
         convert.setSendMessageInviterFlag(relatedVisitor ==null?visitor.getSendMessageInviterFlag():relatedVisitor.getSendMessageInviterFlag());
         convert.setSendSmsFlag(relatedVisitor ==null?visitor.getSendSmsFlag():relatedVisitor.getSendSmsFlag());
