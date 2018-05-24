@@ -25,6 +25,8 @@ public interface DecorationService {
 
     SearchRequestResponse searchRequest(SearchRequestsCommand cmd);
 
+    SearchRequestResponse searchUserRelateRequest(ListUserRequestsCommand cmd);
+
     DecorationRequestDTO getRequestDetail(GetDecorationDetailCommand cmd);
 
     String convertAddress(String address);

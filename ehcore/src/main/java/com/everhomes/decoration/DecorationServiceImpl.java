@@ -373,6 +373,19 @@ public class DecorationServiceImpl implements  DecorationService {
     }
 
     @Override
+    public SearchRequestResponse searchUserRelateRequest(ListUserRequestsCommand cmd) {
+        SearchRequestResponse response = new SearchRequestResponse();
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = null;
+        if (cmd.getPageAnchor() != null)
+            locator = new ListingLocator(cmd.getPageAnchor());
+        List<DecorationRequest> requests =  this.decorationProvider.queryUserRelateRequests(UserContext.getCurrentNamespaceId(),
+                cmd.getConmmunityId(),cmd.getPhone(),pageSize+1,locator);
+
+        return null;
+    }
+
+    @Override
     public DecorationRequestDTO getRequestDetail(GetDecorationDetailCommand cmd) {
         DecorationRequest request = this.decorationProvider.getRequestById(cmd.getId());
         return convertRequest(request,cmd.getProcessorType());
