@@ -2657,7 +2657,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return results;
     }
 
-    @PostConstruct
+    /*@PostConstruct
     @Override
     public void initArchivesNotification() {
         if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
@@ -2676,7 +2676,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesNotificationJob.class,
                 new HashMap<>());
         LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + date);
-    }
+    }*/
 
     @Override
     public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {
@@ -2688,7 +2688,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime nowDateTime){
+    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime){
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
         if(company == null) {
             LOGGER.error("Company not found!");
@@ -2703,7 +2703,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  2.get employee's names
-        Date firstOfWeek = Date.valueOf(nowDateTime.toLocalDate());
+        Date firstOfWeek = Date.valueOf(dateTime.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();
