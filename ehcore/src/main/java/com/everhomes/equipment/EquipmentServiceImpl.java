@@ -471,24 +471,26 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardSearcher.feedDoc(standard);
 
 			} else {
-				if ((cmd.getTargetId() == null || cmd.getTargetId() == 0L) && standard.getTargetId() == 0L) {//全部中修改公共标准
-					equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
-					if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
-						for (Long communityId : cmd.getCommunities()) {
-							EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
-							map.setModelId(standard.getId());
-							map.setTargetType(standard.getTargetType());
-							map.setTargetId(communityId);
-							map.setModelType(EquipmentModelType.STANDARD.getCode());
-							equipmentProvider.createEquipmentModelCommunityMap(map);
-						}
-					}
+				EquipmentInspectionStandards exist  = verifyEquipmentStandard(cmd.getId());
+				standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 
+				if (cmd.getEquipments() != null || cmd.getEquipments().size() > 0) {
+					standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+				} else {
+					throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+							EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST, "标准关联巡检对象为空！");
 				}
-				//创建标准的模板表和item关系表
-				createEquipmentStandardItems(standard, cmd);
-				equipmentProvider.updateEquipmentStandard(standard);
-				equipmentStandardSearcher.feedDoc(standard);
+
+				if (exist.getTargetId() == 0L && cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+					//项目修改公共标准
+					standard.setTargetId(cmd.getTargetId());
+					standard.setTargetType(cmd.getTargetType());
+					standard.setCreatorUid(UserContext.currentUserId());
+					standard.setReferId(cmd.getId());
+					//创建标准的模板表和item关系表
+					createEquipmentStandardItems(standard, cmd);
+					equipmentProvider.creatEquipmentStandard(standard);
+					equipmentStandardSearcher.feedDoc(standard);
 			}
 
 			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
