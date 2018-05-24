@@ -49,13 +49,5 @@ ALTER TABLE `eh_portal_versions` ADD COLUMN `preview_count`  int(11) NULL DEFAUL
 
 -- app配置 1.2.1 end  add by yanjun
 
-
--- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
-ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
-ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
-ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
-
-
-
 -- 资源预约 订单资源表增加字段
 ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(64) NULL;
