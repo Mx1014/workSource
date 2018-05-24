@@ -97,7 +97,7 @@ public class PolicyProviderImpl implements PolicyProvider {
         if(StringUtils.isNotEmpty(ownerType))
             query.addConditions(Tables.EH_POLICIES.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
-            query.addConditions(Tables.EH_POLICIES.OWNER_ID.in(ownerId));
+            query.addConditions(Tables.EH_POLICIES.OWNER_ID.in(ownerId,-1L));
         if(ids.size() > 0)
             query.addConditions(Tables.EH_POLICIES.ID.in(ids));
         if(null != pageAnchor)
