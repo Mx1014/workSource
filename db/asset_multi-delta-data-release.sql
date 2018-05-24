@@ -1,0 +1,1 @@
+UPDATE `eh_service_modules` SET `multiple_flag` = 1 WHERE `id` = 20400;

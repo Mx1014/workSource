@@ -14,6 +14,7 @@ import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.sequence.SequenceProvider;
@@ -194,5 +195,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		ListServiceModuleAppsForBannerResponse  response = new ListServiceModuleAppsForBannerResponse();
 		response.setApps(dtos);
 		return response;
+	}
+
+	@Override
+	public Long getOriginIdFromMappingApp(Long originId) {
+		return null;
+	}
+
+	@Override
+	public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
+
 	}
 }
