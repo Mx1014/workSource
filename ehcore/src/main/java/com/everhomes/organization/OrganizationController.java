@@ -1592,7 +1592,7 @@ public class OrganizationController extends ControllerBase {
      * @param cmd
      * @return
      */
-    @RequestMapping(value = "/org/getAdminType")
+    @RequestMapping(value = "/getAdminType")
     @RestReturn(value = GetAdminTypeResponse.class)
     public RestResponse getAdminType(GetAdminTypeCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
