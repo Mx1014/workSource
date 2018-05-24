@@ -2630,13 +2630,13 @@ public class PunchServiceImpl implements PunchService {
         return 0;
     }
 
-    private void addPunchStatistics(OrganizationMemberDTO member, Long orgId, Calendar startCalendar, Calendar endCalendar) {
+    private void addPunchStatistics(OrganizationMemberDetails detail, Long orgId, Calendar startCalendar, Calendar endCalendar) {
         PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
         if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
             LOGGER.error("filed report dont add punch statistic");
             return;
         }
-        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, member.getTargetId());
+        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
         if (null == pr)
             throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
                     PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
@@ -2670,19 +2670,19 @@ public class PunchServiceImpl implements PunchService {
                     .getTime()));
             statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
             statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-            Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+            Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
             statistic.setOwnerId(ownerId);
-            statistic.setUserId(member.getTargetId());
-            statistic.setDetailId(member.getDetailId());
-            statistic.setUserName(member.getContactName());
-            String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId()));
+            statistic.setUserId(detail.getTargetId());
+            statistic.setDetailId(detail.getId());
+            statistic.setUserName(detail.getContactName());
+            String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
             statistic.setDeptName(depName);
             //2018年5月17日 by wh 删除statistics提前到这里
             List<Long> orgIds = new ArrayList<>();
             orgIds.add(ownerId);
             this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
 
-            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
+            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 
@@ -2716,7 +2716,7 @@ public class PunchServiceImpl implements PunchService {
             statistic.setStatusList(StringHelper.toJsonString(dayStatusDTOList));
             statistic.setDeviceChangeCounts(deviceChangeCounts);
             //年假余额
-            PunchVacationBalance vacationBalance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(member.getDetailId());
+            PunchVacationBalance vacationBalance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(detail.getId());
             if (null != vacationBalance) {
                 statistic.setOvertimeCompensationBalance(vacationBalance.getOvertimeCompensationBalance());
                 statistic.setAnnualLeaveBalance(vacationBalance.getAnnualLeaveBalance());
@@ -2724,7 +2724,7 @@ public class PunchServiceImpl implements PunchService {
 
             //算每一项需要计算的
             processPunchListCount(dayLogList, statistic);
-            int abnormalRequestCount = approvalRequestProvider.countAbnormalUserRequest(member.getTargetId(), ownerId, new Date(startCalendar.getTime().getTime()),
+            int abnormalRequestCount = approvalRequestProvider.countAbnormalUserRequest(detail.getTargetId(), ownerId, new Date(startCalendar.getTime().getTime()),
                     new Date(endCalendar.getTime().getTime()));
             statistic.setExceptionRequestCounts(abnormalRequestCount);
             //2018年5月17日 by wh 之前的特殊处理可以注释掉
@@ -2742,7 +2742,7 @@ public class PunchServiceImpl implements PunchService {
 //                    orgIds.add(org1.getId());
             
         } catch (Exception e) {
-            LOGGER.error("#####refresh month log error!! userid:[" + member.getTargetId()
+            LOGGER.error("#####refresh month log error!! userid:[" + detail.getTargetId()
                     + "] organization id :[" + orgId + "] ", e);
         } finally {
         	
@@ -5932,8 +5932,8 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
         try {
             OrganizationDTO dept = findUserDepartment(userId, ownerId);
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
-            refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, dept.getId());
+            refreshDayLogAndMonthStat(member, dept.getId(), punCalendar, startCalendar);
         } catch (Exception e) {
             LOGGER.error("refresh day log and month stat Wrong", e);
         }
@@ -5945,7 +5945,7 @@ public class PunchServiceImpl implements PunchService {
      *
      * @throws ParseException
      */
-    private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
+    private void refreshDayLogAndMonthStat(OrganizationMemberDetails member, Long orgId,
                                            Calendar punCalendar, Calendar startCalendar) throws ParseException {
         orgId = getTopEnterpriseId(orgId);
 //        try {
@@ -9824,11 +9824,9 @@ public class PunchServiceImpl implements PunchService {
             try {
                 List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null);
                 setMonthReportProcess(report, 5);
-                for (int i = 0; i < members.size(); i++) {
-                    OrganizationMemberDTO dto = ConvertHelper.convert(members.get(i),OrganizationMemberDTO.class);
-                    dto.setDetailId(members.get(i).getId());
+                for (int i = 0; i < members.size(); i++) { 
                     try{
-                    	addPunchStatistics(dto, cmd.getOwnerId(), start, end);
+                    	addPunchStatistics(members.get(i), cmd.getOwnerId(), start, end);
                     }catch(Exception e){
                     	LOGGER.error("update punch month report error ",e);
                     }

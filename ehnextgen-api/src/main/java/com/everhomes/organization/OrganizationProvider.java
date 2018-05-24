@@ -19,6 +19,7 @@ import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.userOrganization.UserOrganizations;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -505,4 +506,6 @@ public interface OrganizationProvider {
     void deleteAllOrganizationAddressById(Long organizationId);
 
 	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+	OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId,
+			Long orgId);
 }
