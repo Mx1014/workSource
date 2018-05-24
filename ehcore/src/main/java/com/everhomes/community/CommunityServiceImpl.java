@@ -4368,8 +4368,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 		dbProvider.execute(status -> {
 
-			for (Long communityId: cmd.getCommunityIds()){
-				changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId(), cmd.getKeepAuthorizationFlag());
+			if(cmd.getCommunityIds() != null && !"".equals(cmd.getCommunityIds())){
+				for (Long communityId: cmd.getCommunityIds()){
+					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId(), cmd.getKeepAuthorizationFlag());
+				}
 			}
 
 			return null;
