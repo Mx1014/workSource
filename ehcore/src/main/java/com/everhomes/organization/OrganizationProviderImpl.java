@@ -143,6 +143,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.NAME,organization.getName())
                 .set(Tables.EH_ORGANIZATIONS.PM_FLAG,organization.getPmFlag())
+                .set(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE,organization.getOrganizationType())
                 .set(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG,organization.getServiceSupportFlag())
                 .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
     }
