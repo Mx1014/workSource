@@ -142,6 +142,9 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         if (params.getVisitorType() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorType", params.getVisitorType()));
         }
+        if (params.getVisitorPhone() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorPhone", params.getVisitorPhone()));
+        }
         if (params.getOfficeLocationId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("officeLocationId", params.getOfficeLocationId()));
         }

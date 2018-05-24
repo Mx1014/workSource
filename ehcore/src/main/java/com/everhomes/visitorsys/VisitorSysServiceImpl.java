@@ -1458,9 +1458,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         params.setVisitorPhone(vPhone);
         params.setStartPlannedVisitTime(VisitorSysUtils.getStartOfDay(now).getTime());
         params.setEndPlannedVisitTime(VisitorSysUtils.getEndOfDay(now).getTime());
-        List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
-                (namespaceId,ownerType,ownerId,vPhone
-                        ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
+        params.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+        params.setVisitorType(VisitorsysVisitorType.BE_INVITED.getCode());
+        params.setEndPlannedVisitTime(VisitorSysUtils.getEndOfDay(now).getTime());
+        params.setSearchFlag(VisitorsysSearchFlagType.BOOKING_MANAGEMENT.getCode());
+        params.setPageSize(100);
+        params.setPageAnchor(0L);
+//        List<VisitorSysVisitor> list = visitorSysVisitorProvider.listVisitorSysVisitorByVisitorPhone
+//                (namespaceId,ownerType,ownerId,vPhone
+//                        ,VisitorSysUtils.getStartOfDay(now),VisitorSysUtils.getEndOfDay(now));
 //        ListBookedVisitorsResponse response = new ListBookedVisitorsResponse();
 //        response.setVisitorDtoList(list.stream().map(r->ConvertHelper.convert(r,BaseVisitorDTO.class)).collect(Collectors.toList()));
         return visitorsysSearcher.searchVisitors(params);
