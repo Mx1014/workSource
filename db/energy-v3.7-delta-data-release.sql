@@ -7,3 +7,6 @@ update eh_version_urls set download_url = replace(download_url,'1-0-1','1-0-3'),
 DELETE FROM  eh_energy_meter_tasks WHERE  plan_id in (SELECT  id from eh_energy_plans where name ='autoPlans');
 
 DELETE  FROM  eh_energy_plans WHERE  name = 'autoPlans';
+
+ALTER TABLE `eh_energy_meter_reading_logs`
+  MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `meter_id`;
