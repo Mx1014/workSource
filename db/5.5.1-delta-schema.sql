@@ -43,3 +43,8 @@ CREATE TABLE `eh_salary_payslip_details` (
   KEY `i_eh_create_time`(`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '工资条详情表';
 -- 薪酬2.2 end
+
+-- app配置 1.2.1 start  add by yanjun 201805241019
+ALTER TABLE `eh_portal_versions` ADD COLUMN `preview_count`  int(11) NULL DEFAULT 0 COMMENT '预览版本发布次数';
+
+-- app配置 1.2.1 end  add by yanjun
