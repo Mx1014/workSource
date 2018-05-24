@@ -13,8 +13,8 @@ import java.util.List;
  * <li>pageSize: 显示数量</li>
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者id</li>
- * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
- * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
+ * <li>targetType:对公转账客户类型为eh_organization即企业</li>
+ * <li>targetId:客户id，对公转账只针对企业，targetId为企业id</li>
  * <li>namespaceId:域空间</li>
  * <li>startPayTime: 缴费开始时间</li>
  * <li>endPayTime: 缴费结束时间</li>

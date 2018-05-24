@@ -4826,9 +4826,9 @@ public class AssetServiceImpl implements AssetService {
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
         publicTransferBillRespForEnt.setOrderCreateTime(String.valueOf(order.getCreateTime()));
         //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
-        publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
-        publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
-        publicTransferBillRespForEnt.setOrderSource("对公转账");
+        //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
+        //publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
+        publicTransferBillRespForEnt.setOrderSource(cmd.getOrderSource());
         if(orderExplain != null && orderExplain.length() != 0) {
         	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
         }

@@ -15,6 +15,7 @@ import java.util.List;
  * <li>payerName：缴费人</li>
  * <li>namespaceId:域空间</li>
  * <li>contractNum:合同编号</li>
+ * <li>orderSource:订单来源，如：物业缴费</li>
  * <li>billList:勾选的要转账的账单集合，参考{@link PaymentBillRequest}</li>
  *</ul>
  */
@@ -26,6 +27,7 @@ public class PublicTransferBillCmdForEnt {
 	private String payerName;
 	private Integer namespaceId;
 	private String contractNum;
+	private String orderSource;
 	private List<PaymentBillRequest> billList;
 	
 	public String getOwnerType() {
@@ -75,6 +77,12 @@ public class PublicTransferBillCmdForEnt {
 	}
 	public void setPayerName(String payerName) {
 		this.payerName = payerName;
+	}
+	public String getOrderSource() {
+		return orderSource;
+	}
+	public void setOrderSource(String orderSource) {
+		this.orderSource = orderSource;
 	}
 	
 }
