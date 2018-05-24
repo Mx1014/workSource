@@ -198,6 +198,7 @@ import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
@@ -224,6 +225,7 @@ import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
@@ -260,6 +262,9 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,8 +276,16 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -292,6 +305,9 @@ import java.util.stream.Collectors;
 @Component
 public class CustomerServiceImpl implements CustomerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerServiceImpl.class);
+
+    final String downloadDir = "\\download\\";
+
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
@@ -3828,5 +3844,218 @@ public class CustomerServiceImpl implements CustomerService {
             });
             enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), bannerList);
         }
+    }
+
+    @Override
+    public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd,HttpServletResponse httpResponse) {
+
+//        ListCustomerAnnualStatisticsCommand annualStatisticsCommand = ConvertHelper.convert(cmd, ListCustomerAnnualStatisticsCommand.class);
+        //各园区企业企业分布
+        EnterpriseCustomerStatisticsDTO customerStatisticsDTO =  listEnterpriseCustomerStatistics(cmd);
+//        ListCustomerAnnualStatisticsResponse annualStatisticsResponse =  listCustomerAnnualStatistics(annualStatisticsCommand);
+        //企业行业分布
+        CustomerIndustryStatisticsResponse industryStatisticsResponse = listCustomerIndustryStatistics(cmd);
+        //企业人才分布
+        CustomerTalentStatisticsResponse talentStatisticsResponse = listCustomerTalentStatistics(cmd);
+        //知识产权分布
+        CustomerIntellectualPropertyStatisticsResponse statisticsResponse = listCustomerIntellectualPropertyStatistics(cmd);
+        //获批项目分布
+        CustomerProjectStatisticsResponse projectStatisticsResponse = listCustomerProjectStatistics(cmd);
+        //认知途径分布
+        CustomerSourceStatisticsResponse sourceStatisticsResponse = listCustomerSourceStatistics(cmd);
+
+        URL rootPath = CustomerServiceImpl.class.getResource("/");
+        String filePath = rootPath.getPath() + this.downloadDir;
+        File file = new File(filePath);
+        if (!file.exists()){
+            boolean mdkirResult =   file.mkdirs();
+            LOGGER.info("mkdir  excel file result :{}",mdkirResult);
+        }
+        filePath = filePath + "enterprise_customer_details" + System.currentTimeMillis() + ".xlsx";
+        //  new file
+        this.createEquipmentStandardsBook(filePath, customerStatisticsDTO, null,
+                industryStatisticsResponse.getDtos(), talentStatisticsResponse.getDtos(), statisticsResponse.getDtos(), projectStatisticsResponse.getDtos(), sourceStatisticsResponse.getDtos());
+
+        return download(filePath, httpResponse);
+    }
+
+    private void createEquipmentStandardsBook(String filePath, EnterpriseCustomerStatisticsDTO customerStatisticsDTO, List<CustomerAnnualStatisticDTO> statisticDTOs, List<CustomerIndustryStatisticsDTO> dtos, List<CustomerTalentStatisticsDTO> dtos1, List<CustomerIntellectualPropertyStatisticsDTO> dtos2, List<CustomerProjectStatisticsDTO> dtos3, List<CustomerSourceStatisticsDTO> dtos4) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        Sheet customerStatisticSheet = wb.createSheet("各园区企业分布");
+        Sheet industrySheet = wb.createSheet("企业行业分布");
+        Sheet talentSheet = wb.createSheet("企业人才分布");
+        Sheet intellectualPropertySheet = wb.createSheet("知识产权分布");
+        Sheet projectSheet = wb.createSheet("获批项目分布");
+        Sheet sourceSheet = wb.createSheet("认知途径分布");
+        customerStatisticSheet.setDefaultColumnWidth(20 * 256);
+        industrySheet.setDefaultColumnWidth(20 * 256);
+        talentSheet.setDefaultColumnWidth(20 * 256);
+        intellectualPropertySheet.setDefaultColumnWidth(20 * 256);
+        projectSheet.setDefaultColumnWidth(20 * 256);
+        sourceSheet.setDefaultColumnWidth(20 * 256);
+        // 设置sheet页面表头和cell数据
+        setNewCustomerStatisticSheetHeadAndBookRow(customerStatisticSheet, customerStatisticsDTO);
+        setNewIndustrySheetHeadAndBookRow(industrySheet, dtos);
+        setNewTalentSheetHeadAndBookRow(talentSheet, dtos1);
+        setNewIntellectualPropertySheetHeadAndBookRow(intellectualPropertySheet, dtos2);
+        setNewProjectSheetHeadAndBookRow(projectSheet, dtos3);
+        setNewSourceSheetHeadAndBookRow(sourceSheet, dtos4);
+
+        try {
+            FileOutputStream out = new FileOutputStream(filePath);
+            wb.write(out);
+            wb.close();
+            out.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+                    EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+                    e.getLocalizedMessage());
+        }
+    }
+
+    private void setNewSourceSheetHeadAndBookRow(Sheet sourceSheet, List<CustomerSourceStatisticsDTO> dtos4) {
+        Row row = sourceSheet.createRow(sourceSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("认知途径");
+        row.createCell(++i).setCellValue("数量");
+        if (dtos4 != null && dtos4.size() > 0) {
+            dtos4.forEach((r) -> setNewSourceSheetBookRow(sourceSheet, r));
+        }
+    }
+
+    private void setNewSourceSheetBookRow(Sheet sourceSheet, CustomerSourceStatisticsDTO dto) {
+        Row row = sourceSheet.createRow(sourceSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getCustomerCount());
+    }
+
+    private void setNewProjectSheetHeadAndBookRow(Sheet projectSheet, List<CustomerProjectStatisticsDTO> dtos3) {
+        Row row = projectSheet.createRow(projectSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("获批项目");
+        row.createCell(++i).setCellValue("项目数量");
+        if(dtos3!=null && dtos3.size()>0){
+            dtos3.forEach((r) -> setNewProjectSheetBookRow(projectSheet, r));
+        }
+    }
+
+    private void setNewProjectSheetBookRow(Sheet projectSheet, CustomerProjectStatisticsDTO dto) {
+        Row row = projectSheet.createRow(projectSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getProjectCount());
+    }
+
+    private void setNewIntellectualPropertySheetHeadAndBookRow(Sheet intellectualPropertySheet, List<CustomerIntellectualPropertyStatisticsDTO> dtos2) {
+        Row row = intellectualPropertySheet.createRow(intellectualPropertySheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("知识产权");
+        row.createCell(++i).setCellValue("数量");
+        if (dtos2 != null && dtos2.size() > 0) {
+            dtos2.forEach((r) -> setNewIntellectualPropertySheetBookRow(intellectualPropertySheet, r));
+        }
+    }
+
+    private void setNewIntellectualPropertySheetBookRow(Sheet intellectualPropertySheet, CustomerIntellectualPropertyStatisticsDTO dto) {
+        Row row = intellectualPropertySheet.createRow(intellectualPropertySheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getPropertyType() == null ? "未知" : dto.getPropertyType());
+        row.createCell(++i).setCellValue(dto.getPropertyCount());
+    }
+
+    private void setNewTalentSheetHeadAndBookRow(Sheet talentSheet, List<CustomerTalentStatisticsDTO> dtos1) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("人才类型");
+        row.createCell(++i).setCellValue("人才数");
+        if (dtos1 != null && dtos1.size() > 0) {
+            dtos1.forEach((r) -> setTalentSheetBookRow(talentSheet, r));
+        }
+    }
+
+    private void setTalentSheetBookRow(Sheet talentSheet, CustomerTalentStatisticsDTO dto) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getCategoryName() == null ? "未知" : dto.getCategoryName());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0L : dto.getCustomerMemberCount());
+    }
+
+    private void setNewIndustrySheetHeadAndBookRow(Sheet industrySheet, List<CustomerIndustryStatisticsDTO> dtos) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("行业");
+        row.createCell(++i).setCellValue("企业数");
+        if (dtos != null && dtos.size() > 0) {
+            dtos.forEach((r) -> setIndustrySheetBookRow(industrySheet, r));
+        }
+    }
+
+    private void setIndustrySheetBookRow(Sheet industrySheet, CustomerIndustryStatisticsDTO dto) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0L : dto.getCustomerCount());
+    }
+
+    private void setNewCustomerStatisticSheetHeadAndBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO statisticDTO) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("企业客户总数 单位：个");
+        row.createCell(++i).setCellValue("项目总企业人数 单位：人");
+        row.createCell(++i).setCellValue("截止到当前，项目总营业额  单位：万元");
+        row.createCell(++i).setCellValue("截止到当前，项目总纳税额  单位：万元");
+        setCustomerStatisticSheetBookRow(customerStatisticSheet, statisticDTO);
+    }
+
+    private void setCustomerStatisticSheetBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO dto) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0 : dto.getCustomerCount());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0 : dto.getCustomerMemberCount());
+        row.createCell(++i).setCellValue(dto.getTotalTurnover().toString());
+        row.createCell(++i).setCellValue(dto.getTotalTaxAmount().toString());
+    }
+
+    public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            if (!file.isFile()) {
+                LOGGER.info("filename:{} is not a file", path);
+            }
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {
+                boolean deleteResult = file.delete();
+                LOGGER.info("delete  excel file result :{}",deleteResult);
+            }
+
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE, QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL, ex.getLocalizedMessage());
+        }
+        return response;
     }
 }

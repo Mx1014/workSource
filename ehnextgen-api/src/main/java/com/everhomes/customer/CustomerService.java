@@ -360,4 +360,6 @@ public interface CustomerService {
     List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
 
     void syncOrganizationToCustomer();
+
+    HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse);
 }
