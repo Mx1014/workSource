@@ -23,6 +23,10 @@ public interface DecorationProvider {
 
     DecorationRequest getRequestById(Long requestId);
 
+    List<DecorationRequest> queryDecorationRequests(Integer namespaceId,Long communityId,Long startTime,Long endTime,
+                                                    String address,Byte status,String keyword,Byte cancelFlag,Integer pageSize,
+                                                    ListingLocator locator);
+
     DecorationWorker getDecorationWorkerById(Long id);
 
     List<DecorationWorker> listWorkersByRequestId(Long requestId, String keyWord, ListingLocator locator, Integer pageSize);
@@ -56,5 +60,9 @@ public interface DecorationProvider {
     DecorationApprovalVal getApprovalValById(Long id);
 
     List<DecorationApprovalVal> listApprovalValsByRequestId(Long requestId);
+
+    List<DecorationCompanyChief> listChiefsByCompanyId(Long companyId);
+
+    void createCompanyChief(DecorationCompanyChief chief);
 
 }

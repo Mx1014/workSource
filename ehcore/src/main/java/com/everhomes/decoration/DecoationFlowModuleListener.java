@@ -17,13 +17,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
 public class DecoationFlowModuleListener implements FlowModuleListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DecoationFlowModuleListener.class);
+    private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
     private PortalService portalService;
     @Autowired
@@ -80,20 +83,59 @@ public class DecoationFlowModuleListener implements FlowModuleListener {
         if (DecorationRequestStatus.CONSTRACT.getFlowOwnerType().equals(flowCase.getReferType())){
             DecorationApprovalVal val = this.decorationProvider.getApprovalValById(flowCase.getReferId());
             request = this.decorationProvider.getRequestById(val.getRequestId());
-            GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-            cmd.setSourceType(EhDecorationApprovalVals.class.getSimpleName());
-            cmd.setSourceId(val.getId());
-            List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd);
-            formEntities.forEach(r -> {
-                if (StringUtils.isBlank(r.getValue())) {
-                    r.setValue("无");
-                }
-            });
-            entities.addAll(formEntities);
+            entities.addAll(this.decorationService.getFormEntitiesByApprovalVal(val));
         }else{
             request = this.decorationProvider.getRequestById(flowCase.getReferId());
         }
+        FlowCaseEntity e;
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("姓名");
+        e.setValue(request.getApplyName());
+        entities.add(e);
 
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("联系电话");
+        e.setValue(request.getApplyPhone());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("企业名称");
+        e.setValue(request.getApplyCompany());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("装修地点");
+        e.setValue(this.decorationService.convertAddress(request.getAddress()));
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("装修期限");
+        e.setValue(sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
+                sdfyMd.format(new Date(request.getEndTime().getTime())));
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("装修公司");
+        e.setValue(request.getDecoratorCompany());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("负责人姓名");
+        e.setValue(request.getDecoratorName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("联系电话");
+        e.setValue(request.getDecoratorPhone());
+        entities.add(e);
         return entities;
     }
 

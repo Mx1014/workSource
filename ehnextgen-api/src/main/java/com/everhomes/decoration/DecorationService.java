@@ -1,6 +1,7 @@
 package com.everhomes.decoration;
 
 import com.everhomes.rest.decoration.*;
+import com.everhomes.rest.flow.FlowCaseEntity;
 
 import java.util.List;
 
@@ -21,6 +22,14 @@ public interface DecorationService {
     void deleteWorker(DeleteWorkerCommand cmd);
 
     DecorationRequestDTO createRequest(CreateRequestCommand cmd);
+
+    SearchRequestResponse searchRequest(SearchRequestsCommand cmd);
+
+    DecorationRequestDTO getRequestDetail(GetDecorationDetailCommand cmd);
+
+    String convertAddress(String address);
+
+    List<FlowCaseEntity> getFormEntitiesByApprovalVal(DecorationApprovalVal val);
 
     void cancelRequest(RequestIdCommand cmd);
 

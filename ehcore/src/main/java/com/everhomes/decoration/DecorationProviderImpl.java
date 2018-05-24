@@ -136,6 +136,41 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
+    public List<DecorationRequest> queryDecorationRequests(Integer namespaceId, Long communityId, Long startTime,
+                                                           Long endTime, String address, Byte status, String keyword, Byte cancelFlag,
+                                                           Integer pageSize, ListingLocator locator) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_REQUESTS);
+        Condition condition = Tables.EH_DECORATION_REQUESTS.COMMUNITY_ID.eq(communityId);
+        if (null != namespaceId)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+        if (null != startTime)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.CREATE_TIME.gt(new Timestamp(startTime)));
+        if (null != endTime)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.CREATE_TIME.lt(new Timestamp(endTime)));
+        if (null != address)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.ADDRESS.like("%"+address+"%"));
+        if (null != status)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.STATUS.eq(status));
+        if (null != keyword)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.APPLY_NAME.eq(keyword).or(Tables.EH_DECORATION_REQUESTS.APPLY_PHONE.eq(keyword))
+                    .or(Tables.EH_DECORATION_REQUESTS.APPLY_COMPANY.eq(keyword)));
+        if (null != cancelFlag)
+            if (cancelFlag == 0)
+                condition = condition.and(Tables.EH_DECORATION_REQUESTS.CANCEL_FLAG.eq((byte) 0));
+            else
+                condition = condition.and(Tables.EH_DECORATION_REQUESTS.CANCEL_FLAG.in((byte) 1, (byte) 2));
+
+        if (null != locator)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
+        step.where(condition);
+        if (null != pageSize)
+            step.limit(pageSize);
+        return step.orderBy(Tables.EH_DECORATION_REQUESTS.ID.desc()).fetch().map(r->ConvertHelper.convert(r,DecorationRequest.class));
+    }
+
+    @Override
     public DecorationWorker getDecorationWorkerById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(
@@ -330,5 +365,29 @@ public class DecorationProviderImpl implements  DecorationProvider {
         condition = condition.and(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG.ne((byte)1));
         step.where(condition);
         return step.fetch().map(r->ConvertHelper.convert(r,DecorationApprovalVal.class));
+    }
+
+    @Override
+    public List<DecorationCompanyChief> listChiefsByCompanyId(Long companyId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_COMPANY_CHIEFS);
+        Condition condition = Tables.EH_DECORATION_COMPANY_CHIEFS.COMPANY_ID.eq(companyId);
+        step.where(condition);
+        return step.fetch().map(r->ConvertHelper.convert(r,DecorationCompanyChief.class));
+    }
+
+    @Override
+    public void createCompanyChief(DecorationCompanyChief chief) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhDecorationCompanyChiefs.class));
+        chief.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationCompanyChiefsRecord record = ConvertHelper.convert(chief,EhDecorationCompanyChiefsRecord.class);
+        InsertQuery<EhDecorationCompanyChiefsRecord> query = context
+                .insertQuery(Tables.EH_DECORATION_COMPANY_CHIEFS);
+        query.setRecord(record);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationCompanyChiefs.class, null);
     }
 }

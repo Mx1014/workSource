@@ -21,8 +21,10 @@ import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.decoration.*;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
@@ -34,6 +36,8 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -77,6 +81,8 @@ public class DecorationServiceImpl implements  DecorationService {
     private GeneralApprovalProvider generalApprovalProvider;
     @Autowired
     private GeneralFormService generalFormService;
+    @Autowired
+    private UserProvider userProvider;
 
 
     private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
@@ -281,7 +287,9 @@ public class DecorationServiceImpl implements  DecorationService {
         request.setApplyUid(UserContext.currentUserId());
         request.setCancelFlag((byte)0);
         request.setStatus(DecorationRequestStatus.APPLY.getCode());
-
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), cmd.getDecoratorPhone());
+        if (userIdentifier != null)
+            request.setDecoratorUid(userIdentifier.getOwnerUid());
         if (request.getDecoratorCompanyId() == null){
             Organization org = organizationProvider.findOrganizationByName(request.getDecoratorCompany(), UserContext.getCurrentNamespaceId());
             if (org!=null)
@@ -320,6 +328,50 @@ public class DecorationServiceImpl implements  DecorationService {
         });
 
         return convertRequest(request,ProcessorType.MASTER.getCode());
+    }
+
+    @Override
+    public SearchRequestResponse searchRequest(SearchRequestsCommand cmd) {
+        SearchRequestResponse response = new SearchRequestResponse();
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = null;
+        if (cmd.getPageAnchor() != null)
+            locator = new ListingLocator(cmd.getPageAnchor());
+        String address = cmd.getBuildingName();
+        if (cmd.getDoorPlate() != null)
+            address += "&"+cmd.getDoorPlate();
+        List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
+                cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize+1,locator);
+        if (requests == null || requests.size() == 0)
+            return null;
+        if (requests.size()>pageSize){
+            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
+            requests.remove(requests.size()-1);
+        }
+        response.setRequests(requests.stream().map(r->{
+            DecorationRequestDTO dto = new DecorationRequestDTO();
+            dto.setId(r.getId());
+            dto.setCreateTime(r.getCreateTime().getTime());
+            dto.setAddress(convertAddress(r.getAddress()));
+            dto.setStartTime(r.getStartTime().getTime());
+            dto.setEndTime(r.getEndTime().getTime());
+            dto.setApplyName(r.getApplyName());
+            dto.setApplyPhone(r.getApplyPhone());
+            dto.setApplyCompany(r.getApplyCompany());
+            dto.setStatus(r.getStatus());
+            dto.setProcessorType(ProcessorType.ROOT.getCode());
+            dto.setCancelFlag(r.getCancelFlag());
+
+            return dto;
+        }).collect(Collectors.toList()));
+
+        return response;
+    }
+
+    @Override
+    public DecorationRequestDTO getRequestDetail(GetDecorationDetailCommand cmd) {
+        DecorationRequest request = this.decorationProvider.getRequestById(cmd.getId());
+        return convertRequest(request,cmd.getProcessorType());
     }
 
     private String getAppName(){
@@ -397,6 +449,8 @@ public class DecorationServiceImpl implements  DecorationService {
                                 DecorationController.moduleId);
                         flowCaseDTO.setStatus(flowCase.getStatus());
                         flowCaseDTO.setFlowCaseId(flowCase.getId());
+                        if (ProcessorType.ROOT.getCode() == processorType)
+                            flowCaseDTO.setFlowCaseForm(getFormEntitiesByApprovalVal(val));
                         dto.getFlowCasees().add(flowCaseDTO);
                     }
                     break;
@@ -408,7 +462,8 @@ public class DecorationServiceImpl implements  DecorationService {
         return dto;
     }
 
-    private String convertAddress(String address) {
+    @Override
+    public String convertAddress(String address) {
         if (StringUtils.isBlank(address))
             return "";
         String[] addresses = address.split(";");
@@ -458,6 +513,20 @@ public class DecorationServiceImpl implements  DecorationService {
             case COMPLETE : return "完成";
         }
         return "";
+    }
+
+    @Override
+    public List<FlowCaseEntity> getFormEntitiesByApprovalVal(DecorationApprovalVal val) {
+        GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+        cmd.setSourceType(EhDecorationApprovalVals.class.getSimpleName());
+        cmd.setSourceId(val.getId());
+        List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd);
+        formEntities.forEach(r -> {
+            if (StringUtils.isBlank(r.getValue())) {
+                r.setValue("无");
+            }
+        });
+        return formEntities;
     }
 
     @Override
@@ -616,6 +685,16 @@ public class DecorationServiceImpl implements  DecorationService {
                 cmd2.setDepartmentIds(new ArrayList<>());
                 cmd2.getDepartmentIds().add(decorationCompany.getOrganizationId());
                 archivesService.addArchivesContact(cmd2);//加入企业
+            }
+            List<DecorationCompanyChief> chiefs = this.decorationProvider.listChiefsByCompanyId(decorationCompany.getId());
+            if (chiefs == null || chiefs.stream().noneMatch(r-> r.getPhone().equals(request.getDecoratorPhone()))){
+                DecorationCompanyChief chief = new DecorationCompanyChief();
+                chief.setCompanyId(decorationCompany.getId());
+                chief.setName(request.getDecoratorName());
+                chief.setNamespaceId(request.getNamespaceId());
+                chief.setPhone(request.getDecoratorPhone());
+                chief.setUid(request.getDecoratorUid());
+                this.decorationProvider.createCompanyChief(chief);
             }
             //工作流
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),

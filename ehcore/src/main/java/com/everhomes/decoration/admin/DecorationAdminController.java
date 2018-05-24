@@ -84,8 +84,9 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("getDecorationDetail")
     @RestReturn(DecorationRequestDTO.class)
     public RestResponse getDecorationDetail(@Valid GetDecorationDetailCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        cmd.setProcessorType(ProcessorType.ROOT.getCode());
+        DecorationRequestDTO dto = this.decorationService.getRequestDetail(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

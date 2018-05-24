@@ -5,7 +5,8 @@ package com.everhomes.rest.decoration;
  * <li>communityId：项目id</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
- * <li>address：门牌号</li>
+ * <li>buildingName：楼栋名</li>
+ * <li>doorPlate：门牌号</li>
  * <li>status：申请状态 参考{@link com.everhomes.rest.decoration.DecorationRequestStatus}</li>
  * <li>cancelFlag：是否取消 0未取消 1取消</li>
  * <li>keyword：关键字</li>
@@ -21,7 +22,8 @@ public class SearchRequestsCommand {
     private Long communityId;
     private Long startTime;
     private Long endTime;
-    private String address;
+    private String buildingName;
+    private String doorPlate;
     private Byte status;
     private String keyword;
     private Byte cancelFlag;
@@ -53,14 +55,6 @@ public class SearchRequestsCommand {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public Byte getStatus() {
@@ -119,4 +113,19 @@ public class SearchRequestsCommand {
         this.currentProjectId = currentProjectId;
     }
 
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getDoorPlate() {
+        return doorPlate;
+    }
+
+    public void setDoorPlate(String doorPlate) {
+        this.doorPlate = doorPlate;
+    }
 }
