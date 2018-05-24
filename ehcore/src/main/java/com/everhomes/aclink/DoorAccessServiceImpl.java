@@ -4397,13 +4397,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
 //      获取用户公司楼层
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
-        List<AddressDTO> floors = new ArrayList<>();
+        List<AddressDTO> userFloors = new ArrayList<>();
         for(OrganizationDTO dto : orgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
             for(OrganizationAddress addr  : addrs) {
                 Address addr2 = addressProvider.findAddressById(addr.getAddressId());
                 addr2 = ApartmentFloorHandler(addr2);
-                floors.add(ConvertHelper.convert(addr2,AddressDTO.class));
+                userFloors.add(ConvertHelper.convert(addr2,AddressDTO.class));
             }
         }
 //      获取设备
@@ -4425,20 +4425,26 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 group.setDescription(access.getDescription());
                 group.setCreateTime(access.getCreateTime());
                 List<DoorAccess> devices = doorAccessProvider.listDoorAccessByGroupId(access.getId(),999);
-                group.setDevices(devices.stream().map(r -> {
-                    DoorAccessDeviceDTO device = new DoorAccessDeviceDTO();
-                    device.setDevUnique(r.getHardwareId());
-                    device.setDeviceName(r.getDisplayNameNotEmpty());
-                    device.setDeviceType(r.getDoorType());
-                    return device;
-                }).collect(Collectors.toList()));
+                if(null != devices && devices.size() > 0){
+                    group.setDevices(devices.stream().map(r -> {
+                        DoorAccessDeviceDTO device = new DoorAccessDeviceDTO();
+                        device.setDevUnique(r.getHardwareId());
+                        device.setDeviceName(r.getDisplayNameNotEmpty());
+                        device.setDeviceType(r.getDoorType());
+                        return device;
+                    }).collect(Collectors.toList()));
+                }
+                List<AddressDTO> floors = new ArrayList<>();
+                floors.addAll(userFloors);
                 JSONObject data = JSON.parseObject(access.getFloorId());
                 JSONArray jsonfloors = data.getJSONArray("floors");
                 for (int i = 0;i < jsonfloors.size();i++){
                     String floorId = jsonfloors.getJSONObject(i).getString("id");
                     floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                 }
-                group.setFloors(floors.stream().distinct().map(r->{return r.getApartmentFloor();}).sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
+                if (null != floors & floors.size() > 0) {
+                    group.setFloors(floors.stream().distinct().map(r -> r.getApartmentFloor()).sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
+                }
             }
         }
 
