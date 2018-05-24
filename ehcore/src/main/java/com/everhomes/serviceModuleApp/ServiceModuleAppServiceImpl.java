@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -20,11 +21,13 @@ import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerRespons
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppMappings;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +56,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	private PortalVersionProvider portalVersionProvider;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 
 	@Override
@@ -198,12 +203,23 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public Long getOriginIdFromMappingApp(Long originId) {
-		return null;
+	public Long getOriginIdFromMappingApp(Long originId, long targetModuleId) {
+		return serviceModuleAppProvider.getOriginIdFromMappingApp(originId, targetModuleId);
 	}
 
 	@Override
 	public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
+		EhServiceModuleAppMappings relation = new ServiceModuleAppMapping();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppMappings.class));
+        relation.setId(nextSequence);
+        relation.setAppModuleIdMale(cmd.getModuleIdRo());
+        relation.setAppOriginIdMale(cmd.getOriginIdRo());
+        relation.setAppModuleIdFemale(cmd.getModuleIdJu());
+        relation.setAppOriginIdFemale(cmd.getOriginIdJu());
+        relation.setCreateUid(UserContext.currentUserId());
 
-	}
+        // add relation
+        serviceModuleAppProvider.insertAppMapping(relation);
+
+    }
 }

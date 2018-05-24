@@ -30,7 +30,7 @@ public interface ServiceModuleAppService {
 
 	ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd);
 
-	Long getOriginIdFromMappingApp(Long originId);
+	Long getOriginIdFromMappingApp(Long originId, long targetModuleId);
 
 	void createAnAppMapping(CreateAnAppMappingCommand cmd);
 }

@@ -2,6 +2,7 @@
 package com.everhomes.serviceModuleApp;
 
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppMappings;
 
 import java.util.List;
 
@@ -34,4 +35,8 @@ public interface ServiceModuleAppProvider {
 	ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Byte actionType, String instanceConfig);
 
 	List<ServiceModuleApp> listServiceModuleAppByOriginId(Long originId);
+
+    Long getOriginIdFromMappingApp(Long originId, long targetModuleId);
+
+	void insertAppMapping(EhServiceModuleAppMappings relation);
 }

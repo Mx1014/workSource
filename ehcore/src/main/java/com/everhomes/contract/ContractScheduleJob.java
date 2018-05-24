@@ -160,7 +160,7 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             if(userIds.size() > 0) {
                                                 String notifyText = getNotifyMessage(contract.getName(), contract.getContractEndDate());
                                                 userIds.forEach(userId -> {
-                                                    sendMessageToUser(userId, notifyText);
+                                                    sendMessageToUser (userId, notifyText);
                                                 });
                                             }
 

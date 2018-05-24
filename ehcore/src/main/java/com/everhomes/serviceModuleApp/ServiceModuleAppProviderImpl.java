@@ -11,7 +11,9 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAppMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppMappings;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -256,5 +258,38 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		return  apps;
 	}
+
+	@Override
+	public Long getOriginIdFromMappingApp(final Long originId, long targetModuleId) {
+	    if(originId == null) return null;
+        final Long[] ret = {null};
+		getContext(AccessSpec.readOnly()).select(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE
+				, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE,
+                Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE)
+				.from(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
+				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(originId)
+						.or(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(originId)))
+				.fetch()
+				.forEach(r ->{
+                    Long valueF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE);
+                    Long moduleF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE);
+                    Long valueM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE);
+                    Long moduleM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE);
+                    if(valueF != null && valueM != null){
+                        if(valueF.longValue() == originId.longValue() && moduleM.longValue() == targetModuleId){
+                            ret[0] = valueM;
+                        }else if(valueM.longValue() == originId.longValue() && moduleF.longValue() == targetModuleId){
+                            ret[0] = valueF;
+                        }
+                    }
+                });
+        return ret[0];
+	}
+
+    @Override
+    public void insertAppMapping(EhServiceModuleAppMappings relation) {
+        EhServiceModuleAppMappingsDao dao = new EhServiceModuleAppMappingsDao(getContext(AccessSpec.readWrite()).configuration());
+        dao.insert(relation);
+    }
 
 }
