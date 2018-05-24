@@ -9795,8 +9795,8 @@ public class PunchServiceImpl implements PunchService {
         PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
             PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
             if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                		PunchServiceErrorCode.ERROR_CANNOT_UPDATE_MONTH,
                         "当前状态不可更新");
             }
             report1.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
