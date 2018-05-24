@@ -8888,6 +8888,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                                 //根据传进来的手机号进行校验，判断该手机号是否已经进行注册
                                 //非空校验
+
+                                if(importEnterpriseDataDTO.getAdminToken() != null && importEnterpriseDataDTO.getAdminName() != null && organization.getId() != null){
+                                    //接下来创建超级管理员
+                                    //创建CreateOrganizationAdminCommand类的对象
+                                    CreateOrganizationAdminCommand cmdnew = new CreateOrganizationAdminCommand();
+                                    //将数据封装进去
+                                    cmdnew.setContactToken(importEnterpriseDataDTO.getAdminToken());
+                                    cmdnew.setContactName(importEnterpriseDataDTO.getAdminName());
+                                    cmdnew.setOrganizationId(organization.getId());
+                                    OrganizationContactDTO organizationContactDTO = rolePrivilegeService.createOrganizationSuperAdmin(cmdnew);
+                                    //查看eh_organization_members表中信息
+                                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberSigned(importEnterpriseDataDTO.getAdminToken(),
+                                            cmd.getNamespaceId(),OrganizationMemberGroupType.MANAGER.getCode());
+                                    //将该organizationMember的id值更新到eh_organizations表中的admin_target_id字段中
+                                    if(organizationMember != null){
+                                        //创建Organization类的对象
+                                        Organization organization1 = new Organization();
+                                        //封装信息
+                                        organization1.setAdminTargetId(organizationMember.getId());
+                                        organization1.setId(organization.getId());
+                                        //更新eh_organizations表信息
+                                        organizationProvider.updateOrganizationByOrgId(organization1);
+                                    }
+                                }
+
+
+
+
+
+                                /*//根据传进来的手机号进行校验，判断该手机号是否已经进行注册
+                                //非空校验
                                 if(importEnterpriseDataDTO.getAdminToken() != null && !"".equals(importEnterpriseDataDTO.getAdminToken())){
                                     //说明手机号已经传进来了，那么我们根据该手机号去查eh_user_identifiers表中看是否已经注册
                                     UserIdentifier userIdentifier = userProvider.getUserByToken(importEnterpriseDataDTO.getAdminToken(),namespaceId);
@@ -8983,7 +9014,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         }
                                     }
 
-                                }
+                                }*/
 
 
 

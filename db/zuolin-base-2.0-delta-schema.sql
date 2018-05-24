@@ -189,6 +189,9 @@ ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `names
 -- 客户端处理方式0-native, 1-outside url, 2-inside url, 3-offline package  add by yanjun 201805171140
 ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
 
-
-
+-- 标准版本的 add by yuanlei
+alter table eh_organization_workplaces add column province_id bigint(20) default null comment '省份id';
+alter table eh_organization_workplaces add column city_id bigint(20) default null comment '城市id';
+alter table eh_organization_workplaces add column area_id bigint(20) default null comment '区域id';
+alter table eh_organization_workplaces add column whole_address_name varchar(128) default null comment '地址详细名称';
 
