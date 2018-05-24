@@ -288,7 +288,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 		}
 		if(keyword != null){
-			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAME.like("%" + keyword + "%"));
+			query.addJoin(Tables.EH_SERVICE_MODULE_APP_PROFILE, JoinType.LEFT_OUTER_JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_PROFILE.ORIGIN_ID));
+			Condition condition = Tables.EH_SERVICE_MODULE_APPS.NAME.like("%" + keyword + "%");
+			condition = condition.or(Tables.EH_SERVICE_MODULE_APP_PROFILE.APP_NO.like("%" + keyword + "%"));
+			query.addConditions(condition);
 		}
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 
