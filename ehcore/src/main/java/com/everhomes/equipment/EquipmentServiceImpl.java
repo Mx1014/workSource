@@ -446,11 +446,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 		} else {
-			standard = verifyEquipmentStandard(cmd.getId());
+			EquipmentInspectionStandards exist  = verifyEquipmentStandard(cmd.getId());
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
-			standard.setStandardSource(cmd.getStandardSource());
-			standard.setName(cmd.getName());
-			standard.setRepeatType(cmd.getRepeatType());
 
 			if (cmd.getEquipments() != null || cmd.getEquipments().size() > 0) {
 				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
@@ -459,7 +456,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST, "标准关联巡检对象为空！");
 			}
 
-			if (standard.getTargetId() == 0L && cmd.getTargetId() != null) {
+			if (exist.getTargetId() == 0L && cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 				//项目修改公共标准
 				standard.setTargetId(cmd.getTargetId());
 				standard.setTargetType(cmd.getTargetType());
