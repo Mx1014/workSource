@@ -3009,6 +3009,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         plan.setRepeatSettingId(0L);
                         plan.setName("autoPlans");
                         plan.setNamespaceId(k);
+                        plan.setTargetType("communityId");
                         plan.setStatus(CommonStatus.AUTO.getCode());
                         plan.setOwnerId(v.get(0).getOwnerId());
                         plan.setOwnerType(v.get(0).getOwnerType());
