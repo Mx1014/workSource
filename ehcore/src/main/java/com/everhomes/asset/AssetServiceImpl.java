@@ -2280,9 +2280,8 @@ public class AssetServiceImpl implements AssetService {
                     if(AssetVariable.UNIT_PRICE.getIdentifier().equals(variable.toString())){
                         variable.append("*");
                         variable.append(String.valueOf(days));
-                    }else{
-                        sb.append(variable.toString());
                     }
+                    sb.append(variable.toString());
                 }
             }
         }
