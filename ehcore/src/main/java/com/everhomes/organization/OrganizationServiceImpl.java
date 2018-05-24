@@ -1665,6 +1665,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(cmd.getPmFlag() != null){
                 //封装是否是管理公司标志
                 organization.setPmFlag(cmd.getPmFlag().byteValue());
+                if(cmd.getPmFlag() == Integer.valueOf(TrueOrFalseFlag.TRUE.getCode())){
+                    //更新对应的eh_organizations表中的organization_type字段为PM表示的是管理公司
+                    organization.setOrganizationType(OrganizationType.PM.getCode());
+                }
             }else{
                 organization.setPmFlag(OrganizationStatus.UNTREATED.getCode());
             }
