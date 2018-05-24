@@ -22,13 +22,13 @@ CREATE TABLE `eh_visitor_sys_visitors` (
   `inviter_name` VARCHAR(256) COMMENT '邀请者的用户姓名',
   `planned_visit_time` DATETIME COMMENT '计划到访时间',
   `visit_time` DATETIME COMMENT '实际到访时间',
-  `confirm_time` DATETIME COMMENT '后台确认到访时间',
-  `confirm_uid` BIGINT COMMENT '后台确认人员id',
-  `confirm_uname` VARCHAR(256) COMMENT '后台确认人员名称',
-  `refuse_time` DATETIME COMMENT '后台拒绝时间',
-  `refuse_uid` BIGINT COMMENT '后台拒绝人员id',
-  `refuse_uname` VARCHAR(256) COMMENT '后台拒绝人员名称',
-  `delete_time` DATETIME COMMENT '后台删除时间',
+--   `confirm_time` DATETIME COMMENT '后台确认到访时间',
+--   `confirm_uid` BIGINT COMMENT '后台确认人员id',
+--   `confirm_uname` VARCHAR(256) COMMENT '后台确认人员名称',
+--   `refuse_time` DATETIME COMMENT '后台拒绝时间',
+--   `refuse_uid` BIGINT COMMENT '后台拒绝人员id',
+--   `refuse_uname` VARCHAR(256) COMMENT '后台拒绝人员名称',
+--   `delete_time` DATETIME COMMENT '后台删除时间',
   `visit_status` TINYINT COMMENT '访客状态，0，已删除; 1，未到访;2，等待确认; 3，已到访; 4，已拒绝; ',
   `booking_status` TINYINT COMMENT '预约状态，0，已删除; 1，未到访; 3，已到访;',
   `send_message_inviter_flag` TINYINT COMMENT '确认到访时是否发送消息给邀请人，0，不发送; 1，发送',
@@ -53,6 +53,22 @@ CREATE TABLE `eh_visitor_sys_visitors` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理访客表 ';
+
+-- 访客管理预约事件表 , add by dengs, 20180425
+-- DROP TABLE IF EXISTS `eh_visitor_sys_actions`;
+CREATE TABLE `eh_visitor_sys_actions` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `visitor_id` BIGINT NOT NULL COMMENT '访客表id',
+	`action_type` TINYINT NOT NULL COMMENT '1,园区自助登记，2,园区到访确认，3,园区拒绝到访  4,企业自助登记，5,企业到访确认，6,企业拒绝到访',
+	`creator_name` VARCHAR(256) COMMENT '事件操作者',
+  `creator_uid` BIGINT COMMENT '创建者id，可以为空',
+  `create_time` DATETIME COMMENT '事件发生时间',
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
 
 -- 访客管理预约编码表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_owner_code`;
