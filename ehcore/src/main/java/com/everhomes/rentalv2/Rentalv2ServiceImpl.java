@@ -6157,7 +6157,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentedCount = rentalv2Provider.countRentalSiteBillOfAllScene(rs, rentalCell, priceRules);
 		}
 
-		dto.setCounts(rentalCell.getCounts() - rentedCount<0?0:rs.getResourceCounts() - rentedCount);
+		dto.setCounts(rentalCell.getCounts() - rentedCount<0?0:rentalCell.getCounts() - rentedCount);
 	}
 
 	private void setRentalCellStatus(java.util.Date reserveTime, RentalSiteRulesDTO dto, RentalCell rsr, RentalDefaultRule rule) {

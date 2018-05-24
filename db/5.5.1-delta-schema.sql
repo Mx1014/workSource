@@ -48,3 +48,6 @@ CREATE TABLE `eh_salary_payslip_details` (
 ALTER TABLE `eh_portal_versions` ADD COLUMN `preview_count`  int(11) NULL DEFAULT 0 COMMENT '预览版本发布次数';
 
 -- app配置 1.2.1 end  add by yanjun
+
+-- 资源预约 订单资源表增加字段
+ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(64) NULL;
