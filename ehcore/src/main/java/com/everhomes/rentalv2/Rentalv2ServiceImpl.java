@@ -1218,7 +1218,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//fix bug : charge uid null point 2016-10-9
 		if(null != rentalSite.getChargeUid() ){
 			User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
-			if(null != charger) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rentalSite.getChargeUid(),rentalSite.getOrganizationId());
+			if (member != null) {
+				rSiteDTO.setChargeName(member.getContactName());
+			} else if(null != charger) {
 				rSiteDTO.setChargeName(charger.getNickName());
 			}
 		}
@@ -6711,6 +6714,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			}
 			return null;
 		});
+	}
+
+	@Override
+	public void updateResourceStatus(UpdateResourceAdminCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+		RentalResource rentalSite = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getId());
+		rentalSite.setStatus(cmd.getStatus());
+		rentalv2Provider.updateRentalSite(rentalSite);
 	}
 
 	@Override
