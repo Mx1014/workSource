@@ -6135,7 +6135,7 @@ public class UserServiceImpl implements UserService {
 					AddressUserDTO dto = new AddressUserDTO();
 
 					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
-					if(org == null || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
+					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
 					}
 					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(member.getStatus())){
