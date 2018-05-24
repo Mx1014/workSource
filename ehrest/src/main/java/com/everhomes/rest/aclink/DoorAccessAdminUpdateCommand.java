@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>longitude: 经度</li>
  * <li>latitude: 纬度</li>
  * <li>enableAmount:门禁是否支持授权按次开门，1是0否</li>
+ * <li>serverId:关联服务器Id</li>
  * </ul>
  */
 public class DoorAccessAdminUpdateCommand {
@@ -27,6 +28,7 @@ public class DoorAccessAdminUpdateCommand {
     private Double longitude;
     private Double latitude;
     private Byte enableAmount;
+    private Long serverId;
     
     public Long getId() {
         return id;
@@ -76,7 +78,13 @@ public class DoorAccessAdminUpdateCommand {
 	public void setEnableAmount(Byte enableAmount) {
 		this.enableAmount = enableAmount;
 	}
-    @Override
+	public Long getServerId() {
+		return serverId;
+	}
+	public void setServerId(Long serverId) {
+		this.serverId = serverId;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

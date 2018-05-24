@@ -34,6 +34,7 @@ import com.everhomes.discover.ItemType;
  * <li>groupId:分组id</li>
  * <li>groupNmae:分组名称</li>
  * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
+ * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
  * </ul>
  * @author janson
  *
@@ -64,9 +65,24 @@ public class DoorAccessDTO {
     private String groupName;
     private Long groupId;
     private Byte enableAmount;
-    
+    private AclinkServerDTO server;
+    private String localUUid;
+    private String localAesKey;
+    private Long localServerId;
 
-    public Byte getStatus() {
+    public String getLocalAesKey() {
+		return localAesKey;
+	}
+
+
+
+	public void setLocalAesKey(String localAesKey) {
+		this.localAesKey = localAesKey;
+	}
+
+
+
+	public Byte getStatus() {
         return status;
     }
 
@@ -354,7 +370,46 @@ public class DoorAccessDTO {
 	public void setEnableAmount(Byte enableAmount) {
 		this.enableAmount = enableAmount;
 	}
-    @Override
+
+
+
+	public AclinkServerDTO getServer() {
+		return server;
+	}
+
+
+
+	public void setServer(AclinkServerDTO server) {
+		this.server = server;
+	}
+
+
+
+	public String getLocalUUid() {
+		return localUUid;
+	}
+
+
+
+	public void setLocalUUid(String localUUid) {
+		this.localUUid = localUUid;
+	}
+
+
+
+	public Long getLocalServerId() {
+		return localServerId;
+	}
+
+
+
+	public void setLocalServerId(Long localServerId) {
+		this.localServerId = localServerId;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
