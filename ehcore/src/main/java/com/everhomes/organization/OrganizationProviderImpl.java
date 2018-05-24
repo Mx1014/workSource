@@ -256,13 +256,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * @return
      */
     @Override
-    public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone) {
+    public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone,Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+        }
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
         //added by wh 2016-10-13 把被拒绝的过滤掉
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
@@ -6426,6 +6429,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .fetchAnyInto(OrganizationMember.class);
         return organizationMember;
     }
+
+
+    /**
+     * 查询eh_organization_members表中已经从注册的对应的信息
+     * @param contactToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId,String memberGroup){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表eh_organization_members
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
 
     /**
      * 查询eh_organization_members表中未注册的对应的信息

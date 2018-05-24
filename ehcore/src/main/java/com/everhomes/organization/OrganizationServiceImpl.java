@@ -1468,7 +1468,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             //根据传进来的手机号进行校验，判断该手机号是否已经进行注册
             //非空校验
-            if(cmd.getEntries() != null && !"".equals(cmd.getEntries())){
+
+            if(cmd.getEntries() != null && cmd.getContactor() != null && organization.getId() != null){
+                //接下来创建超级管理员
+                //创建CreateOrganizationAdminCommand类的对象
+                CreateOrganizationAdminCommand cmdnew = new CreateOrganizationAdminCommand();
+                //将数据封装进去
+                cmdnew.setContactToken(cmd.getEntries());
+                cmdnew.setContactName(cmd.getContactor());
+                cmdnew.setOrganizationId(organization.getId());
+                OrganizationContactDTO organizationContactDTO = rolePrivilegeService.createOrganizationSuperAdmin(cmdnew);
+                //查看eh_organization_members表中信息
+                OrganizationMember organizationMember = organizationProvider.findOrganizationMemberSigned(cmd.getEntries(),
+                        cmd.getNamespaceId(),OrganizationMemberGroupType.MANAGER.getCode());
+                //将该organizationMember的id值更新到eh_organizations表中的admin_target_id字段中
+                if(organizationMember != null){
+                    //创建Organization类的对象
+                    Organization organization1 = new Organization();
+                    //封装信息
+                    organization1.setAdminTargetId(organizationMember.getId());
+                    organization1.setId(organization.getId());
+                    //更新eh_organizations表信息
+                    organizationProvider.updateOrganizationByOrgId(organization1);
+                }
+            }
+
+
+            /*if(cmd.getEntries() != null && !"".equals(cmd.getEntries())){
                 //说明手机号已经传进来了，那么我们根据该手机号去查eh_user_identifiers表中看是否已经注册
                 UserIdentifier userIdentifier = userProvider.getUserByToken(cmd.getEntries(),cmd.getNamespaceId());
                 if(userIdentifier != null){
@@ -1569,7 +1595,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                 }
 
-            }
+            }*/
 
 
             // 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
@@ -7342,7 +7368,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getEnterpriseId(), cmd.getPhone());
+        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getEnterpriseId(), cmd.getPhone(),cmd.getNamespaceId());
 
         if (member != null) {
             if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()))
@@ -7664,7 +7690,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization org = checkOrganization(cmd.getOrganizationId());
 
-        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
+        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone(),namespaceId);
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getAccountPhone());
         if (null == member) {
             member = new OrganizationMember();
@@ -7793,7 +7819,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         //获取当前App所在的域空间
         Integer namespaceId = UserContext.getCurrentNamespaceId(org.getNamespaceId());
         //根据组织id和手机号来查询eh_organization_members表中有效的用户信息
-        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken);
+        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken,org.getNamespaceId());
         //根据域空间id和注册的手机号来查询对应的注册信息
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
         //声明一个boolean类型的变量
@@ -13775,7 +13801,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         dbProvider.execute((TransactionStatus status) -> {
             //根据手机号、域空间id、organizationId来查询eh_organization_members表中的信息
             //判断
-            if(cmd.getEntries() != null && cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
+            /*if(cmd.getEntries() != null && cmd.getNamespaceId() != null && cmd.getOrganizationId() != null){
 
                 //判断该用户是否已经注册，在这里我们的更换的超级管理员只能是已经注册的
                 if(cmd.getIsSigned() == TrueOrFalseFlag.TRUE.getCode()){
@@ -13799,6 +13825,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember.setContactToken(cmd.getEntries());
                         organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
                         organizationMember.setGroupType(OrganizationTypeEnum.ENTERPRISE.getCode());
+                        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
                         organizationMember.setNamespaceId(cmd.getNamespaceId());
                         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getEntries(),cmd.getNamespaceId());
                         organizationMember.setTargetId(userIdentifier.getOwnerUid());
@@ -13816,7 +13843,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 }
 
+            }*/
+
+            if(cmd.getEntries() != null && cmd.getContactor() != null && cmd.getOrganizationId() != null){
+                //接下来创建超级管理员
+                //创建CreateOrganizationAdminCommand类的对象
+                CreateOrganizationAdminCommand cmdnew = new CreateOrganizationAdminCommand();
+                //将数据封装进去
+                cmdnew.setContactToken(cmd.getEntries());
+                cmdnew.setContactName(cmd.getContactor());
+                cmdnew.setOrganizationId(cmd.getOrganizationId());
+                OrganizationContactDTO organizationContactDTO = rolePrivilegeService.createOrganizationSuperAdmin(cmdnew);
+
+
+                //查看eh_organization_members表中信息
+                OrganizationMember organizationMember = organizationProvider.findOrganizationMemberSigned(cmd.getEntries(),
+                        cmd.getNamespaceId(),OrganizationMemberGroupType.MANAGER.getCode());
+                //将该organizationMember的id值更新到eh_organizations表中的admin_target_id字段中
+                if(organizationMember != null){
+                    //创建Organization类的对象
+                    Organization organization1 = new Organization();
+                    //封装信息
+                    organization1.setAdminTargetId(organizationMember.getId());
+                    organization1.setId(cmd.getOrganizationId());
+                    //更新eh_organizations表信息
+                    organizationProvider.updateOrganizationByOrgId(organization1);
+                }
             }
+
             return null;
         });
 
@@ -13898,17 +13952,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         //查询表eh_organization_members
         Long id = organizationProvider.findOrganizationMembersByTokenAndSoON(entries, namespaceId, organizationId);
         //非空校验
-        if (id != null && !"".equals(id)) {
-            //说明有值
-            //然后我们将这个id更新到eh_organizations表中的对应的admin_target_id字段中
-            //创建一个Organization类的对象
-            Organization organization = new Organization();
-            //将数据封装在Organization对象中
-            organization.setId(organizationId);
-            organization.setAdminTargetId(id);
-            //更新eh_organizations表中的信息
-            organizationProvider.updateOrganizationSuperAdmin(organization);
-        }
+        dbProvider.execute((TransactionStatus status) -> {
+            if (id != null && !"".equals(id)) {
+                //说明有值,然后我们将该organizationMembers表中的member_group字段设置为manager表示的是管理员
+                //创建一个OrganizationMember对象
+                OrganizationMember organizationMember = new OrganizationMember();
+                //封装数据进去
+                organizationMember.setId(id);
+                organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+                //更新OrganizationMember表数据
+                organizationProvider.updateOrganizationMember(organizationMember);
+                //然后我们将这个id更新到eh_organizations表中的对应的admin_target_id字段中
+                //创建一个Organization类的对象
+                Organization organization = new Organization();
+                //将数据封装在Organization对象中
+                organization.setId(organizationId);
+                organization.setAdminTargetId(id);
+                //更新eh_organizations表中的信息
+                organizationProvider.updateOrganizationSuperAdmin(organization);
+            }
+            return null;
+        });
     }
 
     /**
