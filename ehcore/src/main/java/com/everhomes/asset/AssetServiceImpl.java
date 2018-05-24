@@ -1220,11 +1220,11 @@ public class AssetServiceImpl implements AssetService {
                     dWithoutLimit.setTime(d.getTime());
                  }else{
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    dWithoutLimit.setTime(d.getTime());
                     if(d.getMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
                         d.add(Calendar.DAY_OF_MONTH, -1);
                     }
-                 }
+                    dWithoutLimit.setTime(d.getTime());
+                }
             }
 
             //the end of a cycle -- d cannot beyond the upper limit of its fee rule
@@ -1263,11 +1263,11 @@ public class AssetServiceImpl implements AssetService {
                 // for a cycle, use 'days method' may not come out 1 as people expected, so if it obvious is a cycle,
                 // just keep r as one
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
-                int divided = daysBetween(dWithoutLimit,aWithoutLimit);
-                days = new Float(divided).intValue();
+                // period of this cycle
+                int divider = daysBetween(d, a);
+                days = new Float(divider).intValue();
                 if(!b){
-                    // period of this cycle
-                    int divider = daysBetween(d, a);
+                    int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                     r = String.valueOf(divider+"/" + divided);
                 }
             }
