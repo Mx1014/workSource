@@ -8544,7 +8544,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                                    "enterprise name is null");
                         }
 
-                        if(importEnterpriseDataDTO.getName().getBytes().length > 200){
+                        LOGGER.info(String.valueOf(importEnterpriseDataDTO.getName().getBytes().length));
+                        if(importEnterpriseDataDTO.getName().getBytes().length > 150){
                             //说明公司的名称的长度大于50个字，那么就不允许
                             LOGGER.error("enterprise name is over than 100 bytes, data = {}", importEnterpriseDataDTO);
                             log.setData(importEnterpriseDataDTO);
