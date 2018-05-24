@@ -54,6 +54,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.Access;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -5718,4 +5719,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
 
+    @Override
+    public Integer getUserOrgAmount(Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMembers.class));
+        SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"));
+        return step.fetchOneInto(Integer.class);
+    }
 }

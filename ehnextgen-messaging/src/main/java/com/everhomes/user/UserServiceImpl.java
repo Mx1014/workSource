@@ -6122,4 +6122,11 @@ public class UserServiceImpl implements UserService {
 		response.setDtos(dtos);
 		return response;
 	}
+
+	@Override
+	public Byte isUserAuth() {
+		User user = UserContext.current().getUser();
+		int amount = this.organizationProvider.getUserOrgAmount(user.getId());
+		return amount > 0 ? (byte) 1 : (byte) 0;
+	}
 }

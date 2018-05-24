@@ -1536,4 +1536,20 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+	/**
+	 * <b>URL: /user/listUserRelatedCards</b>
+	 * <p>判断用户是否为认证用户</p>
+	 * @return
+	 */
+	@RequestMapping("isUserAuth")
+	@RestReturn(String.class)
+	public RestResponse isUserAuth() {
+		RestResponse resp = new RestResponse(userService.isUserAuth());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+
 }
