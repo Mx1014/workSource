@@ -150,7 +150,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 
 	/**根据组织id和手机号来查询eh_organization_members表中有效的用户信息**/
-	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
+	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone,Integer namespaceId);
 
 	/**
 	 * Create enterprise details
@@ -645,6 +645,15 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId);
+
+	/**
+	 * 查询超级管理员
+	 * @param contactToken
+	 * @param namespaceId
+	 * @param memberGroup
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId,String memberGroup);
 
 	/**
 	 * 向eh_organization_members表中添加数据

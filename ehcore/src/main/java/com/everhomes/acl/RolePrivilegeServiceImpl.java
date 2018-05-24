@@ -1596,7 +1596,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param roleId  拥有 所有权限、来创建超级管理员
 	 * @return
 	 */
-    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
+    public OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
 														   String contactToken, Long adminPrivilegeId,
 														   Long roleId){
 		//创建机构账号，包括注册、把用户添加到公司
