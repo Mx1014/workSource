@@ -14,3 +14,5 @@ insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900036,'zh_CN','是否属于服务商标志为空');
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900037,'zh_CN','是否启用工作台标志为空');
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900038,'zh_CN','公司名称不能超过50字');
+insert into eh_locale_strings(scope,code,locale,`text`)values('community',10013,'zh_CN','楼栋名称不能超过20个汉字');
+insert into eh_locale_strings(scope,code,locale,`text`)values('community',10014,'zh_CN','楼栋名称重复了');

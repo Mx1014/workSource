@@ -1741,6 +1741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
                     //将上面的organization对象中的id也封装在对象中
                     organizationWorkPlaces.setOrganizationId(cmd.getOrganizationId());
+                    organizationWorkPlaces.setWholeAddressName(createOfficeSiteCommand.getWholeAddressName());
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
                     //现在的情况是这样的，我们还需要进行维护一张表eh_enterprise_community_map的信息，这张表其实在标准版中是不适用的
@@ -8544,7 +8545,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                                    "enterprise name is null");
                         }
 
-                        if(importEnterpriseDataDTO.getName().getBytes().length > 200){
+                        LOGGER.info(String.valueOf(importEnterpriseDataDTO.getName().getBytes().length));
+                        if(importEnterpriseDataDTO.getName().getBytes().length > 150){
                             //说明公司的名称的长度大于50个字，那么就不允许
                             LOGGER.error("enterprise name is over than 100 bytes, data = {}", importEnterpriseDataDTO);
                             log.setData(importEnterpriseDataDTO);
