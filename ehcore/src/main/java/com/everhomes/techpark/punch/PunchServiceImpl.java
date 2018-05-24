@@ -259,7 +259,7 @@ public class PunchServiceImpl implements PunchService {
 
     private ThreadLocal<SimpleDateFormat> dayStatusSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("MM-dd EEE");
+            return new SimpleDateFormat("MM-dd EEE",Locale.SIMPLIFIED_CHINESE);
         }
     };
     private ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
@@ -1489,7 +1489,11 @@ public class PunchServiceImpl implements PunchService {
                     updateSmartAlignment(offDutyLog);
                     return;
                 }
-                updateSmartAlignment(offDutyLog);
+                //无论有没有成功校准都置为智能校准
+                if (offDutyLog.getId() != null) { 
+                	offDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
+                    punchProvider.updatePunchLog(offDutyLog);
+                } 
 
             }
         }
@@ -1532,8 +1536,11 @@ public class PunchServiceImpl implements PunchService {
                     updateSmartAlignment(onDutyLog);
                     return;
                 }
-                updateSmartAlignment(onDutyLog);
-
+                //无论有没有成功校准都置为智能校准
+                if (onDutyLog.getId() != null) { 
+                	onDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
+                    punchProvider.updatePunchLog(onDutyLog);
+                } 
             }
         }
 
@@ -2631,17 +2638,36 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private void addPunchStatistics(OrganizationMemberDetails detail, Long orgId, Calendar startCalendar, Calendar endCalendar) {
-        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
-        if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
-            LOGGER.error("filed report dont add punch statistic");
-            return;
-        }
-        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
-        if (null == pr)
-            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-                    PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-                    "have no punch rule");
+//        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
+//        if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
+//            LOGGER.error("filed report dont add punch statistic");
+//            return;
+//        }
         PunchStatistic statistic = new PunchStatistic();
+
+        statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                .getTime()));
+        statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
+        statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
+        statistic.setOwnerId(ownerId);
+        statistic.setUserId(detail.getTargetId());
+        statistic.setDetailId(detail.getId());
+        statistic.setUserName(detail.getContactName());
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
+        statistic.setDeptName(depName);
+        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
+
+
+        //2018年5月17日 by wh 删除statistics提前到这里
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(ownerId);
+        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId(),statistic.getDetailId());
+        //没有规则的也要保存,只是没考勤数据
+        if (null == pr){
+            this.punchProvider.createPunchStatistic(statistic);
+            return;
+        } 
         try {
             Organization punchOrg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
             if (null != punchOrg) {
@@ -2665,23 +2691,6 @@ public class PunchServiceImpl implements PunchService {
 //                }
 //
 //            }
-
-            statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                    .getTime()));
-            statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
-            statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-            Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
-            statistic.setOwnerId(ownerId);
-            statistic.setUserId(detail.getTargetId());
-            statistic.setDetailId(detail.getId());
-            statistic.setUserName(detail.getContactName());
-            String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
-            statistic.setDeptName(depName);
-            //2018年5月17日 by wh 删除statistics提前到这里
-            List<Long> orgIds = new ArrayList<>();
-            orgIds.add(ownerId);
-            this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
-
             List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -3097,7 +3106,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
         row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
-        row.createCell(++i).setCellValue(statistic.getWorkCount());
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkCount()));
         row.createCell(++i).setCellValue(objToString(statistic.getAnnualLeaveBalance()));
         row.createCell(++i).setCellValue(objToString(statistic.getOvertimeCompensationBalance()));
         if (null != statistic.getExts()) {
@@ -4604,6 +4613,8 @@ public class PunchServiceImpl implements PunchService {
                 response.setProcess(report.getProcess());
                 response.setErrorInfo(report.getErrorInfo());
                 response.setStatus(report.getStatus());
+                response.setFilerName(report.getFilerName());
+                response.setFileTime(report.getFileTime());
                 if(null != report.getUpdateTime()){
                 	response.setUpdateTime(report.getUpdateTime().getTime());
                 }
@@ -4631,36 +4642,48 @@ public class PunchServiceImpl implements PunchService {
         if (months.size() == 0) {
             return response;
         }
-//        List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
-//        if (null == userIds)
-//            return response;
-        //分页查询
-//        if (cmd.getPageAnchor() == null)
-//            cmd.setPageAnchor(0L);
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
-        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
-        if (members == null || members.size() == 0) {
-            return response;
-        }
-        Long nextPageAnchor = null;
-        if (members != null && members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            nextPageAnchor = members.get(members.size() - 1).getId();
-        }
 
-        List<Long> userIds = new ArrayList<>();
-        for (OrganizationMemberDetails member : members) {
-            if (member.getTargetId() > 0) {
-                userIds.add(member.getTargetId());
-            }
+        //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
+//        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
+//        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
+//        if (members == null || members.size() == 0) {
+//            return response;
+//        }
+//        Long nextPageAnchor = null;
+//        if (members != null && members.size() > pageSize) {
+//            members.remove(members.size() - 1);
+//            nextPageAnchor = members.get(members.size() - 1).getId();
+//        }
 
-        }
-        List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
+//        List<Long> userIds = new ArrayList<>();
+//        for (OrganizationMemberDetails member : members) {
+//            if (member.getTargetId() > 0) {
+//                userIds.add(member.getTargetId());
+//            }
+//
+//        }
+
+      List<Long> detailIds = listDptDetailIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
+      if (null == detailIds || detailIds.size() == 0)
+          return response;
+      //分页查询
+      if (cmd.getPageAnchor() == null)
+          cmd.setPageAnchor(0L);
+      List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
                 organizationId, months,
-                cmd.getExceptionStatus(), userIds, locator, pageSize + 1);
+                cmd.getExceptionStatus(), detailIds, locator, pageSize + 1);
+      if(null == results){
+    	  return response;
+      }
+      Long nextPageAnchor = null;
+      if (results != null && results.size() > pageSize) {
+    	  results.remove(results.size() - 1);
+          nextPageAnchor = results.get(results.size() - 1).getId();
+      }
+
         //减少IO一次查出所有的
         List<PunchExceptionRequest> overTimeRequests = approvalRequestProvider.listOvertimeDurationByOwnerAndMonth(cmd.getOwnerType(),
                 organizationId, months);
@@ -4691,8 +4714,10 @@ public class PunchServiceImpl implements PunchService {
         }
 
         List<Long> absenceUserIdList = new ArrayList<>();
-        for (OrganizationMemberDetails member : members) {
-            PunchStatistic statistic = findPunchStatisticByUserId(results, member.getTargetId());
+        //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
+//        for (OrganizationMemberDetails member : members) {
+//            PunchStatistic statistic = findPunchStatisticByUserId(results, member.getTargetId());
+        for(PunchStatistic statistic :results){
             if(null != statistic) {
                 PunchCountDTO dto = ConvertHelper.convert(statistic, PunchCountDTO.class);
 
@@ -4777,14 +4802,14 @@ public class PunchServiceImpl implements PunchService {
                 dto.setExts(extDTOs);
                 absenceUserIdList.add(statistic.getUserId());
             }
-            else{
-                PunchCountDTO dto = ConvertHelper.convert(member, PunchCountDTO.class);
-                dto.setPunchMonth(months.get(0));
-                dto.setUserName(member.getContactName());
-                String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getId()));
-                dto.setDeptName(depName);
-                punchCountDTOList.add(dto);
-            }
+//            else{
+//                PunchCountDTO dto = ConvertHelper.convert(member, PunchCountDTO.class);
+//                dto.setPunchMonth(months.get(0));
+//                dto.setUserName(member.getContactName());
+//                String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getId()));
+//                dto.setDeptName(depName);
+//                punchCountDTOList.add(dto);
+//            }
         }
         response.setNextPageAnchor(nextPageAnchor);
         response.setPunchCountList(punchCountDTOList);
@@ -4792,15 +4817,13 @@ public class PunchServiceImpl implements PunchService {
 
         return response;
     }
+ 
+    public List<OrganizationMember> listDptOrganizationMembers(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
 
-    @Override
-    public List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
-        //找到所有子部门 下面的用户
-
+        List<OrganizationMember> organizationMembers = null;
         List<String> groupTypeList = new ArrayList<String>();
         groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-        List<OrganizationMember> organizationMembers = null;
         if (null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())) {
 
             List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%", groupTypeList);
@@ -4814,20 +4837,44 @@ public class PunchServiceImpl implements PunchService {
             }
             CrossShardListingLocator locator = new CrossShardListingLocator();
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
-                    OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE - 1);
+                    OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
 
             LOGGER.debug("members  : " + organizationMembers.size());
         } else {
             org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-            organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, null,
                     null, null, Integer.MAX_VALUE - 1);
         }
+        return organizationMembers;
+    } 
+    public List<Long> listDptDetailIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
+    	List<OrganizationMember> organizationMembers =  listDptOrganizationMembers(org,ownerId,userName,includeSubDpt);
+
+        if (null == organizationMembers)
+            return null;
+
+        List<Long> detailIds = new ArrayList<Long>();
+        for (OrganizationMember member : organizationMembers) {
+//            if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+//                userIds.add(member.getTargetId());
+        	detailIds.add(member.getDetailId());
+        }
+
+        LOGGER.debug("detailIds  : " + StringHelper.toJsonString(detailIds));
+        return detailIds; 
+    }
+    @Override
+    public List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
+        //找到所有子部门 下面的用户
+    	List<OrganizationMember> organizationMembers =  listDptOrganizationMembers(org,ownerId,userName,includeSubDpt);
+
         if (null == organizationMembers)
             return null;
         List<Long> userIds = new ArrayList<Long>();
         for (OrganizationMember member : organizationMembers) {
             if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
                 userIds.add(member.getTargetId());
+//        	userIds.add(member.getDetailId());
         }
 
         LOGGER.debug("userIds  : " + StringHelper.toJsonString(userIds));
@@ -5162,15 +5209,17 @@ public class PunchServiceImpl implements PunchService {
         while (!start.after(end)) {
 
             try {
-                LOGGER.debug("refresh day log : userid =[" + userId
-                        + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
-                        + dateSF.get().format(end.getTime()) + "]");
                 PunchDayLog newPunchDayLog = new PunchDayLog();
                 this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
                     PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
                             companyId, dateSF.get().format(start.getTime()));
+//                    if(punchDayLog == null){
+                    LOGGER.debug("refresh day log : userid =[" + userId
+                            + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
+                            + dateSF.get().format(end.getTime()) + "]");
                     PunchTimeRule ptr = null;
                     refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
+//                    }
                     return null;
                 });
 
@@ -5930,12 +5979,12 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.setTime(punCalendar.getTime());
         startCalendar.set(Calendar.HOUR_OF_DAY, 0);
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-        try {
+        try { 
             OrganizationDTO dept = findUserDepartment(userId, ownerId);
-            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, dept.getId());
+            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, ownerId);
             refreshDayLogAndMonthStat(member, dept.getId(), punCalendar, startCalendar);
         } catch (Exception e) {
-            LOGGER.error("refresh day log and month stat Wrong", e);
+            LOGGER.error("refresh day log and month stat Wrong userId is {} owner id is {}", userId, ownerId, e);
         }
 
     }
@@ -5949,7 +5998,7 @@ public class PunchServiceImpl implements PunchService {
                                            Calendar punCalendar, Calendar startCalendar) throws ParseException {
         orgId = getTopEnterpriseId(orgId);
 //        try {
-        LOGGER.debug("refresh day log stat " + member.toString());
+//        LOGGER.debug("refresh day log stat " + StringHelper.toJsonString(member));
         //刷新 daylog
         PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(member.getTargetId(), orgId,
                 dateSF.get().format(punCalendar.getTime()));
@@ -5957,8 +6006,9 @@ public class PunchServiceImpl implements PunchService {
             this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
         }
         //刷月报
+        //2018-5-25 刷月报改成在每天早上5点30固定刷
 
-        addPunchStatistics(member, orgId, startCalendar, punCalendar);
+//        addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
 //        } catch (Exception e) {
 //            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
@@ -9711,7 +9761,15 @@ public class PunchServiceImpl implements PunchService {
         }
         return org;
     }
-
+    /**
+     * 每日早上5点30,刷新前一天的当月的月报数据
+     */
+    @Scheduled(cron = "1 30 5 * * ?")
+    public void refreshStatistics() {
+    	Calendar calendar = Calendar.getInstance();
+    	calendar.add(Calendar.DAY_OF_MONTH, -1);
+    	refreshMonthReport(monthSF.get().format(calendar.getTime()));
+    } 
     /**
      * 每月1日早上1点50,新建当月的月报数据
      */
@@ -9726,15 +9784,22 @@ public class PunchServiceImpl implements PunchService {
                 List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(null, null);
                 if(null != enterpriseIds) {
                     for (Long enterpriseId : enterpriseIds) {
-
+                    	try{
                         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + enterpriseId).enter(() -> {
                             PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(enterpriseId, month);
                             if (null == report) {
-                                createNewReport(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, month);
+                                report = createNewReport(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, month);
                             }
+                            UpdateMonthReportCommand cmd = new UpdateMonthReportCommand();
+                            cmd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+                            cmd.setOwnerId(enterpriseId);
+                            cmd.setMonthReportId(report.getId());
+                            updateMonthReport(cmd);
                             return null;
                         });
-
+                    	}catch(Exception e){
+                    		LOGGER.error("refresh month report error enterprise "+enterpriseId,e);
+                    	}
                     }
                 }
                 return null;
@@ -9790,13 +9855,14 @@ public class PunchServiceImpl implements PunchService {
     private static ExecutorService monthReportExecutorPool = Executors.newFixedThreadPool(10);
     @Override
 	public void updateMonthReport(UpdateMonthReportCommand cmd) {
-        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()+"."+ cmd.getMonthReportId()).enter(() -> {
             PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
             if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                		PunchServiceErrorCode.ERROR_CANNOT_UPDATE_MONTH,
                         "当前状态不可更新");
             }
+            report1.setProcess(0);
             report1.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             report1.setStatus(PunchMonthReportStatus.UPDATING.getCode());
             punchMonthReportProvider.updatePunchMonthReport(report1);
@@ -9860,9 +9926,9 @@ public class PunchServiceImpl implements PunchService {
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.isNull()
-                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.gt(socialSecurityService.getTheLastDate(punchMonth))));
+                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lt(socialSecurityService.getTheLastDate(punchMonth)));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lessOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
 
             if (null != userName) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"));
@@ -9885,7 +9951,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd) {
         PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
-        if (PunchMonthReportStatus.fromCode(report.getStatus()) != PunchMonthReportStatus.CREATED) {
+        if (PunchMonthReportStatus.fromCode(report.getStatus()) != PunchMonthReportStatus.UPDATING) {
             return new GetMonthReportProcessResponse(100);
         }
         return new GetMonthReportProcessResponse(report.getProcess());
@@ -9893,11 +9959,11 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void fileMonthReport(FileMonthReportCommand cmd) {
-        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()+"."+ cmd.getMonthReportId()).enter(() -> {
             PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
             if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                		PunchServiceErrorCode.ERROR_CANNOT_UPDATE_MONTH,
                         "当前状态不可归档");
             }
             report1.setStatus(PunchMonthReportStatus.FILED.getCode());

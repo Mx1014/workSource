@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -23,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchMonthReports;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Component
 public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
@@ -73,18 +75,21 @@ public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
 		if (null != pageSize) {
 			step.limit(pageSize);
 		}
-		return step.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.desc())
+		return step.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
 	}
 
 	@Override
 	public PunchMonthReport findPunchMonthReportByOwnerMonth(Long ownerId, String punchMonth) {
 
-		return getReadOnlyContext().select().from(Tables.EH_PUNCH_MONTH_REPORTS)
+		Record record = getReadOnlyContext().select().from(Tables.EH_PUNCH_MONTH_REPORTS)
 				.where(Tables.EH_PUNCH_MONTH_REPORTS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.eq(punchMonth))
 				.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.asc())
-				.fetchAny().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
+				.fetchAny();
+		if(null == record)
+			return null;
+		return record.map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
 	}
 
 	private EhPunchMonthReportsDao getReadWriteDao() {
