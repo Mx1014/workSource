@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** Created by xq.tian on 2017/11/13. */
-public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProcessor {
+public class FlowCaseProcessorsResolverImpl implements FlowCaseProcessorsResolver {
 
     private List<Long> processorIdList;
     private List<FlowCase> allFlowCase;
@@ -18,7 +18,7 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
     private FlowService flowService;
     private UserService userService;
 
-    public FlowCaseProcessorsProcessorImpl(
+    public FlowCaseProcessorsResolverImpl(
             List<Long> processorIdList,
             List<FlowCase> allFlowCase,
             boolean allFlowCaseFlag,
@@ -38,10 +38,10 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
         List<UserInfo> userInfoList = new ArrayList<>();
         for (Long userId : getProcessorIdList()) {
             UserInfo ui = fixupUserInfo(organizationId, userId);
-            if(ui != null) {
-                userInfoList.add(ui);    
+            if (ui != null) {
+                userInfoList.add(ui);
             }
-            
+
         }
         return userInfoList;
     }
@@ -83,7 +83,7 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
                         r ->
                                 FlowLogType.fromCode(r.getLogType()) == FlowLogType.NODE_ENTER
                                         && r.getStepCount()
-                                                .equals(flowCaseState.getFlowCase().getStepCount()))
+                                        .equals(flowCaseState.getFlowCase().getStepCount()))
                 .map(FlowEventLog::getFlowUserId)
                 .collect(Collectors.toList());
     }

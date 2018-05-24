@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by xq.tian on 2017/11/13.
  */
-public interface FlowCaseProcessorsProcessor {
+public interface FlowCaseProcessorsResolver {
 
     List<Long> getProcessorIdList();
 

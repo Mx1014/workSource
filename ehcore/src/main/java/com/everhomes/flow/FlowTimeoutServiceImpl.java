@@ -1,6 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.flow.action.FlowTimeoutJob;
+import com.everhomes.flow.action.FlowTimeoutAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.FlowTimeoutType;
@@ -85,7 +85,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
                         queueDelay + ft.getId(),
                         queueDelay + ft.getId(),
                         new Date(ft.getTimeoutTick().getTime()),
-                        FlowTimeoutJob.class,
+                        FlowTimeoutAction.class,
                         map
                 );
 
@@ -100,7 +100,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
                         queueNoDelay + ft.getId(),
                         queueNoDelay + ft.getId(),
                         new Date(System.currentTimeMillis() + 1000),
-                        FlowTimeoutJob.class,
+                        FlowTimeoutAction.class,
                         map
                 );
             }

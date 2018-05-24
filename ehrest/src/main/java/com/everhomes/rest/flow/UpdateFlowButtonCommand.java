@@ -17,8 +17,8 @@ import com.everhomes.util.StringHelper;
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>tracker: 跟踪 {@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>script: 脚本 {@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>param: 按钮参数</li>
- *     <li>enterScriptId: 前置脚本id</li>
  *     <li>evaluateStep: 评价后是否跳转下一个节点, no_step:不跳转, approve_step: 跳转下一个节点</li>
  * </ul>
  */
@@ -38,9 +38,9 @@ public class UpdateFlowButtonCommand {
     private FlowActionInfo messageAction;
     private FlowActionInfo smsAction;
     private FlowActionInfo tracker;
+    private FlowActionInfo script;
 
     private String param;
-    private Long enterScriptId;
 
     public Long getFlowButtonId() {
         return flowButtonId;
@@ -114,14 +114,6 @@ public class UpdateFlowButtonCommand {
         this.remindCount = remindCount;
     }
 
-    public Long getEnterScriptId() {
-        return enterScriptId;
-    }
-
-    public void setEnterScriptId(Long enterScriptId) {
-        this.enterScriptId = enterScriptId;
-    }
-
     public Byte getSubjectRequiredFlag() {
         return subjectRequiredFlag;
     }
@@ -160,6 +152,14 @@ public class UpdateFlowButtonCommand {
 
     public void setRemindMsgAction(FlowActionInfo remindMsgAction) {
         this.remindMsgAction = remindMsgAction;
+    }
+
+    public FlowActionInfo getScript() {
+        return script;
+    }
+
+    public void setScript(FlowActionInfo script) {
+        this.script = script;
     }
 
     @Override
