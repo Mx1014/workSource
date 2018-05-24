@@ -55,3 +55,7 @@ ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
 ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
 ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
 
+
+
+-- 资源预约 订单资源表增加字段
+ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(64) NULL;
