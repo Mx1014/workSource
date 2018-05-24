@@ -29,6 +29,8 @@ public interface DecorationProvider {
 
     DecorationWorker getDecorationWorkerById(Long id);
 
+    DecorationWorker queryDecorationWorker(Long requestId,String phone);
+
     List<DecorationWorker> listWorkersByRequestId(Long requestId, String keyWord, ListingLocator locator, Integer pageSize);
 
     void createDecorationWorker(DecorationWorker worker);

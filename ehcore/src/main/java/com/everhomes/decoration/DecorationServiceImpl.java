@@ -206,8 +206,12 @@ public class DecorationServiceImpl implements  DecorationService {
             if (companyId == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                         ErrorCodes.ERROR_INVALID_PARAMETER, "不存在的装修公司");
+            DecorationWorker worker = this.decorationProvider.queryDecorationWorker(request.getId(),cmd.getPhone());
+            if (worker != null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER, "不可重复添加已有员工");
             DecorationCompany dc = decorationProvider.getDecorationCompanyById(companyId);
-            DecorationWorker worker = ConvertHelper.convert(cmd,DecorationWorker.class);
+            worker = ConvertHelper.convert(cmd,DecorationWorker.class);
             VerifyPersonnelByPhoneCommand cmd1 = new VerifyPersonnelByPhoneCommand();
             cmd1.setEnterpriseId(dc.getOrganizationId());
             cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
