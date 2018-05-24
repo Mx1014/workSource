@@ -1220,7 +1220,7 @@ public class AssetServiceImpl implements AssetService {
                     dWithoutLimit.setTime(d.getTime());
                  }else{
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    if(d.getMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
+                    if(d.getActualMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
                         d.add(Calendar.DAY_OF_MONTH, -1);
                     }
                     dWithoutLimit.setTime(d.getTime());
@@ -1540,28 +1540,23 @@ public class AssetServiceImpl implements AssetService {
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //d stands for the end of a cycle i.e. d = a+cycle
             Calendar d = newClearedCalendar();
-            // without limit, a full cycle should have a end of time - dWithoutLimit
-            Calendar dWithoutLimit = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
                 d.setTime(dateStrEnd.getTime());
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
-                d.setTime(a.getTime());
                 if(!cycle.isContract()){
-                    dWithoutLimit.set(Calendar.DAY_OF_MONTH, dWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    dWithoutLimit.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }else{
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    dWithoutLimit.setTime(d.getTime());
-                    if(d.getMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
+                    if(d.getActualMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
                         d.add(Calendar.DAY_OF_MONTH, -1);
                     }
                 }
             }
+
             //the end of a cycle -- d cannot beyond the upper limit of its fee rule
             if(d.compareTo(dateStrEnd)>0){
                 d.setTime(dateStrEnd.getTime());
