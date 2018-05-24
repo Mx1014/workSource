@@ -2636,12 +2636,31 @@ public class PunchServiceImpl implements PunchService {
             LOGGER.error("filed report dont add punch statistic");
             return;
         }
-        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
-        if (null == pr)
-            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-                    PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-                    "have no punch rule");
         PunchStatistic statistic = new PunchStatistic();
+
+        statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                .getTime()));
+        statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
+        statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
+        statistic.setOwnerId(ownerId);
+        statistic.setUserId(detail.getTargetId());
+        statistic.setDetailId(detail.getId());
+        statistic.setUserName(detail.getContactName());
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
+        statistic.setDeptName(depName);
+        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
+
+
+        //2018年5月17日 by wh 删除statistics提前到这里
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(ownerId);
+        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
+        //没有规则的也要保存,只是没考勤数据
+        if (null == pr){
+            this.punchProvider.createPunchStatistic(statistic);
+            return;
+        } 
         try {
             Organization punchOrg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
             if (null != punchOrg) {
@@ -2665,23 +2684,6 @@ public class PunchServiceImpl implements PunchService {
 //                }
 //
 //            }
-
-            statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                    .getTime()));
-            statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
-            statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-            Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
-            statistic.setOwnerId(ownerId);
-            statistic.setUserId(detail.getTargetId());
-            statistic.setDetailId(detail.getId());
-            statistic.setUserName(detail.getContactName());
-            String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
-            statistic.setDeptName(depName);
-            //2018年5月17日 by wh 删除statistics提前到这里
-            List<Long> orgIds = new ArrayList<>();
-            orgIds.add(ownerId);
-            this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
-
             List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -4633,36 +4635,45 @@ public class PunchServiceImpl implements PunchService {
         if (months.size() == 0) {
             return response;
         }
-//        List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
-//        if (null == userIds)
-//            return response;
-        //分页查询
-//        if (cmd.getPageAnchor() == null)
-//            cmd.setPageAnchor(0L);
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
-        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
-        if (members == null || members.size() == 0) {
-            return response;
-        }
-        Long nextPageAnchor = null;
-        if (members != null && members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            nextPageAnchor = members.get(members.size() - 1).getId();
-        }
 
-        List<Long> userIds = new ArrayList<>();
-        for (OrganizationMemberDetails member : members) {
-            if (member.getTargetId() > 0) {
-                userIds.add(member.getTargetId());
-            }
+        //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
+//        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
+//        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
+//        if (members == null || members.size() == 0) {
+//            return response;
+//        }
+//        Long nextPageAnchor = null;
+//        if (members != null && members.size() > pageSize) {
+//            members.remove(members.size() - 1);
+//            nextPageAnchor = members.get(members.size() - 1).getId();
+//        }
 
-        }
+//        List<Long> userIds = new ArrayList<>();
+//        for (OrganizationMemberDetails member : members) {
+//            if (member.getTargetId() > 0) {
+//                userIds.add(member.getTargetId());
+//            }
+//
+//        }
+
+      List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
+      if (null == userIds)
+          return response;
+      //分页查询
+      if (cmd.getPageAnchor() == null)
+          cmd.setPageAnchor(0L);
         List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
                 organizationId, months,
                 cmd.getExceptionStatus(), userIds, locator, pageSize + 1);
+      Long nextPageAnchor = null;
+      if (results != null && results.size() > pageSize) {
+    	  results.remove(results.size() - 1);
+          nextPageAnchor = results.get(results.size() - 1).getId();
+      }
+
         //减少IO一次查出所有的
         List<PunchExceptionRequest> overTimeRequests = approvalRequestProvider.listOvertimeDurationByOwnerAndMonth(cmd.getOwnerType(),
                 organizationId, months);
@@ -4693,8 +4704,10 @@ public class PunchServiceImpl implements PunchService {
         }
 
         List<Long> absenceUserIdList = new ArrayList<>();
-        for (OrganizationMemberDetails member : members) {
-            PunchStatistic statistic = findPunchStatisticByUserId(results, member.getTargetId());
+        //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
+//        for (OrganizationMemberDetails member : members) {
+//            PunchStatistic statistic = findPunchStatisticByUserId(results, member.getTargetId());
+        for(PunchStatistic statistic :results){
             if(null != statistic) {
                 PunchCountDTO dto = ConvertHelper.convert(statistic, PunchCountDTO.class);
 
@@ -4779,14 +4792,14 @@ public class PunchServiceImpl implements PunchService {
                 dto.setExts(extDTOs);
                 absenceUserIdList.add(statistic.getUserId());
             }
-            else{
-                PunchCountDTO dto = ConvertHelper.convert(member, PunchCountDTO.class);
-                dto.setPunchMonth(months.get(0));
-                dto.setUserName(member.getContactName());
-                String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getId()));
-                dto.setDeptName(depName);
-                punchCountDTOList.add(dto);
-            }
+//            else{
+//                PunchCountDTO dto = ConvertHelper.convert(member, PunchCountDTO.class);
+//                dto.setPunchMonth(months.get(0));
+//                dto.setUserName(member.getContactName());
+//                String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getId()));
+//                dto.setDeptName(depName);
+//                punchCountDTOList.add(dto);
+//            }
         }
         response.setNextPageAnchor(nextPageAnchor);
         response.setPunchCountList(punchCountDTOList);
