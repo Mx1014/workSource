@@ -698,20 +698,6 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
 	@Override
-	public Contract findContractByAddressId(Long addressId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		
-		Long contractId = context.select()
-								.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
-								.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
-								.fetchOneInto(Long.class);
-		
-		Contract contract = contractProvider.findContractById(contractId);		
-		
-		return contract;
-	}
-
-	@Override
 	public List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<ContractBuildingMapping> list = new ArrayList<>();

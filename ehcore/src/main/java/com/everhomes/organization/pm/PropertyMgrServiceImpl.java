@@ -2342,71 +2342,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		communityProvider.updateBuilding(building);
 		communityProvider.updateCommunity(community);
 		
-		//更新es搜索引擎中的受影响的document
-		//updateDocInES(cmd);
 	}
 
-	//更新es搜索引擎中的受影响的document(比如与合同绑定的资产名称)
-	/*private void updateDocInES(UpdateApartmentCommand cmd) {
-		Address address = addressProvider.findAddressById(cmd.getId());
-		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-			Contract contract = addressProvider.findContractByAddressId(cmd.getId());
-			if(contract == null) {
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
-						"contract is not exit");
-			}
-		FindContractCommand findContractCommand = ConvertHelper.convert(contract, FindContractCommand.class);
-		Integer namespaceId = contract.getNamespaceId()==null? UserContext.getCurrentNamespaceId():contract.getNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		ContractDetailDTO detail = contractService.findContract(findContractCommand);
-		
-		UpdateContractCommand updateContractCommand = new UpdateContractCommand();
-		updateContractCommand.setNamespaceId(contract.getNamespaceId());
-		updateContractCommand.setId(contract.getId());
-		updateContractCommand.setCommunityId(contract.getCommunityId());
-		
-		updateContractCommand.setCustomerId(detail.getCustomerId());
-		updateContractCommand.setCustomerName(detail.getCustomerName());
-		updateContractCommand.setContractNumber(detail.getContractNumber());
-		updateContractCommand.setContractEndDate(detail.getContractEndDate().getTime());
-		updateContractCommand.setContractStartDate(detail.getContractStartDate().getTime());
-		updateContractCommand.setName(detail.getName());
-		updateContractCommand.setContractType(detail.getContractType());
-		updateContractCommand.setPartyAType(detail.getPartyAType());
-		updateContractCommand.setPartyAId(detail.getPartyAId());
-		updateContractCommand.setCustomerType(detail.getCustomerType());
-		updateContractCommand.setCategoryItemId(detail.getCategoryItemId());
-		updateContractCommand.setRentSize(detail.getRentSize());
-		updateContractCommand.setCreateUid(detail.getCreateUid());
-		updateContractCommand.setStatus(detail.getStatus());
-		//更新apartment信息
-		//updateContractCommand.setApartments(detail.getApartments());
-		List<BuildingApartmentDTO> apartments = detail.getApartments();
-		Long addressId = address.getId();
-		
-		
-		
-		updateContractCommand.setChargingItems(detail.getChargingItems());
-		updateContractCommand.setOrgId(null);
-		
-		contractService.updateContract(updateContractCommand);
-		
-//		FindContractCommand findContractCommand = new FindContractCommand();
-//		findContractCommand.setNamespaceId(contract.getNamespaceId());
-//		findContractCommand.setId(contract.getId());
-//		findContractCommand.setPartyAId(contract.getPartyAId());
-//		findContractCommand.setCommunityId(contract.getCommunityId());
-//		findContractCommand.setContractNumber(contract.getContractNumber());
-		
-		//address.setApartmentName(cmd.getApartmentName());
-		//address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
-		}
-	}*/
 	
-	/*private ContractService getContractService(Integer namespaceId) {
-		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
-		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
-	}*/
 
 	@Override
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
