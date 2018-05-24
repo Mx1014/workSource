@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
@@ -36,4 +37,6 @@ public interface PmsyService {
 	CommonOrderDTO createPmBillOrder(CreatePmsyBillOrderCommand cmd);
 	
 	PmsyCommunityDTO getPmProperty(GetPmsyPropertyCommand cmd);
+	
+	PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd);
 }
