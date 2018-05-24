@@ -9792,7 +9792,7 @@ public class PunchServiceImpl implements PunchService {
     private static ExecutorService monthReportExecutorPool = Executors.newFixedThreadPool(10);
     @Override
 	public void updateMonthReport(UpdateMonthReportCommand cmd) {
-        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()+"."+ cmd.getMonthReportId()).enter(() -> {
             PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
             if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
                 throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -9887,7 +9887,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd) {
         PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
-        if (PunchMonthReportStatus.fromCode(report.getStatus()) != PunchMonthReportStatus.CREATED) {
+        if (PunchMonthReportStatus.fromCode(report.getStatus()) != PunchMonthReportStatus.UPDATING) {
             return new GetMonthReportProcessResponse(100);
         }
         return new GetMonthReportProcessResponse(report.getProcess());
@@ -9895,7 +9895,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void fileMonthReport(FileMonthReportCommand cmd) {
-        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()).enter(() -> {
+        PunchMonthReport report =  this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + cmd.getOwnerId()+"."+ cmd.getMonthReportId()).enter(() -> {
             PunchMonthReport report1 = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
             if (PunchMonthReportStatus.fromCode(report1.getStatus()) != PunchMonthReportStatus.CREATED) {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
