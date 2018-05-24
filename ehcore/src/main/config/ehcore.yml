@@ -147,4 +147,4 @@ core.server.id: 1
 core.server.list: 1,2
 
 # 允许在 nashorn 中通过 Java.type 访问的类
-nashorn.class.includes: java.lang.System, java.util.Scanner, java.io.File, java.lang.Thread, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
+nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
