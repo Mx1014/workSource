@@ -237,6 +237,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
+                //  1.置顶表删除
+                archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
+                //  2.人事删除
+                DeleteArchivesEmployeesCommand command = ConvertHelper.convert(cmd, DeleteArchivesEmployeesCommand.class);
+                deleteArchivesEmployees(command);
+            }
+            return null;
+        });
+        /*Integer namespaceId = UserContext.getCurrentNamespaceId();
+        dbProvider.execute((TransactionStatus status) -> {
+            if (cmd.getDetailIds() != null) {
                 for (Long detailId : cmd.getDetailIds()) {
                     //  1.组织架构删除
                     OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -262,7 +273,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dismissArchivesEmployeesLogs(dismissCommand);
             }
             return null;
-        });
+        });*/
     }
 
     //  通讯录成员置顶接口
@@ -1792,7 +1803,6 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //  添加事务
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.将员工添加到离职人员表
