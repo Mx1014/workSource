@@ -64,8 +64,8 @@ ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(
 -- ------------------------------
 -- 工作流动态函数     add by xq.tian  2018/04/24
 -- ------------------------------
-DROP TABLE IF EXISTS `eh_flow_scripts`;
-  CREATE TABLE `eh_flow_scripts` (
+-- DROP TABLE IF EXISTS `eh_flow_scripts`;
+CREATE TABLE `eh_flow_scripts` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INTEGER NOT NULL DEFAULT '0',
 
@@ -107,7 +107,7 @@ DROP TABLE IF EXISTS `eh_flow_scripts`;
 -- ------------------------------
 -- 工作流动态函数配置表     add by xq.tian  2018/04/24
 -- ------------------------------
-DROP TABLE IF EXISTS `eh_flow_script_configs`;
+-- DROP TABLE IF EXISTS `eh_flow_script_configs`;
 CREATE TABLE `eh_flow_script_configs` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -152,9 +152,9 @@ CREATE TABLE `eh_flow_script_configs` (
 
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN flow_case_id BIGINT;
 
-ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_type VARCHAR(64);
-ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_id BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE ehcore.eh_flow_actions ADD COLUMN script_version INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE eh_flow_actions ADD COLUMN script_type VARCHAR(64);
+ALTER TABLE eh_flow_actions ADD COLUMN script_id BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_flow_actions ADD COLUMN script_version INTEGER NOT NULL DEFAULT 0;
 
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag6` VARCHAR(128) DEFAULT NULL;
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag7` VARCHAR(128) DEFAULT NULL;
