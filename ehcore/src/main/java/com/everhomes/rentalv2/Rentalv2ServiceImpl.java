@@ -1770,6 +1770,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rsb.setRentalResourceRuleId(rentalCell.getId());
 			rsb.setResourceRentalDate(rentalCell.getResourceRentalDate());
 			rsb.setStatus(ResourceOrderStatus.NORMAL.getCode());
+			rsb.setResourceNumber(rentalCell.getResourceNumber());
 
 			rentalv2Provider.createRentalSiteBill(rsb);
 
