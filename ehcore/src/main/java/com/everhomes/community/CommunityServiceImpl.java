@@ -1211,7 +1211,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
 		for (ImportBuildingDataDTO data : datas) {
-			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data,community);
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
 			if (log != null) {
 				list.add(log);
 				continue;
@@ -1278,6 +1278,17 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLatitude(null);
 				}
 
+
+				//进行非空校验
+				if(building.getName().equals(data.getName())){
+						log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
+						log.setData(data);
+						log.setErrorLog("building name is repeat");
+						continue;
+				}
+
+
+
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
 				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(community.getNamespaceId());
@@ -1290,7 +1301,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data,Community community) {
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
 		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
 		if (StringUtils.isEmpty(data.getName())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
@@ -1306,16 +1317,7 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("building name cannot over than 20");
 			return log;
 		}
-		Community community1 = communityProvider.findCommunityById(community.getId());
-		//进行非空校验
-		if(community1 != null){
-			if(data.getName().equals(community1.getName())){
-				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
-				log.setData(data);
-				log.setErrorLog("building name is repeat");
-				return log;
-			}
-		}
+
 
 /*		if (StringUtils.isEmpty(data.getAddress())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
