@@ -1058,6 +1058,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 				if(!StringUtils.isEmpty(categryName))
 					cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categryName));
+
+				//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+				cond = cond.and(launchPadProvider.getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 				query.addConditions(cond);
 				query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
 				query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER);

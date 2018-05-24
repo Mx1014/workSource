@@ -150,7 +150,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 List<String> addressIds = new ArrayList<>();
                 entryInfos.forEach((e) -> {
                     buildings.add(e.getBuildingId().toString());
-                    addressIds.add(e.getAddressId().toString());
+                    if (e.getAddressId() != null){
+                        addressIds.add(e.getAddressId().toString());
+                    }
                 });
                 builder.field("buildingId", StringUtils.join(buildings, "|"));
                 builder.field("addressId", StringUtils.join(addressIds, "|"));
@@ -512,7 +514,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
         if (entryInfos != null && entryInfos.size() > 0) {
-            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+//            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().map((e) -> {
+                String addressName = e.getAddressName();
+                if (addressName != null) {
+                    e.setAddressName(addressName.replaceFirst("-", "/"));
+                }
+                return e;
+            }).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
         return dto;

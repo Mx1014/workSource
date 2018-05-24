@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import java.io.OutputStream;
 import java.sql.Time;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -281,6 +282,8 @@ public interface PunchService {
 
 	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
 
+	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
+	
 	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
 
 	void refreshMonthReport(String month);

@@ -6742,10 +6742,8 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
-        // TODO Auto-generated method stub
-
-        ArrayList resultList = new ArrayList();
+    public ArrayList processImportExcel2ArrayList(MultipartFile[] files){
+    	ArrayList resultList = new ArrayList();
         String rootPath = System.getProperty("user.dir");
         String filePath = rootPath + File.separator + UUID.randomUUID().toString() + ".xlsx";
         LOGGER.error("importOrganization-filePath=" + filePath);
@@ -6763,12 +6761,22 @@ public class PunchServiceImpl implements PunchService {
             resultList = PropMrgOwnerHandler.processorExcel(in);
         } catch (IOException e) {
             LOGGER.error("executeImportOrganization-parse file fail.message=" + e.getMessage());
-        } /*finally {
+        } finally{
+            File file = new File(filePath);
+            file.delete();
+        }
+        return resultList;
+    }
+    @Override
+    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
+        // TODO Auto-generated method stub
+
+        /*finally {
             File file = new File(filePath);
 			if(file.exists())
 				file.delete();
 		}*/
-
+    	ArrayList resultList = processImportExcel2ArrayList(files);
         PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
         addOperateLog(0L, "", result.toString(), 0L, "importPunchScheduling");
         return result;
@@ -8025,6 +8033,7 @@ public class PunchServiceImpl implements PunchService {
                     dto2 = convertPunchLog2DTO(pl);
                 }
                 intervalDTO.getPunchLogs().add(dto2);
+                LOGGER.debug("dto1 =" + dto1 + "dto 2 = " + dto2);
                 if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
                         NormalFlag.fromCode(dto2.getSmartAlignment()) == NormalFlag.YES) {
                     intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
@@ -8106,7 +8115,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
-//		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
+		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
         if (null == ptr) {
             return null;
         }

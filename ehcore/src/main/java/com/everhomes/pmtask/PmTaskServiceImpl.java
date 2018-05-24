@@ -957,13 +957,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		if(null == cmd.getPageSize())
-			cmd.setPageSize(100000);
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(), cmd.getPageAnchor(), cmd.getPageSize());
-		
-		
+			cmd.setPageSize(pageSize);
+		List<PmTaskDTO> list = this.searchTasks(cmd).getRequests();
 		Workbook wb = null;
 		InputStream in;
 		LOGGER.debug("!!!!!!!!!!!!!!!"+this.getClass().getResource("").getPath());
@@ -2655,12 +2652,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dataMap.put("organizationName", "");
 		}
 
-		Category category = categoryProvider.findCategoryById(dto.getCategoryId());
+		if(null != dto.getCategoryId()){
+			Category category = categoryProvider.findCategoryById(dto.getCategoryId());
 
-		if(category != null) {
-			dataMap.put("categoryName",category.getName());
-		} else {
-			dataMap.put("categoryName","");
+			if(category != null) {
+				dataMap.put("categoryName",category.getName());
+			} else {
+				dataMap.put("categoryName","");
+			}
 		}
 
 		dataMap.put("content",dto.getContent());

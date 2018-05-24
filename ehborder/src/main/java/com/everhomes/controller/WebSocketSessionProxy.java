@@ -30,13 +30,13 @@ public class WebSocketSessionProxy {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WebSocketSessionProxy.class);
 
-    @Value("${core.service.uri}")
+    // @Value("${core.service.uri}")
     private String coreServiceUri = "http://10.1.10.37:8080/evh";
 
-    @Value("${border.app.key}")
+    // @Value("${border.app.key}")
     private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
 
-    @Value("${border.app.secret}")
+    // @Value("${border.app.secret}")
     private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
     private static ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
@@ -48,8 +48,8 @@ public class WebSocketSessionProxy {
     @PostConstruct
     public void setup() {
         // 每次满一百条就持久化一次
-        Worker worker = new Worker(100);
-        worker.start();
+        // Worker worker = new Worker(100);
+        // worker.start();
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String token) {
@@ -58,7 +58,7 @@ public class WebSocketSessionProxy {
 //        dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
 //        dto.setSenderTag(senderTag);
 
-        switch (senderTag){
+        /*switch (senderTag){
             case "NOTIFY REQUEST":
                 Map actionData = (Map)StringHelper.fromJsonString(message.getPayload().toString(), Map.class);
                 Map dataMap = (Map) actionData.get("response");
@@ -93,7 +93,7 @@ public class WebSocketSessionProxy {
                 dto2.setSessionToken(token);
                 queue.offer(dto2);
                 break;
-        }
+        }*/
 
         // 提交队列
 

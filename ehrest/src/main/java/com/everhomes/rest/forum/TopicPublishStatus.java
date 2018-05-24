@@ -8,10 +8,11 @@ package com.everhomes.rest.forum;
  * <li>UNPUBLISHED("unpublished"): 未发布</li>
  * <li>PUBLISHED("published"): 已发布，未过期</li>
  * <li>EXPIRED("expired"): 已过期</li>
+ * <li>PUBLISHING_AND_EXPIRED("publishing_and_expired"): 发布中+已过期</li>
  * </ul>
  */
 public enum TopicPublishStatus {
-    ALL("all"), UNPUBLISHED("unpublished"), PUBLISHED("published"), EXPIRED("expired");
+    ALL("all"), UNPUBLISHED("unpublished"), PUBLISHED("published"), EXPIRED("expired"), PUBLISHING_AND_EXPIRED("publishing_and_expired");
     
     private String code;
     

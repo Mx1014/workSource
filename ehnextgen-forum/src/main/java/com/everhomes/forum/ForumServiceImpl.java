@@ -240,6 +240,11 @@ public class ForumServiceImpl implements ForumService {
             cmd.setForumEntryId(0L);
         }
 
+        //没有forumId，则设置当前域空间默认的forumId
+        if(cmd.getForumId() == null) {
+            setNamespaceDefaultForumId(cmd);
+        }
+
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
 
@@ -1945,7 +1950,7 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
-        Long operatorId = operator.getId();
+        Long operatorId = operator == null ? 0 : operator.getId();
         Long organizationId = cmd.getOrganizationId();
         Long communityId = cmd.getCommunityId();
         final Long forumId = cmd.getForumId();
@@ -2066,6 +2071,10 @@ public class ForumServiceImpl implements ForumService {
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+
+            if (TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHING_AND_EXPIRED) {
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
             }
             
             
@@ -5427,6 +5436,25 @@ public class ForumServiceImpl implements ForumService {
     	if(community != null) {
     		topicCmd.setForumId(community.getDefaultForumId());
     	}
+    }
+
+    /**
+     *
+     * 设置当前域空间默认forumId
+     */
+    private void setNamespaceDefaultForumId(NewTopicCommand topicCmd) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+
+        if(UserContext.getCurrentNamespaceId() == null){
+            return;
+        }
+
+        List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+
+        if(communities != null && communities.size() > 0){
+            topicCmd.setForumId(communities.get(0).getDefaultForumId());
+        }
     }
     
     @Override
