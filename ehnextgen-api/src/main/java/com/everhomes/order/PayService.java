@@ -3,8 +3,6 @@ package com.everhomes.order;
 
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.PayOrderCommand;
-import com.everhomes.pay.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.PayOrderRestResponse;
