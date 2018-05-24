@@ -5,13 +5,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>ownerId:ËùÊô×éÖ¯Id</li>
- * <li>ownerType£ºËùÊô×éÖ¯ÀàĞÍ 0Ğ¡Çø 1ÆóÒµ 2¼ÒÍ¥{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
- * <li>eventType:ÊÂ¼şÀàĞÍ null È«²¿ ,0 À¶ÑÀ¿ªÃÅ, 1 ¶şÎ¬Âë¿ªÃÅ,2 Ô¶³Ì¿ªÃÅ,3 ÈËÁ³¿ªÃÅ</li>
- * <li>keyWord:¹Ø¼ü×Ö</li>
- * <li>doorId:ÃÅ½ûid</li>
- * <li>pageAnchor:Ãªµã</li>
- * <li>pageSize:·ÖÒ³´óĞ¡</li>
+ * <li>ownerId:æ‰€å±ç»„ç»‡Id</li>
+ * <li>ownerTypeï¼šæ‰€å±ç»„ç»‡ç±»å‹ 0å°åŒº 1ä¼ä¸š 2å®¶åº­{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
+ * <li>eventType:äº‹ä»¶ç±»å‹ null å…¨éƒ¨ ,0 è“ç‰™å¼€é—¨, 1 äºŒç»´ç å¼€é—¨,2 è¿œç¨‹å¼€é—¨,3 äººè„¸å¼€é—¨</li>
+ * <li>keyWord:å…³é”®å­—</li>
+ * <li>doorId:é—¨ç¦id</li>
+ * <li>pageAnchor:é”šç‚¹</li>
+ * <li>pageSize:åˆ†é¡µå¤§å°</li>
  * </ul>
  *
  */
