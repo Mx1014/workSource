@@ -42,6 +42,20 @@ public class ExportEnterpriseCustomerCommand {
 
     private Long orgId;
 
+    private String trackingUids;
+
+    private Byte adminFlag;
+
+    private Long buildingId;
+
+    private Long addressId;
+
+    private Long ownerId;
+
+    private String ownerType;
+
+    private String trackingName;
+
     public String getIncludedGroupIds() {
         return includedGroupIds;
     }
@@ -186,6 +200,62 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setPropertyArea(String propertyArea) {
         this.propertyArea = propertyArea;
+    }
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public String getTrackingName() {
+        return trackingName;
+    }
+
+    public void setTrackingName(String trackingName) {
+        this.trackingName = trackingName;
+    }
+
+    public String getTrackingUids() {
+        return trackingUids;
+    }
+
+    public void setTrackingUids(String trackingUids) {
+        this.trackingUids = trackingUids;
     }
 
     @Override

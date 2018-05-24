@@ -1,34 +1,31 @@
 // @formatter:off
 package com.everhomes.message;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordResponse;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.search.MessageRecordSearcher;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class MessageServiceImpl implements MessageService {
@@ -37,10 +34,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	
+
 	@Autowired
 	private SmsProvider smsProvider;
 	
@@ -49,7 +43,13 @@ public class MessageServiceImpl implements MessageService {
 	
 	@Autowired
 	private OrganizationService organizationService;
-	
+
+	@Autowired
+	private MessageProvider messageProvider;
+
+	@Autowired
+	private MessageRecordSearcher messageRecordSearcher;
+
 	@Override
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd) {
 		if (cmd.getCommunityId() == null 
@@ -111,6 +111,32 @@ public class MessageServiceImpl implements MessageService {
 		
 		smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, null);
 
+	}
+
+	@Override
+	public void persistMessage(List<MessageRecord> records) {
+		this.messageProvider.createMessageRecords(records);
+	}
+
+	@Override
+	public SearchMessageRecordResponse searchMessageRecord(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessage(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
+	}
+
+	@Override
+	public SearchMessageRecordResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessageByIndex(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
+	}
+
+	@Override
+	public void syncMessageRecord() {
+		messageRecordSearcher.syncMessageRecordIndexs();
 	}
 
 }

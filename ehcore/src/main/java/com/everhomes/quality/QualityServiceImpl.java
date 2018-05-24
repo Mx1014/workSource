@@ -461,21 +461,29 @@ public class QualityServiceImpl implements QualityService {
         	executiveGroup = new ArrayList<>();
     		reviewGroup = new ArrayList<>();
 
-			for(StandardGroupDTO group : groupList) {
+			for (StandardGroupDTO group : groupList) {
 				QualityInspectionStandardGroupMap map = new QualityInspectionStandardGroupMap();
-				 map.setStandardId(standard.getId());
-				 map.setGroupType(group.getGroupType());
-				 map.setGroupId(group.getGroupId());
-				 map.setPositionId(group.getPositionId());
-				 if(group.getInspectorUid() != null)
-					 map.setInspectorUid(group.getInspectorUid());
-				 qualityProvider.createQualityInspectionStandardGroupMap(map);
-				 if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 executiveGroup.add(map);
-				 }
-				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 reviewGroup.add(map);
-				 }
+				map.setStandardId(standard.getId());
+				map.setGroupType(group.getGroupType());
+				map.setGroupId(group.getGroupId());
+				map.setPositionId(group.getPositionId());
+				if (group.getInspectorUid() != null) {
+					map.setInspectorUid(group.getInspectorUid());
+					if (null == map.getGroupId()) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(group.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							map.setGroupId(members.get(0).getOrganizationId());
+						}
+					}
+
+				}
+				qualityProvider.createQualityInspectionStandardGroupMap(map);
+				if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					executiveGroup.add(map);
+				}
+				if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					reviewGroup.add(map);
+				}
 			}
 
 			standard.setExecutiveGroup(executiveGroup);
@@ -4794,13 +4802,17 @@ Long nextPageAnchor = null;
 			List<QualityInspectionStandardGroupMap> executiveGroups = removeDuplicatedStandardGroups(standards);
 			if (executiveGroups != null && executiveGroups.size() > 0) {
 				executiveGroups.forEach((executiveGroup) -> {
-					if (executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) {
+					if ((executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) && executiveGroup.getInspectorUid() == 0) {
 						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
 						List<String> groupTypes = new ArrayList<>();
 						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+						String groupPath = "";
+						if (group != null) {
+							groupPath = group.getPath();
+						}
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(groupPath + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
 						if (organizations != null) {
 							organizations.forEach((o) -> {
 								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
@@ -4809,6 +4821,15 @@ Long nextPageAnchor = null;
 									memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
 								}
 							});
+						}
+					} else if (executiveGroup.getInspectorUid() != 0) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(executiveGroup.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							Organization group = organizationProvider.findOrganizationById(members.get(0).getOrganizationId());
+							memberList.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+							if (group != null){
+								organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+							}
 						}
 					} else {
 						//岗位下所有的人

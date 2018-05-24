@@ -9,20 +9,84 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
-import com.everhomes.rest.customer.*;
-import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.CustomerAccountDTO;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTaxDTO;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ListCustomerAccountsCommand;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTaxesCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -59,6 +123,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -111,6 +176,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -172,11 +240,11 @@ public class FieldServiceImpl implements FieldService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
         List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
@@ -228,11 +296,13 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        //管理员权限校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(result -> {
-                return result.getGroupDisplayName();
-            }).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
 
@@ -246,10 +316,7 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,@Deprecated boolean onlyLeaf, boolean filter) {
-        //管理员权限校验
-        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
-            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
-        }
+
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
@@ -322,8 +389,17 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
-
+        if (1 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        if (2 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+    }
+
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
 
     @Override
@@ -666,16 +742,23 @@ public class FieldServiceImpl implements FieldService {
             case "员工情况":
                 if(customerType == null) {
                     SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    ExportEnterpriseCustomerCommand exportcmd = ConvertHelper.convert(params, ExportEnterpriseCustomerCommand.class);
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
-                    cmd0.setPageSize(Integer.MAX_VALUE-1);
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
-                    if(response.getDtos() != null && response.getDtos().size() > 0) {
+                    cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    //request by get method
+                    if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
+                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                    }
+                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
+                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
                             EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
-                            setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                            setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                         }
                     }
                 } else {
@@ -683,7 +766,7 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setId(customerId);
                     cmd0.setCommunityId(communityId);
                     EnterpriseCustomerDTO dto = customerService.getEnterpriseCustomer(cmd0);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "人才团队信息":
@@ -700,7 +783,7 @@ public class FieldServiceImpl implements FieldService {
                 //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
                 for(int j = 0; j < customerTalentDTOS.size(); j ++){
                     CustomerTalentDTO dto = customerTalentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             //母节点已经不在，全部使用叶节点
@@ -717,7 +800,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "专利信息":
@@ -733,7 +816,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerPatentDTOS.size(); j ++){
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "证书":
@@ -749,7 +832,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCertificateDTOS.size(); j ++){
                     CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "申报项目":
@@ -765,7 +848,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
                     CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "工商信息":
@@ -781,7 +864,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCommercialDTOS.size(); j ++){
                     CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "投融情况":
@@ -797,7 +880,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
                     CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "经济指标":
@@ -813,7 +896,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
                     CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "跟进信息":
@@ -826,7 +909,7 @@ public class FieldServiceImpl implements FieldService {
                 List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
                 if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
-                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "计划信息":
@@ -839,7 +922,7 @@ public class FieldServiceImpl implements FieldService {
                 List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
                 if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
-                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "入驻信息":
@@ -854,7 +937,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
                     LOGGER.info("入驻信息 "+j+":"+customerEntryInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "离场信息":
@@ -870,7 +953,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
                     LOGGER.info("离场信息 "+j+":"+customerDepartureInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "税务信息":
@@ -885,7 +968,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerTaxDTOS == null) customerTaxDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTaxDTOS.size(); j++){
                     LOGGER.info("税务信息 "+j+":"+ customerTaxDTOS.get(j));
-                    setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "银行账号":
@@ -900,7 +983,7 @@ public class FieldServiceImpl implements FieldService {
                 if(customerAccountDTOs == null) customerAccountDTOs = new ArrayList<>();
                 for(int j = 0; j < customerAccountDTOs.size(); j++){
                     LOGGER.info("银行账号 "+j+":"+customerAccountDTOs.get(j));
-                    setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             // 增加企业服务和资源预定
@@ -916,7 +999,7 @@ public class FieldServiceImpl implements FieldService {
                 if(rentalBillDTOS == null) rentalBillDTOS = new ArrayList<>();
                 for(int j = 0; j < rentalBillDTOS.size(); j++){
                     LOGGER.info("资源预定 "+j+":"+rentalBillDTOS.get(j));
-                    setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,rentalBillDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
             case "企业服务":
@@ -931,24 +1014,40 @@ public class FieldServiceImpl implements FieldService {
                 if(requestInfoDTOS == null) requestInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < requestInfoDTOS.size(); j++){
                     LOGGER.info("企业服务 "+j+":"+requestInfoDTOS.get(j));
-                    setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                    setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
         }
         return data;
     }
 
-    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName) {
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
+    }
+
+    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName,String sheetName) {
         List<String> rowDatas = new ArrayList<>();
         for(int i = 0; i <  fields.size(); i++) {
             FieldDTO field = fields.get(i);
-            setRowData(dto, rowDatas, field,communityId,namespaceId,moduleName);
+            setRowData(dto, rowDatas, field,communityId,namespaceId,moduleName,sheetName);
         }
         //一个dto，获得一行数据后置入data中
         data.add(rowDatas);
     }
 
-    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field,Long communityId,Integer namespaceId,String moduleName) {
+    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field,Long communityId,Integer namespaceId,String moduleName,String sheetName) {
         String fieldName = field.getFieldName();
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
@@ -972,7 +1071,7 @@ public class FieldServiceImpl implements FieldService {
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
-            String cellData = getFromObj(fieldName, params, field, dto,communityId,namespaceId,moduleName);
+            String cellData = getFromObj(fieldName, params, field, dto,communityId,namespaceId,moduleName,sheetName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
             }
@@ -988,15 +1087,49 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
-
+        if(sheetName.equals("资源预定")){
+            if(fieldName.equalsIgnoreCase("status")){
+                invoke = SiteBillStatus.fromCode((byte)invoke).getDescribe();
+                return String.valueOf(invoke);
+            }
+        }
+        if(sheetName.equalsIgnoreCase("企业服务")){
+            if(fieldName.equalsIgnoreCase("workflowStatus")){
+                invoke = ServiceAllianceWorkFlowStatus.fromType((byte)invoke).getDescription();
+                return String.valueOf(invoke);
+            }
+        }
         if(invoke==null){
             return "";
+        }
+        //增加管理员和楼栋门牌特殊情况
+        if ("enterpriseAdmins".equals(fieldName)) {
+            if(invoke instanceof  ArrayList){
+                List<OrganizationContactDTO> contacts =  (ArrayList<OrganizationContactDTO>) invoke;
+                if(contacts.size()>0){
+                    List<String> admin = new ArrayList<>();
+                    contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
+                    return String.join(",", admin);
+                }else {
+                    return "";
+                }
+            }
+        }
+        if("entryInfos".equals(fieldName)){
+            List<CustomerEntryInfoDTO> entryInfos = (ArrayList<CustomerEntryInfoDTO>) invoke;
+            if(entryInfos.size()>0){
+                List<String> entryInfo = new ArrayList<>();
+                entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
+                return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
@@ -1079,11 +1212,15 @@ public class FieldServiceImpl implements FieldService {
                 invoke = String.valueOf(detail.getContactName());
             }else{
                 if(uid > 0) {
-                    UserInfo userInfo = userService.getUserInfo(uid);
-                    if(userInfo != null){
-                        invoke = String.valueOf(userInfo.getNickName());
-                    } else {
-                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    try {
+                        UserInfo userInfo = userService.getUserInfo(uid);
+                        if(userInfo != null){
+                            invoke = String.valueOf(userInfo.getNickName());
+                        } else {
+                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("cannot find user any information.uid={}",uid);
                     }
                 } else {
                     invoke = "";
@@ -1521,7 +1658,8 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
+//            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(group.getName()))) {
+            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !(group.getGroupId() == 1L)) {
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;

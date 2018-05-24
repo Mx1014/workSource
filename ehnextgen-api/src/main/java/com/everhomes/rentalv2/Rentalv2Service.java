@@ -86,7 +86,7 @@ public interface Rentalv2Service {
 
 	void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd);
 
-	void cancelRentalBill(CancelRentalBillCommand cmd);
+	void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsoredFlow);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
 
@@ -205,7 +205,7 @@ public interface Rentalv2Service {
 	void onOrderSuccess(RentalOrder bill);
 
 
-	void onOrderCancel(RentalOrder order);
+	void onOrderCancel(RentalOrder order,boolean ifAbsordFlow);
 
 
 	void updateRentalDate(UpdateRentalDateCommand cmd);
@@ -287,7 +287,12 @@ public interface Rentalv2Service {
 
 	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
 
+	QueryRentalStatisticsResponse queryRentalStatistics(QueryRentalStatisticsCommand cmd);
+
+	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
+
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();
+
 }

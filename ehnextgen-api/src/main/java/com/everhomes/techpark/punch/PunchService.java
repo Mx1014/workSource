@@ -283,4 +283,6 @@ public interface PunchService {
 	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
 
 	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
+	
+	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
 }

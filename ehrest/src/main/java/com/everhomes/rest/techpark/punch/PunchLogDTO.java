@@ -6,10 +6,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
+ * <li>expiryTime：状态终止时间(app在超过这个时间之后要重新请求数据更新页面)</li> 
  * <li>punchIntervalNo：第几个打卡时间段</li> 
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
  * <li>punchTime： 实际打卡时间</li> 
+ * <li>shouldPunchTime：应打卡时间(迟到早退用)</li> 
  * <li>latitude： 维度</li>
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
@@ -34,6 +36,8 @@ public class PunchLogDTO {
     private String requestToken;
     private Byte approvalStatus;
     private Byte smartAlignment;
+
+    private Long shouldPunchTime;
 
     @Override
     public String toString() {
@@ -146,5 +150,13 @@ public class PunchLogDTO {
 
 	public void setPunchTime(Long punchTime) {
 		this.punchTime = punchTime;
+	}
+
+	public Long getShouldPunchTime() {
+		return shouldPunchTime;
+	}
+
+	public void setShouldPunchTime(Long shouldPunchTime) {
+		this.shouldPunchTime = shouldPunchTime;
 	}
 }

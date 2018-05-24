@@ -8,6 +8,33 @@ package com.everhomes.rest.asset;
 public class FunctionDisableListCommand {
     private Integer namespaceId;
     private String ownerType;
+    private Long billGroupId;
+    private String billGroupName;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getBillGroupName() {
+        return billGroupName;
+    }
+
+    public void setBillGroupName(String billGroupName) {
+        this.billGroupName = billGroupName;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     public String getOwnerType() {
         return ownerType;

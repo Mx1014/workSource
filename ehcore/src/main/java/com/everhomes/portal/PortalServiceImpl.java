@@ -63,6 +63,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.lucene.util.UnicodeUtil;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1359,6 +1361,7 @@ public class PortalServiceImpl implements PortalService {
 
 					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
+					// 二楼：sb事务 + 1
 					sequenceService.syncSequence();
 
 					UserContext.setCurrentUser(user);

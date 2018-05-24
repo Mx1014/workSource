@@ -113,6 +113,8 @@ public class RentalBillDTO {
 	private String resourceType;
 	private String customObject;
 
+	private Long appId;
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -495,5 +497,13 @@ public class RentalBillDTO {
 
 	public void setOfflinePayPhone(String offlinePayPhone) {
 		this.offlinePayPhone = offlinePayPhone;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 }

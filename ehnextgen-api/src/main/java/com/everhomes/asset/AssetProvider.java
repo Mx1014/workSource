@@ -45,7 +45,9 @@ public interface AssetProvider {
 
     AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
 
-    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType);
+//    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType, ListBillsCommand cmd);
+
+    List<ListBillsDTO> listBills(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommand cmd);
 
     List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
 
@@ -77,7 +79,8 @@ public interface AssetProvider {
 
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 
-    void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
+    void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
+            ,String targetName, String invoiceNum);
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
@@ -232,9 +235,9 @@ public interface AssetProvider {
 
     PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
 
-    List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
+    List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
 
-    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays);
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
 
     AssetPaymentOrder getOrderById(Long orderId);
 
@@ -242,7 +245,7 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
-    List<PaymentBills> getAllBillsByCommunity(Long key);
+    List<PaymentBills> getAllBillsByCommunity(Integer namespaceId, Long key);
 
 
     List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId);
@@ -262,7 +265,7 @@ public interface AssetProvider {
 
     BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
 
-    List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId);
+    List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId);
 
     PaymentServiceConfig findServiceConfig(Integer namespaceId);
 
@@ -303,4 +306,14 @@ public interface AssetProvider {
     PaymentBills findPaymentBillById(Long billId);
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
+
+    void modifySettledBill(Long billId, String invoiceNum);
+
+    boolean checkBillExistById(Long billId);
+
+    String getAddressByBillId(Long id);
+
+    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
+
+    List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 }

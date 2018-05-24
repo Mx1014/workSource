@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
@@ -8,9 +9,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId: 属于的上级ID</li>
  * <li>ownerType: 属于上级的类型</li>
+ * <li>groupId: 分组信息，参考{@link com.everhomes.rest.aclink.DoorAccessType}</li>
  * <li>search: 搜索字符串</li>
- * <li>linkStatus: 连接状态</li>
+ * <li>linkStatus: 连接状态{@link com.everhomes.rest.aclink.DoorAccessLinkStatus}</li>
  * <li>doorType: 门禁类型</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每一页数量</li>
  * </ul>
  * @author janson
  *

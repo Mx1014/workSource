@@ -659,15 +659,27 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改后保存一个未出账单          4?
     /**
-     * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
+     * <p>保存一个未出账单的修改</p>
      * <b>URL: /asset/modifyNotSettledBill</b>
      */
     @RequestMapping("modifyNotSettledBill")
     @RestReturn(value = String.class)
     public RestResponse modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
         assetService.modifyNotSettledBill(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    /**
+     * <p>保存一个已出账单的修改</p>
+     * <b>URL: /asset/modifySettledBill</b>
+     */
+    @RequestMapping("modifySettledBill")
+    @RestReturn(value = String.class)
+    public RestResponse modifySettledBill(ModifySettledBillCommand cmd) {
+        assetService.modifySettledBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -746,7 +758,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 保存一个新增账单         4
+
     /**
      * <p>保存一个新增账单</p>
      * <b>URL: /asset/createBill</b>
@@ -1250,6 +1262,19 @@ public class AssetController extends ControllerBase {
     @RequestMapping("reCalBill")
     public RestResponse reCalBill(ReCalBillCommand cmd){
         assetService.reCalBill(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(NoticeTriggerCommand cmd){
+        assetService.noticeTrigger(cmd.getNamespaceId());
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");

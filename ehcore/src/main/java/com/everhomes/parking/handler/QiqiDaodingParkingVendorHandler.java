@@ -287,13 +287,24 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
             map.put("parkingId", parkingId);
             map.put("plateNo", order.getPlateNumber());
             map.put("typeId", cardInfo.getData().getTypeId());
-            map.put("typeCount", String.valueOf(order.getMonthCount().intValue()));
+            map.put("typeCount", "1");//类型数量	typeCount	是	蓝	类型月数 * 类型数量=月卡月数
             map.put("receivable", String.valueOf(order.getPrice().multiply(new BigDecimal("100"))));//单位分
             map.put("paymentMode", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "121001" : "120901");
+            Timestamp rechargeStartTimestamp = new Timestamp(Utils.strToLong(cardInfo.getData().getExpireDate(), Utils.DateStyle.DATE_TIME));
+            order.setStartPeriod(rechargeStartTimestamp);
             QidiDaodingResponse qidiDaodingResponse = postWithToken(map, OPENAPI_PARKING_MONTHCARD_RENEWALS, QidiDaodingResponse.class, null);
+
             order.setErrorDescriptionJson(qidiDaodingResponse.toString());
             order.setErrorDescription(qidiDaodingResponse.getErrorMsg());
-            return isRequestSuccess(qidiDaodingResponse);
+            boolean isrequestSuccess = isRequestSuccess(qidiDaodingResponse);
+            if(isrequestSuccess){
+                QidiDaodingResponse<QidiDaodingMonthCardEntity> cardInfo2 = getCardInfo(order.getPlateNumber());
+                if (isRequestDataSuccess(cardInfo2)) {
+                    Timestamp rechargeEndTimestamp = new Timestamp(Utils.strToLong(cardInfo2.getData().getExpireDate(), Utils.DateStyle.DATE_TIME));
+                    order.setEndPeriod(rechargeEndTimestamp);
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -606,6 +617,6 @@ public class QiqiDaodingParkingVendorHandler extends DefaultParkingVendorHandler
 
     @Override
     public void refreshToken() {
-        this.requestToken();
+        this.getToken(true);
     }
 }

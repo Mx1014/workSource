@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.parking.ParkingCardRequestType;
 import com.everhomes.parking.ParkingFlow;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
@@ -213,10 +214,10 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
 		do {
 
-			// 获取当前的费率表
-			List<ParkingRechargeRate> rateList = parkingProvider.listParkingRechargeRates(cmd.getOwnerType(),
-					cmd.getOwnerId(), cmd.getParkingLotId(), null);
-			if (null == rateList || rateList.isEmpty()) {
+			// 获取当前的卡类型
+			List<ParkingCardRequestType> typeList = parkingProvider.listParkingCardTypes(cmd.getOwnerType(),
+					cmd.getOwnerId(), cmd.getParkingLotId());
+			if (null == typeList || typeList.isEmpty()) {
 				break;
 			}
 
@@ -228,9 +229,9 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 
 			// 获取费率支持的卡
 			List<ParkingCardType> supportCardTypes = new ArrayList<>();
-			for (ParkingRechargeRate rate : rateList) {
+			for (ParkingCardRequestType type : typeList) {
 				for (KexinXiaomaoCardType cardType : listCardTypes) {
-					if (rate.getCardType().equals(cardType.getStandardId())) {
+					if (type.getCardTypeId().equals(cardType.getStandardId())) {
 						ParkingCardType temp = new ParkingCardType();
 						temp.setTypeId(cardType.getStandardId());
 						temp.setTypeName(cardType.getStandardType());

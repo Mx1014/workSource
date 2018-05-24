@@ -901,4 +901,36 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <b>URL: /rental/admin/queryRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息
+	 * </p>
+	 */
+	@RequestMapping("queryRentalStatistics")
+	@RestReturn(value = QueryRentalStatisticsResponse.class)
+	public RestResponse queryRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		QueryRentalStatisticsResponse statisticsResponse = rentalService.queryRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/queryOrgRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息(公司)
+	 * </p>
+	 */
+	@RequestMapping("queryOrgRentalStatistics")
+	@RestReturn(value = QueryOrgRentalStatisticsResponse.class)
+	public RestResponse queryOrgRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		QueryOrgRentalStatisticsResponse statisticsResponse = rentalService.queryOrgRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
