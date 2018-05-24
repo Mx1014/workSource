@@ -2667,8 +2667,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
 						OrganizationMemberTargetType.USER.getCode(), 1000, new ListingLocator());
 
-		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getContactToken().equals(cmd.getContactToken()));
-		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
+			boolean isSystemAdmin = members.stream().anyMatch(r -> r.getTargetId().equals(cmd.getUserId()));
+			response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
+
 
 
 		//modify by lei yuan
