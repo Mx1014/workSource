@@ -456,7 +456,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        response.setResult(TrueOrFalseFlag.TRUE.getCode());
+        response.setResult(TrueOrFalseFlag.FALSE.getCode());
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
         if (templates.size() == 0)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_TEMPLATE_NOT_EXIST, "" +
@@ -467,7 +467,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                 cmd.getOwnerType(), templates.get(0).getId());
         if (ga == null)*/
         if (counts != templates.size())
-            response.setResult(TrueOrFalseFlag.FALSE.getCode());
+            response.setResult(TrueOrFalseFlag.TRUE.getCode());
         return response;
     }
 

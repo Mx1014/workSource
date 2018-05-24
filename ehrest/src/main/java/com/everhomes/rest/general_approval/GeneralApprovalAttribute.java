@@ -22,7 +22,7 @@ public enum GeneralApprovalAttribute {
 
     private String code;
 
-    private GeneralApprovalAttribute(String code) {
+    GeneralApprovalAttribute(String code) {
         this.code = code;
     }
 

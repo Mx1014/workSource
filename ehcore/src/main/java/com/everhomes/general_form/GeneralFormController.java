@@ -19,21 +19,6 @@ public class GeneralFormController extends ControllerBase {
 
 	@Autowired
 	private GeneralFormService generalFormService;
-//    /**
-//     * <b>URL: /general_form/getTemplateByApprovalId</b>
-//     * <p> 获取表单的信息 </p>
-//     * @return GetTemplateByApprovalIdResponse 表单的数据信息
-//     */
-//    @RequestMapping("getTemplateByApprovalId")
-//    @RestReturn(value=GetTemplateByApprovalIdResponse.class)
-//    public RestResponse getTemplateByApprovalId(@Valid GetTemplateByApprovalIdCommand cmd) {
-//    	GetTemplateByApprovalIdResponse result = generalApprovalService.getTemplateByApprovalId(cmd);
-//    	RestResponse response = new RestResponse(result);
-//    	response.setErrorCode(ErrorCodes.SUCCESS);
-//    	response.setErrorDescription("OK");
-//
-//    	return response;
-//    }
 
 	/**
 	 * <b>URL: /general_form/getTemplateBySourceId</b>
