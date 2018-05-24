@@ -98,7 +98,7 @@ public class PolicyRecordServiceImpl implements PolicyRecordService {
         PolicyRecordResponse resp = new PolicyRecordResponse();
         List<PolicyRecord> results = policyRecordProvider.searchPolicyRecords(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getBeginDate(),cmd.getEndDate(),cmd.getCategoryId(),cmd.getKeyWord(),cmd.getPageAnchor(),cmd.getPageSize());
         if(results.size() > 0){
-            resp.setNextPageAnchor(results.get(0).getId());
+            resp.setNextPageAnchor(results.get(results.size() - 1).getId());
         }
         resp.setDtos(results.stream().map(r -> ConvertHelper.convert(r,PolicyRecordDTO.class)).collect(Collectors.toList()));
         return resp;

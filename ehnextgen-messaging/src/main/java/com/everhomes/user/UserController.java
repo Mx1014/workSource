@@ -1537,7 +1537,7 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /user/listUserRelatedCards</b>
+	 * <b>URL: /user/isUserAuth</b>
 	 * <p>判断用户是否为认证用户</p>
 	 * @return
 	 */

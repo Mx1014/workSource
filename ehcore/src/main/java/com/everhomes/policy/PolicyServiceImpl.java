@@ -109,7 +109,7 @@ public class PolicyServiceImpl implements PolicyService {
         PolicyResponse resp = new PolicyResponse();
         List<Policy> results = policyProvider.listPoliciesByTitle(cmd.getNamespaceId(),cmd.getOwnerType(), ownerIds, cmd.getTitle(), cmd.getPageAnchor(), cmd.getPageSize());
         if(results.size() > 0)
-            resp.setNextPageAnchor(results.get(0).getId());
+            resp.setNextPageAnchor(results.get(results.size() - 1).getId());
         resp.setDtos(results.stream().map(r -> {
             PolicyDTO dto = ConvertHelper.convert(r,PolicyDTO.class);
             List<PolicyCategory> ctgs = policyCategoryService.searchPolicyCategoryByPolicyId(dto.getId(),(byte) 1);
