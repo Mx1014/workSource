@@ -130,6 +130,7 @@ public interface Rentalv2Service {
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
 	void updateResource(UpdateResourceAdminCommand cmd);
+	void updateResourceStatus(UpdateResourceAdminCommand cmd);
 	void updateResourceOrder(UpdateResourceOrderAdminCommand cmd);
 	void updateItem(UpdateItemAdminCommand cmd);
 	void updateItems(UpdateItemsAdminCommand cmd);

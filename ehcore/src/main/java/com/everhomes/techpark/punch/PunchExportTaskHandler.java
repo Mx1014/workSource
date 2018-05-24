@@ -103,6 +103,7 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         }else if (reportType.equals("exportVacationBalances")) {
             outputStream = punchService.getVacationBalanceOutputStream(ownerId, taskId);
         }
+        taskService.updateTaskProcess(taskId, 99);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
