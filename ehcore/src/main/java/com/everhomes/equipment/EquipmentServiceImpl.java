@@ -448,7 +448,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			EquipmentInspectionStandards exist  = verifyEquipmentStandard(cmd.getId());
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
-
+			standard.setTargetType(exist.getTargetType());
+			standard.setTargetId(exist.getTargetId());
 			if (cmd.getEquipments() != null || cmd.getEquipments().size() > 0) {
 				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
 			} else {
