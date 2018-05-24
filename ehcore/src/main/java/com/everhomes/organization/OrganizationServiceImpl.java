@@ -1741,6 +1741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationWorkPlaces.setWorkplaceName(createOfficeSiteCommand.getSiteName());
                     //将上面的organization对象中的id也封装在对象中
                     organizationWorkPlaces.setOrganizationId(cmd.getOrganizationId());
+                    organizationWorkPlaces.setWholeAddressName(createOfficeSiteCommand.getWholeAddressName());
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
                     //现在的情况是这样的，我们还需要进行维护一张表eh_enterprise_community_map的信息，这张表其实在标准版中是不适用的

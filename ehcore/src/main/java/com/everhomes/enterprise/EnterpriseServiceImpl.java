@@ -1123,6 +1123,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
                     if(CollectionUtils.isNotEmpty(organizationList)){
                         listEnterpriseResponse.setEnterprises(organizationList);
+                        listEnterpriseResponse.setNextPageAnchor(locator.getAnchor());
                         return listEnterpriseResponse;
                     }
                 }
