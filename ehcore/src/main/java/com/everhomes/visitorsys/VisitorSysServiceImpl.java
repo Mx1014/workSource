@@ -88,7 +88,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             "enterpriseId","enterpriseName","officeLocationId","officeLocationName",
             "visitReasonId","visitReason"};
     //提取字符串前的数字
-    final Pattern numExtract = Pattern.compile("^([\\d]*).*");
+    final Pattern numExtract = Pattern.compile("^([\\d]+).*");
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -1062,58 +1062,73 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     "unknown visitorToken "+cmd.getVisitorToken());
         }
 
-        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
-
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
-        //
-        setVisitorQrcode(configuration,visitor,response);
-        response = VisitorSysUtils.copyAllNotNullProperties(configuration, response);
-        response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
-        VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(visitor.getOfficeLocationId());
-        response.setOfficeLocationDTO(ConvertHelper.convert(location,BaseOfficeLocationDTO.class));
-        response.setVisitorInfoDTO(ConvertHelper.convert(visitor,BaseVisitorInfoDTO.class));
-        response.setIpadThemeRgb(configuration.getIpadThemeRgb());
-        return response;
+        VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
+        GetConfigurationResponse relatedConfiguration = getConfiguration(ConvertHelper.convert(relatedVisitor, GetConfigurationCommand.class));
+        VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
+        if(ownerType == VisitorsysOwnerType.COMMUNITY) {
+            return setInvitationLetter(configuration,relatedConfiguration,visitor,relatedVisitor);
+        }
+        return setInvitationLetter(relatedConfiguration,configuration,relatedVisitor,visitor);
     }
 
-    /**
-     * 设置response.qrcode 访客二维码
-     * @param configuration 访客配置
-     * @param visitor 访客信息
-     * @param response 访客邀请函实体
-     */
-    private void setVisitorQrcode(GetConfigurationResponse configuration, VisitorSysVisitor visitor, GetInvitationLetterForWebResponse response) {
-        VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
-        boolean canSetQrcode = false;
-        if(ownerType == VisitorsysOwnerType.COMMUNITY){
-            VisitorsysBaseConfig baseConfig = configuration.getBaseConfig();
-            VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsFlag());
-            VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsValidAfterConfirmedFlag());
-            VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
-            if(((doorGuardsFlag == VisitorsysFlagType.YES
-                    && validAfterConfirmedFlag == VisitorsysFlagType.YES
-                    && visitStatus==VisitorsysStatus.HAS_VISITED)
-                    || (doorGuardsFlag == VisitorsysFlagType.YES &&
-                    validAfterConfirmedFlag == VisitorsysFlagType.NO))
-                    && visitStatus!=VisitorsysStatus.DELETED
-                    && visitStatus!=VisitorsysStatus.REJECTED_VISIT){
-                response.setQrcode(visitor.getDoorGuardQrcode());
-            }
-        }else{
-            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
-            GetConfigurationResponse relatedConfiguration = getConfiguration(ConvertHelper.convert(relatedVisitor, GetConfigurationCommand.class));
-            VisitorsysBaseConfig baseConfig = relatedConfiguration.getBaseConfig();
-            VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsFlag());
-            VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(baseConfig==null?null:baseConfig.getDoorGuardsValidAfterConfirmedFlag());
-            VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
-            if((doorGuardsFlag == VisitorsysFlagType.YES
-                    && validAfterConfirmedFlag == VisitorsysFlagType.YES
-                    && visitStatus==VisitorsysStatus.HAS_VISITED)
-                    || (doorGuardsFlag == VisitorsysFlagType.YES &&
-                    validAfterConfirmedFlag == VisitorsysFlagType.NO)){
-                response.setQrcode(relatedVisitor==null?null:relatedVisitor.getDoorGuardQrcode());
-            }
+    private GetInvitationLetterForWebResponse setInvitationLetter(GetConfigurationResponse communityConfig, GetConfigurationResponse enterpriseConfig,
+                                                                  VisitorSysVisitor communityVisitor, VisitorSysVisitor enterpriseVisitor) {
+        GetInvitationLetterForWebResponse response = new GetInvitationLetterForWebResponse();
+        //根据设置，决定是否设置二维码
+        VisitorsysStatus visitStatus = checkVisitStatus(communityVisitor.getVisitStatus());
+        //读取公司访客二维码是否显示
+        VisitorsysFlagType visitorQrcodeFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorQrcodeFlag());
+        //读取园区门禁配置
+        VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsFlag());
+        VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
+        boolean showQrcode =
+                enterpriseConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
+                && enterpriseConfig.getBaseConfig().getDoorGuardId().equals(enterpriseVisitor.getDoorGuardId())
+                && (
+                        (
+                                doorGuardsFlag == VisitorsysFlagType.YES //园区开启门禁对接
+                                && validAfterConfirmedFlag == VisitorsysFlagType.YES//门禁二维码需要在访客确认后生效
+                                && visitStatus==VisitorsysStatus.HAS_VISITED//访客已经是到访状态
+                        )
+                        ||
+                        (
+                                doorGuardsFlag == VisitorsysFlagType.YES //园区开启门禁对接
+                                && validAfterConfirmedFlag == VisitorsysFlagType.NO //门禁二维码不需要需要在访客确认后生效
+                        )
+                )
+                && visitStatus!=VisitorsysStatus.DELETED //访客状态不是已删除
+                && visitStatus!=VisitorsysStatus.REJECTED_VISIT //访客状态不是已拒绝
+                && visitorQrcodeFlag == VisitorsysFlagType.YES; //公司访客设置的邀请函二维码显示
+        showQrcode = showQrcode &&
+                (communityVisitor.getDoorGuardEndTime()==null //门禁失效时间为空，则门禁二维码永久有效
+                        || communityVisitor.getDoorGuardEndTime().getTime()>System.currentTimeMillis());//门禁失效时间未到，则二维码有效
+        if(showQrcode){
+            response.setQrcode(communityVisitor.getDoorGuardQrcode());
         }
+        //目前只有公司访客邀请函，所以以下设置基于公司访客邀请函的设置
+        response = VisitorSysUtils.copyAllNotNullProperties(enterpriseConfig, response);
+        response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
+        VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
+        VisitorsysFlagType visitorInfoFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorInfoFlag());
+        if(visitorInfoFlag == VisitorsysFlagType.YES) {
+            BaseVisitorInfoDTO convert = ConvertHelper.convert(enterpriseVisitor, BaseVisitorInfoDTO.class);
+            convert.setEnterpriseFormValues(enterpriseVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(enterpriseVisitor.getFormJsonValue(),
+                    new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
+            convert.setCommunityFormValues(communityVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(communityVisitor.getFormJsonValue(),
+                    new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
+            response.setVisitorInfoDTO(convert);
+        }else{
+            BaseVisitorInfoDTO dto = new BaseVisitorInfoDTO();
+            dto.setVisitorType(enterpriseVisitor.getVisitorType());
+            response.setVisitorInfoDTO(dto);
+        }
+        VisitorsysFlagType visitorsysFlagType = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getTrafficGuidanceFlag());
+        if(visitorsysFlagType == VisitorsysFlagType.YES) {
+            response.setOfficeLocationDTO(ConvertHelper.convert(location, BaseOfficeLocationDTO.class));
+        }
+        response.setIpadThemeRgb(enterpriseConfig.getIpadThemeRgb());
+        return response;
     }
 
     @Override
@@ -1963,7 +1978,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(now);
         doorCmd.setValidFromMs(now);
-        if(visitor.getInvalidTime()!=null) {
+        if(visitor.getInvalidTime()!=null && visitor.getInvalidTime().length()>0) {
             Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
             if (matcher.find()) {
                 instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
@@ -1997,7 +2012,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     /**
-     * 根据访客，生成关联的（公司/园区）访客实体
+     * 根据访客，生成关联的（公司/园区）访客
      * @param visitor
      * @param formValues
      * @return
@@ -2009,23 +2024,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //新建访客/预约
         if(relatedVisitor !=null){
             convert = relatedVisitor;
-//            convert.setId(relatedVisitor.getId());
-//            convert.setVisitStatus(relatedVisitor.getVisitStatus());
-//            convert.setBookingStatus(relatedVisitor.getBookingStatus());
-//            convert.setVisitTime(relatedVisitor.getVisitTime());
         }
-//        convert.setFormJsonValue(null);
-//        convert.setInvalidTime(null);
-//        convert.setPlateNo(null);
-//        convert.setIdNumber(null);
-//        convert.setVisitFloor(null);
-//        convert.setVisitAddresses(null);
         if(visitorsysOwnerType == visitorsysOwnerType.COMMUNITY) {
             convert.setParentId(relatedVisitor ==null?visitor.getId(): relatedVisitor.getParentId());
             convert.setOwnerId(visitor.getEnterpriseId());
             convert.setOwnerType(visitorsysOwnerType.ENTERPRISE.getCode());
             convert.setEnterpriseName(visitor.getEnterpriseName());
-            convert.setVisitTime(null);
+            convert.setVisitTime(relatedVisitor ==null?null:relatedVisitor.getVisitTime());
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
@@ -2036,7 +2041,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             convert.setOwnerId(communityId==null?0L:communityId);
             convert.setOwnerType(visitorsysOwnerType.COMMUNITY.getCode());
             convert.setEnterpriseName(visitor.getEnterpriseName());
-            convert.setVisitTime(null);
+            convert.setVisitTime(relatedVisitor ==null?null:relatedVisitor.getVisitTime());
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
