@@ -1,8 +1,5 @@
 package com.everhomes.configurations_record_change;
 
-import java.util.List;
-
-import com.everhomes.listing.CrossShardListingLocator;
 
 
 /**
@@ -13,7 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 public interface ConfigurationsRecordChangeProvider {
 	
 	/**
-	 * 创建配置项信息
+	 * 创建配置项变更信息
 	 * @param bo	Configurations
 	 */
 	void crteateConfiguration(ConfigurationsRecordChange bo);
