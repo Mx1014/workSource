@@ -2,6 +2,7 @@ package com.everhomes.aclink;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.user.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -150,5 +151,18 @@ public interface DoorAccessService {
             HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
+
 	public void excuteMessage(String payLoad);
+
+	public QueryDoorAccessByServerResponse listDoorAccessByServerId(QueryDoorAccessByServerCommand cmd);
+
+	public ListDoorAccessByGroupIdResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd);
+
+	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser();
+	
+	public AesUserKey getAesUserKey(User user, DoorAuth doorAuth);
+	
+	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
+	
+	public int invalidVistorAuth(Long DoorId, String phone);
 }
