@@ -1211,7 +1211,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
 		for (ImportBuildingDataDTO data : datas) {
-			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data,community);
 			if (log != null) {
 				list.add(log);
 				continue;
@@ -1290,13 +1290,31 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data,Community community) {
 		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
 		if (StringUtils.isEmpty(data.getName())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
 			log.setData(data);
 			log.setErrorLog("building name cannot be empty");
 			return log;
+		}
+		LOGGER.info(String.valueOf(data.getName().getBytes().length));
+		//校验楼栋名称的长度不能大于20个汉字
+		if(data.getName().getBytes().length > 100){
+			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_OVER_FLOW);
+			log.setData(data);
+			log.setErrorLog("building name cannot over than 20");
+			return log;
+		}
+		Community community1 = communityProvider.findCommunityById(community.getId());
+		//进行非空校验
+		if(community1 != null){
+			if(data.getName().equals(community1.getName())){
+				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
+				log.setData(data);
+				log.setErrorLog("building name is repeat");
+				return log;
+			}
 		}
 
 /*		if (StringUtils.isEmpty(data.getAddress())) {
