@@ -712,14 +712,20 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public ContractBuildingMapping findContractBuildingMappingByAddressId(Long addressId) {
+	public List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ContractBuildingMapping> list = new ArrayList<>();
 		
-		ContractBuildingMapping contractBuildingMapping = context.select()
-														.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
-														.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
-														.fetchOneInto(ContractBuildingMapping.class);
-		return contractBuildingMapping;
+		context.select()
+				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.fetch()
+				.map(r->{
+					ContractBuildingMapping convert = ConvertHelper.convert(r, ContractBuildingMapping.class);
+					list.add(convert);
+					return null;
+				});
+		return list;
 	}
 
 	@Override

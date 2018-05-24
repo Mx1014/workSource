@@ -2255,10 +2255,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setApartmentName(cmd.getApartmentName());
 			address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 			//update EH_Contract_Building_Mapping
-			ContractBuildingMapping contractBuildingMapping = addressProvider.findContractBuildingMappingByAddressId(address.getId());
-			if(contractBuildingMapping != null) {
-				contractBuildingMapping.setApartmentName(cmd.getApartmentName());
-				addressProvider.updateContractBuildingMapping(contractBuildingMapping);
+			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(address.getId());
+			if(contractBuildingMappingList != null && contractBuildingMappingList.size()>0) {
+				for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
+					contractBuildingMapping.setApartmentName(cmd.getApartmentName());
+					addressProvider.updateContractBuildingMapping(contractBuildingMapping);
+				}
 			}
 		}
 
@@ -2345,7 +2347,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	//更新es搜索引擎中的受影响的document(比如与合同绑定的资产名称)
-	private void updateDocInES(UpdateApartmentCommand cmd) {
+	/*private void updateDocInES(UpdateApartmentCommand cmd) {
 		Address address = addressProvider.findAddressById(cmd.getId());
 		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
 			Contract contract = addressProvider.findContractByAddressId(cmd.getId());
@@ -2399,12 +2401,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//address.setApartmentName(cmd.getApartmentName());
 		//address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 		}
-	}
+	}*/
 	
-	private ContractService getContractService(Integer namespaceId) {
+	/*private ContractService getContractService(Integer namespaceId) {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
-	}
+	}*/
 
 	@Override
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {

@@ -1485,6 +1485,10 @@ public class AssetServiceImpl implements AssetService {
                 assetProvider.reCalBillById(bill.getId());
             }
             LOGGER.error("工作flag完成");
+            //得到金额总和并更新到eh_contracts表中 by steve
+            BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
+            assetProvider.setRent(cmd.getContractId(),totalAmount);
+            
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
             LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
