@@ -179,6 +179,17 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
+	public void deleteLaunchPadLayout(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadLayouts.class, null);
+	}
+
+
+	@Override
 	public LaunchPadLayout findLaunchPadLayoutById(long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(LaunchPadLayout.class, id));
 		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());
@@ -264,6 +275,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		condition = condition.and(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 		if(!StringUtils.isEmpty(categryName))
 			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categryName));
 		step.where(condition).fetch().map((r) ->{
@@ -735,7 +750,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return null;
 	}
 
-	private Condition getPreviewPortalVersionCondition(String tableName){
+	@Override
+	public Condition getPreviewPortalVersionCondition(String tableName){
 		String sql = tableName + ".PREVIEW_PORTAL_VERSION_ID is null";
 		if(UserContext.current().getPreviewPortalVersionId() != null){
 			sql = tableName + ".PREVIEW_PORTAL_VERSION_ID = " + UserContext.current().getPreviewPortalVersionId();
