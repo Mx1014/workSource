@@ -171,6 +171,23 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
+    public List<DecorationRequest> queryUserRelateRequests(Integer namespaceId, Long communityId, String phone, Integer pageSize,
+                                                           ListingLocator locator) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select(Tables.EH_DECORATION_REQUESTS.fields()).from(Tables.EH_DECORATION_REQUESTS).leftOuterJoin(Tables.EH_DECORATION_WORKERS).on(
+                Tables.EH_DECORATION_REQUESTS.ID.eq(Tables.EH_DECORATION_WORKERS.REQUEST_ID));
+        Condition condition = Tables.EH_DECORATION_REQUESTS.APPLY_PHONE.eq(phone);
+        condition = condition.or(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE.eq(phone));
+        condition = condition.or(Tables.EH_DECORATION_WORKERS.PHONE.eq(phone));
+        if (locator != null)
+            condition = condition.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
+        step.where(condition);
+        if (pageSize != null)
+            step.limit(pageSize);
+        return step.fetch().map(r-> ConvertHelper.convert(r,DecorationRequest.class));
+    }
+
+    @Override
     public DecorationWorker getDecorationWorkerById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(
