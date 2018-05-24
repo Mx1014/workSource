@@ -1260,14 +1260,13 @@ public class AssetServiceImpl implements AssetService {
             Integer days = null;
             // calculate r if cycle is not one-off deal
             if(billingCycle.byteValue() != (byte) 5){
-                // for a cycle, use 'days method' may not come out 1 as people expected, so if it obvious is a cycle,
-                // just keep r as one
+
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
-                // period of this cycle
-                int divider = daysBetween(d, a);
-                days = new Float(divider).intValue();
+                int divided = daysBetween(dWithoutLimit,aWithoutLimit);
+                days = divided;
                 if(!b){
-                    int divided = daysBetween(dWithoutLimit,aWithoutLimit);
+                    // period of this cycle
+                    int divider = daysBetween(d, a);
                     r = String.valueOf(divider+"/" + divided);
                 }
             }
