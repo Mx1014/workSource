@@ -5032,6 +5032,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
         if (maps != null && maps.size() > 0) {
             List<Long> planIds = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
+            EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId());
+            if (autoPlans != null) {
+                planIds.add(autoPlans.getId());
+            }
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
                     cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
 
