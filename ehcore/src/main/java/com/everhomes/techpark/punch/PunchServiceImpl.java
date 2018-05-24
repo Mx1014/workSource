@@ -9811,9 +9811,9 @@ public class PunchServiceImpl implements PunchService {
         setCalendarMonthBegin(start);
         end.setTime(start.getTime());
         end.add(Calendar.MONTH, 1);
-        List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null);
         monthReportExecutorPool.execute(() -> {
             try {
+                List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null);
                 setMonthReportProcess(report, 5);
                 for (int i = 0; i < members.size(); i++) {
                     OrganizationMemberDTO dto = ConvertHelper.convert(members.get(i),OrganizationMemberDTO.class);
