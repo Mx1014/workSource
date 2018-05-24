@@ -306,6 +306,23 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 *
+	 * <b>URL: /rental/admin/updateResourceStatus</b>
+	 * <p>
+	 * 开启/关闭 资源预约
+	 * </p>
+	 */
+	@RequestMapping("updateResourceStatus")
+	@RestReturn(String.class)
+	public RestResponse updateResourceStatus(@Valid UpdateResourceAdminCommand cmd){
+		this.rentalService.updateResource(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
 	 * <b>URL: /rental/admin/updateResourceOrder</b>
 	 * <p>
 	 * 更新资源顺序
