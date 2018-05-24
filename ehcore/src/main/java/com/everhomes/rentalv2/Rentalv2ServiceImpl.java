@@ -1160,7 +1160,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
-				locator, pageSize, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
+				locator, pageSize+1, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
 
 		if(null == rentalSites)
 			return response;
@@ -2471,21 +2471,41 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	@Scheduled(cron = "30 29,59 * * * ? ")
 	public void autoCompleteBills(){
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
-			Long currTime = DateHelper.currentGMTTime().getTime();
-			for(RentalOrder order : orders ){
-				if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
-					if (currTime + 60*1000L >= order.getEndTime().getTime()){
-						VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
-						ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
-						if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
-							CompleteRentalOrderCommand cmd = new CompleteRentalOrderCommand();
-							cmd.setRentalBillId(order.getId());
-							this.completeRentalOrder(cmd);
+			coordinationProvider.getNamedLock("Rental_schedule_flag1" ) //集群运行时只有一台执行定时任务
+					.tryEnter(() -> {
+						LOGGER.info("autoCompleteBills start:");
+						List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
+						Long currTime = DateHelper.currentGMTTime().getTime();
+						for (RentalOrder order : orders) {
+							if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+								LOGGER.info("the bill id is:{} startTime:{} endTime:{}",order.getId(),order.getStartTime(),order.getEndTime());
+								if (currTime + 60 * 1000L >= order.getEndTime().getTime()) {
+									VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+									ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
+									if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.UP.getCode())) {//车锁升起 自动结束
+                                        RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+                                        restoreRentalBill(order);
+                                        if ((order.getPayTotalMoney().subtract(order.getPaidMoney())).compareTo(BigDecimal.ZERO) == 0)
+                                            order.setStatus(SiteBillStatus.COMPLETE.getCode());
+                                        else
+                                            order.setStatus(SiteBillStatus.OWING_FEE.getCode());
+                                        order.setActualEndTime(new Timestamp(System.currentTimeMillis()));
+                                        order.setActualStartTime(order.getStartTime());
+                                        rentalv2Provider.updateRentalBill(order);
+                                        orderHandler.completeRentalOrder(order);
+                                        //发消息
+                                        RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+                                        if (order.getStatus() == SiteBillStatus.OWING_FEE.getCode()) {
+                                            handler.overTimeSendMessage(order);
+                                        }else if (order.getStatus() == SiteBillStatus.COMPLETE.getCode()) {
+                                            handler.completeOrderSendMessage(order);
+                                        }
+									}
+								}
+							}
 						}
-					}
-				}
-			}
+					});
 		}
 	}
 
@@ -2497,7 +2517,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public void rentalSchedule(){
 		Boolean [] flag = {false};
 		Long currTime = DateHelper.currentGMTTime().getTime();
-		coordinationProvider.getNamedLock("Rental_schedule_flag" ) //集群运行时只有一台执行定时任务
+		coordinationProvider.getNamedLock("Rental_schedule_flag2" ) //集群运行时只有一台执行定时任务
 				.tryEnter(() -> {
 					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
 					Long timeFlag = currTime / 600000;
@@ -2542,9 +2562,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						Map<String, String> map = new HashMap<>();
 						map.put("resourceName", order.getResourceName());
 						Long uid = order.getCreatorUid();
-						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid,order.getUserEnterpriseId());
-						map.put("requestorName",member.getContactName());
-						map.put("requestorPhone",member.getContactToken());
+						if (order.getUserEnterpriseId()!=null) {
+							OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, order.getUserEnterpriseId());
+							map.put("requestorName", member.getContactName());
+							map.put("requestorPhone", member.getContactToken());
+						}else {
+							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+							map.put("requestorPhone",userIdentifier.getIdentifierToken());
+							User user = this.userProvider.findUserById(order.getRentalUid());
+							map.put("requestorName", user.getNickName());
+						}
 
 						RentalResource resource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 						Long chargeUid = resource.getChargeUid();
@@ -2803,13 +2830,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		if (null!=bill.getUserEnterpriseId()){
 			Organization org = this.organizationProvider.findOrganizationById(bill.getUserEnterpriseId());
-			dto.setCompanyName(org.getName());
-			List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
-			if (addresses!=null && addresses.size()>0) {
-				dto.setBuildingName(addresses.get(0).getBuildingName());
-				Address add = this.addressProvider.findAddressById(addresses.get(0).getAddressId());
-				if (add!=null)
-					dto.setAddress(add.getAddress());
+			if (org!=null) {
+				dto.setCompanyName(org.getName());
+				List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
+				if (addresses != null && addresses.size() > 0) {
+					dto.setBuildingName(addresses.get(0).getBuildingName());
+					Address add = this.addressProvider.findAddressById(addresses.get(0).getAddressId());
+					if (add != null)
+						dto.setAddress(add.getAddress());
+				}
 			}
 		}
 
@@ -3681,7 +3710,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void cancelRentalBill(CancelRentalBillCommand cmd) {
+	public void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsordFlow) {
 
 		Long timestamp = System.currentTimeMillis();
 
@@ -3749,7 +3778,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
-			onOrderCancel(order);
+			onOrderCancel(order,ifAbsordFlow);
 			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
 				String[] ids = order.getDoorAuthId().split(",");
 				for (String id:ids)
@@ -4186,10 +4215,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void onOrderCancel(RentalOrder order) {
+	public void onOrderCancel(RentalOrder order,boolean ifAbsordFlow) {
 		//终止工作流
 		FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
-		if(null != flowcase && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
+		if(null != flowcase && ifAbsordFlow && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
 			FlowAutoStepDTO dto = new FlowAutoStepDTO();
 			dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 			dto.setFlowCaseId(flowcase.getId());
@@ -6315,7 +6344,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}   
 		}
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 

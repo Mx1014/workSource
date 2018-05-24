@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import java.util.List;
@@ -7,7 +8,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>获取门禁列表
- * <li> role: 0: 没有权限，1 有权限 </li>
+ * <li> role: 0 没有权限，1 有权限 </li>
+ * <li> nextPageAnchor: 下一页锚点 </li>
+ * <li> doors: 门禁设备列表，参考{@link com.everhomes.rest.aclink.DoorAccessDTO}</li>
  * </ul>
  * @author janson
  *

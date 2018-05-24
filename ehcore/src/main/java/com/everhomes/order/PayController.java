@@ -11,6 +11,7 @@ import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
+
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,9 +148,9 @@ public class PayController extends ControllerBase {
      * <p>转发查询订单支付状态接口</p>
      */
     @RequestMapping("queryOrderPaymentStatus")
-    @RestReturn(value=QueryOrderPaymentStatusRestResponse.class)
+    @RestReturn(value=QueryOrderPaymentStatusCommandResponse.class)
     public RestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
-        QueryOrderPaymentStatusRestResponse cmdResponse = payService.queryOrderPaymentStatus(cmd);
+        QueryOrderPaymentStatusCommandResponse cmdResponse = payService.queryOrderPaymentStatus(cmd);
         RestResponse response = new RestResponse(cmdResponse);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

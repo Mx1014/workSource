@@ -891,16 +891,23 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
 
     @Override
-    public QueryOrderPaymentStatusRestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("queryOrderPaymentStatus-cmd=" + GsonUtil.toJson(cmd));}
+    public QueryOrderPaymentStatusCommandResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query order payment status, cmd={}", cmd);
+        }
         QueryOrderPaymentStatusRestResponse response = restClient.restCall(
                 "POST",
                 ApiConstants.ORDER_QUERYORDERPAYMENTSTATUS_URL,
                 cmd,
                 QueryOrderPaymentStatusRestResponse.class);
 
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("queryOrderPaymentStatus-response=" + GsonUtil.toJson(response));}
-        return response;
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query order payment status, response={}", response);
+        }
+        
+        // 由于使用非rest包的类会导致编译rest包报错，故把原来从pay工程里引用的command和response类拷贝一份放到core server的rest包里
+        // by lqs 20180517
+        return ConvertHelper.convert(response.getResponse(), QueryOrderPaymentStatusCommandResponse.class);
     }
     
     @Override

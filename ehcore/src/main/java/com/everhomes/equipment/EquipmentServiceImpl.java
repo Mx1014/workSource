@@ -233,7 +233,6 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -4858,16 +4857,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Calendar endDay = Calendar.getInstance();
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0), cmd.getNamespaceId());
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(endDay, 0), cmd.getNamespaceId());
 		//增加统计维修中和维修总数
-		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
-		equipmentProvider.statInMaintanceTaskCount(statTasks, getDayBegin(cal, 0), getDayEnd(cal, 0), command);
+//		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
+//		equipmentProvider.statInMaintanceTaskCount(statTasks, getDayBegin(cal, 0), getDayEnd(cal, 0), command);
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0), cmd.getNamespaceId());
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(endDay, 0), cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
+		response.setCompleteInspection(statTasks.getCompleteInspectionTasks());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
@@ -5646,7 +5646,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
+		//ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId())); this will invoke _exit() and kill all thead include children thread
+		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 

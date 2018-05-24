@@ -150,4 +150,5 @@ public interface DoorAccessService {
             HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
+	public void excuteMessage(String payLoad);
 }

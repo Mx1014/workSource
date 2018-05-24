@@ -60,7 +60,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
         for( int i = 0; i < sheetNames.size(); i++){
-            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false);
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false,withData );
             LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
             for(DynamicSheet sheet: sheets){
                 List<DynamicField> fields = sheet.getDynamicFields();
@@ -190,7 +190,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         String headerDisplay = ExcelUtils.getCellValue(cell);
                         headers.add(headerDisplay);
                     }
-                List<DynamicSheet> ds = h.getDynamicSheet(sheet.getSheetName(),params,headers,true);
+                List<DynamicSheet> ds = h.getDynamicSheet(sheet.getSheetName(),params,headers,true, false);
                 if (ds.size() != 1) {
                     LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}",sheet.getSheetName()
                             ,ds==null?0:ds.size());
@@ -264,7 +264,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     }
 
 
-                    h.importData(ds.get(0),rowDatas,params,context,response);
+                     h.importData(ds.get(0),rowDatas,params,context,response);
                     //插入
 //                try {
 //                    h.save2Schema(sheetClassObjs, sheetClass,storage1 , context);

@@ -335,5 +335,7 @@ public interface EnergyConsumptionService {
 
     SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd);
 
-    void  testAutoReading();
+    void meterAutoReading();
+
+    void addMeterPeriodTaskById(Long meterId);
 }

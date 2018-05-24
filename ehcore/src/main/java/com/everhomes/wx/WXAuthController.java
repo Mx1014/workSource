@@ -27,14 +27,9 @@ import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import org.apache.http.Consts;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -575,7 +570,18 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         String result = null;
         try {
             httpclient = HttpClients.createDefault();
+
             HttpGet httpGet = new HttpGet(url);
+
+            //使用测试环境没有固定ip代理访问，从有外网ip的服务器访问微信，从而实现固定id
+            String wechatProxyHost = configurationProvider.getValue("wechat.proxy.host", null);
+            int wechatProxyPort = configurationProvider.getIntValue("wechat.proxy.port", 0);
+            if(wechatProxyHost != null && wechatProxyPort != 0){
+                HttpHost proxy = new HttpHost(wechatProxyHost, wechatProxyPort);
+                RequestConfig requestConfig = RequestConfig.custom().setProxy(proxy).build();
+                httpGet.setConfig(requestConfig);
+            }
+
             response = httpclient.execute(httpGet);
 
             int status = response.getStatusLine().getStatusCode();
