@@ -4641,7 +4641,7 @@ public class PunchServiceImpl implements PunchService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
-        		months.get(0), pageSize, cmd.getPageAnchor());
+        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
         if (members == null || members.size() == 0) {
             return response;
         }
@@ -9822,7 +9822,7 @@ public class PunchServiceImpl implements PunchService {
         end.add(Calendar.MONTH, 1);
         monthReportExecutorPool.execute(() -> {
             try {
-                List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null);
+                List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
                 setMonthReportProcess(report, 5);
                 for (int i = 0; i < members.size(); i++) { 
                     try{
@@ -9854,7 +9854,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, String punchMonth, Integer pageSize,
-        Long anchor) {
+        Long anchor, String userName) {
 //        ListingLocator listingLocator = new ListingLocator();
 //        listingLocator.setAnchor(anchor);
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
@@ -9863,13 +9863,17 @@ public class PunchServiceImpl implements PunchService {
                     .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.gt(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lt(socialSecurityService.getTheLastDate(punchMonth)));
+
+            if (null != userName) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"));
+            }
+            if (null != anchor) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(anchor));
+            }
             query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
 
             query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
             query.addLimit( pageSize + 1);
-            if (null != anchor) {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(anchor));
-            }
             return query;
         });
         if (records == null || records.size() == 0) {
