@@ -364,7 +364,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         List<Community> communities = communityProvider.listCommunities(namespaceId, null, ownerId, null, null, null, locator, 10000);
         List<Long> communityIds = new ArrayList<>();
         if(communities != null){
-            communities.stream().map(r -> communityIds.add(r.getId()));
+            communityIds =  communities.stream().map(r -> r.getId()).collect(Collectors.toList());
         }
 
         DistributeServiceModuleAppAuthorizationCommand cmd = new DistributeServiceModuleAppAuthorizationCommand();
