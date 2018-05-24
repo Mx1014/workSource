@@ -124,6 +124,9 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
                     		PaymentBillRespForEnt p2 = new PaymentBillRespForEnt();
                     		p2 = (PaymentBillRespForEnt) paymentBillDTO.clone();
                     		p2.setDateStr(listBillDetailVO.getDateStr());
+                    		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
+                    		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
+                    		p2.setTargetName(listBillDetailVO.getTargetName());
                     		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
                     		result.getList().add(p2);
                     	}

@@ -12,8 +12,11 @@ import java.util.Date;
  *<ul>
  * <li>defaultOrder:排序数字</li>
  * <li>dateStr:账期，格式为201706，参与排序</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
  * <li>billGroupId:账单组id</li>
  * <li>billGroupName:账单组名称</li>
+ * <li>targetName:客户名称</li>
  * <li>paymentOrderNum: 订单编号</li>
  * <li>orderAmount:交易金额</li>
  * <li>payerName:缴费人</li>
@@ -24,8 +27,11 @@ import java.util.Date;
  */
 public class PaymentBillRespForEnt implements Cloneable{
 	private String dateStr;
+	private String dateStrBegin;
+	private String dateStrEnd;
 	private Long billGroupId;
 	private String billGroupName;
+	private String targetName;
 	private String paymentOrderNum;
 	private BigDecimal orderAmount;
 	private String payerName;
@@ -90,6 +96,24 @@ public class PaymentBillRespForEnt implements Cloneable{
 	
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+	public String getTargetName() {
+		return targetName;
+	}
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 	
 }
