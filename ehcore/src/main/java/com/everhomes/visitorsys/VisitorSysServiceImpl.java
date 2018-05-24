@@ -410,7 +410,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 || sendInviterFlag == VisitorsysFlagType.NO
                 || ownerType == VisitorsysOwnerType.COMMUNITY
                 || visitorType == VisitorsysVisitorType.TEMPORARY
-                || VisitorsysStatus.WAIT_CONFIRM_VISIT != visitStatus){
+                || VisitorsysStatus.HAS_VISITED != visitStatus){
             return;
         }
         String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
