@@ -4604,6 +4604,8 @@ public class PunchServiceImpl implements PunchService {
                 response.setProcess(report.getProcess());
                 response.setErrorInfo(report.getErrorInfo());
                 response.setStatus(report.getStatus());
+                response.setFilerName(report.getFilerName());
+                response.setFileTime(report.getFileTime());
                 if(null != report.getUpdateTime()){
                 	response.setUpdateTime(report.getUpdateTime().getTime());
                 }

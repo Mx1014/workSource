@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>punchMonth: YYYYMM</li>
  * <li>punchMemberNumber: 考勤人数</li>
  * <li>updateTime: 更新时间-数据截止时间</li>
+ * <li>filerName: 归档人</li> 
+ * <li>fileTime: 归档时间</li>
  * </ul>
  */
 
@@ -40,6 +42,9 @@ public class ListPunchCountCommandResponse{
     private Byte status;
     private String punchMonth;
 	private Long updateTime;
+
+    private Timestamp fileTime;
+    private String filerName;
 	private Integer punchMemberNumber;
 
 
@@ -142,5 +147,25 @@ public class ListPunchCountCommandResponse{
 
 	public void setPunchMemberNumber(Integer punchMemberNumber) {
 		this.punchMemberNumber = punchMemberNumber;
+	}
+
+
+	public Timestamp getFileTime() {
+		return fileTime;
+	}
+
+
+	public void setFileTime(Timestamp fileTime) {
+		this.fileTime = fileTime;
+	}
+
+
+	public String getFilerName() {
+		return filerName;
+	}
+
+
+	public void setFilerName(String filerName) {
+		this.filerName = filerName;
 	}
 }
