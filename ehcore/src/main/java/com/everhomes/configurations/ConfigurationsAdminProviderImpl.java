@@ -1,11 +1,8 @@
 package com.everhomes.configurations;
 
-import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
@@ -32,6 +29,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 
+/**
+ * configurations management Provider
+ * @author huanglm
+ *
+ */
 @Component
 public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 
@@ -46,15 +48,15 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	/**
 	 * 新增
 	 */
-	private final static int CREATE = 0;
+	private  static final int CREATE = 0;
 	/**
 	 * 修改
 	 */
-	private final static int UPDATE = 1;
+	private  static final int UPDATE = 1;
 	/**
 	 * 删除
 	 */
-	private final static int DELETE = 3;
+	private  static final int DELETE = 3;
 
 	@Override
 	public List<Configurations> listConfigurations(Integer namespaceId, String name,

@@ -23,6 +23,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+/**
+ * configurations management Service
+ * @author huanglm
+ *
+ */
 @Component
 public class ConfigurationsServiceImpl implements  ConfigurationsService{
 	

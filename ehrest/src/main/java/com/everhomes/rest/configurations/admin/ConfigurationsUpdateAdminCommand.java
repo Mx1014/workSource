@@ -1,5 +1,7 @@
 package com.everhomes.rest.configurations.admin;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,9 +16,14 @@ import com.everhomes.util.StringHelper;
 */
 public class ConfigurationsUpdateAdminCommand {
 
-    private Integer id;   
+	@NotNull
+    private Integer id;  
+	
     private Integer namespaceId;   
+    
+    @NotNull
     private String name;
+    
     private String value;
     private String  description;    
     private String displayName;

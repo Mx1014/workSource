@@ -17,6 +17,11 @@ import com.everhomes.rest.configurations.admin.ConfigurationsIdAdminCommand;
 import com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO;
 import com.everhomes.rest.configurations.admin.ConfigurationsUpdateAdminCommand;
 
+/**
+ * configurations management Controller
+ * @author huanglm
+ *
+ */
 @RestDoc(value="Configurations Admin controller", site="core")
 @RestController
 @RequestMapping("/admin/configurations")
