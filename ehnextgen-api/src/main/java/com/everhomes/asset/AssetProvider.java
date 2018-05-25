@@ -57,7 +57,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType);
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId);
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
@@ -75,9 +75,9 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId);
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
 
-    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
             ,String targetName, String invoiceNum);
@@ -229,7 +229,7 @@ public interface AssetProvider {
 
     boolean checkCoupledChargingStandard(Long cid);
 
-    void deCoupledForChargingItem(Long ownerId, String ownerType);
+    void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId);
 
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
 
@@ -289,7 +289,7 @@ public interface AssetProvider {
 
     void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId);
 
-    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
+    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
     void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
 

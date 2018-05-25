@@ -183,4 +183,8 @@ public interface AssetService {
     void modifySettledBill(ModifySettledBillCommand cmd);
 
     void noticeTrigger(Integer namespaceId);
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
 }

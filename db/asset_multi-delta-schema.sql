@@ -14,6 +14,18 @@ CREATE TABLE `eh_service_module_app_mappings`(
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
 
+-- multiple entry category id for asset module by wentian
+CREATE TABLE `eh_asset_app_categories`(
+  `id` BIGINT NOT NULL,
+  `category_id` BIGINT NOT NULL DEFAULT 1,
+  `create_time` DATETIME NOT NULL DEFAULT now(),
+  `create_uid` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `instance_flag` VARCHAR(1024) DEFAULT NULL ,
+  UNIQUE KEY `i_category_id` (`category_id`),
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
+
 -- 账单数据添加categoryId by wentian 2018/5/25
 ALTER TABLE `eh_payment_bills` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id';
 
@@ -21,3 +33,8 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 
 ALTER TABLE `eh_payment_notice_config` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id';
 
 -- todo 账单管理设置添加category id
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id';
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id';
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id';
+
+

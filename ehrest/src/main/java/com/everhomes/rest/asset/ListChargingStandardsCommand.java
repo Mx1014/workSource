@@ -27,7 +27,16 @@ public class ListChargingStandardsCommand {
     private Integer pageSize;
 
     private Integer namespaceId;
+    private Long categoryId;
 
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

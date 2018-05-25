@@ -844,7 +844,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
@@ -852,6 +852,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.OWNER_ID.eq(ownerId))
                 .and(t.OWNER_TYPE.eq(ownerType))
+                .and(t.CATEGORY_ID.eq(categoryId))
                 .orderBy(t.DEFAULT_ORDER)
                 .fetch()
                 .map(r -> {
@@ -1492,7 +1493,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId) {
+    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId) {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
@@ -1503,6 +1504,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
+                .and(t1.CATEGORY_ID.eq(categoryId))
                 .fetchInto(PaymentChargingItemScope.class);
 
         Byte isSelected = 0;
@@ -1527,7 +1529,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
 
         EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
@@ -1541,6 +1543,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(standardScopeT.OWNER_ID.eq(ownerId))
                 .and(standardScopeT.OWNER_TYPE.eq(ownerType))
                 .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                // add category id constraint
+                .and(standardScopeT.CATEGORY_ID.eq(categoryId))
                 .fetch()
                 .map(r -> {
                     ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
@@ -2852,6 +2856,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
         query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
         query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        //add category constraint
+        query.addConditions(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
         query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
         query.fetch().map(r -> {
             ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
@@ -3355,16 +3361,6 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-//        List<Long> availableIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
-//                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
-//                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
-//                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
-//                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
-//        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-//                .where(t1.CHARGING_ITEM_ID.in(availableIds))
-//                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
-//                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-//                .fetchInto(PaymentChargingItemScope.class);
         List<PaymentChargingItemScope> scopes = context.select(t1.fields())
                 .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
@@ -3372,6 +3368,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                // add category filter by wentian sama
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .and(t1.CHARGING_ITEM_ID.notEqual(AssetPaymentConstants.LATE_FINE_ID))
                 .fetchInto(PaymentChargingItemScope.class);
         for(int j = 0; j < scopes.size(); j ++){
@@ -3559,12 +3557,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deCoupledForChargingItem(Long ownerId, String ownerType) {
+    public void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId) {
         DSLContext context = getReadWriteContext();
         context.update(itemScope)
                 .set(itemScope.DECOUPLING_FLAG,(byte)1)
                 .where(itemScope.OWNER_TYPE.eq(ownerType))
                 .and(itemScope.OWNER_ID.eq(ownerId))
+                //added categoryId constraint
+                .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .execute();
     }
 
@@ -4019,7 +4019,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId) {
+    public List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId) {
         List<ListLateFineStandardsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingStandardsScopes scope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("scope");
@@ -4034,6 +4034,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(namespaceId!=null){
             query.addConditions(scope.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(categoryId != null){
+            query.addConditions(scope.CATEGORY_ID.eq(categoryId));
         }
         query.fetch()
                 .forEach(r -> {

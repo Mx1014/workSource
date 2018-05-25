@@ -554,7 +554,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType());
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
     }
 
     @Override
@@ -795,7 +795,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId());
     }
 
     @Override
@@ -803,7 +803,8 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId()==null){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId());
+        return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
+        , cmd.getCategoryId());
     }
 
     @Override
@@ -3235,7 +3236,7 @@ public class AssetServiceImpl implements AssetService {
         String ownerType = cmd.getOwnerType();
         Integer namespaceId = cmd.getNamespaceId();
         checkNullProhibit("communityId",cmd.getOwnerId());
-        return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId);
+        return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId, cmd.getCategoryId());
     }
 
     @Override
@@ -3340,6 +3341,32 @@ public class AssetServiceImpl implements AssetService {
     public void noticeTrigger(Integer namespaceId) {
         autoBillNotice(namespaceId);
     }
+
+    @Override
+    public long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig) {
+        AssetCategory c = new AssetCategory();
+        c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        c.setCreateUid(aLong);
+        c.setNamespaceId(namespaceId);
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentCategory.class));
+        c.setId(nextSequence);
+        c.setCategoryId(nextSequence);
+        EhAssetCategoryDao dao = new EhAssetCategoryDao();
+        try{
+            dao.insert(c);
+            return nextSequence;
+        }catch (Exception e){
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.xxx, "category constraints voilated")
+        }
+    }
+
+    @Override
+    public void saveInstanceConfig(long categoryId, String ret) {
+        //todo
+        sdjfsd
+
+    }
+
     // 冗余代码，为了测试
     public void autoBillNotice(Integer namespaceId){
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -3537,7 +3564,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }else{
             InsertChargingStandards(cmd, null);
-            assetProvider.deCoupledForChargingItem(cmd.getOwnerId(),cmd.getOwnerType());
+            assetProvider.deCoupledForChargingItem(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }
 
     }
@@ -3580,6 +3607,8 @@ public class AssetServiceImpl implements AssetService {
         s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
         s.setOwnerType(cmd.getOwnerType());
         s.setOwnerId(cmd.getOwnerId());
+        // add categoryId constraint
+        s.setCategoryId(cmd.getCategoryId());
 
         s.setNamespaceId(cmd.getNamespaceId());
         s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
