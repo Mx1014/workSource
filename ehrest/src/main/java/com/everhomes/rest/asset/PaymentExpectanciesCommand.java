@@ -25,6 +25,7 @@ public class PaymentExpectanciesCommand {
     private String noticeTel;
     private Integer pageOffset;
     private Integer pageSize;
+    private Long categoryId;
 
 
     private Byte contractIdType;
@@ -46,6 +47,13 @@ public class PaymentExpectanciesCommand {
         this.isEffectiveImmediately = isEffectiveImmediately;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {

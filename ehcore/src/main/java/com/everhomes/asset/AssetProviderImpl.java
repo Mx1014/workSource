@@ -47,7 +47,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 
 import com.google.gson.Gson;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -455,7 +455,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
         }
 
-        if(!StringUtils.isNullOrEmpty(dateStr)) {
+        if(StringUtils.isNotBlank(dateStr)) {
             query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.like(dateStr + "%"));
         }
 
@@ -481,45 +481,46 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
+            // 应用id，多入口区分账单 by wentian 2018/5/25
+        Long categoryId = cmd.getCategoryId();
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
-//        if(currentNamespaceId.intValue() != (int)0){
-//            query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-//        }
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        if(!org.springframework.util.StringUtils.isEmpty(status)){
+        if(categoryId != null){
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
+        if(status != null){
             query.addConditions(t.SWITCH.eq(status));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
+        if(billGroupId != null) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {
+        if(billStatus != null) {
             query.addConditions(t.STATUS.eq(billStatus));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
+        if(StringUtils.isNotBlank(targetName)) {
             query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+        if(StringUtils.isNotBlank(targetType)){
             query.addConditions(t.TARGET_TYPE.eq(targetType));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
+        if(StringUtils.isNotBlank(contractNum)){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
+        if(StringUtils.isNotBlank(dateStrBegin)){
             query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
+        if(StringUtils.isNotBlank(dateStrEnd)){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
         query.addOrderBy(t.DATE_STR.desc());
-//        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();

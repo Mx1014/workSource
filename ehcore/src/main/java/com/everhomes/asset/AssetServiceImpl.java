@@ -36,6 +36,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.flow.FlowUserSourceType;
@@ -62,6 +63,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -80,7 +82,6 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -178,6 +179,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
 
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
 
 
     @Override
@@ -224,13 +228,9 @@ public class AssetServiceImpl implements AssetService {
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-//        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response, cmd);
-
         List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),response, cmd);
-
         response.setListBillsDTOS(list);
         return response;
     }
@@ -861,6 +861,18 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        //多应用入口校验，如果不说明，则放到categoryId为0的应用中去了
+        Long categoryId = 0l;
+        Long moduleId = ServiceModuleConstants.ASSET_MODULE;
+        Long targetCategoryId = cmd.getCategoryId();
+        if(targetCategoryId != null){
+            Long originIdFromMappingApp = serviceModuleAppService.getOriginIdFromMappingApp(targetCategoryId, moduleId);
+            if(originIdFromMappingApp != null){
+                categoryId = originIdFromMappingApp;
+            }
+        }
+
+
         Calendar now = newClearedCalendar();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         //calculate the details of payment expectancies
@@ -966,6 +978,8 @@ public class AssetServiceImpl implements AssetService {
                             bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
                         }else{
                             PaymentBills newBill = new PaymentBills();
+                            //增加应用入口信息
+                            newBill.setCategoryId(categoryId);
                             //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
                             //一是直接查账单表，二是确定用户信息，拿到targetId
                             newBill.setAddressId(property.getAddressId());

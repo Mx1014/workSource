@@ -26,6 +26,7 @@ import javax.validation.constraints.NotNull;
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
  * <li>contractNum:合同编号</li>
+ * <li>category_id: 应用标识id</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -51,6 +52,15 @@ public class ListBillsCommand {
     private String targetType;
     private String contractNum;
     private Long organizationId;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
