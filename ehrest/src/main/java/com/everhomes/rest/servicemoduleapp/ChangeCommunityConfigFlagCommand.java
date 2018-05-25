@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>communityId: communityId</li>
- *     <li>appSelfConfigFlag: 是否自己配置参考，{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appSelfConfigFlag: 是否自己配置参考，0,null-否（跟随默认），1-是（自己配置），{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ChangeCommunityConfigFlagCommand {

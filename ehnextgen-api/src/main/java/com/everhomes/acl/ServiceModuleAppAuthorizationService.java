@@ -1,6 +1,7 @@
 package com.everhomes.acl;
 
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface ServiceModuleAppAuthorizationService {
     void addAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId);
 
     void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId);
+
+    ServiceModuleAppDTO getAppProfile(GetAppProfileCommand cmd);
 }

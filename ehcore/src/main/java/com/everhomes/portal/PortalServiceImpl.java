@@ -348,7 +348,11 @@ public class PortalServiceImpl implements PortalService {
 		}).collect(Collectors.toList()));
 	}
 
-	private ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp){
+	@Override
+	public ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp){
+		if(moduleApp == null){
+			return null;
+		}
 		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
 		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
 			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());

@@ -7,6 +7,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.ListProjectIdsByAppIdAndOrganizationIdCommand;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -103,6 +104,20 @@ public class AppAuthorizationController {
         return response;
     }
 
+
+    /**
+     * <b>URL: /app/authorizaiton/getAppProfile</b>
+     * 查询应用profile信息
+     */
+    @RequestMapping("getAppProfile")
+    @RestReturn(value = ServiceModuleAppDTO.class)
+    public RestResponse getAppProfile(GetAppProfileCommand cmd) {
+        ServiceModuleAppDTO dto = serviceModuleAppAuthorizationService.getAppProfile(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
     /**
