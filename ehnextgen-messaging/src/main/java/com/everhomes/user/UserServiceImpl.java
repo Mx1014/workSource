@@ -6178,6 +6178,8 @@ public class UserServiceImpl implements UserService {
 									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
 									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
 									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+									addressSiteDTO.setCommunityName(community.getName());
+									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
 									addressSiteDtos.add(addressSiteDTO);
 								}
 
