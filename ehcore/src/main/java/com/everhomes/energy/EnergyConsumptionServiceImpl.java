@@ -3003,43 +3003,63 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             Map<Integer, List<EnergyMeter>> namespaceMeterMap = new HashMap<>();
             namespaceMeterMap = getprocessNamespaceMeterMap(meters);
             if(namespaceMeterMap!=null && namespaceMeterMap.size()>0){
-                namespaceMeterMap.forEach((k,v)->{
-                    if (v != null && v.size() > 0) {
-                        EnergyPlan plan = new EnergyPlan();
-                        plan.setRepeatSettingId(0L);
-                        plan.setName("autoPlans");
-                        plan.setNamespaceId(k);
-                        plan.setTargetType("communityId");
-                        plan.setStatus(CommonStatus.AUTO.getCode());
-                        plan.setOwnerId(v.get(0).getOwnerId());
-                        plan.setOwnerType(v.get(0).getOwnerType());
-                        plan.setTargetId(v.get(0).getCommunityId());
-                        RepeatSettings repeatSetting = new RepeatSettings();
-                        //调用此的时候已经是每月月底
-                        LocalDate localDate = LocalDate.now();
-                        repeatSetting.setOwnerId(meters.get(0).getOwnerId());
-                        repeatSetting.setOwnerType(meters.get(0).getOwnerType());
-                        repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
-                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
-                        repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
-                        repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
-                        repeatSetting.setRepeatInterval(1);
-                        String expression = "{\"expression\":[{\"day\":%s}]}";
-                        expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
-                        repeatSetting.setExpression(expression);
-                        repeatService.createRepeatSettings(repeatSetting);
-                        plan.setRepeatSettingId(repeatSetting.getId());
-                        energyPlanProvider.createEnergyPlan(plan);
-                        meters.forEach((meter)->{
-                            EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
-                            meterMap.setPlanId(plan.getId());
-                            meterMap.setMeterId(meter.getId());
-                            energyPlanProvider.createEnergyPlanMeterMap(meterMap);
-                        });
-                    }
-                });
+                for (Integer key : namespaceMeterMap.keySet()) {
+                    List<EnergyMeter> namespaceMeter = namespaceMeterMap.get(key);
+                    Map<Long, List<EnergyMeter>> communityMeters = getCommunityMapMeters(namespaceMeter);
+                    if (communityMeters != null && communityMeters.size() > 0) {
+                       communityMeters.forEach((k,v)->{
+                           EnergyPlan plan = new EnergyPlan();
+                           plan.setRepeatSettingId(0L);
+                           plan.setName("autoPlans");
+                           plan.setNamespaceId(key);
+                           plan.setTargetType("communityId");
+                           plan.setStatus(CommonStatus.AUTO.getCode());
+                           plan.setOwnerId(v.get(0).getOwnerId());
+                           plan.setOwnerType(v.get(0).getOwnerType());
+                           plan.setTargetId(k);
+                           RepeatSettings repeatSetting = new RepeatSettings();
+                           //调用此的时候已经是每月月底
+                           LocalDate localDate = LocalDate.now();
+                           repeatSetting.setOwnerId(v.get(0).getOwnerId());
+                           repeatSetting.setOwnerType(v.get(0).getOwnerType());
+                           repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
+                           repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
+                           repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
+                           repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
+                           repeatSetting.setRepeatInterval(1);
+                           String expression = "{\"expression\":[{\"day\":%s}]}";
+                           expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
+                           repeatSetting.setExpression(expression);
+                           repeatService.createRepeatSettings(repeatSetting);
+                           plan.setRepeatSettingId(repeatSetting.getId());
+                           energyPlanProvider.createEnergyPlan(plan);
+                           if (v.size() > 0) {
+                               v.forEach((meter) -> {
+                                   EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
+                                   meterMap.setPlanId(plan.getId());
+                                   meterMap.setMeterId(meter.getId());
+                                   energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                               });
+                           }
+                       });
+                   }
+                }
             }
         }
+    }
+
+    private Map<Long,List<EnergyMeter>> getCommunityMapMeters(List<EnergyMeter> v) {
+        Map<Long, List<EnergyMeter>> communityMeterMap = new HashMap<>();
+        if (v != null && v.size() > 0) {
+            v.forEach((r) -> {
+                if(communityMeterMap.get(r.getCommunityId())!=null){
+                    communityMeterMap.get(r.getCommunityId()).add(r);
+                }else {
+                    communityMeterMap.put(r.getCommunityId(), new ArrayList<>(Collections.singletonList(r)));
+                }
+            });
+        }
+        return  communityMeterMap;
     }
 
     private Map<Integer, List<EnergyMeter>> getprocessNamespaceMeterMap(List<EnergyMeter> meters) {
