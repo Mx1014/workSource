@@ -4824,7 +4824,10 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.saveOrderBills(bills,order.getId());
         
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
-        publicTransferBillRespForEnt.setOrderCreateTime(String.valueOf(order.getCreateTime()));
+        
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒
+        String date = format.format(order.getCreateTime());
+		publicTransferBillRespForEnt.setOrderCreateTime(date);
         //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
         //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
         //publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
