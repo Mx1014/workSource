@@ -8,14 +8,14 @@ package com.everhomes.rest.decoration;
  */
 public class ListDecorationCompaniesCommand {
 
-    private Long namespaceId;
+    private Integer namespaceId;
     private String companyName;
 
-    public Long getNamespaceId() {
+    public Integer getNamespaceId() {
         return namespaceId;
     }
 
-    public void setNamespaceId(Long namespaceId) {
+    public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
 

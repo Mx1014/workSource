@@ -1,6 +1,7 @@
 package com.everhomes.decoration;
 
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -17,6 +18,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.decoration.*;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
@@ -33,11 +35,10 @@ import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -83,6 +84,12 @@ public class DecorationServiceImpl implements  DecorationService {
     private GeneralFormService generalFormService;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private QRCodeService qRCodeService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private DecorationSMSProcessor decorationSMSProcessor;
 
 
     private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
@@ -243,6 +250,8 @@ public class DecorationServiceImpl implements  DecorationService {
             dto =  ConvertHelper.convert(worker,DecorationWorkerDTO.class);
             if (!StringUtils.isBlank(dto.getImageUri()))
                 dto.setImageUrl(this.contentServerService.parserUri(dto.getImageUri()));
+            //短信通知
+            decorationSMSProcessor.createWorker(request,worker);
         }
 
         return dto;
@@ -336,6 +345,9 @@ public class DecorationServiceImpl implements  DecorationService {
 
     @Override
     public SearchRequestResponse searchRequest(SearchRequestsCommand cmd) {
+        if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4300043010L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
         SearchRequestResponse response = new SearchRequestResponse();
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = null;
@@ -381,8 +393,39 @@ public class DecorationServiceImpl implements  DecorationService {
             locator = new ListingLocator(cmd.getPageAnchor());
         List<DecorationRequest> requests =  this.decorationProvider.queryUserRelateRequests(UserContext.getCurrentNamespaceId(),
                 cmd.getConmmunityId(),cmd.getPhone(),pageSize+1,locator);
+        if (requests == null || requests.size() == 0)
+            return null;
+        if (requests.size()>pageSize){
+            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
+            requests.remove(requests.size()-1);
+        }
+        response.setRequests(requests.stream().map(r->{
+            DecorationRequestDTO dto = new DecorationRequestDTO();
+            dto.setId(r.getId());
+            dto.setCreateTime(r.getCreateTime().getTime());
+            dto.setAddress(convertAddress(r.getAddress()));
+            dto.setStartTime(r.getStartTime().getTime());
+            dto.setEndTime(r.getEndTime().getTime());
+            dto.setApplyName(r.getApplyName());
+            dto.setApplyPhone(r.getApplyPhone());
+            dto.setApplyCompany(r.getApplyCompany());
+            dto.setStatus(r.getStatus());
+            if (r.getApplyPhone().equals(cmd.getPhone())) {
+                dto.setProcessorType(ProcessorType.MASTER.getCode());
+                if (r.getDecoratorUid() == null){
+                    r.setDecoratorUid(UserContext.currentUserId());
+                    this.decorationProvider.updateDecorationRequest(r);
+                }
+            }
+            else if (r.getDecoratorPhone().equals(cmd.getPhone()))
+                dto.setProcessorType(ProcessorType.CHIEF.getCode());
+            else
+                dto.setProcessorType(ProcessorType.WORKER.getCode());
+            dto.setCancelFlag(r.getCancelFlag());
 
-        return null;
+            return dto;
+        }).collect(Collectors.toList()));
+        return response;
     }
 
     @Override
@@ -549,7 +592,14 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public void modifyFee(ModifyFeeCommand cmd) {
         this.dbProvider.execute((TransactionStatus status) -> {
-            this.decorationProvider.deleteDecorationFeeByRequestId(cmd.getRequestId());
+            List<DecorationFee> fees = this.decorationProvider.listDecorationFeeByRequestId(cmd.getRequestId());
+            if (fees == null || fees.size() == 0){
+                DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+                //短信通知
+                decorationSMSProcessor.feeListGenerate(request);
+            }else {
+                this.decorationProvider.deleteDecorationFeeByRequestId(cmd.getRequestId());
+            }
             DecorationFee fee = new DecorationFee();
             fee.setRequestId(cmd.getRequestId());
             fee.setTotalPrice(cmd.getTotalAmount());
@@ -570,6 +620,10 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public void modifyRefoundAmount(ModifyRefoundAmountCommand cmd) {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
+        if (request.getRefoundAmount() == null){
+            //短信通知
+            decorationSMSProcessor.refoundGenerate(request);
+        }
         request.setRefoundAmount(cmd.getRefoundAmount());
         request.setRefoundComment(cmd.getRefoundComment());
         this.decorationProvider.updateDecorationRequest(request);
@@ -583,6 +637,8 @@ public class DecorationServiceImpl implements  DecorationService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.COMPLETE.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+        //短信通知
+        decorationSMSProcessor.refoundConfirm(request);
     }
 
     @Override
@@ -593,6 +649,8 @@ public class DecorationServiceImpl implements  DecorationService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.CONSTRACT.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+        //短信通知
+        decorationSMSProcessor.feeConfirm(request);
     }
 
     @Override
@@ -600,6 +658,14 @@ public class DecorationServiceImpl implements  DecorationService {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
         request.setStatus((byte)2);
         this.decorationProvider.updateDecorationRequest(request);
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(UserContext.currentUserId(), IdentifierType.MOBILE.getCode());;
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(),cmd.getOrganizationId());
+        if (member != null){
+            decorationSMSProcessor.decorationCancel(request,member.getContactName(),userIdentifier.getIdentifierToken());
+        }else{
+            User user = userProvider.findUserById(UserContext.currentUserId());
+            decorationSMSProcessor.decorationCancel(request,user.getNickName(),userIdentifier.getIdentifierToken());
+        }
     }
 
     @Override
@@ -743,6 +809,9 @@ public class DecorationServiceImpl implements  DecorationService {
 
             request.setStatus(DecorationRequestStatus.FILE_APPROVAL.getCode());
             this.decorationProvider.updateDecorationRequest(request);
+
+            //短信通知
+            decorationSMSProcessor.applySuccess(request);
         }catch (Exception e){
             LOGGER.error("DecorationApplySuccess error e:",e);
             request.setCancelFlag((byte)1);
@@ -759,6 +828,8 @@ public class DecorationServiceImpl implements  DecorationService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.PAYMENT.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+        //短信通知
+        decorationSMSProcessor.fileApprovalSuccess(request);
     }
 
     @Override
@@ -769,6 +840,8 @@ public class DecorationServiceImpl implements  DecorationService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.REFOUND.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+        //短信通知
+        decorationSMSProcessor.checkSuccess(request);
     }
 
     @Override
@@ -806,5 +879,88 @@ public class DecorationServiceImpl implements  DecorationService {
 
         request.setStatus(DecorationRequestStatus.CHECK.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+    }
+
+    @Override
+    public List<DecorationCompanyDTO> listDecorationCompanies(ListDecorationCompaniesCommand cmd) {
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+        List<DecorationCompany> list = this.decorationProvider.listDecorationCompanies(cmd.getNamespaceId(),cmd.getCompanyName());
+        if (list == null || list.size() == 0)
+            return  null;
+        return list.stream().map(r->{
+            DecorationCompanyDTO dto = ConvertHelper.convert(r,DecorationCompanyDTO.class);
+            List<DecorationCompanyChief> chiefs = this.decorationProvider.listChiefsByCompanyId(r.getId());
+            if (chiefs !=null && chiefs.size()!= 0)
+                dto.setCompanyChiefs(chiefs.stream().map(p->ConvertHelper.convert(p,CompanyChiefDTO.class)).collect(Collectors.toList()));
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public QrDetailDTO getQrDetail(GetLicenseCommand cmd) {
+        DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+        QrDetailDTO dto = new QrDetailDTO();
+        if (cmd.getProcessorType() == null || cmd.getProcessorType() == ProcessorType.CHIEF.getCode()){
+            dto.setName(request.getDecoratorName());
+            dto.setPhone(request.getDecoratorPhone());
+            dto.setWorkerType("装修负责人");
+        }else{
+            DecorationWorker worker = this.decorationProvider.getDecorationWorkerById(cmd.getWorkerId());
+            dto.setName(worker.getName());
+            dto.setPhone(worker.getPhone());
+            dto.setWorkerType(worker.getWorkerType());
+        }
+        DecorationRequestDTO requestDTO = convertRequest(request, ProcessorType.WORKER.getCode());
+        org.springframework.beans.BeanUtils.copyProperties(requestDTO,dto);
+        if (request.getStatus() != DecorationRequestStatus.CONSTRACT.getCode())
+            dto.setFlowCasees(null);
+        return dto;
+    }
+
+    @Override
+    public DecorationLicenseDTO getLicense(GetLicenseCommand cmd) {
+        DecorationLicenseDTO dto = new DecorationLicenseDTO();
+        if (cmd.getProcessorType() == ProcessorType.CHIEF.getCode()){
+            if (cmd.getWorkerId() == null){//查看负责人自己的
+                DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+                dto.setName(request.getDecoratorName());
+                dto.setQrUrl(processQrUrl(request.getDecoratorQrid()));
+            }else{ //查看工人的
+                DecorationWorker worker = this.decorationProvider.getDecorationWorkerById(cmd.getWorkerId());
+                dto.setName(worker.getName());
+                dto.setWorkerType(worker.getWorkerType());
+                dto.setQrUrl(processQrUrl(worker.getQrid()));
+            }
+        }else if (cmd.getProcessorType() == ProcessorType.WORKER.getCode()){ //查看工人自己的
+            DecorationWorker worker =  this.decorationProvider.queryDecorationWorker(cmd.getRequestId(),cmd.getPhone());
+            dto.setName(worker.getName());
+            dto.setWorkerType(worker.getWorkerType());
+            dto.setQrUrl(processQrUrl(worker.getQrid()));
+            if (worker.getUid() == null){
+                worker.setUid(UserContext.currentUserId());
+                this.decorationProvider.updateDecorationWorker(worker);
+            }
+        }
+        return dto;
+    }
+
+    private String processQrUrl(String qrid){
+        String url = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+        if(!url.endsWith("/")) {
+            url += "/";
+        }
+        url += "qr?qrid=" + qrid;
+        return url;
+    }
+
+    @Override
+    public GetUserMemberGroupResponse getUserMemberGroup(GetUserMemberGroupCommand cmd) {
+        Long uid = UserContext.currentUserId();
+        GetUserMemberGroupResponse response = new GetUserMemberGroupResponse();
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(uid,cmd.getOrganizationId());
+        if (member == null)
+            return null;
+        response.setMemberGroup(member.getMemberGroup());
+        return response;
     }
 }

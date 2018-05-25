@@ -37,6 +37,8 @@ public class DecoationFlowModuleListener implements FlowModuleListener {
     private DecorationService decorationService;
     @Autowired
     private GeneralFormService generalFormService;
+    @Autowired
+    private DecorationSMSProcessor decorationSMSProcessor;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -56,6 +58,12 @@ public class DecoationFlowModuleListener implements FlowModuleListener {
         DecorationRequest request = decorationProvider.getRequestById(flowCase.getReferId());
         request.setCancelFlag((byte)1);
         this.decorationProvider.updateDecorationRequest(request);
+        if (request.getStatus() == DecorationRequestStatus.FILE_APPROVAL.getCode()){
+            //短信通知
+            decorationSMSProcessor.fileApprovalFail(request);
+        }else if (request.getStatus() == DecorationRequestStatus.CHECK.getCode()){
+            decorationSMSProcessor.checkfail(request);
+        }
     }
 
     @Override

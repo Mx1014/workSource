@@ -53,4 +53,13 @@ public interface DecorationService {
 
     void completeDecoration(RequestIdCommand cmd);
 
+    List<DecorationCompanyDTO> listDecorationCompanies (ListDecorationCompaniesCommand cmd);
+
+    QrDetailDTO getQrDetail(GetLicenseCommand cmd);
+
+    DecorationLicenseDTO getLicense(GetLicenseCommand cmd);
+
+    GetUserMemberGroupResponse getUserMemberGroup(GetUserMemberGroupCommand cmd);
+
+
 }

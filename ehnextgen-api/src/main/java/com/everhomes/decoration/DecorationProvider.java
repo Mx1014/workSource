@@ -44,6 +44,8 @@ public interface DecorationProvider {
 
     void createDecorationCompany(DecorationCompany company);
 
+    List<DecorationCompany> listDecorationCompanies(Integer namespaceId,String keyword);
+
     DecorationCompany getDecorationCompanyById(Long id);
 
     void createDecorationRequest(DecorationRequest request);

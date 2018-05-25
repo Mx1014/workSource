@@ -274,6 +274,18 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
+    public List<DecorationCompany> listDecorationCompanies(Integer namespaceId, String keyword) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_DECORATION_COMPANIES);
+        Condition condition = Tables.EH_DECORATION_COMPANIES.NAMESPACE_ID.eq(namespaceId);
+        if (!StringUtils.isBlank(keyword))
+            condition = condition.and(Tables.EH_DECORATION_COMPANIES.NAME.like("%"+keyword+"%"));
+        step.where(condition);
+        return step.fetch().map(r->ConvertHelper.convert(r,DecorationCompany.class));
+    }
+
+    @Override
     public DecorationCompany getDecorationCompanyById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(

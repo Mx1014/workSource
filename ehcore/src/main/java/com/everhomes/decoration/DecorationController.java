@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+import java.util.List;
+
 import static org.apache.poi.hslf.record.RecordTypes.List;
 
 @RestDoc(value = "decoration controller", site = "ehcore")
@@ -32,6 +34,22 @@ public class DecorationController extends ControllerBase {
     private GeneralApprovalService generalApprovalService;
 
     /**
+     * <b>URL: /decoration/getUserMemberGroup</b>
+     * <p>
+     * 查询用户类型
+     * </p>
+     */
+    @RequestMapping("getUserMemberGroup")
+    @RestReturn(GetUserMemberGroupResponse.class)
+    public RestResponse getUserMemberGroup(@Valid GetUserMemberGroupCommand cmd) {
+        GetUserMemberGroupResponse res = this.decorationService.getUserMemberGroup(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /decoration/listUserRequests</b>
      * <p>
      * 查询用户装修申请列表
@@ -40,8 +58,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("listUserRequests")
     @RestReturn(SearchRequestResponse.class)
     public RestResponse listUserRequests(@Valid ListUserRequestsCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        SearchRequestResponse res = this.decorationService.searchUserRelateRequest(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -89,8 +107,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("listDecorationCompanies")
     @RestReturn(value=DecorationCompanyDTO.class, collection=true)
     public RestResponse listDecorationCompanies(@Valid ListDecorationCompaniesCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        List<DecorationCompanyDTO> list =  this.decorationService.listDecorationCompanies(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -170,8 +188,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getLicense")
     @RestReturn(DecorationLicenseDTO.class)
     public RestResponse getLicense(@Valid GetLicenseCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        DecorationLicenseDTO dto = this.decorationService.getLicense(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -185,9 +203,9 @@ public class DecorationController extends ControllerBase {
      */
     @RequestMapping("geQrDetail")
     @RestReturn(QrDetailDTO.class)
-    public RestResponse geQrDetail(@Valid GetQrDetailCommand cmd) {
-
-        RestResponse response = new RestResponse();
+    public RestResponse geQrDetail(@Valid GetLicenseCommand cmd) {
+        QrDetailDTO dto = this.decorationService.getQrDetail(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -202,7 +220,6 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("getApplySetting")
     @RestReturn(DecorationIllustrationDTO.class)
     public RestResponse getApplySetting(@Valid GetIlluStrationCommand cmd) {
-
         cmd.setOwnerType(IllustrationType.APPLY.getCode());
         DecorationIllustrationDTO dto = this.decorationService.getIllustration(cmd);
         RestResponse response = new RestResponse(dto);
@@ -286,7 +303,7 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("completeDecoration")
     @RestReturn(String.class)
     public RestResponse completeDecoration(@Valid RequestIdCommand cmd) {
-
+        this.decorationService.completeDecoration(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

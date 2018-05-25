@@ -30,8 +30,8 @@ public class DecorationAdminController extends ControllerBase {
     @RequestMapping("searchRequests")
     @RestReturn(SearchRequestResponse.class)
     public RestResponse searchRequests(@Valid SearchRequestsCommand cmd) {
-
-        RestResponse response = new RestResponse();
+        SearchRequestResponse res = this.decorationService.searchRequest(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

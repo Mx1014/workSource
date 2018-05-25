@@ -32,6 +32,7 @@ public class SearchRequestsCommand {
     private Integer pageSize;
     private Long currentPMId;
     private Long currentProjectId;
+    private Long appId;
 
     public Long getCommunityId() {
         return communityId;
@@ -127,5 +128,13 @@ public class SearchRequestsCommand {
 
     public void setDoorPlate(String doorPlate) {
         this.doorPlate = doorPlate;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }
