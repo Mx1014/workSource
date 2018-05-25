@@ -575,6 +575,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setOwnerType(meter.getOwnerType());
         task.setTargetId(meter.getCommunityId());
         task.setPlanId(0L);
+        task.setTargetType("communityId");
         task.setMeterId(meter.getId());
         task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
         LocalDateTime dateTime = meter.getCreateTime().toLocalDateTime();
