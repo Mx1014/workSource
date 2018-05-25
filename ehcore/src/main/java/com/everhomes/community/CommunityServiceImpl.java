@@ -1211,7 +1211,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
 		for (ImportBuildingDataDTO data : datas) {
-			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data , community);
 			if (log != null) {
 				list.add(log);
 				continue;
@@ -1219,6 +1219,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
+
+
+
 			if (building == null) {
 				building = new Building();
 				building.setName(data.getName());
@@ -1279,14 +1282,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 
-				//进行非空校验
-				if(building.getName().equals(data.getName())){
-					log.setData(data);
-					log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
-					log.setData(data);
-					log.setErrorLog("building name is repeat");
-					continue;
-				}
+
 
 
 
@@ -1302,8 +1298,9 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data , Community community) {
 		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getName());
 		if (StringUtils.isEmpty(data.getName())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
 			log.setData(data);
@@ -1316,6 +1313,14 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_OVER_FLOW);
 			log.setData(data);
 			log.setErrorLog("building name cannot over than 20");
+			return log;
+		}
+
+		//进行非空校验
+		if(building.getName().equals(data.getName())){
+			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
+			log.setData(data);
+			log.setErrorLog("building name is repeat");
 			return log;
 		}
 
