@@ -3252,7 +3252,9 @@ public class UserServiceImpl implements UserService {
 		SceneTokenDTO sceneTokenDto = null;
 
 		try {
-			sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
+			//sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
+
+			sceneTokenDto = SceneTokenGenerator.fromWebToken(sceneToken);
 
 			if(LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Parse scene token, userId={}, sceneToken={}", userId, sceneTokenDto);

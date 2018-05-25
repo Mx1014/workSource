@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>描述: 此为上下文信息，客户端和服务器根据具体业务传具体参数。例如：工作台获取应用客户端和服务器约定传orgId，广场获取应用客户端和服务器约定传communityId</li>
  *     <li>communityId: 小区id</li>
  *     <li>orgId: 公司id</li>
+ *     <li>familyId: 家庭id</li>
  * </ul>
  */
 public class ContextDTO {
@@ -19,6 +20,8 @@ public class ContextDTO {
     private Long communityId;
 
     private Long orgId;
+
+    private Long familyId;
 
     public Long getCommunityId() {
         return communityId;
@@ -34,6 +37,14 @@ public class ContextDTO {
 
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
     }
 
     @Override
