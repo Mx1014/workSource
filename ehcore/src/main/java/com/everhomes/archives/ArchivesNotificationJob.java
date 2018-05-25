@@ -1,6 +1,7 @@
 package com.everhomes.archives;
 
 import com.everhomes.flow.FlowServiceImpl;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -32,9 +33,11 @@ public class ArchivesNotificationJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
-            LocalDateTime nowDateTime = LocalDateTime.now();
-            archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
-            LOGGER.info("======================================== ArchivesNotificationJob has been executed at " + nowDateTime);
+            if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+                LocalDateTime nowDateTime = LocalDateTime.now();
+                archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
+                LOGGER.info("======================================== ArchivesNotificationJob has been executed at " + nowDateTime);
+            }
         } catch (Exception e) {
             LOGGER.error("======================================== ArchivesNotificationJob Failed!", e);
         }

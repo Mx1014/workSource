@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.general_form.*;
@@ -135,6 +137,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Autowired
     private TaskService taskService;
@@ -1622,10 +1627,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 nextPageOffset = cmd.getPageAnchor() + 1;
             }
             response.setNextPageAnchor(nextPageOffset);
-            response.setDismissEmployees(results.stream().map(r -> {
-                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+            response.setDismissEmployees(results.stream().map(r -> ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class)).collect(Collectors.toList()));
             return response;
         }
 
@@ -1677,18 +1679,20 @@ public class ArchivesServiceImpl implements ArchivesService {
             return;
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
         if (configurations != null && configurations.size() > 0) {
-            for (ArchivesConfigurations configuration : configurations) {
-                if (configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
-                    EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
-                    employArchivesEmployees(cmd);
-                } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
-                    TransferArchivesEmployeesCommand cmd = (TransferArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), TransferArchivesEmployeesCommand.class);
-                    transferArchivesEmployees(cmd);
-                } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
-                    DismissArchivesEmployeesCommand cmd = (DismissArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
-                    dismissArchivesEmployees(cmd);
+            coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
+                for (ArchivesConfigurations configuration : configurations) {
+                    if (configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
+                        EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
+                        employArchivesEmployees(cmd);
+                    } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
+                        TransferArchivesEmployeesCommand cmd = (TransferArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), TransferArchivesEmployeesCommand.class);
+                        transferArchivesEmployees(cmd);
+                    } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
+                        DismissArchivesEmployeesCommand cmd = (DismissArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
+                        dismissArchivesEmployees(cmd);
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -2066,8 +2070,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (int i = 0; i < fields.size(); i++) {
             if (!fields.get(i).getFieldDisplayName().equals(title.getValues().get(i)))
                 return ImportFileErrorType.TITLE_ERROE.getCode();
-            else
-                continue;
         }
         return null;
     }
@@ -2347,7 +2349,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
         String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.EMPLOYEE_IMPORT_MODULE, "zh_CN", "EmployeeImportModule");
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
-        List<String> titleNames = form.getFormFields().stream().map(r -> r.getFieldDisplayName()).collect(Collectors.toList());
+        List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
         List<String> propertyNames = new ArrayList<>();
         List<Integer> titleSizes = new ArrayList<>();
         for (int i = 0; i < form.getFormFields().size(); i++) {
@@ -2683,9 +2685,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
         if (results == null)
             return;
-        for(ArchivesNotifications result : results){
-            sendArchivesNotification(result, nowDateTime);
-        }
+        coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_NOTIFICATION.getCode()).tryEnter(() -> {
+            for(ArchivesNotifications result : results){
+                sendArchivesNotification(result, nowDateTime);
+            }
+        });
     }
 
     private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime){
@@ -2731,19 +2735,23 @@ public class ArchivesServiceImpl implements ArchivesService {
             map.put("contactName", target.getContactName());
             map.put("companyName", company.getName());
             //  3-1.get the notification body.
-            String body = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, "");
+            StringBuilder body = new StringBuilder(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, ""));
             for (int n = 0; n < 7; n++)
-                body += processNotificationBody(employees, company.getName(), ArchivesUtil.plusDate(firstOfWeek, n));
+                body.append(processNotificationBody(employees, company.getName(), ArchivesUtil.plusDate(firstOfWeek, n)));
             //  3-2.send it
             if(notification.getMailFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
-                sendArchivesEmails(target.getWorkEmail(), body);
+                sendArchivesEmails(target.getWorkEmail(), body.toString());
             if(notification.getMessageFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
-                sendArchivesMessages(target.getUserId(), body);
+                sendArchivesMessages(target.getUserId(), body.toString());
         }
     }
 
     private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date) {
-        String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
+        String body = "";
+        StringBuilder employment = new StringBuilder();
+        StringBuilder anniversary = new StringBuilder();
+        StringBuilder birthday = new StringBuilder();
+        StringBuilder contract = new StringBuilder();StringBuilder idExpiry = new StringBuilder();
 //        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String dateString = date.toLocalDate() + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
@@ -2751,47 +2759,47 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         for (OrganizationMemberDetails employee : employees) {
             if (date.equals(employee.getEmploymentTime()))
-                employment += (employee.getContactName() + "，");
+                employment.append(employee.getContactName()).append("，");
             if (date.equals(employee.getContractEndTime()))
-                contract += (employee.getContactName() + "，");
+                contract.append(employee.getContactName()).append("，");
             if (date.equals(employee.getIdExpiryDate()))
-                idExpiry += (employee.getContactName() + "，");
+                idExpiry.append(employee.getContactName()).append("，");
             if (getMonthAndDay(date).equals(employee.getCheckInTimeIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
                 map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
-                anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
+                anniversary.append(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, ""));
             }
             if (getMonthAndDay(date).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("year", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
-                birthday += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, "");
+                birthday.append(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, ""));
             }
         }
-        if (!employment.equals("")) {
-            employment = employment.substring(0, employment.length() - 1);
+        if (!employment.toString().equals("")) {
+            employment = new StringBuilder(employment.substring(0, employment.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", employment);
+            map.put("contactNames", employment.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_EMPLOYMENT, "zh_CN", map, "");
         }
-        if (!contract.equals("")) {
-            contract = contract.substring(0, contract.length() - 1);
+        if (!contract.toString().equals("")) {
+            contract = new StringBuilder(contract.substring(0, contract.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", contract);
+            map.put("contactNames", contract.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_CONTRACT, "zh_CN", map, "");
         }
-        if (!idExpiry.equals("")) {
-            idExpiry = idExpiry.substring(0, idExpiry.length() - 1);
+        if (!idExpiry.toString().equals("")) {
+            idExpiry = new StringBuilder(idExpiry.substring(0, idExpiry.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", idExpiry);
+            map.put("contactNames", idExpiry.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ID, "zh_CN", map, "");
         }
-        if (!anniversary.equals("")) {
+        if (!anniversary.toString().equals("")) {
             body += anniversary;
         }
-        if (!birthday.equals("")) {
+        if (!birthday.toString().equals("")) {
             body += birthday;
         }
         body += "\n";
