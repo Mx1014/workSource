@@ -1609,7 +1609,7 @@ public class AssetProviderImpl implements AssetProvider {
                     continue;
                 }
                 String varName = getNameByVariableIdenfitier(varIden);
-                if(StringUtils.isNullOrEmpty(varName)){
+                if(StringUtils.isBlank(varName)){
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"formula variable name does not exist in schema");
                 }
                 var.setVariableIdentifier(varIden);
@@ -2968,7 +2968,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
                     .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
                     .fetchOne(t4.PROJECT_LEVEL_NAME);
-            if(StringUtils.isNullOrEmpty(ItemName)){
+            if(StringUtils.isBlank(ItemName)){
                 ItemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
                         .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
                         .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(rule.getChargingItemId()))
