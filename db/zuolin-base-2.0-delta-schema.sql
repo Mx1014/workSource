@@ -195,3 +195,7 @@ alter table eh_organization_workplaces add column city_id bigint(20) default nul
 alter table eh_organization_workplaces add column area_id bigint(20) default null comment '区域id';
 alter table eh_organization_workplaces add column whole_address_name varchar(128) default null comment '地址详细名称';
 
+-- 增加省份字段  add by yanjun 201805251851
+-- 增加省份字段  add by yanjun 201805251851
+ALTER TABLE `eh_communities` ADD COLUMN `province_id`  bigint(20) NULL AFTER `uuid`;
+ALTER TABLE `eh_communities` ADD COLUMN `province_name`  varchar(64) NULL AFTER `province_id`;
