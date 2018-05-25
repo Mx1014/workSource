@@ -4394,6 +4394,16 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaName(cmd.getAreaName());
 		community.setAddress(cmd.getAddress());
 
+		if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+			CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+			if(geoPoint != null){
+				geoPoint.setLatitude(cmd.getLatitude());
+				geoPoint.setLongitude(cmd.getLongitude());
+				geoPoint.setGeohash(GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude()));
+				communityProvider.updateCommunityGeoPoint(geoPoint);
+			}
+		}
+
 
 		community.setOperatorUid(userId);
 		communityProvider.updateCommunity(community);
