@@ -1281,6 +1281,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 				//进行非空校验
 				if(building.getName().equals(data.getName())){
+					log.setData(data);
 					log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
 					log.setData(data);
 					log.setErrorLog("building name is repeat");
