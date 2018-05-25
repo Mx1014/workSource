@@ -341,7 +341,7 @@ public class FlowScriptTest extends LoginAuthTestCase {
 
         FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
         FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getEnterScript().getScript(), FlowAction.class);
-        flowAction.setScriptId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
+        flowAction.setScriptMainId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
         flowAction.setScriptVersion(flowNodeDetail.getEnterScript().getScript().getScriptVersion());
 
         LOGGER.debug("flowAction: {}", flowAction);
@@ -379,7 +379,7 @@ public class FlowScriptTest extends LoginAuthTestCase {
 
         FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
         FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getEnterScript().getScript(), FlowAction.class);
-        flowAction.setScriptId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
+        flowAction.setScriptMainId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
         flowAction.setScriptVersion(flowNodeDetail.getEnterScript().getScript().getScriptVersion());
 
         LOGGER.debug("flowAction: {}", flowAction);

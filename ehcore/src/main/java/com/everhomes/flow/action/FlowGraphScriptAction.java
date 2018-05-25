@@ -3,6 +3,7 @@ package com.everhomes.flow.action;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 import com.everhomes.flow.nashornfunc.NashornScriptMain;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
@@ -27,24 +28,27 @@ public class FlowGraphScriptAction extends FlowGraphAction {
 
     @Override
     public void fireAction(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
-        FlowScriptType scriptType = FlowScriptType.fromCode(this.getFlowAction().getScriptType());
-
+        FlowAction flowAction = this.getFlowAction();
+        FlowScriptType scriptType = FlowScriptType.fromCode(flowAction.getScriptType());
+        if (scriptType == null) {
+            return;
+        }
         switch (scriptType) {
             case JAVA:
                 try {
-                    flowFunctionService.invoke(ctx, this.getFlowAction().getScriptId());
+                    flowFunctionService.invoke(ctx, flowAction.getScriptMainId(), flowAction);
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_FUNCTION_INVOKE_ERROR,
-                            "flow function invoke error, functionId = %s", this.getFlowAction().getScriptId());
+                            "flow function invoke error, functionId = %s", flowAction.getScriptMainId());
                 }
                 break;
             case JAVASCRIPT:
-                FlowScript flowScript = flowScriptProvider.findById(this.getFlowAction().getScriptId());
+                FlowScript flowScript = flowScriptProvider.findByMainIdAndVersion(flowAction.getScriptMainId(), flowAction.getScriptVersion());
                 if (flowScript != null) {
-                    flowNashornEngineService.push(new NashornScriptMain(ctx, flowScript));
+                    flowNashornEngineService.push(new NashornScriptMain(ctx, flowScript, flowAction));
                 } else {
                     LOGGER.warn("can not found script by scriptId = {}, action = {}",
-                            this.getFlowAction().getScriptId(), getFlowAction());
+                            flowAction.getScriptMainId(), flowAction);
                 }
                 break;
             default:

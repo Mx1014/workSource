@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.StringHelper;
@@ -21,6 +22,8 @@ public class FlowCaseStateBrief implements Serializable {
     private FlowSubject subject;
     private FlowLane currentLane;
     private Map<String, Object> extra;
+
+    private FlowAction action;
 
     private Long firedButtonId;
 
@@ -136,6 +139,22 @@ public class FlowCaseStateBrief implements Serializable {
 
     public void setFiredButtonId(Long firedButtonId) {
         this.firedButtonId = firedButtonId;
+    }
+
+    public FlowAction getAction() {
+        return action;
+    }
+
+    public void setAction(FlowAction action) {
+        this.action = action;
+    }
+
+    public Long getFlowActionId() {
+        return this.action.getId();
+    }
+
+    public String getFlowActionType() {
+        return FlowEntityType.FLOW_ACTION.getCode();
     }
 
     @Override

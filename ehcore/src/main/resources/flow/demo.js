@@ -1,6 +1,5 @@
 var configService = require("configService");
 var apiService = require("apiService");
-var fetch = require("fetch");
 var log = require("log");
 
 var app = {};
@@ -9,57 +8,60 @@ var app = {};
 app.config = {
     vendor: {
         description: "供应商名字",
-        default: "通联支付",
+        default: "通联支付"
+    },
+    vendorCount: {
+        description: "供应商数量",
+        default: "2",
         validator: function (value) {
-            return value.indexOf("支付") !== -1;
+            try {
+                parseInt(value);
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
     },
-    vendorURL: {
+    vendorKey: {
         description: "供应商服务器地址",
-        default: "http://zzz.com"
+        default: "http://zzz.com",
+        validator: function (value) {
+            return value.indexOf("http") !== -1;
+        }
     }
 };
 
 // 入口函数，工作流后台启用脚本后，一旦满足触发条件，则会调用此函数，主要业务逻辑所在
 app.main = function (ctx) {
     // 提供的API用于获取管理员在后台配置的属性值
-    var config = configService(ctx.flow.id, ctx.flow.flowVersion);
+    var config = configService(ctx.flowActionType, ctx.flowActionId);
 
     // 通过 apiService 获取 api 提供对象
     var flowService = apiService.get("flowService");
     var moduleService = apiService.get("moduleService");
 
     var vendor = config.getString("vendor");
-    var vendorURL = config.getObject("vendorURL");
-    var vendorKey = config.getInt("vendorKey");
+    var vendorCount = config.getInt("vendorCount");
+    var vendorKey = config.getString("vendorKey");
 
-    fetch("http://www.baidu.com", {
-        param: {
-            a: 1,
-            b: 2,
-            c: "ccccc",
-            d: {
-                d1:"d1"
-            },
-            e: [1,2,3]
-        },
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "xxx-header": "xxxqqq"
-        }
-    }, function (result) {
-        log.info(new java.lang.String(result.getBody()));
-    }, function (reason) {
-        log.warn(reason, "aaaa", "bbbb");
-    });
+    log.debug("vendor = ", vendor);
+    log.debug("vendorCount = ", vendorCount);
+    log.debug("vendorKey = ", vendorKey);
 
-    log.debug(vendor);
-    log.debug(vendorURL);
-    log.debug(vendorKey);
+    var flowGraph = flowService.getFlowGraph(ctx.flow.flowMainId, ctx.flow.flowVersion);
+    log.debug("flowGraph =", flowGraph);
+    log.debug("flowGraph.flow.flowMainId = ", flowGraph.flow.flowMainId);
+    log.debug("flowGraph.flow =", flowGraph.flow);
+
+    var cctx = flowService.getFlowCaseState(ctx);
+    log.debug("FlowCaseState = ", cctx);
+    log.debug("FlowCaseState.operator = ", cctx.operator);
+    log.debug("FlowCaseState.operator.nickName = ", cctx.operator.nickName);
+
+    log.debug("js obj = ", {a:1, b:2});
+    log.debug("js arr = ", [1,2,3]);
 
     flowService.testDummyCall();
-
-    return vendorURL;
 };
 
 module.exports = app;
