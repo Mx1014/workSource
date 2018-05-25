@@ -197,9 +197,8 @@ import com.everhomes.rest.customer.YearQuarter;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
-import com.everhomes.rest.equipment.AdminFlag;
-import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
@@ -3928,7 +3927,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void setNewSourceSheetBookRow(Sheet sourceSheet, CustomerSourceStatisticsDTO dto) {
         Row row = sourceSheet.createRow(sourceSheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getItemName()==null? "未知":dto.getItemName());
         row.createCell(++i).setCellValue(dto.getCustomerCount());
     }
 
