@@ -1674,11 +1674,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
-    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth() {
+    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(listAdminAesUserKeyCommand cmd) {
         User user = UserContext.current().getUser();
         
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), 20);
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), cmd.getRightRemote(), 0);
 
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
@@ -4739,7 +4739,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser() {
 		ListFacialRecognitionKeyByUserResponse rsp = new ListFacialRecognitionKeyByUserResponse();
 		User user = UserContext.current().getUser();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), 0);
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), null, 0);
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();

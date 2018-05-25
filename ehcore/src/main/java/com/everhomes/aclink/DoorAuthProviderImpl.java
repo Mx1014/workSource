@@ -459,7 +459,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, int count) {
+    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, int count) {
         return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -468,6 +468,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                if(rightRemote != null && rightRemote == (byte) 1){
+                	query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq((byte) 1));
+                }
                 return query;
             }
 

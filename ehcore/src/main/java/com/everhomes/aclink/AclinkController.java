@@ -1,17 +1,13 @@
 // @formatter:off
 package com.everhomes.aclink;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,35 +17,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.lingling.AclinkLinglingConstant;
-import com.everhomes.aclink.lingling.AclinkLinglingDevice;
-import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
-import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
-import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogDTO;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
 import com.everhomes.rest.aclink.AclinkServerDTO;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
@@ -57,8 +44,6 @@ import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
-import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
@@ -66,7 +51,6 @@ import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.FaceRecognitionPhotoDTO;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetPhoneVisitorCommand;
@@ -85,34 +69,14 @@ import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionKeyByUserResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
 import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
-import com.everhomes.rest.aclink.PairIpadCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
+import com.everhomes.rest.aclink.listAdminAesUserKeyCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -120,18 +84,6 @@ import java.util.Map.Entry;
 public class AclinkController extends ControllerBase {
     @Autowired
     private DoorAccessService doorAccessService;
-    
-    @Autowired
-    private AesServerKeyProvider aesServerKeyProvider;
-    
-    @Autowired
-    private DoorAccessProvider doorAccessProvider;
-    
-    @Autowired
-    private AclinkLinglingService aclinkLinglingService;
-    
-    @Autowired
-    private RolePrivilegeService rolePrivilegeService;
     
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
@@ -204,8 +156,8 @@ public class AclinkController extends ControllerBase {
     
     @RequestMapping("listAdminAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
-    public RestResponse listAdminAesUserKey() {
-        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth());
+    public RestResponse listAdminAesUserKey(@Valid listAdminAesUserKeyCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
