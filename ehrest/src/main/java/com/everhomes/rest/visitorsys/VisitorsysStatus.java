@@ -13,6 +13,7 @@ import java.util.List;
  * <li>WAIT_CONFIRM_VISIT((byte)2): 等待确认（visitStatus 访客管理用）</li>
  * <li>HAS_VISITED((byte)3): 已到访(visitStatus,bookingStatus共用)</li>
  * <li>REJECTED_VISIT((byte)4): 已拒绝（visitStatus 访客管理用）</li>
+ * <li>HIDDEN((byte)5): 隐藏状态（内部使用）</li>
  * </ul>
  */
 public enum VisitorsysStatus {
@@ -20,7 +21,8 @@ public enum VisitorsysStatus {
 	NOT_VISIT((byte)1,"未到访"),
 	WAIT_CONFIRM_VISIT((byte)2,"等待确认"),
 	HAS_VISITED((byte)3,"已到访"),
-	REJECTED_VISIT((byte)4,"已拒绝");
+	REJECTED_VISIT((byte)4,"已拒绝"),
+	HIDDEN((byte)5,"隐藏");//内部使用，用于临时访客控制
 
 	private byte code;
 	private String  desc;
@@ -56,16 +58,16 @@ public enum VisitorsysStatus {
 		return null;
 	}
 
-	public static VisitorsysStatus fromVisitStatusCode(Byte visitStatusCode) {
-		if (visitStatusCode != null) {
-			for (VisitorsysStatus status : getVisitStatus()) {
-				if (status.code == visitStatusCode.byteValue()) {
-					return status;
-				}
-			}
-		}
-		return null;
-	}
+//	public static VisitorsysStatus fromVisitStatusCode(Byte visitStatusCode) {
+//		if (visitStatusCode != null) {
+//			for (VisitorsysStatus status : getVisitStatus()) {
+//				if (status.code == visitStatusCode.byteValue()) {
+//					return status;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 
 	/**
 	 * 获取访客管理状态

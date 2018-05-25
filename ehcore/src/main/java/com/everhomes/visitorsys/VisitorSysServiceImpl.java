@@ -537,8 +537,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             action = new VisitorSysAction();
             action.setActionType(actionFlag);
             User user = UserContext.current().getUser();
-            action.setCreatorUid(user==null?-1:user.getId());
-            action.setCreatorName(user==null?visitor.getVisitorName():user.getNickName());
+            action.setCreatorUid((user==null || user.getId()==0)?-1:user.getId());
+            action.setCreatorName((user==null || user.getId()==0)?visitor.getVisitorName():user.getNickName());
             action.setCreateTime(new Timestamp(System.currentTimeMillis()));
             action.setNamespaceId(visitor.getNamespaceId());
             action.setVisitorId(visitor.getId());
@@ -726,12 +726,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private VisitorSysVisitor generateRejectVisitor(VisitorSysVisitor visitor) {
-        visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
+        if(visitorType == VisitorsysVisitorType.BE_INVITED) {
+            visitor.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        }else{
+            visitor.setBookingStatus(null);
+        }
         visitor.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
-//        visitor.setRefuseTime(new Timestamp(System.currentTimeMillis()));
-//        User user = UserContext.current().getUser();
-//        visitor.setRefuseUid(user==null?-1:user.getId());
-//        visitor.setRefuseUname(user==null?"anonymous":user.getNickName());
         return visitor;
     }
 
@@ -1148,6 +1149,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 )
                 && visitStatus!=VisitorsysStatus.DELETED //访客状态不是已删除
                 && visitStatus!=VisitorsysStatus.REJECTED_VISIT //访客状态不是已拒绝
+                && visitStatus!=VisitorsysStatus.HIDDEN //访客状态不是隐藏
                 && visitorQrcodeFlag == VisitorsysFlagType.YES; //公司访客设置的邀请函二维码显示
         showQrcode = showQrcode &&
                 (communityVisitor.getDoorGuardEndTime()==null //门禁失效时间为空，则门禁二维码永久有效
@@ -1625,7 +1627,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 tempRow.createCell(2).setCellValue(type.getDesc());
                 tempRow.createCell(3).setCellValue(visitorDTO.getVisitReason());
                 tempRow.createCell(4).setCellValue(visitorDTO.getVisitTime().toLocalDateTime().format(datetimeSF));
-                VisitorsysStatus status = VisitorsysStatus.fromVisitStatusCode(visitorDTO.getVisitStatus());
+                VisitorsysStatus status = VisitorsysStatus.fromCode(visitorDTO.getVisitStatus());
                 tempRow.createCell(5).setCellValue(status==null?"未知":status.getDesc());
             }
 
@@ -1791,20 +1793,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
     }
 
-    /**
-     * 检查非法预约状态
-     * @param bookingStatus
-     */
-    private VisitorsysStatus checkInvaildBookingStatus(Byte bookingStatus) {
-        VisitorsysStatus status = checkBookingStatus(bookingStatus);
-        //以下两种状态，不能在创建用户的时候传入
-        if(status == VisitorsysStatus.DELETED
-                || status == VisitorsysStatus.REJECTED_VISIT){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild visitor bookingStatus = "+bookingStatus);
-        }
-        return status;
-    }
+//    /**
+//     * 检查非法预约状态
+//     * @param bookingStatus
+//     */
+//    private VisitorsysStatus checkInvaildBookingStatus(Byte bookingStatus) {
+//        VisitorsysStatus status = checkBookingStatus(bookingStatus);
+//        //以下两种状态，不能在创建用户的时候传入
+//        if(status == VisitorsysStatus.DELETED
+//                || status == VisitorsysStatus.REJECTED_VISIT){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                    , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild visitor bookingStatus = "+bookingStatus);
+//        }
+//        return status;
+//    }
 
     /**
      * 检查非法访客状态
@@ -2104,20 +2106,36 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         //2018.05.24 与产品 李磊,何智辉商定如此
         //创建园区临时访客，如果状态是已到访，那么设置对应企业访客状态为待确认
-        //创建企业临时访客，如果状态是已到访，那么设置对应园区访客状态为已删除
+        //创建园区临时访客，如果状态是等待确认，那么设置对应企业访客状态为隐藏
+        //创建企业临时访客，如果状态是已到访，那么设置对应园区访客状态为为隐藏
+        //创建企业临时访客，如果状态是等待确认，那么设置对应园区访客状态为隐藏
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
         if(relatedVisitor == null
-                && visitorType == VisitorsysVisitorType.TEMPORARY
-                && visitStatus == VisitorsysStatus.HAS_VISITED){
-            if(ownerType == VisitorsysOwnerType.COMMUNITY){
-                convert.setBookingStatus(null);
+                && visitorType == VisitorsysVisitorType.TEMPORARY){
+            convert.setBookingStatus(null);
+            if(ownerType == VisitorsysOwnerType.COMMUNITY && visitStatus == VisitorsysStatus.HAS_VISITED){
+                convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+            }else if(ownerType == VisitorsysOwnerType.ENTERPRISE &&visitStatus == VisitorsysStatus.HAS_VISITED){
+                convert.setVisitStatus(VisitorsysStatus.HIDDEN.getCode());
+            }else if(visitStatus == VisitorsysStatus.WAIT_CONFIRM_VISIT){
+                convert.setVisitStatus(VisitorsysStatus.HIDDEN.getCode());
+            }
+        }
+        //更新园区临时访客，如果状态是已到访，那么设置对应企业访客状态为待确认
+        //更新园区临时访客，如果状态是等待确认，那么保持企业访客状态
+        //更新企业临时访客，如果状态是已到访，那么保持园区访客状态
+        //更新企业临时访客，如果状态是等待确认，那么保持园区访客状态
+        else if(relatedVisitor!=null && visitorType == VisitorsysVisitorType.TEMPORARY){
+            convert.setBookingStatus(null);
+            //园区临时访客已经在后台登记了，然后设置对应的企业访客为等待确认
+            if(ownerType == VisitorsysOwnerType.COMMUNITY && visitStatus == VisitorsysStatus.HAS_VISITED){
                 convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
             }else{
-                convert.setBookingStatus(null);
-                convert.setVisitStatus(VisitorsysStatus.DELETED.getCode());
+                convert.setVisitStatus(relatedVisitor.getVisitStatus());
             }
-        }else {
+        }
+        else {
             convert.setBookingStatus(relatedVisitor == null ? visitor.getBookingStatus() : relatedVisitor.getBookingStatus());
             convert.setVisitStatus(relatedVisitor == null ? visitor.getVisitStatus() : relatedVisitor.getVisitStatus());
         }

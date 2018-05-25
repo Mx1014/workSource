@@ -55,7 +55,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             "visitorName", "followUpNumbers", "visitorPhone", "visitReasonId", "visitReason",
             "inviterId", "inviterName", "plannedVisitTime", "visitTime", "createTime", "visitStatus", "bookingStatus",
             "visitorType", "enterpriseId", "enterpriseName", "officeLocationId", "officeLocationName",
-            "statsDate", "statsHour", "statsWeek","communityId"};
+            "statsDate", "statsHour", "statsWeek"};
     private static final DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
@@ -134,32 +134,31 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             }
             qb = QueryBuilders.boolQuery().must(QueryBuilders.queryString("*" + params.getKeyWords() + "*").field("visitorName").field("visitorPhone").field("inviterName"));
         }
-
-
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", params.getNamespaceId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", params.getOwnerType()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", params.getOwnerId()));
+        List<FilterBuilder> fbList = new ArrayList();
+        fbList.add(FilterBuilders.termFilter("namespaceId", params.getNamespaceId()));
+        fbList.add(FilterBuilders.termFilter("ownerType", params.getOwnerType()));
+        fbList.add(FilterBuilders.termFilter("ownerId", params.getOwnerId()));
         if (params.getVisitorType() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorType", params.getVisitorType()));
+            fbList.add(FilterBuilders.termFilter("visitorType", params.getVisitorType()));
         }
         if (params.getVisitorPhone() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorPhone", params.getVisitorPhone()));
+            fbList.add(FilterBuilders.termFilter("visitorPhone", params.getVisitorPhone()));
         }
         if (params.getOfficeLocationId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("officeLocationId", params.getOfficeLocationId()));
+             fbList.add(FilterBuilders.termFilter("officeLocationId", params.getOfficeLocationId()));
         }
         if (params.getVisitReasonId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitReasonId", params.getVisitReasonId()));
+             fbList.add(FilterBuilders.termFilter("visitReasonId", params.getVisitReasonId()));
         }
 
         if (params.getEnterpriseId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", params.getEnterpriseId()));
+             fbList.add(FilterBuilders.termFilter("enterpriseId", params.getEnterpriseId()));
         }
 
         VisitorsysSearchFlagType visitorsysSearchFlagType = VisitorsysSearchFlagType.fromCode(params.getSearchFlag());
         FieldSortBuilder sort = SortBuilders.fieldSort("id").order(SortOrder.DESC);
         if (visitorsysSearchFlagType == VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorType", VisitorsysVisitorType.BE_INVITED.getCode()));
+            fbList.add(FilterBuilders.termFilter("visitorType", VisitorsysVisitorType.BE_INVITED.getCode()));
             RangeFilterBuilder rf = new RangeFilterBuilder("plannedVisitTime");
             if (params.getStartPlannedVisitTime() != null) {
                 rf.gt(params.getStartPlannedVisitTime());
@@ -167,11 +166,12 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if (params.getEndPlannedVisitTime() != null) {
                 rf.lt(params.getEndPlannedVisitTime());
             }
-            fb = FilterBuilders.andFilter(fb, rf);
+            fbList.add(rf);
             if (params.getBookingStatus() != null) {
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
+                 fbList.add(FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
             } else {
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
+                 fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
+                 fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.HIDDEN.getCode())));
             }
             sort = SortBuilders.fieldSort("plannedVisitTime").order(SortOrder.ASC);
         } else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.VISITOR_MANAGEMENT) {
@@ -182,15 +182,17 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             if (params.getEndVisitTime() != null) {
                 rf.lt(params.getEndVisitTime());
             }
-            fb = FilterBuilders.andFilter(fb, rf);
+            fbList.add(rf);
             if (params.getVisitStatus() != null) {
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitStatus", params.getVisitStatus()));
+                fbList.add(FilterBuilders.termFilter("visitStatus", params.getVisitStatus()));
             } else {
-                fb = FilterBuilders.andFilter(fb, new RangeFilterBuilder("visitStatus").gt(VisitorsysStatus.NOT_VISIT.getCode()));
+                fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
+                fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.NOT_VISIT.getCode())));
+                fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.HIDDEN.getCode())));
             }
             sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
         } else if (visitorsysSearchFlagType == VisitorsysSearchFlagType.CLIENT_BOOKING) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("visitorType", VisitorsysVisitorType.BE_INVITED.getCode()));
+            fbList.add(FilterBuilders.termFilter("visitorType", VisitorsysVisitorType.BE_INVITED.getCode()));
 
             VisitorsysStatus bookingStatus = VisitorsysStatus.fromBookingCode(params.getBookingStatus());
             if (bookingStatus != null) {
@@ -200,15 +202,15 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 if (bookingStatus == VisitorsysStatus.HAS_VISITED) {
                     sort = SortBuilders.fieldSort("visitTime").order(SortOrder.DESC);
                 }
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
+                fbList.add(FilterBuilders.termFilter("bookingStatus", params.getBookingStatus()));
             } else {
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
+                fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.DELETED.getCode())));
+                fbList.add(FilterBuilders.notFilter(FilterBuilders.termFilter("bookingStatus", VisitorsysStatus.HIDDEN.getCode())));
                 sort = SortBuilders.fieldSort("createTime").order(SortOrder.DESC);
             }
         }
 
-
-        qb = QueryBuilders.filteredQuery(qb, fb);
+        qb = QueryBuilders.filteredQuery(qb, FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()])));
         builder.setSearchType(searchType);
         if (searchType == SearchType.QUERY_THEN_FETCH) {
             builder.setFrom(params.getPageAnchor().intValue() * params.getPageSize()).setSize(params.getPageSize() + 1);
@@ -217,11 +219,11 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         builder.addSort(sort);
 
         if (LOGGER.isDebugEnabled())
-            LOGGER.info("VisitorsysSearcherImpl query builder ：" + builder);
+            LOGGER.debug("VisitorsysSearcherImpl query builder ：" + builder);
 
         SearchResponse searchResponse = builder.execute().actionGet();
-        if (LOGGER.isDebugEnabled())
-            LOGGER.info("VisitorsysSearcherImpl query searchResponse ：" + searchResponse);
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("VisitorsysSearcherImpl query searchResponse ：" + searchResponse);
         return searchResponse;
     }
 
@@ -230,16 +232,18 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
         QueryBuilder qb = QueryBuilders.matchAllQuery();
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", params.getNamespaceId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", params.getOwnerType()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", params.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
+        List<FilterBuilder> fbList = new ArrayList();
+        fbList.add(FilterBuilders.termFilter("namespaceId", params.getNamespaceId()));
+        fbList.add( FilterBuilders.termFilter("ownerType", params.getOwnerType()));
+        fbList.add( FilterBuilders.termFilter("ownerId", params.getOwnerId()));
+        fbList.add( FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
+        fbList.add( FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.HIDDEN.getCode())));
 
 
         TermsBuilder field = null;
 
         if (params.getStartVisitorCountTime() != null && params.getEndVisitorCountTime() != null) {
-            fb = FilterBuilders.andFilter(fb,
+            fbList.add(
                     FilterBuilders
                             .rangeFilter("visitTime")
                             .from(params.getStartVisitTime())
@@ -247,7 +251,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             field = AggregationBuilders.terms("statsDate").field("statsDate");
         }
         if (params.getStartDailyAvgVisitorTime() != null && params.getEndDailyAvgVisitorTime() != null) {
-            fb = FilterBuilders.andFilter(fb,
+            fbList.add(
                     FilterBuilders
                             .rangeFilter("visitTime")
                             .from(params.getStartDailyAvgVisitorTime())
@@ -255,7 +259,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             field = AggregationBuilders.terms("statsWeek").field("statsWeek");
         }
         if (params.getStartTimeShareAvgVisitorTime() != null && params.getEndTimeShareAvgVisitorTime() != null) {
-            fb = FilterBuilders.andFilter(fb,
+            fbList.add(
                     FilterBuilders
                             .rangeFilter("visitTime")
                             .from(params.getStartTimeShareAvgVisitorTime())
@@ -263,18 +267,14 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             field = AggregationBuilders.terms("statsHour").field("statsHour");
         }
         if (params.getStartRankingTime() != null && params.getEndRankingTime() != null) {
-           // fb = FilterBuilders.termFilter("namespaceId", params.getNamespaceId());
-           // fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", VisitorsysOwnerType.ENTERPRISE.getCode()));
-          //  fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", params.getOwnerId()));
-          //  fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.termFilter("visitStatus", VisitorsysStatus.DELETED.getCode())));
-            fb = FilterBuilders.andFilter(fb,
+            fbList.add(
                     FilterBuilders
                             .rangeFilter("visitTime")
                             .from(params.getStartRankingTime())
                             .to(params.getEndRankingTime()));
             field = AggregationBuilders.terms("enterpriseName").field("enterpriseName").order(Terms.Order.count(false));
         }
-        qb = QueryBuilders.filteredQuery(qb, fb);
+        qb = QueryBuilders.filteredQuery(qb, FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()])));
         builder.addAggregation(field);
         builder.setSearchType(searchType);
         if (searchType == SearchType.QUERY_THEN_FETCH) {
@@ -283,11 +283,11 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
         builder.setQuery(qb);
 
         if (LOGGER.isDebugEnabled())
-            LOGGER.info("VisitorsysSearcherImpl query builder ：" + builder);
+            LOGGER.debug("VisitorsysSearcherImpl query builder ：" + builder);
 
         SearchResponse searchResponse = builder.execute().actionGet();
-        if (LOGGER.isDebugEnabled())
-            LOGGER.info("VisitorsysSearcherImpl query searchResponse ：" + searchResponse);
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("VisitorsysSearcherImpl query searchResponse ：" + searchResponse);
         return searchResponse;
     }
 
