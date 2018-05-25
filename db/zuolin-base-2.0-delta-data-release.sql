@@ -16,3 +16,4 @@ insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900
 insert into eh_locale_strings(scope,code,locale,`text`)values('organization',900038,'zh_CN','公司名称不能超过50字');
 insert into eh_locale_strings(scope,code,locale,`text`)values('community',10013,'zh_CN','楼栋名称不能超过20个汉字');
 insert into eh_locale_strings(scope,code,locale,`text`)values('community',10014,'zh_CN','楼栋名称重复了');
+insert into eh_locale_strings(scope,code,locale,`text`)values('address',20011,'zh_CN','门牌地址超过了20个汉字');

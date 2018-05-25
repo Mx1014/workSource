@@ -54,6 +54,7 @@ import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractStatus;
@@ -1961,6 +1962,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				errorLogs.add(log);
 				continue;
 			}
+
+            LOGGER.info(String.valueOf(data.getApartmentName().getBytes().length));
+            //校验楼栋名称的长度不能大于20个汉字
+            if(data.getApartmentName().getBytes().length > 60){
+                log.setCode(AddressServiceErrorCode.ERROR_APPARTMENT_NAME_OVER_FLOW);
+                log.setData(data);
+                log.setErrorLog("address name cannot over than 20");
+                errorLogs.add(log);
+                continue;
+            }
+
 
             Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
 			if(address != null) {

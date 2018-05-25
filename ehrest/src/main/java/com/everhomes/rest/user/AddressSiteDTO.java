@@ -21,6 +21,7 @@ import java.util.List;
  *     <li>longitude: 精度</li>
  *     <li>latitude: 纬度</li>
  *     <li>wholeAddressName: 办公地点名称全称</li>
+ *     <li>communityName: 办公地点所属项目</li>
  * </ul>
  */
 public class AddressSiteDTO {
@@ -36,6 +37,7 @@ public class AddressSiteDTO {
     private Double longitude;
     private Double latitude;
     private String wholeAddressName;
+    private String communityName;
 
     public Long getId() {
         return id;
@@ -131,6 +133,14 @@ public class AddressSiteDTO {
 
     public void setWholeAddressName(String wholeAddressName) {
         this.wholeAddressName = wholeAddressName;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 
     @Override
