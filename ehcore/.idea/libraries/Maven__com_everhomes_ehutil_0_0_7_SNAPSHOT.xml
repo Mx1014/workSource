@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.everhomes:ehutil:0.0.7-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehutil/0.0.7-SNAPSHOT/ehutil-0.0.7-20171214.234913-63.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehutil/0.0.7-SNAPSHOT/ehutil-0.0.7-20171214.234913-63-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehutil/0.0.7-SNAPSHOT/ehutil-0.0.7-20171214.234913-63-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

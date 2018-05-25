@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.everhomes:ehrest:issue-30016-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehrest/issue-30016-SNAPSHOT/ehrest-issue-30016-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehrest/issue-30016-SNAPSHOT/ehrest-issue-30016-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehrest/issue-30016-SNAPSHOT/ehrest-issue-30016-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

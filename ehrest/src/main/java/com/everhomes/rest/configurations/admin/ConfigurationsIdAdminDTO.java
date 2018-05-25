@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 * <li>value: 配置项值</li>
 * <li>displayName: 展示名称</li>
 * <li>description: 配置项描述</li>
+* <li>isReadonly: 是否只读：1，是 ；null 或其他值为 否</li>
 * </ul>
 */
 public class ConfigurationsIdAdminDTO {
@@ -19,6 +20,7 @@ public class ConfigurationsIdAdminDTO {
     private String value;
     private String  displayName;    
     private String description;
+    private Integer isReadonly ;
     
     public Integer getNamespaceId() {
         return namespaceId;
@@ -67,6 +69,16 @@ public class ConfigurationsIdAdminDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+    
+    
+	public Integer getIsReadonly() {
+		return isReadonly;
+	}
+
+	public void setIsReadonly(Integer isReadonly) {
+		this.isReadonly = isReadonly;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -9,12 +9,15 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChange;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChangeProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -28,6 +31,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
  * configurations management Provider
@@ -36,6 +40,8 @@ import com.everhomes.util.DateUtils;
  */
 @Component
 public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationsAdminProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -180,6 +186,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//为保存变动信息字段设值
 		if(CREATE == type){
 			if(aftbo == null){
+				LOGGER.error("aftbo is null,there will not save create-change record.");
 				return;
 			}			
 			String aftbostr = JSONObject.toJSONString(aftbo);
@@ -189,9 +196,11 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 						
 		}else if(UPDATE == type){
 			if(prebo == null){
+				LOGGER.error("prebo is null,there will not save update-change record.");
 				return;
 			}
 			if(aftbo == null){
+				LOGGER.error("aftbo is null,there will not save update-change record.");
 				return;
 			}
 			
@@ -206,6 +215,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 			
 		}else if(DELETE == type){
 			if(prebo == null){
+				LOGGER.error("prebo is null,there will not save delete-change record.");
 				return;
 			}
 			String prebostr = JSONObject.toJSONString(prebo);
@@ -229,4 +239,30 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		
 	}
 	
+	private boolean checkMultiple(Integer id , Integer nemespaceId , String name ){
+		//靠nemespaceId与name查询配置表看是否有存在数据
+		List<Configurations> resultList = listConfigurations(nemespaceId, name, null, null, null);
+		//ID 为空，说明是新增数据，
+		if(id == null ){			
+			if(resultList !=null && resultList.size() >0){
+				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+			}
+		}else {
+			
+			if(resultList !=null && resultList.size() >1){
+				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+			}
+		}
+		getConfigurationById(id , nemespaceId);
+		return true;
+	}
+	
+	/**
+	 * 抛出运行时异常，异常信息参数传递过来
+	 * @param msg 报错信息
+	 */
+	private void throwSelfDefNullException(String msg ){
+		LOGGER.error(msg);
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,msg);
+	}
 }
