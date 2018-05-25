@@ -25,6 +25,7 @@ public class OrganizationAndDetailDTO {
     private List<Long> communityIds;
 
 
+
     //部门类型
     private String departmentType;
 

@@ -13782,6 +13782,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //将办公地点名称封装在对象OfficeSiteDTO中
                     officeSiteDTO.setSiteName(organizationWorkPlaces.getWorkplaceName());
                     officeSiteDTO.setCommunityId(organizationWorkPlaces.getCommunityId());
+                    officeSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
                     //根据查询到的community_id来查询表eh_communities然后得到所属项目的名称，并且将其封装在对象OfficeSiteDTO中
                     String communityName = organizationProvider.getCommunityNameByCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setCommunityName(communityName);
