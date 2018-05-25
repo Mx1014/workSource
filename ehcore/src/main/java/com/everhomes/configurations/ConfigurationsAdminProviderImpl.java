@@ -122,6 +122,8 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	@Override
 	public void crteateConfiguration(Configurations bo) {
 		
+		//重复校验
+		checkMultiple(null,bo.getNamespaceId(),bo.getName());
 		//获取主键序列
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfigurations.class));
 		bo.setId(id.intValue());
@@ -143,6 +145,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		
 		//修改前先查询出来
 		Configurations preBo = getConfigurationById(bo.getId(),null);
+		//是否只读校验，只读数据不能修改
+		
+		//重复校验
+		checkMultiple(bo.getId(),bo.getNamespaceId(),bo.getName());
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
@@ -239,22 +245,35 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		
 	}
 	
-	private boolean checkMultiple(Integer id , Integer nemespaceId , String name ){
+	/**
+	 * 检查新增或修改时该条信息是否与表中数据存在重复（不允许重复的）
+	 * 新增:不能传ID，靠域空间ID与name 查询配置项表，查出数据说明即将新增的数据为重复数据
+	 * 修改：靠域空间ID与name 查询配置项表，存在2条及以上数据说明重复了。查出一条则判断该条是不是将要修改
+	 * 的本身这条，不是则说明重复了。
+	 * @param id 主键
+	 * @param nemespaceId 域空间ID
+	 * @param name 配置信息键值对中的“键”
+	 */
+	private void checkMultiple(Integer id , Integer nemespaceId , String name ){
 		//靠nemespaceId与name查询配置表看是否有存在数据
 		List<Configurations> resultList = listConfigurations(nemespaceId, name, null, null, null);
-		//ID 为空，说明是新增数据，
+		//ID 为空，说明是新增数据，否则为修改数据
 		if(id == null ){			
 			if(resultList !=null && resultList.size() >0){
 				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
 			}
-		}else {
-			
+		}else { 
+			//同一域空间内name 相同的有两个及以上是肯定有问题的
 			if(resultList !=null && resultList.size() >1){
 				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+			}else if(resultList !=null && resultList.size() == 1){
+				//如果只查出一条，判断该 条是否自己本身，不是则要抛出异常
+				Configurations bo = resultList.get(0);
+				if(bo  != null && id.intValue() != bo.getId().intValue() ){
+					throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+				}
 			}
 		}
-		getConfigurationById(id , nemespaceId);
-		return true;
 	}
 	
 	/**
