@@ -189,14 +189,20 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             if(maps != null && maps.size() > 0) {
                                                 Set<Long> userIds = new HashSet<Long>();
                                                 maps.forEach(map -> {
-                                                    //目前只有部门， 先不考虑岗位
-                                                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(map.getGroupId());
-                                                    if(members != null && members.size() > 0) {
-                                                        members.forEach(member -> {
-                                                            userIds.add(member.getTargetId());
-                                                        });
-
-                                                    }
+                                                	List<OrganizationMember> members = null;
+                                                	if (map.getGroupId()!=null && map.getGroupId()!=0) {
+                                                		//按部门找人
+                                                		members = organizationProvider.listOrganizationMembersByOrgId(map.getGroupId());
+                                                		findUser(userIds, members);
+													}else if(map.getPositionId()!=null && map.getPositionId()!=0){
+														//按岗位找人
+														members = organizationProvider.listOrganizationMembersByOrgId(map.getPositionId());
+														findUser(userIds, members);
+													}else if(map.getUserId()!= null && map.getUserId()!=0){
+														//直接找到人
+														userIds.add(map.getUserId());
+													}
+                                                    
                                                 });
                                                 LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                                 if(userIds.size() > 0) {
@@ -217,7 +223,15 @@ public class ContractScheduleJob extends QuartzJobBean {
             });
         }
     }
-
+    
+    private void findUser(Set<Long> userIds,List<OrganizationMember> members){
+    	if(members != null && members.size() > 0) {
+            members.forEach(member -> {
+                userIds.add(member.getTargetId());
+            });
+        }
+    }
+    
     private String getMessage(String contractName, Timestamp time, BigDecimal amount, String scope, String locale, int code) {
         Map<String, Object> notifyMap = new HashMap<String, Object>();
         notifyMap.put("contractName", contractName);
