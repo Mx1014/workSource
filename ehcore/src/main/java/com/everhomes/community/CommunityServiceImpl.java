@@ -4379,6 +4379,22 @@ public class CommunityServiceImpl implements CommunityService {
 			community.setStatus(cmd.getStatus());
 		}
 
+
+		Long provinceId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName()), 0L);  //创建省
+		Long cityId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
+		Long areaId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
+
+
+
+		community.setProvinceId(provinceId);
+		community.setCityId(cityId);
+		community.setAreaId(areaId);
+		community.setProvinceName(cmd.getProvinceName());
+		community.setCityName(cmd.getCityName());
+		community.setAreaName(cmd.getAreaName());
+		community.setAddress(cmd.getAddress());
+
+
 		community.setOperatorUid(userId);
 		communityProvider.updateCommunity(community);
 

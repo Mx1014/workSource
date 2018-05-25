@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 小区Id</li>
  *     <li>uuid: 小区uuid，作为唯一标识</li>
+ *     <li>provinceId: 省份Id</li>
+ *     <li>provinceName: 省份名称</li>
  *     <li>cityId: 城市Id</li>
  *     <li>cityName: 城市名称</li>
  *     <li>areaId: 区域Id</li>
@@ -50,13 +52,15 @@ import com.everhomes.util.StringHelper;
  *     <li>firstLatterOfName: 名字首字母</li>
  *     <li>pmOrgId: 管理公司Id</li>
  *     <li>pmOrgName: 管理公司名称</li>
- *     <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
  *     <li>appSelfConfigFlag: 是否自己配置参考，0,null-否（跟随默认），1-是（自己配置）{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
  * </ul>
  */
 public class CommunityDTO {
     private Long id;
     private String uuid;
+    private Long provinceId;
+    private String provinceName;
     private Long cityId;
     private String cityName;
     private Long areaId;
@@ -123,6 +127,22 @@ public class CommunityDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(Long provinceId) {
+        this.provinceId = provinceId;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
     }
 
     public Long getCityId() {
