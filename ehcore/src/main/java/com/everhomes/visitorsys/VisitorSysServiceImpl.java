@@ -336,13 +336,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
         VisitorSysVisitor visitor = null;
+        boolean hasSendMessage = false;
         if(cmd.getId()==null) {
             visitor = createVisitor(cmd);
         }else{
-            visitor = updateVisitor(cmd);
+            VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
+            hasSendMessage = oldVisitor!=null && VisitorsysStatus.HAS_VISITED == VisitorsysStatus.fromCode(oldVisitor.getVisitStatus());
+            visitor = updateVisitor(cmd,oldVisitor);
         }
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
-        sendMessageInviter(visitor);//发送消息给邀请者
+        if(!hasSendMessage)
+            sendMessageInviter(visitor);//发送消息给邀请者
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
@@ -353,8 +357,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * 更新访客
      * @param cmd
      */
-    private VisitorSysVisitor updateVisitor(CreateOrUpdateVisitorCommand cmd) {
-        VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
+    private VisitorSysVisitor updateVisitor(CreateOrUpdateVisitorCommand cmd,VisitorSysVisitor oldVisitor) {
         String oldFormatVisitorTime = null;
         if(oldVisitor !=null && oldVisitor.getPlannedVisitTime()!=null) {
             oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
@@ -415,7 +418,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
         String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITER_ROUNTE, "");
-        String url = String.format(contextUrl, homeurl,WebTokenGenerator.getInstance().toWebToken(visitor.getId()));
+        //http://10.1.10.84/visitor-appointment/build/index.html?id=460&ns=1000000#/appointment-detail#sign_suffix
+        String url = String.format(contextUrl, homeurl,visitor.getId(),visitor.getNamespaceId());
 
         // 组装路由
         OfficialActionData actionData = new OfficialActionData();

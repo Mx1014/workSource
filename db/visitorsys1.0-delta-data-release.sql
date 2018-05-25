@@ -15,6 +15,7 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 -- 访客管理1.0 连接配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.invitation.link', '%s/visitor-appointment/build/invitation.html?visitorToken=%s', '访客管理邀请函连接地址', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.selfregister.link', '%s/vsregister/dist/i.html?t=%s', '访客管理自助登记连接地址', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.inviter.route', '%s/visitor-appointment/build/index.html?id=%s&ns=%s#/appointment-detail#sign_suffix', '访客管理消息详情连接', '0', NULL);
 
 -- 访客管理1.0 模块配置
 SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url');
