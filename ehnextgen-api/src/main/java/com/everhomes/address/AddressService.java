@@ -25,6 +25,8 @@ public interface AddressService {
     Tuple<Integer, List<CommunityDTO>> listCommunitiesByKeyword(ListCommunityByKeywordCommand cmd);
     Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd);
     Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
+
+    Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordNew(ListPropApartmentsByKeywordCommand cmd);
     
     ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd);
     void disclaimAddress(DisclaimAddressCommand cmd);

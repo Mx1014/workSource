@@ -6787,5 +6787,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .execute();
     }
 
+    /**
+     * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+     * @param organizationId
+     * @param workplaceName
+     * @param communityId
+     * @param wholeAddressNameNew
+     * @param wholeAddressNameOld
+     */
+    @Override
+    public void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew ,
+                                       String wholeAddressNameOld){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_WORKPLACES).set(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME,wholeAddressNameNew)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(workplaceName))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME.eq(wholeAddressNameOld))
+                .execute();
+
+    }
+
 
 }

@@ -27,6 +27,8 @@ public class ListPropApartmentsByKeywordCommand {
     
     private Integer namespaceId;
 
+    private Long buildingId;
+
     public ListPropApartmentsByKeywordCommand() {
     }
 
@@ -76,6 +78,14 @@ public class ListPropApartmentsByKeywordCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
 	}
 
 	@Override
