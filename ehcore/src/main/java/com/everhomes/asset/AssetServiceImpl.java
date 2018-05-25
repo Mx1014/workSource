@@ -62,6 +62,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.sms.SmsProvider;
@@ -1512,7 +1513,7 @@ public class AssetServiceImpl implements AssetService {
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE,cmd.getOrganizationId());
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
         List<NoticeConfig> configsInRet = new ArrayList<>();
-        List<PaymentNoticeConfig> configs = assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+        List<PaymentNoticeConfig> configs = assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryId());
         Gson gson = new Gson();
         for(PaymentNoticeConfig config : configs){
             NoticeConfig cir = new NoticeConfig();
@@ -1563,6 +1564,8 @@ public class AssetServiceImpl implements AssetService {
             noticeConfig.setId(nextPaymentNoticeId);
             noticeConfig.setOwnerType(cmd.getOwnerType());
             noticeConfig.setOwnerId(cmd.getOwnerId());
+            //add categoryId
+            noticeConfig.setCategoryId(cmd.getCategoryId());
             noticeConfig.setNamespaceId(cmd.getNamespaceId());
             noticeConfig.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             noticeConfig.setCreateUid(UserContext.currentUserId());
@@ -3344,27 +3347,29 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig) {
-        AssetCategory c = new AssetCategory();
+        EhAssetAppCategories c = new AssetAppCategory();
         c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         c.setCreateUid(aLong);
         c.setNamespaceId(namespaceId);
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentCategory.class));
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetAppCategories.class));
         c.setId(nextSequence);
         c.setCategoryId(nextSequence);
-        EhAssetCategoryDao dao = new EhAssetCategoryDao();
+        EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao();
         try{
             dao.insert(c);
             return nextSequence;
         }catch (Exception e){
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.xxx, "category constraints voilated")
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION, "category constraints voilated");
         }
     }
 
     @Override
     public void saveInstanceConfig(long categoryId, String ret) {
-        //todo
-        sdjfsd
-
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.update(Tables.EH_ASSET_APP_CATEGORIES)
+                .set(Tables.EH_ASSET_APP_CATEGORIES.INSTANCE_FLAG, ret)
+                .where(Tables.EH_ASSET_APP_CATEGORIES.CATEGORY_ID.eq(categoryId))
+                .execute();
     }
 
     // 冗余代码，为了测试

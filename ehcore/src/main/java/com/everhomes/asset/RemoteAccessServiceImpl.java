@@ -146,7 +146,12 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }else{
             result.setNextPageAnchor(null);
         }
-
+        //todo categoryid filter, copy or merge chongxin's code here
+        if(result.getList()!= null){
+            for(PaymentBillResp resp : result.getList()){
+                resp.getOrderRemark2();
+            }
+        }
         return result;
     }
 

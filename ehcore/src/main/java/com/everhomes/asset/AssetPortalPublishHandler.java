@@ -1,7 +1,6 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.alibaba.fastjson.parser.JSONLexerBase;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.user.UserContext;
@@ -10,6 +9,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,11 +17,13 @@ import org.springframework.stereotype.Component;
  */
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.ASSET_MODULE)
 public class AssetPortalPublishHandler implements PortalPublishHandler{
-    @Override
+     private Logger LOGGER = LoggerFactory.getLogger(AssetPortalPublishHandler.class);
+
+    @Autowired
     private AssetService assetService;
-    private Logger LOGGER = LoggerFactory.getLogger(AssetPortalPublishHandler.class);
+
     // zhang jiang gao ke holds a different uri because in this namespace, the older asset UI is still in use
-    @Override
+   @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         if(instanceConfig == null){
             // new pushlish app
@@ -51,6 +53,17 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+        if(instanceConfig == null) return null;
+        try{
+            JSONObject obj = (JSONObject)new JSONParser().parse(instanceConfig);
+            return String.valueOf(obj.get("categoryId"));
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
         try {
             JSONObject ret = new JSONObject();
@@ -67,20 +80,8 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
         return null;
     }
 
-    // todo do I have to implement this?
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData){
-        JSONObject object = new JSONObject();
-        try {
-            JSONObject jsonObject = (JSONObject) new JSONParser().parse(actionData);
-            String url = (String)jsonObject.get("url");
-            String[] split = url.split("\\?");
-            object.put("url", split[0]);
-            object.put("categoryId", split[1].substring("categoryId=".length()));
-            return object.toJSONString();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
+       return null;
     }
 }

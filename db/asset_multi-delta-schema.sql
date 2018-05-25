@@ -17,7 +17,7 @@ CREATE TABLE `eh_service_module_app_mappings`(
 -- multiple entry category id for asset module by wentian
 CREATE TABLE `eh_asset_app_categories`(
   `id` BIGINT NOT NULL,
-  `category_id` BIGINT NOT NULL DEFAULT 1,
+  `category_id` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME NOT NULL DEFAULT now(),
   `create_uid` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,

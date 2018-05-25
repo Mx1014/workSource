@@ -768,22 +768,6 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 批量导入账单           2
-    /**
-     * <p>批量导入账单</p>
-     * <b>URL: /asset/importBills</b>
-     */
-    @RequestMapping("importBills")
-    @RestReturn(value = String.class)
-    public RestResponse importBills(HttpServletResponse response) {
-        // unfinished, under plan
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        return restResponse;
-    }
-
-
 
     // this is for 按照账单组展示已出账单          4
     /**
@@ -1110,27 +1094,6 @@ public class AssetController extends ControllerBase {
 
 
     /**
-     * <p>测试清单产生</p>
-     * <b>URL: /asset/doctor</b>
-     *
-     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
-     */
-    @RequestMapping("doctor")
-    @RestReturn(String.class)
-    public String hi(@RequestBody PaymentExpectanciesCommand cmd){
-//        List<FeeRules> feesRules = cmd.getFeesRules();
-//        for(int i = 0; i < feesRules.size(); i++) {
-//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
-//            for(int j = 0; j < list.size(); j++){
-//                Integer variableValue = (Integer)list.get(j).getVariableValue();
-//                BigDecimal c = new BigDecimal(variableValue);
-//                list.get(j).setVariableValue(c);
-//            }
-//        }
-        assetService.paymentExpectancies_re_struct(cmd);
-        return "ROU ARE WA GA DEKI ROU KU ROU!";
-    }
-    /**
      * <b>URL: /asset/autoNoticeConfig</b>
      * <p>自动缴费配置</p>
      */
@@ -1172,18 +1135,6 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
     /**
-     * <b>URL: /asset/activeLateFine</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-//    @RequestMapping("activeLateFine")
-//    @RestReturn(String.class)
-//    public RestResponse activeLateFine(){
-//        assetService.activeLateFine();
-//        RestResponse restResponse = new RestResponse();
-//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
 
     /**
      * <b>URL: /asset/functionDisableList</b>
