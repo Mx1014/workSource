@@ -488,12 +488,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//自己配置则复制一份
 		if(cmd.getAppSelfConfigFlag().byteValue() == 1){
 			//管理公司安装的app
+
+			Organization organization = organizationProvider.findOrganizationById(organizationProperty.getOrganizationId());
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(organization.getNamespaceId());
+
 			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationProperty.getOrganizationId()));
 					query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
 					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.COMMUNITY.getCode()));
+					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(releaseVersion.getId()));
 					return query;
 				}
 			});
