@@ -73,7 +73,7 @@ public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
 		if (null != pageSize) {
 			step.limit(pageSize);
 		}
-		return step.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.ID.desc())
+		return step.orderBy(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, PunchMonthReport.class));
 	}
 

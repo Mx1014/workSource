@@ -6,5 +6,5 @@ DELETE FROM eh_punch_month_reports;
 SET @id := 1;
 INSERT INTO eh_punch_month_reports(id, punch_month,owner_type,owner_id, STATUS,PROCESS,creator_uid,create_time ,punch_member_number )  
   SELECT   (@id :=@id +1) id, punch_month,owner_type,owner_id, 1 STATUS,100 PROCESS,creator_uid,create_time ,COUNT(1) punch_member_number FROM eh_punch_statistics
-GROUP BY punch_month,owner_type,owner_id ;
+GROUP BY punch_month,owner_type,owner_id ORDER BY punch_month DESC   ;
 -- 考勤4.2  end
