@@ -22,6 +22,8 @@ function argArr(argObj) {
         var el = argObj[i];
         if (el == null) {
             a.push("null");
+        } else if (el === undefined) {
+            a.push("undefined");
         } else if (typeof el === "object") {
             var ify = JSON.stringify(el);
             if (ify !== undefined && ify !== "undefined") {
