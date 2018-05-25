@@ -14075,5 +14075,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+
+    /**
+     * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+     * @param cmd
+     */
+    @Override
+    public void updateWholeAddressName(WholeAddressComamnd cmd){
+
+        //首先需要进行非空校验
+        if(cmd.getCommunityId() != null && cmd.getOrganizationId() != null && cmd.getSiteName() != null && cmd.getWholeAddressNameNew() != null &&
+                cmd.getWholeAddressNameOld() != null){
+            //说明上面的参数不为空，那么我们就根据上面的参数来进行更新表eh_organization_workplaces中的信息
+            //// TODO: 2018/5/25
+            organizationProvider.updateWholeAddressName(cmd.getOrganizationId(),cmd.getSiteName(),cmd.getCommunityId(),cmd.getWholeAddressNameNew(),cmd.getWholeAddressNameOld());
+        }
+    }
+
 }
 

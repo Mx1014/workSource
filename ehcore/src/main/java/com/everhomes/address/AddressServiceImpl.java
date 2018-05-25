@@ -723,6 +723,56 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
 
+
+    /**
+     * new
+     * @param cmd
+     * @return
+     */
+    @Override
+    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordNew(ListPropApartmentsByKeywordCommand cmd) {
+        if (cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId, buildingName or keyword parameter");
+        if (cmd.getKeyword() == null)
+            cmd.setKeyword("");
+        List<ApartmentDTO> results = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_addresses和表eh_organization_addresses进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
+        if(cmd.getBuildingName() != null){
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
+        }
+        query.fetch().map( r -> {
+            ApartmentDTO apartment = new ApartmentDTO();
+            apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
+            apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+            apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+            apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
+            apartment.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+            if(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID) == null){
+                apartment.setIsLived(Byte.valueOf("0"));
+            }else{
+                apartment.setIsLived(Byte.valueOf("1"));
+            }
+            results.add(apartment);
+            return null;
+        });
+        Collections.sort(results);
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
+        return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
+
+    }
+
+
+
     @Override
     public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd) {
         if (cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())

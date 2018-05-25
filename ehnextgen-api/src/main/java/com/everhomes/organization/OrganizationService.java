@@ -737,4 +737,10 @@ public interface OrganizationService {
 	 */
 	void changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd);
 
+	/**
+	 * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+	 * @param cmd
+	 */
+	void updateWholeAddressName(WholeAddressComamnd cmd);
+
 }

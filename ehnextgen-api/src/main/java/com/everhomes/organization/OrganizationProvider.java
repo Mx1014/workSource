@@ -791,4 +791,14 @@ public interface OrganizationProvider {
 	 * @param workBenchFlag
 	 */
 	void updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(Long organizationId,Integer namespaceId,Byte workBenchFlag);
+
+	/**
+	 * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+	 * @param organizationId
+	 * @param workplaceName
+	 * @param communityId
+	 * @param wholeAddressNameNew
+	 * @param wholeAddressNameOld
+	 */
+	void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew , String wholeAddressNameOld);
 }

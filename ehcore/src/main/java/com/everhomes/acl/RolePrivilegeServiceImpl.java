@@ -2673,20 +2673,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		//modify by lei yuan
-		Long organizationId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		if(organizationId != null && organizationId.equals(cmd.getUserId())){
-			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
+		Long adminTargetId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		//根据adminTargetId来查询eh_organization_members表中的target_id字段
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(adminTargetId);
+		if(organizationMember != null){
+			if(adminTargetId != null && organizationMember.getTargetId().equals(cmd.getUserId())){
+				response.setIsTopAdminFlag(AllFlagType.YES.getCode());
 
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-			if(identifier != null){
-				response.setTopAdminToken(identifier.getIdentifierToken());
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
+				if(identifier != null){
+					response.setTopAdminToken(identifier.getIdentifierToken());
+				}
+				User user = userProvider.findUserById(cmd.getUserId());
+				if(user != null){
+					response.setTopAdminName(user.getNickName());
+				}
+			}else{
+				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 			}
-			User user = userProvider.findUserById(cmd.getUserId());
-			if(user != null){
-				response.setTopAdminName(user.getNickName());
-			}
-		}else{
-			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 		}
 
 		return response;

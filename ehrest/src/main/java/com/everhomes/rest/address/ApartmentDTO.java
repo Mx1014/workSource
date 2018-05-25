@@ -26,6 +26,7 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
     private Double areaSize;
     private String enterpriseName;
     private String apartmentFloor;
+    private Byte isLived;
     
     public String getBusinessApartmentName() {
 		return businessApartmentName;
@@ -106,7 +107,15 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
 		this.apartmentFloor = apartmentFloor;
 	}
 
-	@Override
+    public Byte getIsLived() {
+        return isLived;
+    }
+
+    public void setIsLived(Byte isLived) {
+        this.isLived = isLived;
+    }
+
+    @Override
     public boolean equals(Object obj){
         if (! (obj instanceof ApartmentDTO)) {
             return false;

@@ -1635,6 +1635,23 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/updateWholeAddressName</b>
+     * <p>修改办公地点名称全称（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("updateWholeAddressName")
+    @RestReturn(value = String.class)
+    public RestResponse updateWholeAddressName(WholeAddressComamnd cmd){
+        RestResponse response = new RestResponse();
+        //// TODO: 2018/5/25
+        organizationService.updateWholeAddressName(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/enterprise/closeOrOpenWorkBench</b>
      * <p>禁用或者是开启移动工作台（标准版）</p>
      * @param cmd
