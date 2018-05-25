@@ -25,9 +25,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.schema.Tables;
-import com.everhomes.schema.tables.daos.EhConfigurationsDao;
-import com.everhomes.schema.tables.pojos.EhConfigurations;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.EhConfigurationsDao;
+import com.everhomes.server.schema.tables.pojos.EhConfigurations;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
@@ -63,6 +63,11 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	 * 删除
 	 */
 	private  static final int DELETE = 3;
+	
+	/**
+	 * 只读
+	 */
+	private static final int READONLY = 1;
 
 	@Override
 	public List<Configurations> listConfigurations(Integer namespaceId, String name,
@@ -92,9 +97,13 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		query.where(condition);
 		//默认ID倒序（更容易看到新增的）
 		query.orderBy(Tables.EH_CONFIGURATIONS.ID.desc());
-		//限制每页查询量
-		pageSize = pageSize + 1;
-		query.limit(pageSize);
+		
+		if(pageSize != null){
+			//限制每页查询量
+			pageSize = pageSize + 1;
+			query.limit(pageSize);
+		}
+		
 		result = query.fetch().map((r) -> ConvertHelper.convert(r, Configurations.class));
 		
 		if(locator != null ){
@@ -146,7 +155,9 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//修改前先查询出来
 		Configurations preBo = getConfigurationById(bo.getId(),null);
 		//是否只读校验，只读数据不能修改
-		
+		if(preBo.getIsReadonly() !=null && READONLY == preBo.getIsReadonly().intValue()){
+			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+		}
 		//重复校验
 		checkMultiple(bo.getId(),bo.getNamespaceId(),bo.getName());
 		
@@ -168,6 +179,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//删除前先查询出来
 		Configurations bo = getConfigurationById(id,null);
 		
+		//是否只读校验，只读数据不能删除
+		if(bo.getIsReadonly() !=null && READONLY == bo.getIsReadonly().intValue()){
+			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
 		dao.deleteById(id);
@@ -260,17 +275,17 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//ID 为空，说明是新增数据，否则为修改数据
 		if(id == null ){			
 			if(resultList !=null && resultList.size() >0){
-				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
 			}
 		}else { 
 			//同一域空间内name 相同的有两个及以上是肯定有问题的
 			if(resultList !=null && resultList.size() >1){
-				throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
 			}else if(resultList !=null && resultList.size() == 1){
 				//如果只查出一条，判断该 条是否自己本身，不是则要抛出异常
 				Configurations bo = resultList.get(0);
 				if(bo  != null && id.intValue() != bo.getId().intValue() ){
-					throwSelfDefNullException("Multiple name is not allow in one nemespace.");
+					throwSelfDefNullException("A nemespace is not allowed to repeat name .");
 				}
 			}
 		}

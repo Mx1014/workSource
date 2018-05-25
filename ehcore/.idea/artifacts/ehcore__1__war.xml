@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="ehcore (1):war">
-    <output-path>$PROJECT_DIR$/target</output-path>
-    <root id="archive" name="ehcore-issue-30016-SNAPSHOT.war">
-      <element id="artifact" artifact-name="ehcore (1):war exploded" />
-    </root>
-  </artifact>
-</component>
