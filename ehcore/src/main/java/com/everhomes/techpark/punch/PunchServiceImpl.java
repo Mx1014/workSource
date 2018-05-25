@@ -5972,8 +5972,9 @@ public class PunchServiceImpl implements PunchService {
             this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
         }
         //刷月报
+        //2018-5-25 刷月报改成在每天早上5点30固定刷
 
-        addPunchStatistics(member, orgId, startCalendar, punCalendar);
+//        addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
 //        } catch (Exception e) {
 //            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
@@ -9726,7 +9727,15 @@ public class PunchServiceImpl implements PunchService {
         }
         return org;
     }
-
+    /**
+     * 每日早上5点30,刷新前一天的当月的月报数据
+     */
+    @Scheduled(cron = "1 30 5 * * ?")
+    public void refreshStatistics() {
+    	Calendar calendar = Calendar.getInstance();
+    	calendar.add(Calendar.DAY_OF_MONTH, -1);
+    	refreshMonthReport(monthSF.get().format(calendar.getTime()));
+    } 
     /**
      * 每月1日早上1点50,新建当月的月报数据
      */
@@ -9745,8 +9754,13 @@ public class PunchServiceImpl implements PunchService {
                         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + enterpriseId).enter(() -> {
                             PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(enterpriseId, month);
                             if (null == report) {
-                                createNewReport(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, month);
+                                report = createNewReport(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, month);
                             }
+                            UpdateMonthReportCommand cmd = new UpdateMonthReportCommand();
+                            cmd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+                            cmd.setOwnerId(enterpriseId);
+                            cmd.setMonthReportId(report.getId());
+                            updateMonthReport(cmd);
                             return null;
                         });
 
