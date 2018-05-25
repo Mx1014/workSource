@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component
+// @Component
 public class FlowModuleListenerDummy1 implements FlowFunctionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy1.class);
