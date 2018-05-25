@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -18,6 +19,7 @@ import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
@@ -31,6 +33,7 @@ import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.RuntimeErrorException;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -648,6 +651,22 @@ public class ContractProviderImpl implements ContractProvider {
 
 		return result;
 	}
+	
+	@Override
+	public Map<Long, Byte> listInWorkFlags(List<Long> ids) {
+		Map<Long, Byte> result = new HashMap<>();
+		EhPaymentContractReceiver contract_receiver = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract_receiver");
+        DSLContext context = getReadOnlyContext();
+        context.select(contract_receiver.CONTRACT_ID,contract_receiver.IN_WORK)
+                .from(contract_receiver)
+                .where(contract_receiver.CONTRACT_ID.in(ids))
+                .fetch()
+                .map(r->{
+                	result.put(r.getValue(contract_receiver.CONTRACT_ID), r.getValue(contract_receiver.IN_WORK));
+                	return null;
+                });
+        return result;
+	}
 
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
@@ -672,4 +691,5 @@ public class ContractProviderImpl implements ContractProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
 }

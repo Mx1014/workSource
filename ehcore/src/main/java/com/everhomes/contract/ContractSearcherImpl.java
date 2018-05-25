@@ -2,6 +2,7 @@ package com.everhomes.contract;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -320,10 +321,19 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
+        //add by steve
+        Map<Long, Byte> inWorkFlagMap = contractProvider.listInWorkFlags(ids);
         if(contracts != null && contracts.size() > 0) {
             //把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
             ids.forEach(id -> {
                 Contract contract = contracts.get(id);
+                //add by steve
+                if (inWorkFlagMap.containsKey(id)) {
+                	Byte inWorkFlag = inWorkFlagMap.get(id);
+                    if (inWorkFlag == (byte)1) {
+    					contract.setRent(null);
+    				}
+				}
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 if(contract.getCustomerType() != null && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                     EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
