@@ -358,6 +358,14 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
                 condition = condition.and(tempCondition);
             }
         }
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+        /*QueryCondition tempCondition = PaymentAttributes.PAYMENT_TYPE.eq("2");//2：对公转账，目前此接口未出，字段定义未明，下一阶段完善
+        if(condition == null) {
+            condition = tempCondition;
+        } else {
+            condition = condition.and(tempCondition);
+        }*/
         return condition;
     }
 }
