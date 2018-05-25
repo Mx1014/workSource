@@ -1315,12 +1315,13 @@ public class ContractServiceImpl implements ContractService {
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
 		
-		ExecutorUtil.submit(new Runnable() {
+		/*ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
 				generatePaymentExpectancies(contract, cmd.getChargingItems(), cmd.getAdjusts(), cmd.getFrees());
 			}
-		});
+		});*/
+		generatePaymentExpectancies(contract, cmd.getChargingItems(), cmd.getAdjusts(), cmd.getFrees());
 
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
