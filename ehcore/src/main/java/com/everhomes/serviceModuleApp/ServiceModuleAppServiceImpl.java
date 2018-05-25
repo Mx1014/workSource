@@ -11,6 +11,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.*;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -18,6 +19,7 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.acl.ServiceModuleEntryConstans;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
@@ -29,6 +31,7 @@ import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleLocationType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -38,10 +41,8 @@ import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
+import com.google.gson.reflect.TypeToken;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -347,6 +348,41 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				dto.setDisplayVersion(profile.getDisplayVersion());
 				String url = contentServerService.parserUri(profile.getIconUri(), dto.getClass().getSimpleName(), dto.getId());
 				dto.setIconUrl(url);
+				dto.setDescription(profile.getDescription());
+
+				if(profile.getPcUris() != null){
+					List<String> pcUris = GsonUtil.fromJson(profile.getPcUris(), new TypeToken<List<String>>(){}.getType());
+					List<String> pcUrls = contentServerService.parserUri(pcUris, profile.getClass().getSimpleName(), profile.getId());
+					dto.setPcUris(pcUris);
+					dto.setPcUrls(pcUrls);
+				}
+
+				if(profile.getMobileUris() != null){
+					List<String> mobileUris = GsonUtil.fromJson(profile.getMobileUris(), new TypeToken<List<String>>(){}.getType());
+					List<String> mobileUrls = contentServerService.parserUri(mobileUris, profile.getClass().getSimpleName(), profile.getId());
+					dto.setMobileUris(mobileUris);
+					dto.setMobileUrls(mobileUrls);
+				}
+
+				if(profile.getDependentAppIds() != null){
+					List<Long> dependentAppIds = GsonUtil.fromJson(profile.getDependentAppIds(), new TypeToken<List<Long>>(){}.getType());
+					List<String> dependentAppNames = new ArrayList<>();
+					if(dependentAppIds != null && dependentAppIds.size() > 0){
+						for (Long id: dependentAppIds){
+							ServiceModuleApp moduleAppByOriginId = findReleaseServiceModuleAppByOriginId(id);
+							if(moduleAppByOriginId != null){
+								dependentAppNames.add(moduleAppByOriginId.getName());
+							}
+						}
+					}
+					dto.setDependentAppIds(dependentAppIds);
+					dto.setDependentAppNames(dependentAppNames);
+				}
+
+				if(profile.getAppEntryInfos() != null){
+					List<AppEntryInfoDTO> entryInfos = GsonUtil.fromJson(profile.getAppEntryInfos(), new TypeToken<List<AppEntryInfoDTO>>(){}.getType());
+					dto.setAppEntryInfos(entryInfos);
+				}
 			}
 
 			dtos.add(dto);
@@ -433,14 +469,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	public void changeCommunityConfigFlag(ChangeCommunityConfigFlagCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
-		if(TrueOrFalseFlag.fromCode(cmd.getSelfConfigFlag()) == TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag())){
-			LOGGER.error("Status exception，from status={}, to status={}", community.getAppSelfConfigFlag(), cmd.getSelfConfigFlag());
+		if(TrueOrFalseFlag.fromCode(cmd.getAppSelfConfigFlag()) == TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag())){
+			LOGGER.error("Status exception，from status={}, to status={}", community.getAppSelfConfigFlag(), cmd.getAppSelfConfigFlag());
 			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
-					ServiceModuleAppServiceErrorCode.ERROR_APP_COMMUNITY_STATUS_EXCEPTION, "Status exception，from status=" + community.getAppSelfConfigFlag() + "to status=" + cmd.getSelfConfigFlag());
+					ServiceModuleAppServiceErrorCode.ERROR_APP_COMMUNITY_STATUS_EXCEPTION, "Status exception，from status=" + community.getAppSelfConfigFlag() + "to status=" + cmd.getAppSelfConfigFlag());
 
 		}
 
-		community.setAppSelfConfigFlag(cmd.getSelfConfigFlag());
+		community.setAppSelfConfigFlag(cmd.getAppSelfConfigFlag());
+		communityProvider.updateCommunity(community);
 
 		//清空原有自定义配置
 		appCommunityConfigProvider.deleteAppCommunityConfigByCommunityId(cmd.getCommunityId());
@@ -448,12 +485,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//查询管理公司
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
 
-		if(cmd.getSelfConfigFlag().byteValue() == 1){
+		//自己配置则复制一份
+		if(cmd.getAppSelfConfigFlag().byteValue() == 1){
 			//管理公司安装的app
 			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(organizationProperty.getOrganizationId()));
+					query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
+					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.COMMUNITY.getCode()));
 					return query;
 				}
 			});
@@ -502,10 +542,24 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			//跟随默认方案的
 			//管理公司安装的app
+
+			if(cmd.getOrganizationId() == null){
+				List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+				if(orgcoms != null && orgcoms.size() > 0){
+					cmd.setOrganizationId(orgcoms.get(0).getOrganizationId());
+				}
+			}
+
+			Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(organization.getNamespaceId());
+
 			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(cmd.getOrganizationId()));
+					query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID));
+					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.COMMUNITY.getCode()));
+					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(releaseVersion.getId()));
 					return query;
 				}
 			});
@@ -534,8 +588,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		ServiceModuleApp serviceModuleApp = this.findReleaseServiceModuleAppByOriginId(dto.getAppOriginId());
 
 		if(serviceModuleApp != null){
-			String url = contentServerService.parserUri(serviceModuleApp.getIconUri(), serviceModuleApp.getClass().getSimpleName(), serviceModuleApp.getId());
-			dto.setIconUrl(url);
 			dto.setServiceModuleAppName(serviceModuleApp.getName());
 		}
 
@@ -543,6 +595,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		if(profile != null){
 			dto.setAppNo(profile.getAppNo());
+			String url = contentServerService.parserUri(profile.getIconUri(), profile.getClass().getSimpleName(), profile.getOriginId());
+			dto.setIconUrl(url);
 		}
 
 		return dto;

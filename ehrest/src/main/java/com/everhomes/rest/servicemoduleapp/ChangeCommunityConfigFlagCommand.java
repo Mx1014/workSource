@@ -5,12 +5,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>communityId: communityId</li>
- *     <li>selfConfigFlag: 是否自己配置参考，{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appSelfConfigFlag: 是否自己配置参考，{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ChangeCommunityConfigFlagCommand {
 	private Long communityId;
-	private Byte selfConfigFlag;
+	private Byte appSelfConfigFlag;
 
 	public Long getCommunityId() {
 		return communityId;
@@ -20,12 +20,12 @@ public class ChangeCommunityConfigFlagCommand {
 		this.communityId = communityId;
 	}
 
-	public Byte getSelfConfigFlag() {
-		return selfConfigFlag;
+	public Byte getAppSelfConfigFlag() {
+		return appSelfConfigFlag;
 	}
 
-	public void setSelfConfigFlag(Byte selfConfigFlag) {
-		this.selfConfigFlag = selfConfigFlag;
+	public void setAppSelfConfigFlag(Byte appSelfConfigFlag) {
+		this.appSelfConfigFlag = appSelfConfigFlag;
 	}
 
 	@Override

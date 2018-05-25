@@ -51,6 +51,7 @@ import com.everhomes.util.StringHelper;
  *     <li>pmOrgId: 管理公司Id</li>
  *     <li>pmOrgName: 管理公司名称</li>
  *     <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
+ *     <li>appSelfConfigFlag: 是否自己配置参考，{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -100,6 +101,7 @@ public class CommunityDTO {
 
     private Long pmOrgId;
     private String pmOrgName;
+    private Byte appSelfConfigFlag;
 
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -438,5 +440,13 @@ public class CommunityDTO {
 
     public void setPmOrgName(String pmOrgName) {
         this.pmOrgName = pmOrgName;
+    }
+
+    public Byte getAppSelfConfigFlag() {
+        return appSelfConfigFlag;
+    }
+
+    public void setAppSelfConfigFlag(Byte appSelfConfigFlag) {
+        this.appSelfConfigFlag = appSelfConfigFlag;
     }
 }

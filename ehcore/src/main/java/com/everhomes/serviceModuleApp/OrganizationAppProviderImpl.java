@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
+import com.everhomes.util.RecordHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -88,7 +90,7 @@ public class OrganizationAppProviderImpl implements OrganizationAppProvider {
     public List<OrganizationApp> queryOrganizationApps(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationApps.class));
 
-        SelectQuery<EhOrganizationAppsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_APPS);
+        SelectQuery<Record> query = context.select(Tables.EH_ORGANIZATION_APPS.fields()).from(Tables.EH_ORGANIZATION_APPS).getQuery();
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
@@ -98,7 +100,7 @@ public class OrganizationAppProviderImpl implements OrganizationAppProvider {
 
         query.addLimit(count);
         List<OrganizationApp> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, OrganizationApp.class);
+            return RecordHelper.convert(r, OrganizationApp.class);
         });
 
         if(objs.size() >= count) {

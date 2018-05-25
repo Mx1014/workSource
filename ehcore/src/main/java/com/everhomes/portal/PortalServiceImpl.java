@@ -383,7 +383,16 @@ public class PortalServiceImpl implements PortalService {
 
 		if(moduleApp.getDependentAppIds() != null){
 			List<Long> dependentAppIds = GsonUtil.fromJson(moduleApp.getDependentAppIds(), new TypeToken<List<Long>>(){}.getType());
-			//List<Long> configAppIds = (ArrayList<Long>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);
+			List<String> dependentAppNames = new ArrayList<>();
+			if(dependentAppIds != null && dependentAppIds.size() > 0){
+				for (Long id: dependentAppIds){
+					ServiceModuleApp moduleAppByOriginId = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(id);
+					if(moduleAppByOriginId != null){
+						dependentAppNames.add(moduleAppByOriginId.getName());
+					}
+				}
+			}
+			dto.setDependentAppNames(dependentAppNames);
 			dto.setDependentAppIds(dependentAppIds);
 		}
 
