@@ -3099,7 +3099,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(statistic.getUserName());
         row.createCell(++i).setCellValue(statistic.getDeptName());
         row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
-        row.createCell(++i).setCellValue(statistic.getWorkCount());
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkCount()));
         row.createCell(++i).setCellValue(objToString(statistic.getAnnualLeaveBalance()));
         row.createCell(++i).setCellValue(objToString(statistic.getOvertimeCompensationBalance()));
         if (null != statistic.getExts()) {
