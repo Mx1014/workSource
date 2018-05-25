@@ -1311,7 +1311,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		LOGGER.info(String.valueOf(data.getName().getBytes().length));
 		//校验楼栋名称的长度不能大于20个汉字
-		if(data.getName().getBytes().length > 100){
+		if(data.getName().getBytes().length > 60){
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_OVER_FLOW);
 			log.setData(data);
 			log.setErrorLog("building name cannot over than 20");
