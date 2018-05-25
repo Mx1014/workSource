@@ -18,6 +18,6 @@ CREATE TABLE `eh_service_module_app_mappings`(
 ALTER TABLE `eh_payment_bills` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id';
 
 -- 账单催缴设置添加categoryId by wentian 2018/5/25
-ALTER TABLE `eh_payment_notice_configs` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id';
+ALTER TABLE `eh_payment_notice_config` ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id';
 
 -- todo 账单管理设置添加category id
