@@ -44,7 +44,7 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
     }
 
     @Override
-    public void createFlowScriptWithoutId(FlowScript obj) {
+    public void createFlowScriptWithId(FlowScript obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowScripts.class));
 
         obj.setCreateTime(DateUtils.currentTimestamp());

@@ -18,11 +18,21 @@ log.warn = function () {
 
 function argArr(argObj) {
     var a = [];
-    for(var i = 0; i < argObj.length; i++){
-        if (typeof argObj[i] === "object") {
-            a.push(JSON.stringify(argObj[i]));
+    for(var i = 0; i < argObj.length; i++) {
+        var el = argObj[i];
+        if (el == null) {
+            a.push("null");
+        } else if (el === undefined) {
+            a.push("undefined");
+        } else if (typeof el === "object") {
+            var ify = JSON.stringify(el);
+            if (ify !== undefined && ify !== "undefined") {
+                a.push(ify);
+            } else {
+                a.push(el.toString());
+            }
         } else {
-            a.push(argObj[i]);
+            a.push(el);
         }
     }
     return a;

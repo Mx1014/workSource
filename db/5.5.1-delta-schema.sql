@@ -64,7 +64,7 @@ ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(
 -- ------------------------------
 -- 工作流动态函数     add by xq.tian  2018/04/24
 -- ------------------------------
--- DROP TABLE IF EXISTS `eh_flow_scripts`;
+DROP TABLE IF EXISTS `eh_flow_scripts`; -- 原来存在这张表，没有数据，删掉重新建
 CREATE TABLE `eh_flow_scripts` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -169,3 +169,5 @@ ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag9` BIGINT(20) NOT NUL
 ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag10` BIGINT(20) NOT NULL DEFAULT '0';
 
 ALTER TABLE eh_flow_cases ADD COLUMN path VARCHAR(1024) COMMENT 'flow case path';
+
+ALTER TABLE eh_flow_actions CHANGE COLUMN script_id script_main_id BIGINT NOT NULL DEFAULT 0;

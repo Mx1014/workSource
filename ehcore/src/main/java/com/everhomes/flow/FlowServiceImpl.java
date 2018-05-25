@@ -883,23 +883,23 @@ public class FlowServiceImpl implements FlowService {
 
         // script
         if (FlowActionType.ENTER_SCRIPT.getCode().equals(action.getActionType())
-                && action.getScriptId() != null
-                && action.getScriptId() != 0
-                && FlowScriptType.fromCode(action.getScriptType()) != null) {
+                && FlowScriptType.fromCode(action.getScriptType()) != null
+                && action.getScriptMainId() != 0L
+                && action.getScriptVersion() != null) {
             FlowScript script;
             FlowScriptType scriptType = FlowScriptType.fromCode(action.getScriptType());
             if (scriptType == FlowScriptType.JAVA) {
                 Flow flow = flowProvider.getFlowById(action.getFlowMainId());
-                Method method = flowFunctionService.getExportFlowFunction(flow.getModuleId(), action.getScriptId());
+                Method method = flowFunctionService.getExportFlowFunction(flow.getModuleId(), action.getScriptMainId());
                 script = new FlowScript();
-                script.setId(action.getScriptId());
+                script.setId(action.getScriptMainId());
                 script.setScriptVersion(action.getScriptVersion());
-                script.setScriptMainId(action.getScriptId());
+                script.setScriptMainId(action.getScriptMainId());
                 script.setScriptType(FlowScriptType.JAVA.getCode());
                 script.setNamespaceId(action.getNamespaceId());
                 script.setName(method.getName());
             } else {
-                script = flowScriptProvider.findById(action.getScriptId());
+                script = flowScriptProvider.findByMainIdAndVersion(action.getScriptMainId(), action.getScriptVersion());
             }
             actionDTO.setScript(toFlowScriptDTO(script, FlowEntityType.FLOW_ACTION.getCode(), action.getId()));
         }
@@ -979,10 +979,8 @@ public class FlowServiceImpl implements FlowService {
             if (actionInfo.getTrackerProcessor() != null) {
                 action.setTrackerProcessor(actionInfo.getTrackerProcessor());
             }
-            if (actionInfo.getScript() != null) {
-                action.setScriptId(actionInfo.getScript().getId());
-                action.setScriptType(actionInfo.getScript().getScriptType());
-            }
+            setScriptInfo(actionInfo, action);
+
             if (actionInfo.getEnabled() != null) {
                 action.setStatus(actionInfo.getEnabled());
             } else {
@@ -1446,10 +1444,8 @@ public class FlowServiceImpl implements FlowService {
             action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
             action.setNamespaceId(flowButton.getNamespaceId());
             action.setFlowStepType(flowStepType);
-            if (actionInfo.getScript() != null) {
-                action.setScriptId(actionInfo.getScript().getId());
-                action.setScriptType(actionInfo.getScript().getScriptType());
-            }
+            setScriptInfo(actionInfo, action);
+
             if (actionInfo.getTemplateId() != null) {
                 action.setTemplateId(actionInfo.getTemplateId());
             }
@@ -1487,11 +1483,17 @@ public class FlowServiceImpl implements FlowService {
 
     private void setScriptInfo(FlowActionInfo actionInfo, FlowAction action) {
         if (actionInfo.getScript() != null) {
-            action.setScriptId(actionInfo.getScript().getId());
-            action.setScriptType(actionInfo.getScript().getScriptType());
+            // 前端传来的参数是id,这里要转换成scriptMainId和scriptVersion
+            FlowScript script = flowScriptProvider.findById(actionInfo.getScript().getId());
+            if (script != null) {
+                action.setScriptType(script.getScriptType());
+                action.setScriptMainId(script.getScriptMainId());
+                action.setScriptVersion(script.getScriptVersion());
+            }
         } else {
-            action.setScriptId(0L);
             action.setScriptType(null);
+            action.setScriptMainId(0L);
+            action.setScriptVersion(0);
         }
     }
 
@@ -1812,7 +1814,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
-                , FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.APPROVE_STEP.getCode());
+                , FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
         if (action != null) {
             graphAction = new FlowGraphScriptAction();
             graphAction.setFlowAction(action);
@@ -1903,7 +1905,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
-                , FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+                , FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
         if (action != null) {
             graphAction = new FlowGraphScriptAction();
             graphAction.setFlowAction(action);
@@ -1969,6 +1971,7 @@ public class FlowServiceImpl implements FlowService {
             doSnapshotAction(flow, flowNode.getId(), node.getTrackApproveEnter());
             doSnapshotAction(flow, flowNode.getId(), node.getTrackRejectEnter());
             doSnapshotAction(flow, flowNode.getId(), node.getTrackTransferLeave());
+            doSnapshotAction(flow, flowNode.getId(), node.getEnterScript());
         }
 
         Map<Long, Long> configLaneIdToSnapshotLaneIdMap = new HashMap<>();
@@ -2200,6 +2203,15 @@ public class FlowServiceImpl implements FlowService {
                 flowUserSelectionProvider.createFlowUserSelection(sel);
             }
         }
+
+        if (!Objects.equals(flowAction.getScriptMainId(), 0L)) {
+            List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByOwner(FlowEntityType.FLOW_ACTION.getCode(), oldFlowActionId);
+            for (FlowScriptConfig scriptConfig : scriptConfigs) {
+                scriptConfig.setOwnerId(flowAction.getId());
+                scriptConfig.setFlowVersion(flowAction.getFlowVersion());
+                flowScriptConfigProvider.createFlowScriptConfig(scriptConfig);
+            }
+        }
     }
 
     @Override
@@ -2208,9 +2220,7 @@ public class FlowServiceImpl implements FlowService {
             return getConfigGraph(flowId);
         }
 
-        String fmt = String.format("%d:%d", flowId, flowVer);
-
-        FlowGraph snapshotGraph = graphMap.get(fmt);
+        String fmt = String.format("%d:%d", flowId, flowVer);FlowGraph snapshotGraph = graphMap.get(fmt);
         if (snapshotGraph == null) {
             snapshotGraph = getSnapshotGraph(flowId, flowVer);
             graphMap.put(fmt, snapshotGraph);
@@ -5201,7 +5211,7 @@ public class FlowServiceImpl implements FlowService {
             validateSyntax(script);
         }
 
-        flowScriptProvider.createFlowScriptWithoutId(script);
+        flowScriptProvider.createFlowScriptWithId(script);
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
@@ -5259,8 +5269,8 @@ public class FlowServiceImpl implements FlowService {
         script.setScript(cmd.getScript());
         script.setDescription(cmd.getDescription());
         script.setName(cmd.getName());
-        script.setScriptVersion(script.getScriptVersion() + 1);
         script.setScriptMainId(script.getTopId());
+        script.incrementVersion();
         script.setId(flowScriptProvider.getNextId());
 
         FlowScriptType scriptType = FlowScriptType.fromCode(script.getScriptType());
@@ -5268,7 +5278,7 @@ public class FlowServiceImpl implements FlowService {
             // 语法检查
             validateSyntax(script);
         }
-        flowScriptProvider.createFlowScriptWithoutId(script);
+        flowScriptProvider.createFlowScriptWithId(script);
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
@@ -6031,7 +6041,9 @@ public class FlowServiceImpl implements FlowService {
                 && flowCase.getEvaluateStatus().equals(TrueOrFalseFlag.FALSE.getCode())) {
 
             List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-            if (items != null && items.size() > 0) {
+            List<FlowEvaluateItem> flowCaseItem = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowCase(flowCase.getId());
+            items.addAll(flowCaseItem);
+            if (items.size() > 0) {
                 FlowButtonDTO evalBtn = new FlowButtonDTO();
                 evalBtn.setButtonName(buttonDefName(flowCase.getNamespaceId(), FlowStepType.EVALUATE_STEP));
                 evalBtn.setFlowStepType(FlowStepType.EVALUATE_STEP.getCode());
