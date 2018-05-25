@@ -2950,7 +2950,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             log.setOperatorId(UserContext.currentUserId());
                             if (meter.getLastReading() != null &&
-                                    Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
+                                    new BigDecimal(result.get("this_read")).subtract(meter.getLastReading()).intValue() < 0) {
                                 log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
                             } else {
                                 log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
