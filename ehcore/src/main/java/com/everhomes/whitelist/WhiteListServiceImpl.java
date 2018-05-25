@@ -9,6 +9,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
 
     @Override
     public void createWhiteList(CreateWhiteListCommand cmd) {
-        if (null == cmd.getPhoneNumber() || "".equals(cmd.getPhoneNumber())) {
+        if (StringUtils.isBlank(cmd.getPhoneNumber())) {
             LOGGER.error("PhoneNumber cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "PhoneNumber cannot be null.");
@@ -42,26 +43,34 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
                     "namespaceId cannot be null.");
         }
 
+        PhoneWhiteList checkPhoneIsExists = this.whiteListProvider.checkPhoneIsExists(cmd.getNamespaceId(), cmd.getPhoneNumber());
+
+        if (null != checkPhoneIsExists) {
+            LOGGER.error("PhoneNumber is exists.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "PhoneNumber is exists.");
+        }
+
         User user = UserContext.current().getUser();
         PhoneWhiteList phoneWhiteList = new PhoneWhiteList();
         phoneWhiteList.setPhoneNumber(cmd.getPhoneNumber());
         phoneWhiteList.setNamespaceId(cmd.getNamespaceId());
         phoneWhiteList.setCreatorUid(user.getId());
-        phoneWhiteList.setCreatorTime(new Timestamp(System.currentTimeMillis()));
+        phoneWhiteList.setCreateTime(new Timestamp(System.currentTimeMillis()));
         whiteListProvider.createWhiteList(phoneWhiteList);
     }
 
     @Override
     public void batchCreateWhiteList(BatchCreateWhiteListCommand cmd) {
-        if (null == cmd.getPhoneNumbers()) {
+        if (StringUtils.isBlank(cmd.getPhoneNumbers())) {
             throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
         }
 
         List<PhoneWhiteList> list = new ArrayList<>();
-
+        List<String> allPhoneNumbers = this.whiteListProvider.listAllWhiteList(cmd.getNamespaceId());
         String[] phoneNumbers = cmd.getPhoneNumbers().split(",");
         for (String phone :phoneNumbers) {
-            if (null == phone || "".equals(phone)) {
+            if (StringUtils.isBlank(phone)) {
                 LOGGER.error("PhoneNumber cannot be null.");
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "PhoneNumber cannot be null.");
@@ -71,13 +80,18 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "namespaceId cannot be null.");
             }
+            if (allPhoneNumbers.contains(phone)) {
+                LOGGER.error("PhoneNumber {} is exists.",phone);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "PhoneNumber is exists.");
+            }
 
             User user = UserContext.current().getUser();
             PhoneWhiteList phoneWhiteList = new PhoneWhiteList();
             phoneWhiteList.setPhoneNumber(phone);
             phoneWhiteList.setNamespaceId(cmd.getNamespaceId());
             phoneWhiteList.setCreatorUid(user.getId());
-            phoneWhiteList.setCreatorTime(new Timestamp(System.currentTimeMillis()));
+            phoneWhiteList.setCreateTime(new Timestamp(System.currentTimeMillis()));
             list.add(phoneWhiteList);
         }
         whiteListProvider.batchCreateWhiteList(list);
@@ -117,6 +131,14 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
             LOGGER.error("PhoneWhiteList not found, cmd={}",cmd);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "PhoneWhiteList not found.");
+        }
+
+        PhoneWhiteList checkPhoneIsExists = this.whiteListProvider.checkPhoneIsExists(phoneWhiteList.getNamespaceId(), cmd.getPhoneNumber());
+
+        if (null != checkPhoneIsExists) {
+            LOGGER.error("PhoneNumber is exists.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "PhoneNumber is exists.");
         }
 
         if (null != cmd.getPhoneNumber()) {

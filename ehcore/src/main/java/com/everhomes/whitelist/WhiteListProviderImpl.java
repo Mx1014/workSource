@@ -12,6 +12,7 @@ import com.everhomes.server.schema.tables.daos.EhPhoneWhiteListDao;
 import com.everhomes.server.schema.tables.pojos.EhPhoneWhiteList;
 import com.everhomes.server.schema.tables.records.EhPhoneWhiteListRecord;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +92,7 @@ public class WhiteListProviderImpl implements WhiteListProvider{
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPhoneWhiteList.class));
         SelectQuery<EhPhoneWhiteListRecord> query = context.selectQuery(Tables.EH_PHONE_WHITE_LIST);
 
-        if (null != phoneNumber && !"".equals(phoneNumber)) {
+        if (!StringUtils.isEmpty(phoneNumber)) {
             query.addConditions(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER.eq(phoneNumber));
         }
 
@@ -103,5 +104,33 @@ public class WhiteListProviderImpl implements WhiteListProvider{
         }
         query.addOrderBy(Tables.EH_PHONE_WHITE_LIST.ID.desc());
         return query.fetch().map(r -> ConvertHelper.convert(r, PhoneWhiteList.class));
+    }
+
+    @Override
+    public List<String> listAllWhiteList(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPhoneWhiteList.class));
+        SelectQuery<EhPhoneWhiteListRecord> query = context.selectQuery(Tables.EH_PHONE_WHITE_LIST);
+        query.addConditions(Tables.EH_PHONE_WHITE_LIST.NAMESPACE_ID.eq(namespaceId));
+        return query.fetch(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER);
+    }
+
+    @Override
+    public PhoneWhiteList checkPhoneIsExists(Integer namespaceId, String phoneNumber) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPhoneWhiteList.class));
+        SelectQuery<EhPhoneWhiteListRecord> query = context.selectQuery(Tables.EH_PHONE_WHITE_LIST);
+
+        if (!StringUtils.isEmpty(phoneNumber)) {
+            query.addConditions(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER.eq(phoneNumber));
+        }
+
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_PHONE_WHITE_LIST.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        EhPhoneWhiteListRecord record = query.fetchOne();
+        if (null != record) {
+            return ConvertHelper.convert(record, PhoneWhiteList.class);
+        }
+        return null;
     }
 }
