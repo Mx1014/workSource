@@ -1538,11 +1538,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             cmd.setNamespaceId(configuration.getNamespaceId());
             cmd.setOwnerType(configuration.getOwnerType());
             cmd.setOwnerId(configuration.getOwnerId());
-            return;
+        }else{
+            LOGGER.error("beforePostForWeb is fail. {}",cmd.getOwnerToken());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "unknown ownerToken "+cmd.getOwnerToken());
         }
-        LOGGER.error("beforePostForWeb is fail. {}",cmd.getOwnerToken());
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                "unknown ownerToken "+cmd.getOwnerToken());
+        if(cmd.getNamespaceId()==null){
+            LOGGER.error("namespaceId is null. {}",cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "unknown namespaceId is null");
+        }
     }
 
     @Override
