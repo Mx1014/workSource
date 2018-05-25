@@ -51,7 +51,7 @@ import com.everhomes.util.StringHelper;
  *     <li>pmOrgId: 管理公司Id</li>
  *     <li>pmOrgName: 管理公司名称</li>
  *     <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
- *     <li>appSelfConfigFlag: 是否自己配置参考，{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appSelfConfigFlag: 是否自己配置参考，0,null-否（跟随默认），1-是（自己配置）{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class CommunityDTO {

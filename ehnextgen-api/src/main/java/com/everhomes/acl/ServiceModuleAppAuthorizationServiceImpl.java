@@ -7,8 +7,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -46,6 +48,10 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
@@ -394,5 +400,30 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             }
         }
 
+    }
+
+    @Override
+    public ServiceModuleAppDTO getAppProfile(GetAppProfileCommand cmd) {
+        ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
+        ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(cmd.getOriginId());
+
+        if(app != null && profile != null){
+            app.setProfileId(profile.getId());
+            app.setAppNo(profile.getAppNo());
+            app.setDisplayVersion(profile.getDisplayVersion());
+            app.setDescription(profile.getDescription());
+            app.setMobileFlag(profile.getMobileFlag());
+            app.setMobileUris(profile.getMobileUris());
+            app.setPcFlag(profile.getPcFlag());
+            app.setPcUris(profile.getPcUris());
+            app.setAppEntryInfos(profile.getAppEntryInfos());
+            app.setIndependentConfigFlag(profile.getIndependentConfigFlag());
+            app.setDependentAppIds(profile.getDependentAppIds());
+            app.setSupportThirdFlag(profile.getSupportThirdFlag());
+            app.setDefaultFlag(profile.getDefaultFlag());
+            app.setIconUri(profile.getIconUri());
+        }
+
+        return portalService.processServiceModuleAppDTO(app);
     }
 }

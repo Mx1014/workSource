@@ -2,6 +2,7 @@
 package com.everhomes.portal;
 
 import com.everhomes.rest.portal.*;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
 import java.util.List;
 
@@ -28,7 +29,9 @@ public interface PortalService {
 	ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd);
 
 
-	PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd);
+    ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp);
+
+    PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd);
 
 
 	PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd);

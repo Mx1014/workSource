@@ -32,7 +32,7 @@ import java.util.List;
  *     <li>appEntryInfos: 应用entry信息</li>
  *     <li>independentConfigFlag: 允许独立配置</li>
  *     <li>dependentAppIds: 配置应用id</li>
- *     <li>dependentAppNames: 配置应用id</li>
+ *     <li>dependentAppNames: 配置应用name</li>
  *     <li>supportThirdFlag: 支持第三方对接</li>
  *     <li>defaultFlag: 默认flag</li>
  *     <li>iconUri: iconUri</li>
