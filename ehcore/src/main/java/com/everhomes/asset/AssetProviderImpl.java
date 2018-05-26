@@ -862,6 +862,9 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingDay(r.getValue(t.BILLS_DAY));
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
+                    dto.setBizPayeeAccount(r.getValue(t.BIZ_PAYEE_ACCOUNT));//收款方账户名称
+                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+                    dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
                     list.add(dto);
                     return null;
                 });
