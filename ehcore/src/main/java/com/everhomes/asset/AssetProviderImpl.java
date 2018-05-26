@@ -2793,7 +2793,9 @@ public class AssetProviderImpl implements AssetProvider {
         group.setOwnerId(cmd.getOwnerId());
         group.setOwnerType(cmd.getOwnerType());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        group.setPayeeAccount(cmd.getPayeeAccount());//增加收款方账户
+        group.setBizPayeeAccount(cmd.getBizPayeeAccount());//增加收款方账户
+        group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
+        group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
@@ -2809,7 +2811,9 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
                     .set(t.DUE_DAY,cmd.getDueDay())
                     .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
-                    .set(t.PAYEE_ACCOUNT,cmd.getPayeeAccount())//更新收款方账户
+                    .set(t.BIZ_PAYEE_ACCOUNT,cmd.getBizPayeeAccount())//更新收款方账户
+                    .set(t.BIZ_PAYEE_ID,cmd.getBizPayeeId())//更新收款方账户id
+                    .set(t.BIZ_PAYEE_TYPE,cmd.getBizPayeeType())//更新收款方账户类型
                     .where(t.ID.eq(cmd.getBillGroupId()))
                     .or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
                     .execute();
@@ -2827,7 +2831,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
                 .set(t.DUE_DAY,cmd.getDueDay())
                 .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
-                .set(t.PAYEE_ACCOUNT,cmd.getPayeeAccount())//更新收款方账户
+                .set(t.BIZ_PAYEE_ACCOUNT,cmd.getBizPayeeAccount())//更新收款方账户
+                .set(t.BIZ_PAYEE_ID,cmd.getBizPayeeId())//更新收款方账户id
+                .set(t.BIZ_PAYEE_TYPE,cmd.getBizPayeeType())//更新收款方账户类型
                 .where(t.ID.eq(cmd.getBillGroupId()))
                 .execute();
     }
