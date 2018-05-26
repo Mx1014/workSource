@@ -1267,7 +1267,20 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
+    
+    /**
+     * <b>URL: /asset/listPayeeAccounts</b>
+     * <p>列出当前项目下所有的收款方账户</p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListPayeeAccountsResp.class)
+    public RestResponse listPayeeAccounts(ListPayeeAccountsCommand cmd){
+    	ListPayeeAccountsResp listPayeeAccountsResp = assetService.listPayeeAccounts(cmd);
+        RestResponse restResponse = new RestResponse(listPayeeAccountsResp);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 }
 

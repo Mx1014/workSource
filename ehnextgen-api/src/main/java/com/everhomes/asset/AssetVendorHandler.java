@@ -193,4 +193,9 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+    ListPayeeAccountsResp listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+    	LOGGER.error("Insufficient privilege, handler listPayeeAccounts");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
 }

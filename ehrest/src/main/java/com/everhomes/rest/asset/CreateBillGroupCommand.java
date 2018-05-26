@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  * <li>billDay:出账单日</li>
  * <li>dueDay:最晚还款日</li>
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
+ * <li>payeeAccount:收款方账户</li>
  *</ul>
  */
 public class CreateBillGroupCommand {
@@ -35,6 +36,7 @@ public class CreateBillGroupCommand {
     private Integer dueDay;
     @NotNull
     private Byte dueDayType;
+    private String payeeAccount;
 
     @Override
     public String toString() {
@@ -108,4 +110,12 @@ public class CreateBillGroupCommand {
     public CreateBillGroupCommand() {
 
     }
+
+	public String getPayeeAccount() {
+		return payeeAccount;
+	}
+
+	public void setPayeeAccount(String payeeAccount) {
+		this.payeeAccount = payeeAccount;
+	}
 }

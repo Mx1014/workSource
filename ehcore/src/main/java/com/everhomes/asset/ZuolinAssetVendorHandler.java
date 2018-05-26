@@ -1647,5 +1647,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);
     }
+    
+    public ListPayeeAccountsResp listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+    	ListPayeeAccountsResp listPayeeAccountsResp = new ListPayeeAccountsResp();
+    	//调接口从电商获取收款方账户
+    	
+    	
+    	
+    	return listPayeeAccountsResp;
+    }
 }
 

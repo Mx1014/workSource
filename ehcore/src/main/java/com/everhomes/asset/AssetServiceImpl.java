@@ -4376,4 +4376,12 @@ public class AssetServiceImpl implements AssetService {
         }
         return fieldMap;
     }
+    
+    public ListPayeeAccountsResp listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listPayeeAccounts(cmd);
+    }
+    
 }

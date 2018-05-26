@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
  * <li>billDay:出账单日</li>
  * <li>dueDay:最晚还款日</li>
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
+ * <li>payeeAccount:收款方账户</li>
  *</ul>
  */
 public class ModifyBillGroupCommand {
@@ -30,10 +31,11 @@ public class ModifyBillGroupCommand {
     @NotNull
     private Byte dueDayType;
 
-
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
+    
+    private String payeeAccount;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -116,4 +118,12 @@ public class ModifyBillGroupCommand {
     public ModifyBillGroupCommand() {
 
     }
+
+	public String getPayeeAccount() {
+		return payeeAccount;
+	}
+
+	public void setPayeeAccount(String payeeAccount) {
+		this.payeeAccount = payeeAccount;
+	}
 }
