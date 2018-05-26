@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.FaceRecognitionPhotoDTO;
 import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 
 public interface FaceRecognitionPhotoProvider {
@@ -23,5 +24,9 @@ public interface FaceRecognitionPhotoProvider {
 	FaceRecognitionPhoto findById(Long photoId);
 
 	SyncLocalVistorDataResponse queryVistorPhotoBySync(Long serverId);
+
+	List<FaceRecognitionPhoto> findFaceRecognitionPhotoByIds(List<Long> photoIds);
+
+	void updateFacialRecognitionPhotos(List<FaceRecognitionPhoto> listPhotos);
 
 }

@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>imgUri：图片uri</li>
  * <li>imgUrl：图片url</li>
+ * <li>userType:用户类型0正式用户1访客</li>
+ * <li>authId:授权id</li>
  * </ul>
  */
 public class SetFacialRecognitionPhotoCommand {
@@ -14,6 +16,20 @@ public class SetFacialRecognitionPhotoCommand {
 	private String imgUrl;
 	private Long ownerId;
 	private Byte ownerType;
+	private Byte userType;
+	private Long authId;
+	public Byte getUserType() {
+		return userType;
+	}
+	public void setUserType(Byte userType) {
+		this.userType = userType;
+	}
+	public Long getAuthId() {
+		return authId;
+	}
+	public void setAuthId(Long authId) {
+		this.authId = authId;
+	}
 	public String getImgUri() {
 		return imgUri;
 	}

@@ -891,7 +891,7 @@ public class AclinkAdminController extends ControllerBase {
     /**
      * 
      * <b>URL: /admin/aclink/syncLocalUserData</b>
-     * <p>同步人脸识别照片及授权 </p>
+     * <p>同步人脸识别照片及授权(注册用户) </p>
      * @return
      */
     @RequireAuthentication(false)
@@ -900,6 +900,23 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
     	//同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
     	RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncLocalVistorData</b>
+     * <p>同步人脸识别照片及授权(访客) </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("syncLocalVistorData")
+    @RestReturn(value=SyncLocalVistorDataResponse.class)
+    public RestResponse syncLocalVistorData(SyncLocalVistorDataCommand cmd){
+    	//同步访客信息
+    	RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalVistorData(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -918,6 +935,40 @@ public class AclinkAdminController extends ControllerBase {
     	faceRecognitionPhotoService.updateUserSyncTime(cmd);
     	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateVistorSyncTime</b>
+     * <p>更新用户同步时间 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateVistorSyncTime")
+    @RestReturn(value=String.class)
+    public RestResponse updateVistorSyncTime(UpdateVistorSyncTimeCommand cmd){
+    	faceRecognitionPhotoService.updateVistorSyncTimes(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+//createLocalVisitorAuth Test
+    /**
+     * 
+     * <b>URL: /admin/aclink/createLocalVisitorAuth</b>
+     * <p>更新用户同步时间 </p>
+     * @return
+     */
+    @RequestMapping("createLocalVisitorAuth")
+    @RestReturn(value=String.class)
+    public RestResponse createLocalVisitorAuth(CreateLocalVistorCommand cmd){
+    	RestResponse response = new RestResponse();
+    	doorAccessService.createLocalVisitorAuth(cmd);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

@@ -4804,6 +4804,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
+        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+        SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+        createPhotoCmd.setImgUrl(cmd.getHeadImgUrl());
+        createPhotoCmd.setAuthId(auth.getId());
+        faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+        
+        cmd1.setDoorId(cmd.getDoorId());
+        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
 		return dto;
 	}
 

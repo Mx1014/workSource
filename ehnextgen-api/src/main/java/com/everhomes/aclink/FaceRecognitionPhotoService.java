@@ -10,6 +10,7 @@ import com.everhomes.rest.aclink.SyncLocalUserDataResponse;
 import com.everhomes.rest.aclink.SyncLocalVistorDataCommand;
 import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 import com.everhomes.rest.aclink.UpdateUserSyncTimeCommand;
+import com.everhomes.rest.aclink.UpdateVistorSyncTimeCommand;
 
 public interface FaceRecognitionPhotoService {
 
@@ -26,5 +27,7 @@ public interface FaceRecognitionPhotoService {
 	void notifySyncVistorsCommand(NotifySyncVistorsCommand cmd);
 
 	SyncLocalVistorDataResponse syncLocalVistorData(SyncLocalVistorDataCommand cmd);
+
+	void updateVistorSyncTimes(UpdateVistorSyncTimeCommand cmd);
 
 }

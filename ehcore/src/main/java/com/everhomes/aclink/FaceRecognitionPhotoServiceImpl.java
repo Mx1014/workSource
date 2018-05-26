@@ -36,6 +36,7 @@ import com.everhomes.rest.aclink.SyncLocalUserDataResponse;
 import com.everhomes.rest.aclink.SyncLocalVistorDataCommand;
 import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 import com.everhomes.rest.aclink.UpdateUserSyncTimeCommand;
+import com.everhomes.rest.aclink.UpdateVistorSyncTimeCommand;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.user.User;
@@ -88,6 +89,21 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	public void setFacialRecognitionPhoto(SetFacialRecognitionPhotoCommand cmd) {
 		User user = UserContext.current().getUser();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if(cmd.getUserType() != null && cmd.getUserType() != 0 && cmd.getAuthId() != null){
+			//访客照片,只新增,不更新
+			FaceRecognitionPhoto rec = new FaceRecognitionPhoto();
+			rec.setImgUri(cmd.getImgUri());
+			rec.setImgUrl(cmd.getImgUrl());
+			rec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rec.setCreatorUid(user.getId());
+			rec.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rec.setOperatorUid(user.getId());
+			rec.setAuthId(cmd.getAuthId());
+			rec.setUserType(cmd.getUserType());
+			rec.setStatus((byte) 1);
+			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			return;
+		}
 		List<FaceRecognitionPhoto> recs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(locator, user.getId(), 0);
 		if(recs != null && recs.size() > 0){
 			FaceRecognitionPhoto rec = recs.get(0);
@@ -293,5 +309,11 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 		}else{
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_NOT_FOUND, "Photo not found");
 		}
+	}
+
+	@Override
+	public void updateVistorSyncTimes(UpdateVistorSyncTimeCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 }
