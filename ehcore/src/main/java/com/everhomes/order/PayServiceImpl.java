@@ -1,43 +1,17 @@
 //@formatter:off
 package com.everhomes.order;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.base.RestClient;
-import com.everhomes.pay.order.*;
-import com.everhomes.pay.rest.ApiConstants;
-import com.everhomes.pay.user.BindPhoneCommand;
-import com.everhomes.pay.user.BusinessUserType;
-import com.everhomes.pay.user.RegisterBusinessUserCommand;
-import com.everhomes.query.QueryBuilder;
-import com.everhomes.query.QueryCondition;
-import com.everhomes.rest.MapListRestResponse;
-import com.everhomes.rest.StringRestResponse;
-import com.everhomes.rest.group.GroupServiceErrorCode;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.order.OrderPaymentStatus;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
-import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -47,15 +21,69 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.base.RestClient;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.PaymentAttributes;
+import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.QueryBalanceCommand;
+import com.everhomes.pay.order.QueryOrderPaymentsCommand;
+import com.everhomes.pay.order.SettlementType;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.pay.order.TransactionType;
+import com.everhomes.pay.order.ValidationType;
+import com.everhomes.pay.rest.ApiConstants;
+import com.everhomes.pay.user.BindPhoneCommand;
+import com.everhomes.pay.user.BusinessUserDTO;
+import com.everhomes.pay.user.BusinessUserType;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
+import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.query.QueryBuilder;
+import com.everhomes.query.QueryCondition;
+import com.everhomes.rest.MapListRestResponse;
+import com.everhomes.rest.StringRestResponse;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.ListPaymentWithdrawOrderCommand;
+import com.everhomes.rest.order.ListPaymentWithdrawOrderResponse;
+import com.everhomes.rest.order.OrderPaymentStatus;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
+import com.everhomes.rest.order.PaymentBalanceDTO;
+import com.everhomes.rest.order.PaymentBankCardType;
+import com.everhomes.rest.order.PaymentCommitFlag;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.order.PaymentWithdrawCommand;
+import com.everhomes.rest.order.PaymentWithdrawOrderDTO;
+import com.everhomes.rest.order.PaymentWithdrawOrderStatus;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pay.controller.ListBusinessUsersRestResponse;
+import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
+import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 
 
 @Service
@@ -128,10 +156,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param expiration 过期时间
      * @return
      */
-    @Override
-    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration) {
-        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, expiration);
-    }
+//    @Override
+//    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration) {
+//        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, expiration);
+//    }
 
     /**
      *
@@ -145,10 +173,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param resourceId  订单资源类型ID
      * @return
      */
-    @Override
-    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId) {
-        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , resourceType, resourceId, null);
-    }
+//    @Override
+//    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId) {
+//        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , resourceType, resourceId, null);
+//    }
 
     /**
      *
@@ -195,10 +223,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param paramsDTO 微信支付的参数
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, null);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, null);
+//    }
 
     /**
      *
@@ -213,10 +241,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param expiration 过期时间
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, expiration);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, expiration);
+//    }
 
     /**
      *
@@ -232,10 +260,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param resourceId 订单资源类型ID
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, resourceType, resourceId, null);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, resourceType, resourceId, null);
+//    }
 
     /**
      *
@@ -1210,5 +1238,58 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
         
         return orderDto;
+    }
+    
+    @Override
+    public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags){
+        ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
+        // 给支付系统的bizUserId的形式：EhBizBusinesses1037001
+        String userPrefix = "EhBizBusinesses";
+        cmd.setBizUserId(userPrefix + orgnizationId);
+        if(tags != null && tags.length > 0) {
+            cmd.setTag1s(Arrays.asList(tags));
+        }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", orgnizationId, tags, cmd);
+        }
+        ListBusinessUsersRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.MEMBER_LISTBUSINESSUSERS_URL,
+                cmd,
+                ListBusinessUsersRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", orgnizationId, tags, GsonUtil.toJson(response));
+        }
+        
+        List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();        
+        if(response != null && response.getErrorCode() != null && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201)
+                && response.getResponse() != null) {
+            List<BusinessUserDTO>  bizUserList = response.getResponse();
+            for(BusinessUserDTO bizUser : bizUserList) {
+                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+                dto.setAccountId(bizUser.getId());
+                dto.setAccountName(bizUser.getManageIdentifierToken());
+                
+                // 支付系统中用户类型com.everhomes.pay.user.UserType: MANAGEMENT(0), PERSONAL(1), BUSINESS(2);
+                // 由于可能涉及到业务系统不支付的用户类型（如MANAGEMENT），故当是企业是使用企业类型，其它则对应到普通用户
+                Integer userType = bizUser.getUserType();
+                if(userType != null && userType == 2) {
+                    dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    dto.setAccountType(OwnerType.USER.getCode());
+                }
+                
+                // 支付系统中状态：0-未审核、1-已审核(支付系统并没有提供枚举）
+                Integer checkResult = bizUser.getBusinessCheckResult();
+                if(checkResult != null && checkResult.intValue() == 1) {
+                    dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+            }
+        }
+        return result;
+
     }
 }
