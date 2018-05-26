@@ -126,8 +126,10 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
     private ContentServerService contentServerService;
     
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        openHttpClient();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            openHttpClient();
+        }
     }
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，

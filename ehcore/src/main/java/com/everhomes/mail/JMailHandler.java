@@ -48,8 +48,10 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
         session.setDebug(true);
     }
     
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     public void sendMail(Integer namespaceId, String from, String to, String subject, String body) {

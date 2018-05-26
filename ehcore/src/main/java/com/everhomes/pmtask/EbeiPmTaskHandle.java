@@ -116,8 +116,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     private List<CategoryDTO> listServiceType(String projectId, Long parentId) {

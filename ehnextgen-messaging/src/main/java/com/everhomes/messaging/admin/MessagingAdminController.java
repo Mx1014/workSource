@@ -41,8 +41,10 @@ public class MessagingAdminController extends ControllerBase implements Applicat
     }
     
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
     public void sendMessage(@Valid SendMessageAdminCommand cmd) {

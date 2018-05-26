@@ -270,8 +270,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
 	@Override

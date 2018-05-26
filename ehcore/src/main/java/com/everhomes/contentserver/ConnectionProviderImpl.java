@@ -71,8 +71,10 @@ public class ConnectionProviderImpl implements ConnectionProvider, ApplicationLi
         });
     }
     
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     @Override

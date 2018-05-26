@@ -477,8 +477,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     private void checkEnergyMeterUnique(Long id, Long communityId, String meterNumber, String meterName) {

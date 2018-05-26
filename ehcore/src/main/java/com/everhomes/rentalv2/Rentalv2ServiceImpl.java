@@ -265,8 +265,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 	
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
 
 	private String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 

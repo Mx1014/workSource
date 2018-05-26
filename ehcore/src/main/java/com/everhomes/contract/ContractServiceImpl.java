@@ -306,8 +306,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
 	}
 
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
 	
 	@Override

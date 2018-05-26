@@ -91,8 +91,10 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         this.httpClient = httpClientBuilder.build();
     }
     
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     @PreDestroy

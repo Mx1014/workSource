@@ -142,8 +142,10 @@ public class ArchivesServiceImpl implements ArchivesService, ApplicationListener
     private TaskService taskService;
     
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        initArchivesNotification();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            initArchivesNotification();
+        }
     }
     
     @Override

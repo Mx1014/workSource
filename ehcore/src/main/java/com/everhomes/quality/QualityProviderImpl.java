@@ -192,8 +192,10 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 	}
     
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
 
 	@Override

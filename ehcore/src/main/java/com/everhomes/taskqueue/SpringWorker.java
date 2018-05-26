@@ -101,8 +101,10 @@ public class SpringWorker extends WorkerImpl implements ApplicationContextAware,
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        init();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
     }
     
     @PreDestroy
