@@ -1287,8 +1287,18 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 } else {
                     dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
                 }
+                result.add(dto);
             }
         }
+        
+        //杨崇鑫用于前端测试开始
+        ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+        dto.setAccountId(Long.parseLong("666666666"));
+        dto.setAccountName("账户名称");
+        dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+        dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+        result.add(dto);
+        //杨崇鑫用于前端测试结束
         return result;
 
     }

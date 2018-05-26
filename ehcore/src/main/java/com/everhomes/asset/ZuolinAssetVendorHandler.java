@@ -23,6 +23,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -1648,13 +1649,13 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return contractService.listCustomerContracts(cmd);
     }
     
-    public ListPayeeAccountsResp listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-    	ListPayeeAccountsResp listPayeeAccountsResp = new ListPayeeAccountsResp();
+    public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	//调接口从电商获取收款方账户
-    	
-    	
-    	
-    	return listPayeeAccountsResp;
+    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
+    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    	}else {
+    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    	}
     }
 }
 
