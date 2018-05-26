@@ -13,7 +13,10 @@ import java.lang.reflect.Method;
 public enum FlowCaseCustomField {
 
     PROJECT_TYPE_A("string_tag1", "stringTag1", Tables.EH_FLOW_CASES.STRING_TAG1),
-    PROJECT_ID_A("integral_tag1", "integralTag1", Tables.EH_FLOW_CASES.INTEGRAL_TAG1);
+    PROJECT_ID_A("integral_tag1", "integralTag1", Tables.EH_FLOW_CASES.INTEGRAL_TAG1),
+
+    CURRENT_LANE("string_tag2", "stringTag2", Tables.EH_FLOW_CASES.STRING_TAG2),
+    CURRENT_NODE("string_tag3", "stringTag3", Tables.EH_FLOW_CASES.STRING_TAG3);
 
     private String fieldName;
     private String propertyName;

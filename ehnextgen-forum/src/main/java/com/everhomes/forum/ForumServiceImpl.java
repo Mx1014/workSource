@@ -5456,7 +5456,7 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setForumId(communities.get(0).getDefaultForumId());
         }
     }
-
+    
     @Override
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
         User user = UserContext.current().getUser();

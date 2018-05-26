@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.Map;
 
 import static java.lang.Class.forName;
@@ -51,6 +52,11 @@ public class TaskScheduleJob extends QuartzJobBean {
         params.put("process", process);
 
         try {
+
+            //0、更新任务为开始执行
+            Task task = taskService.findById(taskId);
+            task.setExecuteStartTime(new Timestamp(System.currentTimeMillis()));
+            taskService.updateTask(task);
 
             //1、获取业务实现类
             TaskHandler handler = null;

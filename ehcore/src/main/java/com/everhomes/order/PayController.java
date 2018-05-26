@@ -3,6 +3,7 @@ package com.everhomes.order;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
@@ -132,6 +133,7 @@ public class PayController extends ControllerBase {
      * <b>URL: /pay/payOrder</b>
      * <p>转发支付订单接口</p>
      */
+    @SuppressDiscover //暂时解决编译问题
     @RequestMapping("payOrder")
     @RestReturn(value=PayOrderCommandResponse.class)
     public RestResponse payOrder(PayOrderCommand cmd) {
@@ -147,6 +149,7 @@ public class PayController extends ControllerBase {
      * <b>URL: /pay/queryOrderPaymentStatus</b>
      * <p>转发查询订单支付状态接口</p>
      */
+    @SuppressDiscover//暂时解决编译问题
     @RequestMapping("queryOrderPaymentStatus")
     @RestReturn(value=QueryOrderPaymentStatusCommandResponse.class)
     public RestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {

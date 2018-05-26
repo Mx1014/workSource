@@ -99,7 +99,7 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 
 		excelUtils.setNeedSequenceColumn(true);
 		OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, dtos);
-		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
 		taskService.processUpdateTask(taskId, fileLocationDTO);
 
 	}

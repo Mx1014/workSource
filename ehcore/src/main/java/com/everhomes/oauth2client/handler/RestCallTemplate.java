@@ -44,7 +44,7 @@ public class RestCallTemplate {
     private Class<?> errorType;
     private Map<String, Object> variables = new HashMap<>();
     private HttpHeaders headers = new HttpHeaders();
-    private String body;
+    private Object body;
     private Gson gson = new Gson();
 
     private RestEntityHandler restEntityHandler;
@@ -146,7 +146,7 @@ public class RestCallTemplate {
         return HttpMethod.POST;
     }
 
-    public RestCallTemplate body(String body) {
+    public RestCallTemplate body(Object body) {
         this.body = body;
         return this;
     }
@@ -164,6 +164,14 @@ public class RestCallTemplate {
             return this;
         }
         this.headers.put(name, new ArrayList<>(Arrays.asList(value)));
+        return this;
+    }
+
+    public RestCallTemplate headers(Map<String, String> headers) {
+        if (headers == null) {
+            return this;
+        }
+        headers.forEach((k, v) -> this.headers.put(k, Collections.singletonList(v)));
         return this;
     }
 
@@ -190,7 +198,7 @@ public class RestCallTemplate {
     }
 
     private <R> HttpResponseEntity<R> execute(HttpMethod method) {
-        HttpEntity httpEntity = new HttpEntity(body, headers);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(body, headers);
         ResponseEntity<String> result = template.exchange(url, method, httpEntity, String.class, variables);
         // handle error
         if (hasError(result.getStatusCode())) {
@@ -217,6 +225,11 @@ public class RestCallTemplate {
         return responseEntity;
     }
 
+    public ResponseEntity<byte[]> byteDataExecute() {
+        HttpEntity httpEntity = new HttpEntity(body, headers);
+        return template.exchange(url, httpMethod, httpEntity, byte[].class, variables);
+    }
+
     public static QueryStringBuilder queryStringBuilder() {
         return new QueryStringBuilder();
     }
@@ -240,6 +253,17 @@ public class RestCallTemplate {
             return this;
         }
 
+        public QueryStringBuilder vars(Map<String, Object> vars) {
+            if (vars == null) {
+                return this;
+            }
+            vars.forEach((k, v) -> {
+                List<Object> value = queryMap.computeIfAbsent(k, r -> new ArrayList<>());
+                value.add(v);
+            });
+            return this;
+        }
+
         public String build() {
             StringBuilder querySb = new StringBuilder();
             this.queryMap.forEach((k, v) -> {
@@ -259,7 +283,7 @@ public class RestCallTemplate {
         }
 
         public String build(String url) {
-            return url + "?" + this.build();
+            return url + (url.length() > 0 ? "?" : "") + this.build();
         }
     }
 
@@ -356,4 +380,8 @@ public class RestCallTemplate {
     private static final boolean jacksonPresent =
             ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", RestTemplate.class.getClassLoader()) &&
                     ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", RestTemplate.class.getClassLoader());
+
+    public static void main(String[] args) {
+        System.out.println(new java.lang.String(RestCallTemplate.url("https://www.baidu.com").byteDataExecute().getBody()));
+    }
 }

@@ -25,7 +25,7 @@ public class FlowGraphScriptAction extends FlowGraphAction {
 		if(flowScript != null) {
 			//TODO SpringWorker
 			if(FlowScriptType.BEAN_ID.equals(flowScript.getScriptType())) {
-				runnableScript = (FlowScriptFire)PlatformContext.getComponent(flowScript.getScriptCls());	
+				runnableScript = PlatformContext.getComponent(flowScript.getScriptCls());
 			} else {
 				try {
 					Class clz = Class.forName(flowScript.getScriptCls());
