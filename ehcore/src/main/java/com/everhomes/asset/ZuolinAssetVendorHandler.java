@@ -33,6 +33,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
@@ -735,7 +736,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        User user = UserContext.current().getUser();
 //        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
-
+        
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        if(paymentBillGroup != null) {
+        	try {
+        		if(paymentBillGroup.getBizPayeeId() != null) {
+        			cmd2pay.setBizPayeeId(Long.valueOf(paymentBillGroup.getBizPayeeId()));
+        		}
+        	}catch (Exception e) {
+				LOGGER.error(e.getMessage());
+			}
+        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        }
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
