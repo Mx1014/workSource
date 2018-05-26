@@ -73,7 +73,4 @@ public interface ContractProvider {
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
 
-	Map<Long, Byte> listInWorkFlags(List<Long> ids);
-
-
 }
