@@ -10,13 +10,24 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>aesUserKeys:钥匙列表{@link com.everhomes.rest.aclink.AesUserKeyDTO}</li>
+ * <li>nextPageAnchor: 下一页锚点(CREATE_TIME)</li>
  * </ul>
  */
 public class ListFacialRecognitionKeyByUserResponse {
 	@ItemType(AesUserKeyDTO.class)
-    List<AesUserKeyDTO> aesUserKeys;
+    private List<AesUserKeyDTO> aesUserKeys;
+	
+	private Long nextPageAnchor;
 
-    public List<AesUserKeyDTO> getAesUserKeys() {
+    public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public List<AesUserKeyDTO> getAesUserKeys() {
         return aesUserKeys;
     }
 

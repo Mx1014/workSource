@@ -66,6 +66,7 @@ import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListFacialRecognitionKeyByUserCommand;
 import com.everhomes.rest.aclink.ListFacialRecognitionKeyByUserResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
 import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
@@ -825,8 +826,8 @@ public class AclinkController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listFacialRecognitionKeyByUser")
     @RestReturn(value=ListFacialRecognitionKeyByUserResponse.class)
-    public RestResponse listFacialRecognitionKeyByUser(){
-    	RestResponse response = new RestResponse(doorAccessService.listFacialAesUserKeyByUser());
+    public RestResponse listFacialRecognitionKeyByUser(ListFacialRecognitionKeyByUserCommand cmd){
+    	RestResponse response = new RestResponse(doorAccessService.listFacialAesUserKeyByUser(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

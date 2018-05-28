@@ -158,7 +158,7 @@ public interface DoorAccessService {
 
 	public ListDoorAccessByGroupIdResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd);
 
-	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser();
+	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd);
 	
 	public AesUserKey getAesUserKey(User user, DoorAuth doorAuth);
 	

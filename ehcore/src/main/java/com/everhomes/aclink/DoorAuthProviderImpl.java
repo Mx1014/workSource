@@ -170,7 +170,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+            query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
             }
         // count<=0默认查全部
         if(count > 0){

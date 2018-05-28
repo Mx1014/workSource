@@ -1677,8 +1677,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(ListAdminAesUserKeyCommand cmd) {
         User user = UserContext.current().getUser();
         
+        cmd.setPageSize(cmd.getPageSize()== null? 0 : cmd.getPageSize());
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), cmd.getRightRemote(), 0);
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), cmd.getPageSize());
 
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
@@ -1723,6 +1726,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 dtos.add(dto);
             }
+        }
+        
+        if(dtos.size() > cmd.getPageSize()){
+        	resp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
+        	dtos.remove(dtos.size() - 1);
         }
         
         resp.setAesUserKeys(dtos);
@@ -4736,10 +4744,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
-	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser() {
+	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd) {
 		ListFacialRecognitionKeyByUserResponse rsp = new ListFacialRecognitionKeyByUserResponse();
 		User user = UserContext.current().getUser();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), null, 0);
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();
@@ -4785,7 +4795,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}
             }
         }
-        
+        if(dtos.size() > cmd.getPageSize()){
+        	rsp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
+        	dtos.remove(dtos.size() - 1);
+        }
         rsp.setAesUserKeys(dtos);
 		
 		return rsp;
