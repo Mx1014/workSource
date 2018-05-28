@@ -873,6 +873,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
                     if(r.getValue(t.BIZ_PAYEE_ID) != null && r.getValue(t.BIZ_PAYEE_ID) != "") {
                     	userIds.add(Long.parseLong(r.getValue(t.BIZ_PAYEE_ID)));
+                    }else {
+                    	userIds.add(null);
                     }
                     dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
                     list.add(dto);
@@ -883,7 +885,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<UserAccountInfo> result = payService.listBusinessUserByIds(cmd);
         for(int i = 0;i < result.size();i++) {
         	for(int j = 0;j < list.size();j++) {
-        		if(String.valueOf(result.get(i).getUserId()).equals(list.get(j).getBizPayeeId())){
+        		if(result.get(i).getUserId() != null && list.get(j).getBizPayeeId() != null &&
+        				String.valueOf(result.get(i).getUserId()).equals(list.get(j).getBizPayeeId())){
         			list.get(j).setBizPayeeAccount(result.get(i).getRemark());
         		}
         	}
