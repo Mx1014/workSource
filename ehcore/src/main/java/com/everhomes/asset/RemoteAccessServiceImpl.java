@@ -444,7 +444,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         //缴费时间字段精确到时分，筛选缴费时间到天即可
         if(cmd.getStartPayTime() != null) {
-        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+        	//SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date start = sdf.parse(cmd.getStartPayTime());
             QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
             if(condition == null) {
@@ -454,7 +455,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         if(cmd.getEndPayTime() != null) {
-        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+        	//SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+        	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date end = sdf.parse(cmd.getEndPayTime());
             QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
             if(condition == null) {
