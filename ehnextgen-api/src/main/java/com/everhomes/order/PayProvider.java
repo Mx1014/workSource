@@ -2,6 +2,7 @@
 package com.everhomes.order;
 
 import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 
 import java.util.List;
 
@@ -61,5 +62,7 @@ public interface PayProvider {
      * @param order 订单信息
      */
     void updatePaymentWithdrawOrder(PaymentWithdrawOrder order);
+
+    EhNamespacePayMappingsRecord getNamespacePayMapping(Integer namespaceId);
     
 }
