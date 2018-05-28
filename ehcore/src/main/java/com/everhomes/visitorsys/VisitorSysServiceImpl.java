@@ -967,6 +967,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitorSysConfigurationProvider.createVisitorSysConfiguration(configuration);
             } else {
                 configuration = VisitorSysUtils.copyNotNullProperties(cmd, configuration);
+                configuration.setWelcomePages(cmd.getWelcomePages());
+                configuration.setWelcomePicUri(cmd.getWelcomePicUri());
+                configuration.setLogoUri(cmd.getLogoUri());
                 visitorSysConfigurationProvider.updateVisitorSysConfiguration(configuration);
             }
             return configuration;
@@ -1952,6 +1955,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor "+cmd);
         }
         oldVisitor = VisitorSysUtils.copyNotNullProperties(cmd, oldVisitor);
+        oldVisitor.setVisitorPicUri(cmd.getVisitorPicUri());
         checkVisitor(oldVisitor);
         return oldVisitor;
     }
