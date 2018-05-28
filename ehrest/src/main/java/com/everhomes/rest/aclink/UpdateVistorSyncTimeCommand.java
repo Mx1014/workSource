@@ -3,6 +3,7 @@ package com.everhomes.rest.aclink;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -11,16 +12,17 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class UpdateVistorSyncTimeCommand {
-	private List<Long> photoIds;
+	
+	private String photoIds;
 
-	public List<Long> getPhotoIds() {
+	public String getPhotoIds() {
 		return photoIds;
 	}
 
-	public void setPhotoIds(List<Long> photoIds) {
+	public void setPhotoIds(String photoIds) {
 		this.photoIds = photoIds;
 	}
-	
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

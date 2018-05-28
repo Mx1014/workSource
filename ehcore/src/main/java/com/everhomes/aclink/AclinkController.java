@@ -72,7 +72,7 @@ import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
-import com.everhomes.rest.aclink.listAdminAesUserKeyCommand;
+import com.everhomes.rest.aclink.ListAdminAesUserKeyCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
@@ -156,7 +156,7 @@ public class AclinkController extends ControllerBase {
     
     @RequestMapping("listAdminAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
-    public RestResponse listAdminAesUserKey(@Valid listAdminAesUserKeyCommand cmd) {
+    public RestResponse listAdminAesUserKey(@Valid ListAdminAesUserKeyCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

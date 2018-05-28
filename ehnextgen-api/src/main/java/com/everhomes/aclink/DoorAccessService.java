@@ -47,7 +47,7 @@ public interface DoorAccessService {
 
     void updateDoorAccess(DoorAccessAdminUpdateCommand cmd);
 
-    ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(listAdminAesUserKeyCommand cmd);
+    ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(ListAdminAesUserKeyCommand cmd);
 
     DoorAccess onDoorAccessConnecting(AclinkConnectingCommand cmd);
 

@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  * <ul> 查询转发的消息
  * <li>rightRemote: 是否有远程开门权限0无1有</li>
  * </ul>
- * @author janson
  *
  */
 public class ListAdminAesUserKeyCommand {

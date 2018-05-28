@@ -119,7 +119,7 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 		List<DoorAuthDTO> listAuths = new ArrayList<DoorAuthDTO>();
 		SelectOffsetStep<Record> step = context.select().from(Tables.EH_FACE_RECOGNITION_PHOTOS)
 //				.asTable(Tables.EH_FACE_RECOGNITION_PHOTOS.getName())
-				.join(Tables.EH_DOOR_AUTH).on(Tables.EH_FACE_RECOGNITION_PHOTOS.AUTH_ID.eq(Tables.EH_DOOR_ACCESS.ID))
+				.join(Tables.EH_DOOR_AUTH).on(Tables.EH_FACE_RECOGNITION_PHOTOS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID))
 //				.asTable(Tables.EH_DOOR_AUTH.getName())
 				.where((Tables.EH_FACE_RECOGNITION_PHOTOS.SYNC_TIME.isNull().or(Tables.EH_FACE_RECOGNITION_PHOTOS.SYNC_TIME.lt(Tables.EH_FACE_RECOGNITION_PHOTOS.OPERATE_TIME)))
 						.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.gt((byte) 0))
@@ -128,7 +128,23 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 						).orderBy(Tables.EH_FACE_RECOGNITION_PHOTOS.ID.desc()).limit(null);
 		step.fetch().map(r ->{
 			FaceRecognitionPhotoDTO photo = ConvertHelper.convert(r, FaceRecognitionPhotoDTO.class);
+			photo.setId(r.getValue(Tables.EH_FACE_RECOGNITION_PHOTOS.ID));
+			photo.setImgUrl(r.getValue(Tables.EH_FACE_RECOGNITION_PHOTOS.IMG_URL));
+			photo.setAuthId(r.getValue(Tables.EH_FACE_RECOGNITION_PHOTOS.AUTH_ID));
+			
 			DoorAuthDTO auth = ConvertHelper.convert(r, DoorAuthDTO.class);
+			auth.setId(r.getValue(Tables.EH_DOOR_AUTH.ID));
+			auth.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
+			auth.setAuthRuleType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE));
+			auth.setDoorId(r.getValue(Tables.EH_DOOR_AUTH.DOOR_ID));
+			auth.setStatus(r.getValue(Tables.EH_DOOR_AUTH.STATUS));
+			auth.setTotalAuthAmount(r.getValue(Tables.EH_DOOR_AUTH.TOTAL_AUTH_AMOUNT));
+			auth.setUserId(r.getValue(Tables.EH_DOOR_AUTH.USER_ID));
+			auth.setValidAuthAmount(r.getValue(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT));
+			auth.setValidEndMs(r.getValue(Tables.EH_DOOR_AUTH.VALID_END_MS));
+			auth.setValidFromMs(r.getValue(Tables.EH_DOOR_AUTH.VALID_FROM_MS));
+			auth.setNickname(r.getValue(Tables.EH_DOOR_AUTH.NICKNAME));
+			auth.setPhone(r.getValue(Tables.EH_DOOR_AUTH.PHONE));
 			//左邻门禁,取二维码字符串
 			auth.setLocalAuthKey(r.getValue(Tables.EH_DOOR_AUTH.STRING_TAG6));
 			listPhotos.add(photo);

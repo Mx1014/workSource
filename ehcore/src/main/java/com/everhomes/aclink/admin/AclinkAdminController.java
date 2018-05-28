@@ -942,7 +942,7 @@ public class AclinkAdminController extends ControllerBase {
     /**
      * 
      * <b>URL: /admin/aclink/updateVistorSyncTime</b>
-     * <p>更新用户同步时间 </p>
+     * <p>更新访客同步时间 </p>
      * @return
      */
     @RequireAuthentication(false)

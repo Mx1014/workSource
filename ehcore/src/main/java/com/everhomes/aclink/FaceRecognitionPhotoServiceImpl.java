@@ -49,6 +49,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
+import ch.qos.logback.core.pattern.ConverterUtil;
+
 @Component
 public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionPhotoServiceImpl.class);
@@ -295,9 +297,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	
 	@Override
 	public SyncLocalVistorDataResponse syncLocalVistorData(SyncLocalVistorDataCommand cmd) {
-		//TODO sync vistor Data
-
-		return null;
+		return faceRecognitionPhotoProvider.queryVistorPhotoBySync(cmd.getServerId());
 	}
 
 	@Override
@@ -313,7 +313,19 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 
 	@Override
 	public void updateVistorSyncTimes(UpdateVistorSyncTimeCommand cmd) {
-		// TODO Auto-generated method stub
+		String[] ids = cmd.getPhotoIds().split(",");
+		List<Long> photoIds = new ArrayList<Long>();
+		for (String id : ids){
+			photoIds.add(Long.valueOf(id));
+		}
+		List<FaceRecognitionPhoto> listPhotos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(photoIds);
+		Timestamp nowTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+		if(listPhotos != null && listPhotos.size() > 0){
+			for(FaceRecognitionPhoto photo : listPhotos){
+				photo.setSyncTime(nowTime);
+			}
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
+		}
 		
 	}
 }

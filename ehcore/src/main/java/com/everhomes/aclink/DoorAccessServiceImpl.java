@@ -1674,7 +1674,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
-    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(listAdminAesUserKeyCommand cmd) {
+    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(ListAdminAesUserKeyCommand cmd) {
         User user = UserContext.current().getUser();
         
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
@@ -4806,6 +4806,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         dto.setQrString(auth.getQrKey());
         NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
         SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+        createPhotoCmd.setUserType((byte) 1);
         createPhotoCmd.setImgUrl(cmd.getHeadImgUrl());
         createPhotoCmd.setAuthId(auth.getId());
         faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
