@@ -82,7 +82,7 @@ public interface VisitorSysService {
 
     GetFormForWebResponse getFormForWeb(GetFormForWebCommand cmd);
 
-    void rejectVisitor(GetBookedVisitorByIdCommand cmd);
+    void rejectVisitor(CreateOrUpdateVisitorCommand cmd);
 
     void syncVisitor(BaseVisitorsysCommand cmd);
 

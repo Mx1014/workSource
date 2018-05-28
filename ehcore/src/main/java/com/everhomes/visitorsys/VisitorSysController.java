@@ -435,7 +435,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("rejectVisitor")
 	@RestReturn(String.class)
-	public RestResponse rejectVisitor(GetBookedVisitorByIdCommand cmd) {
+	public RestResponse rejectVisitor(CreateOrUpdateVisitorCommand cmd) {
 		visitorSysService.rejectVisitor(cmd);
 
 		RestResponse response = new RestResponse();

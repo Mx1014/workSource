@@ -1082,22 +1082,38 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param cmd
      */
     @Override
-    public void rejectVisitor(GetBookedVisitorByIdCommand cmd) {
+    public void rejectVisitor(CreateOrUpdateVisitorCommand cmd) {
         checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
-        if(visitor == null){
+        VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getId());
+        if(oldVisitor == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "unknown visitor "+cmd.getVisitorId());
+                    "unknown visitor "+cmd.getId());
         }
-
+        String oldFormatVisitorTime = null;
+        if(oldVisitor !=null && oldVisitor.getPlannedVisitTime()!=null) {
+            oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        }
+        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
+        String newFormatVisitorTime = null;
+        if(visitor !=null && visitor.getPlannedVisitTime()!=null) {
+            newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+        }
+        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+        //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
+        if(type == VisitorsysVisitorType.BE_INVITED
+                && newFormatVisitorTime!=null
+                && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
+            coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
+                    +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
+                visitor.setInvitationNo(generateInvitationNo(visitor));
+                return null;
+            });
+        }
         dbProvider.execute(r->{
-//            VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
             generateRejectVisitor(visitor);
             visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
             visitorsysSearcher.syncVisitor(visitor);
             createVisitorActions(visitor);
-//            visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
-//            visitorsysSearcher.syncVisitor(relatedVisitor);
             return null;
         });
     }
@@ -1238,6 +1254,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         beforePostForWeb(cmd);
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(cmd, GetConfigurationCommand.class));
         setConfigurationEnterpriseName(configuration);//enterprise情况下，设置公司名称
+        ListOfficeLocationsResponse response = listOfficeLocations(ConvertHelper.convert(cmd, ListOfficeLocationsCommand.class));
+        List<BaseOfficeLocationDTO> officeLocationList = response.getOfficeLocationList();
+        if(officeLocationList!=null && officeLocationList.size()>0){
+            configuration.setOfficeLocationName(officeLocationList.get(0).getOfficeLocationName());
+        }
         return configuration;
     }
 
@@ -1308,6 +1329,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(),cmd.getDeviceId());
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(device, GetConfigurationCommand.class));
         setConfigurationEnterpriseName(configuration);
+        ListOfficeLocationsResponse response = listOfficeLocations(ConvertHelper.convert(device, ListOfficeLocationsCommand.class));
+        List<BaseOfficeLocationDTO> officeLocationList = response.getOfficeLocationList();
+        if(officeLocationList!=null && officeLocationList.size()>0){
+            configuration.setOfficeLocationName(officeLocationList.get(0).getOfficeLocationName());
+        }
         return configuration;
     }
 
@@ -2092,7 +2118,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysVisitor convert = ConvertHelper.convert(visitor, VisitorSysVisitor.class);
         //新建访客/预约
         if(relatedVisitor !=null){
-            convert = relatedVisitor;
+            convert = copyRelatedVisitor(visitor,relatedVisitor);
         }
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             convert.setParentId(relatedVisitor ==null?visitor.getId(): relatedVisitor.getParentId());
@@ -2159,18 +2185,38 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             convert.setVisitTime(relatedVisitor == null ? null : relatedVisitor.getVisitTime());
         }
-//        convert.setConfirmTime(relatedVisitor ==null?null:relatedVisitor.getConfirmTime());
-//        convert.setConfirmUid(relatedVisitor ==null?null:relatedVisitor.getConfirmUid());
-//        convert.setConfirmUname(relatedVisitor ==null?null:relatedVisitor.getConfirmUname());
-//        convert.setRefuseUid(relatedVisitor ==null?null:relatedVisitor.getRefuseUid());
-//        convert.setRefuseUname(relatedVisitor ==null?null:relatedVisitor.getRefuseUname());
-//        convert.setRefuseTime(relatedVisitor ==null?null:relatedVisitor.getRefuseTime());
-//        convert.setDeleteTime(relatedVisitor ==null?null:relatedVisitor.getDeleteTime());
-
         convert.setSendMessageInviterFlag(relatedVisitor ==null?visitor.getSendMessageInviterFlag():relatedVisitor.getSendMessageInviterFlag());
         convert.setSendSmsFlag(relatedVisitor ==null?visitor.getSendSmsFlag():relatedVisitor.getSendSmsFlag());
+        convert.setEnterpriseId(visitor.getEnterpriseId());
+        convert.setVisitorName(visitor.getVisitorName());
+        convert.setVisitorPhone(visitor.getVisitorPhone());
+        convert.setVisitorSignUri(visitor.getVisitorSignUri());
+        convert.setVisitorSignCharacter(visitor.getVisitorSignCharacter());
+        convert.setVisitorPicUri(visitor.getVisitorPicUri());
+        convert.setPlannedVisitTime(visitor.getPlannedVisitTime());
+        convert.setVisitReason(visitor.getVisitReason());
+        convert.setVisitReasonId(visitor.getVisitReasonId());
+        convert.setFollowUpNumbers(visitor.getFollowUpNumbers());
         return convert;
         //更新子访客/预约
+    }
+
+    private VisitorSysVisitor copyRelatedVisitor(VisitorSysVisitor visitor, VisitorSysVisitor relatedVisitor) {
+        relatedVisitor.setEnterpriseName(visitor.getEnterpriseName());
+        relatedVisitor.setEnterpriseId(visitor.getEnterpriseId());
+        relatedVisitor.setVisitorName(visitor.getVisitorName());
+        relatedVisitor.setVisitorPhone(visitor.getVisitorPhone());
+        relatedVisitor.setVisitorSignUri(visitor.getVisitorSignUri());
+        relatedVisitor.setVisitorSignCharacter(visitor.getVisitorSignCharacter());
+        relatedVisitor.setVisitorPicUri(visitor.getVisitorPicUri());
+        relatedVisitor.setPlannedVisitTime(visitor.getPlannedVisitTime());
+        relatedVisitor.setVisitTime(visitor.getVisitTime());
+        relatedVisitor.setSendMessageInviterFlag(visitor.getSendMessageInviterFlag());
+        relatedVisitor.setSendSmsFlag(visitor.getSendSmsFlag());
+        relatedVisitor.setVisitReason(visitor.getVisitReason());
+        relatedVisitor.setVisitReasonId(visitor.getVisitReasonId());
+        relatedVisitor.setFollowUpNumbers(visitor.getFollowUpNumbers());
+        return relatedVisitor;
     }
 
     /**
