@@ -11,6 +11,8 @@ public interface GeneralApprovalHandler {
 
 	void onFlowCaseAbsorted(FlowCaseState flowCase);
 
-	PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase);
+	default PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
+		return null;
+	}
 	
 }

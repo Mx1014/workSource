@@ -1,6 +1,7 @@
 package com.everhomes.general_approval;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.enterpriseApproval.GeneralApprovalDefaultHandler;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -33,7 +34,7 @@ import java.util.Date;
  * </ul>
  */
 @Component(GeneralApprovalPunchDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME)
-public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHandler{
+public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHandler {
 	
 	static final String GENERAL_APPROVAL_DEFAULT_HANDLER_NAME = GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "PunchDefault";
 	@Autowired

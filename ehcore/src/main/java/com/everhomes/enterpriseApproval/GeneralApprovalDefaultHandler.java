@@ -1,6 +1,9 @@
-package com.everhomes.general_approval;
+package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.general_approval.GeneralApprovalHandler;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
@@ -51,17 +54,11 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 
 	@Override
 	public void onApprovalCreated(FlowCase flowCase) {
-		//// TODO: 2017/11/15  子类自己实现
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState flowCase) {
-		//// TODO: 2017/11/15  子类自己实现
 
 	}
 
-	@Override
-	public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
-		return null;
-	}
 }

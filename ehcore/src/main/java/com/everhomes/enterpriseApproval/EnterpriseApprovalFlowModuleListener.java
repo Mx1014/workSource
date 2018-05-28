@@ -1,9 +1,12 @@
 package com.everhomes.enterpriseApproval;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -24,6 +27,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Autowired
     ServiceModuleProvider serviceModuleProvider;
 
+    @Autowired
+    GeneralApprovalProvider generalApprovalProvider;
+
     @Override
     public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -41,6 +47,20 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : " + ctx.getCurrentEvent().getUserType());
         EnterpriseApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
         handler.onFlowCaseAbsorted(ctx);
+    }
+
+    private EnterpriseApprovalHandler getGeneralApprovalHandler(Long referId) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
+        if(ga!=null){
+            EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
+                    + ga.getApprovalAttribute());
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+
+//        return getGeneralApprovalHandler(ga.getApprovalAttribute());
     }
 
     @Override
