@@ -4,6 +4,7 @@ package com.everhomes.rest.contract;
  * <ul>
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/21.
  */
@@ -27,7 +28,16 @@ public class DeleteContractCommand {
     public void setPaymentFlag(Byte paymentFlag) {
         this.paymentFlag = paymentFlag;
     }
+    
+	private Long categoryId;
 
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
     private Boolean checkAuth;
 
     public Boolean getCheckAuth() {

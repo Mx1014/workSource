@@ -19,6 +19,7 @@ import java.util.List;
  *     <li>receivableUnit: 合同费用清单应收日期单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  *     <li>payorreceiveContractType: 合同类型 0 收款合同 1付款合同</li>
  *     <li>generateContractNumberRule: 合同编号规则</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -60,6 +61,16 @@ public class SetContractParamCommand {
 		this.payorreceiveContractType = payorreceiveContractType;
 	}
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	
 	@ItemType(ContractParamGroupMapDTO.class)
     private List<ContractParamGroupMapDTO> notifyGroups;
     @ItemType(ContractParamGroupMapDTO.class)
