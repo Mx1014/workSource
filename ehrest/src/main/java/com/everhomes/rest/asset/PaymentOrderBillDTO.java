@@ -44,6 +44,7 @@ import com.everhomes.discover.ItemType;
  * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
  * <li>exemptionItemDTOList:减免项集合，参考{@link com.everhomes.rest.asset.ExemptionItemDTO}</li>
+ * <li>state:前端触发事件使用，1是外层，2是内层(children代表内层)</li>
  *</ul>
  */
 public class PaymentOrderBillDTO implements Cloneable{
@@ -60,7 +61,6 @@ public class PaymentOrderBillDTO implements Cloneable{
     private Integer settlementStatus;
     private String orderRemark1;
     private Long paymentOrderId;
-
     private String orderRemark2;
     private String orderSource;
     private String payerName;
@@ -83,6 +83,8 @@ public class PaymentOrderBillDTO implements Cloneable{
     private List<BillItemDTO> billItemDTOList;
     @ItemType(ExemptionItemDTO.class)
     private List<ExemptionItemDTO> exemptionItemDTOList;
+    
+    private Byte state;
     
     public String getPayerTel() {
         return payerTel;
@@ -320,5 +322,13 @@ public class PaymentOrderBillDTO implements Cloneable{
 
 	public void setAmountExemption(BigDecimal amountExemption) {
 		this.amountExemption = amountExemption;
+	}
+
+	public Byte getState() {
+		return state;
+	}
+
+	public void setState(Byte state) {
+		this.state = state;
 	}
 }

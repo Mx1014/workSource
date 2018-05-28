@@ -38,6 +38,7 @@ import com.everhomes.discover.ItemType;
  * <li>targetType:客户类型</li>
  * <li>amountReceivable:应收(元)：该订单下所有账单应收金额的总和</li>
  * <li>amountReceived:实收(元)：该订单下所有账单实收金额的总和</li>
+ * <li>state:前端触发事件使用，1是外层，2是内层(children代表内层)</li>
  * <li>children:订单下所有账单的集合，参考{@link PaymentOrderBillDTO}
  *</ul>
  */
@@ -65,6 +66,7 @@ public class PaymentBillResp implements Cloneable{
     private String targetType;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
+    private Byte state;
     
     private List<PaymentOrderBillDTO> children;
     
@@ -225,5 +227,13 @@ public class PaymentBillResp implements Cloneable{
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+
+	public Byte getState() {
+		return state;
+	}
+
+	public void setState(Byte state) {
+		this.state = state;
 	}
 }

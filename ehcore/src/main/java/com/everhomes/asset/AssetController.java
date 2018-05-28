@@ -1112,7 +1112,24 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(result);
         return response;
     }
-
+    
+    /**
+     * <b>URL: /asset/listPaymentBillDetail</b>
+     * <p>交易明细查看账单明细接口</p>
+     */
+    @RequestMapping(value = "listPaymentBillDetail")
+    @RestReturn(PaymentOrderBillDTO.class)
+    public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+    	ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+    	PaymentOrderBillDTO result = new PaymentOrderBillDTO();
+    	if(listPaymentBillResp != null && listPaymentBillResp.getList() != null && listPaymentBillResp.getList().get(0) != null
+    			&& listPaymentBillResp.getList().get(0).getChildren() != null) {
+    		result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+    	}
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+    
 
     /**
      * <p>测试清单产生</p>

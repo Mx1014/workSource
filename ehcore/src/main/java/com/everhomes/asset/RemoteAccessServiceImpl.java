@@ -3,13 +3,9 @@ package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.http.HttpUtils;
-import com.everhomes.junit.Test;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.base.RestClient;
-import com.everhomes.pay.order.OrderPaymentStatus;
 import com.everhomes.pay.order.PaymentAttributes;
 import com.everhomes.pay.order.QueryOrderPaymentsCommand;
 import com.everhomes.pay.order.TransactionType;
@@ -20,27 +16,19 @@ import com.everhomes.query.SortSpec;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceImpl;
 import com.everhomes.util.AmountUtil;
 import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.LongUtil;
-import jdk.nashorn.internal.runtime.Context;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.protocol.HTTP;
-import org.hibernate.engine.config.spi.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,13 +48,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     @Autowired
     private AssetProvider assetProvider;
     @Autowired
-    private UserService userService;
-    @Autowired
     private UserProvider userProvider;
-    @Autowired
-    private OrganizationService organizationService;
-    @Autowired
-    private OrganizationProvider organizationProvider;
 
 //    @PostConstruct
 //    void init() throws Exception {
@@ -123,12 +105,18 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
         queryBuilder.limit(cmd.getPageSize()).offset(cmd.getPageAnchor());
-
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listOrderPayment(request), cmd={}", cmd);
+        }
         MapListRestResponse response = (MapListRestResponse) callPaymentMethod(
                 "POST",
                 ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
                 payCmd.done(),
                 MapListRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listOrderPayment(response), response={}", GsonUtil.toJson(response));
+        }
 
         ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
@@ -136,6 +124,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
                 PaymentBillResp paymentBillDTO = convert(map);
+                paymentBillDTO.setState(new Byte("1"));//前端触发事件使用，1是外层，2是内层(children代表内层)
                 PaymentOrderBillDTO paymentOrderBillDTO = convertOrderBill(map);
                 if(paymentBillDTO != null) {
                     processAmount(paymentBillDTO, cmd);
@@ -145,6 +134,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
                     BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
                     BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
+                    String targetName = "";
+                    String targetType = "";
                     for(int i = 0;i < listBillDetailVOs.size();i++) {
                     	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
                     	if(listBillDetailVO != null) {
@@ -167,20 +158,25 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
                     			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
                     		}
+                    		p2.setState(new Byte("2"));//前端触发事件使用，1是外层，2是内层(children代表内层)
                     		children.add(p2);
                     		amountReceivable = amountReceivable.add(listBillDetailVO.getAmountReceivable());
                     		amountReceived = amountReceived.add(listBillDetailVO.getAmountReceived());
+                    		targetName = listBillDetailVO.getTargetName();
+                    		targetType = listBillDetailVO.getTargetType();
                     	}
                     }
                     paymentBillDTO.setAmountReceivable(amountReceivable);
                     paymentBillDTO.setAmountReceived(amountReceived);
+                    paymentBillDTO.setTargetName(targetName);
+                    paymentBillDTO.setTargetType(targetType);
                     paymentBillDTO.setChildren(children);
                     result.getList().add(paymentBillDTO);
                 }
             }
         }
         
-        test(result,cmd);//杨崇鑫用于测试
+        //test(result,cmd);//杨崇鑫用于测试
         
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
             result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
@@ -191,76 +187,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         return result;
     }
     
-    private void test(ListPaymentBillResp result, ListPaymentBillCmd cmd) throws Exception {
-        PaymentBillResp paymentBillDTO = new PaymentBillResp();
-        paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
-        paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
-        paymentBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
-        paymentBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
-        paymentBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
-        paymentBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
-        paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));
-        paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
-        paymentBillDTO.setPaymentStatus(1);//订单状态：1：已完成，0：订单异常
-        paymentBillDTO.setPaymentType(1);//支付方式，0:微信，1：支付宝，2：对公转账
-        paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
-        paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
-        paymentBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
-        paymentBillDTO.setUserId(Long.parseLong("1210"));
-        PaymentOrderBillDTO paymentOrderBillDTO = new PaymentOrderBillDTO();
-        paymentOrderBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
-        paymentOrderBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
-        paymentOrderBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
-        paymentOrderBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
-        paymentOrderBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
-        paymentOrderBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
-        paymentOrderBillDTO.setPaymentOrderId(Long.parseLong("1316"));
-        paymentOrderBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
-        paymentOrderBillDTO.setPaymentStatus(1);//订单状态：1：已完成，0：订单异常
-        paymentOrderBillDTO.setPaymentType(1);//支付方式，0:微信，1：支付宝，2：对公转账
-        paymentOrderBillDTO.setPayTime("2018-01-20 17:42");//交易时间
-        paymentOrderBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
-        paymentOrderBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
-        paymentOrderBillDTO.setUserId(Long.parseLong("1210"));
-        //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
-        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
-        List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
-        BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
-        BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
-        for(int i = 0;i < listBillDetailVOs.size();i++) {
-        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
-        	if(listBillDetailVO != null) {
-        		PaymentOrderBillDTO p2 = new PaymentOrderBillDTO();
-        		p2 = (PaymentOrderBillDTO) paymentOrderBillDTO.clone();
-        		p2.setBillId(listBillDetailVO.getBillId());
-        		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
-        		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
-        		p2.setTargetName(listBillDetailVO.getTargetName());
-        		p2.setTargetType(listBillDetailVO.getTargetType());
-        		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
-        		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
-        		p2.setAmountExemption(listBillDetailVO.getAmoutExemption());
-        		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
-        		p2.setBuildingName(listBillDetailVO.getBuildingName());
-        		p2.setApartmentName(listBillDetailVO.getApartmentName());
-        		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
-        		p2.setAddresses(listBillDetailVO.getAddresses());
-        		if(listBillDetailVO.getBillGroupDTO() != null) {
-        			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
-        			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
-        		}
-        		children.add(p2);
-        		amountReceivable = amountReceivable.add(listBillDetailVO.getAmountReceivable());
-        		amountReceived = amountReceived.add(listBillDetailVO.getAmountReceived());
-        	}
-        }
-        paymentBillDTO.setAmountReceivable(amountReceivable);
-        paymentBillDTO.setAmountReceived(amountReceived);
-        paymentBillDTO.setChildren(children);
-        result.getList().add(paymentBillDTO);
-    }
-
     private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
         String orderRemark2 = dto.getOrderRemark2();
         Long orderId = null;
@@ -647,5 +573,84 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         return condition;
+    }
+    
+    private void test(ListPaymentBillResp result, ListPaymentBillCmd cmd) throws Exception {
+        PaymentBillResp paymentBillDTO = new PaymentBillResp();
+        paymentBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
+        paymentBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
+        paymentBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
+        paymentBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
+        paymentBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
+        paymentBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
+        paymentBillDTO.setPaymentOrderId(Long.parseLong("1316"));
+        paymentBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
+        paymentBillDTO.setPaymentStatus(1);//订单状态：1：已完成，0：订单异常
+        paymentBillDTO.setPaymentType(1);//支付方式，0:微信，1：支付宝，2：对公转账
+        paymentBillDTO.setPayTime("2018-01-20 17:42");//交易时间
+        paymentBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
+        paymentBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
+        paymentBillDTO.setUserId(Long.parseLong("1210"));
+        paymentBillDTO.setState(new Byte("1"));//前端触发事件使用，1是外层，2是内层(children代表内层)
+        PaymentOrderBillDTO paymentOrderBillDTO = new PaymentOrderBillDTO();
+        paymentOrderBillDTO.setAmount(new BigDecimal("0.03"));//入账金额
+        paymentOrderBillDTO.setFeeAmount(new BigDecimal("-0.02"));//手续费
+        paymentOrderBillDTO.setOrderAmount(new BigDecimal("0.01"));//交易金额
+        paymentOrderBillDTO.setOrderNo("WUF00000000000001098");//支付流水号
+        paymentOrderBillDTO.setOrderRemark1("wuyeCode");//业务系统自定义字段（要求传订单来源）
+        paymentOrderBillDTO.setOrderRemark2("320");//业务系统自定义字段（对应eh_asset_payment_order表的id）
+        paymentOrderBillDTO.setPaymentOrderId(Long.parseLong("1316"));
+        paymentOrderBillDTO.setPaymentOrderNum("954650447962984448");//订单编号，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。
+        paymentOrderBillDTO.setPaymentStatus(1);//订单状态：1：已完成，0：订单异常
+        paymentOrderBillDTO.setPaymentType(1);//支付方式，0:微信，1：支付宝，2：对公转账
+        paymentOrderBillDTO.setPayTime("2018-01-20 17:42");//交易时间
+        paymentOrderBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
+        paymentOrderBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
+        paymentOrderBillDTO.setUserId(Long.parseLong("1210"));
+      //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+        List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
+        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+        List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
+        BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
+        BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
+        String targetName = "";
+        String targetType = "";
+        for(int i = 0;i < listBillDetailVOs.size();i++) {
+        	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
+        	if(listBillDetailVO != null) {
+        		PaymentOrderBillDTO p2 = new PaymentOrderBillDTO();
+        		p2 = (PaymentOrderBillDTO) paymentOrderBillDTO.clone();
+        		p2.setBillId(listBillDetailVO.getBillId());
+        		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
+        		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
+        		p2.setTargetName(listBillDetailVO.getTargetName());
+        		p2.setTargetType(listBillDetailVO.getTargetType());
+        		p2.setAmountReceivable(listBillDetailVO.getAmountReceivable());
+        		p2.setAmountReceived(listBillDetailVO.getAmountReceived());
+        		p2.setAmountExemption(listBillDetailVO.getAmoutExemption());
+        		p2.setAmountSupplement(listBillDetailVO.getAmountSupplement());
+        		p2.setBuildingName(listBillDetailVO.getBuildingName());
+        		p2.setApartmentName(listBillDetailVO.getApartmentName());
+        		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
+        		p2.setAddresses(listBillDetailVO.getAddresses());
+        		if(listBillDetailVO.getBillGroupDTO() != null) {
+        			p2.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
+        			p2.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
+        		}
+        		p2.setState(new Byte("2"));//前端触发事件使用，1是外层，2是内层(children代表内层)
+        		children.add(p2);
+        		amountReceivable = amountReceivable.add(listBillDetailVO.getAmountReceivable());
+        		amountReceived = amountReceived.add(listBillDetailVO.getAmountReceived());
+        		targetName = listBillDetailVO.getTargetName();
+        		targetType = listBillDetailVO.getTargetType();
+        	}
+        }
+        paymentBillDTO.setAmountReceivable(amountReceivable);
+        paymentBillDTO.setAmountReceived(amountReceived);
+        paymentBillDTO.setTargetName(targetName);
+        paymentBillDTO.setTargetType(targetType);
+        paymentBillDTO.setChildren(children);
+        result.getList().add(paymentBillDTO);
+        result.getList().add(paymentBillDTO);
     }
 }
