@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>moduleName: 模块名</li>
  *     <li>communityId: 项目id</li>
  *     <li>orgId: 公司id</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -24,6 +25,16 @@ public class ListFieldGroupCommand {
     // 暂时增加用于物业巡检使用
     private String  equipmentCategoryName;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getOrgId() {
         return orgId;
     }
