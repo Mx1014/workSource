@@ -98,18 +98,21 @@ function fetch(url, data, success, error) {
     var requestMethod = new RequestMethod(data.method);
 
     try {
-        print(body);
-        print(requestMethod.method);
+        var response = template
+            .url(url)
+            .body(body)
+            .headers(data.headers ? data.headers : {})
+            .method(requestMethod.method)
+            .byteDataExecute();
 
-        if (success) {
-            success(
-                template
-                    .url(url)
-                    .body(body)
-                    .headers(data.headers ? data.headers : {})
-                    .method(requestMethod.method)
-                    .byteDataExecute()
-            );
+        if (response.getStatusCode().value() < 400) {
+            if (success) {
+                success(response);
+            }
+        } else {
+            if (error) {
+                error(response);
+            }
         }
     } catch (e) {
         if (error) {

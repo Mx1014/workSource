@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Component
+// @Component
 public class FlowModuleListenerDummy4 implements FlowFunctionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy4.class);

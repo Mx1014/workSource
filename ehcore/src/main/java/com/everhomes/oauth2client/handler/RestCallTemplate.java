@@ -227,6 +227,7 @@ public class RestCallTemplate {
 
     public ResponseEntity<byte[]> byteDataExecute() {
         HttpEntity httpEntity = new HttpEntity(body, headers);
+        this.hasErrorHandler = statusCode -> false;
         return template.exchange(url, httpMethod, httpEntity, byte[].class, variables);
     }
 

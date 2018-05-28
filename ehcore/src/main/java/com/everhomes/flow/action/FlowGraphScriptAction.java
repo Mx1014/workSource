@@ -3,7 +3,6 @@ package com.everhomes.flow.action;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 import com.everhomes.flow.nashornfunc.NashornScriptMain;
-import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
