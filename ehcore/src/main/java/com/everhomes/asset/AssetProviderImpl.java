@@ -972,6 +972,7 @@ public class AssetProviderImpl implements AssetProvider {
             Byte isOwed = cmd.getIsOwed();
             String customerTel = cmd.getCustomerTel();
             String invoiceNum = cmd.getInvoiceNum();
+            Long categoryId = cmd.getCategoryId();
 
             //普通信息卸载
             Long billGroupId = billGroupDTO.getBillGroupId();
@@ -1203,7 +1204,8 @@ public class AssetProviderImpl implements AssetProvider {
 
             newBill.setInvoiceNumber(invoiceNum);
 
-
+            // added category Id
+            newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
@@ -1318,7 +1320,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType) {
+    public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1331,6 +1333,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(endLimit!=null) {
             query.addConditions(r.DATE_STR.lessOrEqual(endLimit));
         }
+        query.addConditions(r.CATEGORY_ID.eq(categoryId));
         query.addConditions(r.OWNER_ID.eq(ownerId));
         query.addConditions(r.OWNER_TYPE.eq(ownerType));
         query.addConditions(r.SWITCH.eq((byte)1));
@@ -1350,7 +1353,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit) {
+    public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
@@ -1359,6 +1362,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> settledBillIds = context.select(t1.ID)
                 .from(t1)
                 .where(t1.SWITCH.eq((byte) 1))
+                .and(t1.CATEGORY_ID.eq(categoryId))
                 .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),t.NAME,t.ID);
@@ -1434,7 +1438,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId) {
+    public List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhCommunities o = Tables.EH_COMMUNITIES.as("o");
@@ -1447,6 +1451,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(dateStrEnd!=null){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        query.addConditions(t.CATEGORY_ID.eq(categoryId));
         query.addConditions(t.SWITCH.eq((byte)1));
         Table<Record> r = query.asTable("r");
 
@@ -4187,6 +4192,14 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId));
         }
         return query.fetchInto(PaymentNoticeConfig.class);
+    }
+
+    @Override
+    public Long findCategoryIdFromBillGroup(Long billGroupId) {
+        return getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

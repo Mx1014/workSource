@@ -91,6 +91,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -225,6 +227,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         //校验查看的权限
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
@@ -555,6 +561,10 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
     }
 
@@ -579,6 +589,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -587,6 +601,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         //校验催缴的权限
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE, cmd.getOrganizationId());
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
@@ -698,6 +716,10 @@ public class AssetServiceImpl implements AssetService {
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
         //校验是否有查看账单统计的权限
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_STATISTICS_VIEW,cmd.getOrganizationId());
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -715,6 +737,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(5000);
         }
@@ -796,6 +822,10 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId());
     }
 
@@ -803,6 +833,10 @@ public class AssetServiceImpl implements AssetService {
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
         if(cmd.getOwnerId()==null){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
         }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
         , cmd.getCategoryId());
@@ -1510,6 +1544,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE,cmd.getOrganizationId());
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
         List<NoticeConfig> configsInRet = new ArrayList<>();
@@ -1555,6 +1592,9 @@ public class AssetServiceImpl implements AssetService {
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         //这里存储催缴的对象和模板使用信息
         List<EhPaymentNoticeConfig> toSaveConfigs = new ArrayList<>();
         List<NoticeConfig> configs = cmd.getConfigs();
@@ -3239,6 +3279,10 @@ public class AssetServiceImpl implements AssetService {
         String ownerType = cmd.getOwnerType();
         Integer namespaceId = cmd.getNamespaceId();
         checkNullProhibit("communityId",cmd.getOwnerId());
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId, cmd.getCategoryId());
     }
 
@@ -3517,6 +3561,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd) {
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         return assetProvider.listAvailableChargingItems(cmd);
     }
 
@@ -3527,6 +3575,10 @@ public class AssetServiceImpl implements AssetService {
         List<Long> communityIds = new ArrayList<>();
         if(communityId == null || communityId == -1){
             communityIds = getAllCommunity(namespaceId,true);
+        }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
     }
@@ -3552,6 +3604,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
+         // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
             Long brotherStandardId = null;
@@ -3809,6 +3865,10 @@ public class AssetServiceImpl implements AssetService {
         byte deCouplingFlag = 1;
         Long brotherGroupId = null;
         //创造账单组不涉及到安全问题，所以只需要看同步与否
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
@@ -3850,6 +3910,9 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }// set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
         }
         List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
         if(list.size() > cmd.getPageSize()){
@@ -3862,6 +3925,15 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
+    private void setCmdCategoryDefault(Object obj, Long v){
+        Class clz = obj.getClass();
+        try {
+            Method method = clz.getDeclaredMethod("setCategoryId", new Class[]{Long.class});
+            method.invoke(obj, v);
+        } catch (Exception  e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd) {

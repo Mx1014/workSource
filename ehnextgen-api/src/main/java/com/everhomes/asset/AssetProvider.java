@@ -67,11 +67,11 @@ public interface AssetProvider {
 
     ListBillDetailVO listBillDetail(Long billId);
 
-    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType);
+    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId);
 
-    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit);
+    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit, Long categoryId);
 
-    List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId);
+    List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId, Long categoryId);
 
     void modifyBillStatus(Long billId);
 
@@ -316,4 +316,6 @@ public interface AssetProvider {
     List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
+
+    Long findCategoryIdFromBillGroup(Long billGroupId);
 }
