@@ -21,6 +21,7 @@ import java.util.List;
  *     <li>pcFlag: 支持PC端(0:不支持，1:支持)</li>
  *     <li>independentConfigFlag: 允许独立配置(0:不支持，1:支持)</li>
  *     <li>supportThirdFlag: 支持第三方对接(0:不支持，1:支持)</li>
+ *     <li>excludeSystemAppFlag: 排除系统应用null、0-不排除，1-排除，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
@@ -50,6 +51,8 @@ public class ListServiceModuleAppsCommand {
 	private Byte independentConfigFlag;
 
 	private Byte supportThirdFlag;
+
+	private Byte excludeSystemAppFlag;
 
 	public ListServiceModuleAppsCommand() {
 
@@ -167,5 +170,13 @@ public class ListServiceModuleAppsCommand {
 
 	public void setAppType(Byte appType) {
 		this.appType = appType;
+	}
+
+	public Byte getExcludeSystemAppFlag() {
+		return excludeSystemAppFlag;
+	}
+
+	public void setExcludeSystemAppFlag(Byte excludeSystemAppFlag) {
+		this.excludeSystemAppFlag = excludeSystemAppFlag;
 	}
 }
