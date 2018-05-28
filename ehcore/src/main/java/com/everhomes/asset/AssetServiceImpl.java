@@ -3398,9 +3398,8 @@ public class AssetServiceImpl implements AssetService {
         long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetAppCategories.class));
         c.setId(nextSequence);
         c.setCategoryId(nextSequence);
-        EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao();
         try{
-            dao.insert(c);
+            assetProvider.insertAssetCategory(c);
             return nextSequence;
         }catch (Exception e){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION, "category constraints voilated");

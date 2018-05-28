@@ -36,12 +36,8 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
-import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.*;
 
-import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
-
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
@@ -4200,6 +4196,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
                 .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID);
+    }
+
+    @Override
+    public void insertAssetCategory(EhAssetAppCategories c) {
+        EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao(getReadWriteContext().configuration());
+        dao.insert(c);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

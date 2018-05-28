@@ -318,4 +318,6 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
     Long findCategoryIdFromBillGroup(Long billGroupId);
+
+    void insertAssetCategory(EhAssetAppCategories c);
 }
