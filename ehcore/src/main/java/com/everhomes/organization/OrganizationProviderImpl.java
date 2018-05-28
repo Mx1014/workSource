@@ -6822,5 +6822,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.insert(organizationAddress);
     }
 
+    /**
+     * 根据域空间Id和项目编号来查询楼栋
+     * @param namespaceId
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId, Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_BUILDINGS)
+                .where(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+                .fetch()
+                .map(r->ConvertHelper.convert(r, Building.class));
+    }
+
 
 }
