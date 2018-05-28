@@ -248,6 +248,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     if(v.iterator().next().getWholeAdderssName() != null){
                         v.stream().map(EnterprisePropertyDTO::getWholeAdderssName).reduce((r1, r2) -> r1+","+r2).ifPresent(dto::setWholeAdderssName);
                         dto.setWholeAdderssName(v.iterator().next().getWholeAdderssName());
+                    }else{
+                        dto.setWholeAdderssName("");
                     }
                     newEnterprisePropertyDTOS.add(dto);
                 });
