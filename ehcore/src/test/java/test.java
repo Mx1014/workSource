@@ -12,49 +12,30 @@ import java.util.Date;
 import java.util.Locale;
 
 public class test {
-    @Test
-    public void test() {
-        /*Long departmentId = 1023329L;
-        String path = "/1023080/1023305/1023329";
-        System.out.println(path.contains(String.valueOf(departmentId)));
+    public static void main(String[] args) {
+        Parent p = new Parent();
+        Child c = new Child();
+        p.A();
+        p.B();
+        c.A();
+        c.B();
+    }
+}
 
-        LocalDate date = LocalDate.now();
-        System.out.println(date);
-        System.out.println(java.sql.Date.valueOf(date));
+class Parent{
 
-        LocalDate nowDate = LocalDate.now();
-        System.out.println(nowDate);
-        System.out.println(nowDate.plusDays(6));
-        System.out.println(LocalDate.now().minusYears(1));
-
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
-        System.out.println(df.format(ArchivesUtil.currentDate().toLocalDate()));
-        System.out.println(ArchivesUtil.currentDate().toLocalDate().getDayOfWeek());
-        System.out.println(ArchivesUtil.currentDate().toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE));
-
-        System.out.println(Locale.SIMPLIFIED_CHINESE.toString());
-        System.out.println(formatter.format(ArchivesUtil.currentDate().toLocalDate()));
-
-        System.out.println(0 == departmentId);
-        System.out.println(0 == departmentId.longValue());
-        Long yep = null;
-        System.out.println(0 == yep);
-        */
-
-
-/*        java.sql.Date date1 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
-        java.sql.Date date3 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
-        System.out.println(date1);
-        System.out.println(date3);
-        System.out.println(date3.after(date1));
-        System.out.println(date3.equals(date1));
-        System.out.println(date3.before(date1));*/
-
-        String str1 = " \r\n Display";
-        System.out.println(str1);
-        String str2 = str1.replace(" \r\n", "\r\n");
-        System.out.println(str2);
+    public void A(){
+        System.out.println("A");
     }
 
+    public void B(){
+        System.out.println("B");
+    }
+}
+
+class Child extends Parent{
+
+    public void A(){
+        super.B();
+    }
 }
