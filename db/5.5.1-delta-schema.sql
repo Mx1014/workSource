@@ -171,3 +171,70 @@ ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag10` BIGINT(20) NOT NU
 ALTER TABLE eh_flow_cases ADD COLUMN path VARCHAR(1024) COMMENT 'flow case path';
 
 ALTER TABLE eh_flow_actions CHANGE COLUMN script_id script_main_id BIGINT NOT NULL DEFAULT 0;
+
+
+-- 政务服务 1.0
+-- by shiheng.ma
+-- 政策表
+CREATE TABLE `eh_policies` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `category_id` bigint(20),
+	`title` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '',
+	`outline` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
+	`content` text COMMENT 'content data',
+	`priority` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the rank of policy',
+	`creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+	`updater_uid` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策类型中间表
+CREATE TABLE `eh_policy_categories` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `policy_id` bigint(20) NOT NULL COMMENT 'id of the policy',
+  `category_id` bigint(20) NOT NULL COMMENT 'category of policy',
+	`active_flag` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策查询记录表
+CREATE TABLE `eh_policy_records` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `category_id` bigint(20),
+	`creator_id` bigint(20) NOT NULL COMMENT '',
+	`creator_name` varchar(128) NOT NULL COMMENT '',
+	`creator_phone` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
+	`creator_org_id` bigint(20) NOT NULL COMMENT '',
+	`creator_org_name` varchar(128) NOT NULL COMMENT '',
+	`turnover` varchar(60) NOT NULL DEFAULT '' COMMENT '营业额',
+	`tax` varchar(60) NOT NULL DEFAULT '' COMMENT '纳税总额',
+	`qualification` varchar(60) NOT NULL DEFAULT '' COMMENT '单位资质',
+	`financing` varchar(60) NOT NULL DEFAULT '' COMMENT 'A轮融资',
+	`create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策代办配置表
+CREATE TABLE `eh_policy_agent_rules` (
+  `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type : community ; organization',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
+  `agent_flag` TINYINT(4) DEFAULT NULL COMMENT '是否代办:0为不可代办，1为可代办',
+  `agent_phone` varchar(64) DEFAULT NULL COMMENT '联系方式',
+	`agent_info` text DEFAULT NULL COMMENT '代办介绍',
+	`creator_id` bigint(20) NOT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`updater_uid` bigint(20) COMMENT '修改人',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 政务服务 1.0 end

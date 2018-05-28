@@ -3927,7 +3927,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void setNewSourceSheetBookRow(Sheet sourceSheet, CustomerSourceStatisticsDTO dto) {
         Row row = sourceSheet.createRow(sourceSheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" :dto.getItemName());
         row.createCell(++i).setCellValue(dto.getCustomerCount());
     }
 
