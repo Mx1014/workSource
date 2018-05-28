@@ -1275,14 +1275,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
                 // 支付系统中的用户ID
                 dto.setAccountId(bizUser.getId());
-<<<<<<< HEAD
-                // 用户向支付系统注册帐号时填写的帐号名称
-                dto.setAccountName(bizUser.getManageIdentifierToken());
-=======
                 //dto.setAccountName(bizUser.getManageIdentifierToken());
                 dto.setAccountName(bizUser.getRemark());
->>>>>>> 8a8750a05d7e13475acc0814b9f898f3397809b9
-                
                 // 支付系统中用户类型com.everhomes.pay.user.UserType: MANAGEMENT(0), PERSONAL(1), BUSINESS(2);
                 // 由于可能涉及到业务系统不支付的用户类型（如MANAGEMENT），故当是企业是使用企业类型，其它则对应到普通用户
                 Integer userType = bizUser.getUserType();
