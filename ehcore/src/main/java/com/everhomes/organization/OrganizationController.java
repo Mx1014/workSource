@@ -1602,8 +1602,10 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         try {
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);    
+            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+            adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         } catch(Exception ex) {
+            //nothing
             
         }
         
