@@ -9,6 +9,23 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * <ul>
+ *     <li>flow: 工作流 {@link com.everhomes.flow.Flow}</li>
+ *     <li>module: 模块信息 {@link com.everhomes.flow.FlowModuleInfo}</li>
+ *     <li>flowCase: flowCase {@link com.everhomes.flow.FlowCase}</li>
+ *     <li>operator: 处理人 {@link com.everhomes.rest.user.UserInfo}</li>
+ *     <li>stepType: 步骤类型 {@link com.everhomes.rest.flow.FlowStepType}</li>
+ *     <li>prefixNode: 上一个节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>currentNode: 当前节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>nextNode: 下一个节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>subject: 用户输入{@link com.everhomes.flow.FlowSubject}</li>
+ *     <li>currentLane: 当前泳道{@link com.everhomes.flow.FlowLane}</li>
+ *     <li>extra: 附加信息 from FlowCaseState</li>
+ *     <li>action: 触发脚本调用的 flowAction {@link com.everhomes.flow.FlowAction}</li>
+ *     <li>firedButtonId: 触发的按钮id</li>
+ * </ul>
+ */
 public class FlowCaseStateBrief implements Serializable {
 
     private Flow flow;
