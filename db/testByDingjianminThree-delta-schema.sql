@@ -9,5 +9,3 @@ ALTER TABLE `eh_contracts` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'con
 ALTER TABLE `eh_var_field_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
--- --合同管理，工作流设置，不同入口对应不同工作流
-ALTER TABLE `eh_flows` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
