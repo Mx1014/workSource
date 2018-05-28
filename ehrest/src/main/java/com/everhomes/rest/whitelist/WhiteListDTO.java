@@ -19,7 +19,7 @@ public class WhiteListDTO {
 
     private Integer namespaceId;
 
-    private String createTIme;
+    private String createTime;
 
     public Long getId() {
         return id;
@@ -45,12 +45,12 @@ public class WhiteListDTO {
         this.namespaceId = namespaceId;
     }
 
-    public String getCreateTIme() {
-        return createTIme;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setCreateTIme(String createTIme) {
-        this.createTIme = createTIme;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     @Override

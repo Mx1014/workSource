@@ -155,7 +155,10 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "ID cannot be null.");
         }
-        return ConvertHelper.convert(whiteListProvider.getWhiteList(cmd.getId()), WhiteListDTO.class);
+        PhoneWhiteList phoneWhiteList = this.whiteListProvider.getWhiteList(cmd.getId());
+        WhiteListDTO whiteListDTO = ConvertHelper.convert(phoneWhiteList, WhiteListDTO.class);
+        whiteListDTO.setCreateTime(phoneWhiteList.getCreateTime().toString());
+        return whiteListDTO;
     }
 
     @Override
@@ -167,6 +170,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
         if (size >0) {
             response.setWhiteListDTOList(list.stream().map(r -> {
                 WhiteListDTO whiteListDTO = ConvertHelper.convert(r, WhiteListDTO.class);
+                whiteListDTO.setCreateTime(r.getCreateTime().toString());
                 return  whiteListDTO;
             }).collect(Collectors.toList()));
             if (size != cmd.getPageSize()) {
