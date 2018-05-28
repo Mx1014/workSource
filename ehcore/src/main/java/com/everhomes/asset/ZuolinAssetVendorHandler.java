@@ -745,7 +745,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         			cmd2pay.setBizPayeeId(Long.valueOf(paymentBillGroup.getBizPayeeId()));
         		}
         	}catch (Exception e) {
-				LOGGER.error(e.getMessage());
+        		cmd2pay.setBizPayeeId(null);
 			}
         	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
         }
