@@ -1694,7 +1694,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 oldData = exist.getTrackingName();
                             }
 
-                            if (newData == null || newData.equals("")||oldData.equals("空")) {
+                            if (newData == null || newData.equals("")||newData.equals("空")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
