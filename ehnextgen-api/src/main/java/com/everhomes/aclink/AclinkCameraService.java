@@ -17,7 +17,7 @@ import com.everhomes.rest.aclink.ListLocalCamerasCommand;
 import com.everhomes.rest.aclink.ListLocalCamerasResponse;
 import com.everhomes.rest.aclink.QueryAclinkCamerasCommand;
 import com.everhomes.rest.aclink.UpdateLocalCamerasCommand;
-import com.everhomes.rest.aclink.updateLocalServersCommand;
+import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 
 public interface AclinkCameraService {
 	ListLocalCamerasResponse listLocalCameras(CrossShardListingLocator locator, Long ownerId, Byte ownerType,

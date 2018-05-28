@@ -47,7 +47,7 @@ import com.everhomes.rest.aclink.SyncLocalServerResponse;
 import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.rest.aclink.LocalDoorAccessDTO;
-import com.everhomes.rest.aclink.updateLocalServersCommand;
+import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -194,7 +194,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	}
 
 	@Override
-	public void updateLocalServer(updateLocalServersCommand cmd) {
+	public void updateLocalServer(UpdateLocalServersCommand cmd) {
 		AclinkServer server = aclinkServerProvider.findServerById(cmd.getId());
 		server.setName(cmd.getName());
 		aclinkServerProvider.updateLocalServer(server);

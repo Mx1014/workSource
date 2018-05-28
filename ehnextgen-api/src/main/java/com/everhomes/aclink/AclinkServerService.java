@@ -20,7 +20,7 @@ import com.everhomes.rest.aclink.QueryServerRelationsCommand;
 import com.everhomes.rest.aclink.QueryServerRelationsResponse;
 import com.everhomes.rest.aclink.SyncLocalServerResponse;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
-import com.everhomes.rest.aclink.updateLocalServersCommand;
+import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 
 public interface AclinkServerService {
 
@@ -32,7 +32,7 @@ public interface AclinkServerService {
 
 	void createLocalServer(CreateLocalServersCommand cmd);
 
-	void updateLocalServer(updateLocalServersCommand cmd);
+	void updateLocalServer(UpdateLocalServersCommand cmd);
 
 	void deleteLocalServer(DeleteLocalServerCommand cmd);
 

@@ -657,7 +657,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("updateLocalServers")
     @RestReturn(value=String.class)
-    public RestResponse updateLocalServers(updateLocalServersCommand cmd){
+    public RestResponse updateLocalServers(UpdateLocalServersCommand cmd){
     	//名称是否可重复？
     	aclinkServerService.updateLocalServer(cmd);
     	RestResponse response = new RestResponse();
