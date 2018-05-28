@@ -5061,8 +5061,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if (autoPlans != null) {
                 planIds.add(autoPlans.getId());
             }
+            planIds.add(0L);
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
-                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
+                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE - 1, taskUpdateTime);
 
             if(tasks != null && tasks.size() > 0) {
                 Set<Long> meterIds = new HashSet<>();
