@@ -1122,7 +1122,8 @@ public class AssetController extends ControllerBase {
     public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
     	ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
     	PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-    	if(listPaymentBillResp != null && listPaymentBillResp.getList() != null && listPaymentBillResp.getList().get(0) != null
+    	if(listPaymentBillResp != null && listPaymentBillResp.getList() != null 
+    			&& listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
     			&& listPaymentBillResp.getList().get(0).getChildren() != null) {
     		result = listPaymentBillResp.getList().get(0).getChildren().get(0);
     	}
