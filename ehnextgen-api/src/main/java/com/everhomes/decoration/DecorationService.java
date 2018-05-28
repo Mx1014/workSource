@@ -3,6 +3,7 @@ package com.everhomes.decoration;
 import com.everhomes.rest.decoration.*;
 import com.everhomes.rest.flow.FlowCaseEntity;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface DecorationService {
@@ -61,5 +62,8 @@ public interface DecorationService {
 
     GetUserMemberGroupResponse getUserMemberGroup(GetUserMemberGroupCommand cmd);
 
+    void exportRentalBills(SearchRequestsCommand cmd, HttpServletResponse response);
+
+    void exportWorkers(ListWorkersCommand cmd, HttpServletResponse response);
 
 }

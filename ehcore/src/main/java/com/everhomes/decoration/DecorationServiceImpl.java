@@ -35,20 +35,29 @@ import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -94,6 +103,7 @@ public class DecorationServiceImpl implements  DecorationService {
 
     private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat sdfMd = new SimpleDateFormat("MM-dd");
+    private static final SimpleDateFormat sdfyMdHm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     @Override
     public DecorationIllustrationDTO getIllustration(GetIlluStrationCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -364,7 +374,13 @@ public class DecorationServiceImpl implements  DecorationService {
             response.setNextPageAnchor(requests.get(requests.size()-1).getId());
             requests.remove(requests.size()-1);
         }
-        response.setRequests(requests.stream().map(r->{
+        response.setRequests(processSearchResult(requests));
+
+        return response;
+    }
+
+    private List<DecorationRequestDTO> processSearchResult(List<DecorationRequest> requests){
+        return requests.stream().map(r->{
             DecorationRequestDTO dto = new DecorationRequestDTO();
             dto.setId(r.getId());
             dto.setCreateTime(r.getCreateTime().getTime());
@@ -379,9 +395,7 @@ public class DecorationServiceImpl implements  DecorationService {
             dto.setCancelFlag(r.getCancelFlag());
 
             return dto;
-        }).collect(Collectors.toList()));
-
-        return response;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -962,5 +976,146 @@ public class DecorationServiceImpl implements  DecorationService {
             return null;
         response.setMemberGroup(member.getMemberGroup());
         return response;
+    }
+
+    @Override
+    public void exportRentalBills(SearchRequestsCommand cmd, HttpServletResponse response) {
+        if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4300043010L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
+        Integer pageSize = Integer.MAX_VALUE;
+        String address = cmd.getBuildingName();
+        if (cmd.getDoorPlate() != null)
+            address += "&"+cmd.getDoorPlate();
+        List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
+                cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize,null);
+
+        List<DecorationRequestDTO> dtos = processSearchResult(requests);
+
+        ByteArrayOutputStream out = createRequestsStream(dtos);
+
+        DownloadUtils.download(out, response);
+    }
+
+    private ByteArrayOutputStream createRequestsStream( List<DecorationRequestDTO> dtos){
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        if (null == dtos || dtos.isEmpty()) {
+            return out;
+        }
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("request");
+        createRequestsBookSheetHead(sheet);
+        for (DecorationRequestDTO dto:dtos){
+            this.setNewRequestsBookRow(sheet,dto);
+        }
+        try {
+            wb.write(out);
+            wb.close();
+
+        } catch (IOException e) {
+            LOGGER.error("export is fail", e);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CREATE_EXCEL,
+                    "export is fail.");
+        }
+
+        return out;
+    }
+
+    private void createRequestsBookSheetHead(Sheet sheet){
+        Row row = sheet.createRow(sheet.getLastRowNum());
+        int i =-1 ;
+        row.createCell(++i).setCellValue("序号");
+        row.createCell(++i).setCellValue("提交时间");
+        row.createCell(++i).setCellValue("装修地点");
+        row.createCell(++i).setCellValue("装修日期");
+        row.createCell(++i).setCellValue("申请人");
+        row.createCell(++i).setCellValue("联系方式");
+        row.createCell(++i).setCellValue("公司名称");
+        row.createCell(++i).setCellValue("装修进度");
+    }
+
+    private void setNewRequestsBookRow(Sheet sheet,DecorationRequestDTO dto){
+        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        int i = -1;
+        //序号
+        row.createCell(++i).setCellValue(row.getRowNum());
+        //提交时间
+        row.createCell(++i).setCellValue(sdfyMdHm.format(new Date(dto.getCreateTime())));
+        //装修地点
+        row.createCell(++i).setCellValue(dto.getAddress());
+        //装修日期
+        row.createCell(++i).setCellValue(sdfyMd.format(new Date(dto.getStartTime()))+"至"+sdfMd.format(new Date(dto.getEndTime())));
+        //申请人
+        row.createCell(++i).setCellValue(dto.getApplyName());
+        //联系方式
+        row.createCell(++i).setCellValue(dto.getApplyPhone());
+        //公司名称
+        row.createCell(++i).setCellValue(dto.getApplyCompany());
+        //装修进度
+        if (dto.getCancelFlag() == null || dto.getCancelFlag() == 0)
+            if (dto.getStatus() != null)
+                row.createCell(++i).setCellValue(DecorationRequestStatus.fromCode(dto.getStatus()).getDescribe());
+        else
+            row.createCell(++i).setCellValue("已取消");
+    }
+
+    @Override
+    public void exportWorkers(ListWorkersCommand cmd, HttpServletResponse response) {
+        Integer pageSize = Integer.MAX_VALUE;
+        List<DecorationWorker> workers = decorationProvider.listWorkersByRequestId(cmd.getRequestId(),cmd.getKeyword(),null,pageSize+1);
+        List<DecorationWorkerDTO> dtos = workers.stream().map(r->ConvertHelper.convert(r,DecorationWorkerDTO.class)).collect(Collectors.toList());
+        ByteArrayOutputStream out = createWorkersStream(dtos);
+
+        DownloadUtils.download(out, response);
+    }
+
+    private ByteArrayOutputStream createWorkersStream(List<DecorationWorkerDTO> dtos){
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        if (null == dtos || dtos.isEmpty()) {
+            return out;
+        }
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("worker");
+        createWorkersBookSheetHead(sheet);
+
+        for (DecorationWorkerDTO dto:dtos){
+            this.setNewWorkersBookRow(sheet,dto);
+        }
+        try {
+            wb.write(out);
+            wb.close();
+
+        } catch (IOException e) {
+            LOGGER.error("export is fail", e);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CREATE_EXCEL,
+                    "export is fail.");
+        }
+
+        return out;
+
+    }
+
+    private void createWorkersBookSheetHead(Sheet sheet){
+        Row row = sheet.createRow(sheet.getLastRowNum());
+        int i =-1 ;
+        row.createCell(++i).setCellValue("序号");
+        row.createCell(++i).setCellValue("姓名");
+        row.createCell(++i).setCellValue("联系方式");
+        row.createCell(++i).setCellValue("工种");
+    }
+
+    private void setNewWorkersBookRow(Sheet sheet,DecorationWorkerDTO dto){
+        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        int i = -1;
+        //序号
+        row.createCell(++i).setCellValue(row.getRowNum());
+        //姓名
+        row.createCell(++i).setCellValue(sdfyMdHm.format(new Date(dto.getName())));
+        //联系方式
+        row.createCell(++i).setCellValue(dto.getPhone());
+        //工种
+        row.createCell(++i).setCellValue(dto.getWorkerType());
     }
 }
