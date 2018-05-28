@@ -1,4 +1,4 @@
---短信白名单 #30013
+-- 短信白名单 #30013
 CREATE TABLE `eh_phone_white_list` (
 	`id` BIGINT NOT NULL COMMENT '主键',
 	`namespace_id` INT NOT NULL DEFAULT 0 COMMENT '域空间',
