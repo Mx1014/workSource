@@ -37,6 +37,8 @@ import java.util.List;
  *     <li>defaultFlag: 默认flag</li>
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
+ *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用，是模块的属性。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>intiAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -72,7 +74,8 @@ public class ServiceModuleAppDTO {
     private Byte defaultFlag;
     private String iconUri;
     private String iconUrl;
-
+    private String systemAppFlag;
+    private String initAppFlag;
 
     public Long getId() {
         return id;
@@ -320,5 +323,21 @@ public class ServiceModuleAppDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getSystemAppFlag() {
+        return systemAppFlag;
+    }
+
+    public void setSystemAppFlag(String systemAppFlag) {
+        this.systemAppFlag = systemAppFlag;
+    }
+
+    public String getInitAppFlag() {
+        return initAppFlag;
+    }
+
+    public void setInitAppFlag(String initAppFlag) {
+        this.initAppFlag = initAppFlag;
     }
 }
