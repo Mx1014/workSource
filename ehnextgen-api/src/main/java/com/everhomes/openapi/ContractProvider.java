@@ -1,9 +1,11 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.news.NewsCategory;
 import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
@@ -25,9 +27,9 @@ public interface ContractProvider {
 
 	void deleteContractByOrganizationName(Integer namespaceId, String name);
 
-	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers);
+	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers, Long categoryId);
 
-	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
+	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize, Long categoryId);
 
 	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
@@ -35,9 +37,9 @@ public interface ContractProvider {
 
 	void deleteContract(Contract contract);
 
-	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
+	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId);
 
-	List<Contract> listContractByOrganizationId(Long organizationId);
+	List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
 
@@ -53,7 +55,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId);
 
 	void createContractParamGroupMap(ContractParamGroupMap map);
 	void deleteContractParamGroupMap(ContractParamGroupMap map);
@@ -73,5 +75,10 @@ public interface ContractProvider {
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
 
+    //多入口
+    void createContractCategory(ContractCategory newsCategory);
 
+	ContractCategory findContractCategoryById(Long categoryId);
+
+	void updateContractCategory(ContractCategory contractCategory);
 }
