@@ -27,6 +27,7 @@ import java.util.List;
  * <li>baseConfig: (选填)基本配置（配置中所有的是否配置和门禁配置），{@link com.everhomes.rest.visitorsys.VisitorsysBaseConfig}</li>
  * <li>formConfig: (选填)表单配置列表，{@link com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem}</li>
  * <li>passCardConfig: (选填)通行证配置，{@link com.everhomes.rest.visitorsys.VisitorsysPassCardConfig}</li>
+ * <li>officeLocationName: (选填)园区办公地点名称</li>
  * </ul>
  */
 public class GetUIConfigurationResponse extends GetConfigurationResponse{
