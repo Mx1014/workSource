@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class test {
     @Test
-    public void test(){
+    public void test() {
         /*Long departmentId = 1023329L;
         String path = "/1023080/1023305/1023329";
         System.out.println(path.contains(String.valueOf(departmentId)));
@@ -41,13 +41,20 @@ public class test {
         Long yep = null;
         System.out.println(0 == yep);
         */
-        java.sql.Date date1 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
+
+
+/*        java.sql.Date date1 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
         java.sql.Date date3 = java.sql.Date.valueOf(LocalDate.now().plusDays(1));
         System.out.println(date1);
         System.out.println(date3);
         System.out.println(date3.after(date1));
         System.out.println(date3.equals(date1));
-        System.out.println(date3.before(date1));
+        System.out.println(date3.before(date1));*/
+
+        String str1 = " \r\n Display";
+        System.out.println(str1);
+        String str2 = str1.replace(" \r\n", "\r\n");
+        System.out.println(str2);
     }
 
 }
