@@ -23,6 +23,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -32,6 +33,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
@@ -734,7 +736,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        User user = UserContext.current().getUser();
 //        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
-
+        
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        if(paymentBillGroup != null) {
+        	try {
+        		if(paymentBillGroup.getBizPayeeId() != null) {
+        			cmd2pay.setBizPayeeId(Long.valueOf(paymentBillGroup.getBizPayeeId()));
+        		}
+        	}catch (Exception e) {
+				LOGGER.error(e.getMessage());
+			}
+        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        }
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
@@ -1648,13 +1662,13 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return contractService.listCustomerContracts(cmd);
     }
     
-    public ListPayeeAccountsResp listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-    	ListPayeeAccountsResp listPayeeAccountsResp = new ListPayeeAccountsResp();
+    public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	//调接口从电商获取收款方账户
-    	
-    	
-    	
-    	return listPayeeAccountsResp;
+    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
+    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    	}else {
+    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    	}
     }
 }
 

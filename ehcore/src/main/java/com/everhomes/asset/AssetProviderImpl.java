@@ -8,9 +8,12 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
+import com.everhomes.pay.user.UserAccountInfo;
 import com.everhomes.rest.asset.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -79,7 +82,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private CoordinationProvider coordinationProvider;
-
+    
+    @Autowired 
+    private PayService payService;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -845,6 +850,8 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
+        List<Long> userIds = new ArrayList<Long>();
+        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         context.select()
@@ -862,12 +869,25 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingDay(r.getValue(t.BILLS_DAY));
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
-                    dto.setBizPayeeAccount(r.getValue(t.BIZ_PAYEE_ACCOUNT));//收款方账户名称
+                    //dto.setBizPayeeAccount(r.getValue(t.BIZ_PAYEE_ACCOUNT));//收款方账户名称
                     dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+                    if(r.getValue(t.BIZ_PAYEE_ID) != null && r.getValue(t.BIZ_PAYEE_ID) != "") {
+                    	userIds.add(Long.parseLong(r.getValue(t.BIZ_PAYEE_ID)));
+                    }
                     dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
                     list.add(dto);
                     return null;
                 });
+        //由于收款方账户名称可能存在修改的情况，故重新请求电商
+        cmd.setUserIds(userIds);
+        List<UserAccountInfo> result = payService.listBusinessUserByIds(cmd);
+        for(int i = 0;i < result.size();i++) {
+        	for(int j = 0;j < list.size();j++) {
+        		if(String.valueOf(result.get(i).getUserId()).equals(list.get(j).getBizPayeeId())){
+        			list.get(j).setBizPayeeAccount(result.get(i).getRemark());
+        		}
+        	}
+        }
         return list;
     }
 

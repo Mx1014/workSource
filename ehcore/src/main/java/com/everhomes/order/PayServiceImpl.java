@@ -45,8 +45,10 @@ import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.pay.user.BindPhoneCommand;
 import com.everhomes.pay.user.BusinessUserDTO;
 import com.everhomes.pay.user.BusinessUserType;
+import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.pay.user.UserAccountInfo;
 import com.everhomes.query.QueryBuilder;
 import com.everhomes.query.QueryCondition;
 import com.everhomes.rest.MapListRestResponse;
@@ -71,9 +73,11 @@ import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pay.controller.ListBusinessUseByIdsRestResponse;
 import com.everhomes.rest.pay.controller.ListBusinessUsersRestResponse;
 import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -85,7 +89,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
-
+/*@Scope(value = WebApplicationContext.SCOPE_SESSION)*/
 @Service
 public class PayServiceImpl implements PayService, ApplicationListener<ContextRefreshedEvent> {
 
@@ -122,13 +126,14 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String payHomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
-        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
-        if(paymentAccount == null){
-            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+        EhNamespacePayMappingsRecord payMapping = payProvider.getNamespacePayMapping(UserContext.getCurrentNamespaceId());
+        if(payMapping == null){
+            LOGGER.error("pay account mapping not found for namespaceId={}", UserContext.getCurrentNamespaceId());
             return;
         }
-        restClient = new RestClient(payHomeUrl, paymentAccount.getAppKey(), paymentAccount.getSecretKey());
+        restClient = new RestClient(payHomeUrl, payMapping.getAppKey(), payMapping.getSecretKey());
     }
+
 
     /**
      *
@@ -1270,8 +1275,13 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
                 // 支付系统中的用户ID
                 dto.setAccountId(bizUser.getId());
+<<<<<<< HEAD
                 // 用户向支付系统注册帐号时填写的帐号名称
                 dto.setAccountName(bizUser.getManageIdentifierToken());
+=======
+                //dto.setAccountName(bizUser.getManageIdentifierToken());
+                dto.setAccountName(bizUser.getRemark());
+>>>>>>> 8a8750a05d7e13475acc0814b9f898f3397809b9
                 
                 // 支付系统中用户类型com.everhomes.pay.user.UserType: MANAGEMENT(0), PERSONAL(1), BUSINESS(2);
                 // 由于可能涉及到业务系统不支付的用户类型（如MANAGEMENT），故当是企业是使用企业类型，其它则对应到普通用户
@@ -1289,11 +1299,43 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 } else {
                     dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
                 }
+                result.add(dto);
             }
         }
+        
+        /*//杨崇鑫用于前端测试开始
+        ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+        dto.setAccountId(Long.parseLong("666666666"));
+        dto.setAccountName("账户名称");
+        dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+        dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+        result.add(dto);
+        //杨崇鑫用于前端测试结束*/   
         return result;
+    }
 
+    @Override
+    public String getPayServerHomeURL() {
+        return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.v2.home.url", "");
     }
     
-    
+    public List<UserAccountInfo> listBusinessUserByIds(ListBusinessUserByIdsCommand cmd){
+    	if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBusinessUserByIds(request), cmd={}", cmd);
+        }
+		ListBusinessUseByIdsRestResponse  response =  restClient.restCall(
+				"POST", 
+				ApiConstants.MEMBER_LISTBUSINESSUSERBYIDS_URL, 
+				cmd,
+				ListBusinessUseByIdsRestResponse.class);
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBusinessUserByIds(response), response={}", GsonUtil.toJson(response));
+        }
+		List<UserAccountInfo> result = new ArrayList<UserAccountInfo>();        
+		if(response != null && response.getErrorCode() != null && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201)
+                && response.getResponse() != null) {
+			result = response.getResponse();
+		}
+		return result;
+    }
 }

@@ -2,20 +2,22 @@
 package com.everhomes.order;
 
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PaymentWithdrawCommand;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
+import com.everhomes.pay.user.UserAccountInfo;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.ListPaymentWithdrawOrderCommand;
 import com.everhomes.rest.order.ListPaymentWithdrawOrderResponse;
 import com.everhomes.rest.order.PaymentBalanceDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentWithdrawCommand;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.user.User;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/9/6.
@@ -142,4 +144,13 @@ public interface PayService {
      * @return 帐号列表
      */
     List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags);
+    
+    /**
+     * 查询支付服务器地址
+     * @return 订单信息
+     */
+    String getPayServerHomeURL();
+    
+    List<UserAccountInfo> listBusinessUserByIds(ListBusinessUserByIdsCommand cmd);
+
 }

@@ -18,6 +18,8 @@ import com.everhomes.rest.order.ListPaymentWithdrawOrderCommand;
 import com.everhomes.rest.order.ListPaymentWithdrawOrderResponse;
 import com.everhomes.rest.order.PaymentBalanceDTO;
 import com.everhomes.rest.order.PaymentWithdrawCommand;
+import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 
 
@@ -28,6 +30,8 @@ public class PayController extends ControllerBase {
 	
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private PayProvider payProvider;
 	
 	/**
 	 * <b>URL: /pay/payNotify</b>
@@ -122,6 +126,36 @@ public class PayController extends ControllerBase {
         ListPaymentWithdrawOrderResponse cmdResponse = payService.listPaymentWithdrawOrders(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pay/getPayServerHomeURL</b>
+     * <p>查询支付服务域名</p>
+     */
+    @RequestMapping("getPayServerHomeURL")
+    public RestResponse getPayServerHomeURL() {
+
+        String url = payService.getPayServerHomeURL();
+        url = url.substring(0, url.length() - 4);
+        RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pay/getPayAppKey</b>
+     * <p>查询当前用户所在的域对应的支付appKey</p>
+     */
+    @RequestMapping("getPayAppKey")
+    public RestResponse getPayAppKey() {
+        EhNamespacePayMappingsRecord payMapping = payProvider.getNamespacePayMapping(UserContext.getCurrentNamespaceId());
+
+        String appKey = payMapping.getAppKey();
+        RestResponse response = new RestResponse(appKey);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

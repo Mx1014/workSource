@@ -22,6 +22,8 @@ import javax.validation.constraints.NotNull;
  *     <li>extendInfo: 额外信息，将原样返回</li>
  *     <li>paymentType: 支付类型，不传则获取除微信公众号以外的所有方式，微信公众号必传 参考{@link com.everhomes.pay.order.PaymentType}</li>
  *     <li>paymentParams: 支付参数 微信公众号必传 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ *     <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
+ *     <li>bizPayeeId:收款方账户id</li>
  * </ul>
  */
 public class PreOrderCommand {
