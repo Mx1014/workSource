@@ -6626,7 +6626,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             EnterprisePropertyDTO dto = new EnterprisePropertyDTO();
             dto.setId(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.ID));
             dto.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
-            dto.setSiteName(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME));
+            dto.setSiteName(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME));
             dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
             return dto;
         });

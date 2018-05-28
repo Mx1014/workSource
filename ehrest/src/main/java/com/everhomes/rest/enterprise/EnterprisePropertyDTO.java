@@ -19,6 +19,7 @@ public class EnterprisePropertyDTO {
     private Long organizationId;
     //办公地点名称
     private String siteName;
+    private String wholeAdderssName;
     private List<OrganizationSiteApartmentDTO> siteDtos;
     private Long id;
 
@@ -60,6 +61,14 @@ public class EnterprisePropertyDTO {
 
     public void setSiteDtos(List<OrganizationSiteApartmentDTO> siteDtos) {
         this.siteDtos = siteDtos;
+    }
+
+    public String getWholeAdderssName() {
+        return wholeAdderssName;
+    }
+
+    public void setWholeAdderssName(String wholeAdderssName) {
+        this.wholeAdderssName = wholeAdderssName;
     }
 
     @Override
