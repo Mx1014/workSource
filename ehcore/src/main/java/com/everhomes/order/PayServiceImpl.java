@@ -1268,7 +1268,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
             List<BusinessUserDTO>  bizUserList = response.getResponse();
             for(BusinessUserDTO bizUser : bizUserList) {
                 ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+                // 支付系统中的用户ID
                 dto.setAccountId(bizUser.getId());
+                // 用户向支付系统注册帐号时填写的帐号名称
                 dto.setAccountName(bizUser.getManageIdentifierToken());
                 
                 // 支付系统中用户类型com.everhomes.pay.user.UserType: MANAGEMENT(0), PERSONAL(1), BUSINESS(2);
@@ -1292,4 +1294,6 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         return result;
 
     }
+    
+    
 }
