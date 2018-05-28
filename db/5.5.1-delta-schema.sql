@@ -1,3 +1,7 @@
+-- 1: 同步客户
+-- /customer/syncEnterpriseCustomerIndex
+
+
 -- Designer: wuhan
 -- Description: ISSUE#25515: 薪酬V2.2（工资条发放管理；app支持工资条查看/确认）
 
