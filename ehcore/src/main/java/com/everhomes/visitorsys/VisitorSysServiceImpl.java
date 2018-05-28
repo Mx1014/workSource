@@ -2118,7 +2118,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysVisitor convert = ConvertHelper.convert(visitor, VisitorSysVisitor.class);
         //新建访客/预约
         if(relatedVisitor !=null){
-            convert = copyRelatedVisitor(visitor,relatedVisitor);
+            convert = relatedVisitor;
+            convert.setEnterpriseId(visitor.getEnterpriseId());
+            convert.setVisitorName(visitor.getVisitorName());
+            convert.setVisitorPhone(visitor.getVisitorPhone());
+            convert.setVisitorSignUri(visitor.getVisitorSignUri());
+            convert.setVisitorSignCharacter(visitor.getVisitorSignCharacter());
+            convert.setVisitorPicUri(visitor.getVisitorPicUri());
+            convert.setPlannedVisitTime(visitor.getPlannedVisitTime());
+            convert.setVisitReason(visitor.getVisitReason());
+            convert.setVisitReasonId(visitor.getVisitReasonId());
+            convert.setFollowUpNumbers(visitor.getFollowUpNumbers());
         }
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             convert.setParentId(relatedVisitor ==null?visitor.getId(): relatedVisitor.getParentId());
@@ -2187,36 +2197,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         convert.setSendMessageInviterFlag(relatedVisitor ==null?visitor.getSendMessageInviterFlag():relatedVisitor.getSendMessageInviterFlag());
         convert.setSendSmsFlag(relatedVisitor ==null?visitor.getSendSmsFlag():relatedVisitor.getSendSmsFlag());
-        convert.setEnterpriseId(visitor.getEnterpriseId());
-        convert.setVisitorName(visitor.getVisitorName());
-        convert.setVisitorPhone(visitor.getVisitorPhone());
-        convert.setVisitorSignUri(visitor.getVisitorSignUri());
-        convert.setVisitorSignCharacter(visitor.getVisitorSignCharacter());
-        convert.setVisitorPicUri(visitor.getVisitorPicUri());
-        convert.setPlannedVisitTime(visitor.getPlannedVisitTime());
-        convert.setVisitReason(visitor.getVisitReason());
-        convert.setVisitReasonId(visitor.getVisitReasonId());
-        convert.setFollowUpNumbers(visitor.getFollowUpNumbers());
         return convert;
         //更新子访客/预约
-    }
-
-    private VisitorSysVisitor copyRelatedVisitor(VisitorSysVisitor visitor, VisitorSysVisitor relatedVisitor) {
-        relatedVisitor.setEnterpriseName(visitor.getEnterpriseName());
-        relatedVisitor.setEnterpriseId(visitor.getEnterpriseId());
-        relatedVisitor.setVisitorName(visitor.getVisitorName());
-        relatedVisitor.setVisitorPhone(visitor.getVisitorPhone());
-        relatedVisitor.setVisitorSignUri(visitor.getVisitorSignUri());
-        relatedVisitor.setVisitorSignCharacter(visitor.getVisitorSignCharacter());
-        relatedVisitor.setVisitorPicUri(visitor.getVisitorPicUri());
-        relatedVisitor.setPlannedVisitTime(visitor.getPlannedVisitTime());
-        relatedVisitor.setVisitTime(visitor.getVisitTime());
-        relatedVisitor.setSendMessageInviterFlag(visitor.getSendMessageInviterFlag());
-        relatedVisitor.setSendSmsFlag(visitor.getSendSmsFlag());
-        relatedVisitor.setVisitReason(visitor.getVisitReason());
-        relatedVisitor.setVisitReasonId(visitor.getVisitReasonId());
-        relatedVisitor.setFollowUpNumbers(visitor.getFollowUpNumbers());
-        return relatedVisitor;
     }
 
     /**
