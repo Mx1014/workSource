@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -20,11 +21,14 @@ import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.pojos.EhNewsCategories;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
@@ -51,10 +55,12 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.news.NewsCategory;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
+import com.everhomes.server.schema.tables.daos.EhNewsCategoriesDao;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.util.StringUtils;
 
@@ -128,12 +134,13 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers) {
+	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers, Long categoryId) {
 		Result<Record> result = getReadOnlyContext().select()
 			.from(Tables.EH_CONTRACTS)
 			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+			.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
 			.fetch();
 		
@@ -208,11 +215,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize) {
+	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize, Long categoryId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
 				.limit(from, pageSize)
 				.fetch();
@@ -225,11 +233,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 	
 	@Override
-	public List<Contract> listContractByOrganizationId(Long organizationId) {
+	public List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc()) 
 				.fetch();
 			
@@ -398,11 +407,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId) {
+	public List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId) {
 		return getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 				.fetch()
 				.map(r->ConvertHelper.convert(r, Contract.class));
 	}
@@ -542,13 +552,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType) {
-
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
 		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
 		if(payorreceiveContractType != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.PAYORRECEIVE_CONTRACT_TYPE.eq(payorreceiveContractType));
+		}
+		if(categoryId != null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.eq(categoryId));
+		}
+		if (categoryId == null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.isNull());
 		}
 		if(communityId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
@@ -647,6 +662,29 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 
 		return result;
+	}
+	
+	@Override
+	public void createContractCategory(ContractCategory contractCategory) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractCategories.class));
+		contractCategory.setId(id);
+		contractCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class, id));
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
+		dao.insert(contractCategory);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractCategories.class, id);
+	}
+	
+	@Override
+	public ContractCategory findContractCategoryById(Long categoryId) { 
+		assert(categoryId != null);
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(getReadOnlyContext().configuration());
+		return ConvertHelper.convert(dao.findById(categoryId), ContractCategory.class);
+	}
+	@Override
+	public void updateContractCategory(ContractCategory contractCategory) {
+		new EhContractCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(contractCategory);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
 	}
 
 	private EhContractsDao getReadWriteDao() {
