@@ -22,15 +22,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
+public class NashornEngineServiceImpl implements NashornEngineService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowNashornEngineServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NashornEngineServiceImpl.class);
     private static final int N = 20;
 
     private ThreadLocal<CompliedScriptHolder> scriptHolderThreadLocal;
-    private ThreadLocal<ExecutorService> executorServiceThreadLocal;
+    private ExecutorService rawExecutorService;
 
-    private BlockingQueue<NashornScript> queue;
+    private BlockingQueue<NashornScript<?>> queue;
     private AtomicBoolean started = new AtomicBoolean(false);
     private final ThreadFactory threadFactory;
     private Thread[] threads;
@@ -38,9 +38,6 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
 
     @Value("#{T(java.util.Arrays).asList('${nashorn.class.includes}')}")
     private List<String> includeClass;
-
-    @Autowired
-    private FlowScriptProvider flowScriptProvider;
 
     private class MyClassFilter implements ClassFilter {
 
@@ -61,7 +58,7 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
         }
     }
 
-    public FlowNashornEngineServiceImpl() {
+    public NashornEngineServiceImpl() {
         threadFactory = new CustomizableThreadFactory("flow-nashorn-engine");
         this.queue = new LinkedBlockingQueue<>();
 
@@ -95,10 +92,7 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
             return null;
         });
         // 线程内的线程池
-        executorServiceThreadLocal = ThreadLocal.withInitial(() -> {
-            return Executors.newFixedThreadPool(1);
-        });
-
+        rawExecutorService = Executors.newFixedThreadPool(N, new CustomizableThreadFactory("flow-nashorn-engine-raw-"));
         start();
     }
 
@@ -124,42 +118,42 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
 
     private void start(final int i) {
         shouldContinue = true;
-        FutureTask<Object> futureTask = new FutureTask<>(() -> {
+
+        threads[i] = threadFactory.newThread(() -> {
             while (shouldContinue) {
                 try {
-                    return process(queue.take());
+                    process(queue.take());
                 } catch (InterruptedException ignored) {
                     //
                 }
             }
-            return null;
         });
 
-        threads[i] = threadFactory.newThread(futureTask);
         threads[i].start();
     }
 
-    private <O> O process(NashornScript<FlowNashornEngineServiceImpl, O> func) {
+    private <O> void process(NashornScript<O> func) {
         Future<O> future = null;
         try {
             if (null == func.getJSFunc()) {
-                return null;
+                return;
             }
 
-            future = executorServiceThreadLocal.get().submit(() -> func.process(this));
+            future = rawExecutorService.submit(() -> func.process(this));
 
             // 超过5分钟就终止
-            O result = future.get(60 * 5, TimeUnit.SECONDS);
+            O result = future.get(60 * 1, TimeUnit.SECONDS);
 
             func.onComplete(result);
-
-            return result;
         } catch (Exception e) {
             cancelFuture(future);
+            // timeout 的时候没有 message 信息
+            if (e instanceof TimeoutException && e.getMessage() == null) {
+                e = new RuntimeException("future timeout exception", e);
+            }
             func.onError(e);
             LOGGER.error("call js function error, func = " + func.getScript(), e);
         }
-        return null;
     }
 
     private void cancelFuture(Future<?> future) {
@@ -169,7 +163,7 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
     }
 
     @Override
-    public void push(NashornScript obj) {
+    public void push(NashornScript<?> obj) {
         if (!started.get()) {
             throw new IllegalStateException("service hasn't be started or was closed");
         }
@@ -221,22 +215,14 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
      * 注意： 需要在 threads 中的线程调用,因为这里用到了 ThreadLocal
      */
     @Override
-    public void compileScript(Long scriptMainId, Integer scriptVersion) {
-        FlowScript flowScript = flowScriptProvider.findByMainIdAndVersion(scriptMainId, scriptVersion);
-        if (flowScript != null) {
-            CompliedScriptHolder compliedScriptHolder = getCompliedScriptHolder();
-            compliedScriptHolder.compile(flowScript);
-        }
-    }
-
-    @Override
-    public ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion) {
-        CompliedScriptHolder compliedScriptHolder = getCompliedScriptHolder();
-        ScriptObjectMirror mirror = compliedScriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
-        if (mirror == null) {
+    public ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion,
+                                                    NashornScript<?> script) {
+        CompliedScriptHolder scriptHolder = getCompliedScriptHolder();
+        ScriptObjectMirror mirror = scriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
+        if (mirror == null && script.getScript() != null) {
             // lazy load
-            compileScript(scriptMainId, scriptVersion);
-            mirror = compliedScriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
+            scriptHolder.compile(scriptMainId, scriptVersion, script.getScript());
+            mirror = scriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
         }
         return mirror;
     }

@@ -6,6 +6,10 @@ var apiService = require("apiService");
 var log = require("log");
 var fetch = require("fetch");
 
+// 常用库
+var md5 = require("lib/md5");
+var base64 = require("lib/base64");
+
 var App = {};
 
 /**
@@ -20,12 +24,32 @@ App.config = {
         description: "供应商数量",
         default: "2"
     },
-    vendorKey: {
+    vendorURL: {
         description: "供应商服务器地址",
         default: "http://zzz.com",
+        // 校验用户输入内容, 如果校验通过, 返回 true, 否则返回提示信息
         validator: function (value) {
-            return value.indexOf("http") !== -1;
+            var pass = value.indexOf("http") !== -1;
+            return pass ? pass : "请输入正确的URL";
         }
+    }
+};
+
+/**
+ * 通过 http 请求回调到这里
+ */
+App.mapping = {
+    base64: function (requestParamMap, requestBody) {
+        var b = base64.encode(requestParamMap.toString());
+        log.info("base64.encode() = ", b);
+        return b;
+    },
+    md5: function (requestParamMap, requestBody) {
+        var hash = md5.create();
+        hash.update(requestParamMap.toString());
+        var hex = hash.hex();
+        log.info("hash.hex() = ", hex);
+        return hex;
     }
 };
 
@@ -36,13 +60,13 @@ App.main = function (ctx) {
     // 提供的API用于获取管理员在后台配置的属性值
     var config = configService(ctx.flowActionType, ctx.flowActionId);
 
-    var vendor = config.getString("vendor");
-    var vendorCount = config.getInt("vendorCount");
-    var vendorKey = config.getString("vendorKey");
+    var vendor = config.getString("vendor") || "通联支付";
+    var vendorCount = config.getInt("vendorCount") || 2;
+    var vendorURL = config.getString("vendorURL") || "http://zzz.com";
 
     log.debug("vendor = ", vendor);
     log.debug("vendorCount = ", vendorCount);
-    log.debug("vendorKey = ", vendorKey);
+    log.debug("vendorURL = ", vendorURL);
 
     // 通过 apiService 获取 api 提供对象
     var flowService = apiService.get("flowService");
@@ -50,23 +74,30 @@ App.main = function (ctx) {
     // moduleService.testCall();
 
     var flowGraph = flowService.getFlowGraph(ctx.flow.flowMainId, ctx.flow.flowVersion);
-    log.debug("flowGraph =", flowGraph);
-    log.debug("flowGraph.flow =", flowGraph.flow);
-    log.debug("flowGraph.flow.flowMainId = ", flowGraph.flow.flowMainId);
+    if (flowGraph != null) {
+        log.debug("flowGraph =", flowGraph);
+        log.debug("flowGraph.flow =", flowGraph.flow);
+        log.debug("flowGraph.flow.flowMainId = ", flowGraph.flow.flowMainId);
+    }
 
     var cctx = flowService.getFlowCaseState(ctx);
-    log.debug("flowCaseState = ", cctx);
-    log.debug("flowCaseState.operator = ", cctx.operator);
-    log.debug("flowCaseState.operator.nickName = ", cctx.operator.nickName);
+    if (cctx != null) {
+        log.debug("flowCaseState = ", cctx);
+        log.debug("flowCaseState.operator = ", cctx.operator);
+        log.debug("flowCaseState.operator.nickName = ", cctx.operator.nickName);
+    }
+
+    var url = "http://10.1.110.33:8888/";
+    url += "?scriptMainId=";
+    url += ctx.action.scriptMainId;
+    url += "&scriptVersion=";
+    url += ctx.action.scriptVersion;
 
     // 发送 http 请求
-    fetch("https://www.zuolin.com", {
-        method: "GET",
-        param: {a: 1, b: "bbb"}
-    }, function (result) {
+    fetch(url, function (result) {
         log.info(new java.lang.String(result.getBody()))
     }, function (reason) {
-        log.error(reason.getStatusCode().value())
+        log.error(reason)
     });
 };
 

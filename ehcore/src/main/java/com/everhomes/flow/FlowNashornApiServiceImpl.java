@@ -23,6 +23,9 @@ public class FlowNashornApiServiceImpl implements FlowModuleNashornApiService {
     }
 
     public FlowGraph getFlowGraph(Long flowId, Integer flowVersion) {
+        if (flowId == null || flowVersion == null) {
+            return null;
+        }
         return flowService.getFlowGraph(flowId, flowVersion);
     }
 

@@ -521,8 +521,6 @@ public class FlowServiceTest extends LoginAuthTestCase {
     @Test
     public void testScripts() {
     	ListScriptsCommand cmd = new ListScriptsCommand();
-    	ListScriptsResponse resp = flowService.listScripts(cmd);
-    	Assert.assertTrue(resp.getScripts().size() > 0);
     }
     
     @Test
@@ -562,5 +560,4 @@ public class FlowServiceTest extends LoginAuthTestCase {
     public void testSynsequence() {
     	sequenceService.syncSequence();
     }
-
 }

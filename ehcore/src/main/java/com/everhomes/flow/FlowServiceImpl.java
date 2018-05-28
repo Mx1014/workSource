@@ -17,6 +17,7 @@ import com.everhomes.flow.action.FlowGraphMessageAction;
 import com.everhomes.flow.action.FlowGraphSMSAction;
 import com.everhomes.flow.action.FlowGraphScriptAction;
 import com.everhomes.flow.action.FlowGraphTrackerAction;
+import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.flow.nashornfunc.NashornScriptConfigExtractor;
 import com.everhomes.flow.nashornfunc.NashornScriptConfigValidator;
 import com.everhomes.flow.nashornfunc.NashornScriptValidator;
@@ -45,6 +46,7 @@ import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
@@ -67,6 +69,8 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.SmsReportRequest;
+import com.everhomes.sms.SmsReportResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -88,8 +92,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -238,7 +247,7 @@ public class FlowServiceImpl implements FlowService {
     private GeneralFormService generalFormService;
 
     @Autowired
-    private FlowNashornEngineService flowNashornEngineService;
+    private NashornEngineService nashornEngineService;
 
     @Autowired
     private FlowScriptConfigProvider flowScriptConfigProvider;
@@ -1187,10 +1196,10 @@ public class FlowServiceImpl implements FlowService {
     }
 
     private void validateScriptConfig(FlowScript script, List<FlowScriptConfigInfo> configs) {
-        LinkedTransferQueue<Map<String, Boolean>> transferQueue = new LinkedTransferQueue<>();
-        flowNashornEngineService.push(new NashornScriptConfigValidator(script, configs, transferQueue));
+        LinkedTransferQueue<List<FlowScriptConfigValidateResult>> transferQueue = new LinkedTransferQueue<>();
+        nashornEngineService.push(new NashornScriptConfigValidator(script, configs, transferQueue));
 
-        Map<String, Boolean> result = null;
+        List<FlowScriptConfigValidateResult> result = null;
         try {
             result = transferQueue.poll(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -1201,17 +1210,17 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_NASHORN_CONFIG_VALIDATE_TIMEOUT,
                     "script config validate timeout");
         }
-        result.forEach((k, pass) -> {
-            if (!pass) {
-                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_NASHORN_CONFIG_VALIDATE_ERROR,
-                        "script config validate error");
+        result.forEach(r -> {
+            if (!r.isPass()) {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_NASHORN_CONFIG_VALIDATE_CUSTOMIZE,
+                        r.getDescription());
             }
         });
     }
 
     private void validateSyntax(FlowScript script) {
         LinkedTransferQueue<Boolean> transferQueue = new LinkedTransferQueue<>();
-        flowNashornEngineService.push(new NashornScriptValidator(script, transferQueue));
+        nashornEngineService.push(new NashornScriptValidator(script, transferQueue));
 
         Boolean pass = null;
         try {
@@ -1231,7 +1240,7 @@ public class FlowServiceImpl implements FlowService {
 
     private List<FlowScriptConfigInfo> getScriptConfig(FlowScript script) {
         LinkedTransferQueue<List<FlowScriptConfigInfo>> transferQueue = new LinkedTransferQueue<>();
-        flowNashornEngineService.push(new NashornScriptConfigExtractor(script, transferQueue));
+        nashornEngineService.push(new NashornScriptConfigExtractor(script, transferQueue));
 
         List<FlowScriptConfigInfo> configs = null;
         try {
@@ -4314,36 +4323,6 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public ListScriptsResponse listScripts(ListScriptsCommand cmd) {
-        ListScriptsResponse resp = new ListScriptsResponse();
-        List<FlowScriptDTO> scripts = new ArrayList<>();
-        resp.setScripts(scripts);
-
-        if (cmd.getNamespaceId() == null) {
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        }
-
-        FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
-        if (entityType == null) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");
-        }
-        Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-        if (flow == null) {
-            return resp;
-        }
-
-        List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(flow.getModuleId(), flow.getModuleType());
-        if (scs != null && scs.size() > 0) {
-            scs.forEach(s -> {
-                FlowScriptDTO dto = ConvertHelper.convert(s, FlowScriptDTO.class);
-                scripts.add(dto);
-            });
-        }
-
-        return resp;
-    }
-
-    @Override
     public FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd) {
         if (cmd.getNamespaceId() == null) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -5376,6 +5355,45 @@ public class FlowServiceImpl implements FlowService {
         ListFlowModuleAppServiceTypesResponse response = new ListFlowModuleAppServiceTypesResponse();
         response.setDtos(typeResponse.getServiceTypes());
         return response;
+    }
+
+    @Override
+    public DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request) {
+        DeferredResult<Object> deferredResult = new DeferredResult<>(5 * 60 * 1000);
+
+        FlowScript flowScript = null;
+
+        FlowScriptMappingMode mappingMode = FlowScriptMappingMode.fromCode(mode);
+        switch (mappingMode) {
+            case SCRIPT_ID_VERSION:
+                flowScript = flowScriptProvider.findByMainIdAndVersion(id1, Integer.valueOf(id2+""));
+                break;
+            case ORGANIZATION_MODULE:
+                flowScript = flowScriptProvider.findNewestFlowScript(id1);
+                break;
+            default:
+                LOGGER.warn("unknown script mapping mode = {}, id1 = {}, id2 = {}", mode, id1, id2);
+                break;
+        }
+
+        if (flowScript == null) {
+            deferredResult.setResult("could not found function");
+            return deferredResult;
+        }
+
+        StringBuilder requestBody = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                requestBody.append(line);
+            }
+        } catch (Exception e) {
+            LOGGER.error("read request body error ", e);
+        }
+
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        nashornEngineService.push(new NashornScriptMappingCall(flowScript, functionName, parameterMap, requestBody.toString(), deferredResult));
+        return deferredResult;
     }
 
     private FlowScriptDTO toFlowScriptDTO(FlowScript script, String ownerType, Long ownerId) {
@@ -6630,7 +6648,7 @@ public class FlowServiceImpl implements FlowService {
         return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 
-    @Scheduled(fixedRate = 10 * 1000L)
+    @Scheduled(fixedRate = 30 * 60 * 1000L)
     public void refreshFlowServiceType() {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());

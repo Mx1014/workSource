@@ -3,7 +3,6 @@ package com.everhomes.flow.action;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 import com.everhomes.flow.nashornfunc.NashornScriptMain;
-import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
@@ -17,12 +16,12 @@ public class FlowGraphScriptAction extends FlowGraphAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphScriptAction.class);
 
     transient private FlowScriptProvider flowScriptProvider;
-    transient private FlowNashornEngineService flowNashornEngineService;
+    transient private NashornEngineService nashornEngineService;
     transient private FlowFunctionService flowFunctionService;
 
     public FlowGraphScriptAction() {
         flowScriptProvider = PlatformContext.getComponent(FlowScriptProvider.class);
-        flowNashornEngineService = PlatformContext.getComponent(FlowNashornEngineService.class);
+        nashornEngineService = PlatformContext.getComponent(NashornEngineService.class);
         flowFunctionService = PlatformContext.getComponent(FlowFunctionService.class);
     }
 
@@ -45,7 +44,7 @@ public class FlowGraphScriptAction extends FlowGraphAction {
             case JAVASCRIPT:
                 FlowScript flowScript = flowScriptProvider.findByMainIdAndVersion(flowAction.getScriptMainId(), flowAction.getScriptVersion());
                 if (flowScript != null) {
-                    flowNashornEngineService.push(new NashornScriptMain(ctx, flowScript, flowAction));
+                    nashornEngineService.push(new NashornScriptMain(ctx, flowScript, flowAction));
                 } else {
                     LOGGER.warn("can not found script by scriptId = {}, action = {}",
                             flowAction.getScriptMainId(), flowAction);

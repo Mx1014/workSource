@@ -15,6 +15,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,27 +108,22 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
         return objs;
     }
 
-    private void prepareObj(FlowScript obj) {
-
+    @Override
+    public FlowScript findNewestFlowScript(Long scriptMainId) {
+        com.everhomes.server.schema.tables.EhFlowScripts t = Tables.EH_FLOW_SCRIPTS;
+        List<FlowScript> flowScripts = queryFlowScripts(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(t.SCRIPT_MAIN_ID.eq(scriptMainId));
+            query.addOrderBy(t.SCRIPT_VERSION.desc());
+            return query;
+        });
+        if (flowScripts.size() > 0) {
+            return flowScripts.iterator().next();
+        }
+        return null;
     }
 
-    @Override
-    public List<FlowScript> findFlowScriptByModuleId(Long moduleId, String moduleType) {
-        ListingLocator locator = new ListingLocator();
-        return queryFlowScripts(locator, 100, new ListingQueryBuilderCallback() {
+    private void prepareObj(FlowScript obj) {
 
-            @Override
-            public SelectQuery<? extends Record> buildCondition(
-                    ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_FLOW_SCRIPTS.MODULE_ID.eq(moduleId));
-                if (moduleType != null) {
-                    query.addConditions(Tables.EH_FLOW_SCRIPTS.MODULE_TYPE.eq(moduleType));
-                }
-
-                return query;
-            }
-
-        });
     }
 
     @Override
