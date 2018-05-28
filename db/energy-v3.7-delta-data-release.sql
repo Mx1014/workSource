@@ -3,7 +3,3 @@ update eh_version_urls set download_url = replace(download_url,'1-0-1','1-0-3'),
   info_url = replace(info_url,'1-0-1','1-0-3'),
   target_version = '1.0.3' where realm_id = (select id from eh_version_realm where realm = 'energyManagement');
 
--- 删除能耗无用数据   by jiarui
-DELETE FROM  eh_energy_meter_tasks WHERE  plan_id in (SELECT  id from eh_energy_plans where name ='autoPlans' and eh_energy_plans.namespace_id =999961 );
-
-DELETE  FROM  eh_energy_plans WHERE  name = 'autoPlans' AND  namespace_id = 999961;
