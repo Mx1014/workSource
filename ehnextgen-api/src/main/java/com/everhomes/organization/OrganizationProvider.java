@@ -801,4 +801,10 @@ public interface OrganizationProvider {
 	 * @param wholeAddressNameOld
 	 */
 	void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew , String wholeAddressNameOld);
+
+	/**
+	 * 向表eh_organizationAddress表中添加数据
+	 * @param organizationAddress
+	 */
+	void insertIntoOrganizationAddress(OrganizationAddress organizationAddress);
 }

@@ -6809,5 +6809,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     }
 
+    /**
+     * 向表eh_organizationAddress表中添加数据
+     * @param organizationAddress
+     */
+    @Override
+    public void insertIntoOrganizationAddress(OrganizationAddress organizationAddress){
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
+        organizationAddress.setId(id);
+        dao.insert(organizationAddress);
+    }
+
 
 }
