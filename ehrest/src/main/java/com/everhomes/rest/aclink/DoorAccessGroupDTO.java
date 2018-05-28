@@ -33,7 +33,7 @@ public class DoorAccessGroupDTO {
     private String keyU;
     @ItemType(DoorAccessDeviceDTO.class)
     private List<DoorAccessDeviceDTO> devices;
-    private List<String> floors;
+    private List<FloorDTO> floors;
 
     public Long getId() {
         return id;
@@ -99,11 +99,11 @@ public class DoorAccessGroupDTO {
         this.devices = devices;
     }
 
-    public List<String> getFloors() {
+    public List<FloorDTO> getFloors() {
         return floors;
     }
 
-    public void setFloors(List<String> floors) {
+    public void setFloors(List<FloorDTO> floors) {
         this.floors = floors;
     }
 
