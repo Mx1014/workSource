@@ -1045,39 +1045,42 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     @Override
     public void rejectVisitor(CreateOrUpdateVisitorCommand cmd) {
-        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getId());
-        if(oldVisitor == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "unknown visitor "+cmd.getId());
-        }
-        String oldFormatVisitorTime = null;
-        if(oldVisitor !=null && oldVisitor.getPlannedVisitTime()!=null) {
-            oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
-        }
-        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
-        String newFormatVisitorTime = null;
-        if(visitor !=null && visitor.getPlannedVisitTime()!=null) {
-            newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
-        }
-        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
-        //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
-        if(type == VisitorsysVisitorType.BE_INVITED
-                && newFormatVisitorTime!=null
-                && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
-            coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
-                    +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
-                visitor.setInvitationNo(generateInvitationNo(visitor));
-                return null;
-            });
-        }
-        dbProvider.execute(r->{
-            generateRejectVisitor(visitor);
-            visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
-            visitorsysSearcher.syncVisitor(visitor);
-            createVisitorActions(visitor);
-            return null;
-        });
+        cmd.setVisitStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        cmd.setBookingStatus(VisitorsysStatus.REJECTED_VISIT.getCode());
+        createOrUpdateVisitor(cmd);
+//        checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//        VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getId());
+//        if(oldVisitor == null){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "unknown visitor "+cmd.getId());
+//        }
+//        String oldFormatVisitorTime = null;
+//        if(oldVisitor !=null && oldVisitor.getPlannedVisitTime()!=null) {
+//            oldFormatVisitorTime = oldVisitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+//        }
+//        VisitorSysVisitor visitor = checkUpdateVisitor(cmd,oldVisitor);
+//        String newFormatVisitorTime = null;
+//        if(visitor !=null && visitor.getPlannedVisitTime()!=null) {
+//            newFormatVisitorTime = visitor.getPlannedVisitTime().toLocalDateTime().format(YYYYMMDD);
+//        }
+//        VisitorsysVisitorType type = checkVisitorType(visitor.getVisitorType());
+//        //如果计划到访时间修改为不是当天，那么重新生成邀请码，生成唯一的邀请码,锁的对象是owner，因为邀请码会有区分owner的部分
+//        if(type == VisitorsysVisitorType.BE_INVITED
+//                && newFormatVisitorTime!=null
+//                && !newFormatVisitorTime.equals(oldFormatVisitorTime)) {
+//            coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_GEN_IN_NO.getCode()
+//                    +visitor.getOwnerType()+visitor.getOwnerId()).enter(()-> {
+//                visitor.setInvitationNo(generateInvitationNo(visitor));
+//                return null;
+//            });
+//        }
+//        dbProvider.execute(r->{
+//            generateRejectVisitor(visitor);
+//            visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
+//            visitorsysSearcher.syncVisitor(visitor);
+//            createVisitorActions(visitor);
+//            return null;
+//        });
     }
 
     @Override
