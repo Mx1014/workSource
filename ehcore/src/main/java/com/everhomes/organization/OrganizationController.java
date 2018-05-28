@@ -1598,9 +1598,6 @@ public class OrganizationController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
         adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
         try {
             resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
             adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -1608,7 +1605,10 @@ public class OrganizationController extends ControllerBase {
             //nothing
             
         }
-        
+        RestResponse response = new RestResponse(adminType);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
         return response;
     }
 
