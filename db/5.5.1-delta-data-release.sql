@@ -7,3 +7,7 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 UPDATE eh_service_modules SET action_type = 74 WHERE id = 51400;
 UPDATE eh_service_module_apps SET action_type = 74 WHERE module_id = 51400;
 -- 薪酬2.2 end
+
+
+-- 客户管理第三方数据跟进人  by jiarui
+UPDATE  eh_enterprise_customers set tracking_uid = NULL  WHERE  tracking_uid = -1;
