@@ -556,6 +556,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 
 			Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+			if(organization == null){
+				return null;
+			}
 			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(organization.getNamespaceId());
 
 			List<OrganizationApp> organizationApps = organizationAppProvider.queryOrganizationApps(new ListingLocator(), 100000, new ListingQueryBuilderCallback() {

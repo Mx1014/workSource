@@ -4362,11 +4362,6 @@ public class CommunityServiceImpl implements CommunityService {
 					"Invalid communityId parameter");
 		}
 
-//		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"Invalid geoPointList parameter");
-//		}
-
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
@@ -4384,20 +4379,33 @@ public class CommunityServiceImpl implements CommunityService {
 			community.setStatus(cmd.getStatus());
 		}
 
+		if(cmd.getProvinceName() != null && cmd.getCityName() != null && cmd.getAreaName() != null){
+			Long provinceId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName()), 0L);  //创建省
+			Long cityId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
+			Long areaId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
+			community.setProvinceId(provinceId);
+			community.setCityId(cityId);
+			community.setAreaId(areaId);
+			community.setProvinceName(cmd.getProvinceName());
+			community.setCityName(cmd.getCityName());
+			community.setAreaName(cmd.getAreaName());
+		}
 
-		Long provinceId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName()), 0L);  //创建省
-		Long cityId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
-		Long areaId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
+
+		if(cmd.getAddress() != null){
+			community.setAddress(cmd.getAddress());
+		}
 
 
-
-		community.setProvinceId(provinceId);
-		community.setCityId(cityId);
-		community.setAreaId(areaId);
-		community.setProvinceName(cmd.getProvinceName());
-		community.setCityName(cmd.getCityName());
-		community.setAreaName(cmd.getAreaName());
-		community.setAddress(cmd.getAddress());
+		if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+			CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+			if(geoPoint != null){
+				geoPoint.setLatitude(cmd.getLatitude());
+				geoPoint.setLongitude(cmd.getLongitude());
+				geoPoint.setGeohash(GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude()));
+				communityProvider.updateCommunityGeoPoint(geoPoint);
+			}
+		}
 
 
 		community.setOperatorUid(userId);
