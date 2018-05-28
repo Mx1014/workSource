@@ -668,9 +668,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
+//            if(customer.getTrackingUid() == null) {
+//                customer.setTrackingUid(-1L);
+//            }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
             insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
