@@ -967,8 +967,10 @@ public class AssetServiceImpl implements AssetService {
                 item.setApartmentName(property.getApartmentName());
                 item.setPropertyIdentifer(property.getPropertyName());
                 //金额
-                item.setAmountOwed(exp.getAmountReceivable());
-                item.setAmountReceivable(exp.getAmountReceivable());
+                //add #30669 增加负数校验
+
+                item.setAmountOwed(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
+                item.setAmountReceivable(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
                 item.setAmountReceived(new BigDecimal("0"));
                 //关联和显示
                 item.setBillGroupId(group.getId());

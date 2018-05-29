@@ -1133,9 +1133,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setApartmentName(dto.getApartmentName());
                     BigDecimal var1 = dto.getAmountReceivable();
                     //减免项不覆盖收费项目的收付，暂时
-                    if(var1==null){
-                        var1 = new BigDecimal("0");
-                    }
+                    var1 = DecimalUtils.negativeValueFilte(var1);
                     item.setAmountOwed(var1);
                     item.setAmountReceivable(var1);
                     item.setAmountReceived(new BigDecimal("0"));
@@ -1185,12 +1183,14 @@ public class AssetProviderImpl implements AssetProvider {
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
+            amountOwed = DecimalUtils.negativeValueFilte(amountOwed);
             newBill.setAmountOwed(amountOwed);
             if(amountOwed.compareTo(zero) == 0) {
                 newBill.setStatus((byte)1);
             }else{
                 newBill.setStatus(billStatus);
             }
+            amountReceivable = DecimalUtils.negativeValueFilte(amountReceivable);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
             newBill.setAmountSupplement(amountSupplement);
