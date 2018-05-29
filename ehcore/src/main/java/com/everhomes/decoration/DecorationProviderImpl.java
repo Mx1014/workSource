@@ -75,7 +75,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
         if (null != ownerId)
             condition = condition.and(Tables.EH_DECORATION_SETTING.OWNER_ID.eq(ownerId));
         step.where(condition);
-        DecorationSetting setting = step.fetchOne().map(r->ConvertHelper.convert(r,DecorationSetting.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        DecorationSetting setting = ConvertHelper.convert(record,DecorationSetting.class);
         return setting;
     }
 
@@ -86,7 +89,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 Tables.EH_DECORATION_SETTING);
         Condition condition = Tables.EH_DECORATION_SETTING.ID.eq(id);
         step.where(condition);
-        DecorationSetting setting = step.fetchOne().map(r->ConvertHelper.convert(r,DecorationSetting.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        DecorationSetting setting = ConvertHelper.convert(record,DecorationSetting.class);
         return setting;
     }
 
@@ -132,7 +138,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 Tables.EH_DECORATION_REQUESTS);
         Condition condition = Tables.EH_DECORATION_REQUESTS.ID.eq(requestId);
         step.where(condition);
-        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationRequest.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        return ConvertHelper.convert(record,DecorationRequest.class);
     }
 
     @Override
@@ -194,7 +203,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 Tables.EH_DECORATION_WORKERS);
         Condition condition = Tables.EH_DECORATION_WORKERS.ID.eq(id);
         step.where(condition);
-        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationWorker.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        return ConvertHelper.convert(record,DecorationWorker.class);
     }
 
     @Override
@@ -205,7 +217,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
         Condition condition = Tables.EH_DECORATION_WORKERS.REQUEST_ID.eq(requestId);
         condition = condition.and(Tables.EH_DECORATION_WORKERS.PHONE.eq(phone));
         step.where(condition);
-        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationWorker.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        return ConvertHelper.convert(record,DecorationWorker.class);
     }
 
     @Override
@@ -292,7 +307,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 Tables.EH_DECORATION_COMPANIES);
         Condition condition = Tables.EH_DECORATION_COMPANIES.ID.eq(id);
         step.where(condition);
-        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationCompany.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        return ConvertHelper.convert(record,DecorationCompany.class);
     }
 
     @Override
@@ -393,7 +411,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
                 Tables.EH_DECORATION_APPROVAL_VALS);
         Condition condition = Tables.EH_DECORATION_APPROVAL_VALS.ID.eq(id);
         step.where(condition);
-        return step.fetchOne().map(r->ConvertHelper.convert(r,DecorationApprovalVal.class));
+        Record record = step.fetchOne();
+        if (record == null)
+            return  null;
+        return ConvertHelper.convert(record,DecorationApprovalVal.class);
     }
 
     @Override
