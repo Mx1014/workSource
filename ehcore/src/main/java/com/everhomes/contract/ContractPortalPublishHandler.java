@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -21,40 +24,48 @@ import com.everhomes.util.StringHelper;
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.CONTRACT_MODULE)
 public class ContractPortalPublishHandler implements PortalPublishHandler {
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(ContractPortalPublishHandler.class);
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContractPortalPublishHandler.class);
+
 	@Autowired
-    private ContractProvider contractProvider;
-	
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
 	@Override
 	public String publish(Integer namespaceId, String instanceConfig, String appName) {
-        LOGGER.error("publish contract. instanceConfig = {}, itemLabel = {}", instanceConfig, appName);
-        ContractInstanceConfig contractInstanceConfig = (ContractInstanceConfig)StringHelper.fromJsonString(instanceConfig, ContractInstanceConfig.class);
-        
-        if(contractInstanceConfig == null) {
-        	contractInstanceConfig = new ContractInstanceConfig();
-        }
-        if(contractInstanceConfig.getCategoryId() == null) {
-        	ContractCategory contractCategory = createContractCategory(namespaceId, appName);
-        	contractInstanceConfig.setCategoryId(contractCategory.getId());
-        } else {
-        	updateContractCategory(namespaceId, contractInstanceConfig.getCategoryId(), appName);
+		LOGGER.error("publish contract. instanceConfig = {}, itemLabel = {}", instanceConfig, appName);
+		ContractInstanceConfig contractInstanceConfig = (ContractInstanceConfig) StringHelper
+				.fromJsonString(instanceConfig, ContractInstanceConfig.class);
+
+		if (contractInstanceConfig == null) {
+			contractInstanceConfig = new ContractInstanceConfig();
 		}
-        return StringHelper.toJsonString(contractInstanceConfig);
+		if (contractInstanceConfig.getCategoryId() == null) {
+			ContractCategory contractCategory = createContractCategory(namespaceId, appName);
+			contractInstanceConfig.setCategoryId(contractCategory.getId());
+		} else {
+			updateContractCategory(namespaceId, contractInstanceConfig.getCategoryId(), appName);
+		}
+		return StringHelper.toJsonString(contractInstanceConfig);
 	}
 
 	@Override
 	public String processInstanceConfig(String instanceConfig) {
-		/*String appendix = "categoryId";
-		instanceConfig = "{\\"url:\\", \\"xxxxxxx\\"}" + categoryId;*/
 		return instanceConfig;
 	}
 
 	@Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig) {
-	
-		
-		return instanceConfig;
+		ContractInstanceConfig map = (ContractInstanceConfig) StringHelper.fromJsonString(instanceConfig,
+				ContractInstanceConfig.class);
+		String categoryId = String.valueOf(map.getCategoryId());
+		String homeUrl = configurationProvider.getValue("home.url", "");
+		String contractAppUrl = configurationProvider.getValue("contract.app.url", "");
+		Map<String, String> variables = new HashMap<String, String>();
+		variables.put("categoryId", categoryId);
+		variables.put("home.url", homeUrl);
+		return StringHelper.interpolate(contractAppUrl, variables);
 	}
 
 	@Override
@@ -62,48 +73,48 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		return actionData;
 	}
 
-   final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*)");
-   
-   @Override
-   public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
-   	if(instanceConfig!=null && instanceConfig.length()!=0){
-   		Matcher m = pattern.matcher(instanceConfig);
-	    	if(m.find()){
-	    		return m.group(1);
-	    	}
-   	}
-   	LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
-   	return null;
-   }
-   
-   @Override
+	final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*)");
+
+	@Override
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+		if (instanceConfig != null && instanceConfig.length() != 0) {
+			Matcher m = pattern.matcher(instanceConfig);
+			if (m.find()) {
+				return m.group(1);
+			}
+		}
+		LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}", instanceConfig);
+		return null;
+	}
+
+	@Override
 	public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
 		return null;
 	}
-    
-   private ContractCategory createContractCategory(Integer namespaceId, String name){
-       User user = UserContext.current().getUser();
-       ContractCategory contractCategory = new ContractCategory();
-       contractCategory.setNamespaceId(namespaceId);
-       contractCategory.setOwnerType("0");
-       contractCategory.setOwnerId(0L);
-       contractCategory.setParentId(0L);
-       contractCategory.setName(name);
-       contractCategory.setStatus(NewsStatus.ACTIVE.getCode());
-       contractCategory.setCreatorUid(user.getId());
-       contractCategory.setDeleteUid(user.getId());
-       contractProvider.createContractCategory(contractCategory);
-       return contractCategory;
-   }
-   
-   private ContractCategory updateContractCategory(Integer namespaceId, Long categoryId, String name){
-	   ContractCategory contractCategory = contractProvider.findContractCategoryById(categoryId);
-       if(null != contractCategory){
-    	   contractCategory.setName(name);
-           contractProvider.updateContractCategory(contractCategory);
-       }else{
-           LOGGER.error("news category is null. categoryId = {}", categoryId);
-       }
-       return contractCategory;
-   }
+
+	private ContractCategory createContractCategory(Integer namespaceId, String name) {
+		User user = UserContext.current().getUser();
+		ContractCategory contractCategory = new ContractCategory();
+		contractCategory.setNamespaceId(namespaceId);
+		contractCategory.setOwnerType("0");
+		contractCategory.setOwnerId(0L);
+		contractCategory.setParentId(0L);
+		contractCategory.setName(name);
+		contractCategory.setStatus(NewsStatus.ACTIVE.getCode());
+		contractCategory.setCreatorUid(user.getId());
+		contractCategory.setDeleteUid(user.getId());
+		contractProvider.createContractCategory(contractCategory);
+		return contractCategory;
+	}
+
+	private ContractCategory updateContractCategory(Integer namespaceId, Long categoryId, String name) {
+		ContractCategory contractCategory = contractProvider.findContractCategoryById(categoryId);
+		if (null != contractCategory) {
+			contractCategory.setName(name);
+			contractProvider.updateContractCategory(contractCategory);
+		} else {
+			LOGGER.error("news category is null. categoryId={}", categoryId);
+		}
+		return contractCategory;
+	}
 }
