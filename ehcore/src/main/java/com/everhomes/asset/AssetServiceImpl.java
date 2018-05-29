@@ -830,7 +830,7 @@ public class AssetServiceImpl implements AssetService {
 		            String billItemListMsg = "";
 		            if(billItemDTOList != null) {
 		            	for(int k = 0; k < billItemDTOList.size();k++) {
-		            		BillItemDTO billItemDTO = billItemDTOList.get(j);
+		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
 		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
 		            	}
 		            }
