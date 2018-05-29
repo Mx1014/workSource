@@ -247,6 +247,7 @@ CREATE TABLE `eh_policy_agent_rules` (
 ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT NULL DEFAULT 0 AFTER `create_time`;
 
 
+
 -- ------------------------------
 -- 服务联盟V3.3（新增需求提单功能）     编辑 登记工时 取消跟踪
 -- 产品功能 #26469 add by huangmingbo  2018/05/29
@@ -323,3 +324,7 @@ ALTER TABLE `eh_service_alliance_jump_module`
 	
 ALTER TABLE `eh_service_alliance_jump_module`
 	ADD COLUMN `instance_config` TEXT NULL DEFAULT NULL AFTER `module_url`;
+
+-- 超级管理员 Added by janson
+ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+
