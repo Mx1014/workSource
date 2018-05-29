@@ -1,6 +1,7 @@
 package com.everhomes.general_approval;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.enterpriseApproval.EnterpriseApprovalFormHandler;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "GENERAL_APPROVE")
-public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
+public class GeneralApprovalFormHandler extends EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
 
-    @Autowired
+    /*@Autowired
     private GeneralApprovalService generalApprovalService;
     @Autowired
     private GeneralFormProvider generalFormProvider;
@@ -101,5 +102,5 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         return null;
-    }
+    }*/
 }
