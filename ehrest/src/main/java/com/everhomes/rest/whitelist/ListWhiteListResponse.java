@@ -14,25 +14,25 @@ import java.util.List;
  */
 public class ListWhiteListResponse {
 
-    private Long nextAnchor;
+    private Long nextPageAnchor;
 
     @ItemType(WhiteListDTO.class)
-    private List<WhiteListDTO> whiteListDTOList;
+    private List<WhiteListDTO> dtos;
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<WhiteListDTO> getWhiteListDTOList() {
-        return whiteListDTOList;
+    public List<WhiteListDTO> getDtos() {
+        return dtos;
     }
 
-    public void setWhiteListDTOList(List<WhiteListDTO> whiteListDTOList) {
-        this.whiteListDTOList = whiteListDTOList;
+    public void setDtos(List<WhiteListDTO> dtos) {
+        this.dtos = dtos;
     }
 
     @Override
