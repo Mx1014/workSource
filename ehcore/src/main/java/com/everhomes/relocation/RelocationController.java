@@ -92,10 +92,10 @@ public class RelocationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /relocation/admin/setRelocationConfig</b>
+     * <b>URL: /relocation/admin/getRelocationConfig</b>
      * <p>获取物品放行参数</p>
      */
-    @RequestMapping("admin/setRelocationConfig")
+    @RequestMapping("admin/getRelocationConfig")
     @RestReturn(value=RelocationConfigDTO.class)
     public RestResponse getRelocationConfig(GetRelocationConfigCommand cmd) {
         RestResponse response = new RestResponse(relocationConfigService.searchRelocationConfigById(cmd));
