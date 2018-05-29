@@ -23,8 +23,17 @@ public class ListBillDetailVO {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
+    private Byte billStatus;
+    
+    public Byte getBillStatus() {
+		return billStatus;
+	}
 
-    public String getInvoiceNum() {
+	public void setBillStatus(Byte billStatus) {
+		this.billStatus = billStatus;
+	}
+
+	public String getInvoiceNum() {
         return invoiceNum;
     }
 
