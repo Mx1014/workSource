@@ -4427,7 +4427,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 			if(cmd.getCommunityIds() != null && !"".equals(cmd.getCommunityIds())){
 				for (Long communityId: cmd.getCommunityIds()){
-					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId(), cmd.getKeepAuthorizationFlag());
+					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId());
 				}
 			}
 
@@ -4438,7 +4438,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId, Byte keepAuthorizationFlag) {
+	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId) {
 
 		if(communityId == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
