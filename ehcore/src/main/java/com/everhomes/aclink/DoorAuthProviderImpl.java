@@ -144,7 +144,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_DOOR_AUTH.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_DOOR_AUTH.ID.ge(locator.getAnchor()));
             }
 
         if(count > 0) query.addLimit(count + 1);
@@ -152,7 +152,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
 
-        if(objs.size() > count) {
+        if(count > 0 && objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -180,8 +180,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
 
-        if(count > 0 && objs.size() >= count) {
+        if(count > 0 && objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+            objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);
         }

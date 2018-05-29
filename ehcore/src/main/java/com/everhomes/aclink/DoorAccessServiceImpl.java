@@ -1585,11 +1585,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         LOGGER.info("timeout for cmdId=", cmdId);
     }
     
-    List<AesUserKey> listAesUserKeyByUser(User user) {
+    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         //TODO cache AesUserKey
+        if(locator == null || locator.getAnchor() == null || locator.getAnchor() == 0){
+        	locator = new ListingLocator();
+        }
+        if(count == null ||count == 0){
+        	count = 60;
+        }
         
-        ListingLocator locator = new ListingLocator();
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), 60));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), count));
         
         //TODO when the key is invalid, MUST invalid it and generate a command.
         
@@ -1614,7 +1619,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public  List<AesUserKey> listAesUserKeyByUserId(Long userId) {
         User user = userProvider.findUserById(userId);
         if(user != null) {
-            return listAesUserKeyByUser(user);
+            return listAesUserKeyByUser(user, null, null);
         }
         
         return new ArrayList<AesUserKey>();
@@ -1623,11 +1628,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     //list all AesUserKeys for current login user
     @Override
-    public ListAesUserKeyByUserResponse listAesUserKeyByUser() {
+    public ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd) {
         User user = UserContext.current().getUser();
         
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user);
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user, locator, cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(AesUserKey key : aesUserKeys) {
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
@@ -1644,6 +1651,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
         
+        if(cmd.getPageSize() != null && cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
+        	locator.setAnchor(dtos.get(dtos.size() - 1).getAuthId());
+        	dtos.remove(dtos.size() - 1);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
         return resp;
@@ -1728,11 +1740,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
         
-        if(dtos.size() > cmd.getPageSize()){
+        if(cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
         	resp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
         	dtos.remove(dtos.size() - 1);
         }
-        
+        resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
         return resp;        
@@ -4795,10 +4807,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}
             }
         }
-        if(dtos.size() > cmd.getPageSize()){
-        	rsp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
-        	dtos.remove(dtos.size() - 1);
-        }
+        rsp.setNextPageAnchor(locator.getAnchor());
         rsp.setAesUserKeys(dtos);
 		
 		return rsp;

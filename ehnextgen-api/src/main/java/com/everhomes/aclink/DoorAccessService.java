@@ -33,7 +33,7 @@ public interface DoorAccessService {
 
     Long deleteDoorAccess(Long doorAccessId);
 
-    ListAesUserKeyByUserResponse listAesUserKeyByUser();
+    ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd);
 
     List<AesUserKey> listAesUserKeyByUserId(Long userId);
 
