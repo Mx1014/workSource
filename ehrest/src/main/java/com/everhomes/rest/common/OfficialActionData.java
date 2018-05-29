@@ -15,7 +15,15 @@ public class OfficialActionData implements Serializable{
     private static final long serialVersionUID = -22341699932739557L;
     //{"url": "http://www.zuolin.com"}  
     private String url;
-    
+
+
+    public OfficialActionData() {
+    }
+
+    public OfficialActionData(String url) {
+        this.url = url;
+    }
+
     public String getUrl() {
         return url;
     }

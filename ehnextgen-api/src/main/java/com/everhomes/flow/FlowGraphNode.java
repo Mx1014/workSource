@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class FlowGraphNode  implements Serializable {
+public abstract class FlowGraphNode implements Serializable {
 
     private FlowNode flowNode;
 
@@ -21,20 +21,21 @@ public abstract class FlowGraphNode  implements Serializable {
     private FlowGraphAction trackApproveEnter;
     private FlowGraphAction trackRejectEnter;
     private FlowGraphAction trackTransferLeave;
+    private FlowGraphAction enterScript;
+
+    private List<FlowGraphAction> enterActions;
+    private List<FlowGraphAction> leaveActions;
+    private List<FlowGraphAction> timeoutActions;
 
     private List<FlowGraphCondition> conditions;
 
     private List<FlowGraphLink> linksIn;
     private List<FlowGraphLink> linksOut;
-    transient private Map<Long, FlowGraphLink> idToLink;
+    private Map<Long, FlowGraphLink> idToLink;
 
     private List<FlowGraphButton> processorButtons;
     private List<FlowGraphButton> applierButtons;
     private List<FlowGraphButton> supervisorButtons;
-
-    private List<FlowGraphAction> enterActions;
-    private List<FlowGraphAction> leaveActions;
-    private List<FlowGraphAction> timeoutActions;
 
     public FlowGraphNode() {
         processorButtons = new ArrayList<>();
@@ -63,30 +64,20 @@ public abstract class FlowGraphNode  implements Serializable {
             return FlowCaseStatus.PROCESS;
         }
     }
-    
+
     public void fireAction(FlowCaseState ctx) {
-        if (this.getMessageAction() != null) {
-            Byte status = this.getMessageAction().getFlowAction().getStatus();
+        fireAction(ctx, this.getMessageAction());
+        fireAction(ctx, this.getSmsAction());
+        fireAction(ctx, this.getTickMessageAction());
+        fireAction(ctx, this.getTickSMSAction());
+        fireAction(ctx, this.getEnterScript());
+    }
+
+    private void fireAction(FlowCaseState ctx, FlowGraphAction action) {
+        if (action != null) {
+            Byte status = action.getFlowAction().getStatus();
             if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                this.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (this.getSmsAction() != null) {
-            Byte status = this.getSmsAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                this.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (this.getTickMessageAction() != null) {
-            Byte status = this.getTickMessageAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                this.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (this.getTickSMSAction() != null) {
-            Byte status = this.getTickSMSAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                this.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+                action.fireAction(ctx, ctx.getCurrentEvent());
             }
         }
     }
@@ -179,6 +170,14 @@ public abstract class FlowGraphNode  implements Serializable {
         this.trackApproveEnter = trackApproveEnter;
     }
 
+    public FlowGraphAction getEnterScript() {
+        return enterScript;
+    }
+
+    public void setEnterScript(FlowGraphAction enterScript) {
+        this.enterScript = enterScript;
+    }
+
     public FlowGraphAction getTrackRejectEnter() {
         return trackRejectEnter;
     }
@@ -247,5 +246,13 @@ public abstract class FlowGraphNode  implements Serializable {
             }
         }
         return idToLink.get(linkId);
+    }
+
+    public Long getFlowNodeId() {
+        return flowNode.getId();
+    }
+
+    public Long getFlowLaneId() {
+        return flowNode.getFlowLaneId();
     }
 }

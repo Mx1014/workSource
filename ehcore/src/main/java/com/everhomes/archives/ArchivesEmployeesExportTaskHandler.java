@@ -64,7 +64,7 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream = archivesService.getArchivesEmployeesExportStream(cmd, taskId);
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

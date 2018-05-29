@@ -44,6 +44,9 @@ public class PmsyHttpUtil {
             nvps.add(new BasicNameValuePair("p5", p5));
             nvps.add(new BasicNameValuePair("p6", p6));
             nvps.add(new BasicNameValuePair("p7", p7));
+            if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Request to siyuan, url={}, param={}", url, nvps);
+    		}
             httpPost.setEntity(new UrlEncodedFormEntity(nvps,"utf-8"));
             CloseableHttpResponse response = httpclient.execute(httpPost);
 
@@ -68,9 +71,15 @@ public class PmsyHttpUtil {
                 	while((s = reader.readLine()) != null){
                 		sb.append(s);
                 	}
-                	System.out.println(sb.toString());
+                	//System.out.println(sb.toString());
+                	if(LOGGER.isDebugEnabled()) {
+	        			LOGGER.debug("Response from siyuan, result={}", sb.toString());
+	        		}
                 			//sb.substring(sb.indexOf(">{")+2, sb.indexOf("</string>"));
                 	result = sb.substring(sb.indexOf(">{")+1, sb.indexOf("</string>"));
+                	if(LOGGER.isDebugEnabled()) {
+	        			LOGGER.debug("Response from siyuan, result->substring={}", result);
+	        		}
                 			// do something useful with the response
                 	instream.close();
                 }

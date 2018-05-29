@@ -1688,13 +1688,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        }
 						}
                         if("trackingUid".equals(field.getFieldName())) {
-                            if (oldData == null || oldData.equals("")) {
+                            if (oldData == null || oldData.equals("")|| oldData.equals("空")) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if (newData == null || newData.equals("")) {
+                            if (newData == null || newData.equals("")||newData.equals("空")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();

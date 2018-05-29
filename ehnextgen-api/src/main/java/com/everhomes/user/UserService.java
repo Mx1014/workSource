@@ -327,4 +327,6 @@ public interface UserService {
     List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
     String makeAnbangRedirectUrl(Long userId, String location,
             Map<String, String[]> paramMap);
+
+    Byte isUserAuth();
 }

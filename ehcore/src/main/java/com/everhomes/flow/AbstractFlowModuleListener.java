@@ -20,15 +20,14 @@ public abstract class AbstractFlowModuleListener implements FlowModuleListener {
 
     @Override
     public List<FlowFormDTO> listFlowForms(Flow flow) {
-        List<FlowFormDTO> flowFormDTOS = new ArrayList<>();
-        List<GeneralForm> generalForms =
-                generalFormProvider.queryGeneralForms(new ListingLocator(), 1000, (locator, query) -> {
+        List<GeneralForm> generalForms = generalFormProvider.queryGeneralForms(new ListingLocator(), 1000, (locator, query) -> {
             query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(flow.getNamespaceId()));
             query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(flow.getModuleType()));
             query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(flow.getModuleId()));
             return query;
         });
 
+        List<FlowFormDTO> flowFormDTOS = new ArrayList<>();
         if (generalForms != null) {
             for (GeneralForm generalForm : generalForms) {
                 FlowFormDTO dto = new FlowFormDTO();
