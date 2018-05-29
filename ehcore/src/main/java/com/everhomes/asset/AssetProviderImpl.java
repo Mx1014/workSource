@@ -2524,7 +2524,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds, Long categoryId) {
         byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
@@ -2536,12 +2536,12 @@ public class AssetProviderImpl implements AssetProvider {
                 }
                 if(coupled){
                     de_coupling = 0;
-                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling);
+                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
                 }
             }
         }else{
             //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling);
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling, categoryId);
         }
     }
 
@@ -2560,7 +2560,7 @@ public class AssetProviderImpl implements AssetProvider {
         return true;
     }
 
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2569,6 +2569,8 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
+                    // add categoryId constraint
+                    .and(t.CATEGORY_ID.eq(categoryId))
                     .execute();
             return;
         }
@@ -2581,6 +2583,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setNamespaceId(namespaceId);
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
+            scope.setCategoryId(categoryId);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             scope.setDecouplingFlag(decouplingFlag);
             scope.setDecouplingFlag(decouplingFlag);
