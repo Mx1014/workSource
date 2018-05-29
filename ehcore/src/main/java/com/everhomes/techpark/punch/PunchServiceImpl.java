@@ -1489,7 +1489,11 @@ public class PunchServiceImpl implements PunchService {
                     updateSmartAlignment(offDutyLog);
                     return;
                 }
-                updateSmartAlignment(offDutyLog);
+                //无论有没有成功校准都置为智能校准
+                if (offDutyLog.getId() != null) { 
+                	offDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
+                    punchProvider.updatePunchLog(offDutyLog);
+                } 
 
             }
         }
@@ -1532,8 +1536,11 @@ public class PunchServiceImpl implements PunchService {
                     updateSmartAlignment(onDutyLog);
                     return;
                 }
-                updateSmartAlignment(onDutyLog);
-
+                //无论有没有成功校准都置为智能校准
+                if (onDutyLog.getId() != null) { 
+                	onDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
+                    punchProvider.updatePunchLog(onDutyLog);
+                } 
             }
         }
 
