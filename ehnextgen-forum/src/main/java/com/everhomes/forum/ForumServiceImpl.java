@@ -300,6 +300,11 @@ public class ForumServiceImpl implements ForumService {
         return dto;
     }
 
+    @Override
+    public PostDTO updateTopic(NewTopicCommand cmd) {
+        return null;
+    }
+
 
 
     /*private void createPostEvent(PostDTO dto){
