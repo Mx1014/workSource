@@ -5187,14 +5187,14 @@ public class PunchServiceImpl implements PunchService {
         while (!start.after(end)) {
 
             try {
-                LOGGER.debug("refresh day log : userid =[" + userId
-                        + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
-                        + dateSF.get().format(end.getTime()) + "]");
                 PunchDayLog newPunchDayLog = new PunchDayLog();
                 this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
                     PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
                             companyId, dateSF.get().format(start.getTime()));
                     if(punchDayLog == null){
+                        LOGGER.debug("refresh day log : userid =[" + userId
+                                + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
+                                + dateSF.get().format(end.getTime()) + "]");
 	                    PunchTimeRule ptr = null;
 	                    refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
                     }
