@@ -245,3 +245,6 @@ CREATE TABLE `eh_policy_agent_rules` (
 
 -- 企业管理员列表 by jiarui
 ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT NULL DEFAULT 0 AFTER `create_time`;
+
+-- 超级管理员 Added by janson
+ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
