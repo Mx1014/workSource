@@ -47,7 +47,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
 
         if (null != checkPhoneIsExists) {
             LOGGER.error("PhoneNumber is exists.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, WhiteListServiceErrorCode.ERROR_WHITELIST_PHONE_IS_EXISTS,
                     "PhoneNumber is exists.");
         }
 
@@ -69,6 +69,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
         List<PhoneWhiteList> list = new ArrayList<>();
         List<String> allPhoneNumbers = this.whiteListProvider.listAllWhiteList(cmd.getNamespaceId());
         String[] phoneNumbers = cmd.getPhoneNumbers().split(",");
+        StringBuffer existsPhones = new StringBuffer();
         for (String phone :phoneNumbers) {
             if (StringUtils.isBlank(phone)) {
                 LOGGER.error("PhoneNumber cannot be null.");
@@ -81,11 +82,9 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
                         "namespaceId cannot be null.");
             }
             if (allPhoneNumbers.contains(phone)) {
-                LOGGER.error("PhoneNumber {} is exists.",phone);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "PhoneNumber is exists.");
+                existsPhones.append(phone).append(",");
+                continue;
             }
-
             User user = UserContext.current().getUser();
             PhoneWhiteList phoneWhiteList = new PhoneWhiteList();
             phoneWhiteList.setPhoneNumber(phone);
@@ -93,6 +92,11 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
             phoneWhiteList.setCreatorUid(user.getId());
             phoneWhiteList.setCreateTime(new Timestamp(System.currentTimeMillis()));
             list.add(phoneWhiteList);
+        }
+        if (existsPhones.length() > 0) {
+            LOGGER.error("PhoneNumber {} is exists.",existsPhones.toString());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, WhiteListServiceErrorCode.ERROR_WHITELIST_PHONE_IS_EXISTS,
+                    "PhoneNumber: "+ existsPhones.toString()+" is exists.");
         }
         whiteListProvider.batchCreateWhiteList(list);
     }
@@ -137,7 +141,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
 
         if (null != checkPhoneIsExists) {
             LOGGER.error("PhoneNumber is exists.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, WhiteListServiceErrorCode.ERROR_WHITELIST_PHONE_IS_EXISTS,
                     "PhoneNumber is exists.");
         }
 
