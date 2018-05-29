@@ -19,6 +19,10 @@ public class UserContext {
     //预览版本标志
     private Long previewPortalVersionId;
 
+    private Long communityId;
+    private Long organizationId;
+    private Long familyId;
+
     public UserContext() {
     }
     
@@ -150,5 +154,29 @@ public class UserContext {
 
     public void setPreviewPortalVersionId(Long previewPortalVersionId) {
         this.previewPortalVersionId = previewPortalVersionId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
     }
 }
