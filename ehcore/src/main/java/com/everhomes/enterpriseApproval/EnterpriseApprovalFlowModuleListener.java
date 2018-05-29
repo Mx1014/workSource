@@ -59,13 +59,13 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
 
     @Override
     public FlowModuleInfo initModule() {
-        FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        /*FlowModuleInfo moduleInfo = new FlowModuleInfo();
         ServiceModule module = serviceModuleProvider.findServiceModuleById(EnterpriseApprovalController.MODULE_ID);
         moduleInfo.setModuleId(module.getId());
         moduleInfo.setModuleName(module.getName());
         //  (启用工作流中的表单设置)
         moduleInfo.addMeta(FlowModuleInfo.META_KEY_FORM_FLAG, String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
-        return null;
+       */ return null;
     }
 
     @Override
