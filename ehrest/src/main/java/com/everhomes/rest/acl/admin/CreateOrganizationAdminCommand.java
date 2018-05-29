@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId:  当前操作的公司id  用于权限校验</li>
  * <li>communityId:  当前操作的小区id  用于权限校验</li>
  * <li>namespaceId:  namespaceId</li>
+ * <li>userId:  用户id</li>
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
@@ -31,6 +32,8 @@ public class CreateOrganizationAdminCommand {
 	private Long communityId;
 
 	private Integer namespaceId;
+
+	private Long userId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -101,4 +104,11 @@ public class CreateOrganizationAdminCommand {
         return StringHelper.toJsonString(this);
     }
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }
