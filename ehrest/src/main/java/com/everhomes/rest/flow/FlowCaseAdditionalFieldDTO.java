@@ -1,8 +1,14 @@
 package com.everhomes.rest.flow;
 
 /**
- * 要使用这个附加字段对象的话，可以继承这个类，
- * 然后再写像com.everhomes.flow.FlowActionCustomField那样的枚举，这样就不用记这些乱七八糟的名称了
+ * <pre>
+ * flowCase在数据库中给业务提供了这些字段供业务存储自己的数据
+ * 在创建flowCase的时候传入此对象工作流就会把对应字段存储到flowCase的表中
+ *
+ * Note:
+ *  要使用这个附加字段对象的话，可以继承这个类
+ *  然后再写像 com.everhomes.flow.FlowActionCustomField 那样的枚举，这样就不用记这些乱七八糟的名称了
+ * </pre>
  *
  * Created by xq.tian on 2017/10/24.
  */

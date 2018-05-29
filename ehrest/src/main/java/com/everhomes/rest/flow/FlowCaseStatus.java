@@ -8,6 +8,7 @@ package com.everhomes.rest.flow;
  * <li>ABSORTED(3): 已完成（已完成，但是处于异常的结束）</li>
  * <li>FINISHED(4): 已完成</li>
  * <li>EVALUATE(5): 待评价</li>
+ * <li>SUSPEND(6): 暂缓</li>
  * <li> 注意： 不能随便改 FlowCaseStatus 的参数值 </li>
  * </ul>
  * @author janson
@@ -19,7 +20,9 @@ public enum FlowCaseStatus {
     PROCESS((byte) 2),
     ABSORTED((byte) 3),
     FINISHED((byte) 4),
-    EVALUATE((byte) 5);
+    EVALUATE((byte) 5),
+    SUSPEND((byte) 6),
+    ;
 
     private Byte code;
 

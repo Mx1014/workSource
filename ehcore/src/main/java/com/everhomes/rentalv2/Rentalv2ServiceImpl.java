@@ -1218,7 +1218,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//fix bug : charge uid null point 2016-10-9
 		if(null != rentalSite.getChargeUid() ){
 			User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
-			if(null != charger) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rentalSite.getChargeUid(),rentalSite.getOrganizationId());
+			if (member != null) {
+				rSiteDTO.setChargeName(member.getContactName());
+			} else if(null != charger) {
 				rSiteDTO.setChargeName(charger.getNickName());
 			}
 		}
@@ -1302,7 +1305,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				return ;
 			}
 		}
-		
+
+		if (rSiteDTO.getNeedPay() == NormalFlag.NONEED.getCode()){
+			rSiteDTO.setAvgPriceStr("免费");
+			return;
+		}
 		List<SitePriceRuleDTO> sitePriceRuleDTOs = rSiteDTO.getSitePriceRules();
 		if (sitePriceRuleDTOs.size() == 1) {
 			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
@@ -1763,6 +1770,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rsb.setRentalResourceRuleId(rentalCell.getId());
 			rsb.setResourceRentalDate(rentalCell.getResourceRentalDate());
 			rsb.setStatus(ResourceOrderStatus.NORMAL.getCode());
+			rsb.setResourceNumber(rentalCell.getResourceNumber());
 
 			rentalv2Provider.createRentalSiteBill(rsb);
 
@@ -6149,7 +6157,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			// 如果超过一种规则，则需要计算其它规则下是否已经占用了此资源（前方高能，即将进入一个极其复杂的方法）
 			rentedCount = rentalv2Provider.countRentalSiteBillOfAllScene(rs, rentalCell, priceRules);
 		}
-		dto.setCounts(rs.getResourceCounts() - rentedCount<0?0:rs.getResourceCounts() - rentedCount);
+
+		dto.setCounts(rentalCell.getCounts() - rentedCount<0?0:rentalCell.getCounts() - rentedCount);
 	}
 
 	private void setRentalCellStatus(java.util.Date reserveTime, RentalSiteRulesDTO dto, RentalCell rsr, RentalDefaultRule rule) {
@@ -6714,6 +6723,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
+	public void updateResourceStatus(UpdateResourceAdminCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+		RentalResource rentalSite = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getId());
+		rentalSite.setStatus(cmd.getStatus());
+		rentalv2Provider.updateRentalSite(rentalSite);
+	}
+
+	@Override
 	public void updateItem(UpdateItemAdminCommand cmd) {
 		if(null==cmd.getItemType())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -6764,12 +6783,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cell.setPrice(cmd.getPrice());
 			cell.setInitiatePrice(cmd.getInitiatePrice());
 			cell.setOriginalPrice(cmd.getOriginalPrice());
-			cell.setOrgMemberPrice(cmd.getOrgMemberPrice());
-			cell.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
-			cell.setOrgMemberOriginalPrice(cmd.getOrgMemberOriginalPrice());
-			cell.setApprovingUserPrice(cmd.getApprovingUserPrice());
-			cell.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
-			cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
+			if (RentalUserPriceType.UNIFICATION.getCode() == cmd.getUserPriceType()){
+				cell.setOrgMemberPrice(cmd.getPrice());
+				cell.setOrgMemberInitiatePrice(cmd.getInitiatePrice());
+				cell.setOrgMemberOriginalPrice(cmd.getOriginalPrice());
+				cell.setApprovingUserPrice(cmd.getPrice());
+				cell.setApprovingUserInitiatePrice(cmd.getInitiatePrice());
+				cell.setApprovingUserOriginalPrice(cmd.getOriginalPrice());
+			}else {
+				cell.setOrgMemberPrice(cmd.getOrgMemberPrice());
+				cell.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
+				cell.setOrgMemberOriginalPrice(cmd.getOrgMemberOriginalPrice());
+				cell.setApprovingUserPrice(cmd.getApprovingUserPrice());
+				cell.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
+				cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
+			}
 			cell.setStatus(cmd.getStatus());
 			cell.setCounts(cmd.getCounts());
 			cell.setPricePackageId(cmd.getSitePackageId());

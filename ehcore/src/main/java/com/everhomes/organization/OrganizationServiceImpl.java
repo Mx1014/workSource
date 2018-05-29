@@ -1666,9 +1666,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
+//            if(customer.getTrackingUid() == null) {
+//                customer.setTrackingUid(-1L);
+//            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1686,7 +1686,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
-            customer.setTrackingUid(-1L);
+//            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -9164,7 +9164,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
                 managerDTO.setMemberId(member.getId());
                 managerDTO.setDetailId(member.getDetailId());
-                managerDTO.setContactName(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()).getContactName());
+                OrganizationMemberDetails memberDetails = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                if (memberDetails != null) {
+                    managerDTO.setContactName(memberDetails.getContactName());
+                }
                 dtos.add(managerDTO);
             }
         }
