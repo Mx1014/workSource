@@ -4250,8 +4250,14 @@ public class CommunityServiceImpl implements CommunityService {
 		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
-				Community community = communityProvider.findCommunityById(pointList.get(0).getCommunityId());
-				if(community != null){
+				for(CommunityGeoPoint point: pointList){
+
+
+					Community community = communityProvider.findCommunityById(point.getCommunityId());
+					if(community == null || !community.getNamespaceId().equals(UserContext.getCurrentNamespaceId())){
+						continue;
+					}
+
 					CommunityInfoDTO dto = ConvertHelper.convert(community, CommunityInfoDTO.class);
 
 					Set<Long> familyCommunityIdSet;
@@ -4277,6 +4283,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 					return dto;
 				}
+
 			}
 		}
 
