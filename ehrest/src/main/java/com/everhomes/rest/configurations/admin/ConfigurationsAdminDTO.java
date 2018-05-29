@@ -6,12 +6,12 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>
-* <li>dtoList: 后台返回数组 ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
+* <li>dtos: 后台返回数组 ，参考{@com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO}</li>
 * <li>nextPageAnchor: 下一页开始锚点</li>
 * </ul>
 */
 public class ConfigurationsAdminDTO {
-	private List<ConfigurationsIdAdminDTO> dtoList;
+	private List<ConfigurationsIdAdminDTO> dtos;
 	
 
     private Long nextPageAnchor;
@@ -28,13 +28,13 @@ public class ConfigurationsAdminDTO {
 	}
 
 
-	public List<ConfigurationsIdAdminDTO> getDtoList() {
-		return dtoList;
+	public List<ConfigurationsIdAdminDTO> getDtos() {
+		return dtos;
 	}
 
 
-	public void setDtoList(List<ConfigurationsIdAdminDTO> dtoList) {
-		this.dtoList = dtoList;
+	public void setDtos(List<ConfigurationsIdAdminDTO> dtos) {
+		this.dtos = dtos;
 	}
 
 

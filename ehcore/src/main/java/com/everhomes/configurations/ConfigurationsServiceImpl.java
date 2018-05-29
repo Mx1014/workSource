@@ -59,7 +59,7 @@ public class ConfigurationsServiceImpl implements  ConfigurationsService{
 		 //对象转换
 		ConfigurationsAdminDTO returnDto = new ConfigurationsAdminDTO ();
 
-		returnDto.setDtoList(boList.stream().map(r->{
+		returnDto.setDtos(boList.stream().map(r->{
 			//copy 相同属性下的值
 			ConfigurationsIdAdminDTO dto = ConvertHelper.convert(r, ConfigurationsIdAdminDTO.class);				
 				return dto;
