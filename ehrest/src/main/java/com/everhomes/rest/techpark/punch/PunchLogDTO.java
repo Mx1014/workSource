@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
- * <li>expiryTime：状态终止时间(app在超过这个时间之后要重新请求数据更新页面)</li> 
+ * <li>expiryTime：状态终止时间(APP在超过这个时间之后要重新请求数据更新页面)</li> 
  * <li>punchIntervalNo：第几个打卡时间段</li> 
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
@@ -19,6 +19,11 @@ import com.everhomes.util.StringHelper;
  * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
  * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
  * <li>identification： 打卡设备的唯一标识 </li>
+ * <li>userName： 用户姓名 </li>
+ * <li>deptName：部门名 </li>
+ * <li>ruleName：规则名称 </li>
+ * <li>locationInfo：打卡地点信息 </li>
+ * <li>deviceChangeFlag：设备异常 0-否 1-是 </li>
  * </ul>
  */
 public class PunchLogDTO {
@@ -38,7 +43,17 @@ public class PunchLogDTO {
     private Byte smartAlignment;
 
     private Long shouldPunchTime;
+    private Long punchDate;
 
+    private Long userId;
+    private String userName;
+    private String deptName;
+    private String ruleName;
+
+    private String locationInfo;
+
+    private Byte deviceChangeFlag;
+    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -46,6 +61,46 @@ public class PunchLogDTO {
 
 	public String getIdentification() {
 		return identification;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+
+	public String getRuleName() {
+		return ruleName;
+	}
+
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
+
+	public String getLocationInfo() {
+		return locationInfo;
+	}
+
+	public void setLocationInfo(String locationInfo) {
+		this.locationInfo = locationInfo;
+	}
+
+	public Byte getDeviceChangeFlag() {
+		return deviceChangeFlag;
+	}
+
+	public void setDeviceChangeFlag(Byte deviceChangeFlag) {
+		this.deviceChangeFlag = deviceChangeFlag;
 	}
 
 	public void setIdentification(String identification) {
@@ -158,5 +213,21 @@ public class PunchLogDTO {
 
 	public void setShouldPunchTime(Long shouldPunchTime) {
 		this.shouldPunchTime = shouldPunchTime;
+	}
+
+	public Long getPunchDate() {
+		return punchDate;
+	}
+
+	public void setPunchDate(Long punchDate) {
+		this.punchDate = punchDate;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }

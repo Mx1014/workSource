@@ -1,29 +1,5 @@
 package com.everhomes.techpark.punch;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.everhomes.rest.approval.*;
-import com.everhomes.rest.approval.ApprovalStatus;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
-import com.everhomes.rest.techpark.punch.*;
-import com.everhomes.server.schema.tables.daos.*;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -32,8 +8,40 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.ListTargetType;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.techpark.punch.ClockCode;
+import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
+import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchOwnerType;
+import com.everhomes.rest.techpark.punch.PunchRquestType;
+import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.TimeCompareFlag;
+import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
+import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
+import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
+import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWorkdayRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
@@ -69,6 +77,37 @@ import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteWhereStep;
+import org.jooq.InsertQuery;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Record3;
+import org.jooq.Record5;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectHavingStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class PunchProviderImpl implements PunchProvider {
@@ -1060,6 +1099,49 @@ public class PunchProviderImpl implements PunchProvider {
                     return r.value1();
                 });
         return resultRecord;
+	}
+
+
+	@Override
+	public List<PunchLog> listPunchLogs(List<Long> userIds, Long ownerId, String startDay,
+			String endDay, Byte exceptionStatus, Integer pageOffset, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode());
+    	condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_TIME.isNotNull());
+        if(null != ownerId){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId));
+        }
+        if(null != userIds){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.USER_ID.in(userIds));
+        } 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        if(null!=exceptionStatus){
+        	if(NormalFlag.fromCode(exceptionStatus) == NormalFlag.NEED){ 
+            	condition = condition.and(Tables.EH_PUNCH_LOGS.STATUS.eq(PunchStatus.NORMAL.getCode()));
+        	}else { 
+            	condition = condition.and(Tables.EH_PUNCH_LOGS.STATUS.ne(PunchStatus.NORMAL.getCode()));
+        	}
+        }
+//        Integer offset = (pageOffset == null) ? 0 : (pageOffset - 1) * pageSize;
+        if (null != pageOffset && null != pageSize){
+            step.limit(pageOffset, pageSize);
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<EhPunchLogsRecord> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_TIME.desc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, EhPunchLogsRecord.class);
+                });
+
+        List<PunchLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchLog.class);
+        }).collect(Collectors.toList());
+        return result;
 	}
     @Override
     public List<PunchLog> listPunchLogs(Long userId,
@@ -2399,12 +2481,10 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId, Long detailId) {
+    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        DeleteWhereStep<EhPunchStatisticsRecord> step = context
-                .delete(Tables.EH_PUNCH_STATISTICS);
+        DeleteWhereStep<EhPunchStatisticsRecord> step = context.delete(Tables.EH_PUNCH_STATISTICS);
         Condition condition = Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.equal(punchMonth)
-                .and(Tables.EH_PUNCH_STATISTICS.USER_ID.equal(userId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.in(ownerId))
                 .and(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.equal(detailId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.equal(ownerType));
@@ -2849,9 +2929,9 @@ public class PunchProviderImpl implements PunchProvider {
             return ConvertHelper.convert(r, PunchExceptionRequest.class);
         }).collect(Collectors.toList());
         if (result == null || result.size() == 0) {
-            return null;
+            return new ArrayList<>();
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     @Override
@@ -2892,10 +2972,11 @@ public class PunchProviderImpl implements PunchProvider {
         if (result == null || result.size() == 0) {
             return null;
         }
-        return result;
+        return new ArrayList<>(result);
     }
+
     @Override
-    public Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth) {
+    public Integer countExceptionRequests(Long userId, Long ownerId, String punchMonth, List<Byte> statusList) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         Date beginDate;
         try {
@@ -2909,12 +2990,10 @@ public class PunchProviderImpl implements PunchProvider {
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
-                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
-//					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
-//			LOGGER.debug(step.toString());
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.in(statusList));
             return step.fetchOneInto(Integer.class);
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return 0;
         }
@@ -2957,7 +3036,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth) {
+    public List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth, Map<Long, String> approvalCategoryIdNames) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         Timestamp beginDate;
         try {
@@ -2977,10 +3056,9 @@ public class PunchProviderImpl implements PunchProvider {
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode()))
                     .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
-                    .where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(0))
-                    .and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(0L))
-                    .groupBy(Tables.EH_APPROVAL_CATEGORIES.ID);
-//			LOGGER.debug(step.toString());
+                    .where(Tables.EH_APPROVAL_CATEGORIES.ID.in(approvalCategoryIdNames.keySet()))
+                    .groupBy(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME);
+
             result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
                 ExtDTO dto = new ExtDTO();
                 dto.setName(r.value1());
@@ -2996,8 +3074,6 @@ public class PunchProviderImpl implements PunchProvider {
             }
             return result;
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             return null;
         }
     }
@@ -3175,5 +3251,265 @@ public class PunchProviderImpl implements PunchProvider {
         return result;
 
     }
+
+    @Override
+    public void deletePunchLogs(Long ownerId, Date monthBegin, Date monthEnd){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	context.delete(Tables.EH_PUNCH_LOG_FILES)
+    	.where(Tables.EH_PUNCH_LOG_FILES.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_LOG_FILES.PUNCH_DATE.between(monthBegin, monthEnd))).execute();
+    }
+
+    @Override
+    public void filePunchLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	
+    	context.insertInto(Tables.EH_PUNCH_LOG_FILES,
+    			Tables.EH_PUNCH_LOG_FILES.ID,
+    			Tables.EH_PUNCH_LOG_FILES.USER_ID,
+    			Tables.EH_PUNCH_LOG_FILES.ENTERPRISE_ID,
+    			Tables.EH_PUNCH_LOG_FILES.LONGITUDE,
+    			Tables.EH_PUNCH_LOG_FILES.LATITUDE,
+    			Tables.EH_PUNCH_LOG_FILES.PUNCH_DATE,
+    			Tables.EH_PUNCH_LOG_FILES.PUNCH_TIME,
+    			Tables.EH_PUNCH_LOG_FILES.PUNCH_STATUS,
+    			Tables.EH_PUNCH_LOG_FILES.IDENTIFICATION,
+    			Tables.EH_PUNCH_LOG_FILES.PUNCH_TYPE,
+    			Tables.EH_PUNCH_LOG_FILES.PUNCH_INTERVAL_NO,
+    			Tables.EH_PUNCH_LOG_FILES.RULE_TIME,
+    			Tables.EH_PUNCH_LOG_FILES.STATUS,
+    			Tables.EH_PUNCH_LOG_FILES.APPROVAL_STATUS,
+    			Tables.EH_PUNCH_LOG_FILES.SMART_ALIGNMENT,
+    			Tables.EH_PUNCH_LOG_FILES.WIFI_INFO,
+                Tables.EH_PUNCH_LOG_FILES.LOCATION_INFO,
+                Tables.EH_PUNCH_LOG_FILES.DEVICE_CHANGE_FLAG,
+    			Tables.EH_PUNCH_LOG_FILES.SHOULD_PUNCH_TIME)
+    	.select(context.select(Tables.EH_PUNCH_LOGS.ID,
+    			Tables.EH_PUNCH_LOGS.USER_ID,
+    			Tables.EH_PUNCH_LOGS.ENTERPRISE_ID,
+    			Tables.EH_PUNCH_LOGS.LONGITUDE,
+    			Tables.EH_PUNCH_LOGS.LATITUDE,
+    			Tables.EH_PUNCH_LOGS.PUNCH_DATE,
+    			Tables.EH_PUNCH_LOGS.PUNCH_TIME,
+    			Tables.EH_PUNCH_LOGS.PUNCH_STATUS,
+    			Tables.EH_PUNCH_LOGS.IDENTIFICATION,
+    			Tables.EH_PUNCH_LOGS.PUNCH_TYPE,
+    			Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO,
+    			Tables.EH_PUNCH_LOGS.RULE_TIME,
+    			Tables.EH_PUNCH_LOGS.STATUS,
+    			Tables.EH_PUNCH_LOGS.APPROVAL_STATUS,
+    			Tables.EH_PUNCH_LOGS.SMART_ALIGNMENT,
+    			Tables.EH_PUNCH_LOGS.WIFI_INFO,
+                Tables.EH_PUNCH_LOGS.LOCATION_INFO,
+                Tables.EH_PUNCH_LOGS.DEVICE_CHANGE_FLAG,
+                Tables.EH_PUNCH_LOGS.SHOULD_PUNCH_TIME).from(Tables.EH_PUNCH_LOGS)
+    			.where(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(monthBegin, monthEnd))))
+    					.execute();
+    	
+    	context.update(Tables.EH_PUNCH_LOG_FILES).set(Tables.EH_PUNCH_LOG_FILES.FILE_TIME,report.getFileTime())
+    	.set(Tables.EH_PUNCH_LOG_FILES.FILER_NAME,report.getFilerName())
+    	.set(Tables.EH_PUNCH_LOG_FILES.FILER_UID,report.getFilerUid())
+    	.set(Tables.EH_PUNCH_LOG_FILES.MONTH_REPORT_ID,report.getId())
+    	.where(Tables.EH_PUNCH_LOG_FILES.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_LOG_FILES.PUNCH_DATE.between(monthBegin, monthEnd))).execute();
+    }
+
+	@Override
+	public void deletePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	context.delete(Tables.EH_PUNCH_DAY_LOG_FILES)
+    	.where(Tables.EH_PUNCH_DAY_LOG_FILES.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_DATE.between(monthBegin, monthEnd))).execute();
+	}
+
+	@Override
+	public void filePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd,
+			PunchMonthReport report) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	
+    	context.insertInto(Tables.EH_PUNCH_DAY_LOG_FILES,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.ID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.USER_ID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.ENTERPRISE_ID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_DATE,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.ARRIVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.LEAVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.WORK_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.STATUS,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.CREATOR_UID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.CREATE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.VIEW_FLAG,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.MORNING_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.AFTERNOON_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_TIMES_PER_DAY,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.NOON_LEAVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.AFTERNOON_ARRIVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.EXCEPTION_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.DEVICE_CHANGE_FLAG,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.STATUS_LIST,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_COUNT,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_ORGANIZATION_ID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.RULE_TYPE,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.TIME_RULE_NAME,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.TIME_RULE_ID,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.APPROVAL_STATUS_LIST,
+                Tables.EH_PUNCH_DAY_LOG_FILES.BELATE_TIME_TOTAL,
+                Tables.EH_PUNCH_DAY_LOG_FILES.LEAVE_EARLY_TIME_TOTAL,
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.SMART_ALIGNMENT)
+    	.select(context.select(Tables.EH_PUNCH_DAY_LOGS.ID,
+    		    Tables.EH_PUNCH_DAY_LOGS.USER_ID,
+    		    Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID,
+    		    Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,
+    		    Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.LEAVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.WORK_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.STATUS,
+    		    Tables.EH_PUNCH_DAY_LOGS.CREATOR_UID,
+    		    Tables.EH_PUNCH_DAY_LOGS.CREATE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG,
+    		    Tables.EH_PUNCH_DAY_LOGS.MORNING_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOGS.PUNCH_TIMES_PER_DAY,
+    		    Tables.EH_PUNCH_DAY_LOGS.NOON_LEAVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.AFTERNOON_ARRIVE_TIME,
+    		    Tables.EH_PUNCH_DAY_LOGS.EXCEPTION_STATUS,
+    		    Tables.EH_PUNCH_DAY_LOGS.DEVICE_CHANGE_FLAG,
+    		    Tables.EH_PUNCH_DAY_LOGS.STATUS_LIST,
+    		    Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT,
+    		    Tables.EH_PUNCH_DAY_LOGS.PUNCH_ORGANIZATION_ID,
+    		    Tables.EH_PUNCH_DAY_LOGS.RULE_TYPE,
+    		    Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_NAME,
+    		    Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID,
+    		    Tables.EH_PUNCH_DAY_LOGS.APPROVAL_STATUS_LIST,
+                Tables.EH_PUNCH_DAY_LOGS.BELATE_TIME_TOTAL,
+                Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_TIME_TOTAL,
+    		    Tables.EH_PUNCH_DAY_LOGS.SMART_ALIGNMENT )
+    		    .from(Tables.EH_PUNCH_DAY_LOGS)
+    			.where(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(monthBegin, monthEnd))))
+    					.execute();
+    	
+    	context.update(Tables.EH_PUNCH_DAY_LOG_FILES).set(Tables.EH_PUNCH_DAY_LOG_FILES.FILE_TIME,report.getFileTime())
+    	.set(Tables.EH_PUNCH_DAY_LOG_FILES.FILER_NAME,report.getFilerName())
+    	.set(Tables.EH_PUNCH_DAY_LOG_FILES.FILER_UID,report.getFilerUid())
+    	.set(Tables.EH_PUNCH_DAY_LOG_FILES.MONTH_REPORT_ID,report.getId())
+    	.where(Tables.EH_PUNCH_DAY_LOG_FILES.ENTERPRISE_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_DATE.between(monthBegin, monthEnd))).execute();
+	}
+
+	@Override
+	public void deletePunchDayLogs(Long ownerId, String punchMonth) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	context.delete(Tables.EH_PUNCH_STATISTIC_FILES)
+    	.where(Tables.EH_PUNCH_STATISTIC_FILES.OWNER_ID.eq(ownerId)
+    					.and(Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_MONTH.eq(punchMonth))).execute();
+	}
+
+	@Override
+	public void filePunchDayLogs(Long ownerId, String punchMonth, PunchMonthReport report) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	
+    	context.insertInto(Tables.EH_PUNCH_STATISTIC_FILES,Tables.EH_PUNCH_STATISTIC_FILES.ID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_MONTH,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.OWNER_TYPE,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.OWNER_ID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.USER_ID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.USER_NAME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.DEPT_ID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.DEPT_NAME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.WORK_DAY_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.WORK_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.BELATE_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.LEAVE_EARLY_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.BLANDLE_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.UNPUNCH_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.ABSENCE_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.SICK_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.EXCHANGE_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.OUTWORK_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.OVER_TIME_SUM,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_TIMES_PER_DAY,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.EXCEPTION_STATUS,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.DESCRIPTION,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.CREATOR_UID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.CREATE_TIME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.EXTS,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.USER_STATUS,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_ORG_NAME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.DETAIL_ID,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.EXCEPTION_DAY_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.ANNUAL_LEAVE_BALANCE,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_COMPENSATION_BALANCE,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.DEVICE_CHANGE_COUNTS,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.EXCEPTION_REQUEST_COUNTS,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.BELATE_TIME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.LEAVE_EARLY_TIME,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_COUNT,
+    		    Tables.EH_PUNCH_STATISTIC_FILES.STATUS_LIST )
+    	.select(context.select(Tables.EH_PUNCH_STATISTICS.ID,
+    		    Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH,
+    		    Tables.EH_PUNCH_STATISTICS.OWNER_TYPE,
+    		    Tables.EH_PUNCH_STATISTICS.OWNER_ID,
+    		    Tables.EH_PUNCH_STATISTICS.USER_ID,
+    		    Tables.EH_PUNCH_STATISTICS.USER_NAME,
+    		    Tables.EH_PUNCH_STATISTICS.DEPT_ID,
+    		    Tables.EH_PUNCH_STATISTICS.DEPT_NAME,
+    		    Tables.EH_PUNCH_STATISTICS.WORK_DAY_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.WORK_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.BELATE_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.BLANDLE_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.UNPUNCH_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.SICK_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.EXCHANGE_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.OUTWORK_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.OVER_TIME_SUM,
+    		    Tables.EH_PUNCH_STATISTICS.PUNCH_TIMES_PER_DAY,
+    		    Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS,
+    		    Tables.EH_PUNCH_STATISTICS.DESCRIPTION,
+    		    Tables.EH_PUNCH_STATISTICS.CREATOR_UID,
+    		    Tables.EH_PUNCH_STATISTICS.CREATE_TIME,
+    		    Tables.EH_PUNCH_STATISTICS.EXTS,
+    		    Tables.EH_PUNCH_STATISTICS.USER_STATUS,
+    		    Tables.EH_PUNCH_STATISTICS.PUNCH_ORG_NAME,
+    		    Tables.EH_PUNCH_STATISTICS.DETAIL_ID,
+    		    Tables.EH_PUNCH_STATISTICS.EXCEPTION_DAY_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.ANNUAL_LEAVE_BALANCE,
+    		    Tables.EH_PUNCH_STATISTICS.OVERTIME_COMPENSATION_BALANCE,
+    		    Tables.EH_PUNCH_STATISTICS.DEVICE_CHANGE_COUNTS,
+    		    Tables.EH_PUNCH_STATISTICS.EXCEPTION_REQUEST_COUNTS,
+    		    Tables.EH_PUNCH_STATISTICS.BELATE_TIME,
+    		    Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_TIME,
+    		    Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT,
+    		    Tables.EH_PUNCH_STATISTICS.STATUS_LIST).from(Tables.EH_PUNCH_STATISTICS)
+    			.where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth))))
+    					.execute();
+    	
+    	context.update(Tables.EH_PUNCH_STATISTIC_FILES).set(Tables.EH_PUNCH_STATISTIC_FILES.FILE_TIME,report.getFileTime())
+    	.set(Tables.EH_PUNCH_STATISTIC_FILES.FILER_NAME,report.getFilerName())
+    	.set(Tables.EH_PUNCH_STATISTIC_FILES.MONTH_REPORT_ID,report.getId())
+    	.set(Tables.EH_PUNCH_STATISTIC_FILES.FILER_UID,report.getFilerUid())
+    	.where(Tables.EH_PUNCH_STATISTIC_FILES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_MONTH.eq(punchMonth)).execute();
+		
+	}
+
+	@Override
+	public PunchLog findLastPunchLog(Long userId, Long enterpriseId, Timestamp punchTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+    	Record record = context.select().from(Tables.EH_PUNCH_LOGS)
+    	.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
+		.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(enterpriseId))
+		.and(Tables.EH_PUNCH_LOGS.PUNCH_TIME.lt(punchTime))
+		.orderBy(Tables.EH_PUNCH_LOGS.PUNCH_TIME.desc())
+		.limit(1).fetchAny();
+    	if(null == record)
+    		return null;
+    	
+		return record.map(r->{ return ConvertHelper.convert(r, PunchLog.class);});
+	}
 }
 

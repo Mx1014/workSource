@@ -1,23 +1,53 @@
 package com.everhomes.techpark.punch;
 
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
+import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
+import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
+import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
+import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
+import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
+import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
+import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
+import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
+import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
+import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
+import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
+import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
+import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.PunchClockCommand;
+import com.everhomes.rest.techpark.punch.PunchLogsDay;
+import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
+import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
-import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
+import javax.validation.Valid;
 
 /**
  * <ul>
@@ -224,15 +254,12 @@ public class PunchController extends ControllerBase {
 
 	/**
 	 * <b>URL: /techpark/punch/listApprovalCategories</b>
-	 * <p>
-	 * 根据请求 companyid和日期 取一年的打卡记录
-	 * </p>
+	 * <p>获取请假类型</p>
 	 */
 	@RequestMapping("listApprovalCategories")
 	@RestReturn(value = ListApprovalCategoriesResponse.class)
-	public RestResponse listApprovalCategories() {
-
-		RestResponse res = new RestResponse(punchService.listApprovalCategories());
+	public RestResponse listApprovalCategories(ListApprovalCategoriesCommand cmd) {
+		RestResponse res = new RestResponse(punchService.listApprovalCategories(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
@@ -383,7 +410,7 @@ public class PunchController extends ControllerBase {
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
 		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+//		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

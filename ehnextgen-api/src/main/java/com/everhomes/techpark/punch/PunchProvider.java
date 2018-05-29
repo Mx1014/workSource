@@ -1,10 +1,5 @@
 package com.everhomes.techpark.punch;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -12,7 +7,13 @@ import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
- 
+
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+
 
 public interface PunchProvider {
 
@@ -259,8 +260,8 @@ public interface PunchProvider {
 
 	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
-  
-	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId,Long detailId);
+
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long detailId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
@@ -339,10 +340,10 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
 
-	Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth);
+	Integer countExceptionRequests(Long userId, Long ownerId, String punchMonth, List<Byte> statusList);
 
-	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth);
-	
+	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth, Map<Long, String> approvalCategoryIdNames);
+
 	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
 
 	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
@@ -369,4 +370,21 @@ public interface PunchProvider {
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
 
 	Integer countpunchStatistic(String punchMonth, Long ownerId);
+
+	void deletePunchLogs(Long ownerId, Date monthBegin, Date monthEnd);
+
+	void filePunchLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report);
+
+	public void deletePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd);
+
+	public void filePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report1);
+
+	public void deletePunchDayLogs(Long ownerId, String punchMonth);
+
+	public void filePunchDayLogs(Long ownerId, String punchMonth, PunchMonthReport report1);
+
+	public PunchLog findLastPunchLog(Long userId, Long enterpriseId, Timestamp punchTime);
+
+	public List<PunchLog> listPunchLogs(List<Long> userIds, Long ownerId, String startDay,
+			String endDay, Byte exceptionStatus, Integer pageOffset, Integer pageSize);
 }

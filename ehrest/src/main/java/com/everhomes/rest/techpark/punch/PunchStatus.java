@@ -14,6 +14,8 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
+    // 迟到且缺卡
+    BELATE_AND_FORGOT((byte) 18),
 	NOTWORKDAY((byte)17),
 	NONENTRY((byte) 16),
 	RESIGNED((byte) 15),

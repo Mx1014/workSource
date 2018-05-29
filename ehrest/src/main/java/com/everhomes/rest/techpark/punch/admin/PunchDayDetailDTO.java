@@ -1,19 +1,21 @@
 package com.everhomes.rest.techpark.punch.admin;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
+import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>id：</li>
  * <li>userId：用户id</li>
  * <li>userName：用户名称</li>
- * <li>deptName：部门</li>  
- * <li>punchOrgName：所属规则</li>  
+ * <li>deptId：部门id</li>
+ * <li>deptName：部门name</li>
+ * <li>punchOrgName：所属规则</li>
  * <li>punchDate: 打卡日期</li>
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
@@ -22,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
  * <li>statuString：状态文字</li>
  * <li>approvalStatuString：校正状态文字</li>
+ * <li>timeIntervals: 上下班时间，参考{@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO}</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>approvalRecords：列表 参照{@link EnterpriseApprovalRecordDTO}</li>
  * </ul>
@@ -30,8 +33,9 @@ public class PunchDayDetailDTO {
 	private Long id;
 	private Long userId;
 	private String userName;
-	private String deptName;   
-	private String punchOrgName;   
+	private Long deptId;
+	private String deptName;
+	private String punchOrgName;
 	private Long punchDate;
 	private Long arriveTime;
 	private Long noonLeaveTime;
@@ -50,7 +54,8 @@ public class PunchDayDetailDTO {
     private Byte exceptionStatus ;
     private Byte deviceChangeFlag;
     private String statuString;
-    private String approvalStatuString;
+	private String approvalStatuString;
+	private List<PunchTimeIntervalDTO> timeIntervals;
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
 	@ItemType(EnterpriseApprovalRecordDTO.class)
@@ -247,6 +252,13 @@ public class PunchDayDetailDTO {
 		this.punchCount = punchCount;
 	}
 
+	public List<PunchTimeIntervalDTO> getTimeIntervals() {
+		return timeIntervals;
+	}
+
+	public void setTimeIntervals(List<PunchTimeIntervalDTO> timeIntervals) {
+		this.timeIntervals = timeIntervals;
+	}
 
 	public List<PunchLogDTO> getPunchLogs() {
 		return punchLogs;
@@ -270,5 +282,13 @@ public class PunchDayDetailDTO {
 
 	public void setApprovalRecords(List<EnterpriseApprovalRecordDTO> approvalRecords) {
 		this.approvalRecords = approvalRecords;
+	}
+
+	public Long getDeptId() {
+		return deptId;
+	}
+
+	public void setDeptId(Long deptId) {
+		this.deptId = deptId;
 	}
 }

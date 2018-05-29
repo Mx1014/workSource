@@ -57,5 +57,9 @@ public class PunchConstants {
 	public static final int PUNCH_MESSAGE_UPDATE_PAIBAN = 4;
 	public static final int PUNCH_MESSAGE_TIMERULES = 5;
 	public static final String PUNCH_MESSAGE_RESTTIME = "6";
+	
+
+	/** REDIS monthReport Process*/
+	public static final String MONTH_REPORT_PROCESS ="MONTH.REPORT.PROCESS";
 
 }

@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>restName: 请假类型</li>
  * <li>startTime: 开始时间 格式为:yy-MM-dd HH:mm</li>
  * <li>endTime: 结束时间 格式为:yy-MM-dd HH:mm</li>
+ * <li>timeUnit: 请假时长的单位，{@link com.everhomes.rest.approval.ApprovalCategoryTimeUnit}</li>
  * <li>duration: 请假时长</li>
  * </ul>
  */
@@ -20,6 +21,8 @@ public class ComponentAskForLeaveValue {
 	private String startTime;
 
 	private String endTime;
+
+	private String timeUnit;
 
 	private Double duration;
 
@@ -53,6 +56,14 @@ public class ComponentAskForLeaveValue {
 
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
+	}
+
+	public String getTimeUnit() {
+		return timeUnit;
+	}
+
+	public void setTimeUnit(String timeUnit) {
+		this.timeUnit = timeUnit;
 	}
 
 	public Double getDuration() {
