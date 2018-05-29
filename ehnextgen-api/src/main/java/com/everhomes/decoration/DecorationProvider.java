@@ -66,7 +66,7 @@ public interface DecorationProvider {
 
     DecorationApprovalVal getApprovalValById(Long id);
 
-    List<DecorationApprovalVal> listApprovalValsByRequestId(Long requestId);
+    List<DecorationApprovalVal> listApprovalVals(Long requestId,Long approvalId);
 
     List<DecorationCompanyChief> listChiefsByCompanyId(Long companyId);
 

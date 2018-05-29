@@ -513,7 +513,7 @@ public class DecorationServiceImpl implements  DecorationService {
                 dto.getFlowCasees().add(flowCaseDTO);
                 break;
             case CONSTRACT:
-                List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalValsByRequestId(request.getId());
+                List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalVals(request.getId(),null);
                 if (vals != null && vals.size()>0){
                     dto.setFlowCasees(new ArrayList<>());
                     for (DecorationApprovalVal val:vals){
@@ -997,7 +997,21 @@ public class DecorationServiceImpl implements  DecorationService {
         DownloadUtils.download(out, response);
     }
 
-    private ByteArrayOutputStream createRequestsStream( List<DecorationRequestDTO> dtos){
+    @Override
+    public DecorationFlowCaseDTO getApprovalVals(getApprovalValsCommand cmd) {
+        List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalVals(cmd.getRequestId(),cmd.getRequestId());
+        if (vals == null || vals.isEmpty())
+            return null;
+        DecorationFlowCaseDTO dto  = new DecorationFlowCaseDTO();
+        dto.setApprovalName(vals.get(0).getApprovalName());
+        FlowCase flowCase = this.flowCaseProvider.findFlowCaseByReferId(vals.get(0).getId(),DecorationRequestStatus.CONSTRACT.getFlowOwnerType(),
+                DecorationController.moduleId);
+        dto.setStatus(flowCase.getStatus());
+        dto.setFlowCaseId(flowCase.getId());
+        return dto;
+    }
+
+    private ByteArrayOutputStream createRequestsStream(List<DecorationRequestDTO> dtos){
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         if (null == dtos || dtos.isEmpty()) {

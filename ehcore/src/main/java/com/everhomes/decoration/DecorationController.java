@@ -262,6 +262,22 @@ public class DecorationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /decoration/getApprovalVals</b>
+     * <p>
+     * 获取指定审批详情
+     * </p>
+     */
+    @RequestMapping("getApprovalVals")
+    @RestReturn(DecorationFlowCaseDTO.class)
+    public RestResponse getApprovalVals(@Valid getApprovalValsCommand cmd) {
+        DecorationFlowCaseDTO dto = this.decorationService.getApprovalVals(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /decoration/getCompleteSetting</b>
      * <p>
      * 	获取竣工申请说明

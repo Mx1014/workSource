@@ -397,11 +397,13 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
-    public List<DecorationApprovalVal> listApprovalValsByRequestId(Long requestId) {
+    public List<DecorationApprovalVal> listApprovalVals(Long requestId,Long approvalId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(
                 Tables.EH_DECORATION_APPROVAL_VALS);
         Condition condition = Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId);
+        if (null != approvalId)
+            condition = condition.and(Tables.EH_DECORATION_APPROVAL_VALS.APPROVAL_ID.eq(approvalId));
         condition = condition.and(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG.ne((byte)1));
         step.where(condition);
         return step.fetch().map(r->ConvertHelper.convert(r,DecorationApprovalVal.class));

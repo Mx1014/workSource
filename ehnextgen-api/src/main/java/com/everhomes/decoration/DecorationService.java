@@ -66,4 +66,6 @@ public interface DecorationService {
 
     void exportWorkers(ListWorkersCommand cmd, HttpServletResponse response);
 
+    DecorationFlowCaseDTO getApprovalVals(getApprovalValsCommand cmd);
+
 }
