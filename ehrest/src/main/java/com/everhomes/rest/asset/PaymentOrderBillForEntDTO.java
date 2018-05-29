@@ -3,7 +3,6 @@ package com.everhomes.rest.asset;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author created by yangcx
@@ -24,10 +23,9 @@ import java.util.List;
  * <li>payTime:缴费时间</li>
  * <li>orderRemark2:业务系统自定义字段（对应eh_asset_payment_order表的id）</li>
  * <li>state:前端触发事件使用，1是外层，2是内层(children代表内层)</li>
- * <li>children:订单下所有账单的集合，参考{@link PaymentOrderBillForEntDTO}
  *</ul>
  */
-public class PaymentBillRespForEnt implements Cloneable{
+public class PaymentOrderBillForEntDTO implements Cloneable{
 	private String dateStr;
 	private String dateStrBegin;
 	private String dateStrEnd;
@@ -41,7 +39,6 @@ public class PaymentBillRespForEnt implements Cloneable{
 	private String payTime;
 	private String orderRemark2;
 	private Byte state;
-	private List<PaymentOrderBillForEntDTO> children;
 	
 	public String getDateStr() {
 		return dateStr;
@@ -124,12 +121,6 @@ public class PaymentBillRespForEnt implements Cloneable{
 	}
 	public void setState(Byte state) {
 		this.state = state;
-	}
-	public List<PaymentOrderBillForEntDTO> getChildren() {
-		return children;
-	}
-	public void setChildren(List<PaymentOrderBillForEntDTO> children) {
-		this.children = children;
 	}
 	
 }

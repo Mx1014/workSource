@@ -3,43 +3,26 @@ package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.http.HttpUtils;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.base.RestClient;
-import com.everhomes.pay.order.OrderPaymentStatus;
 import com.everhomes.pay.order.PaymentAttributes;
 import com.everhomes.pay.order.QueryOrderPaymentsCommand;
 import com.everhomes.pay.order.TransactionType;
 import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.query.QueryBuilder;
 import com.everhomes.query.QueryCondition;
-import com.everhomes.query.SortSpec;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceImpl;
 import com.everhomes.util.AmountUtil;
 import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.LongUtil;
-import jdk.nashorn.internal.runtime.Context;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.protocol.HTTP;
-import org.hibernate.engine.config.spi.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -100,12 +83,18 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         //queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
         queryBuilder.limit(cmd.getPageSize()).offset(cmd.getPageAnchor());
-
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listOrderPayment(request), cmd={}", cmd);
+        }
         MapListRestResponse response = (MapListRestResponse) callPaymentMethod(
                 "POST",
                 ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
                 payCmd.done(),
                 MapListRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listOrderPayment(response), response={}", GsonUtil.toJson(response));
+        }
 
         ListPaymentBillRespForEnt result = new ListPaymentBillRespForEnt(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillRespForEnt>());
@@ -113,24 +102,30 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
         if(response.getResponse() != null && !response.getResponse().isEmpty()) {
             for(Map<String, String> map : response.getResponse()) {
             	PaymentBillRespForEnt paymentBillDTO = convert(map);
+            	paymentBillDTO.setState(new Byte("1"));//前端触发事件使用，1是外层，2是内层(children代表内层)
+            	PaymentOrderBillForEntDTO paymentOrderBillForEntDTO = convertOrderBill(map);
                 if(paymentBillDTO != null) {
                     //processAmount(paymentBillDTO, cmd);
                     //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
                     List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
                     putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+                    List<PaymentOrderBillForEntDTO> children = new ArrayList<PaymentOrderBillForEntDTO>();
                     for(int i = 0;i < listBillDetailVOs.size();i++) {
                     	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
                     	if(listBillDetailVO != null) {
-                    		PaymentBillRespForEnt p2 = new PaymentBillRespForEnt();
-                    		p2 = (PaymentBillRespForEnt) paymentBillDTO.clone();
+                    		PaymentOrderBillForEntDTO p2 = new PaymentOrderBillForEntDTO();
+                    		p2 = (PaymentOrderBillForEntDTO) paymentOrderBillForEntDTO.clone();
                     		p2.setDateStr(listBillDetailVO.getDateStr());
                     		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
                     		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
                     		p2.setTargetName(listBillDetailVO.getTargetName());
                     		p2.setBillGroupName(listBillDetailVO.getBillGroupName());
-                    		result.getList().add(p2);
+                    		p2.setState(new Byte("2"));//前端触发事件使用，1是外层，2是内层(children代表内层)
+                    		children.add(p2);
                     	}
                     }
+                    paymentBillDTO.setChildren(children);
+                    result.getList().add(paymentBillDTO);
                 }
             }
         }
@@ -236,6 +231,29 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
             paymentBill.setPayTime(format);
         }
         return paymentBill;
+    }
+    
+    private PaymentOrderBillForEntDTO convertOrderBill(Map<String, String> map) {
+    	PaymentOrderBillForEntDTO paymentOrderBillForEntDTO = new PaymentOrderBillForEntDTO();
+    	paymentOrderBillForEntDTO.setPaymentOrderNum(map.get("supportingOrderNum"));
+    	paymentOrderBillForEntDTO.setOrderAmount(AmountUtil.centToUnit(LongUtil.convert(map.get("orderAmount"))));
+    	paymentOrderBillForEntDTO.setPaymentStatus(IntegerUtil.convert(map.get("paymentStatus")));
+    	paymentOrderBillForEntDTO.setOrderRemark2(map.get("orderRemark2"));
+
+        Long payTimeMill = LongUtil.convert(map.get("createTime"));
+        if(payTimeMill != null) {
+            Date date = new Date(payTimeMill);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String format = "";
+            try{
+                format = sdf.format(date);
+            }catch(Exception e){
+                sdf = new SimpleDateFormat("yyyy-MM-dd");
+                format = sdf.format(date);
+            }
+            paymentOrderBillForEntDTO.setPayTime(format);
+        }
+        return paymentOrderBillForEntDTO;
     }
     
     /*private List<SortSpec> getListOrderPaymentSorts(List<ReSortCmd> sorts) {
