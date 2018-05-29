@@ -4667,14 +4667,17 @@ public class PunchServiceImpl implements PunchService {
 //        }
 
       List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
-      if (null == userIds)
+      if (null == userIds || userIds.size() == 0)
           return response;
       //分页查询
       if (cmd.getPageAnchor() == null)
           cmd.setPageAnchor(0L);
-        List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
+      List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
                 organizationId, months,
                 cmd.getExceptionStatus(), userIds, locator, pageSize + 1);
+      if(null == results){
+    	  return response;
+      }
       Long nextPageAnchor = null;
       if (results != null && results.size() > pageSize) {
     	  results.remove(results.size() - 1);
@@ -5191,8 +5194,10 @@ public class PunchServiceImpl implements PunchService {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
                     PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
                             companyId, dateSF.get().format(start.getTime()));
-                    PunchTimeRule ptr = null;
-                    refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
+                    if(punchDayLog == null){
+	                    PunchTimeRule ptr = null;
+	                    refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
+                    }
                     return null;
                 });
 
