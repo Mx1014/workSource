@@ -21,7 +21,7 @@ import com.everhomes.discover.ItemType;
  * <li>orderNo: 支付流水号，如：WUF00000000000001098</li> 
  * <li>paymentOrderNum:订单编号，如：954650447962984448，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。</li>
  * <li>payTime:交易时间（缴费时间）</li>
- * <li>paymentType:支付方式，微信/支付宝/对公转账</li>
+ * <li>paymentType:支付方式，0:微信，1：支付宝，2：对公转账</li>
  * <li>transactionType:交易类型，如：手续费/充值/提现/退款等</li>
  * <li>orderAmount:交易金额</li>
  * <li>amount:入账金额</li>

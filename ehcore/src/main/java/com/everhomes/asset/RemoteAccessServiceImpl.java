@@ -170,7 +170,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     paymentBillDTO.setAmountReceived(amountReceived);
                     paymentBillDTO.setTargetName(targetName);
                     paymentBillDTO.setTargetType(targetType);
-                    paymentBillDTO.setChildren(children);
+                    if(children.size() != 0) {
+                    	paymentBillDTO.setChildren(children);
+                    }
                     result.getList().add(paymentBillDTO);
                 }
             }
@@ -292,7 +294,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBill.setUserId(LongUtil.convert(map.get("userId")));
         paymentBill.setPaymentOrderNum(map.get("supportingOrderNum"));
         paymentBill.setPaymentStatus(IntegerUtil.convert(map.get("paymentStatus")));
-        paymentBill.setPaymentType(IntegerUtil.convert(map.get("paymentType")));
+        Integer paymentType = IntegerUtil.convert(map.get("paymentType"));
+        paymentBill.setPaymentType(convertPaymentType(paymentType));
         paymentBill.setSettlementStatus(IntegerUtil.convert(map.get("settlementStatus")));
         paymentBill.setTransactionType(IntegerUtil.convert(map.get("transactionType")));
         paymentBill.setOrderRemark1(map.get("orderRemark1"));
@@ -324,7 +327,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     	paymentOrderBillDTO.setUserId(LongUtil.convert(map.get("userId")));
     	paymentOrderBillDTO.setPaymentOrderNum(map.get("supportingOrderNum"));
     	paymentOrderBillDTO.setPaymentStatus(IntegerUtil.convert(map.get("paymentStatus")));
-    	paymentOrderBillDTO.setPaymentType(IntegerUtil.convert(map.get("paymentType")));
+    	Integer paymentType = IntegerUtil.convert(map.get("paymentType"));
+    	paymentOrderBillDTO.setPaymentType(convertPaymentType(paymentType));
     	paymentOrderBillDTO.setSettlementStatus(IntegerUtil.convert(map.get("settlementStatus")));
     	paymentOrderBillDTO.setTransactionType(IntegerUtil.convert(map.get("transactionType")));
     	paymentOrderBillDTO.setOrderRemark1(map.get("orderRemark1"));
@@ -346,6 +350,20 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             paymentOrderBillDTO.setPayTime(format);
         }
         return paymentOrderBillDTO;
+    }
+    
+    private Integer convertPaymentType(Integer paymentType) {
+    	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+        if(paymentType.equals(1) || paymentType.equals(7) || paymentType.equals(9) || paymentType.equals(12) || paymentType.equals(21)) {
+        	paymentType = 0;//微信
+        }else if(paymentType.equals(8) || paymentType.equals(10) || paymentType.equals(13)) {
+        	paymentType = 1;//支付宝
+        }else {
+        	paymentType = 2;//对公转账
+        }
+        return paymentType;
     }
 
     private List<SortSpec> getListOrderPaymentSorts(List<ReSortCmd> sorts) {
