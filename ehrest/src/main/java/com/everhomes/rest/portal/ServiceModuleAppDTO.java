@@ -73,8 +73,8 @@ public class ServiceModuleAppDTO {
     private Byte supportThirdFlag;
     private String iconUri;
     private String iconUrl;
-    private String systemAppFlag;
-    private String defaultAppFlag;
+    private Byte systemAppFlag;
+    private Byte defaultAppFlag;
 
     public Long getId() {
         return id;
@@ -316,19 +316,19 @@ public class ServiceModuleAppDTO {
         this.status = status;
     }
 
-    public String getSystemAppFlag() {
+    public Byte getSystemAppFlag() {
         return systemAppFlag;
     }
 
-    public void setSystemAppFlag(String systemAppFlag) {
+    public void setSystemAppFlag(Byte systemAppFlag) {
         this.systemAppFlag = systemAppFlag;
     }
 
-    public String getDefaultAppFlag() {
+    public Byte getDefaultAppFlag() {
         return defaultAppFlag;
     }
 
-    public void setDefaultAppFlag(String defaultAppFlag) {
+    public void setDefaultAppFlag(Byte defaultAppFlag) {
         this.defaultAppFlag = defaultAppFlag;
     }
 }
