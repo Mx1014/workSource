@@ -1907,6 +1907,26 @@ public class FieldServiceImpl implements FieldService {
         if (globalFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
         }
+        // 三种情况 要求删除的item不显示
+        if (fieldItem != null) {
+            Map<Long, ScopeFieldGroup> scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName());
+            // community
+            if (scopeFieldGroupMap != null && scopeFieldGroupMap.size() > 0) {
+                fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+            } else {
+                //namespace
+                Map<Long, ScopeFieldGroup> namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName());
+                if (namespaceGroupMap != null && namespaceGroupMap.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+                } else {
+                    //global
+                    Map<Long, ScopeFieldGroup> globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName());
+                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
+                    }
+                }
+            }
+        }
 
         return fieldItem;
     }
