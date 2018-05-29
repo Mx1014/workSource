@@ -124,7 +124,9 @@ public class RemoteForEntAccessServiceImpl implements RemoteForEntAccessService 
                     		children.add(p2);
                     	}
                     }
-                    paymentBillDTO.setChildren(children);
+                    if(children.size() != 0) {
+                    	paymentBillDTO.setChildren(children);
+                    }
                     result.getList().add(paymentBillDTO);
                 }
             }
