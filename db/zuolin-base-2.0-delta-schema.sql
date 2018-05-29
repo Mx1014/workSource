@@ -203,4 +203,4 @@ ALTER TABLE `eh_communities` ADD COLUMN `province_name`  varchar(64) NULL AFTER 
 -- 系统应用标志、默认安装应用标志 add by yanjun 201805280955
 ALTER TABLE `eh_service_modules` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `init_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
