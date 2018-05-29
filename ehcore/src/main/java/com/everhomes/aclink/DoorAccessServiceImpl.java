@@ -2525,6 +2525,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 return null;
             }
             
+            //没有二维码读头的门禁不返回二维码,by liuyilin 20180529
+            if(doorAccess.getHasQr() != (byte) 1){
+            	continue;
+            }
+            
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
