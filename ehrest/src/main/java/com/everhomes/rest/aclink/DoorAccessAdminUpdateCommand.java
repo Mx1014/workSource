@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude: 纬度</li>
  * <li>enableAmount:门禁是否支持授权按次开门，1是0否</li>
  * <li>serverId:关联服务器Id</li>
+ * <li>hasQr:是否支持二维码0否1是</li>
  * </ul>
  */
 public class DoorAccessAdminUpdateCommand {
@@ -29,6 +30,7 @@ public class DoorAccessAdminUpdateCommand {
     private Double latitude;
     private Byte enableAmount;
     private Long serverId;
+    private Byte hasQr;
     
     public Long getId() {
         return id;
@@ -83,6 +85,12 @@ public class DoorAccessAdminUpdateCommand {
 	}
 	public void setServerId(Long serverId) {
 		this.serverId = serverId;
+	}
+	public Byte getHasQr() {
+		return hasQr;
+	}
+	public void setHasQr(Byte hasQr) {
+		this.hasQr = hasQr;
 	}
 	@Override
     public String toString() {
