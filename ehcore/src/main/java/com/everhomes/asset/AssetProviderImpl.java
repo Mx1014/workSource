@@ -969,7 +969,7 @@ public class AssetProviderImpl implements AssetProvider {
 		    .fetch()
 		    .map(r -> {
 		        ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-		        dto.setAmountOwed(r.getValue(exemption.AMOUNT));
+		        dto.setAmountReceivable(r.getValue(exemption.AMOUNT));
 		        dto.setBillItemName(r.getValue(exemption.REMARKS));
 		        dtos.add(dto);
 		        amountOwed[0] = amountOwed[0].add(r.getValue(exemption.AMOUNT));
