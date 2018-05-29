@@ -29,6 +29,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -246,6 +247,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     AlipayClient alipayClient;
     
@@ -4834,7 +4838,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
         SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
         createPhotoCmd.setUserType((byte) 1);
-        createPhotoCmd.setImgUrl(cmd.getHeadImgUrl());
+        createPhotoCmd.setImgUri(cmd.getHeadImgUri());
+        createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
         createPhotoCmd.setAuthId(auth.getId());
         faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
         
