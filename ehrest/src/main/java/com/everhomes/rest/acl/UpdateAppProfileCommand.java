@@ -19,7 +19,7 @@ import java.util.List;
  *     <li>independentConfigFlag: 允许独立配置</li>
  *     <li>dependentAppIds: dependentAppIds</li>
  *     <li>supportThirdFlag: 支持对接硬件和第三方系统</li>
- *     <li>defaultFlag: 新建企业默认安装</li>
+ *     <li>defaultAppFlag: 新建企业默认安装</li>
  *     <li>iconUri: iconUri</li>
  * </ul>
  */
@@ -37,7 +37,7 @@ public class UpdateAppProfileCommand {
     private Byte independentConfigFlag;
     private List<Long> dependentAppIds;
     private Byte supportThirdFlag;
-    private Byte defaultFlag;
+    private Byte defaultAppFlag;
     private String iconUri;
 
     @Override
@@ -133,12 +133,12 @@ public class UpdateAppProfileCommand {
         this.supportThirdFlag = supportThirdFlag;
     }
 
-    public Byte getDefaultFlag() {
-        return defaultFlag;
+    public Byte getDefaultAppFlag() {
+        return defaultAppFlag;
     }
 
-    public void setDefaultFlag(Byte defaultFlag) {
-        this.defaultFlag = defaultFlag;
+    public void setDefaultAppFlag(Byte defaultAppFlag) {
+        this.defaultAppFlag = defaultAppFlag;
     }
 
     public String getAppNo() {

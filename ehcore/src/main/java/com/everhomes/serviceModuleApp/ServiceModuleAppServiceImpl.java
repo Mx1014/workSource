@@ -661,11 +661,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			return;
 		}
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(organization.getNamespaceId());
-		List<ServiceModuleApp> initApps = serviceModuleAppProvider.listInitApps(releaseVersion.getId());
+		List<ServiceModuleApp> defaultApps = serviceModuleAppProvider.listDefaultApps(releaseVersion.getId());
 		List<ServiceModuleApp> systemApps = serviceModuleAppProvider.listSystemApps(releaseVersion.getId());
 
 		List<ServiceModuleApp> apps = new ArrayList<>();
-		apps.addAll(initApps);
+		apps.addAll(defaultApps);
 		apps.addAll(systemApps);
 
 		if(apps != null){

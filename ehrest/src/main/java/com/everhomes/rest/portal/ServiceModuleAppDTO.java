@@ -38,7 +38,7 @@ import java.util.List;
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
  *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用，是模块的属性。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>intiAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>defaultAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -71,11 +71,10 @@ public class ServiceModuleAppDTO {
     private List<Long> dependentAppIds;
     private List<String> dependentAppNames;
     private Byte supportThirdFlag;
-    private Byte defaultFlag;
     private String iconUri;
     private String iconUrl;
     private String systemAppFlag;
-    private String initAppFlag;
+    private String defaultAppFlag;
 
     public Long getId() {
         return id;
@@ -285,14 +284,6 @@ public class ServiceModuleAppDTO {
         this.supportThirdFlag = supportThirdFlag;
     }
 
-    public Byte getDefaultFlag() {
-        return defaultFlag;
-    }
-
-    public void setDefaultFlag(Byte defaultFlag) {
-        this.defaultFlag = defaultFlag;
-    }
-
     public String getDisplayVersion() {
         return displayVersion;
     }
@@ -333,11 +324,11 @@ public class ServiceModuleAppDTO {
         this.systemAppFlag = systemAppFlag;
     }
 
-    public String getInitAppFlag() {
-        return initAppFlag;
+    public String getDefaultAppFlag() {
+        return defaultAppFlag;
     }
 
-    public void setInitAppFlag(String initAppFlag) {
-        this.initAppFlag = initAppFlag;
+    public void setDefaultAppFlag(String defaultAppFlag) {
+        this.defaultAppFlag = defaultAppFlag;
     }
 }

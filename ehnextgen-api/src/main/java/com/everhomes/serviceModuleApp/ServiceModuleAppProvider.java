@@ -43,5 +43,5 @@ public interface ServiceModuleAppProvider {
 
     List<ServiceModuleApp> listSystemApps(Long versionId);
 
-	List<ServiceModuleApp> listInitApps(Long versionId);
+	List<ServiceModuleApp> listDefaultApps(Long versionId);
 }

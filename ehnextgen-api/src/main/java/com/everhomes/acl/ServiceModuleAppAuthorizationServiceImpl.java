@@ -247,7 +247,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         }
 
         ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
-        app.setDefaultAppFlag(cmd.getDefaultFlag());
+        app.setDefaultAppFlag(cmd.getDefaultAppFlag());
         serviceModuleAppProvider.updateServiceModuleApp(app);
 
     }
@@ -447,7 +447,6 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             app.setIndependentConfigFlag(profile.getIndependentConfigFlag());
             app.setDependentAppIds(profile.getDependentAppIds());
             app.setSupportThirdFlag(profile.getSupportThirdFlag());
-            app.setDefaultFlag(profile.getDefaultFlag());
             app.setIconUri(profile.getIconUri());
         }
 

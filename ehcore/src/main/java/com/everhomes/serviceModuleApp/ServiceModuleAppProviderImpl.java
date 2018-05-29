@@ -381,7 +381,6 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				Tables.EH_SERVICE_MODULE_APP_PROFILE.INDEPENDENT_CONFIG_FLAG,
 				Tables.EH_SERVICE_MODULE_APP_PROFILE.DEPENDENT_APP_IDS,
 				Tables.EH_SERVICE_MODULE_APP_PROFILE.SUPPORT_THIRD_FLAG,
-				Tables.EH_SERVICE_MODULE_APP_PROFILE.DEFAULT_FLAG,
 				Tables.EH_SERVICE_MODULE_APP_PROFILE.ICON_URI,
 				Tables.EH_SERVICE_MODULE_APP_PROFILE.DEVELOP_ID
 		).from(Tables.EH_SERVICE_MODULE_APPS).leftOuterJoin(Tables.EH_SERVICE_MODULE_APP_PROFILE).on(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_PROFILE.ORIGIN_ID))
@@ -428,11 +427,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listInitApps(Long versionId) {
+	public List<ServiceModuleApp> listDefaultApps(Long versionId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
-		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.INIT_APP_FLAG.eq((byte)1));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.DEFAULT_APP_FLAG.eq((byte)1));
 		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
 	}
