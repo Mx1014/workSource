@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
 import com.everhomes.atomikos.AtomikosHelper;
-import com.everhomes.sequence.SequenceProviderImpl;
+import com.everhomes.sequence.MysqlSequenceProviderImpl;
 
 /**
  * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap processStat
@@ -26,7 +26,7 @@ import com.everhomes.sequence.SequenceProviderImpl;
  *
  */
 @ComponentScan(value={"com.everhomes"}, excludeFilters={
-        @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value={SequenceProviderImpl.class})})
+        @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value={MysqlSequenceProviderImpl.class})})
 @EnableAutoConfiguration(exclude={
     XADataSourceAutoConfiguration.class,
     DataSourceAutoConfiguration.class, 
