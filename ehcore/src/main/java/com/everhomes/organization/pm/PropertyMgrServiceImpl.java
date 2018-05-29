@@ -2235,8 +2235,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if (cmd.getStatus() != null) {
 			Long organizationId = findOrganizationByCommunity(community);
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-			communityAddressMapping.setLivingStatus(cmd.getStatus());
-			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			if (communityAddressMapping != null) {
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}else {
+				communityAddressMapping = new CommunityAddressMapping();
+				communityAddressMapping.setOrganizationId(organizationId);
+				communityAddressMapping.setCommunityId(community.getId());
+				communityAddressMapping.setAddressId(address.getId());
+				communityAddressMapping.setOrganizationAddress(address.getAddress());
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+				organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+			}
 		}
 
 		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
