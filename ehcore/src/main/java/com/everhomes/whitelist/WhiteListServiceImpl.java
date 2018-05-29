@@ -96,7 +96,7 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
         if (existsPhones.length() > 0) {
             LOGGER.error("PhoneNumber {} is exists.",existsPhones.toString());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, WhiteListServiceErrorCode.ERROR_WHITELIST_PHONE_IS_EXISTS,
-                    "PhoneNumber: "+ existsPhones.toString()+" is exists.");
+                    existsPhones.toString());
         }
         whiteListProvider.batchCreateWhiteList(list);
     }
