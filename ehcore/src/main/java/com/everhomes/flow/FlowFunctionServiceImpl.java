@@ -32,7 +32,7 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() != null) {
+        if (event.getApplicationContext().getParent() != null || functionListeners == null) {
             return;
         }
         for (FlowFunctionListener listener : functionListeners) {
