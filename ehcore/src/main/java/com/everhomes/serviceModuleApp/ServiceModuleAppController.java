@@ -1,11 +1,14 @@
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +46,23 @@ public class ServiceModuleAppController extends ControllerBase {
 		//TODO 需要对接权限，当前公司的管理员才可以操作
 		ServiceModuleAppDTO res = serviceModuleAppService.installApp(cmd);
 		RestResponse response =  new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>给公司安装应用</p>
+	 * <b>URL: /servicemoduleapp/installAppForAllOrganizations</b>
+	 */
+	@RequestMapping("installAppForAllOrganizations")
+	@RestReturn(value=String.class)
+	public RestResponse installAppForAllOrganizations(InstallAppForAllOrganizationsCommand cmd) {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		serviceModuleAppService.installAppForAllOrganizations(cmd);
+		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

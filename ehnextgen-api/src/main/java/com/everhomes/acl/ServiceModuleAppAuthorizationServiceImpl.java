@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.portal.PortalVersion;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -19,6 +20,8 @@ import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+import org.jooq.Condition;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,9 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -239,6 +245,11 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             profile.setId(oldProfile.getId());
             serviceModuleAppProfileProvider.updateServiceModuleAppProfile(profile);
         }
+
+        ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
+        app.setDefaultAppFlag(cmd.getDefaultFlag());
+        serviceModuleAppProvider.updateServiceModuleApp(app);
+
     }
 
     @Override
@@ -254,6 +265,8 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
         final int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
 
+        PortalVersion releaseVersion = portalService.findReleaseVersion(cmd.getNamespaceId());
+
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -262,6 +275,12 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 if(cmd.getOrganizationId() != null){
                     query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
                 }
+
+                //过滤掉系统应用
+                query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID));
+                Condition systemAppCondition = Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.isNull().or(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)0));
+                query.addConditions(systemAppCondition);
+                query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(releaseVersion.getId()));
 
                 //不包含授权给自己的记录
                 if(cmd.getIncludeAuthToOwnerFlag() != null && cmd.getIncludeAuthToOwnerFlag().byteValue() == 0){
@@ -303,6 +322,8 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
         final int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
 
+        PortalVersion releaseVersion = portalService.findReleaseVersion(cmd.getNamespaceId());
+
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -310,6 +331,12 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 
+
+                //过滤掉系统应用
+                query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID));
+                Condition systemAppCondition = Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.isNull().or(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)0));
+                query.addConditions(systemAppCondition);
+                query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(releaseVersion.getId()));
 
                 if(cmd.getPageAnchor() != null){
                     query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ID.gt(cmd.getPageAnchor()));

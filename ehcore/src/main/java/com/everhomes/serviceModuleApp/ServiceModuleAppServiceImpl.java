@@ -7,6 +7,7 @@ import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.*;
@@ -538,8 +539,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			if(appCommunityConfigs != null){
 				for (AppCommunityConfig config: appCommunityConfigs){
-					AppCommunityConfigDTO dto = toDto(config);
-					dtos.add(dto);
+					AppCommunityConfigDTO dto = getAppCommunityConfigDTO(config);
+					if(dto != null){
+						dtos.add(dto);
+					}
+
 				}
 			}
 
@@ -578,8 +582,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 					config.setAppOriginId(app.getAppOriginId());
 					config.setDisplayName(app.getDisplayName());
 					config.setVisibilityFlag(app.getVisibilityFlag() == null ? TrueOrFalseFlag.TRUE.getCode() : app.getVisibilityFlag());
-					AppCommunityConfigDTO dto = toDto(config);
-					dtos.add(dto);
+					AppCommunityConfigDTO dto = getAppCommunityConfigDTO(config);
+
+					if(dto != null){
+						dtos.add(dto);
+					}
+
 				}
 
 			}
@@ -591,13 +599,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	private AppCommunityConfigDTO toDto(AppCommunityConfig config){
+	private AppCommunityConfigDTO getAppCommunityConfigDTO(AppCommunityConfig config){
 		AppCommunityConfigDTO dto = ConvertHelper.convert(config, AppCommunityConfigDTO.class);
 		ServiceModuleApp serviceModuleApp = this.findReleaseServiceModuleAppByOriginId(dto.getAppOriginId());
 
-		if(serviceModuleApp != null){
-			dto.setServiceModuleAppName(serviceModuleApp.getName());
+		if(serviceModuleApp == null || TrueOrFalseFlag.fromCode(serviceModuleApp.getSystemAppFlag()) == TrueOrFalseFlag.TRUE){
+			return null;
 		}
+
+		dto.setServiceModuleAppName(serviceModuleApp.getName());
 
 		ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(dto.getAppOriginId());
 
@@ -636,6 +646,91 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			orgapp.setDisplayName(cmd.getDisplayName());
 			orgapp.setVisibilityFlag(cmd.getVisibilityFlag());
 			organizationAppProvider.updateOrganizationApp(orgapp);
+		}
+
+	}
+
+	/**
+	 *
+	 * @param organizationId
+	 */
+	@Override
+	public void installDefaultAppByOrganizationId(Long organizationId){
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if(organization == null){
+			return;
+		}
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(organization.getNamespaceId());
+		List<ServiceModuleApp> initApps = serviceModuleAppProvider.listInitApps(releaseVersion.getId());
+		List<ServiceModuleApp> systemApps = serviceModuleAppProvider.listSystemApps(releaseVersion.getId());
+
+		List<ServiceModuleApp> apps = new ArrayList<>();
+		apps.addAll(initApps);
+		apps.addAll(systemApps);
+
+		if(apps != null){
+			InstallAppCommand cmd = new InstallAppCommand();
+			cmd.setOrganizationId(organizationId);
+			for (ServiceModuleApp app: apps){
+				//管理公司安装全部、其他公司安装oa应用
+				if(TrueOrFalseFlag.fromCode(organization.getPmFlag()) == TrueOrFalseFlag.TRUE
+						|| ServiceModuleAppType.fromCode(app.getAppType()) == ServiceModuleAppType.OA) {
+					cmd.setOriginId(app.getOriginId());
+					installApp(cmd);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 给所有公司安装一个应用
+	 * @param cmd
+	 */
+	@Override
+	public void installAppForAllOrganizations(InstallAppForAllOrganizationsCommand cmd) {
+
+		ServiceModuleApp serviceModuleApp = findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
+
+		if(serviceModuleApp == null){
+			LOGGER.error("app not found, originId = {}", cmd.getOriginId());
+			throw RuntimeErrorException.errorWith(ServiceModuleAppServiceErrorCode.SCOPE,
+					ServiceModuleAppServiceErrorCode.ERROR_SERVICEMODULEAPP_NOT_FOUND, "app not found, originId = " + cmd.getOriginId());
+		}
+
+		//找出该域空间所有的公司
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<Organization> organizations = this.organizationProvider.listEnterpriseByNamespaceIds(serviceModuleApp.getNamespaceId(), null,
+				null, null, locator, 1000000);
+
+
+		//给每个公司安装应用
+		for (Organization org: organizations){
+
+			//管理公司安装全部、其他公司安装oa应用
+			if(TrueOrFalseFlag.fromCode(org.getPmFlag()) == TrueOrFalseFlag.TRUE
+					|| ServiceModuleAppType.fromCode(serviceModuleApp.getAppType()) == ServiceModuleAppType.OA) {
+
+				//已经安装的跳过
+				OrganizationApp orgapps = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(cmd.getOriginId(), org.getId());
+				if(orgapps != null){
+					LOGGER.info("already install this app, orgid = {}, originId = {}", org.getId(), cmd.getOriginId());
+					continue;
+				}
+
+				orgapps = new OrganizationApp();
+				orgapps.setAppOriginId(cmd.getOriginId());
+				orgapps.setOrgId(org.getId());
+				orgapps.setStatus(OrganizationAppStatus.ENABLE.getCode());
+				orgapps.setCreatorUid(UserContext.currentUserId());
+				orgapps.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+				//安装
+				organizationAppProvider.createOrganizationApp(orgapps);
+
+				//给自己添加自己园区的所有授权
+				serviceModuleAppAuthorizationService.addAllCommunityAppAuthorizations(serviceModuleApp.getNamespaceId(), org.getId(), cmd.getOriginId());
+			}
+
 		}
 
 	}

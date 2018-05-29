@@ -1633,6 +1633,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 this.addAddresses(organization.getId(), addressDTOs, user.getId());
             }
 
+            //安装默认应用，包括系统 add by yanjun 201805281536
+            serviceModuleAppService.installDefaultAppByOrganizationId(organization.getId());
+
 //            createEnterpriseCustomer(organization, cmd.getAvatar(), organizationDetail, cmd.getCommunityId(), addressDTOs);
             return null;
         });

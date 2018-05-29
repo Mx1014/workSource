@@ -12,7 +12,9 @@ import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppAuthorizations
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppAuthorizationsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -103,7 +105,7 @@ public class ServiceModuleAppAuthorizationProviderImpl implements ServiceModuleA
     public List<ServiceModuleAppAuthorization> queryServiceModuleAppAuthorizations(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppAuthorizations.class));
 
-        SelectQuery<EhServiceModuleAppAuthorizationsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS);
+        SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.fields()).from(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS).getQuery();
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
@@ -113,7 +115,7 @@ public class ServiceModuleAppAuthorizationProviderImpl implements ServiceModuleA
 
         query.addLimit(count);
         List<ServiceModuleAppAuthorization> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, ServiceModuleAppAuthorization.class);
+            return RecordHelper.convert(r, ServiceModuleAppAuthorization.class);
         });
 
         if(objs.size() >= count) {

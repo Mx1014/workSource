@@ -22,7 +22,6 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private Byte independentConfigFlag;
     private String dependentAppIds;
     private Byte supportThirdFlag;
-    private Byte defaultFlag;
     private String iconUri;
 
 
@@ -130,14 +129,6 @@ public class ServiceModuleApp extends EhServiceModuleApps {
 
     public void setSupportThirdFlag(Byte supportThirdFlag) {
         this.supportThirdFlag = supportThirdFlag;
-    }
-
-    public Byte getDefaultFlag() {
-        return defaultFlag;
-    }
-
-    public void setDefaultFlag(Byte defaultFlag) {
-        this.defaultFlag = defaultFlag;
     }
 
     public String getDisplayVersion() {

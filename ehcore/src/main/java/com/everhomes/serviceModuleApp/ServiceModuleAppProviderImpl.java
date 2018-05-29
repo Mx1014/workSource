@@ -284,6 +284,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		SelectQuery query = getReadOnlyContext().select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+
+		//不查系统应用
+		Condition systemAppCondition = Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.isNull().or(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)0));
+		query.addConditions(systemAppCondition);
+
 		if(appType != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 		}
@@ -411,5 +416,26 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
 	}
+
+	@Override
+	public List<ServiceModuleApp> listSystemApps(Long versionId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)1));
+		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
+	@Override
+	public List<ServiceModuleApp> listInitApps(Long versionId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.INIT_APP_FLAG.eq((byte)1));
+		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
 
 }

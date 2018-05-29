@@ -47,4 +47,8 @@ public interface ServiceModuleAppService {
 	ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd);
 
 	void updateAppCommunityConfig(UpdateAppCommunityConfigCommand cmd);
+
+	void installDefaultAppByOrganizationId(Long organizationId);
+
+	void installAppForAllOrganizations(InstallAppForAllOrganizationsCommand cmd);
 }

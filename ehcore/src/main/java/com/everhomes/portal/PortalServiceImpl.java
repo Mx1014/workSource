@@ -182,9 +182,23 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getModuleId(), cmd.getKeywords(), cmd.getDeveloperIds(), cmd.getAppType(), cmd.getMobileFlag(), cmd.getPcFlag(), cmd.getIndependentConfigFlag(), cmd.getSupportThirdFlag());
-		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
-			return processServiceModuleAppDTO(r);
-		}).collect(Collectors.toList()));
+
+
+		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+
+		for (ServiceModuleApp app: moduleApps){
+
+			//过滤掉系统应用
+			if (cmd.getExcludeSystemAppFlag() != null && cmd.getExcludeSystemAppFlag().byteValue() == 1 && app.getSystemAppFlag() != null && app.getSystemAppFlag().byteValue() == 1){
+				continue;
+			}
+			ServiceModuleAppDTO dto =  processServiceModuleAppDTO(app);
+			dtos.add(dto);
+		}
+
+		ListServiceModuleAppsResponse response = new ListServiceModuleAppsResponse();
+		response.setServiceModuleApps(dtos);
+		return response;
 	}
 
 	@Override

@@ -60,7 +60,6 @@ CREATE TABLE `eh_service_module_app_profile` (
   `independent_config_flag` tinyint(4) DEFAULT 0,
   `dependent_app_ids` varchar(128) DEFAULT NULL,
   `support_third_flag` tinyint(4) DEFAULT 0,
-  `default_flag` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
