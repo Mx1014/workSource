@@ -926,9 +926,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitorSysConfigurationProvider.createVisitorSysConfiguration(configuration);
             } else {
                 configuration = VisitorSysUtils.copyNotNullProperties(cmd, configuration);
-                configuration.setWelcomePages(cmd.getWelcomePages());
-                configuration.setWelcomePicUri(cmd.getWelcomePicUri());
-                configuration.setLogoUri(cmd.getLogoUri());
                 visitorSysConfigurationProvider.updateVisitorSysConfiguration(configuration);
             }
             return configuration;
