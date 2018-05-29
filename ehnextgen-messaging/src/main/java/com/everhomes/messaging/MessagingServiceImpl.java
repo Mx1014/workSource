@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -178,6 +179,7 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
                 record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
                 record.setMeta(r.getMeta());
+                record.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 MessagePersistWorker.getQueue().offer(record);
             }
         }

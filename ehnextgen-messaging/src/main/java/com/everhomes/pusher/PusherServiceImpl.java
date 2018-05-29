@@ -51,6 +51,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -455,6 +456,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
                         record.setMeta(mb.getMeta());
+                        record.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
                         Map data_map = (Map) StringHelper.fromJsonString(mb.getContent(), Map.class);
                         if(data_map.get("extra") != null){
                             Map extraData = (Map)data_map.get("extra");
