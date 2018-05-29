@@ -801,4 +801,18 @@ public interface OrganizationProvider {
 	 * @param wholeAddressNameOld
 	 */
 	void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew , String wholeAddressNameOld);
+
+	/**
+	 * 向表eh_organizationAddress表中添加数据
+	 * @param organizationAddress
+	 */
+	void insertIntoOrganizationAddress(OrganizationAddress organizationAddress);
+
+	/**
+	 * 根据域空间Id和项目编号来查询楼栋
+	 * @param namespaceId
+	 * @param communityId
+	 * @return
+	 */
+	List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId, Long communityId);
 }

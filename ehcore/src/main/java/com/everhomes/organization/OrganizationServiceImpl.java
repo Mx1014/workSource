@@ -3814,6 +3814,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+                OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
+                tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 //物业或业委增加小区Id和小区name信息
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
@@ -13961,6 +13963,18 @@ public class OrganizationServiceImpl implements OrganizationService {
                             communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
                             //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
                             organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
+                            //// TODO: 2018/5/28
+                            //同时向eh_organization_addresses表中添加一条记录，表示的是该楼栋中的该门牌已经被入驻，
+                            //创建OrganizationAddress类的对象
+                            OrganizationAddress organizationAddress = new OrganizationAddress();
+                            //将数据封装在对象OrganizationAddress对象中
+                            organizationAddress.setAddressId(organizationSiteApartmentDTO.getApartmentId());
+                            organizationAddress.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
+                            organizationAddress.setOrganizationId(cmd.getOrganizationId());
+                            organizationAddress.setBuildingName(organizationSiteApartmentDTO.getBuildingName());
+                            //持久化到数据库
+                            //// TODO: 2018/5/28
+                            organizationProvider.insertIntoOrganizationAddress(organizationAddress);
                         }
                     }
 

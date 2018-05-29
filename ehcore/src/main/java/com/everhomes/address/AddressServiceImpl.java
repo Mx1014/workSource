@@ -53,8 +53,8 @@ import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.CommunityDoc;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractStatus;
@@ -72,7 +72,6 @@ import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -85,11 +84,11 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.elasticsearch.common.collect.Lists;
+import org.elasticsearch.common.collect.Sets;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -100,7 +99,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -108,9 +106,6 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
-import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
@@ -196,6 +191,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private FieldService fieldService;
+
+
 
     @PostConstruct
     public void setup() {
@@ -1993,8 +1990,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
 			Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-
-		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>(); 
+		//首先根据项目id来查询eh_buildings表中的该项目下面的所有的楼栋名称的集合
+        List<Building> buildingList = organizationProvider.findBuildingByNamespaceIdAndCommunityId(2,cmd.getCommunityId());
+        //采用forEach循环遍历
+        //创建一个Set<String>集合，用来承载楼栋的名称
+        Set<String> buildingNames = Sets.newHashSet();
+        if(CollectionUtils.isNotEmpty(buildingList)){
+            for(Building building : buildingList){
+                buildingNames.add(building.getName());
+            }
+        }
+		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>();
 		for (ImportApartmentDataDTO data : datas) {
 			ImportFileResultLog<ImportApartmentDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
 			if (StringUtils.isEmpty(data.getBuildingName())) {
@@ -2004,6 +2010,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				errorLogs.add(log);
 				continue;
 			}
+
+			if(!buildingNames.contains(data.getBuildingName())){
+                log.setData(data);
+                log.setErrorLog("building is not exists");
+                log.setCode(BuildingServiceErrorCode.ERROR_BUILDING_IS_NOT_EXISTS);
+                errorLogs.add(log);
+                continue;
+            }
 			
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);

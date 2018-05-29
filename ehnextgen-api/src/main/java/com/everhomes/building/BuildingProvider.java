@@ -30,4 +30,12 @@ public interface BuildingProvider {
 	 */
 	List<Building> getBuildingByCommunityIdAndNamespaceId(Long communityId,Integer namespaceId,String buildingName);
 
+	/**
+	 * 根据域空间Id和项目编号来查询楼栋
+	 * @param namespaceId
+	 * @param communityId
+	 * @return
+	 */
+	List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId,Long communityId);
+
 }
