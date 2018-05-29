@@ -26,6 +26,8 @@ public interface ServiceModuleAppAuthorizationService {
 
     void addAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId);
 
+    void updateAllAuthToNewOrganization(Integer namespaceId, Long organizationId, Long communityId);
+
     void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId);
 
     ServiceModuleAppDTO getAppProfile(GetAppProfileCommand cmd);

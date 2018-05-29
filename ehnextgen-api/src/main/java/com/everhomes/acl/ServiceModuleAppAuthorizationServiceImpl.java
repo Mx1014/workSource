@@ -10,6 +10,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
@@ -407,6 +408,47 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         cmd.setToOrgId(ownerId);
         cmd.setProjectIds(communityIds);
         distributeServiceModuleAppAuthorization(cmd);
+    }
+
+    /**
+     * 更新应用的授权
+     * @param namespaceId
+     * @param organizationId
+     * @param communityId
+     */
+    @Override
+    public void updateAllAuthToNewOrganization(Integer namespaceId, Long organizationId, Long communityId) {
+
+
+        //先清除所有原有的授权
+        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = listCommunityRelations(namespaceId, null, communityId);
+        if(serviceModuleAppAuthorizations != null){
+            for(ServiceModuleAppAuthorization authorization: serviceModuleAppAuthorizations){
+                serviceModuleAppAuthorizationProvider.deleteServiceModuleAppAuthorization(authorization);
+            }
+        }
+
+
+        PortalVersion releaseVersion = portalService.findReleaseVersion(namespaceId);
+
+        List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), null, null, organizationId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), null, 1000);
+
+        if (apps != null && apps.size() > 0) {
+            List<ServiceModuleAppAuthorization> createAuthorizations = new ArrayList<>();
+            apps.forEach(r -> {
+                ServiceModuleAppAuthorization authorization = new ServiceModuleAppAuthorization();
+                authorization.setOwnerId(organizationId);
+                authorization.setOrganizationId(organizationId);
+                authorization.setAppId(r.getOriginId());
+                authorization.setNamespaceId(namespaceId);
+                authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+                authorization.setProjectId(communityId);
+                authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                authorization.setUpdateTime(authorization.getCreateTime());
+                createAuthorizations.add(authorization);
+            });
+            serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(createAuthorizations);
+        }
     }
 
     @Override

@@ -324,7 +324,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			pageSize = cmd.getPageSize();
 		}
 
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), cmd.getAppType(), cmd.getKeyword(), cmd.getOrganizationId(), cmd.getInstallFlag(), cmd.getPageAnchor(), pageSize + 1);
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), cmd.getAppType(), cmd.getKeyword(), cmd.getOrganizationId(), cmd.getInstallFlag(), null, cmd.getPageAnchor(), pageSize + 1);
 		if(apps == null){
 			return null;
 		}
