@@ -181,6 +181,10 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
+    
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
 

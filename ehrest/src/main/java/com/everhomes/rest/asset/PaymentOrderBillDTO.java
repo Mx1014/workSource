@@ -2,14 +2,9 @@
 package com.everhomes.rest.asset;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-
-/**
- * Created by Wentian Wang on 2017/9/28.
- */
 
 /**
  * @author change by yangcx
@@ -34,15 +29,25 @@ import com.everhomes.discover.ItemType;
  * <li>paymentOrderId:</li>
  * <li>payerName:缴费人</li>
  * <li>payerTel:缴费人电话</li>
+ * <li>billId:账单id</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
+ * <li>billGroupName:账单组名称</li>
  * <li>targetName:客户名称</li>
  * <li>targetType:客户类型</li>
- * <li>amountReceivable:应收(元)：该订单下所有账单应收金额的总和</li>
- * <li>amountReceived:实收(元)：该订单下所有账单实收金额的总和</li>
+ * <li>amountReceivable:应收(元),应收=应收-减免+增收</li>
+ * <li>amountReceived:实收(元)</li>
+ * <li>amountExemption:减免(元)</li>
+ * <li>amountSupplement:增收(元)</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
+ * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
+ * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
+ * <li>exemptionItemDTOList:减免项集合，参考{@link com.everhomes.rest.asset.ExemptionItemDTO}</li>
  * <li>state:前端触发事件使用，1是外层，2是内层(children代表内层)</li>
- * <li>children:订单下所有账单的集合，参考{@link PaymentOrderBillDTO}
  *</ul>
  */
-public class PaymentBillResp implements Cloneable{
+public class PaymentOrderBillDTO implements Cloneable{
     private Long userId;
     private String orderNo;
     private String paymentOrderNum;
@@ -56,19 +61,30 @@ public class PaymentBillResp implements Cloneable{
     private Integer settlementStatus;
     private String orderRemark1;
     private Long paymentOrderId;
-
     private String orderRemark2;
     private String orderSource;
     private String payerName;
     private String payerTel;
     
+    private Long billId;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String billGroupName;
     private String targetName;
     private String targetType;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
-    private Byte state;
+    private BigDecimal amountExemption;
+    private BigDecimal amountSupplement;
+    private String buildingName;
+    private String apartmentName;
+    private String addresses;
+    @ItemType(BillItemDTO.class)
+    private List<BillItemDTO> billItemDTOList;
+    @ItemType(ExemptionItemDTO.class)
+    private List<ExemptionItemDTO> exemptionItemDTOList;
     
-    private List<PaymentOrderBillDTO> children;
+    private Byte state;
     
     public String getPayerTel() {
         return payerTel;
@@ -184,6 +200,30 @@ public class PaymentBillResp implements Cloneable{
         this.paymentOrderId = paymentOrderId;
     }
 
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
+
 	public String getTargetName() {
 		return targetName;
 	}
@@ -216,17 +256,72 @@ public class PaymentBillResp implements Cloneable{
 		this.amountReceived = amountReceived;
 	}
 
-	public List<PaymentOrderBillDTO> getChildren() {
-		return children;
+	public String getBuildingName() {
+		return buildingName;
 	}
 
-	public void setChildren(List<PaymentOrderBillDTO> children) {
-		this.children = children;
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 
-	@Override
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
+	}
+
+	public List<BillItemDTO> getBillItemDTOList() {
+		return billItemDTOList;
+	}
+
+	public void setBillItemDTOList(List<BillItemDTO> billItemDTOList) {
+		this.billItemDTOList = billItemDTOList;
+	}
+
+	public List<ExemptionItemDTO> getExemptionItemDTOList() {
+		return exemptionItemDTOList;
+	}
+
+	public void setExemptionItemDTOList(List<ExemptionItemDTO> exemptionItemDTOList) {
+		this.exemptionItemDTOList = exemptionItemDTOList;
+	}
+
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
+
+	public BigDecimal getAmountExemption() {
+		return amountExemption;
+	}
+
+	public void setAmountExemption(BigDecimal amountExemption) {
+		this.amountExemption = amountExemption;
 	}
 
 	public Byte getState() {

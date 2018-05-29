@@ -1091,7 +1091,25 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(result);
         return response;
     }
-
+    
+    /**
+     * <b>URL: /asset/listPaymentBillDetail</b>
+     * <p>交易明细查看账单明细接口</p>
+     */
+    @RequestMapping(value = "listPaymentBillDetail")
+    @RestReturn(PaymentOrderBillDTO.class)
+    public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+    	ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+    	PaymentOrderBillDTO result = new PaymentOrderBillDTO();
+    	if(listPaymentBillResp != null && listPaymentBillResp.getList() != null 
+    			&& listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
+    			&& listPaymentBillResp.getList().get(0).getChildren() != null) {
+    		result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+    	}
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+    
 
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
@@ -1213,6 +1231,44 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
+    
+    /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(NoticeTriggerCommand cmd){
+        assetService.noticeTrigger(cmd.getNamespaceId());
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <b>URL: /asset/judgeAppShowPay</b>
+     * <p>取出配置项，用于判断APP多账单组的缴费方式：全部缴费/部分缴费/单个缴费</p>
+     */
+    @RequestMapping("judgeAppShowPay")
+    public RestResponse judgeAppShowPay(JudgeAppShowPayCommand cmd){
+    	JudgeAppShowPayResponse judgeAppShowPayResponse = assetService.judgeAppShowPay(cmd);
+        RestResponse restResponse = new RestResponse(judgeAppShowPayResponse);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <p>导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrders</b>
+     */
+    @RequestMapping("exportOrders")
+    public HttpServletResponse exportOrders(ListPaymentBillCmd cmd,HttpServletResponse response) {
+        assetService.exportOrders(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
 }
 

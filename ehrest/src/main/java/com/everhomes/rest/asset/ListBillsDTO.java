@@ -17,8 +17,8 @@ import java.math.BigDecimal;
  * <li>targetType:客户类型</li>
  * <li>contractId:合同id</li>
  * <li>contractNum:合同编号</li>
- * <li>buildingName:楼栋门牌</li>
- * <li>apartmentName:楼栋门牌</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
  * <li>noticeTel:催缴联系号码</li>
  * <li>amountReceivable:应收(元)</li>
  * <li>amountReceived:实收(元)</li>
@@ -27,9 +27,12 @@ import java.math.BigDecimal;
  * <li>noticeTimes:已催缴次数</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
- * <li>dateStrBegin:所属者类型</li>
- * <li>dateStrEnd:所属者类型</li>
  * <li>payStatus:清账信息</li>
+ * <li>invoiceNum:发票编号</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
+ * <li>customerTel:客户手机号</li>
+ * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -55,6 +58,11 @@ public class ListBillsDTO {
     private String payStatus;
     // introduce invoice num for bill display. by wentian 2018/4/16 on earth
     private String invoiceNum;
+    
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String customerTel;
+    private String addresses;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -239,4 +247,36 @@ public class ListBillsDTO {
     public ListBillsDTO() {
 
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
 }
