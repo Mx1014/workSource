@@ -3,7 +3,8 @@
 UPDATE  eh_var_field_groups set title = '收款合同' WHERE  module_name ='contract' and title ='合同信息' AND  parent_id =0;
 UPDATE `eh_var_fields`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE `module_name`='contract' AND `name`='contractType';
 UPDATE `eh_var_field_scopes`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE  field_id IN (SELECT id FROM eh_var_fields   WHERE `module_name`='contract' AND `name`='contractType');
-
+UPDATE `eh_var_fields`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE `module_name`='contract' AND `name`='status';
+UPDATE `eh_var_field_scopes`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE  field_id IN (SELECT id FROM eh_var_fields   WHERE `module_name`='contract' AND `name`='status');
 -- 表单select 自定义
 UPDATE  eh_var_fields  SET field_param = REPLACE(field_param,'select','customizationSelect') WHERE module_name = 'enterprise_customer' AND `name` <> 'levelItemId';
 UPDATE  eh_var_fields  SET field_param = REPLACE(field_param,'select','customizationSelect') WHERE module_name = 'contract' AND `name` NOT  IN ('contractType','status');
