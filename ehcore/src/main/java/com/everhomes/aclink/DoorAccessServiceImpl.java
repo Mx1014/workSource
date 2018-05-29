@@ -1558,7 +1558,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         doorAccess.setLatitude(cmd.getLatitude());
         doorAccess.setLongitude(cmd.getLongitude());
-        
+        doorAccess.setHasQr(cmd.getHasQr());
         doorAccessProvider.updateDoorAccess(doorAccess);
         if(doorCommand != null) {
             doorCommandProvider.createDoorCommand(doorCommand);
