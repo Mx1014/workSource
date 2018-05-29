@@ -1997,11 +1997,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void updateEnterpriseCustomerAdminRecord(String contacToken) {
+    public void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
-                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(OrganizationMemberTargetType.UNTRACK.getCode()))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .fetchInto(CustomerAdminRecord.class);
         if (records != null && records.size() > 0) {
             for (CustomerAdminRecord record : records) {

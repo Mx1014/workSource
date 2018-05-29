@@ -168,7 +168,7 @@ public interface EnterpriseCustomerProvider {
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 
-    void updateEnterpriseCustomerAdminRecord(String contacToken);
+    void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId);
 
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
 
