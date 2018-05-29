@@ -54,10 +54,10 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
         if (approval == null || GeneralApprovalStatus.RUNNING.getCode() != approval.getStatus())
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
                     "The approval's status is not running");
-        List<GeneralApprovalScopeMapDTO> scopes = generalApprovalService.listGeneralApprovalScopes(namespaceId, approval.getId());
+/*        List<GeneralApprovalScopeMapDTO> scopes = generalApprovalService.listGeneralApprovalScopes(namespaceId, approval.getId());
         if (generalApprovalService.checkTheApprovalScope(scopes, member))
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
-                    "The user is not in the approval scope");
+                    "The user is not in the approval scope");*/
         //  post value
         PostApprovalFormCommand command = new PostApprovalFormCommand();
         command.setApprovalId(approvalId);
