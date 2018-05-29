@@ -1552,6 +1552,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
+    public boolean checkBillByCategory(Long billId, Long categoryId) {
+        DSLContext context = getReadOnlyContext();
+        Long fetch = context.select(Tables.EH_PAYMENT_BILLS.CATEGORY_ID)
+                .from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchOne(Tables.EH_PAYMENT_BILLS.CATEGORY_ID);
+        if(fetch != null && fetch.longValue() == categoryId.longValue()){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");

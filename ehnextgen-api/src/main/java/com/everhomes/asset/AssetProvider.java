@@ -325,4 +325,5 @@ public interface AssetProvider {
     
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
+    boolean checkBillByCategory(Long billId, Long categoryId);
 }

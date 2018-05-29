@@ -138,10 +138,15 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     String targetType = "";
                     for(int i = 0;i < listBillDetailVOs.size();i++) {
                     	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
-                    	if(listBillDetailVO != null) {
+                        Long billId = listBillDetailVO.getBillId();
+                        //todo categoryid filter, copy or merge chongxin's code here
+                        if(!assetProvider.checkBillByCategory(billId, cmd.getCategoryId())){
+                            continue;
+                        }
+                        if(listBillDetailVO != null) {
                     		PaymentOrderBillDTO p2 = new PaymentOrderBillDTO();
                     		p2 = (PaymentOrderBillDTO) paymentOrderBillDTO.clone();
-                    		p2.setBillId(listBillDetailVO.getBillId());
+                    		p2.setBillId(billId);
                     		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
                     		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
                     		p2.setTargetName(listBillDetailVO.getTargetName());
@@ -184,7 +189,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }else{
             result.setNextPageAnchor(null);
         }
-        //todo categoryid filter, copy or merge chongxin's code here
 //        if(result.getList()!= null){
 //            for(PaymentBillResp resp : result.getList()){
 //                resp.getOrderRemark2();
