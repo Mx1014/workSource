@@ -1978,6 +1978,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 doorCmd.setValidEndMs(instance.getTimeInMillis());
             }
         }
+        if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
+            doorCmd.setHeadImgUri(visitor.getVisitorPicUri());
+        }
         DoorAuthDTO localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());

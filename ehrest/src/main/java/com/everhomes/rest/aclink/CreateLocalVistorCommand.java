@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
  * <li>totalAuthAmount: 有效开门次数</li>
- * <li>headImgUrl:[String ]头像照片地址</li>
+ * <li>headImgUri:[String ]头像照片地址</li>
  * </ul>
  *
  */
@@ -42,7 +42,7 @@ public class CreateLocalVistorCommand {
 	private Long validEndMs;
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
-	private String headImgUrl;
+	private String headImgUri;
 	public String getPhone() {
 		return phone;
 	}
@@ -121,12 +121,15 @@ public class CreateLocalVistorCommand {
 	public void setTotalAuthAmount(Integer totalAuthAmount) {
 		this.totalAuthAmount = totalAuthAmount;
 	}
-	public String getHeadImgUrl() {
-		return headImgUrl;
+
+	public String getHeadImgUri() {
+		return headImgUri;
 	}
-	public void setHeadImgUrl(String headImgUrl) {
-		this.headImgUrl = headImgUrl;
+
+	public void setHeadImgUri(String headImgUri) {
+		this.headImgUri = headImgUri;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
