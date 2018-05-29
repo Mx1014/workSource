@@ -13,6 +13,8 @@ import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.community_approve.CommunityApproveKeyMapping;
+import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;

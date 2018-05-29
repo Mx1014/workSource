@@ -320,7 +320,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 return handler;
             }
         }
-        return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+//        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+        return null;
     }
 
 
