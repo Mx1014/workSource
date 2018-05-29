@@ -1971,7 +1971,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken) {
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         CustomerAdminRecord record = new CustomerAdminRecord();
@@ -1982,6 +1982,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         record.setCreatorUid(UserContext.currentUserId());
+        record.setNamespaceId(namespaceId);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
         dao.insert(record);
@@ -1996,11 +1997,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void updateEnterpriseCustomerAdminRecord(String contacToken) {
+    public void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
-                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(OrganizationMemberTargetType.UNTRACK.getCode()))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .fetchInto(CustomerAdminRecord.class);
         if (records != null && records.size() > 0) {
             for (CustomerAdminRecord record : records) {

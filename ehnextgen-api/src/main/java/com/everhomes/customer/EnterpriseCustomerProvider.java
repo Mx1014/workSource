@@ -164,11 +164,11 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
 
-    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken);
+    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId);
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 
-    void updateEnterpriseCustomerAdminRecord(String contacToken);
+    void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId);
 
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId,String contactType);
 

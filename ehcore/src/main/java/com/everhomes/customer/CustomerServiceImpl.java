@@ -3621,11 +3621,11 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             rolePrivilegeService.createOrganizationAdmin(cmd);
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         }
         if (customer != null) {
             customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -3677,7 +3677,7 @@ public class CustomerServiceImpl implements CustomerService {
             result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken()));
+                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
                 customer.setAdminFlag(AdminFlag.YES.getCode());
                 enterpriseCustomerSearcher.feedDoc(customer);
             }
