@@ -164,7 +164,7 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseBannerUri(Long id, List<AttachmentDescriptor> banner);
 
-    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken);
+    void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId);
 
     void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken);
 

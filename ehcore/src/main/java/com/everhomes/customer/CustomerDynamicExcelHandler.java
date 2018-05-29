@@ -1044,6 +1044,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     createOrganizationAdminCommand.setOrganizationId(enterpriseCustomer.getOrganizationId());
                     createOrganizationAdminCommand.setContactName(contactName);
                     createOrganizationAdminCommand.setContactToken(contactToken);
+                    createOrganizationAdminCommand.setNamespaceId(enterpriseCustomer.getNamespaceId());
                     cmds.add(createOrganizationAdminCommand);
                 }
                 //修改企业是否设置管理员
@@ -1064,7 +1065,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                    } else {
                        contactType = OrganizationMemberTargetType.UNTRACK.getCode();
                    }
-                   customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken());
+                   customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken(),c.getNamespaceId());
                    if(c.getOrganizationId()!=null && c.getOrganizationId()!=0){
                        rolePrivilegeService.createOrganizationAdmin(c);
                    }

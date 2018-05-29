@@ -11,3 +11,8 @@ UPDATE eh_service_module_apps SET action_type = 74 WHERE module_id = 51400;
 
 -- 客户管理第三方数据跟进人  by jiarui
 UPDATE  eh_enterprise_customers set tracking_uid = NULL  WHERE  tracking_uid = -1;
+update eh_enterprise_customer_admins  set namespace_id  = (select namespace_id from eh_enterprise_customers where id = customer_id);
+
+update eh_enterprise_customer_admins t2  set contact_type  = (select target_type from eh_organization_members t1 where t1.contact_token = t2.contact_token and t1.namespace_id = t2.namespace_id limit 1);
+
+

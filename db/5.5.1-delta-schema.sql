@@ -242,3 +242,6 @@ CREATE TABLE `eh_policy_agent_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- 政务服务 1.0 end
+
+-- 企业管理员列表 by jiarui
+ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT NULL DEFAULT 0 AFTER `create_time`;

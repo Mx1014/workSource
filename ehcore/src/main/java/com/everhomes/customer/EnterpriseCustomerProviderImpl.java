@@ -1971,7 +1971,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken) {
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         CustomerAdminRecord record = new CustomerAdminRecord();
@@ -1982,6 +1982,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         record.setCreatorUid(UserContext.currentUserId());
+        record.setNamespaceId(namespaceId);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
         dao.insert(record);
