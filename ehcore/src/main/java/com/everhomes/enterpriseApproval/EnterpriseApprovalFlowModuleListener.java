@@ -1,31 +1,34 @@
 package com.everhomes.enterpriseApproval;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
-import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.flow.*;
+import com.everhomes.general_approval.*;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener {
@@ -44,12 +47,23 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
 
     @Autowired
+    GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    GeneralFormService generalFormService;
+
+    @Autowired
+    GeneralFormProvider generalFormProvider;
+
+    @Autowired
     ContentServerService contentServerService;
 
     @Autowired
     LocaleStringService localeStringService;
 
     private DecimalFormat decimalFormat = new DecimalFormat("0.000");
+
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public EnterpriseApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -59,13 +73,13 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
 
     @Override
     public FlowModuleInfo initModule() {
-        /*FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        FlowModuleInfo moduleInfo = new FlowModuleInfo();
         ServiceModule module = serviceModuleProvider.findServiceModuleById(EnterpriseApprovalController.MODULE_ID);
         moduleInfo.setModuleId(module.getId());
         moduleInfo.setModuleName(module.getName());
         //  (启用工作流中的表单设置)
         moduleInfo.addMeta(FlowModuleInfo.META_KEY_FORM_FLAG, String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
-       */ return null;
+        return moduleInfo;
     }
 
     @Override
@@ -93,7 +107,16 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
         StringBuilder content = new StringBuilder(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
-
+        for (int i = 0; i < entities.size(); i++) {
+            if (i == 3)
+                break;
+            String key = entities.get(i).getKey();
+            //  将"null"屏蔽为空字符串
+            String value = StringUtils.isEmpty(entities.get(i).getValue()) ? "无" : entities.get(i).getValue();
+            content.append(key).append(" : ").append(value).append("\n");
+        }
+        content = new StringBuilder(content.substring(0, content.length() - 1));
+        flowCase.setContent(content.toString());
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values){
@@ -259,17 +282,218 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     @Override
+    public void onFlowCaseEnd(FlowCaseState ctx) {
+        // 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
+        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)) {
+            FlowCase flowCase = ctx.getRootState().getFlowCase();
+            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
+            EnterpriseApprovalHandler handler;
+            //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
+            if (flowCase.getReferId().longValue() == 0L)
+                handler = getEnterpriseApprovalHandler(flowCase.getOwnerId());
+            else
+                handler = getEnterpriseApprovalHandler(flowCase.getReferId());
+            handler.onFlowCaseEnd(flowCase);
+        }
+    }
+
+    @Override
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
 
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        //  姓名
+        FlowCaseEntity e;
+        //  approval-1.6 added by R
+        EnterpriseApprovalFlowCase gf = ConvertHelper.convert(flowCase, EnterpriseApprovalFlowCase.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "审批编号"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApprovalNo() != null ? gf.getApprovalNo().toString() : null);
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(dateFormat.format(gf.getCreateTime().toLocalDateTime()));
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApplierName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "所在部门"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getCreatorDepartment());
+        entities.add(e);
+
+        entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+        return entities;
+    }
+
+    private List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
+            List<GeneralApprovalVal> vals = this.generalApprovalValProvider
+                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                    vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+            // 模板设定的字段DTOs
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
+                    GeneralFormFieldDTO.class);
+            processEntities(entities, vals, fieldDTOs);
+
+        }
+        return entities;
+    }
+
+    private void processEntities(
+            List<FlowCaseEntity> entities, List<GeneralApprovalVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
+
+        for (GeneralApprovalVal val : vals) {
+            try {
+                if (!DEFAULT_FIELDS.contains(val.getFieldName())) {
+                    // 不在默认fields的就是自定义字符串，组装这些
+                    FlowCaseEntity e = new FlowCaseEntity();
+                    GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+                    if (null == dto) {
+                        //  just process the subForm value (there is no more subForm)
+                        continue;
+                    }
+                    e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+                    switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+                        case SINGLE_LINE_TEXT:
+                        case NUMBER_TEXT:
+                        case DATE:
+                        case DROP_BOX:
+                            generalApprovalFieldProcessor.processDropBoxField(entities, e, val.getFieldStr3());
+                            break;
+                        case MULTI_LINE_TEXT:
+                            generalApprovalFieldProcessor.processMultiLineTextField(entities, e, val.getFieldStr3());
+                            break;
+                        case IMAGE:
+                            generalApprovalFieldProcessor.processImageField(entities, e, val.getFieldStr3());
+                            break;
+                        case FILE:
+                            generalApprovalFieldProcessor.processFileField(entities, e, val.getFieldStr3());
+                            break;
+                        case INTEGER_TEXT:
+                            generalApprovalFieldProcessor.processIntegerTextField(entities, e, val.getFieldStr3());
+                            break;
+                        case SUBFORM:
+                            generalApprovalFieldProcessor.processSubFormField(entities, dto, val.getFieldStr3());
+                            break;
+                        case CONTACT:
+                            //企业联系人
+                            generalApprovalFieldProcessor.processContactField(entities, e, val.getFieldStr3());
+                            break;
+                        case ASK_FOR_LEAVE:
+                            //请假
+                            processAskForLeaveField(entities, e, val.getFieldStr3());
+                            break;
+                        case BUSINESS_TRIP:
+                            //出差
+                            processBusinessTripField(entities, e, val.getFieldStr3());
+                            break;
+                        case OVERTIME:
+                            //加班
+                            processOverTimeField(entities, e, val.getFieldStr3());
+                            break;
+                        case GO_OUT:
+                            //外出
+                            processGoOutField(entities, e, val.getFieldStr3());
+                            break;
+                        case ABNORMAL_PUNCH:
+                            //打卡异常
+                            processAbnormalPunchField(entities, e, val.getFieldStr3());
+                            break;
+                    }
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(" ********** 空指针错误  val = " + JSON.toJSONString(val), e);
+            } catch (Exception e) {
+                LOGGER.error(" ********** 这是什么错误  = " + JSON.toJSONString(val), e);
+
+            }
+        }
+    }
+
+    private GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {
+        for (GeneralFormFieldDTO val : fieldDTOs) {
+            if (val.getFieldName().equals(fieldName))
+                return val;
+        }
         return null;
     }
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
 
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<GeneralApproval> ga = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
+                Integer.MAX_VALUE - 1, (locator, query) -> {
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
+
+                    if (ownerType != null && ownerId != null) {
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+                    }
+                    return query;
+                });
+        if (ga != null) {
+            return ga.stream().map(r -> {
+                FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+                dto.setId(r.getId());
+                dto.setNamespaceId(r.getNamespaceId());
+                dto.setServiceName(r.getApprovalName());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<FlowFormDTO> listFlowForms(Flow flow) {
+        List<FlowFormDTO> flowFormDTOS = new ArrayList<>();
+        if (flow.getOwnerType().equals(FlowOwnerType.GENERAL_APPROVAL.getCode())) {
+            GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(flow.getOwnerId());
+            if (approval.getApprovalAttribute().equals(GeneralApprovalAttribute.CUSTOMIZE.getCode())) {
+                ListGeneralFormsCommand command = new ListGeneralFormsCommand();
+                command.setOwnerId(flow.getOrganizationId());
+                command.setOwnerType("EhOrganizations");
+                command.setModuleId(EnterpriseApprovalController.MODULE_ID);
+                command.setModuleType(EnterpriseApprovalController.MODULE_TYPE);
+                ListGeneralFormResponse response = generalFormService.listGeneralForms(command);
+                if (response.getForms() != null && response.getForms().size() > 0)
+                    response.getForms().forEach(r -> {
+                        FlowFormDTO dto = new FlowFormDTO();
+                        dto.setName(r.getFormName());
+                        dto.setFormVersion(r.getFormVersion());
+                        dto.setFormOriginId(r.getFormOriginId());
+                        flowFormDTOS.add(dto);
+                    });
+            } else {
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(approval.getFormOriginId());
+                if (form != null) {
+                    FlowFormDTO dto = new FlowFormDTO();
+                    dto.setName(form.getFormName());
+                    dto.setFormVersion(form.getFormVersion());
+                    dto.setFormOriginId(form.getFormOriginId());
+                    flowFormDTOS.add(dto);
+                }
+            }
+        }
+        return flowFormDTOS;
     }
 }
