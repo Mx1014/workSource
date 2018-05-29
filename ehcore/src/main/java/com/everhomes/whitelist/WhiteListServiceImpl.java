@@ -157,7 +157,9 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
         }
         PhoneWhiteList phoneWhiteList = this.whiteListProvider.getWhiteList(cmd.getId());
         WhiteListDTO whiteListDTO = ConvertHelper.convert(phoneWhiteList, WhiteListDTO.class);
-        whiteListDTO.setCreateTime(phoneWhiteList.getCreateTime().toString());
+        if (null != phoneWhiteList && null != phoneWhiteList.getCreateTime()) {
+            whiteListDTO.setCreateTime(phoneWhiteList.getCreateTime().toString());
+        }
         return whiteListDTO;
     }
 
