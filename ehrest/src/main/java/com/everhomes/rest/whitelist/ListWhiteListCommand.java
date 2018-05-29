@@ -3,15 +3,21 @@ package com.everhomes.rest.whitelist;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 
 /**
  * <ul>
+ *     <li>namespaceId: 域空间ID</li>
  *     <li>phoneNumber: 白名单手机号码[选填]</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每一页的数量</li>
  * </ul>
  */
 public class ListWhiteListCommand {
+
+    @NotNull
+    private Integer namespaceId;
 
     private String phoneNumber;
 
@@ -41,6 +47,14 @@ public class ListWhiteListCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

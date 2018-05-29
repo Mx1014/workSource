@@ -163,9 +163,14 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
 
     @Override
     public ListWhiteListResponse listWhiteList(ListWhiteListCommand cmd) {
+        if(null == cmd.getNamespaceId()) {
+            LOGGER.error("namespaceId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId cannot be null.");
+        }
         ListWhiteListResponse response = new ListWhiteListResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
-        List<PhoneWhiteList> list = whiteListProvider.listWhiteList(cmd.getPhoneNumber(), cmd.getPageAnchor(), cmd.getPageSize());
+        List<PhoneWhiteList> list = whiteListProvider.listWhiteList(cmd.getPhoneNumber(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
         int size = list.size();
         if (size >0) {
             response.setWhiteListDTOList(list.stream().map(r -> {

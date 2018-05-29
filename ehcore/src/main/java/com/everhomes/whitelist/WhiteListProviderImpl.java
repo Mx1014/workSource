@@ -88,7 +88,7 @@ public class WhiteListProviderImpl implements WhiteListProvider{
     }
 
     @Override
-    public List<PhoneWhiteList> listWhiteList(String phoneNumber, Long pageAnchor, Integer pageSize) {
+    public List<PhoneWhiteList> listWhiteList(String phoneNumber, Integer namespaceId, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPhoneWhiteList.class));
         SelectQuery<EhPhoneWhiteListRecord> query = context.selectQuery(Tables.EH_PHONE_WHITE_LIST);
 
@@ -96,6 +96,9 @@ public class WhiteListProviderImpl implements WhiteListProvider{
             query.addConditions(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER.eq(phoneNumber));
         }
 
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_PHONE_WHITE_LIST.NAMESPACE_ID.eq(namespaceId));
+        }
         if (null != pageAnchor && 0L != pageAnchor) {
             query.addConditions(Tables.EH_PHONE_WHITE_LIST.ID.lt(pageAnchor));
         }

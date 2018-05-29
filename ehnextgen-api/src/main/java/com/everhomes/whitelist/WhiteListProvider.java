@@ -15,7 +15,7 @@ public interface WhiteListProvider {
 
     PhoneWhiteList getWhiteList(Long id);
 
-    List<PhoneWhiteList> listWhiteList(String phoneNumber, Long pageAnchor, Integer pageSize);
+    List<PhoneWhiteList> listWhiteList(String phoneNumber, Integer namespaceId, Long pageAnchor, Integer pageSize);
 
     List<String> listAllWhiteList(Integer namespaceId);
 
