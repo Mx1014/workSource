@@ -78,3 +78,174 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
 
 
+
+-- 合同动态表单修改  by jiarui
+UPDATE  eh_var_field_groups set title = '收款合同' WHERE  module_name ='contract' and title ='合同信息' AND  parent_id =0;
+UPDATE `eh_var_fields`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE `module_name`='contract' AND `name`='contractType';
+UPDATE `eh_var_field_scopes`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE  field_id IN (SELECT id FROM eh_var_fields   WHERE `module_name`='contract' AND `name`='contractType');
+UPDATE `eh_var_fields`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE `module_name`='contract' AND `name`='status';
+UPDATE `eh_var_field_scopes`  SET `field_param`='{\"fieldParamType\": \"text\", \"length\": 32}' WHERE  field_id IN (SELECT id FROM eh_var_fields   WHERE `module_name`='contract' AND `name`='status');
+-- 表单select 自定义
+UPDATE  eh_var_fields  SET field_param = REPLACE(field_param,'select','customizationSelect') WHERE module_name = 'enterprise_customer' AND `name` <> 'levelItemId';
+UPDATE  eh_var_fields  SET field_param = REPLACE(field_param,'select','customizationSelect') WHERE module_name = 'contract' AND `name` NOT  IN ('contractType','status');
+
+UPDATE  eh_var_field_scopes SET field_param = (SELECT field_param FROM eh_var_fields WHERE id = field_id);
+-- 表单default  by jiarui
+
+SET  @id = (SELECT MAX(id) FROM  eh_var_field_group_scopes);
+INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '1', '客户信息', '1', '2', '1', NOW(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '基本信息', '1', '2', '1', NOW(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '企业情况', '3', '2', '1',NOW(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '12', '员工情况', '4', '2', '1', NOW(), NULL, NULL, NULL, NULL);
+
+SET  @id = (SELECT MAX(id) FROM  eh_var_field_scopes);
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '2', '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', '1', '1', '2', '1', now(), '1', NULL , NULL, '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '3', '{\"fieldParamType\": \"text\", \"length\": 32}', '简称', '0', '3', '2', '1', now(), NULL, NULL, NULL, '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '4', '{\"fieldParamType\": \"select\", \"length\": 32}', '客户类型', '0', '3', '2', '1', now(), NULL, NULL, NULL, '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '5', '{\"fieldParamType\": \"select\", \"length\": 32}', '客户级别', '1', '4', '2', '1', now(), '1', NULL , NULL, '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '7', '{\"fieldParamType\": \"text\", \"length\": 32}', '联系人', '1', '5', '2', '1', now(), '1', NULL , NULL, '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '10', '{\"fieldParamType\": \"text\", \"length\": 32}', '联系电话', '1', '6', '2', '1',now(), '1', NULL , NULL , '/1/10/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '10', '211', '{\"fieldParamType\": \"text\", \"length\": 32}', '跟进人', '0', '8', '2', '1', now(), '1', NULL , NULL, '/1/10/');
+
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '15', '{\"fieldParamType\": \"text\", \"length\": 32}', '地址', '1', '8', '2', '1', now(), NULL, NULL, NULL, '/1/11/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '17', '{\"fieldParamType\": \"text\", \"length\": 32}', '企业网址', '0', '11', '2', '1', now(), NULL, NULL, NULL, '/1/11/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '24', '{\"fieldParamType\": \"select\", \"length\": 32}', '行业类型', '0', '13', '2', '1',now(), NULL, NULL, NULL, '/1/11/');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '36', '{\"fieldParamType\": \"image\", \"length\": 1}', '企业LOGO', '0', '46', '2', '1', now(), '1', NULL , NULL , '/1/11//');
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '11', '37', '{\"fieldParamType\": \"multiText\", \"length\": 2048}', '企业简介', '0', '26', '2', '1', now(), '1', NULL , NULL , '/1/11/');
+
+SET  @id = (SELECT MAX(id) FROM  eh_var_field_item_scopes);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '5', '3', '普通客户', '3', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '5', '4', '重要客户', '4', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '5', '5', '意向客户', '5', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '5', '6', '已成交客户', '6', '2', '1',now(), NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '202', '集成电路', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '203', '软件', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '204', '通信技术', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '205', '生物医药', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '206', '医疗器械', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '207', '光机电', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '208', '金融服务', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '209', '新能源与环保', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '210', '文化创意', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '211', '商业-餐饮', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '212', '商业-超市', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '213', '商业-食堂', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '214', '商业-其他', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '24', '215', '其他', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+
+
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '4', '197', '业主', '1', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '4', '198', '办公', '2', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '4', '199', '商业', '3', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '4', '200', '孵化器', '4', '2', '1', now(), NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`) VALUES ((@id:=@id+1), '0', 'enterprise_customer', '4', '201', '物业公司', '5', '2', '1', now(), NULL, NULL, NULL, NULL);
+
+-- 能耗更新离线包版本   by jiarui
+update eh_version_urls set download_url = replace(download_url,'1-0-1','1-0-3'),
+  info_url = replace(info_url,'1-0-1','1-0-3'),
+  target_version = '1.0.3' where realm_id = (select id from eh_version_realm where realm = 'energyManagement');
+
+-- 合同管理2.7， by dingjianmin
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_service_module_exclude_functions`),0);
+-- 同步合同 98
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999953', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999952', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999959', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999948', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '2', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '11', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999956', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999949', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999950', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999945', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999943', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999946', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999963', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999951', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999941', NULL, '21200', '98');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999942', NULL, '21200', '98');
+-- 同步客户 99                                                                                                                            
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999953', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999952', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999959', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999948', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '2', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '11', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999956', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999949', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999950', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999945', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999943', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999946', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999963', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999951', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999941', NULL, '21200', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999942', NULL, '21200', '99');
+-- 企业客户管理，去掉相应的权限（新增，导入客户，下载模板）
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999983', NULL, '21100', '21101');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999983', NULL, '21100', '21103');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '1000000', NULL, '21100', '21101');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '1000000', NULL, '21100', '21103');
+-- 企业客户管理，去掉相应的权限（同步客户99）
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999953', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999952', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999959', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999948', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '2', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '11', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999956', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999949', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999950', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999945', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999943', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999946', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999963', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999951', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999941', NULL, '21100', '99');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999942', NULL, '21100', '99');
+
+-- 合同基础参数配置 工作流配置 权限 by dingjianmin
+SELECT id from eh_service_modules WHERE path IN ('/110000/21200/21230','/110000/21200/21220');
+SELECT id from EH_SERVICE_MODULE_PRIVILEGES  WHERE module_id='21210' AND privilege_id=21213 AND privilege_type=0;
+-- 对接第三方 权限
+SELECT id from EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS  WHERE namespace_id IN(999971,1000000) AND module_id IN (21100,21200)AND function_id IN(98,99);
+-- 免租期字段删除 权限
+SELECT id from  EH_VAR_FIELDS WHERE module_name='contract' AND group_id=15 AND group_path='/13/15/' AND `name`='freeDays';
+-- 客户管理 同步客户权限
+SELECT id from  EH_SERVICE_MODULE_PRIVILEGES WHERE module_id=21110 and privilege_id=21104;
+
+-- 合同基础参数配置 工作流配置 权限 by dingjianmin
+DELETE FROM EH_SERVICE_MODULES WHERE id IN(SELECT id FROM (SELECT id from eh_service_modules WHERE path IN ('/110000/21200/21230','/110000/21200/21220')) sm);
+DELETE FROM EH_SERVICE_MODULE_PRIVILEGES WHERE id IN(SELECT id FROM (SELECT id from EH_SERVICE_MODULE_PRIVILEGES  WHERE module_id='21210' AND privilege_id=21213 AND privilege_type=0) smp);
+-- 对接第三方 权限
+DELETE FROM EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS WHERE id IN(SELECT id FROM (SELECT id from EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS  WHERE namespace_id IN(999971,1000000) AND module_id IN (21100,21200)AND function_id IN(98,99))smef);
+-- 免租期字段删除 权限
+DELETE FROM EH_VAR_FIELDS WHERE id IN(SELECT id FROM (SELECT id from  EH_VAR_FIELDS WHERE module_name='contract' AND group_id=15 AND group_path='/13/15/' AND `name`='freeDays')vf);
+-- 客户管理 同步客户权限
+DELETE FROM EH_SERVICE_MODULE_PRIVILEGES WHERE id IN(SELECT id FROM (SELECT id from  EH_SERVICE_MODULE_PRIVILEGES WHERE module_id=21110 and privilege_id=21104)smp);
+
+-- 更新合同列表为收款合同
+UPDATE EH_SERVICE_MODULES SET `name`='收款合同' WHERE `level`=3 and parent_id=21200 and path='/110000/21200/21210';
+
+-- 更新合同列表为付款合同 下的相关权限 by dingjianmin
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '签约、修改' ,default_order=1 WHERE module_id = 21210 AND privilege_id = 21201;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '发起审批' ,default_order=2 WHERE module_id = 21210 AND privilege_id = 21202;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '删除' ,default_order=3 WHERE module_id = 21210 AND privilege_id = 21204;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '作废' ,default_order=4 WHERE module_id = 21210 AND privilege_id = 21205;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '入场' ,default_order=5 WHERE module_id = 21210 AND privilege_id = 21206;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '查看' ,default_order=0 WHERE module_id = 21210 AND privilege_id = 21207;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '续约' ,default_order=6 WHERE module_id = 21210 AND privilege_id = 21208;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '变更' ,default_order=7 WHERE module_id = 21210 AND privilege_id = 21209;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '退约' ,default_order=8 WHERE module_id = 21210 AND privilege_id = 21214;
+-- 更新付款合同下的相关权限显示
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '新增' ,default_order=5 WHERE module_id = 21215 AND privilege_id = 21215;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '签约、发起审批',default_order=1 WHERE module_id = 21215 AND privilege_id = 21216;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '修改' ,default_order=2 WHERE module_id = 21215 AND privilege_id = 21217;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '删除' ,default_order=3 WHERE module_id = 21215 AND privilege_id = 21218;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '作废' ,default_order=4 WHERE module_id = 21215 AND privilege_id = 21219;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '查看' ,default_order=0 WHERE module_id = 21215 AND privilege_id = 21220;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '续约' ,default_order=6 WHERE module_id = 21215 AND privilege_id = 21221;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '变更' ,default_order=7 WHERE module_id = 21215 AND privilege_id = 21222;
+UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '退约' ,default_order=8 WHERE module_id = 21215 AND privilege_id = 21223;
+

@@ -104,6 +104,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncResultViewedCommand;
 import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
@@ -359,7 +360,7 @@ public interface CustomerService {
 
     List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
 
-    void syncOrganizationToCustomer();
+    void syncOrganizationToCustomer(SyncCustomerDataCommand cmd);
 
     HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse);
 }

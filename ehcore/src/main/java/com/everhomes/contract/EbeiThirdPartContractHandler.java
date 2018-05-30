@@ -537,9 +537,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
-//            if(customer.getTrackingUid() == null) {
-//                customer.setTrackingUid(-1L);
-//            }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
             insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
@@ -550,9 +547,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contractProvider.createContract(contract);
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);
-
-
-
 
     }
 
@@ -668,9 +662,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
-//            if(customer.getTrackingUid() == null) {
-//                customer.setTrackingUid(-1L);
-//            }
+
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
             insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
@@ -738,6 +730,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         }
 
         organizationProvider.createOrganizationAddress(organizationAddress);
+        // add sync to customer entry info  20180523
+        organizationService.updateCustomerEntryInfo(customer, organizationAddress);
     }
 
     private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
@@ -746,6 +740,11 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             organizationAddress.setOperatorUid(1L);
             organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationProvider.updateOrganizationAddress(organizationAddress);
+            //sync to customer entry info 20180523 by jiarui
+            EnterpriseCustomer customer =  customerProvider.findByOrganizationId(organizationAddress.getOrganizationId());
+            if (customer != null) {
+                customerProvider.deleteCustomerEntryInfoByCustomerIdAndAddressId(customer.getId(), organizationAddress.getAddressId());
+            }
         }
     }
 
