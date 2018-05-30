@@ -35,6 +35,7 @@ import com.everhomes.discover.ItemType;
  * <li>groupNmae:分组名称</li>
  * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
  * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
+ * <li>hasQr:门禁是否支持二维码0否1是</li>
  * </ul>
  * @author janson
  *
@@ -69,6 +70,7 @@ public class DoorAccessDTO {
     private String localUUid;
     private String localAesKey;
     private Long localServerId;
+    private Byte hasQr;
 
     public String getLocalAesKey() {
 		return localAesKey;
@@ -405,6 +407,18 @@ public class DoorAccessDTO {
 
 	public void setLocalServerId(Long localServerId) {
 		this.localServerId = localServerId;
+	}
+
+
+
+	public Byte getHasQr() {
+		return hasQr;
+	}
+
+
+
+	public void setHasQr(Byte hasQr) {
+		this.hasQr = hasQr;
 	}
 
 

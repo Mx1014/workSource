@@ -29,6 +29,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -246,6 +247,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     AlipayClient alipayClient;
     
@@ -1558,7 +1562,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         doorAccess.setLatitude(cmd.getLatitude());
         doorAccess.setLongitude(cmd.getLongitude());
-        
+        doorAccess.setHasQr(cmd.getHasQr());
         doorAccessProvider.updateDoorAccess(doorAccess);
         if(doorCommand != null) {
             doorCommandProvider.createDoorCommand(doorCommand);
@@ -1585,11 +1589,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         LOGGER.info("timeout for cmdId=", cmdId);
     }
     
-    List<AesUserKey> listAesUserKeyByUser(User user) {
+    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         //TODO cache AesUserKey
+        if(locator == null || locator.getAnchor() == null || locator.getAnchor() == 0){
+        	locator = new ListingLocator();
+        }
+        if(count == null ||count == 0){
+        	count = 60;
+        }
         
-        ListingLocator locator = new ListingLocator();
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), 60));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), count));
         
         //TODO when the key is invalid, MUST invalid it and generate a command.
         
@@ -1614,7 +1623,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public  List<AesUserKey> listAesUserKeyByUserId(Long userId) {
         User user = userProvider.findUserById(userId);
         if(user != null) {
-            return listAesUserKeyByUser(user);
+            return listAesUserKeyByUser(user, null, null);
         }
         
         return new ArrayList<AesUserKey>();
@@ -1623,11 +1632,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     //list all AesUserKeys for current login user
     @Override
-    public ListAesUserKeyByUserResponse listAesUserKeyByUser() {
+    public ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd) {
         User user = UserContext.current().getUser();
         
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user);
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user, locator, cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(AesUserKey key : aesUserKeys) {
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
@@ -1644,6 +1655,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
         
+        if(cmd.getPageSize() != null && cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
+        	locator.setAnchor(dtos.get(dtos.size() - 1).getAuthId());
+        	dtos.remove(dtos.size() - 1);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
         return resp;
@@ -1674,11 +1690,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
-    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth() {
+    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(ListAdminAesUserKeyCommand cmd) {
         User user = UserContext.current().getUser();
         
+        cmd.setPageSize(cmd.getPageSize()== null? 0 : cmd.getPageSize());
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), 20);
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), cmd.getPageSize());
 
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
@@ -1725,6 +1744,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
         
+        if(cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
+        	resp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
+        	dtos.remove(dtos.size() - 1);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
         return resp;        
@@ -1917,7 +1941,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         List<DoorAuth> auths = doorAuthProvider.queryDoorAuthByApproveId(locator, user.getId(), count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        List<DoorAuth> invalidAuths = new ArrayList<DoorAuth>();
         for(DoorAuth auth : auths) {
+        	//issue-30615 授权过了有效期则置为失效 by liuyilin 20180529
+        	long now = DateHelper.currentGMTTime().getTime();
+            if(auth.getValidEndMs() < now){
+            	auth.setStatus(DoorAuthStatus.INVALID.getCode());
+            	invalidAuths.add(auth);
+            }
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
@@ -1932,7 +1963,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //            }
             dtos.add(dto);
         }
-        
+        //issue-30615 授权过了有效期则置为失效 by liuyilin 20180529
+        doorAuthProvider.updateDoorAuth(invalidAuths);
         resp.setDtos(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
@@ -2503,6 +2535,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 auth.setStatus(DoorAuthStatus.INVALID.getCode());
                 doorAuthProvider.updateDoorAuth(auth);
                 return null;
+            }
+            
+            //没有二维码读头的门禁不返回二维码,by liuyilin 20180529
+            if(doorAccess.getHasQr() != (byte) 1){
+            	continue;
             }
             
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
@@ -4736,10 +4773,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
-	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser() {
+	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd) {
 		ListFacialRecognitionKeyByUserResponse rsp = new ListFacialRecognitionKeyByUserResponse();
 		User user = UserContext.current().getUser();
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), 0);
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();
@@ -4785,7 +4824,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}
             }
         }
-        
+        rsp.setNextPageAnchor(locator.getAnchor());
         rsp.setAesUserKeys(dtos);
 		
 		return rsp;
@@ -4804,6 +4843,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
+        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+        SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+        createPhotoCmd.setUserType((byte) 1);
+        createPhotoCmd.setImgUri(cmd.getHeadImgUri());
+        createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
+        createPhotoCmd.setAuthId(auth.getId());
+        faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+        
+        cmd1.setDoorId(cmd.getDoorId());
+        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
 		return dto;
 	}
 

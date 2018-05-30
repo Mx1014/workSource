@@ -36,6 +36,7 @@ import com.everhomes.rest.aclink.SyncLocalUserDataResponse;
 import com.everhomes.rest.aclink.SyncLocalVistorDataCommand;
 import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 import com.everhomes.rest.aclink.UpdateUserSyncTimeCommand;
+import com.everhomes.rest.aclink.UpdateVistorSyncTimeCommand;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.user.User;
@@ -47,6 +48,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
+import ch.qos.logback.core.pattern.ConverterUtil;
 
 @Component
 public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoService {
@@ -88,6 +91,21 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	public void setFacialRecognitionPhoto(SetFacialRecognitionPhotoCommand cmd) {
 		User user = UserContext.current().getUser();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if(cmd.getUserType() != null && cmd.getUserType() != 0 && cmd.getAuthId() != null){
+			//访客照片,只新增,不更新
+			FaceRecognitionPhoto rec = new FaceRecognitionPhoto();
+			rec.setImgUri(cmd.getImgUri());
+			rec.setImgUrl(cmd.getImgUrl());
+			rec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rec.setCreatorUid(user.getId());
+			rec.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rec.setOperatorUid(user.getId());
+			rec.setAuthId(cmd.getAuthId());
+			rec.setUserType(cmd.getUserType());
+			rec.setStatus((byte) 1);
+			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			return;
+		}
 		List<FaceRecognitionPhoto> recs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(locator, user.getId(), 0);
 		if(recs != null && recs.size() > 0){
 			FaceRecognitionPhoto rec = recs.get(0);
@@ -279,9 +297,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	
 	@Override
 	public SyncLocalVistorDataResponse syncLocalVistorData(SyncLocalVistorDataCommand cmd) {
-		//TODO sync vistor Data
-
-		return null;
+		return faceRecognitionPhotoProvider.queryVistorPhotoBySync(cmd.getServerId());
 	}
 
 	@Override
@@ -292,6 +308,40 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(photo);
 		}else{
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_NOT_FOUND, "Photo not found");
+		}
+	}
+
+	@Override
+	public void updateVistorSyncTimes(UpdateVistorSyncTimeCommand cmd) {
+		String[] ids = cmd.getPhotoIds().split(",");
+		List<Long> photoIds = new ArrayList<Long>();
+		for (String id : ids){
+			photoIds.add(Long.valueOf(id));
+		}
+		List<FaceRecognitionPhoto> listPhotos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(photoIds);
+		Timestamp nowTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+		if(listPhotos != null && listPhotos.size() > 0){
+			for(FaceRecognitionPhoto photo : listPhotos){
+				photo.setSyncTime(nowTime);
+			}
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
+		}
+		
+	}
+
+	@Override
+	public void invalidVistorSyncState(UpdateVistorSyncTimeCommand cmd) {
+		String[] ids = cmd.getPhotoIds().split(",");
+		List<Long> photoIds = new ArrayList<Long>();
+		for (String id : ids){
+			photoIds.add(Long.valueOf(id));
+		}
+		List<FaceRecognitionPhoto> listPhotos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(photoIds);
+		if(listPhotos != null && listPhotos.size() > 0){
+			for(FaceRecognitionPhoto photo : listPhotos){
+				photo.setStatus((byte) 0);
+			}
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
 		}
 	}
 }

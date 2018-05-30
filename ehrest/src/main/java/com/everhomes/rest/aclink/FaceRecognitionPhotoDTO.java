@@ -28,6 +28,8 @@ public class FaceRecognitionPhotoDTO {
 	private Timestamp syncTime;
 	private Timestamp crearteTime;
 	private Byte syncStatus;
+	private Byte userType;
+	private Long authId;
 	public Long getId() {
 		return id;
 	}
@@ -70,6 +72,18 @@ public class FaceRecognitionPhotoDTO {
 	}
 	public void setCrearteTime(Timestamp crearteTime) {
 		this.crearteTime = crearteTime;
+	}
+	public Byte getUserType() {
+		return userType;
+	}
+	public void setUserType(Byte userType) {
+		this.userType = userType;
+	}
+	public Long getAuthId() {
+		return authId;
+	}
+	public void setAuthId(Long authId) {
+		this.authId = authId;
 	}
 	@Override
     public boolean equals(Object obj){

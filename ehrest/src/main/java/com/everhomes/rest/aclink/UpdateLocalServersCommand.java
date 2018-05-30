@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>name：内网服务器名称</li>
  * </ul>
  */
-public class updateLocalServersCommand {
+public class UpdateLocalServersCommand {
 	private Long id;
 	private String name;
 	public Long getId() {

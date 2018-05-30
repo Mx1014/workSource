@@ -66,6 +66,7 @@ public class DoorAuthDTO {
     private Integer validAuthAmount;
     private String localAuthKey;
     private String qrString;
+    private Byte rightOpen;
 
     public String getAddress() {
         return address;
@@ -325,6 +326,16 @@ public class DoorAuthDTO {
 
 	public void setQrString(String qrString) {
 		this.qrString = qrString;
+	}
+
+
+	public Byte getRightOpen() {
+		return rightOpen;
+	}
+
+
+	public void setRightOpen(Byte rightOpen) {
+		this.rightOpen = rightOpen;
 	}
 
 

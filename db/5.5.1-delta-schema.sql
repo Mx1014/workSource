@@ -411,7 +411,7 @@ CREATE TABLE `eh_face_recognition_photos` (
     `user_id` BIGINT(20) COMMENT '用户id(正式用户)',
 	`auth_id` BIGINT(20) COMMENT '授权id(访客)',
 	`user_type` TINYINT NOT NULL DEFAULT '0' COMMENT '照片关联的用户类型,0正式用户,1访客',
-	`img_uri` VARCHAR(2048) NOT NULL COMMENT '照片uri',
+	`img_uri` VARCHAR(2048) COMMENT '照片uri',
 	`img_url` VARCHAR(2048) NOT NULL COMMENT '照片url',
 	`sync_time` DATETIME COMMENT '上次同步时间时间' ,
 	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态1正常2已删除',
@@ -430,4 +430,5 @@ ALTER TABLE eh_aclink_firmware MODIFY COLUMN `info_url` VARCHAR(1024);
 ALTER TABLE `eh_door_access` ADD COLUMN `has_qr` TINYINT NOT NULL DEFAULT '1' COMMENT '门禁二维码能力0无1有';
 
 -- End by: yilin Liu
+
 
