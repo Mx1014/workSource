@@ -924,15 +924,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
-    	if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
-    		exportOrgBillTemplates(cmd, response);//导出企业客户账单模板
-    	}else {
-    		exportUserBillTemplates(cmd, response);//导出个人客户账单模板
-    	}
-    }
-    
-    public void exportOrgBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
-        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
+		ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
         List<String> headList = new ArrayList<>();
         List<Integer> mandatoryIndex = new ArrayList<>();
         Integer cur = -1;
@@ -944,7 +936,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         mandatoryIndex.add(1);//账期结束时间置为必填
         headList.add("客户名称");
         cur++;
-        mandatoryIndex.add(1);//客户名称置为必填
+        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        	mandatoryIndex.add(1);//企业客户：客户名称为必填
+        }else {
+        	mandatoryIndex.add(0);//个人客户：客户名称为非必填
+        }
         headList.add("合同编号");
         cur++;
         mandatoryIndex.add(0);
@@ -963,7 +959,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         }
         headList.add("楼栋/门牌");
         cur++;
-        mandatoryIndex.add(0);
+        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        	mandatoryIndex.add(0);//企业客户：楼栋/门牌为非必填
+        }else {
+        	mandatoryIndex.add(1);//个人客户：楼栋/门牌为必填
+        }
         headList.add("减免金额(元)");
         cur++;
         mandatoryIndex.add(0);
@@ -983,7 +983,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
         if(fileName == null) fileName = "";
-        new ExcelUtils(response,"企业客户账单导入模板"+fileName+System.currentTimeMillis(),fileName+"模板")
+        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        	fileName = "企业客户账单导入模板" + fileName;
+        }else {
+        	fileName = "个人客户账单导入模板" + fileName;
+        }
+        new ExcelUtils(response,fileName+System.currentTimeMillis(),fileName+"模板")
                 .setNeedMandatoryTitle(true)
                 .setMandatoryTitle(mandatoryIndex)
                 .setNeedTitleRemark(true)
@@ -1002,77 +1007,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 .writeExcel(null, headers, true, null, null);
     }
     
-    public void exportUserBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
-        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
-        List<String> headList = new ArrayList<>();
-        List<Integer> mandatoryIndex = new ArrayList<>();
-        Integer cur = -1;
-        headList.add("账单开始时间");
-        cur++;
-        mandatoryIndex.add(1);//账期开始时间置为必填
-        headList.add("账单结束时间");
-        cur++;
-        mandatoryIndex.add(1);//账期结束时间置为必填
-        headList.add("客户名称");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("合同编号");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("客户手机号");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("催缴手机号");
-        cur++;
-        mandatoryIndex.add(1);
-        //可变标题 , 需要后期excel加字段？ not likely    在数据库中能获得这些字段的展示名称吗？ not likely   写死中文？ 导出功能较多时，考虑建立导出设置表统一管理
-        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
-        for(BillItemDTO dto : billItemDTOList){
-            headList.add(dto.getBillItemName()+"(元)");
-            cur++;
-            mandatoryIndex.add(1);//收费项为必填
-        }
-        headList.add("楼栋/门牌");
-        cur++;
-        mandatoryIndex.add(1);//个人客户楼栋门牌为必填
-        headList.add("减免金额(元)");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("减免备注");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("增收金额(元)");
-        cur++;
-        mandatoryIndex.add(0);
-        headList.add("增收备注");
-        cur++;
-        mandatoryIndex.add(0);
-        //发票
-        headList.add("发票单号");
-        cur++;
-        mandatoryIndex.add(0);
-        String[] headers = headList.toArray(new String[headList.size()]);
-        String fileName = webPage.getBillGroupName();
-        if(fileName == null) fileName = "";
-        new ExcelUtils(response,"个人客户账单导入模板"+fileName+System.currentTimeMillis(),fileName+"模板")
-                .setNeedMandatoryTitle(true)
-                .setMandatoryTitle(mandatoryIndex)
-                .setNeedTitleRemark(true)
-                .setTitleRemarkColorIndex(HSSFColor.YELLOW.index)
-                .setHeaderColorIndex(HSSFColor.YELLOW.index)
-                .setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
-                        "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-                        "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
-                        "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-                        "4、带有星号（*）的红色字段为必填项。\n" +
-                        "5、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
-                        "6、企业客户需填写与系统内客户管理一致的企业名称，个人客户需填写与系统内个人客户资料一致的楼栋门牌，否则会导致无法定位客户。\n" +
-                        "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12", (short)13, (short)2500)
-                .setNeedSequenceColumn(false)
-                .setIsCellStylePureString(true)
-                .writeExcel(null, headers, true, null, null);
-    }
-
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
         BatchImportBillsResponse response = new BatchImportBillsResponse();

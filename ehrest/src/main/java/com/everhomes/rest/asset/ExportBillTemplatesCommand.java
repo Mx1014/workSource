@@ -9,7 +9,7 @@ package com.everhomes.rest.asset;
  * <li>communityId:园区id</li>
  * <li>namespaceId:域名id</li>
  * <li>billGroupId:账单组id</li>
- * <li>exportType:1：企业模板，2：个人客户模板</li>
+ * <li>exportType:1：企业模板，2：个人客户模板，参考com.everhomes.rest.asset.AssetExportType</li>
  *</ul>
  */
 public class ExportBillTemplatesCommand {
