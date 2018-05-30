@@ -14,7 +14,7 @@ public class exportPaymentBillsDetail {
     private String amountReceived;
     private String amountOwed;
     private String status;
-    private String noticeTimes;
+
     private String contractNum;
     private String invoiceNum;
 
@@ -98,11 +98,5 @@ public class exportPaymentBillsDetail {
         this.status = status;
     }
 
-    public String getNoticeTimes() {
-        return noticeTimes;
-    }
 
-    public void setNoticeTimes(String noticeTimes) {
-        this.noticeTimes = noticeTimes;
-    }
 }

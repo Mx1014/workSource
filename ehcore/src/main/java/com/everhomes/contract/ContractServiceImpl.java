@@ -43,6 +43,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -850,7 +851,7 @@ public class ContractServiceImpl implements ContractService {
 //		assetService.paymentExpectancies(command);
 
 		command.setIsEffectiveImmediately((byte)0);
-		assetService.paymentExpectancies_re_struct(command);
+		assetService.paymentExpectanciesCalculate(command);
 	}
 
 

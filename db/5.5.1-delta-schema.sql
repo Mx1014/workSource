@@ -334,3 +334,6 @@ ALTER TABLE `eh_energy_meter_tasks`
 	MODIFY COLUMN `last_task_reading`  decimal(10,2) NULL DEFAULT NULL AFTER `executive_expire_time`;
 ALTER TABLE `eh_energy_meter_tasks`
 	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `last_task_reading`;
+
+-- added a new column for eh_payment_bill_groups by wentian
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `bills_day_type` TINYINT NOT NULL DEFAULT 4 COMMENT '1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日';
