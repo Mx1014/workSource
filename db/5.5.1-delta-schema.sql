@@ -148,5 +148,6 @@ CREATE TABLE `eh_face_recognition_photos` (
 ALTER TABLE eh_aclink_firmware MODIFY COLUMN `download_url` VARCHAR(1024);
 ALTER TABLE eh_aclink_firmware MODIFY COLUMN `info_url` VARCHAR(1024);
 
-
+-- issue28839允许修改门禁开门方式,增加字段表示是否支持二维码
+ALTER TABLE `eh_door_access` ADD COLUMN `has_qr` TINYINT NOT NULL DEFAULT '1' COMMENT '门禁二维码能力0无1有';
 -- End by: yilin Liu
