@@ -328,3 +328,13 @@ ALTER TABLE `eh_service_alliance_jump_module`
 -- 超级管理员 Added by janson
 ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
 
+-- 大沙河梯控
+-- by shiheng.ma
+-- 新增字段 第三方KeyU字段
+ALTER TABLE `eh_door_auth`
+ADD COLUMN `key_u` VARCHAR(16) NULL DEFAULT NULL COMMENT '第三方用户秘钥' AFTER `right_remote`;
+
+-- 新增字段 授权楼层
+ALTER TABLE `eh_door_access`
+ADD COLUMN `floor_id` VARCHAR(2000) NULL DEFAULT NULL COMMENT '授权楼层' AFTER `groupId`;
+-- 大沙河梯控 end
