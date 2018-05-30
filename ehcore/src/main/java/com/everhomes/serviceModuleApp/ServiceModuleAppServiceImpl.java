@@ -411,7 +411,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
 			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
-				orgId = cmd.getContext().getOrgId();
+				orgId = cmd.getContext().getOrganizationId();
 				appType = ServiceModuleAppType.OA.getCode();
 				sceneType = ServiceModuleSceneType.CLIENT.getCode();
 			}else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){

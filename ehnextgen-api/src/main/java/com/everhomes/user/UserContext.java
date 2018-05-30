@@ -4,6 +4,7 @@ package com.everhomes.user;
 import com.everhomes.app.App;
 import com.everhomes.domain.Domain;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.launchpadbase.AppContext;
 
 public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
@@ -19,9 +20,7 @@ public class UserContext {
     //预览版本标志
     private Long previewPortalVersionId;
 
-    private Long communityId;
-    private Long organizationId;
-    private Long familyId;
+    private AppContext appContext;
 
     public UserContext() {
     }
@@ -156,27 +155,11 @@ public class UserContext {
         this.previewPortalVersionId = previewPortalVersionId;
     }
 
-    public Long getCommunityId() {
-        return communityId;
+    public AppContext getAppContext() {
+        return appContext;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
+    public void setAppContext(AppContext appContext) {
+        this.appContext = appContext;
     }
 }

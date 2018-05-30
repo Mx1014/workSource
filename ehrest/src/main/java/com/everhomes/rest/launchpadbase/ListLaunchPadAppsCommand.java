@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>layoutId: layoutId</li>
  *     <li>widget: 组件 参考{@link Widget}</li>
  *     <li>instanceConfig: instanceConfig</li>
- *     <li>context: 上下文信息context {@link ContextDTO}</li>
+ *     <li>context: 上下文信息context {@link AppContext}</li>
  * </ul>
  */
 public class ListLaunchPadAppsCommand {
@@ -18,7 +18,7 @@ public class ListLaunchPadAppsCommand {
     private Long layoutId;
     private String widget;
     private String instanceConfig;
-    private ContextDTO context;
+    private AppContext context;
 
     public Long getLayoutId() {
         return layoutId;
@@ -44,11 +44,11 @@ public class ListLaunchPadAppsCommand {
         this.instanceConfig = instanceConfig;
     }
 
-    public ContextDTO getContext() {
+    public AppContext getContext() {
         return context;
     }
 
-    public void setContext(ContextDTO context) {
+    public void setContext(AppContext context) {
         this.context = context;
     }
 
