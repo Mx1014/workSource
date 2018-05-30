@@ -32,3 +32,49 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) VALUES (
 SET @pri_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41910', '0', '4190041910', '全部权限', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41920', '0', '4190041920', '全部权限', '0', UTC_TIMESTAMP());
+
+-- 合同的开始结束时间改为，开始在00：00：00， 结束在23：59：59 by wentian
+update eh_contracts set contract_start_date = date_format(contract_start_date,'%Y-%m-%d 00:00:00');
+update eh_contracts set contract_end_date = date_format(contract_end_date,'%Y-%m-%d 23:59:59');
+
+-- ------------------------------
+-- 服务联盟V3.3（新增需求提单功能）     
+-- 产品功能 #26469 add by huangmingbo  2018/05/29
+-- ------------------------------
+-- 添加错误信息提示
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11000', 'zh_CN', '新事件申请用户不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11001', 'zh_CN', '未找到工作流信息');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11002', 'zh_CN', '服务商功能并未开启');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11003', 'zh_CN', '该服务商不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11004', 'zh_CN', '上传的文件地址为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11005', 'zh_CN', '邮件附件获取失败');
+
+-- 删除样式管理，模块，权限，模块权限表，更新module的顺序  #26469 add by huangmingbo  2018/05/29
+delete from eh_service_modules where parent_id = 40500 and id = 40510;
+update eh_service_modules m set m.default_order = 0 where m.parent_id = 40500 and m.id = 40520;
+update eh_service_modules m set m.default_order = 1 where m.parent_id = 40500 and m.id = 40540;
+update eh_service_modules m set m.default_order = 2 where m.parent_id = 40500 and m.id = 40530;
+delete from eh_service_module_privileges where module_id = 40510;
+delete from  eh_acl_privileges  where id =  4050040510;
+
+SET @ns_id = 999954;
+SET @module_id = 40500;
+
+-- 将服务联盟都变成community_control  #26469 add by huangmingbo  2018/05/29
+UPDATE `eh_service_modules` SET `module_control_type`='community_control' WHERE  `id`=@module_id;
+update eh_service_module_apps set  module_control_type='community_control' where module_id = @module_id and  module_control_type = 'unlimit_control';
+
+-- 新建事件  #26469 add by huangmingbo  2018/05/29
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', 'flow_node', '新建事件', 'new event', '{"nodeType":"NEW_EVENT"}', 2, NULL, NULL, NULL, NULL);  
+
+-- “停车缴费”、“物业报修”、“物品放行”、“园区入驻”  #26469 add by huangmingbo  2018/05/29
+SET @jump_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_jump_module`), 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '停车缴费', 40800, 'zl://parking/query?displayName=停车缴费', NULL, 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物业报修', 20100, NULL, '{"taskCategoryId":6,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物品放行', 49200, NULL, '{"prefix":"/goods-move/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '园区入驻', 40100, NULL, '{"skipRoute":"zl://park-service/settle"}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+
+

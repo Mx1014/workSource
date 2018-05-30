@@ -1591,8 +1591,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 */
 	private List<JumpModuleDTO> checkSpecificApp(List<ServiceModuleApp> apps, JumpModuleDTO dto) {
 		final long APARTMENT_SERVICE_MODULE_ID = 20100L; // 物业报修/投诉建议
-		final long PARK_IN_MODULE_ID = 36000L; // 园区入驻
+		final long PARK_IN_MODULE_ID = 40100L; // 园区入驻
 		final long ARTICLES_PASS_MODULE_ID = 49200L; // 物品放行
+		List<JumpModuleDTO> dtos = new ArrayList<>(10);
+
+		// 若未获取配置，直接返回dto
+		String instanceConfig = dto.getInstanceConfig();
+		if (StringUtils.isEmpty(instanceConfig)) {
+			dtos.add(dto);
+			return dtos;
+		}
 
 		// 物业报修/投诉建议
 		if (APARTMENT_SERVICE_MODULE_ID == dto.getModuleId()) {
@@ -1609,7 +1617,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return CheckArticlesPassAppMatch(apps, dto);
 		}
 
-		List<JumpModuleDTO> dtos = new ArrayList<>(1);
 		dtos.add(dto);
 		return dtos;
 	}
@@ -1621,18 +1628,21 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 */
 	private List<JumpModuleDTO> CheckApartmentServiceAppMatch(List<ServiceModuleApp> apps, JumpModuleDTO dto) {
 
-		// 获取jump中的config
-		String jumpConfig = dto.getInstanceConfig();
-		if (StringUtils.isEmpty(jumpConfig)) {
-			return null;
-		}
+		
 
+		// 获取taskCategoryId
 		final String TASK_CATEGORY_ID_KEY = "taskCategoryId";
+		String jumpConfig = dto.getInstanceConfig();
 		JSONObject json = JSONObject.parseObject(jumpConfig);
 		Long jumpCheckId = json.getLong(TASK_CATEGORY_ID_KEY);
 		if (null == jumpCheckId) {
 			return null;
 		}
+		
+		//获取url相关配置
+		String skipRoute = json.getString("skipRoute"); // 跳转路由，如zl://browser/i?url=
+		String prefix = json.getString("prefix"); // 业务前缀
+		String suffix = json.getString("suffix"); // 业务后缀
 
 		// 对当前应用进行匹配
 		for (ServiceModuleApp app : apps) {
@@ -1676,25 +1686,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 				continue;
 			}
 
-			// 相同时进行url组装
-			// ${home.url}/property-repair-web/build/index.html?
-			// ns=999990&type=user&taskCategoryId=6&displayName=%e6%8a%a5%e4%bf%ae#home#sign_suffix
-			String displayName = "displayName";
-			try {
-				// 标题为中文时需要转码
-				displayName = URLEncoder.encode(app.getName(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("encode name failed name:" + app.getName());
-			}
 
-			String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
-			StringBuilder finalModuleUrl = new StringBuilder(homeUrl);
-			finalModuleUrl.append("/property-repair-web/build/index.html?");
-			finalModuleUrl.append("ns=" + app.getNamespaceId());
-			finalModuleUrl.append("&type=user");
-			finalModuleUrl.append("&taskCategoryId=" + taskCategoryId);
-			finalModuleUrl.append("&displayName=" + displayName);
-			finalModuleUrl.append("#home#sign_suffix");
+			Map<String, String> normalParams = new HashMap<>(10);
+			normalParams.put("taskCategoryId", taskCategoryId + "");
+			normalParams.put("type", "user");
+			normalParams.put("ns", app.getNamespaceId()+"");
+
+			Map<String, String> encodeParams = new HashMap<>(10);
+			encodeParams.put("displayName", app.getName() + "");
+			
+			// 生成url
+			String finalModuleUrl = generateModuleUrl(skipRoute, prefix, normalParams, encodeParams, suffix);
 
 			dto.setModuleUrl(finalModuleUrl.toString());
 			List<JumpModuleDTO> dtos = new ArrayList<>(1);
@@ -1711,6 +1713,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private List<JumpModuleDTO> CheckParkInAppMatch(List<ServiceModuleApp> apps, JumpModuleDTO dto) {
 
 		List<JumpModuleDTO> dtos = new ArrayList<>(10);
+
+		JSONObject json = JSONObject.parseObject(dto.getInstanceConfig());
+		String skipRoute = json.getString("skipRoute"); // 跳转路由，如zl://browser/i?url=
+
 		for (ServiceModuleApp app : apps) {
 			// 获取categoryId
 			Long categoryId = 1L;
@@ -1723,24 +1729,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 			}
 
-			// 增加该应用
-			String displayName = "displayName";
-			try {
-				// 标题为中文时需要转码
-				displayName = URLEncoder.encode(app.getName(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("encode name failed name:" + app.getName());
-			}
+			Map<String, String> normalParams = new HashMap<>(10);
+			normalParams.put("categoryId", categoryId + "");
 
-			// zl://park-service/settle?displayName='value2'&categoryId='value3'
-			StringBuilder finalModuleUrl = new StringBuilder();
-			finalModuleUrl.append("zl://park-service/settle?");
-			finalModuleUrl.append("displayName=" + displayName);
-			finalModuleUrl.append("&categoryId=" + categoryId);
+			Map<String, String> encodeParams = new HashMap<>(10);
+			encodeParams.put("displayName", app.getName() + "");
+			// 生成url
+			String finalModuleUrl = generateModuleUrl(skipRoute, null, normalParams, encodeParams, null);
 
 			JumpModuleDTO newDto = new JumpModuleDTO();
 			newDto.setModuleName(dto.getModuleName());
-			newDto.setModuleUrl(finalModuleUrl.toString());
+			newDto.setModuleUrl(finalModuleUrl);
 			dtos.add(newDto);
 		}
 
@@ -1748,38 +1747,134 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 	
 	/**
-	 * 检查是否物品搬迁
+	 * 检查是否物品搬迁 这是一个h5链接，需要url
+	 * http://beta.zuolin.com/goods-move/build/index.html?ns=1000000&hideNavigationBar=1&ehnavigatorstyle=0#/home#sign_suffix
 	 */
 	private List<JumpModuleDTO> CheckArticlesPassAppMatch(List<ServiceModuleApp> apps, JumpModuleDTO dto) {
+		// 获取配置
+		JSONObject json = JSONObject.parseObject(dto.getInstanceConfig());
+		String skipRoute = json.getString("skipRoute"); // 跳转路由，如zl://browser/i?url=
+		String prefix = json.getString("prefix"); // 业务前缀
+		String suffix = json.getString("suffix"); // 业务后缀
 
 		List<JumpModuleDTO> dtos = new ArrayList<>(10);
 		for (ServiceModuleApp app : apps) {
 
-			// 增加该应用
-			String displayName = "displayName";
-			try {
-				// 标题为中文时需要转码
-				displayName = URLEncoder.encode(app.getName(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("encode name failed name:" + app.getName());
-			}
+			Map<String, String> params = new HashMap<>(10);
+			params.put("ns", app.getNamespaceId() + "");
+			params.put("hideNavigationBar", "1");
+			params.put("ehnavigatorstyle", "0");
 
-			// http://beta.zuolin.com/goods-move/build/index.html?ns=1000000&hideNavigationBar=1&ehnavigatorstyle=0#/home#sign_suffix
-			String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
-			StringBuilder finalModuleUrl = new StringBuilder(homeUrl);
-			finalModuleUrl.append("/goods-move/build/index.html?");
-			finalModuleUrl.append("ns=" + app.getNamespaceId());
-			finalModuleUrl.append("&hideNavigationBar=1");
-			finalModuleUrl.append("&ehnavigatorstyle=0");
-			finalModuleUrl.append("#/home#sign_suffix");
+			// 根据参数生成模块url
+			String finalModuleUrl = generateModuleUrl(skipRoute, prefix, params, null, suffix);
 
 			JumpModuleDTO newDto = new JumpModuleDTO();
 			newDto.setModuleName(dto.getModuleName());
-			newDto.setModuleUrl(finalModuleUrl.toString());
+			newDto.setModuleUrl(finalModuleUrl);
 			dtos.add(newDto);
 		}
 
 		return dtos;
+	}
+
+	/**
+	 * @Function: YellowPageServiceImpl.java
+	 * @Description: 设置最终的url
+	 * @param skipRoute
+	 *            跳转路由 如zl://browser/i?url=
+	 * @param prefix
+	 * @param normalParams
+	 *            普通参数map
+	 * @param needEncodeParams
+	 *            需要编码的参数map
+	 * @param suffix
+	 *            后缀
+	 * @param needEncode
+	 *            最后的url是否需要编码
+	 * 
+	 * @version: v1.0.0
+	 * @author: 黄明波
+	 * @date: 2018年5月30日 上午10:29:44
+	 *
+	 */
+	private String generateModuleUrl(String skipRoute, String prefix, Map<String, String> normalParams,
+			Map<String, String> needEncodeParams, String suffix) {
+		
+		StringBuilder moduleUrl = new StringBuilder();
+		boolean needEncode = false;
+		
+		//判断是否为H5链接
+		if ("zl://browser/i?url=".equals(skipRoute)) {
+			String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
+			needEncode = true;
+			prefix = homeUrl + prefix;
+			
+			if (StringUtils.isEmpty(suffix)) {
+				suffix = "#/home#sign_suffix"; //h5默认的结尾参数
+			}
+		}
+		
+		if (!StringUtils.isEmpty(prefix)) {
+			moduleUrl.append(prefix);
+		}
+
+		boolean firstParam = true;
+		// 普通的参数
+		if (null != normalParams) {
+
+			for (Map.Entry<String, String> entry : normalParams.entrySet()) {
+
+				if (!firstParam) {
+					moduleUrl.append("&");
+				} else {
+					moduleUrl.append("?");
+					firstParam = false;
+				}
+
+				moduleUrl.append(entry.getKey() + "=" + entry.getValue());
+			}
+		}
+
+		// 需要编码的参数
+		if (null != needEncodeParams) {
+			for (Map.Entry<String, String> entry : needEncodeParams.entrySet()) {
+
+				if (!firstParam) {
+					moduleUrl.append("&");
+				} else {
+					moduleUrl.append("?");
+					firstParam = false;
+				}
+
+				String encodeValue = entry.getKey();
+				try {
+					// 失败时不返回异常
+					encodeValue = URLEncoder.encode(entry.getValue(), "utf-8");
+				} catch (UnsupportedEncodingException e) {
+					LOGGER.error("encode failed key:" + entry.getKey() + " value:" + entry.getValue());
+				}
+
+				moduleUrl.append(entry.getKey() + "=" + encodeValue);
+			}
+		}
+
+		// 添加后缀
+		if (!StringUtils.isEmpty(suffix)){
+			moduleUrl.append(suffix);
+		}
+
+		// 编码判断
+		String encodeModuleUrl = moduleUrl.toString();
+		if (needEncode) { // h5页面链接需要进行编码
+			try {
+				// 失败时不返回异常
+				encodeModuleUrl = URLEncoder.encode(encodeModuleUrl, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("encode failed encodeModuleUrl:" + encodeModuleUrl);
+			}
+		}
+
+		return skipRoute + encodeModuleUrl;
 	}
 
 	private List<JumpModuleDTO> createTree(List<JumpModuleDTO> modules) {
