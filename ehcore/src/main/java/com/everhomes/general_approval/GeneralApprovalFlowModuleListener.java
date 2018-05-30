@@ -5,8 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.everhomes.enterpriseApproval.EnterpriseApprovalController;
-import com.everhomes.enterpriseApproval.EnterpriseApprovalFlowCase;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
@@ -14,25 +12,17 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.*;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
@@ -57,10 +47,6 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     protected LocaleStringService localeStringService;
     @Autowired
     protected OrganizationProvider organizationProvider;
-
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-    private DecimalFormat decimalFormat = new DecimalFormat("0.000");
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -309,18 +295,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public FlowModuleInfo initModule() {
-        //todo: 去除以下代码
-
-/*        FlowModuleInfo moduleInfo = new FlowModuleInfo();
-        ServiceModule module = serviceModuleProvider.findServiceModuleById(GeneralApprovalController.MODULE_ID);
-        moduleInfo.setModuleName(module.getName());
-        moduleInfo.setModuleId(GeneralApprovalController.MODULE_ID);
-
-        // 添加表单支持
-        moduleInfo.addMeta(FlowModuleInfo.META_KEY_FORM_FLAG, String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
-
-        return moduleInfo;*/
-        return null;
+        return new FlowModuleInfo();
     }
 
 

@@ -175,12 +175,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
-        ApprovalPostValHandler handler = getApprovalPostItemHandler();
-        return handler.postApprovalForm();
-    }
-
-    private ApprovalPostValHandler getApprovalPostItemHandler(){
-        return null;
+/*        GeneralApprovalFormHandler handler = getApprovalPostItemHandler();
+        return handler.postApprovalForm();*/
+return null;
     }
 
   /*  public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {

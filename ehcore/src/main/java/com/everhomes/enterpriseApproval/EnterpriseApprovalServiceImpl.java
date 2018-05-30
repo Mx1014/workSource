@@ -102,6 +102,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     private DbProvider dbProvider;
 
 
+/*
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
         GetTemplateByApprovalIdResponse res = new GetTemplateByApprovalIdResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -120,6 +121,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         });
        return null;
     }
+*/
 
     @Override
     public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {

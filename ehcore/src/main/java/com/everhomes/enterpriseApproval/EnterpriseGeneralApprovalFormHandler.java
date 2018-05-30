@@ -1,6 +1,7 @@
 package com.everhomes.enterpriseApproval;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
@@ -17,6 +18,7 @@ import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalServiceErrorCode;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -34,12 +36,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Component(EnterpriseApprovalPostHandler.ENTERPRISE_APPROVAL_POST)
-public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
+@Component(EnterpriseGeneralApprovalFormHandler.ENTERPRISE_APPROVAL_FORM)
+public class EnterpriseGeneralApprovalFormHandler implements GeneralApprovalFormHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalPostHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseGeneralApprovalFormHandler.class);
 
-    static final String ENTERPRISE_APPROVAL_POST = ApprovalPostValHandler.APPROVAL_POST_PREFIX + "any-module";
+    static final String ENTERPRISE_APPROVAL_FORM = GeneralApprovalFormHandler.GENERAL_APPROVAL_FORM_PREFIX + "any-module";
 
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
@@ -72,7 +74,7 @@ public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
 
-         //  1.check the approval is legal(判断审批是否启用
+        //  1.check the approval is legal(判断审批是否启用
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null || GeneralApprovalStatus.RUNNING.getCode() != ga.getStatus())
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
@@ -82,7 +84,7 @@ public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
         //  2.get the form by flow(新版通过工作流拿表单，所以必须有工作流)
         Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
                 EnterpriseApprovalController.MODULE_TYPE, cmd.getApprovalId(), EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
-        if(flow == null)
+        if (flow == null)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
                     EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
 
@@ -128,10 +130,11 @@ public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
 
             Long flowCaseId = flowService.getNextFlowCaseId();
 
-            // 把values 存起来
+            // 6.save approval vals
             for (PostApprovalFormItem val : cmd.getValues()) {
                 GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
                 obj.setApprovalId(ga.getId());
+                obj.setFormOriginId(form.getFormOriginId());    // the originId is in the flow
                 obj.setFormVersion(form.getFormVersion());
                 obj.setFlowCaseId(flowCaseId);
                 obj.setFieldName(val.getFieldName());
@@ -153,9 +156,10 @@ public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
             handler.onApprovalCreated(flowCase);
             return null;
         });
-
-        return null;
-        }
+        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        dto.setValues(cmd.getValues());
+        return dto;
+    }
 
     private Long generateApprovalNumber(Integer namespaceId, Long organizationId){
         RedisTemplate template = bigCollectionProvider.getMapAccessor(ENTERPRISE_APPROVAL_NO, "").getTemplate(new StringRedisSerializer());
@@ -191,5 +195,43 @@ public class EnterpriseApprovalPostHandler implements ApprovalPostValHandler {
             }
         }
         return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
+    }
+
+    @Override
+    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+        //  get the basic data
+        Long approvalId = cmd.getSourceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
+                EnterpriseApprovalController.MODULE_TYPE, approvalId, EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
+        if(flow == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
+                    EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
+        Long formOriginId = flow.getFormOriginId();
+        //  compatible with the previous data
+        if(0 == formOriginId){
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+            formOriginId = ga.getFormOriginId();
+        }
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
+        if(form == null )
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
+                    EnterpriseApprovalServiceErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        //  organizationId is still needed
+        GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(organizationIdField);
+
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
     }
 }

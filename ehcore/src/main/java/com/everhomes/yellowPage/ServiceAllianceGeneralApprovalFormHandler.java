@@ -1,6 +1,5 @@
 package com.everhomes.yellowPage;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
@@ -12,9 +11,11 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -22,10 +23,10 @@ import org.springframework.transaction.TransactionStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component(ServiceAllianceApprovalPostHandler.SERVICE_ALLIANCE_APPROVAL_POST)
-public class ServiceAllianceApprovalPostHandler implements ApprovalPostValHandler {
+@Component(ServiceAllianceGeneralApprovalFormHandler.SERVICE_ALLIANCE_APPROVAL_FROM)
+public class ServiceAllianceGeneralApprovalFormHandler implements GeneralApprovalFormHandler {
 
-    static final String SERVICE_ALLIANCE_APPROVAL_POST = ApprovalPostValHandler.APPROVAL_POST_PREFIX + "service_alliance";
+    static final String SERVICE_ALLIANCE_APPROVAL_FROM = GeneralApprovalFormHandler.GENERAL_APPROVAL_FORM_PREFIX + "service_alliance";
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
@@ -115,6 +116,56 @@ public class ServiceAllianceApprovalPostHandler implements ApprovalPostValHandle
         item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
         items.add(item);
         dto.setValues(items);
+        return dto;
+    }
+
+    @Override
+    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd
+                .getSourceId());
+
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(ga
+                .getFormOriginId());
+        if(form == null )
+            throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
+        form.setFormVersion(form.getFormVersion());
+        List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
+        fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        //增加一个隐藏的field 用于存放sourceId
+        GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
+        sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
+        sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
+        sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(sourceIdField);
+
+        GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(organizationIdField);
+
+        GeneralFormFieldDTO customField = new GeneralFormFieldDTO();
+        customField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        customField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        customField.setRequiredFlag(NormalFlag.NONEED.getCode());
+        customField.setDynamicFlag(NormalFlag.NONEED.getCode());
+        customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        customField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        customField.setFieldValue(JSONObject.toJSONString(ga));
+        fieldDTOs.add(customField);
+
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        dto.setFormFields(fieldDTOs);
         return dto;
     }
 }
