@@ -326,7 +326,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 
 		SearchTasksResponse response = new SearchTasksResponse();
 //		V3.5修改兼容查询域空间下全部项目
-		List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize);
+		List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
 //		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
 //				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
 //				cmd.getPageAnchor(), pageSize+1);
@@ -467,7 +467,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //			cmd1.setAppId(cmd.getAppId());
 //			cmd1.setOrganizationId(cmd.getCurrentPMId());
 			List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
-			ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
+			ownerIds.addAll(dtos.stream().map(elem -> elem.getProjectId()).collect(Collectors.toList()));
 		} else {
 			ownerIds.add(cmd.getOwnerId());
 		}
