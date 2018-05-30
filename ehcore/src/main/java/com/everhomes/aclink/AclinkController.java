@@ -1,7 +1,25 @@
+// @formatter:off
 package com.everhomes.aclink;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.lingling.AclinkLinglingService;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -10,6 +28,55 @@ import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkLogCreateCommand;
+import com.everhomes.rest.aclink.AclinkLogListResponse;
+import com.everhomes.rest.aclink.AclinkMessageTestCommand;
+import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkServerDTO;
+import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
+import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeResponse;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
+import com.everhomes.rest.aclink.DoorAccessActivedCommand;
+import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
+import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetPhoneVisitorCommand;
+import com.everhomes.rest.aclink.GetShortMessageCommand;
+import com.everhomes.rest.aclink.GetShortMessageResponse;
+import com.everhomes.rest.aclink.GetVisitorCommand;
+import com.everhomes.rest.aclink.GetVisitorResponse;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessByGroupIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessByGroupIdResponse;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
+import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAuthCommand;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListFacialRecognitionKeyByUserCommand;
+import com.everhomes.rest.aclink.ListFacialRecognitionKeyByUserResponse;
+import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
+import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
+import com.everhomes.rest.aclink.ListAdminAesUserKeyCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserCommand;
+import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
@@ -50,10 +117,10 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private AesServerKeyProvider aesServerKeyProvider;
-    
+
     @Autowired
     private DoorAccessProvider doorAccessProvider;
-    
+
     @Autowired
     private AclinkLinglingService aclinkLinglingService;
     
@@ -62,7 +129,12 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
-    
+    @Autowired
+    private FaceRecognitionPhotoService faceRecognitionPhotoService;
+
+    @Autowired
+    AclinkServerService aclinkServerService;
+
     /**
      * <b>URL: /aclink/activing</b>
      * <p>激活门禁</p>
@@ -80,7 +152,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * <b>URL: /aclink/active</b>
-     * <p>激活门禁</p>
+     * <p>激活门禁,在activing之后调用</p>
      * @return 激活门禁消息
      */
     @RequestMapping("active")
@@ -115,8 +187,8 @@ public class AclinkController extends ControllerBase {
      */
     @RequestMapping("listAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
-    public RestResponse listAesUserKey() {
-        RestResponse response = new RestResponse(doorAccessService.listAesUserKeyByUser());
+    public RestResponse listAesUserKey(ListAesUserKeyByUserCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listAesUserKeyByUser(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
@@ -125,8 +197,8 @@ public class AclinkController extends ControllerBase {
     
     @RequestMapping("listAdminAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
-    public RestResponse listAdminAesUserKey() {
-        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth());
+    public RestResponse listAdminAesUserKey(@Valid ListAdminAesUserKeyCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
@@ -243,6 +315,24 @@ public class AclinkController extends ControllerBase {
         return response;
     }
     
+    /**
+     *
+     * <b>URL: /aclink/serverConnecting</b>
+     * <p>建立内网websocket链接</p>
+     * @return
+     */
+    @RequestMapping("serverConnecting")
+    @RestReturn(value=AclinkServerDTO.class)
+    public RestResponse serverConnecting(@Valid AclinkConnectingCommand cmd) {
+        RestResponse response = new RestResponse();
+
+        response.setResponseObject(aclinkServerService.onServerConnecting(cmd));
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * 
      * <b>URL: /aclink/disConnected</b>
@@ -737,4 +827,100 @@ public class AclinkController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     *
+     * <b>URL: /aclink/setFacialRecognitionPhoto</b>
+     * <p>人脸识别照片上传 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("setFacialRecognitionPhoto")
+    @RestReturn(value=String.class)
+    public RestResponse setFacialRecognitionPhoto(SetFacialRecognitionPhotoCommand cmd){
+    	RestResponse response = new RestResponse();
+    	faceRecognitionPhotoService.setFacialRecognitionPhoto(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/listFacialRecognitionPhotoByUser</b>
+     * <p>显示人脸识别照片 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listFacialRecognitionPhotoByUser")
+    @RestReturn(value=ListFacialRecognitionPhotoByUserResponse.class)
+    public RestResponse listFacialRecognitionPhotoByUser(){
+    	RestResponse response = new RestResponse(faceRecognitionPhotoService.listFacialRecognitionPhotoByUser());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/listDoorAccessByGroupId</b>
+     * <p>获取组内门禁 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listDoorAccessByGroupId")
+    @RestReturn(value=ListDoorAccessByGroupIdResponse.class)
+    public RestResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd){
+    	RestResponse response = new RestResponse(doorAccessService.listDoorAccessByGroupId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/listFacialRecognitionKeyByUser</b>
+     * <p>获取人脸开门钥匙 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listFacialRecognitionKeyByUser")
+    @RestReturn(value=ListFacialRecognitionKeyByUserResponse.class)
+    public RestResponse listFacialRecognitionKeyByUser(ListFacialRecognitionKeyByUserCommand cmd){
+    	RestResponse response = new RestResponse(doorAccessService.listFacialAesUserKeyByUser(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /aclink/getShortMessages</b>
+     * <p>来访事由</p>
+     */
+    @RequestMapping("getShortMessages")
+    @RestReturn(value=GetShortMessageResponse.class)
+    public RestResponse getShortMessages(@Valid GetShortMessageCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.getShortMessages(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/listLocalServerByOrg</b>
+     * <p> 内网服务器列表 </p>
+     * @return
+     */
+    @RequestMapping("listLocalServerByOrg")
+    @RestReturn(value=ListLocalServerByOrgResponse.class)
+    public RestResponse listLocalServerByUser(ListLocalServerByOrgCommand cmd) {
+        RestResponse response = new RestResponse();
+
+        response.setResponseObject(aclinkServerService.listLocalServerByOrg(cmd));
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
