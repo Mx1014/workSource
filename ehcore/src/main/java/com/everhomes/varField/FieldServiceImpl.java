@@ -467,9 +467,9 @@ public class FieldServiceImpl implements FieldService {
                 globalFlag = false;
             }
             // don't read general configutations when choose all scope
-            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
-                globalFlag = false;
-            }
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
         }
         // add general scope fields version 3.5
         if(globalFlag) {
@@ -545,9 +545,9 @@ public class FieldServiceImpl implements FieldService {
             if(fieldItems!=null && fieldItems.size()>0){
                 globalFlag = false;
             }
-            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
-                globalFlag = false;
-            }
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
         }
         if(globalFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
@@ -1992,9 +1992,9 @@ public class FieldServiceImpl implements FieldService {
             if(groups!=null && groups.size()>0){
                 globalFlag = false;
             }
-            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
-                globalFlag = false;
-            }
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
         }
         //add global general scope groups version 3.5
         if(globalFlag){
