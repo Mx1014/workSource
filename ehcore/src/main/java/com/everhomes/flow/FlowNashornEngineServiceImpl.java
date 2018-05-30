@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+
 import com.everhomes.util.StringHelper;
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
@@ -42,6 +43,7 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
     @Autowired
     private FlowScriptProvider flowScriptProvider;
 
+
     private class MyClassFilter implements ClassFilter {
 
         private List<Pattern> patterns;
@@ -61,12 +63,14 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
         }
     }
 
+
     public FlowNashornEngineServiceImpl() {
         threadFactory = new CustomizableThreadFactory("flow-nashorn-engine");
         this.queue = new LinkedBlockingQueue<>();
 
         threads = new Thread[N];
         scriptHolderThreadLocal = ThreadLocal.withInitial(() -> {
+
             try {
                 NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
                 List<Pattern> patterns = includeClass.stream()
@@ -92,6 +96,7 @@ public class FlowNashornEngineServiceImpl implements FlowNashornEngineService {
             } catch (ScriptException e) {
                 LOGGER.error("start js engine error", e);
             }
+
             return null;
         });
         // 线程内的线程池

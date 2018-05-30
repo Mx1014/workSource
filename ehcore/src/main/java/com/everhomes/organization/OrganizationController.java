@@ -7,9 +7,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
+import com.everhomes.rest.enterprise.GetAdminTypeCommand;
+import com.everhomes.rest.enterprise.GetAdminTypeResponse;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
@@ -27,6 +31,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -1583,4 +1589,30 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/getAdminType</b>
+     * <p>更改超级管理员(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/org/getAdminType")
+    @RestReturn(value = GetAdminTypeResponse.class)
+    public RestResponse getAdminType(GetAdminTypeCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
+        adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        try {
+            adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);    
+        } catch(Exception ex) {
+            
+        }
+        
+        return response;
+    }
+
 }
