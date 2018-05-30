@@ -179,4 +179,9 @@ public interface EnterpriseCustomerProvider {
     void deleteAllCustomerEntryInfo(Long customerId);
 
     void deleteAllEnterpriseCustomerAdminRecord(Long id);
+
+    void deleteCustomerEntryInfoByCustomerIdAndAddressId(Long id, Long addressId);
+
+    void deleteCustomerEntryInfoByCustomerIdAndAddressIds(Long id, List<Long> addressIds);
+
 }

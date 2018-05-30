@@ -2801,16 +2801,22 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-        if (communities != null) {
-            for (Community community : communities) {
-                SyncCustomersCommand command = new SyncCustomersCommand();
-                command.setNamespaceId(community.getNamespaceId());
-                command.setCommunityId(community.getId());
-                syncEnterpriseCustomers(command, false);
-                syncIndividualCustomers(command);
-            }
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
+        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+        if(StringUtils.isEmpty(runningFlag)) {
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+            List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+            if (communities != null) {
+                for (Community community : communities) {
+                    SyncCustomersCommand command = new SyncCustomersCommand();
+                    command.setNamespaceId(community.getNamespaceId());
+                    command.setCommunityId(community.getId());
+                    syncEnterpriseCustomers(command, false);
+                    syncIndividualCustomers(command);
+                }
 
+            }
         }
     }
 
@@ -3706,7 +3712,7 @@ public class CustomerServiceImpl implements CustomerService {
         //防止执行两次  之前出现过
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        String runningFlag = getSyncTaskToken(redisTemplate);
+        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
         if(StringUtils.isEmpty(runningFlag)) {
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
             List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations(cmd.getNamespaceId());
@@ -3745,19 +3751,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    private String getSyncTaskToken(RedisTemplate redisTemplate) {
-        Map<String, String> map = makeSyncTaskToken(redisTemplate);
+    private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
         if(map == null) {
             return null;
         }
-        return  map.get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+        return  map.get(code);
     }
 
-    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate) {
-        Object o = redisTemplate.opsForValue().get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Object o = redisTemplate.opsForValue().get(code);
         if(o != null) {
             Map<String, String> keys = new HashMap<>();
-            keys.put(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), (String)o);
+            keys.put(code, (String)o);
             return keys;
         } else {
             return null;

@@ -1,22 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -686,4 +671,7 @@ public interface OrganizationService {
 	// 根据detailId获取部门
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
+
+	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
+
 }
