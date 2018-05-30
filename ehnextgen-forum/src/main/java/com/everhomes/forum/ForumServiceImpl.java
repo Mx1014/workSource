@@ -107,6 +107,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.security.auth.Subject;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -313,40 +314,195 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "post is null.");
         }
-        if (!cmd.getEmbeddedJson().equals(post.getEmbeddedJson())) {
-            post.setEmbeddedJson(cmd.getEmbeddedJson());
-        }
-        if (!cmd.getSubject().equals(post.getSubject())) {
+
+        List<String> changeList = new ArrayList<>();
+        if (!StringUtils.isEmpty(cmd.getSubject()) && !cmd.getSubject().equals(post.getSubject())) {
             post.setSubject(cmd.getSubject());
+            changeList.add("subject");
         }
-        if (!cmd.getTag().equals(post.getTag())) {
+        if (!StringUtils.isEmpty(cmd.getTag()) && !cmd.getTag().equals(post.getTag())) {
             post.setTag(cmd.getTag());
         }
-        if (cmd.getStartTime() != post.getStartTime().getTime()) {
+        if (cmd.getStartTime() != post.getStartTime().getTime() || cmd.getEndTime() != post.getEndTime().getTime()) {
             Timestamp startTime = new Timestamp(cmd.getStartTime());
             post.setStartTime(startTime);
-        }
-        if (cmd.getEndTime() != post.getEndTime().getTime()) {
             Timestamp endTime = new Timestamp(cmd.getEndTime());
             post.setEndTime(endTime);
+            changeList.add("time");
         }
         if (cmd.getLongitude() != post.getLongitude() || cmd.getLatitude() != post.getLatitude()) {
             post.setLatitude(cmd.getLatitude());
             post.setLongitude(cmd.getLongitude());
+            changeList.add("address");
         }
-        if (!cmd.getContent().equals(post.getContent())) {
+        if (!StringUtils.isEmpty(cmd.getContent()) && !cmd.getContent().equals(post.getContent())) {
             post.setContent(cmd.getContent());
         }
+        Activity activity = setActivityPostCommand(post, cmd);
         this.forumProvider.updatePostAfterPublish(post);
 
-        //更新了活动后，先删除所有的附件，再保存附件。add by yanlong.liang 2018-5-30
+        //更新了活动后，先删除所有的附件，再保存附件
         this.forumProvider.deleteAttachments(post.getId());
         processPostAttachments(UserContext.current().getUser().getId(), cmd.getAttachments(), post);
 
+        //消息推送
+        Map map = new HashMap();
+        Integer code = getSendMessage(changeList,map,activity);
+        List<ActivityRoster> activityRosterList = this.activityProvider.listRosters(activity.getId(),ActivityRosterStatus.NORMAL);
+        if (changeList.size() > 0 && activityRosterList.size() > 0) {
+            ActivityDetailActionData actionData = new ActivityDetailActionData();
+            actionData.setForumId(post.getForumId());
+            actionData.setTopicId(post.getId());
+            String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+            String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+                    String.valueOf(ActivityLocalStringCode.ACTIVITY_HAVE_CHANGE),
+                    UserContext.current().getUser().getLocale(),
+                    "Activity Have been Change");
+            Map<String, String> meta = createActivityRouterMeta(url, subject);
+            for (ActivityRoster activityRoster : activityRosterList) {
+                sendMessageCode(activityRoster.getUid(), UserContext.current().getUser().getLocale(), map, code, meta);
+            }
+        }
 
         return ConvertHelper.convert(post, PostDTO.class);
     }
 
+    private Activity setActivityPostCommand(Post post, NewTopicCommand cmd) {
+        ActivityPostCommand oldCmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+                ActivityPostCommand.class);
+
+        ActivityPostCommand newCmd = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                ActivityPostCommand.class);
+
+        Activity activity = this.activityProvider.findSnapshotByPostId(post.getId());
+        if (null == activity) {
+            LOGGER.error("activity is null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activity is null.");
+        }
+        if (!StringUtils.isEmpty(newCmd.getSubject()) && !newCmd.getSubject().equals(oldCmd.getSubject())) {
+            oldCmd.setSubject(newCmd.getSubject());
+            activity.setSubject(newCmd.getSubject());
+        }
+        if (newCmd.getContentCategoryId() != oldCmd.getContentCategoryId()) {
+            oldCmd.setContentCategoryId(newCmd.getContentCategoryId());
+            activity.setContentCategoryId(newCmd.getContentCategoryId());
+        }
+        if (!StringUtils.isEmpty(newCmd.getTag()) && !newCmd.getTag().equals(oldCmd.getTag())) {
+            oldCmd.setTag(newCmd.getTag());
+            activity.setTag(newCmd.getTag());
+        }
+        if (!StringUtils.isEmpty(newCmd.getPosterUri()) && !newCmd.getPosterUri().equals(oldCmd.getPosterUri())) {
+            oldCmd.setPosterUri(newCmd.getPosterUri());
+            activity.setPosterUri(newCmd.getPosterUri());
+        }
+
+        if (!StringUtils.isEmpty(newCmd.getStartTime()) && !newCmd.getStartTime().equals(oldCmd.getStartTime())) {
+            oldCmd.setStartTime(newCmd.getStartTime());
+            activity.setStartTime(post.getStartTime());
+            activity.setStartTimeMs(post.getStartTime().getTime());
+        }
+        if (!StringUtils.isEmpty(newCmd.getEndTime()) && !newCmd.getEndTime().equals(oldCmd.getEndTime())) {
+            oldCmd.setEndTime(newCmd.getEndTime());
+            activity.setEndTime(post.getEndTime());
+            activity.setEndTimeMs(post.getEndTime().getTime());
+        }
+        if (newCmd.getLatitude() != oldCmd.getLatitude() || newCmd.getLongitude() != oldCmd.getLongitude()) {
+            oldCmd.setLatitude(newCmd.getLatitude());
+            oldCmd.setLongitude(newCmd.getLongitude());
+            oldCmd.setLocation(newCmd.getLocation());
+            activity.setLatitude(newCmd.getLatitude());
+            activity.setLongitude(newCmd.getLongitude());
+            activity.setLocation(newCmd.getLocation());
+        }
+        if (!StringUtils.isEmpty(newCmd.getContent()) && !newCmd.getContent().equals(oldCmd.getContent())) {
+            oldCmd.setContent(newCmd.getContent());
+        }
+        post.setEmbeddedJson(StringHelper.toJsonString(oldCmd));
+        this.activityProvider.updateActivity(activity);
+        return activity;
+    }
+
+
+    private Integer getSendMessage(List changeList, Map map, Activity activity){
+        Integer code = 0;
+        switch (changeList.size()) {
+            case 0 : break;
+            case 1 :
+            {
+                String type = changeList.get(0).toString();
+                if ("subject".equals(type)) {
+                    map.put("postName", activity.getSubject());
+                    code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT;
+                }
+                if ("time".equals(type)) {
+                    map.put("startTime", activity.getStartTime());
+                    map.put("endTime", activity.getEndTime());
+                    code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_TIME;
+                }
+                if ("address".equals(type)) {
+                    map.put("address", activity.getLocation());
+                    code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_ADDRESS;
+                }
+            };break;
+            case 2 :
+            {
+                String type1 = changeList.get(0).toString();
+                String type2 = changeList.get(1).toString();
+                if ("subject".equals(type1) && "time".equals(type2)) {
+                    map.put("postName", activity.getSubject());
+                    map.put("startTime", activity.getStartTime());
+                    map.put("endTime", activity.getEndTime());
+                    code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_TIME;
+                }
+                if ("subject".equals(type1) && "address".equals(type2)) {
+                    map.put("postName", activity.getSubject());
+                    map.put("address", activity.getLocation());
+                    code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_ADDRESS;
+                }
+                if ("time".equals(type1) && "address".equals(type2)) {
+                    map.put("startTime", activity.getStartTime());
+                    map.put("endTime", activity.getEndTime());
+                    map.put("address", activity.getLocation());
+                    code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_TIME_ADDRESS;
+                }
+            };break;
+            case 3 :
+            {
+                map.put("postName", activity.getSubject());
+                map.put("startTime", activity.getStartTime());
+                map.put("endTime", activity.getEndTime());
+                map.put("address", activity.getLocation());
+                code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS;
+            };break;
+            default:
+                break;
+
+        }
+        return code;
+    }
+
+    private Map<String, String> createActivityRouterMeta(String url, String subject){
+        Map<String, String> meta = new HashMap<String, String>();
+        RouterMetaObject routerMetaObject = new RouterMetaObject();
+        routerMetaObject.setUrl(url);
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, "message.router");
+        meta.put(MessageMetaConstant.META_OBJECT, routerMetaObject.toString());
+        if(subject != null){
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
+        }
+        return meta;
+    }
+
+    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code, Map<String, String> meta) {
+
+        String scope = ActivityNotificationTemplateCode.SCOPE;
+
+        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+
+        sendMessageToUser(uid, notifyTextForOther, meta);
+    }
 
 
     /*private void createPostEvent(PostDTO dto){

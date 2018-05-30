@@ -1195,6 +1195,8 @@ public class ForumProviderImpl implements ForumProvider {
 
     }
 
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#post.id"),
+            @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
     @Override
     public void updatePostAfterPublish(Post post) {
         assert(post.getId() != 0);
@@ -1207,7 +1209,7 @@ public class ForumProviderImpl implements ForumProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
     }
 
-
+    @Caching(evict={@CacheEvict(value="ForumAttachmentList", key="#postId")})
     @Override
     public void deleteAttachments(Long postId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
