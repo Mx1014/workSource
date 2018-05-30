@@ -59,14 +59,15 @@ public class AppConfig implements AsyncConfigurer {
     }
     */
 
-    @Bean
-    CharacterEncodingFilter encodingFilter() {
-        CharacterEncodingFilter filter = new CharacterEncodingFilter();
-
-        filter.setEncoding("UTF-8");
-        filter.setForceEncoding(true);
-        return filter;
-    }
+    // 使用下面的filter进行转码，反而使得不管是请求还是响应结果都中文乱码，把代码注释掉则不乱码，原因未明  by lqs 20180530
+//    @Bean
+//    CharacterEncodingFilter encodingFilter() {
+//        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+//
+//        filter.setEncoding("UTF-8");
+//        filter.setForceEncoding(true);
+//        return filter;
+//    }
 
     @Override
     public Executor getAsyncExecutor() {
