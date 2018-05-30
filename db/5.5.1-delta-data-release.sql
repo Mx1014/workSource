@@ -32,3 +32,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) VALUES (
 SET @pri_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41910', '0', '4190041910', '全部权限', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41920', '0', '4190041920', '全部权限', '0', UTC_TIMESTAMP());
+
+-- 合同的开始结束时间改为，开始在00：00：00， 结束在23：59：59 by wentian
+update eh_contracts set contract_start_date = date_format(contract_start_date,'%Y-%m-%d 00:00:00');
+update eh_contracts set contract_end_date = date_format(contract_end_date,'%Y-%m-%d 23:59:59');
