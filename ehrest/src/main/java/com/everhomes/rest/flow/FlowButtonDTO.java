@@ -195,13 +195,6 @@ public class FlowButtonDTO {
         this.subjectRequiredFlag = subjectRequiredFlag;
     }
 
-    public String getParam() {
-        return param;
-    }
-
-    public void setParam(String param) {
-        this.param = param;
-    }
 
     public Long getConditionNodeId() {
         return conditionNodeId;
@@ -239,5 +232,13 @@ public class FlowButtonDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getParam() {
+		return param;
+	}
+
+	public void setParam(String param) {
+		this.param = param;
+	}
 }
 

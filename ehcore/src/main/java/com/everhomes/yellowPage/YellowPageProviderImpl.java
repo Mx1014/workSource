@@ -230,7 +230,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR) {
+			Long ownerId, Long parentId, Long categoryId, String keywords, Byte displayFlag, Condition conditionOR) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -264,7 +264,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         } else {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
 		}
-
+        
+        if (null != displayFlag) {
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(displayFlag));
+        }
 
         //by dengs,按照defaultorder排序，20170525
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
@@ -1243,4 +1246,5 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         return query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
 	
 	}
+
 }

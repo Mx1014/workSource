@@ -8737,6 +8737,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationDTO dto : orgs) {
             addPathOrganizationId(dto.getPath(), orgnaizationIds);
         }
+        
+        //Added by janson，这个接口原本的意思是拿用户所有的公司，但是在 getOrganizationMemberGroups 是拿用户自己关联的子公司，所以这里把本公司加上
+        orgnaizationIds.add(organizationId);
+        
         return orgnaizationIds;
     }
 
@@ -8789,6 +8793,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(orgPath, groupTypes, token);
         for (OrganizationMember member : members) {
             Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+            //comment by janson, 这段代码看不懂，为何只留下非顶级公司的组？
             if (null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE && group.getParentId() != 0L) {
                 groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
             }

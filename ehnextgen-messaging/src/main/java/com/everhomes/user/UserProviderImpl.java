@@ -443,7 +443,48 @@ public class UserProviderImpl implements UserProvider {
         
         return null;
     }
-    
+
+
+    /**
+     *根据手机号和域空间来查询eh_user_identifiers表中的数据
+     * @param identifierToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(String identifierToken,Integer namespaceId) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
+    }
+
+
+    /**
+     * 根据域空间id和注册的手机号来查询对应的注册信息
+     * @param namespaceId
+     * @param identifierToken
+     * @return
+     */
     @Override
     public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();
@@ -1868,6 +1909,7 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+
     @Override
     public String findUserTokenOfUser(Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
@@ -1880,4 +1922,39 @@ public class UserProviderImpl implements UserProvider {
             return null;
         }
     }
+
+	@Override
+	/*
+	 * 根据用户id获得昵称和手机号，手机号有可能为空
+	 * */
+	public TargetDTO findUserTargetById(Long userId) {
+
+		if (null == userId || userId < 0) {
+			return null;
+		}
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
+		com.everhomes.server.schema.tables.EhUsers user = Tables.EH_USERS.as("user");
+
+		TargetDTO targetDTO = new TargetDTO();
+		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
+				.on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID))).where(user.ID.eq(userId))
+				.fetchOne().map(r -> {
+					targetDTO.setTargetName(r.getValue(user.NICK_NAME));
+					targetDTO.setTargetType("eh_user");
+					targetDTO.setTargetId(r.getValue(user.ID));
+					targetDTO.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
+					return null;
+				});
+
+		if (!userId.equals(targetDTO.getTargetId())) {
+			return null;
+		}
+
+		return targetDTO;
+	}
+
+    
+
 }
