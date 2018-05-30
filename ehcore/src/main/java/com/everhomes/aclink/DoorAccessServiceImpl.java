@@ -4436,19 +4436,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 List<AddressDTO> floors = new ArrayList<>();
                 floors.addAll(userFloors);
-                JSONObject data = JSON.parseObject(access.getFloorId());
-                JSONArray jsonfloors = data.getJSONArray("floors");
-                for (int i = 0;i < jsonfloors.size();i++){
-                    String floorId = jsonfloors.getJSONObject(i).getString("id");
-                    floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
-                }
-                if (null != floors & floors.size() > 0) {
-                    group.setFloors(floors.stream().distinct().map(r -> {
-                        FloorDTO dto = new FloorDTO();
-                        dto.setFloor(r.getApartmentFloor());
-                        dto.setFloorName(r.getAddress());
-                        return dto;
-                    }).collect(Collectors.toList()));
+                if(org.apache.commons.lang.StringUtils.isNotEmpty(access.getFloorId())){
+                    JSONObject data = JSON.parseObject(access.getFloorId());
+                    JSONArray jsonfloors = data.getJSONArray("floors");
+                    for (int i = 0;i < jsonfloors.size();i++){
+                        String floorId = jsonfloors.getJSONObject(i).getString("id");
+                        floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
+                    }
+                    if (null != floors & floors.size() > 0) {
+                        group.setFloors(floors.stream().distinct().map(r -> {
+                            FloorDTO dto = new FloorDTO();
+                            dto.setFloor(r.getApartmentFloor());
+                            dto.setFloorName(r.getAddress());
+                            return dto;
+                        }).collect(Collectors.toList()));
+                    }
                 }
             }
         }
