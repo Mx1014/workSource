@@ -136,9 +136,9 @@ public class GeneralApprovalFieldProcessorImpl implements GeneralApprovalFieldPr
                     processMultiLineTextField(entities, e, subVal.getFieldValue());
                     break;
                 case IMAGE:
-                    break;
+                    processImageField(entities, e, subVal.getFieldValue());
                 case FILE:
-                    break;
+                    processFileField(entities, e, subVal.getFieldValue());
                 case INTEGER_TEXT:
                     processIntegerTextField(entities, e, subVal.getFieldValue());
                     break;
