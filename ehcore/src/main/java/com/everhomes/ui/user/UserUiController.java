@@ -19,7 +19,6 @@ import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.user.SceneTokenGenerator;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -85,9 +84,9 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-// 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 
-		SceneTokenDTO sceneToken = SceneTokenGenerator.fromWebToken(cmd.getSceneToken());
+		//SceneTokenDTO sceneToken = SceneTokenGenerator.fromWebToken(cmd.getSceneToken());
 
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){

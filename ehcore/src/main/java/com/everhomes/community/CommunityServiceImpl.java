@@ -4427,7 +4427,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 			if(cmd.getCommunityIds() != null && !"".equals(cmd.getCommunityIds())){
 				for (Long communityId: cmd.getCommunityIds()){
-					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId(), cmd.getKeepAuthorizationFlag());
+					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId());
 				}
 			}
 
@@ -4438,7 +4438,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId, Byte keepAuthorizationFlag) {
+	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId) {
 
 		if(communityId == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4469,20 +4469,10 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationProvider.createOrganizationCommunity(organizationCommunity);
 			}
 
-			//查询原有园区授权记录
-			List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelations(community.getNamespaceId(), null, communityId);
 
-			if(serviceModuleAppAuthorizations != null){
-				for (ServiceModuleAppAuthorization authorization: serviceModuleAppAuthorizations){
+			//更新授权，删除原有授权，新增新的授权
+			serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(community.getNamespaceId(), toOrgId, community.getId());
 
-					//管理公司自己的应用要迁移，不保留授权的话也要迁移
-					if(authorization.getOrganizationId().equals(fromOrgId) || keepAuthorizationFlag == null || keepAuthorizationFlag.byteValue() == 0){
-						authorization.setOrganizationId(toOrgId);
-						authorization.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-						serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorization(authorization);
-					}
-				}
-			}
 
 			return null;
 		});

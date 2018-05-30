@@ -280,14 +280,17 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppsByOrganizationId(Long versionId, Byte appType, String keyword, Long organizationId, Byte installFlag, Long pageAnchor, int pageSize) {
+	public List<ServiceModuleApp> listServiceModuleAppsByOrganizationId(Long versionId, Byte appType, String keyword, Long organizationId, Byte installFlag, Byte needSystemAppFlag, Long pageAnchor, int pageSize) {
 
 		SelectQuery query = getReadOnlyContext().select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 
 		//不查系统应用
-		Condition systemAppCondition = Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.isNull().or(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)0));
-		query.addConditions(systemAppCondition);
+		if(needSystemAppFlag == null || needSystemAppFlag.byteValue() == 0){
+			Condition systemAppCondition = Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.isNull().or(Tables.EH_SERVICE_MODULE_APPS.SYSTEM_APP_FLAG.eq((byte)0));
+			query.addConditions(systemAppCondition);
+		}
+
 
 		if(appType != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));

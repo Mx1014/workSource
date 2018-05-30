@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
-public class SceneTokenGenerator {
+public class ContextGenerator {
 
 
     /**
@@ -30,45 +30,56 @@ public class SceneTokenGenerator {
      * @param tokenString
      * @return
      */
-    public static SceneTokenDTO fromWebToken(String tokenString) {
+    public static ContextDTO fromWebToken(String tokenString) {
 
+
+        if(tokenString == null){
+            return null;
+        }
+
+
+        //先尝试用ContextDTO解析
         try {
             String s = base64SafeUrlDecode(tokenString);
             Gson gson = new Gson();
-            ContextDTO t = gson.fromJson(s, ContextDTO.class);
-
-            if(t != null){
-                SceneTokenDTO dto = new SceneTokenDTO();
-                dto.setNamespaceId(UserContext.getCurrentNamespaceId());
-                dto.setUserId(UserContext.currentUserId());
-
-                //优先解析成PARK_TOURIST，然后是ENTERPRISE，然后是FAMILY
-                if(t.getCommunityId() != null){
-                    dto.setEntityId(t.getCommunityId());
-                    dto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
-                    dto.setScene(SceneType.PARK_TOURIST.getCode());
-                }else if(t.getOrgId() != null){
-                    dto.setEntityId(t.getOrgId());
-                    dto.setEntityType(UserCurrentEntityType.ENTERPRISE.getCode());
-                    dto.setScene(SceneType.ENTERPRISE.getCode());
-                }else if(t.getFamilyId() != null){
-                    dto.setEntityId(t.getFamilyId());
-                    dto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
-                    dto.setScene(SceneType.FAMILY.getCode());
-                }else {
-                    throw new Exception();
-                }
-
-                return dto;
-            }
-
+            ContextDTO context = gson.fromJson(s, ContextDTO.class);
+            return context;
         }catch (Exception ex){
             //try WebTokenGenerator
         }
 
 
-        SceneTokenDTO dto = WebTokenGenerator.getInstance().fromWebToken(tokenString, SceneTokenDTO.class);
-        return dto;
+        //在尝试用SceneTokenDTO解析
+        try {
+            SceneTokenDTO dto = WebTokenGenerator.getInstance().fromWebToken(tokenString, SceneTokenDTO.class);
+
+            if(dto != null){
+                ContextDTO context = new ContextDTO();
+                switch (UserCurrentEntityType.fromCode(dto.getEntityType())){
+                    case COMMUNITY:
+                    case COMMUNITY_COMMERCIAL:
+                    case COMMUNITY_RESIDENTIAL:
+                        context.setCommunityId(dto.getEntityId());
+                        break;
+                    case ORGANIZATION:
+                    case ENTERPRISE:
+                        context.setOrgId(dto.getEntityId());
+                    case FAMILY:
+                        context.setFamilyId(dto.getEntityId());
+                        break;
+                    default:
+                            context = null;
+                }
+
+                return context;
+            }
+
+        }catch (Exception ex){
+            //nothing return null
+        }
+
+
+        return null;
     }
 
 

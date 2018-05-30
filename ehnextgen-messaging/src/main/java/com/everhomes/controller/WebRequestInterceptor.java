@@ -17,6 +17,7 @@ import com.everhomes.portal.PortalVersionUser;
 import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.domain.DomainDTO;
+import com.everhomes.rest.launchpadbase.ContextDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
@@ -157,6 +158,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
+
+            //设置上下文信息
+            setSceneContent(request.getParameterMap());
+
             //加上频率控制
             frequencyControlHandler(request,handler);
             if (isProtected(handler)) {
@@ -503,6 +508,28 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         }
 
 
+    }
+
+
+    /**
+     * 标准版之后去除sceneToken设置上下文信息
+     * @param
+     */
+    private void setSceneContent(Map<String, String[]> paramMap) {
+
+        UserContext context = UserContext.current();
+
+        String[] sceneTokens = paramMap.get("sceneToken");
+
+        if(sceneTokens != null && sceneTokens.length > 0){
+            String sceneToken = sceneTokens[0];
+            ContextDTO dto = ContextGenerator.fromWebToken(sceneToken);
+            if(dto != null){
+                context.setCommunityId(dto.getCommunityId());
+                context.setOrganizationId(dto.getOrgId());
+                context.setFamilyId(dto.getFamilyId());
+            }
+        }
     }
 
     private void setupUserContext(LoginToken loginToken) {
