@@ -404,8 +404,6 @@ ALTER TABLE `eh_door_access`
 ADD `local_server_id` BIGINT(20) COMMENT '服务器id';
 
 -- 人脸识别照片表创建
-DROP TABLE IF EXISTS `eh_face_recognition_photos`;
-
 CREATE TABLE `eh_face_recognition_photos` (
 	`id` BIGINT(20) NOT NULL,
     `user_id` BIGINT(20) COMMENT '用户id(正式用户)',
