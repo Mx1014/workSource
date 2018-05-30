@@ -1941,7 +1941,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         List<DoorAuth> auths = doorAuthProvider.queryDoorAuthByApproveId(locator, user.getId(), count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        List<DoorAuth> invalidAuths = new ArrayList<DoorAuth>();
         for(DoorAuth auth : auths) {
+        	//issue-30615 授权过了有效期则置为失效 by liuyilin 20180529
+        	long now = DateHelper.currentGMTTime().getTime();
+            if(auth.getValidEndMs() < now){
+            	auth.setStatus(DoorAuthStatus.INVALID.getCode());
+            	invalidAuths.add(auth);
+            }
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
@@ -1956,7 +1963,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //            }
             dtos.add(dto);
         }
-        
+        //issue-30615 授权过了有效期则置为失效 by liuyilin 20180529
+        doorAuthProvider.updateDoorAuth(invalidAuths);
         resp.setDtos(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
