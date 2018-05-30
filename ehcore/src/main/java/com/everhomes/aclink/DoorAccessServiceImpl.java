@@ -4439,9 +4439,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(org.apache.commons.lang.StringUtils.isNotEmpty(access.getFloorId())){
                     JSONObject data = JSON.parseObject(access.getFloorId());
                     JSONArray jsonfloors = data.getJSONArray("floors");
-                    for (int i = 0;i < jsonfloors.size();i++){
-                        String floorId = jsonfloors.getJSONObject(i).getString("id");
-                        floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
+                    if(null != jsonfloors){
+                        for (int i = 0;i < jsonfloors.size();i++){
+                            String floorId = jsonfloors.getJSONObject(i).getString("id");
+                            floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
+                        }
                     }
                     if (null != floors & floors.size() > 0) {
                         group.setFloors(floors.stream().distinct().map(r -> {
