@@ -249,7 +249,7 @@ ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT N
 
 
 -- ------------------------------
--- 服务联盟V3.3（新增需求提单功能）     编辑 登记工时 取消跟踪
+-- 服务联盟V3.3（新增需求提单功能）     
 -- 产品功能 #26469 add by huangmingbo  2018/05/29
 -- ------------------------------
 -- DROP TABLE IF EXISTS `eh_flow_script_configs`;
