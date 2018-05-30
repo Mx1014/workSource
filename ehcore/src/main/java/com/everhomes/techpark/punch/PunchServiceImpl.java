@@ -5191,13 +5191,13 @@ public class PunchServiceImpl implements PunchService {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
                     PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
                             companyId, dateSF.get().format(start.getTime()));
-                    if(punchDayLog == null){
-                        LOGGER.debug("refresh day log : userid =[" + userId
-                                + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
-                                + dateSF.get().format(end.getTime()) + "]");
-	                    PunchTimeRule ptr = null;
-	                    refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
-                    }
+//                    if(punchDayLog == null){
+                    LOGGER.debug("refresh day log : userid =[" + userId
+                            + "] day is [" + dateSF.get().format(start.getTime()) + "] enddate ["
+                            + dateSF.get().format(end.getTime()) + "]");
+                    PunchTimeRule ptr = null;
+                    refreshPunchDayLog(userId, companyId, punchDayLog, start, ptr, newPunchDayLog);
+//                    }
                     return null;
                 });
 
