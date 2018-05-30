@@ -173,4 +173,7 @@ public interface UserProvider {
 	String findMobileByUid(Long contactId);
 
     String findUserTokenOfUser(Long userId);
+
+    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
+            String identifierToken, Integer namespaceId);
 }

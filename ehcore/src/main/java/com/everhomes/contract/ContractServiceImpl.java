@@ -143,8 +143,13 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -1277,25 +1282,25 @@ public class ContractServiceImpl implements ContractService {
 					"contractNumber is already exist");
 		}
 		if(cmd.getContractStartDate() != null) {
-			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
 		if(cmd.getContractEndDate() != null) {
-			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+			contract.setContractEndDate(setToEnd(cmd.getContractEndDate()));
 		}
 		if(cmd.getDecorateBeginDate() != null) {
-			contract.setDecorateBeginDate(new Timestamp(cmd.getDecorateBeginDate()));
+			contract.setDecorateBeginDate(setToBegin(cmd.getDecorateBeginDate()));
 		}
 		if(cmd.getDecorateEndDate() != null) {
-			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
+			contract.setDecorateEndDate(setToEnd(cmd.getDecorateEndDate()));
 		}
 		if(cmd.getSignedTime() != null) {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
 		}
 		if(cmd.getDepositTime() != null) {
-			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
+			contract.setDepositTime(setToEnd(cmd.getDepositTime()));
 		}
 		if(cmd.getDownpaymentTime() != null) {
-			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
+			contract.setDownpaymentTime(setToEnd(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
 		Double rentSize = dealContractApartments(contract, cmd.getApartments());
@@ -1322,6 +1327,27 @@ public class ContractServiceImpl implements ContractService {
 		});
 
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+	}
+
+	private Timestamp setToEnd(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MAX).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
+	}
+
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private Timestamp setToBegin(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MIN).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
 	}
 
 	@Override

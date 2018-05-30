@@ -24,7 +24,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41910', '政策管理', '41900', '/40000/41900/41910', '1', '3', '2', '0', UTC_TIMESTAMP(), '', NULL, UTC_TIMESTAMP(), '0', '0', '', '0', 'community_control');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41920', '查询记录', '41900', '/40000/41900/41920', '1', '3', '2', '0', UTC_TIMESTAMP(), '', NULL, UTC_TIMESTAMP(), '0', '0', '', '0', 'community_control');
 -- 新增模块菜单 eh_web_menus
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `path`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('16032200', '政务服务', '16030000', 'policy-service', '1', '/16000000/16030000/16032200', '22', '41900', '3', 'system', 'module')
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `path`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('16032200', '政务服务', '16030000', 'policy-service', '1', '/16000000/16030000/16032200', '22', '41900', '3', 'system', 'module');
 -- 权限
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) VALUES ('4190041910', '0', '政策管理', '政策管理 全部权限');
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) VALUES ('4190041920', '0', '查询记录', '查询记录 全部权限');
@@ -32,3 +32,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) VALUES (
 SET @pri_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41910', '0', '4190041910', '全部权限', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@pri_id := @pri_id + 1, '41920', '0', '4190041920', '全部权限', '0', UTC_TIMESTAMP());
+
+-- 合同的开始结束时间改为，开始在00：00：00， 结束在23：59：59 by wentian
+update eh_contracts set contract_start_date = date_format(contract_start_date,'%Y-%m-%d 00:00:00');
+update eh_contracts set contract_end_date = date_format(contract_end_date,'%Y-%m-%d 23:59:59');
