@@ -40,10 +40,7 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupProvider;
+import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -93,10 +90,7 @@ import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.forum.*;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupJoinPolicy;
-import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.group.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
@@ -322,6 +316,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+    @Autowired
+    private GroupService groupService;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -14089,6 +14086,40 @@ public class OrganizationServiceImpl implements OrganizationService {
             //说明参数不为空，那么我们就根据该参数来进行修改eh_organizations表中的work_platform_flag字段的值，1-表示的是开启工作台，0-表示的是禁用工作台
             //调用dao层进行修改数据
             organizationProvider.updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(cmd.getOrganizationId(),cmd.getNamespaceId(),cmd.getWorkBenchFlag());
+
+            //发送消息
+            //根据公司id来查询eh_organization_members表中的target_id集合
+            List<Long> targetIdList = organizationProvider.findTargetIdListByOrgId(cmd.getOrganizationId());
+            //进行非空校验
+            if(!CollectionUtils.isEmpty(targetIdList)){
+                //说明查询出来的targetIdList不为空，然后我们根据前端传过来的工作台标志，判断是开启工作台还是关闭工作台，然后进行不同的操作
+                //采用forEach循环进行遍历集合targetIdList
+                for(Long lon : targetIdList){
+                    if(cmd.getWorkBenchFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                        //说明是开启工作台
+                        String openOrCloseType = MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode();
+
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        map.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+
+                        String scope = WorkBenchTemplateCode.SCOPE;
+                        Integer namespaceId = 2;
+                        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId,scope, WorkBenchTemplateCode.WORK_BENCH_PLATFORM_OPEN, "zh_CN", map, "");
+
+                        groupService.workBenchSendMessageToUser(lon , notifyTextForApplicant , openOrCloseType);
+                    }else if(cmd.getWorkBenchFlag() == TrueOrFalseFlag.FALSE.getCode()){
+                        //说明是进行的是关闭工作台
+                        String openOrCloseType = MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode();
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        map.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+
+                        String scope = WorkBenchTemplateCode.SCOPE;
+                        Integer namespaceId = 2;
+                        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId,scope, WorkBenchTemplateCode.WORK_BENCH_PLATFORM_CLOSE, "zh_CN", map, "");
+                        groupService.workBenchSendMessageToUser(lon , notifyTextForApplicant , openOrCloseType);
+                    }
+                }
+            }
         }
     }
 

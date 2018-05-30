@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.address.Address;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
@@ -21,10 +20,8 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
-import com.everhomes.point.PointLog;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.enterprise.CreateSettledEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
@@ -39,7 +36,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserOrganizations;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
@@ -49,8 +45,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-
-import org.elasticsearch.common.collect.Lists;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -61,16 +55,12 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
-import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.everhomes.server.schema.Tables.EH_ORGANIZATION_MEMBERS;
 
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
@@ -6837,6 +6827,43 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
                 .fetch()
                 .map(r->ConvertHelper.convert(r, Building.class));
+    }
+
+
+    /**
+     * 根据targetId来查询eh_organization_members表中的公司的id的集合
+     * @param targetId
+     * @return
+     */
+    @Override
+    public List<Long> findOrganizationIdListByTargetId(Long targetId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> orgIdList = context.select(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(Byte.valueOf("3")))
+                .fetchInto(Long.class);
+        return orgIdList;
+    }
+
+    /**
+     * 根据公司id来查询eh_organization_members表中的targetId集合
+     * @param organizationId
+     * @return
+     */
+    @Override
+    public List<Long> findTargetIdListByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> targetIdList = context.select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(Byte.valueOf("3")))
+                .fetchInto(Long.class);
+        return targetIdList;
     }
 
 

@@ -18,3 +18,5 @@ insert into eh_locale_strings(scope,code,locale,`text`)values('community',10013,
 insert into eh_locale_strings(scope,code,locale,`text`)values('community',10014,'zh_CN','楼栋名称重复了');
 insert into eh_locale_strings(scope,code,locale,`text`)values('address',20011,'zh_CN','门牌地址超过了20个汉字');
 insert into eh_locale_strings(scope,code,locale,`text`)values('building',10005,'zh_CN','该项目下不存在该楼栋');
+INSERT INTO EH_LOCALE_TEMPLATES(scope,code,locale,description,`text`,namespace_id)VALUES('workbench',1,'zh_CN','开启工作台','"${organizationName}"开启工作台' , 2);
+INSERT INTO EH_LOCALE_TEMPLATES(scope,code,locale,description,`text`,namespace_id)VALUES('workbench',2,'zh_CN','关闭工作台','"${organizationName}"关闭工作台' , 2);

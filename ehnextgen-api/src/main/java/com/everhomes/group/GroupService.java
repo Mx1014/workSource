@@ -185,4 +185,12 @@ public interface GroupService {
     ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd);
 
     ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd);
+
+    /**
+     * 开启或者关闭工作台发消息
+     * @param uid
+     * @param content
+     * @param openOrCloseType
+     */
+    void workBenchSendMessageToUser(Long uid , String content , String openOrCloseType);
 }

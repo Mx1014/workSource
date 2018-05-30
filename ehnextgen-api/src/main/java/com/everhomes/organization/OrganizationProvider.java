@@ -815,4 +815,18 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId, Long communityId);
+
+	/**
+	 * 根据targetId来查询eh_organization_members表中的公司的id的集合
+	 * @param targetId
+	 * @return
+	 */
+	List<Long> findOrganizationIdListByTargetId(Long targetId);
+
+	/**
+	 * 根据公司id来查询eh_organization_members表中的targetId集合
+	 * @param organizationId
+	 * @return
+	 */
+	List<Long> findTargetIdListByOrgId(Long organizationId);
 }
