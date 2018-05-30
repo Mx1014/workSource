@@ -835,7 +835,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setAvatar(updateCustomer.getCorpLogoUri());
                 command.setDescription(updateCustomer.getCorpDescription());
                 command.setCommunityId(updateCustomer.getCommunityId());
-                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
+                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : (long) updateCustomer.getCorpEmployeeAmount());
                 command.setAddress(updateCustomer.getContactAddress());
                 command.setLongitude(updateCustomer.getLongitude());
                 command.setLatitude(updateCustomer.getLatitude());
@@ -3778,9 +3778,15 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3793,14 +3799,19 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setNamespaceId(organization.getNamespaceId());
             customer.setOrganizationId(organization.getId());
             customer.setName(organization.getName());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

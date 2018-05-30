@@ -1666,6 +1666,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
 //            if(customer.getTrackingUid() == null) {
 //                customer.setTrackingUid(-1L);
 //            }
@@ -1686,6 +1695,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
 //            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
@@ -1844,7 +1861,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setCorpLogoUri(cmd.getAvatar());
                 customer.setPostUri(cmd.getPostUri());
                 customer.setHotline(cmd.getContactsPhone());
+                customer.setCorpDescription(cmd.getDescription());
+                customer.setCorpEntryDate(new Timestamp(DateUtil.parseDate(cmd.getCheckinDate()).getTime()));
                 customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+                customer.setCorpEmail(cmd.getEmailDomain());
+                customer.setCorpEmployeeAmount(cmd.getMemberCount().intValue());
 
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
