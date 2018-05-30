@@ -590,7 +590,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addOrderBy(t.STATUS);
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
-            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
@@ -977,7 +977,7 @@ public class AssetProviderImpl implements AssetProvider {
         });
         response.setAmountReceivable(amountReceivable[0]);
         response.setAmountOwed(amountOwed[0]);
-        response.setDatestr(dateStr[0]);
+        response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
         return response;
     }
@@ -1396,8 +1396,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
+                , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1969,7 +1969,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum) {
+            ,String targetName, String invoiceNum, String noticeTel) {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
