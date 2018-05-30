@@ -14090,6 +14090,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //发送消息
             //根据公司id来查询eh_organization_members表中的target_id集合
             List<Long> targetIdList = organizationProvider.findTargetIdListByOrgId(cmd.getOrganizationId());
+            Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
             //进行非空校验
             if(!CollectionUtils.isEmpty(targetIdList)){
                 //说明查询出来的targetIdList不为空，然后我们根据前端传过来的工作台标志，判断是开启工作台还是关闭工作台，然后进行不同的操作
@@ -14100,7 +14101,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         String openOrCloseType = MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode();
 
                         Map<String, Object> map = new HashMap<String, Object>();
-                        map.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+                        map.put("organizationName", organization.getName());
 
                         String scope = WorkBenchTemplateCode.SCOPE;
                         Integer namespaceId = 2;
@@ -14111,7 +14112,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         //说明是进行的是关闭工作台
                         String openOrCloseType = MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode();
                         Map<String, Object> map = new HashMap<String, Object>();
-                        map.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+                        map.put("organizationName", organization.getName());
 
                         String scope = WorkBenchTemplateCode.SCOPE;
                         Integer namespaceId = 2;

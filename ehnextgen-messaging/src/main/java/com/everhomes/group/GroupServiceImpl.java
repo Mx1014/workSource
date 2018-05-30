@@ -4673,16 +4673,17 @@ public class GroupServiceImpl implements GroupService {
                         //用户进行发送消息，说将要开启工作台
                         continue;
                     }
-                    if(openWorkBench == false){
+                    if(!openWorkBench){
                         //说明该员工所在的公司之前都没有开启工作台，那么我们就该该员工发送消息，说将要开启工作台
                         MessageDTO messageDto = new MessageDTO();
                         messageDto.setAppId(AppConstants.APPID_MESSAGING);
                         messageDto.setSenderUid(User.SYSTEM_UID);
                         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-                        messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+                        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                         messageDto.setBody(content);
                         messageDto.setMetaAppId(AppConstants.APPID_GROUP);
-                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+
                         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                     }
