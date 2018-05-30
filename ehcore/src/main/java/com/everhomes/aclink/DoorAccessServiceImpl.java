@@ -4407,7 +4407,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
 //      获取设备
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.listValidDoorAuthByUser(user.getId(), null)).stream().filter(r -> r.getRightOpen().equals((byte)1)).collect(Collectors.toList());
         DoorAccessGroupResp resp = new DoorAccessGroupResp();
         resp.setUserId(user.getId());
         List<DoorAccessGroupDTO> groups = new ArrayList<>();
@@ -4416,7 +4416,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAccessGroupDTO group = new DoorAccessGroupDTO();
             groups.add(group);
-            if(null != access){
+            if(null != access && access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
                 group.setId(access.getId());
                 group.setGroupName(access.getName());
                 group.setKeyU(auth.getKeyU());
