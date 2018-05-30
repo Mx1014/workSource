@@ -68,6 +68,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	 * 只读
 	 */
 	private static final int READONLY = 1;
+	/**
+	 * 非只读(可维护)
+	 */
+	private static final int NOTREADONLY = 0;
 
 	@Override
 	public List<Configurations> listConfigurations(Integer namespaceId, String name,
@@ -104,7 +108,15 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 			query.limit(pageSize);
 		}
 		
-		result = query.fetch().map((r) -> ConvertHelper.convert(r, Configurations.class));
+		query.fetch().map((r) -> {	
+			Configurations bo = ConvertHelper.convert(r, Configurations.class);
+			//将非 1 值的的展示出来时都是展示0
+			if(bo.getIsReadonly()==null || bo.getIsReadonly() !=READONLY){
+				bo.setIsReadonly(NOTREADONLY);
+			}
+			result.add(bo);
+			return null;
+		});
 		
 		if(locator != null ){
 			locator.setAnchor(null);//重置分页锚点类
@@ -124,7 +136,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
 		EhConfigurations ehBo = dao.findById(id);
-		
+		//将非 1 值的的展示出来时都是展示0
+		if(ehBo !=null &&( ehBo.getIsReadonly()==null || ehBo.getIsReadonly() !=READONLY)){
+			ehBo.setIsReadonly(NOTREADONLY);
+		}
 		return ConvertHelper.convert(ehBo, Configurations.class);
 	}
 
