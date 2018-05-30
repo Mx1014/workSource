@@ -81,7 +81,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
-        fieldService.updateFields(cmd);
+        
+        //cmd.setCategoryId(78L);
+    	fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -96,6 +98,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listFields")
     @RestReturn(value=FieldDTO.class, collection = true)
     public RestResponse listFields(@Valid ListFieldCommand cmd) {
+    	
+    	//cmd.setCategoryId(78L);
+    	
         List<FieldDTO> fields = fieldService.listFields(cmd);
         RestResponse res = new RestResponse(fields);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -111,6 +116,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldGroups")
     @RestReturn(value=String.class)
     public RestResponse updateFieldGroups(@Valid UpdateFieldGroupsCommand cmd) {
+    	
+    	//cmd.setCategoryId(78L);
+    	
         fieldService.updateFieldGroups(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -126,6 +134,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listFieldGroups")
     @RestReturn(value=FieldGroupDTO.class, collection = true)
     public RestResponse listFieldGroups(@Valid ListFieldGroupCommand cmd) {
+    	
+    	//cmd.setCategoryId(78L);
+    	
         List<FieldGroupDTO> groups = fieldService.listFieldGroups(cmd);
         RestResponse res = new RestResponse(groups);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -141,6 +152,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldItems")
     @RestReturn(value=String.class)
     public RestResponse updateFieldItems(@Valid UpdateFieldItemsCommand cmd) {
+    	
+    	//cmd.setCategoryId(78L);
+    	
         fieldService.updateFieldItems(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -156,6 +170,9 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listFieldItems")
     @RestReturn(value=FieldItemDTO.class, collection = true)
     public RestResponse listFieldItems(@Valid ListFieldItemCommand cmd) {
+    	
+    	//cmd.setCategoryId(78L);
+    	
         List<FieldItemDTO> items = fieldService.listFieldItems(cmd);
         RestResponse res = new RestResponse(items);
         res.setErrorCode(ErrorCodes.SUCCESS);

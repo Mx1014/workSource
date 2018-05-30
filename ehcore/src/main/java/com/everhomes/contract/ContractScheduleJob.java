@@ -58,7 +58,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     public static final String SCHEDELE_NAME = "contract-";
 
-    public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    //public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    public static String CRON_EXPRESSION = "0 10 * * * ?";
 
     @Autowired
     private ScheduleProvider scheduleProvider;
@@ -106,9 +107,9 @@ public class ContractScheduleJob extends QuartzJobBean {
                     return;
                 }
 
-                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId);
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId, null,null);
                 if(communityExist == null && communityId != null) {
-                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null,null,null);
                 }
                 ContractParam param = communityExist;
 

@@ -4,7 +4,6 @@ package com.everhomes.rest.contract;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>communityId: 园区id</li>
@@ -16,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryItemId: 合同类型</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li> 
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  */
 public class ListContractsCommand {
@@ -23,7 +23,7 @@ public class ListContractsCommand {
 	private Integer namespaceId;
 
 	private Long communityId;
-	
+
 	private String buildingName;
 
 	private String keywords;
@@ -41,10 +41,19 @@ public class ListContractsCommand {
 	private Integer pageSize;
 
 	private Long orgId;
-	
+
+	private Long categoryId;
 
 	public ListContractsCommand() {
 
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public Long getOrgId() {
@@ -138,6 +147,6 @@ public class ListContractsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	} 
+	}
 
 }

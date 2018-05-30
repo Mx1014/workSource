@@ -27,18 +27,23 @@ public class PaymentExpectanciesCommand {
     private Integer pageSize;
     private Long categoryId;
 
-
     private Byte contractIdType;
-
-
+    private Byte isEffectiveImmediately;
+	private Long categoryId;
+    
     @ItemType(RentAdjust.class)
     private List<RentAdjust> rentAdjusts;
     @ItemType(RentFree.class)
     private List<RentFree> rentFrees;
 
+	public Long getCategoryId() {
+		return categoryId;
+	}
 
-    private Byte isEffectiveImmediately;
-
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	
     public Byte getIsEffectiveImmediately() {
         return isEffectiveImmediately;
     }

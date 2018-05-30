@@ -16,6 +16,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1091,7 +1092,7 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(result);
         return response;
     }
-    
+
     /**
      * <b>URL: /asset/listPaymentBillDetail</b>
      * <p>交易明细查看账单明细接口</p>
@@ -1099,17 +1100,17 @@ public class AssetController extends ControllerBase {
     @RequestMapping(value = "listPaymentBillDetail")
     @RestReturn(PaymentOrderBillDTO.class)
     public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-    	ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
-    	PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-    	if(listPaymentBillResp != null && listPaymentBillResp.getList() != null 
-    			&& listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
-    			&& listPaymentBillResp.getList().get(0).getChildren() != null) {
-    		result = listPaymentBillResp.getList().get(0).getChildren().get(0);
-    	}
+        ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+        PaymentOrderBillDTO result = new PaymentOrderBillDTO();
+        if (listPaymentBillResp != null && listPaymentBillResp.getList() != null
+                && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
+                && listPaymentBillResp.getList().get(0).getChildren() != null) {
+            result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+        }
         RestResponse response = new RestResponse(result);
         return response;
     }
-    
+
 
     /**
      * <b>URL: /asset/autoNoticeConfig</b>

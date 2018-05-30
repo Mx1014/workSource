@@ -1217,7 +1217,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		
 		// 列出这个组织所有的合同，然后比较，我有他无删，我无他有增，无有他有更新
-		List<Contract> contractList = contractProvider.listContractByOrganizationId(namespaceId, organization.getId());
+		List<Contract> contractList = contractProvider.listContractByOrganizationId(namespaceId, organization.getId(),null);
 		for (Contract contract : contractList) {
 			CustomerContract customerContract = findFromTheirContractList(contract, customerContractList);
 			if (customerContract != null) {

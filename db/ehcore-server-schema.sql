@@ -18042,7 +18042,6 @@ CREATE TABLE `eh_enterprise_customer_attachments` (
 DROP TABLE IF EXISTS `eh_enterprise_customer_admins`;
 
 
-
 CREATE TABLE `eh_enterprise_customer_admins` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `customer_id` bigint(20) NOT NULL DEFAULT '0',
@@ -18053,3 +18052,4 @@ CREATE TABLE `eh_enterprise_customer_admins` (
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
