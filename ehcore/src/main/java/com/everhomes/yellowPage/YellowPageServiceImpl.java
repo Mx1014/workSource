@@ -1607,7 +1607,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return CheckApartmentServiceAppMatch(apps, dto);
 		}
 
-		// 园区入驻
+		// 园区入驻  
 		if (PARK_IN_MODULE_ID == dto.getModuleId()) {
 			return CheckParkInAppMatch(apps, dto);
 		}
@@ -1719,21 +1719,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		for (ServiceModuleApp app : apps) {
 			// 获取categoryId
-			Long categoryId = 1L;
-			String appConfig = app.getInstanceConfig();
-			if (!StringUtils.isEmpty(appConfig)) {
-				JSONObject appJson = JSONObject.parseObject(appConfig);
-				Long newCategoryId = appJson.getLong("categoryId");
-				if (null != newCategoryId) {
-					categoryId = newCategoryId;
-				}
-			}
+//			Long categoryId = 1L;
+//			String appConfig = app.getInstanceConfig();
+//			if (!StringUtils.isEmpty(appConfig)) {
+//				JSONObject appJson = JSONObject.parseObject(appConfig);
+//				Long newCategoryId = appJson.getLong("categoryId");
+//				if (null != newCategoryId) {
+//					categoryId = newCategoryId;
+//				}
+//			}
 
+			//IOS兼容旧版本的要求，参数需要传rentType=，希望后续可以去掉这个奇怪的东西
 			Map<String, String> normalParams = new HashMap<>(10);
-			normalParams.put("categoryId", categoryId + "");
+			normalParams.put("rentType", "");
 
 			Map<String, String> encodeParams = new HashMap<>(10);
 			encodeParams.put("displayName", app.getName() + "");
+			
 			// 生成url
 			String finalModuleUrl = generateModuleUrl(skipRoute, null, normalParams, encodeParams, null);
 
