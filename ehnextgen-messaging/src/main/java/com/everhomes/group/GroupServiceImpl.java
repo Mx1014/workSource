@@ -4713,10 +4713,10 @@ public class GroupServiceImpl implements GroupService {
                         messageDto.setAppId(AppConstants.APPID_MESSAGING);
                         messageDto.setSenderUid(User.SYSTEM_UID);
                         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-                        messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+                        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                         messageDto.setBody(content);
                         messageDto.setMetaAppId(AppConstants.APPID_GROUP);
-                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
                         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                     }
