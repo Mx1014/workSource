@@ -30,4 +30,6 @@ public interface FaceRecognitionPhotoService {
 
 	void updateVistorSyncTimes(UpdateVistorSyncTimeCommand cmd);
 
+	void invalidVistorSyncState(UpdateVistorSyncTimeCommand cmd);
+
 }

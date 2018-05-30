@@ -328,4 +328,20 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 		}
 		
 	}
+
+	@Override
+	public void invalidVistorSyncState(UpdateVistorSyncTimeCommand cmd) {
+		String[] ids = cmd.getPhotoIds().split(",");
+		List<Long> photoIds = new ArrayList<Long>();
+		for (String id : ids){
+			photoIds.add(Long.valueOf(id));
+		}
+		List<FaceRecognitionPhoto> listPhotos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(photoIds);
+		if(listPhotos != null && listPhotos.size() > 0){
+			for(FaceRecognitionPhoto photo : listPhotos){
+				photo.setStatus((byte) 0);
+			}
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
+		}
+	}
 }

@@ -956,6 +956,23 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateVistorSyncState</b>
+     * <p>更新访客同步时间 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateVistorSyncState")
+    @RestReturn(value=String.class)
+    public RestResponse updateVistorSyncState(UpdateVistorSyncTimeCommand cmd){
+    	faceRecognitionPhotoService.invalidVistorSyncState(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 //createLocalVisitorAuth Test
     /**
      * 
