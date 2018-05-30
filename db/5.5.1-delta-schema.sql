@@ -327,4 +327,10 @@ ALTER TABLE `eh_service_alliance_jump_module`
 
 -- 超级管理员 Added by janson
 ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
-
+-- 能耗抄表精度  by jiarui
+ALTER TABLE `eh_energy_meter_reading_logs`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `meter_id`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `last_task_reading`  decimal(10,2) NULL DEFAULT NULL AFTER `executive_expire_time`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `last_task_reading`;
