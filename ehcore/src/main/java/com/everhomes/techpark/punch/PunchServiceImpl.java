@@ -2638,11 +2638,11 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private void addPunchStatistics(OrganizationMemberDetails detail, Long orgId, Calendar startCalendar, Calendar endCalendar) {
-        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
-        if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
-            LOGGER.error("filed report dont add punch statistic");
-            return;
-        }
+//        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(orgId, monthSF.get().format(startCalendar.getTime()));
+//        if (report != null && PunchMonthReportStatus.FILED == PunchMonthReportStatus.fromCode(report.getStatus())) {
+//            LOGGER.error("filed report dont add punch statistic");
+//            return;
+//        }
         PunchStatistic statistic = new PunchStatistic();
 
         statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -9762,7 +9762,7 @@ public class PunchServiceImpl implements PunchService {
                 List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(null, null);
                 if(null != enterpriseIds) {
                     for (Long enterpriseId : enterpriseIds) {
-
+                    	try{
                         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode() + enterpriseId).enter(() -> {
                             PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(enterpriseId, month);
                             if (null == report) {
@@ -9775,7 +9775,9 @@ public class PunchServiceImpl implements PunchService {
                             updateMonthReport(cmd);
                             return null;
                         });
-
+                    	}catch(Exception e){
+                    		LOGGER.error("refresh month report error enterprise "+enterpriseId,e);
+                    	}
                     }
                 }
                 return null;
