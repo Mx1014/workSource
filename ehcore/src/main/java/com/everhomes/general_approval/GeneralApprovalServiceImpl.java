@@ -1,25 +1,20 @@
 package com.everhomes.general_approval;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.*;
 import java.sql.Timestamp;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.enterpriseApproval.GeneralApprovalDefaultHandler;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
@@ -28,7 +23,6 @@ import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import com.everhomes.workReport.WorkReportService;
-import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -39,11 +33,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -73,7 +63,6 @@ import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
@@ -186,127 +175,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
-        RedisTemplate template = bigCollectionProvider.getMapAccessor("general_approval_no", "").getTemplate(new StringRedisSerializer());
-        ValueOperations op = template.opsForValue();
-
-        // TODO Auto-generated method stub
-        return this.dbProvider.execute((TransactionStatus status) -> {
-            User user = UserContext.current().getUser();
-            GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                    .getApprovalId());
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-                    .getFormOriginId());
-
-            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-                // 使用表单/审批 注意状态 config
-                form.setStatus(GeneralFormStatus.RUNNING.getCode());
-                this.generalFormProvider.updateGeneralForm(form);
-            }
-            Flow flow = null;
-            if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())) {
-                flow = flowService.getEnabledFlow(ga.getNamespaceId(), 40500L,
-                        FlowModuleType.NO_MODULE.getCode(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
-            } else {
-                flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
-                        ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
-            }
-
-            CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
-            cmd21.setApplyUserId(user.getId());
-            cmd21.setReferType(FlowReferType.APPROVAL.getCode());
-            cmd21.setReferId(ga.getId());
-            cmd21.setProjectType(ga.getOwnerType());
-            cmd21.setProjectId(ga.getOwnerId());
-            // 把command作为json传到content里，给flowcase的listener进行处理
-            cmd21.setContent(JSON.toJSONString(cmd));
-            cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
-            cmd21.setApplierOrganizationId(cmd.getOrganizationId());
-            cmd21.setTitle(ga.getApprovalName());
-
-            /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/
-            GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
-            if (member != null) {
-                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
-                //  存储部门 id 及名称
-                fieldDTO.setDepartment(department.getName());
-                fieldDTO.setDepartmentId(department.getId());
-            }
-
-            //  设置审批编号 added by approval1.6
-            String countKey = "general_approval_no" + user.getNamespaceId() + cmd.getOrganizationId();
-            String count;
-            if (op.get(countKey) == null) {
-                LocalDate tomorrowStart = LocalDate.now().plusDays(1);
-                long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
-                op.set(countKey, "1", seconds, TimeUnit.SECONDS);
-                count = "1";
-            } else {
-                count = (String) op.get(countKey);
-            }
-            String approvalNo = approvalNoFormat.format(new Date());
-            for (int i = 0; i < 4 - count.length(); i++)
-                approvalNo += "0";
-            approvalNo += count;
-            op.increment(countKey, 1L);
-            fieldDTO.setApprovalNo(Long.valueOf(approvalNo));
-            /*****************  存储更多的信息 end by nan.rong for approval-1.6  *****************/
-
-            cmd21.setAdditionalFieldDTO(fieldDTO);
-            ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
-            if (category != null) {
-                cmd21.setServiceType(category.getName());
-            }
-
-            Long flowCaseId = flowService.getNextFlowCaseId();
-
-            // 把values 存起来
-            for (PostApprovalFormItem val : cmd.getValues()) {
-                GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
-                obj.setApprovalId(ga.getId());
-                obj.setFormVersion(form.getFormVersion());
-                obj.setFlowCaseId(flowCaseId);
-                obj.setFieldName(val.getFieldName());
-                obj.setFieldType(val.getFieldType());
-                obj.setFieldStr3(val.getFieldValue());
-                this.generalApprovalValProvider.createGeneralApprovalVal(obj);
-            }
-
-            FlowCase flowCase;
-            if (null == flow) {
-                // 给他一个默认哑的flow
-                GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
-                gm.setOwnerId(ga.getId());
-                gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
-                cmd21.setFlowCaseId(flowCaseId);
-                flowCase = flowService.createDumpFlowCase(gm, cmd21);
-                flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
-                flowCaseProvider.updateFlowCase(flowCase);
-            } else {
-                cmd21.setFlowMainId(flow.getFlowMainId());
-                cmd21.setFlowVersion(flow.getFlowVersion());
-                cmd21.setFlowCaseId(flowCaseId);
-                flowCase = flowService.createFlowCase(cmd21);
-            }
-
-            GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
-                    GetTemplateByApprovalIdResponse.class);
-            response.setFlowCaseId(flowCase.getId());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-            response.setFormFields(fieldDTOs);
-            response.setValues(cmd.getValues());
-
-
-            //added by wh 建立了审批单之后
-
-            GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
-            LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
-            handler.onApprovalCreated(flowCase);
-            return response;
-        });
+        ApprovalPostItemHandler handler = getApprovalPostItemHandler();
+        return handler.postApprovalForm();
     }
 
-    public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
+    private ApprovalPostItemHandler getApprovalPostItemHandler(){
+        return null;
+    }
+
+  /*  public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
 
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
         return getGeneralApprovalHandler(ga.getApprovalAttribute());
@@ -323,7 +200,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 //        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
         return null;
     }
-
+*/
 
     @Override
     public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {

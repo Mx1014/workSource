@@ -1,11 +1,9 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.general_approval.GeneralApprovalHandler;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
 
 import com.everhomes.techpark.punch.PunchService;
@@ -24,10 +22,10 @@ import java.text.SimpleDateFormat;
  * 用于审批的默认handler
  * </ul>
  */
-@Component(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME)
-public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
+@Component(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME)
+public class EnterpriseApprovalDefaultHandler implements EnterpriseApprovalHandler {
 
-	static final String GENERAL_APPROVAL_DEFAULT_HANDLER_NAME = GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "Default";
+	static final String ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "Default";
 	@Autowired
 	protected PunchProvider punchProvider;
 	@Autowired
@@ -50,7 +48,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 			return new SimpleDateFormat("yyyy-MM-dd");
 		}
 	};
-	protected static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalDefaultHandler.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalDefaultHandler.class);
 
 	@Override
 	public void onApprovalCreated(FlowCase flowCase) {

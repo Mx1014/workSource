@@ -75,11 +75,13 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
                 EnterpriseApprovalController.MODULE_TYPE, approvalId, EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
+        if(flow == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
+                    EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
         Long formOriginId = flow.getFormOriginId();
         //  compatible with the previous data
         if(0 == formOriginId){
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd
-                    .getSourceId());
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
             formOriginId = ga.getFormOriginId();
         }
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);

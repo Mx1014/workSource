@@ -99,7 +99,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                 return handler;
             }
         }
-        return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
             }
 
         }
-        return null;
+        return entities;
     }
 
     private void processAskForLeaveField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {

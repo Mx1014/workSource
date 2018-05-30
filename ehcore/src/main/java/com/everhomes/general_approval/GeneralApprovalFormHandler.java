@@ -68,7 +68,7 @@ public class GeneralApprovalFormHandler extends EnterpriseApprovalFormHandler im
         sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
         sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setDyn amicFlag(NormalFlag.NEED.getCode());
         sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
         sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
         fieldDTOs.add(sourceIdField);
