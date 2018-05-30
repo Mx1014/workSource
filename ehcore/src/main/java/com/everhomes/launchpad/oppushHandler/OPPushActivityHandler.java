@@ -7,13 +7,11 @@ import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.launchpadbase.ContextDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.OPPushCard;
 import com.everhomes.rest.launchpadbase.routerjson.ActivityContentRouterJson;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.GsonUtil;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,7 +33,7 @@ public class OPPushActivityHandler implements OPPushHandler {
     private LaunchPadService launchPadService;
 
     @Override
-    public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, ContextDTO context) {
+    public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
 
         ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);

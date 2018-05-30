@@ -2,9 +2,8 @@
 package com.everhomes.user;
 
 
-import com.everhomes.rest.launchpadbase.ContextDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.util.WebTokenGenerator;
 import com.google.gson.Gson;
@@ -12,7 +11,7 @@ import com.google.gson.Gson;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
-public class ContextGenerator {
+public class AppContextGenerator {
 
 
     /**
@@ -20,7 +19,7 @@ public class ContextGenerator {
      * @param object
      * @return
      */
-    public String toBase64WebToken(ContextDTO object) {
+    public String toBase64WebToken(AppContext object) {
         return base64SafeUrlEncode(object.toString());
     }
 
@@ -30,7 +29,7 @@ public class ContextGenerator {
      * @param tokenString
      * @return
      */
-    public static ContextDTO fromWebToken(String tokenString) {
+    public static AppContext fromWebToken(String tokenString) {
 
 
         if(tokenString == null){
@@ -42,7 +41,7 @@ public class ContextGenerator {
         try {
             String s = base64SafeUrlDecode(tokenString);
             Gson gson = new Gson();
-            ContextDTO context = gson.fromJson(s, ContextDTO.class);
+            AppContext context = gson.fromJson(s, AppContext.class);
             return context;
         }catch (Exception ex){
             //try WebTokenGenerator
@@ -54,7 +53,7 @@ public class ContextGenerator {
             SceneTokenDTO dto = WebTokenGenerator.getInstance().fromWebToken(tokenString, SceneTokenDTO.class);
 
             if(dto != null){
-                ContextDTO context = new ContextDTO();
+                AppContext context = new AppContext();
                 switch (UserCurrentEntityType.fromCode(dto.getEntityType())){
                     case COMMUNITY:
                     case COMMUNITY_COMMERCIAL:
@@ -63,7 +62,7 @@ public class ContextGenerator {
                         break;
                     case ORGANIZATION:
                     case ENTERPRISE:
-                        context.setOrgId(dto.getEntityId());
+                        context.setOrganizationId(dto.getEntityId());
                     case FAMILY:
                         context.setFamilyId(dto.getEntityId());
                         break;

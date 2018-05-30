@@ -2,19 +2,18 @@
 package com.everhomes.rest.launchpadbase;
 
 
-import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *     <li>instanceConfig: instanceConfig</li>
- *     <li>context: 上下文信息context {@link ContextDTO}</li>
+ *     <li>context: 上下文信息context {@link AppContext}</li>
  * </ul>
  */
 public class ListBannersCommand {
 
     private String instanceConfig;
-    private ContextDTO context;
+    private AppContext context;
 
     public String getInstanceConfig() {
         return instanceConfig;
@@ -24,11 +23,11 @@ public class ListBannersCommand {
         this.instanceConfig = instanceConfig;
     }
 
-    public ContextDTO getContext() {
+    public AppContext getContext() {
         return context;
     }
 
-    public void setContext(ContextDTO context) {
+    public void setContext(AppContext context) {
         this.context = context;
     }
 

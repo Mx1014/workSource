@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>layoutId: layoutId</li>
  *     <li>instanceConfig: 从layout的group中获取，参考{@link OPPush}。其中itemGroup字段包含了组件信息，例如活动为OPPushActivity</li>
- *     <li>context: context {@link ContextDTO}</li>
+ *     <li>context: context {@link AppContext}</li>
  * </ul>
  */
 public class ListOPPushCardsCommand {
@@ -18,7 +18,7 @@ public class ListOPPushCardsCommand {
 
     private String instanceConfig;
 
-    private ContextDTO context;
+    private AppContext context;
 
     public Long getLayoutId() {
         return layoutId;
@@ -36,11 +36,11 @@ public class ListOPPushCardsCommand {
         this.instanceConfig = instanceConfig;
     }
 
-    public ContextDTO getContext() {
+    public AppContext getContext() {
         return context;
     }
 
-    public void setContext(ContextDTO context) {
+    public void setContext(AppContext context) {
         this.context = context;
     }
 

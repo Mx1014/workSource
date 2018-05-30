@@ -5232,123 +5232,130 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
-        User user = UserContext.current().getUser();
-        Long userId = user.getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-//        List<Long> visibleRegionIds = new ArrayList<Long>();
-//        VisibleRegionType visibleRegionType = VisibleRegionType.COMMUNITY;
-//        switch(sceneType) {
-//        case DEFAULT:
-//        case PARK_TOURIST:
-//        	visibleRegionIds.add(sceneToken.getEntityId());
-//            break;
-//        case FAMILY:
-//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-//            if(family != null) {
-//                visibleRegionIds.add(family.getCommunityId());
-//            } else {
-//                if(LOGGER.isWarnEnabled()) {
-//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-//                }
-//            }
-//            break;
-//        case PM_ADMIN:// 无小区ID
-//        case ENTERPRISE: 
-//        case ENTERPRISE_NOAUTH: 
-//            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
-//            if(org != null) {
+//        User user = UserContext.current().getUser();
+//        Long userId = user.getId();
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+////        List<Long> visibleRegionIds = new ArrayList<Long>();
+////        VisibleRegionType visibleRegionType = VisibleRegionType.COMMUNITY;
+////        switch(sceneType) {
+////        case DEFAULT:
+////        case PARK_TOURIST:
+////        	visibleRegionIds.add(sceneToken.getEntityId());
+////            break;
+////        case FAMILY:
+////            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+////            if(family != null) {
+////                visibleRegionIds.add(family.getCommunityId());
+////            } else {
+////                if(LOGGER.isWarnEnabled()) {
+////                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+////                }
+////            }
+////            break;
+////        case PM_ADMIN:// 无小区ID
+////        case ENTERPRISE:
+////        case ENTERPRISE_NOAUTH:
+////            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+////            if(org != null) {
+////
+////            	if(OrganizationType.ENTERPRISE == OrganizationType.fromCode(org.getOrganizationType())){
+////            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+////            		if(null != organizationCommunityRequest){
+////                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+////            		}
+////            	}else{
+//////                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+//////                	command.setCommunityId(org.getId());
+//////                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
+//////                	for (CommunityDTO communityDTO : communityDTOs) {
+//////                		visibleRegionIds.add(communityDTO.getId());
+//////    				}
+////            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+////            		if(null != organizationCommunityRequest){
+////                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+////            		}
+////            	}
+////
+////            } else {
+////                if(LOGGER.isWarnEnabled()) {
+////                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+////                }
+////            }
+////            break;
+////        default:
+////            break;
+////        }
 //
-//            	if(OrganizationType.ENTERPRISE == OrganizationType.fromCode(org.getOrganizationType())){
-//            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
-//            		if(null != organizationCommunityRequest){
-//                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
-//            		}
-//            	}else{
-////                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-////                	command.setCommunityId(org.getId());
-////                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
-////                	for (CommunityDTO communityDTO : communityDTOs) {
-////                		visibleRegionIds.add(communityDTO.getId());
-////    				}
-//            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
-//            		if(null != organizationCommunityRequest){
-//                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
-//            		}
-//            	}
-//            	
+//        //查全部公告，对于小区，需要找到上级所有机构，对于管理公司，需要管理公司及其所在小区，对于普通公司，需要其管理公司及其所在小区
+//        List<Long> communityIds = new ArrayList<>();
+//        List<Long> organizationIds = new ArrayList<>();
+//        //检查游客是否能继续访问此场景 by sfyan 20161009
+//        userService.checkUserScene(sceneType);
+//        Long communityId = null;
+//        switch(sceneType) {
+//	    case DEFAULT:
+//	    case PARK_TOURIST:
+//	    	communityId = sceneToken.getEntityId();
+//	    	communityIds.add(communityId);
+//			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+//	        break;
+//	    case FAMILY:
+//	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//	        if(family != null) {
+//	            communityId = family.getCommunityId();
+//		    	communityIds.add(communityId);
+//				organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+//	        } else {
+//	            if(LOGGER.isWarnEnabled()) {
+//	                LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//	            }
+//	        }
+//	        break;
+//        case ENTERPRISE:
+//        case ENTERPRISE_NOAUTH:
+//            // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告
+//            OrganizationDTO org = organizationService.getOrganizationById(sceneToken.getEntityId());
+//            if(org != null) {
+//                communityId = org.getCommunityId();
+//                if(communityId == null) {
+//                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}",
+//                        sceneToken.getEntityId(), cmd, sceneToken);
+//                } else {
+//        	    	communityIds.add(communityId);
+//        			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+//                }
 //            } else {
-//                if(LOGGER.isWarnEnabled()) {
-//                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+//                LOGGER.error("Organization not found, organizationId={}, cmd={}, sceneToken={}", sceneToken.getEntityId(), cmd, sceneToken);
+//            }
+//            break;
+//        case PM_ADMIN:
+//        	Long organizationId = sceneToken.getEntityId();
+//        	org = organizationService.getOrganizationById(organizationId);
+//            if(org != null) {
+//            	organizationIds.add(organizationId);
+//                communityId = org.getCommunityId();
+//                if(communityId == null) {
+//                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}",
+//                        sceneToken.getEntityId(), cmd, sceneToken);
+//                }else {
+//                	communityIds.add(communityId);
+//        			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
 //                }
 //            }
 //            break;
-//        default:
-//            break;
-//        }
-        
-        //查全部公告，对于小区，需要找到上级所有机构，对于管理公司，需要管理公司及其所在小区，对于普通公司，需要其管理公司及其所在小区
+//	    default:
+//	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//	        break;
+//	    }
+
+
+        Long communityId = UserContext.current().getAppContext().getCommunityId();
         List<Long> communityIds = new ArrayList<>();
+        communityIds.add(communityId);
         List<Long> organizationIds = new ArrayList<>();
-        //检查游客是否能继续访问此场景 by sfyan 20161009
-        userService.checkUserScene(sceneType);
-        Long communityId = null;
-        switch(sceneType) {
-	    case DEFAULT:
-	    case PARK_TOURIST:
-	    	communityId = sceneToken.getEntityId();
-	    	communityIds.add(communityId);
-			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-	        break;
-	    case FAMILY:
-	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-	        if(family != null) {
-	            communityId = family.getCommunityId();
-		    	communityIds.add(communityId);
-				organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-	        } else {
-	            if(LOGGER.isWarnEnabled()) {
-	                LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-	            }
-	        }
-	        break;
-        case ENTERPRISE: 
-        case ENTERPRISE_NOAUTH: 
-            // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告
-            OrganizationDTO org = organizationService.getOrganizationById(sceneToken.getEntityId());
-            if(org != null) {
-                communityId = org.getCommunityId();
-                if(communityId == null) {
-                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}", 
-                        sceneToken.getEntityId(), cmd, sceneToken);
-                } else {
-        	    	communityIds.add(communityId);
-        			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-                }
-            } else {
-                LOGGER.error("Organization not found, organizationId={}, cmd={}, sceneToken={}", sceneToken.getEntityId(), cmd, sceneToken);
-            }
-            break;
-        case PM_ADMIN:
-        	Long organizationId = sceneToken.getEntityId();
-        	org = organizationService.getOrganizationById(organizationId);
-            if(org != null) {
-            	organizationIds.add(organizationId);
-                communityId = org.getCommunityId();
-                if(communityId == null) {
-                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}", 
-                        sceneToken.getEntityId(), cmd, sceneToken);
-                }else {
-                	communityIds.add(communityId);
-        			organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-                }
-            }
-            break;
-	    default:
-	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-	        break;
-	    }
-        
+
+        organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
         
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
     }
