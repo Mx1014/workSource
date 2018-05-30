@@ -1,3 +1,7 @@
+-- 1: 同步客户
+-- /customer/syncEnterpriseCustomerIndex
+
+
 -- Designer: wuhan
 -- Description: ISSUE#25515: 薪酬V2.2（工资条发放管理；app支持工资条查看/确认）
 
@@ -59,6 +63,280 @@ ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
 
 -- 资源预约 订单资源表增加字段
 ALTER TABLE `eh_rentalv2_resource_orders` ADD COLUMN `resource_number`  VARCHAR(64) NULL;
+
+
+-- ------------------------------
+-- 工作流动态函数     add by xq.tian  2018/04/24
+-- ------------------------------
+DROP TABLE IF EXISTS `eh_flow_scripts`; -- 原来存在这张表，没有数据，删掉重新建
+CREATE TABLE `eh_flow_scripts` (
+	`id` BIGINT NOT NULL,
+	`namespace_id` INTEGER NOT NULL DEFAULT '0',
+
+	`module_type` VARCHAR(64) NOT NULL,
+	`module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+
+	`owner_type` VARCHAR(64),
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
+
+	`script_category` VARCHAR(64) NOT NULL COMMENT 'system_script, user_script',
+	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+
+	`script_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_scripts',
+	`script_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'script version',
+
+	`name` VARCHAR(128) DEFAULT NULL COMMENT 'script name',
+	`description` TEXT DEFAULT NULL COMMENT 'script description',
+	`script` LONGTEXT DEFAULT NULL COMMENT 'script content',
+
+	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
+  `create_time` DATETIME(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+
+	`string_tag1` VARCHAR(128) DEFAULT NULL,
+	`string_tag2` VARCHAR(128) DEFAULT NULL,
+	`string_tag3` VARCHAR(128) DEFAULT NULL,
+	`string_tag4` VARCHAR(128) DEFAULT NULL,
+	`string_tag5` VARCHAR(128) DEFAULT NULL,
+	`integral_tag1` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag2` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag3` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag4` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag5` BIGINT(20) NOT NULL DEFAULT '0',
+	PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts in dev mode';
+
+-- ------------------------------
+-- 工作流动态函数配置表     add by xq.tian  2018/04/24
+-- ------------------------------
+-- DROP TABLE IF EXISTS `eh_flow_script_configs`;
+CREATE TABLE `eh_flow_script_configs` (
+	`id` BIGINT NOT NULL,
+	`namespace_id` INTEGER NOT NULL DEFAULT '0',
+
+	`module_type` VARCHAR(64) NOT NULL,
+	`module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+
+	`flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+	`flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'flow version',
+
+	`owner_type` VARCHAR(64),
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
+
+	`script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+
+	`script_name` VARCHAR(128) NULL DEFAULT NULL COMMENT 'export script name, only for script type of java',
+	`script_main_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'ref eh_flow_scripts',
+	`script_version` INTEGER NOT NULL DEFAULT '0' COMMENT 'script version',
+
+	`field_name` VARCHAR(1024) DEFAULT NULL COMMENT 'field name',
+	`field_desc` TEXT DEFAULT NULL COMMENT 'field description',
+	`field_value` VARCHAR(1024) DEFAULT NULL COMMENT 'field value',
+
+	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
+	`create_time` DATETIME(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+
+	`string_tag1` VARCHAR(128) DEFAULT NULL,
+	`string_tag2` VARCHAR(128) DEFAULT NULL,
+	`string_tag3` VARCHAR(128) DEFAULT NULL,
+	`string_tag4` VARCHAR(128) DEFAULT NULL,
+	`string_tag5` VARCHAR(128) DEFAULT NULL,
+	`integral_tag1` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag2` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag3` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag4` BIGINT(20) NOT NULL DEFAULT '0',
+	`integral_tag5` BIGINT(20) NOT NULL DEFAULT '0',
+	PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'flow scripts config in dev mode';
+
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN flow_case_id BIGINT;
+
+ALTER TABLE eh_flow_actions ADD COLUMN script_type VARCHAR(64);
+ALTER TABLE eh_flow_actions ADD COLUMN script_id BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_flow_actions ADD COLUMN script_version INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag6` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag7` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag8` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag9` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `string_tag10` VARCHAR(128) DEFAULT NULL;
+
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag6` BIGINT(20) NOT NULL DEFAULT '0';
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag7` BIGINT(20) NOT NULL DEFAULT '0';
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag8` BIGINT(20) NOT NULL DEFAULT '0';
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag9` BIGINT(20) NOT NULL DEFAULT '0';
+ALTER TABLE eh_flow_evaluate_items ADD COLUMN `integral_tag10` BIGINT(20) NOT NULL DEFAULT '0';
+
+ALTER TABLE eh_flow_cases ADD COLUMN path VARCHAR(1024) COMMENT 'flow case path';
+
+ALTER TABLE eh_flow_actions CHANGE COLUMN script_id script_main_id BIGINT NOT NULL DEFAULT 0;
+
+
+-- 政务服务 1.0
+-- by shiheng.ma
+-- 政策表
+CREATE TABLE `eh_policies` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `category_id` bigint(20),
+	`title` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '',
+	`outline` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
+	`content` text COMMENT 'content data',
+	`priority` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the rank of policy',
+	`creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+	`updater_uid` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策类型中间表
+CREATE TABLE `eh_policy_categories` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `policy_id` bigint(20) NOT NULL COMMENT 'id of the policy',
+  `category_id` bigint(20) NOT NULL COMMENT 'category of policy',
+	`active_flag` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策查询记录表
+CREATE TABLE `eh_policy_records` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `category_id` bigint(20),
+	`creator_id` bigint(20) NOT NULL COMMENT '',
+	`creator_name` varchar(128) NOT NULL COMMENT '',
+	`creator_phone` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '',
+	`creator_org_id` bigint(20) NOT NULL COMMENT '',
+	`creator_org_name` varchar(128) NOT NULL COMMENT '',
+	`turnover` varchar(60) NOT NULL DEFAULT '' COMMENT '营业额',
+	`tax` varchar(60) NOT NULL DEFAULT '' COMMENT '纳税总额',
+	`qualification` varchar(60) NOT NULL DEFAULT '' COMMENT '单位资质',
+	`financing` varchar(60) NOT NULL DEFAULT '' COMMENT 'A轮融资',
+	`create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 政策代办配置表
+CREATE TABLE `eh_policy_agent_rules` (
+  `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type : community ; organization',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
+  `agent_flag` TINYINT(4) DEFAULT NULL COMMENT '是否代办:0为不可代办，1为可代办',
+  `agent_phone` varchar(64) DEFAULT NULL COMMENT '联系方式',
+	`agent_info` text DEFAULT NULL COMMENT '代办介绍',
+	`creator_id` bigint(20) NOT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`updater_uid` bigint(20) COMMENT '修改人',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 政务服务 1.0 end
+
+-- 企业管理员列表 by jiarui
+ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT NULL DEFAULT 0 AFTER `create_time`;
+
+
+
+-- ------------------------------
+-- 服务联盟V3.3（新增需求提单功能）     
+-- 产品功能 #26469 add by huangmingbo  2018/05/29
+-- ------------------------------
+-- DROP TABLE IF EXISTS `eh_flow_script_configs`;
+CREATE TABLE `eh_service_alliance_providers` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL DEFAULT '0',
+	`owner_type` VARCHAR(32) NOT NULL DEFAULT '\'\'',
+	`owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+	`app_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'module_app id, new type of alliance, represent one kine fo alliance',
+	`type` BIGINT(20) NOT NULL COMMENT 'old type of Alliance，represent one kind of alliance',
+	`name` VARCHAR(50) NOT NULL COMMENT 'provider name',
+	`category_id` BIGINT(20) NOT NULL COMMENT '见 categories表',
+	`mail` VARCHAR(50) NOT NULL COMMENT 'enterprise mail',
+	`contact_number` VARCHAR(50) NOT NULL COMMENT 'mobile or contact phone',
+	`contact_name` VARCHAR(50) NOT NULL COMMENT 'contact name',
+	`total_score` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'total score',
+	`score_times` INT(11) NOT NULL DEFAULT '0' COMMENT 'the num of times make the score',
+	`score_flow_case_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'the final flow case id that make score',
+	`status` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0-deleted 1-active',
+	`create_time` DATETIME NOT NULL,
+	`create_uid` BIGINT(20) NOT NULL COMMENT 'create user id',
+	PRIMARY KEY (`id`)
+)
+COMMENT='服务商信息'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE TABLE `eh_alliance_extra_events` (
+	`id` BIGINT(20) NOT NULL,
+	`flow_case_id` BIGINT(20) NOT NULL,
+	`topic` VARCHAR(200) NOT NULL COMMENT 'topic of current event',
+	`time` DATETIME NOT NULL COMMENT 'the time that event happen',
+	`address` VARCHAR(200) NULL DEFAULT NULL,
+	`provider_id` BIGINT(20) NULL DEFAULT NULL COMMENT 'id of alliance_providers',
+	`provider_name` VARCHAR(50) NULL DEFAULT NULL COMMENT 'name of alliance_provider',
+	`members` VARCHAR(500) NOT NULL COMMENT 'those who participate in',
+	`content` MEDIUMTEXT NOT NULL COMMENT 'main body',
+	`enable_read` TINYINT(3) NOT NULL DEFAULT '0' COMMENT '0-hide for applier  1-show for applier',
+	`enable_notify_by_email` TINYINT(3) NOT NULL DEFAULT '0' COMMENT '0-not send email  1-send email to provider',
+	`create_time` DATETIME NOT NULL,
+	`create_uid` BIGINT(20) NOT NULL,
+	PRIMARY KEY (`id`)
+)
+COMMENT='工作流中，新建事件表'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE TABLE `eh_alliance_extra_event_attachment` (
+	`id` BIGINT(20) NOT NULL,
+	`owner_id` BIGINT(20) NOT NULL COMMENT 'the id of eh_alliance_extra_events',
+	`file_type` VARCHAR(32) NULL DEFAULT NULL COMMENT 'like image,jpg. in lower case',
+	`file_uri` VARCHAR(1024) NOT NULL COMMENT 'like cs://1/...',
+	`file_name` VARCHAR(200) NULL DEFAULT NULL,
+	`file_size` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'file size (Byte)',
+	`create_uid` BIGINT(20) NOT NULL,
+	`create_time` DATETIME NOT NULL COMMENT 'create time',
+	PRIMARY KEY (`id`)
+)
+COMMENT='用于服务联盟工作流中新建事件时保存附件使用'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+ALTER TABLE `eh_service_alliance_jump_module`
+	ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT '0' AFTER `module_name`;
+	
+	
+ALTER TABLE `eh_service_alliance_jump_module`
+	ADD COLUMN `instance_config` TEXT NULL DEFAULT NULL AFTER `module_url`;
+
+-- 超级管理员 Added by janson
+ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+-- 能耗抄表精度  by jiarui
+ALTER TABLE `eh_energy_meter_reading_logs`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `meter_id`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `last_task_reading`  decimal(10,2) NULL DEFAULT NULL AFTER `executive_expire_time`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `last_task_reading`;
+
+-- added a new column for eh_payment_bill_groups by wentian
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `bills_day_type` TINYINT NOT NULL DEFAULT 4 COMMENT '1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日';
 
 -- ISSUE#26184 门禁人脸识别 by liuyilin 201180524
 -- 内网服务器表创建
@@ -150,3 +428,4 @@ ALTER TABLE eh_aclink_firmware MODIFY COLUMN `info_url` VARCHAR(1024);
 
 
 -- End by: yilin Liu
+

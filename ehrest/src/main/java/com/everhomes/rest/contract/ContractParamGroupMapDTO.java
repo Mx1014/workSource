@@ -1,5 +1,6 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -8,6 +9,7 @@ package com.everhomes.rest.contract;
  *     <li>paramId: 参数id</li>
  *     <li>groupId: 部门id</li>
  *     <li>positionId: 岗位id</li>
+ *     <li>userId: 用户id</li>
  * </ul>
  * Created by ying.xiong on 2018/1/4.
  */
@@ -18,8 +20,18 @@ public class ContractParamGroupMapDTO {
     private Long groupId;
     private Long positionId;
     private String name;
+    //add by steve issue29880
+    private Long userId;
+    
+    public Long getUserId() {
+		return userId;
+	}
 
-    public String getName() {
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getName() {
         return name;
     }
 
@@ -65,5 +77,10 @@ public class ContractParamGroupMapDTO {
 
     public void setPositionId(Long positionId) {
         this.positionId = positionId;
+    }
+    
+    @Override
+    public String toString() {
+    	return StringHelper.toJsonString(this);
     }
 }

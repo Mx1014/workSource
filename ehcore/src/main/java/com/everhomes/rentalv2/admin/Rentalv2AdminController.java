@@ -314,7 +314,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceStatus")
 	@RestReturn(String.class)
 	public RestResponse updateResourceStatus(@Valid UpdateResourceAdminCommand cmd){
-		this.rentalService.updateResource(cmd);
+		this.rentalService.updateResourceStatus(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -34,7 +34,7 @@ public class MessageProviderImpl implements MessageProvider {
 
     @Override
     public void createMessageRecord(MessageRecord messageRecord) {
-        messageRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        // messageRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMessageRecords.class));
         messageRecord.setId(id);
@@ -47,7 +47,7 @@ public class MessageProviderImpl implements MessageProvider {
     public void createMessageRecords(List<MessageRecord> messageRecords) {
         List<EhMessageRecords> records = new ArrayList<>();
         messageRecords.forEach(r->{
-            r.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            // r.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMessageRecords.class));
             r.setId(id);
             records.add(ConvertHelper.convert(r, EhMessageRecords.class));

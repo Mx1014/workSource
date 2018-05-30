@@ -1415,7 +1415,9 @@ public class HotlineServiceImpl implements HotlineService {
 				content.add("[语音]");
 			}
 			else {
-				content.add(dto.getMessage());
+				//这里做表情过滤功能
+				String filterMsg = HotlineUtils.filterEmoji(dto.getMessage(), "[表情]"); 
+				content.add(filterMsg);
 			}
 			content.add("\n");
 		}
