@@ -8,8 +8,6 @@ import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RequireAuthentication;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,9 +40,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse listContracts(ListContractsCommand cmd){
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		return new RestResponse(contractService.listContracts(cmd));
 	}
 
@@ -57,9 +52,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		return new RestResponse(contractService.listContractsByOraganizationId(cmd));
 	}
 
@@ -70,11 +62,7 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("searchContracts")
 	@RestReturn(ListContractsResponse.class)
 	public RestResponse searchContracts(SearchContractCommand cmd){
- 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
-		
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		if (namespaceId == 999971) {
 			ContractService contractService = getContractService(namespaceId);
 			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
@@ -103,9 +91,6 @@ public class ContractController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse generateContractNumber(GenerateContractNumberCommand cmd){
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		return new RestResponse(contractService.generateContractNumber(cmd));
 	}
 
@@ -118,10 +103,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse createContract(CreateContractCommand cmd){
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
-		
 		return new RestResponse(contractService.createContract(cmd));
 	}
 
@@ -134,9 +115,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse updateContract(UpdateContractCommand cmd){
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		return new RestResponse(contractService.updateContract(cmd));
 	}
 
@@ -149,9 +127,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse deleteContract(DeleteContractCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		contractService.deleteContract(cmd);
 		return new RestResponse();
 	}
@@ -165,9 +140,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse denunciationContract(DenunciationContractCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
 		contractService.denunciationContract(cmd);
 		return new RestResponse();
 	}
@@ -222,9 +194,6 @@ public class ContractController extends ControllerBase {
 		return new RestResponse(contractService.listEnterpriseCustomerContracts(cmd));
 	}
 
-	
-	
-	
 	/**
 	 * <p>查看个人客户合同</p>
 	 * <b>URL: /contract/listIndividualCustomerContracts</b>
@@ -258,12 +227,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse setContractParam(SetContractParamCommand cmd) {
 //		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		//cmd.setPayorreceiveContractType((byte)0); //收款合同
-		//cmd.setPayorreceiveContractType((byte)1);//付款合同
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
-		
 		contractService.setContractParam(cmd);
 		return new RestResponse();
 	}
@@ -277,12 +240,6 @@ public class ContractController extends ControllerBase {
 	public RestResponse getContractParam(GetContractParamCommand cmd){
 //		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		//cmd.setPayorreceiveContractType((byte)0); //收款合同
-		//cmd.setPayorreceiveContractType((byte)1);//付款合同
-		
-		//设置参数
-		//cmd.setCategoryId(74L);
-		
 		return new RestResponse(contractService.getContractParam(cmd));
 	}
 
