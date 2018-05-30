@@ -222,6 +222,9 @@ public class ContractController extends ControllerBase {
 		return new RestResponse(contractService.listEnterpriseCustomerContracts(cmd));
 	}
 
+	
+	
+	
 	/**
 	 * <p>查看个人客户合同</p>
 	 * <b>URL: /contract/listIndividualCustomerContracts</b>
