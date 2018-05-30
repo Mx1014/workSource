@@ -1330,16 +1330,24 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private Timestamp setToEnd(Long date) {
-  	    Timestamp stp = new Timestamp(date);
-		LocalDateTime time = stp.toLocalDateTime();
-		return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MAX).format(dateTimeFormat));
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MAX).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
 	}
 
 	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private Timestamp setToBegin(Long date) {
-	    Timestamp stp = new Timestamp(date);
-		LocalDateTime time = stp.toLocalDateTime();
-		return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MIN).format(dateTimeFormat));
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MIN).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
 	}
 
 	@Override
