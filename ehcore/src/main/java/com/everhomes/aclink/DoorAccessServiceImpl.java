@@ -4414,9 +4414,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setGroups(groups);
         for(DoorAuth auth : auths){
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-            DoorAccessGroupDTO group = new DoorAccessGroupDTO();
-            groups.add(group);
             if(null != access && access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+                DoorAccessGroupDTO group = new DoorAccessGroupDTO();
+                groups.add(group);
                 group.setId(access.getId());
                 group.setGroupName(access.getName());
                 group.setKeyU(auth.getKeyU());
