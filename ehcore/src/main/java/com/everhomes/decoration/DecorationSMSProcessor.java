@@ -1,5 +1,6 @@
 package com.everhomes.decoration;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.message_handler.VipParkingRentalMessageHandler;
@@ -20,6 +21,8 @@ public class DecorationSMSProcessor {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     public void applySuccess(DecorationRequest request){
         //发短信给负责人
@@ -28,7 +31,8 @@ public class DecorationSMSProcessor {
         smsProvider.addToTupleList(variables, "applyName", request.getApplyName());
         smsProvider.addToTupleList(variables, "applyPhone", request.getApplyPhone());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "url", "");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "url", homeUrl+"/mobile/static/downloadLink/src/downLink.html?namespaceId="+request.getNamespaceId());
 
         int templateId = SmsTemplateCode.DECORATION_APPLY_SUCCESS;
 
@@ -202,7 +206,8 @@ public class DecorationSMSProcessor {
         smsProvider.addToTupleList(variables, "decoratorName", request.getDecoratorName());
         smsProvider.addToTupleList(variables, "decoratorPhone", request.getDecoratorPhone());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "url", "");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "url", homeUrl+"/mobile/static/downloadLink/src/downLink.html?namespaceId="+request.getNamespaceId());
         int templateId = SmsTemplateCode.DECORATION_CREATE_WORKER;
         String templateLocale = RentalNotificationTemplateCode.locale;
 
