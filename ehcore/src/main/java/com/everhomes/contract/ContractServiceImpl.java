@@ -160,6 +160,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
@@ -2118,6 +2119,7 @@ public class ContractServiceImpl implements ContractService {
 		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
 		String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
 		if(StringUtils.isEmpty(runningFlag)) {
+			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
 			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
 			if (communities != null) {
 				for (Community community : communities) {
