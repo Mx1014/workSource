@@ -290,39 +290,5 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /module/findServiceModuleBtnList</b>
-     * 配置项目功能列表,获取所有功能按钮
-     */
-    @RequestMapping("findServiceModuleBtnList")
-    @RestReturn(value = Long.class, collection = true)
-    public RestResponse findServiceModuleBtnList(@Valid ListServiceModulefunctionsCommand cmd) {
-        return new RestResponse(serviceModuleService.findServiceModuleBtnList(cmd.getModuleId()));
-    }
-    
-    /**
-     * <b>URL: /module/deleteServiceModuleFromBlack</b>
-     * <p>
-     *  把功能模块从黑名单删除，界面显示相应的功能
-     * </p>
-     */
-    /*@RequestMapping("deleteServiceModuleFromBlack")
-    @RestReturn(value = String.class)
-    public RestResponse deleteServiceModuleFromBlack(@Valid ListServiceModuleExcludeFunctionsCommand cmd) {
-        serviceModuleService.deleteServiceModuleFromBlack(cmd);
-        return new RestResponse();
-    }*/
-    
-    /**
-     * <b>URL: /module/addServiceModuleFromBlack</b>
-     * <p>
-     *  把功能模块按钮添加到黑名单，界面不再显示相应的功能按钮
-     * </p>
-     */
-    /*@RequestMapping("addServiceModuleFromBlack")
-    @RestReturn(value = String.class)
-    public RestResponse addServiceModuleFromBlack(@Valid ListServiceModuleExcludeFunctionsCommand cmd) {
-        serviceModuleService.addServiceModuleFromBlack(cmd);
-        return new RestResponse();
-    }*/
+
 }
