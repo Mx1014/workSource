@@ -174,7 +174,7 @@ public interface EnterpriseCustomerProvider {
 
     List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long id);
 
-    List<Organization> listNoSyncOrganizations();
+    List<Organization> listNoSyncOrganizations(Integer namespaceId);
 
     void deleteAllCustomerEntryInfo(Long customerId);
 

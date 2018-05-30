@@ -172,6 +172,7 @@ import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.customer.QuarterStatistics;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.customer.SyncResultViewedCommand;
@@ -3701,14 +3702,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncOrganizationToCustomer() {
+    public void syncOrganizationToCustomer(SyncCustomerDataCommand cmd) {
         //防止执行两次  之前出现过
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
         String runningFlag = getSyncTaskToken(redisTemplate);
         if(StringUtils.isEmpty(runningFlag)) {
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
-            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
+            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations(cmd.getNamespaceId());
             if (organizations != null && organizations.size() > 0) {
                 organizations.forEach((organization -> {
                     try {
