@@ -4274,5 +4274,16 @@ public class AssetProviderImpl implements AssetProvider {
     private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("itemScope");
     private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("groupRule");
 
+    //add by steve
+	@Override
+	public void setRent(Long contractId, BigDecimal rent) {
+		 DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+	     // 更新合同中的rent字段
+	     dslContext.update(Tables.EH_CONTRACTS)
+	                .set(Tables.EH_CONTRACTS.RENT, rent)
+	                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
+	                .execute();
+	}
+
 
 }

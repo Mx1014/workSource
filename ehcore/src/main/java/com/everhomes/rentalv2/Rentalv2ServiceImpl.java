@@ -1748,6 +1748,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalBillDTO billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 		mappingRentalBillDTO(billDTO, rentalBill, rs);
+		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
 		return billDTO;
 	}
 
