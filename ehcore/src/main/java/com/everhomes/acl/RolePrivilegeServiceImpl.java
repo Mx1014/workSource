@@ -2674,7 +2674,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		//modify by lei yuan
 		Long adminTargetId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		//根据adminTargetId来查询eh_organization_members表中的target_id字段
+/*		//根据adminTargetId来查询eh_organization_members表中的target_id字段
 		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(adminTargetId);
 		if(organizationMember != null){
 			if(adminTargetId != null && organizationMember.getTargetId().equals(cmd.getUserId())){
@@ -2691,6 +2691,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}else{
 				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 			}
+		}*/
+
+		//超级管理员的判断是根据admin_target_id（uid）来查询eh_users表中的信息，如果存在信息的话，那么他就是超级管理员，否则就不是超级管理员
+		//根据admin_target_id来查询eh_users表
+		User user = userProvider.findUserById(adminTargetId);
+		if(user != null){
+			if(adminTargetId != null && user.getId() == cmd.getUserId()){
+				response.setIsTopAdminFlag(AllFlagType.YES.getCode());
+
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
+				if(identifier != null){
+					response.setTopAdminToken(identifier.getIdentifierToken());
+				}
+				response.setTopAdminName(user.getNickName());
+
+			}else{
+				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
+			}
+
 		}
 
 		return response;
