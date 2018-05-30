@@ -9,45 +9,18 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.aclink.AclinkConnectingCommand;
-import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
-import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
-import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMessageTestCommand;
-import com.everhomes.rest.aclink.AclinkMgmtCommand;
-import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
-import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
-import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
-import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeResponse;
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.CreateDoorAuthByUser;
-import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.DoorAccessActivedCommand;
-import com.everhomes.rest.aclink.DoorAccessActivingCommand;
-import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
-import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
-import com.everhomes.rest.aclink.GetPhoneVisitorCommand;
-import com.everhomes.rest.aclink.GetVisitorCommand;
-import com.everhomes.rest.aclink.GetVisitorResponse;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.ListDoorAuthCommand;
-import com.everhomes.rest.aclink.ListDoorAuthResponse;
-import com.everhomes.rest.aclink.QueryDoorMessageCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -58,10 +31,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -742,4 +717,24 @@ public class AclinkController extends ControllerBase {
         m.put("result", 0l);
         return m;
     }*/
+
+
+    /**
+     *
+     * <b>URL: /aclink/listDoorAccessByUser</b>
+     * <p>列出用户授权梯控列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessByUser")
+//    @RestReturn(value=RestResponse.class)
+    public RestResponse listDoorAccessByUser(ListDoorAccessByUserCommand cmd) {
+        RestResponse response = new RestResponse();
+
+        response.setResponseObject(doorAccessService.listDoorAccessByUser(cmd));
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

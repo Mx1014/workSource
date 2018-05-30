@@ -97,4 +97,7 @@ public interface DoorAuthProvider {
 
 	Long countCommunityDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Long communityId, Byte communityType,
 			Integer namespaceId, Byte rightType);
+
+
+    List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
 }

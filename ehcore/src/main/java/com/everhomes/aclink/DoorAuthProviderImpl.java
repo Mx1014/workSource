@@ -53,6 +53,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -70,7 +71,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     
     @Autowired
     private GroupProvider groupProvider;
-    
+
     @Override
     public Long getNextDoorAuth() {
     	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuth.class));
@@ -508,12 +509,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
         condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
         condition = condition.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
-        
+
         //by liuyilin 20180328 目前授权是对门禁组授权，如果以后可以给组内单个门禁授权，则没有被统计
         if(cmd.getDoorAccessGroupId() != null){
         	condition = condition.and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorAccessGroupId()));
         }
-        
+
         AuthVisitorStasticResponse resp = new AuthVisitorStasticResponse();
         resp.setDtos(new ArrayList<AuthVisitorStasticDTO>());
 
@@ -922,7 +923,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         }
         return cond;
     }
-    
+
     private Condition getIsAuthCond(Byte isAuth){
         if(null == isAuth){
         	return null;
@@ -1127,8 +1128,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 		return users;
 
 	}
-	
-	
+
+
 	private Condition getCommunityAuthedCondition(DSLContext context, Integer namespaceId,
 			Byte communityType, Long communityId) {
 		if(CommunityType.fromCode(communityType) == CommunityType.COMMERCIAL){
@@ -1154,8 +1155,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 query.addConditions(c);
                 return query;
             });
-    		
-    		List<Long> groupIds = new ArrayList<Long>(); 
+
+    		List<Long> groupIds = new ArrayList<Long>();
     		for (Group group : groups) {
     			groupIds.add(group.getId());
     		}
@@ -1169,7 +1170,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     			query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
                 return query;
             });
-    		
+
     		List<Long> userIds = new ArrayList<Long>();
     		for(GroupMember member : groupMembers){
     			userIds.add(member.getMemberId());
@@ -1177,7 +1178,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 	        Condition subQueryCondition = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode())
 	                .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
 	                .and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
-	
+
 	        if(namespaceId != null){
 	            subQueryCondition = subQueryCondition.and(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
 	        }
@@ -1221,7 +1222,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             ).and(Tables.EH_USER_PROFILES.ITEM_VALUE.eq(String.valueOf(communityId)));
 
         }
-        
+
         return Tables.EH_USERS.ID.isNotNull();
     }
 
@@ -1248,7 +1249,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 }
                 cond = cond.and(authCond);
             }
-            
+
             //认证条件
             if (isAuth == null) {
 				// 全部用户(不在园区中,且在公司也没有认证的用户不统计)
@@ -1334,4 +1335,15 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
 
 
+    @Override
+    public List<DoorAuth> listValidDoorAuthByUser(long userId, String driver) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
+        query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+        if (null != driver){
+            query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+        }
+        query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+        return query.fetch().stream().map(r -> ConvertHelper.convert(r,DoorAuth.class)).collect(Collectors.toList());
+    }
 }

@@ -6,6 +6,7 @@ import com.everhomes.rest.aclink.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface DoorAccessService {
@@ -151,4 +152,7 @@ public interface DoorAccessService {
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
 	public void excuteMessage(String payLoad);
+
+    DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd);
+
 }
