@@ -103,7 +103,7 @@ public class WhiteListProviderImpl implements WhiteListProvider{
             query.addConditions(Tables.EH_PHONE_WHITE_LIST.ID.lt(pageAnchor));
         }
         if (null != pageSize) {
-            query.addLimit(pageSize);
+            query.addLimit(pageSize+1);
         }
         query.addOrderBy(Tables.EH_PHONE_WHITE_LIST.ID.desc());
         return query.fetch().map(r -> ConvertHelper.convert(r, PhoneWhiteList.class));

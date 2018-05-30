@@ -179,16 +179,17 @@ public class WhiteListServiceImpl implements WhiteListSerivce{
         List<PhoneWhiteList> list = whiteListProvider.listWhiteList(cmd.getPhoneNumber(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
         int size = list.size();
         if (size >0) {
+            if (size <= cmd.getPageSize()) {
+                response.setNextPageAnchor(null);
+            }else {
+                list.remove(size-1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+            }
             response.setDtos(list.stream().map(r -> {
                 WhiteListDTO whiteListDTO = ConvertHelper.convert(r, WhiteListDTO.class);
                 whiteListDTO.setCreateTime(r.getCreateTime().toString());
                 return  whiteListDTO;
             }).collect(Collectors.toList()));
-            if (size != cmd.getPageSize()) {
-                response.setNextPageAnchor(null);
-            }else {
-                response.setNextPageAnchor(list.get(size - 1).getId());
-            }
         }
         return response;
     }
