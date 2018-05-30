@@ -6,6 +6,7 @@ import com.everhomes.rest.relocation.SetRelocationConfigCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +23,11 @@ public class RelocationConfigServiceImpl implements RelocationConfigService {
         if(null != result){
             if(null != cmd.getAgreementFlag())
                 result.setAgreementFlag(cmd.getAgreementFlag());
-            if(null != cmd.getAgreementContent())
+            if(StringUtils.isNotEmpty(cmd.getAgreementContent()))
                 result.setAgreementContent(cmd.getAgreementContent());
             if(null != cmd.getTipsFlag())
                 result.setTipsFlag(cmd.getTipsFlag());
-            if(null != cmd.getTipsContent()){
+            if(StringUtils.isNotEmpty(cmd.getTipsContent())){
                 result.setTipsContent(cmd.getTipsContent());
             }
             result.setOperatorUid(user.getId());

@@ -9,6 +9,7 @@ import com.everhomes.server.schema.tables.EhRelocationConfigs;
 import com.everhomes.server.schema.tables.daos.EhRelocationConfigsDao;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class RelocationConfigProviderImpl implements RelocationConfigProvider {
@@ -51,10 +53,10 @@ public class RelocationConfigProviderImpl implements RelocationConfigProvider {
     @Override
     public RelocationConfig searchRelocationConfigById(Integer namespaceId, String ownerType, Long ownerId, Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhRelocationConfigs.class));
-        SelectQuery query = context.selectQuery();
+        SelectQuery query = context.selectQuery(Tables.EH_RELOCATION_CONFIGS);
         if (null != namespaceId)
             query.addConditions(Tables.EH_RELOCATION_CONFIGS.NAMESPACE_ID.eq(namespaceId));
-        if (null != ownerType)
+        if (StringUtils.isNotEmpty(ownerType))
             query.addConditions(Tables.EH_RELOCATION_CONFIGS.OWNER_TYPE.eq(ownerType));
         if (null != ownerId)
             query.addConditions(Tables.EH_RELOCATION_CONFIGS.OWNER_ID.eq(ownerId));
