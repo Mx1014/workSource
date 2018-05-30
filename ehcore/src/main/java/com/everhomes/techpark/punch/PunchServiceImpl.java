@@ -259,7 +259,7 @@ public class PunchServiceImpl implements PunchService {
 
     private ThreadLocal<SimpleDateFormat> dayStatusSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("MM-dd EEE");
+            return new SimpleDateFormat("MM-dd EEE",Locale.SIMPLIFIED_CHINESE);
         }
     };
     private ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
