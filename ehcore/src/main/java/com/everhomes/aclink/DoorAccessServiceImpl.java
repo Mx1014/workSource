@@ -4834,16 +4834,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
-        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
-        SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
-        createPhotoCmd.setUserType((byte) 1);
-        createPhotoCmd.setImgUri(cmd.getHeadImgUri());
-        createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
-        createPhotoCmd.setAuthId(auth.getId());
-        faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
-        
-        cmd1.setDoorId(cmd.getDoorId());
-        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+        if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
+            NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+            SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+            createPhotoCmd.setUserType((byte) 1);
+            createPhotoCmd.setImgUri(cmd.getHeadImgUri());
+            createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
+            createPhotoCmd.setAuthId(auth.getId());
+            faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+            
+            cmd1.setDoorId(cmd.getDoorId());
+            faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+        }
+
 		return dto;
 	}
 
