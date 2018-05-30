@@ -17942,10 +17942,3 @@ CREATE TABLE `eh_contract_categories` (
   `entry_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `eh_test_infos` (
-   `id` BIGINT(20) NOT NULL,
-   `name` VARCHAR(200) DEFAULT NULL,
-   `age` INT(11) DEFAULT NULL,
-   PRIMARY KEY (`id`)
- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
