@@ -1,12 +1,12 @@
 package com.everhomes.flow;
 
-public interface NashornScript<I, O> {
+public interface NashornScript<O> {
 
     String getJSFunc();
 
-    FlowScript getScript();
+    String getScript();
 
-    O process(I input);
+    O process(NashornEngineService input);
 
     void onComplete(O out);
 

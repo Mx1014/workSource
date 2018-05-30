@@ -1,31 +1,33 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowNashornEngineService;
+import com.everhomes.flow.NashornEngineService;
 import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
 import com.everhomes.rest.flow.FlowScriptConfigInfo;
+import com.everhomes.rest.flow.FlowScriptConfigValidateResult;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
-public class NashornScriptConfigValidator implements NashornScript<FlowNashornEngineService, Map<String, Boolean>> {
+public class NashornScriptConfigValidator implements NashornScript<List<FlowScriptConfigValidateResult>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NashornScriptConfigValidator.class);
 
     private NashornScriptConfig scriptConfig;
     private List<FlowScriptConfigInfo> configs;
 
-    private LinkedTransferQueue<Map<String, Boolean>> queue;
+    private LinkedTransferQueue<List<FlowScriptConfigValidateResult>> queue;
 
     public NashornScriptConfigValidator(FlowScript script,
                                         List<FlowScriptConfigInfo> configs,
-                                        LinkedTransferQueue<Map<String, Boolean>> queue) {
+                                        LinkedTransferQueue<List<FlowScriptConfigValidateResult>> queue) {
 
         this.scriptConfig = new NashornScriptConfig(script, null);
         this.configs = configs;
@@ -38,21 +40,26 @@ public class NashornScriptConfigValidator implements NashornScript<FlowNashornEn
     }
 
     @Override
-    public FlowScript getScript() {
+    public String getScript() {
         return scriptConfig.getScript();
     }
 
     @Override
-    public Map<String, Boolean> process(FlowNashornEngineService input) {
+    public List<FlowScriptConfigValidateResult> process(NashornEngineService input) {
         ScriptObjectMirror configMirror = scriptConfig.process(input);
 
-        Map<String, Boolean> resultMap = new HashMap<>();
+        List<FlowScriptConfigValidateResult> resultList = new ArrayList<>();
+
         for (FlowScriptConfigInfo config : configs) {
             Object field = configMirror.get(config.getFieldName());
             if (field == null) {
                 continue;
             }
-            resultMap.put(config.getFieldName(), true);
+
+            FlowScriptConfigValidateResult result = new FlowScriptConfigValidateResult();
+            result.setPass(Boolean.TRUE);
+            result.setFieldName(config.getFieldName());
+            resultList.add(result);
 
             if (field instanceof ScriptObjectMirror) {
                 ScriptObjectMirror fieldMirror = (ScriptObjectMirror) field;
@@ -60,18 +67,21 @@ public class NashornScriptConfigValidator implements NashornScript<FlowNashornEn
                 if (validator instanceof ScriptObjectMirror) {
                     try {
                         Object ret = ((ScriptObjectMirror) validator).call(validator, config.getFieldValue());
-                        resultMap.put(config.getFieldName(), Boolean.valueOf(String.valueOf(ret)));
+                        if (ret != null && !Boolean.TRUE.toString().equals(ret.toString())) {
+                            result.setPass(Boolean.FALSE);
+                            result.setDescription(ret.toString());
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
         }
-        return resultMap;
+        return resultList;
     }
 
     @Override
-    public void onComplete(Map<String, Boolean> out) {
+    public void onComplete(List<FlowScriptConfigValidateResult> out) {
         try {
             if (queue != null) {
                 queue.tryTransfer(out, 10, TimeUnit.SECONDS);
@@ -85,7 +95,7 @@ public class NashornScriptConfigValidator implements NashornScript<FlowNashornEn
     public void onError(Exception ex) {
         try {
             if (queue != null) {
-                queue.tryTransfer(new HashMap<>(), 10, TimeUnit.SECONDS);
+                queue.tryTransfer(new ArrayList<>(), 10, TimeUnit.SECONDS);
             }
         } catch (InterruptedException e) {
             LOGGER.error("transfer queue error", e);
