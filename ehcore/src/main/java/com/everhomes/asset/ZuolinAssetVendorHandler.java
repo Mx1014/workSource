@@ -936,7 +936,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         mandatoryIndex.add(1);//账期结束时间置为必填
         headList.add("客户名称");
         cur++;
-        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
         	mandatoryIndex.add(1);//企业客户：客户名称为必填
         }else {
         	mandatoryIndex.add(0);//个人客户：客户名称为非必填
@@ -959,7 +959,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         }
         headList.add("楼栋/门牌");
         cur++;
-        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
         	mandatoryIndex.add(0);//企业客户：楼栋/门牌为非必填
         }else {
         	mandatoryIndex.add(1);//个人客户：楼栋/门牌为必填
@@ -983,7 +983,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
         if(fileName == null) fileName = "";
-        if(cmd.getExportType() != null && cmd.getExportType().equals(AssetExportType.ORGANIZATION.getCode())) {
+        if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
         	fileName = "企业客户账单导入模板" + fileName;
         }else {
         	fileName = "个人客户账单导入模板" + fileName;
@@ -1034,7 +1034,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         ArrayList finalResultList = resultList;
         task = importFileService.executeTask(() -> {
             ImportFileResponse importTaskResponse = new ImportFileResponse();
-            Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch());
+            Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch(), cmd.getTargetType());
             List<CreateBillCommand> createBillCommands = new ArrayList<>();
             List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
             for(Map.Entry<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> entry : map.entrySet()){
@@ -1056,7 +1056,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return response;
     }
 
-    private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch) {
+    private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch, String targetType) {
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
