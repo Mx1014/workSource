@@ -9,12 +9,14 @@ package com.everhomes.rest.asset;
  * <li>communityId:园区id</li>
  * <li>namespaceId:域名id</li>
  * <li>billGroupId:账单组id</li>
+ * <li>exportType:1：企业模板，2：个人客户模板</li>
  *</ul>
  */
 public class ExportBillTemplatesCommand {
     private Long communityId;
     private Integer namespaceId;
     private Long billGroupId;
+    private Byte exportType;
 
     public Long getCommunityId() {
         return communityId;
@@ -39,4 +41,12 @@ public class ExportBillTemplatesCommand {
     public void setBillGroupId(Long billGroupId) {
         this.billGroupId = billGroupId;
     }
+
+	public Byte getExportType() {
+		return exportType;
+	}
+
+	public void setExportType(Byte exportType) {
+		this.exportType = exportType;
+	}
 }

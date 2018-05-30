@@ -2505,13 +2505,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
         //更改金钱
         context.update(t)
-                .set(t.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .set(t.AMOUNT_OWED,new BigDecimal("0"))
                 .where(t.ID.in(billIds))
                 .execute();
         context.update(t1)
-                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
+                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
 
