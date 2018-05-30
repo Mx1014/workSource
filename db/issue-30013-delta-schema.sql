@@ -17,7 +17,7 @@ CREATE TABLE `eh_configurations_record_change` (
   `conf_aft_json` VARCHAR(1024)  COMMENT '变动后信息JSON字符串',
   `record_change_type` INT(3) COMMENT '变动类型。0，新增；1，修改；3，删除',
   `operator_uid` BIGINT(20)   COMMENT '操作人userId',
-  `operator_time` DATETIME    COMMENT '操作时间',
+  `operate_time` DATETIME    COMMENT '操作时间',
   `operator_ip` VARCHAR(50)   COMMENT '操作者的IP地址',
 
   PRIMARY KEY(`id`)
