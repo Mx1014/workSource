@@ -2826,11 +2826,11 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
         if(StringUtils.isEmpty(runningFlag)) {
-            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
             List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
             if (communities != null) {
                 for (Community community : communities) {
