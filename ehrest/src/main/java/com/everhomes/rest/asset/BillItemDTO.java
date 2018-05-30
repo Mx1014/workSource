@@ -17,6 +17,7 @@ import java.math.BigDecimal;
  * <li>apartmentName:楼栋</li>
  * <li>buildingName:门牌</li>
  * <li>billGroupRuleId:计价标准id</li>
+ * <li>lateFineAmount:滞纳金</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -29,6 +30,7 @@ public class BillItemDTO {
     private String apartmentName;
     private String buildingName;
     private Long billGroupRuleId;
+    private BigDecimal lateFineAmount;
 
     @Override
     public String toString() {
@@ -111,4 +113,12 @@ public class BillItemDTO {
     public BillItemDTO() {
 
     }
+
+	public BigDecimal getLateFineAmount() {
+		return lateFineAmount;
+	}
+
+	public void setLateFineAmount(BigDecimal lateFineAmount) {
+		this.lateFineAmount = lateFineAmount;
+	}
 }
