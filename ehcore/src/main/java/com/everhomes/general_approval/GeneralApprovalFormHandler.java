@@ -1,30 +1,53 @@
 package com.everhomes.general_approval;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.enterpriseApproval.EnterpriseApprovalFormHandler;
-import com.everhomes.general_form.GeneralForm;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralFormModuleHandler;
-import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "GENERAL_APPROVE")
-public class GeneralApprovalFormHandler extends EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
+public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
+    @Override
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
+        ApprovalPostValHandler handler = getApprovalPostItemHandler(cmd.getSourceId());
+        Post
+        return handler.postApprovalForm(cmd);
+    }
+
+    private ApprovalPostValHandler getApprovalPostItemHandler(Long approvalId) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
+        if (ga != null) {
+            ApprovalPostValHandler handler = PlatformContext.getComponent(ApprovalPostValHandler.APPROVAL_POST_PREFIX +
+                    ga.getModuleType());
+            if (handler != null)
+                return handler;
+        }
+        return PlatformContext.getComponent(ApprovalPostValHandler.APPROVAL_POST_PREFIX + FlowModuleType.NO_MODULE.getCode());
+    }
+
+
+    @Override
+    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
+    }
 
     /*@Autowired
     private GeneralApprovalService generalApprovalService;
     @Autowired
     private GeneralFormProvider generalFormProvider;
 
-    @Autowired
-    private GeneralApprovalProvider generalApprovalProvider;
+
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 

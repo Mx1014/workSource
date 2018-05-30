@@ -45,19 +45,7 @@ public class EnterpriseApprovalFormHandler implements GeneralFormModuleHandler {
         //  get the basic data
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
-        Long approvalId = cmd.getSourceId();
-        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getCurrentOrganizationId());
-        if (member == null)
-            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getCurrentOrganizationId());
-        //  check the approval is legal
-        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approvalId);
-        if (approval == null || GeneralApprovalStatus.RUNNING.getCode() != approval.getStatus())
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
-                    "The approval's status is not running");
-/*        List<GeneralApprovalScopeMapDTO> scopes = generalApprovalService.listGeneralApprovalScopes(namespaceId, approval.getId());
-        if (generalApprovalService.checkTheApprovalScope(scopes, member))
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
-                    "The user is not in the approval scope");*/
+
         //  post value
         PostApprovalFormCommand command = new PostApprovalFormCommand();
         command.setApprovalId(approvalId);

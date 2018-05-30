@@ -57,8 +57,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalServiceImpl.class);
 
     @Autowired
     private EnterpriseApprovalProvider enterpriseApprovalProvider;
@@ -102,10 +101,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     @Autowired
     private DbProvider dbProvider;
 
-    private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
-       /* GetTemplateByApprovalIdResponse res = new GetTemplateByApprovalIdResponse();
+        GetTemplateByApprovalIdResponse res = new GetTemplateByApprovalIdResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
 
@@ -115,66 +113,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
         dbProvider.execute((TransactionStatus status) -> {
 //           User user = UserContext.current().getUser();
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
-
-            Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
-                    EnterpriseApprovalController.MODULE_TYPE, cmd.getApprovalId(), EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
-            if(flow == null)
-                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                        EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
-            Long formOriginId = flow.getFormOriginId();
-            //  compatible with the previous data
-            if (0 == formOriginId) {
-                formOriginId = ga.getFormOriginId();
-            }
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
-            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-                // change the status
-                form.setStatus(GeneralFormStatus.RUNNING.getCode());
-                this.generalFormProvider.updateGeneralForm(form);
-            }
-            CreateFlowCaseCommand caseCommand = new CreateFlowCaseCommand();
-            caseCommand.setApplyUserId(userId);
-            caseCommand.setReferType(FlowReferType.APPROVAL.getCode());
-            caseCommand.setReferId(ga.getId());
-            caseCommand.setProjectType(ga.getOwnerType());
-            caseCommand.setProjectId(ga.getOwnerId());
-            // 把command作为json传到content里，给flowcase的listener进行处理
-            caseCommand.setContent(JSON.toJSONString(cmd));
-            caseCommand.setCurrentOrganizationId(cmd.getOrganizationId());
-            caseCommand.setApplierOrganizationId(cmd.getOrganizationId());
-            caseCommand.setTitle(ga.getApprovalName());
-            GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
-            if (member != null) {
-                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
-                //  存储部门 id 及名称
-                fieldDTO.setDepartment(department.getName());
-                fieldDTO.setDepartmentId(department.getId());
-            }
-            //  approval number added by approval1.6
-            String countKey = "enterprise_approval_no" + namespaceId + cmd.getOrganizationId();
-            String count;
-            if (op.get(countKey) == null) {
-                LocalDate tomorrowStart = LocalDate.now().plusDays(1);
-                long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
-                op.set(countKey, "1", seconds, TimeUnit.SECONDS);
-                count = "1";
-            } else {
-                count = (String) op.get(countKey);
-            }
-            StringBuilder approvalNo = new StringBuilder(format.format(LocalDate.now()));
-            for (int i = 0; i < 4 - count.length(); i++)
-                approvalNo.append("0");
-            approvalNo.append(count);
-            op.increment(countKey, 1L);
-            fieldDTO.setApprovalNo(Long.valueOf(approvalNo.toString()));
-            caseCommand.setAdditionalFieldDTO(fieldDTO);
 
             Long flowCaseId = flowService.getNextFlowCaseId();
 
             return null;
-        });*/
+        });
        return null;
     }
 
