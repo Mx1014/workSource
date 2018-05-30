@@ -52,7 +52,7 @@ import com.everhomes.util.StringHelper;
 public class NewTopicCommand {
     private Long oldId;
 
-    private Long editId;
+    private Long updateId;
 
     private String ownerType;
 
@@ -423,12 +423,12 @@ public class NewTopicCommand {
         this.moduleCategoryId = moduleCategoryId;
     }
 
-    public Long getEditId() {
-        return editId;
+    public Long getUpdateId() {
+        return updateId;
     }
 
-    public void setEditId(Long editId) {
-        this.editId = editId;
+    public void setUpdateId(Long updateId) {
+        this.updateId = updateId;
     }
 
     @Override

@@ -302,7 +302,49 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO updateTopic(NewTopicCommand cmd) {
-        return null;
+        if (null == cmd.getUpdateId()) {
+            LOGGER.error("updateId is null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "updateId is null.");
+        }
+        Post post = this.forumProvider.findPostById(cmd.getUpdateId());
+        if (null == post) {
+            LOGGER.error("post is null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "post is null.");
+        }
+        if (!cmd.getEmbeddedJson().equals(post.getEmbeddedJson())) {
+            post.setEmbeddedJson(cmd.getEmbeddedJson());
+        }
+        if (!cmd.getSubject().equals(post.getSubject())) {
+            post.setSubject(cmd.getSubject());
+        }
+        if (!cmd.getTag().equals(post.getTag())) {
+            post.setTag(cmd.getTag());
+        }
+        if (cmd.getStartTime() != post.getStartTime().getTime()) {
+            Timestamp startTime = new Timestamp(cmd.getStartTime());
+            post.setStartTime(startTime);
+        }
+        if (cmd.getEndTime() != post.getEndTime().getTime()) {
+            Timestamp endTime = new Timestamp(cmd.getEndTime());
+            post.setEndTime(endTime);
+        }
+        if (cmd.getLongitude() != post.getLongitude() || cmd.getLatitude() != post.getLatitude()) {
+            post.setLatitude(cmd.getLatitude());
+            post.setLongitude(cmd.getLongitude());
+        }
+        if (!cmd.getContent().equals(post.getContent())) {
+            post.setContent(cmd.getContent());
+        }
+        this.forumProvider.updatePostAfterPublish(post);
+
+        //更新了活动后，先删除所有的附件，再保存附件。add by yanlong.liang 2018-5-30
+        this.forumProvider.deleteAttachments(post.getId());
+        processPostAttachments(UserContext.current().getUser().getId(), cmd.getAttachments(), post);
+
+
+        return ConvertHelper.convert(post, PostDTO.class);
     }
 
 
