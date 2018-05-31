@@ -268,7 +268,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		recordBo.setOperatorUid(uid);
 		//操作时间
 		Timestamp operatorTime = DateUtils.currentTimestamp();
-		recordBo.setOperatorTime(operatorTime);
+		recordBo.setOperateTime(operatorTime);
 		//获取操作者的IP地址,目前并未获取
 		recordBo.setOperatorIp(null);
 		configurationsRecordChangeProvider.crteateConfiguration(recordBo);
