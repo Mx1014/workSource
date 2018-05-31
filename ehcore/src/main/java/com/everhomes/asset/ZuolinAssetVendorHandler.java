@@ -1122,7 +1122,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             continue bill;
                     	}else {
                     		cmd.setTargetName(data[j]);
-                    		//通过客户名称查询关联的企业id
+                    		//通过客户名称（企业名称）查询关联的企业id
                     		Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
                             if(organizationByName != null){
                                 cmd.setTargetId(organizationByName.getId());
@@ -1132,28 +1132,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     	cmd.setTargetName(data[j]);
                     }
                 }else if(headers[j].contains("客户手机号")){
-                    /*if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
-                        if(StringUtils.isBlank(data[j])){
-                            log.setErrorLog("个人客户情况下，客户手机号不能为空");
-                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                            datas.add(log);
-                            continue bill;
-                        }
-
-                        if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                            log.setErrorLog("客户手机号码格式不正确");
-                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                            datas.add(log);
-                            continue bill;
-                        }
-                        UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
-                        if(claimedIdentifierByToken!=null){
-                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
-                        }
-                        cmd.setCustomerTel(data[j]);
-                    }*/
-                }
-                else if(headers[j].contains("账单开始时间")){
+                	if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
+                        log.setErrorLog("客户手机号码格式不正确");
+                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+                        datas.add(log);
+                        continue bill;
+                    }
+                	cmd.setCustomerTel(data[j]);
+                }else if(headers[j].contains("账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
                 }else if(headers[j].contains("账单结束时间")){
                     cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
@@ -1166,12 +1152,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         cmd.setContractId(list.get(0));
                     }
                 }else if(headers[j].contains("催缴手机号")){
-                    if(StringUtils.isBlank(data[j])){
-                        log.setErrorLog("notice tel cannot be emtpy");
-                        log.setCode(AssetBillImportErrorCodes.NOTICE_TEL_EMPTY_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
                     if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
                         log.setErrorLog("催缴手机号码格式不正确");
                         log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
@@ -1184,7 +1164,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 else if(j >= itemStart && j <= itemEnd){
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
                     if(itemPojo == null){
-                        log.setErrorLog("charging Item not found");
+                        log.setErrorLog("没有找到收费项目");
                         log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
                         datas.add(log);
                         continue bill;
@@ -1203,13 +1183,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         datas.add(log);
                         continue bill;
                     }
-
                     // id , name, groupRuleId, amount, 楼栋，门牌，addressId
                     item.setBillItemId(itemPojo.getId());
                     item.setBillItemName(headers[j]);
                     item.setAmountReceivable(amountReceivable);
-                    item.setBuildingName(building);
-                    item.setApartmentName(apartment);
+                    /*item.setBuildingName(building);
+                    item.setApartmentName(apartment);*/
+                    
+                    if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){//企业客户
+                    	
+                    }else {//个人客户
+                    	
+                    }
+                    
                     billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
@@ -1218,7 +1204,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
                             exemptionItemDTO.setIsPlus((byte)0);
-                            exemptionItemDTO.setDateStr(dateStr);
+                            //exemptionItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(exemptionItemDTO);
                         }
                     }catch(Exception e){
@@ -1237,7 +1223,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
                             increaseItemDTO.setIsPlus((byte)1);
-                            increaseItemDTO.setDateStr(dateStr);
+                            //increaseItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(increaseItemDTO);
                         }
                     }catch(Exception e){
