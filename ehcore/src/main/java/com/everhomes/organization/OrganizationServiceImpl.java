@@ -1670,7 +1670,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setCorpEntryDate(enterprise.getCheckinDate());
             customer.setCorpOpAddress(enterprise.getAddress());
             customer.setCorpDescription(enterprise.getDescription());
-            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(enterprise.getPostUri());
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
