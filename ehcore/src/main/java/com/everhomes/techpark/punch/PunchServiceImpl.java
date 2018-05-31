@@ -9904,9 +9904,9 @@ public class PunchServiceImpl implements PunchService {
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.isNull()
-                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.gt(socialSecurityService.getTheLastDate(punchMonth))));
+                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lt(socialSecurityService.getTheLastDate(punchMonth)));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lessOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
 
             if (null != userName) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"));
