@@ -314,6 +314,8 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "post is null.");
         }
+        Map map = new HashMap();
+        map.put("postName", post.getSubject());
 
         List<String> changeList = new ArrayList<>();
         if (!StringUtils.isEmpty(cmd.getSubject()) && !cmd.getSubject().equals(post.getSubject())) {
@@ -345,7 +347,7 @@ public class ForumServiceImpl implements ForumService {
         processPostAttachments(UserContext.current().getUser().getId(), cmd.getAttachments(), post);
 
         //消息推送
-        Map map = new HashMap();
+
         Integer code = getSendMessage(changeList,map,activity);
         List<ActivityRoster> activityRosterList = this.activityProvider.listRosters(activity.getId(),ActivityRosterStatus.NORMAL);
         if (changeList.size() > 0 && activityRosterList.size() > 0) {
@@ -400,15 +402,17 @@ public class ForumServiceImpl implements ForumService {
         if ((!StringUtils.isEmpty(newCmd.getStartTime()) && !newCmd.getStartTime().equals(oldCmd.getStartTime())) ||
                 (!StringUtils.isEmpty(newCmd.getEndTime()) && !newCmd.getEndTime().equals(oldCmd.getEndTime()))) {
             oldCmd.setStartTime(newCmd.getStartTime());
-            activity.setStartTime(post.getStartTime());
-            activity.setStartTimeMs(post.getStartTime().getTime());
+            Timestamp startTime = Timestamp.valueOf(newCmd.getStartTime());
+            activity.setStartTime(startTime);
+            activity.setStartTimeMs(startTime.getTime());
 
             oldCmd.setEndTime(newCmd.getEndTime());
-            activity.setEndTime(post.getEndTime());
-            activity.setEndTimeMs(post.getEndTime().getTime());
+            Timestamp endTime = Timestamp.valueOf(newCmd.getEndTime());
+            activity.setEndTime(endTime);
+            activity.setEndTimeMs(endTime.getTime());
             changeList.add("time");
         }
-        if (newCmd.getLatitude() != oldCmd.getLatitude() || newCmd.getLongitude() != oldCmd.getLongitude()) {
+        if (!StringUtils.isEmpty(newCmd.getLocation()) && !newCmd.getLocation().equals(oldCmd.getLocation())) {
             oldCmd.setLatitude(newCmd.getLatitude());
             oldCmd.setLongitude(newCmd.getLongitude());
             oldCmd.setLocation(newCmd.getLocation());
@@ -434,7 +438,7 @@ public class ForumServiceImpl implements ForumService {
             {
                 String type = changeList.get(0).toString();
                 if ("subject".equals(type)) {
-                    map.put("postName", activity.getSubject());
+                    map.put("newPostName", activity.getSubject());
                     code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT;
                 }
                 if ("time".equals(type)) {
@@ -452,13 +456,13 @@ public class ForumServiceImpl implements ForumService {
                 String type1 = changeList.get(0).toString();
                 String type2 = changeList.get(1).toString();
                 if ("subject".equals(type1) && "time".equals(type2)) {
-                    map.put("postName", activity.getSubject());
+                    map.put("newPostName", activity.getSubject());
                     map.put("startTime", activity.getStartTime());
                     map.put("endTime", activity.getEndTime());
                     code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_TIME;
                 }
                 if ("subject".equals(type1) && "address".equals(type2)) {
-                    map.put("postName", activity.getSubject());
+                    map.put("newPostName", activity.getSubject());
                     map.put("address", activity.getLocation());
                     code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_ADDRESS;
                 }
@@ -471,7 +475,7 @@ public class ForumServiceImpl implements ForumService {
             };break;
             case 3 :
             {
-                map.put("postName", activity.getSubject());
+                map.put("newPostName", activity.getSubject());
                 map.put("startTime", activity.getStartTime());
                 map.put("endTime", activity.getEndTime());
                 map.put("address", activity.getLocation());
@@ -7255,5 +7259,18 @@ public class ForumServiceImpl implements ForumService {
         ListTopicsByForumEntryIdResponse response = new ListTopicsByForumEntryIdResponse();
         response.setDtos(collect);
         return response;
+    }
+
+    @Override
+    public PostDTO previewPost(PreviewPostCommand cmd) {
+        Post post = this.forumProvider.findPostById(cmd.getPostId());
+        if (null == post) {
+            LOGGER.error("post is null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "post is null.");
+        }
+        PostDTO postDTO = new PostDTO();
+        postDTO.setEmbeddedJson(post.getEmbeddedJson());
+        return postDTO;
     }
 }
