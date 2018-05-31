@@ -1037,9 +1037,9 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public Integer countpunchStatistic(String punchMonth, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_PUNCH_MONTH_REPORTS.ID.count()).from(Tables.EH_PUNCH_MONTH_REPORTS)
-                .where(Tables.EH_PUNCH_MONTH_REPORTS.OWNER_ID.eq(ownerId))
-                .and(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.eq(punchMonth))
+        return context.select(Tables.EH_PUNCH_STATISTICS.ID.count()).from(Tables.EH_PUNCH_STATISTICS)
+                .where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth))
                 .execute();
     }
 
