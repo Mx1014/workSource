@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChange;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChangeProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.configurations.admin.ConfigurationsErrorCode;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhConfigurationsDao;
@@ -171,7 +171,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		Configurations preBo = getConfigurationById(bo.getId(),null);
 		//是否只读校验，只读数据不能修改
 		if(preBo.getIsReadonly() !=null && READONLY == preBo.getIsReadonly().intValue()){
-			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+			throwReadonlyException("the data is read-only,  not allowed to modify.");
 		}
 		//重复校验
 		checkMultiple(bo.getId(),bo.getNamespaceId(),bo.getName());
@@ -196,7 +196,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		
 		//是否只读校验，只读数据不能删除
 		if(bo.getIsReadonly() !=null && READONLY == bo.getIsReadonly().intValue()){
-			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+			throwReadonlyException("the data is read-only,  not allowed to modify.");
 		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
@@ -290,28 +290,37 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//ID 为空，说明是新增数据，否则为修改数据
 		if(id == null ){			
 			if(resultList !=null && resultList.size() >0){
-				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+				throwRepeatNameException("A nemespace is not allowed to repeat name .");
 			}
 		}else { 
 			//同一域空间内name 相同的有两个及以上是肯定有问题的
 			if(resultList !=null && resultList.size() >1){
-				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+				throwRepeatNameException("A nemespace is not allowed to repeat name .");
 			}else if(resultList !=null && resultList.size() == 1){
 				//如果只查出一条，判断该 条是否自己本身，不是则要抛出异常
 				Configurations bo = resultList.get(0);
 				if(bo  != null && id.intValue() != bo.getId().intValue() ){
-					throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+					throwRepeatNameException("A nemespace is not allowed to repeat name .");
 				}
 			}
 		}
 	}
 	
 	/**
-	 * 抛出运行时异常，异常信息参数传递过来
+	 * 抛出运行时repeat name异常，异常信息参数传递过来
 	 * @param msg 报错信息
 	 */
-	private void throwSelfDefNullException(String msg ){
+	private void throwRepeatNameException(String msg ){
 		LOGGER.error(msg);
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,msg);
+		throw RuntimeErrorException.errorWith(ConfigurationsErrorCode.SCOPE, ConfigurationsErrorCode.ERROR_CODE_MULTIPLE,msg);
+	}
+	
+	/**
+	 * 抛出运行时read-only异常，异常信息参数传递过来
+	 * @param msg 报错信息
+	 */
+	private void throwReadonlyException(String msg ){
+		LOGGER.error(msg);
+		throw RuntimeErrorException.errorWith(ConfigurationsErrorCode.SCOPE, ConfigurationsErrorCode.ERROR_CODE_READONLY,msg);
 	}
 }
