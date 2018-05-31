@@ -5959,10 +5959,10 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
         try {
             OrganizationDTO dept = findUserDepartment(userId, ownerId);
-            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, dept.getId());
+            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, ownerId);
             refreshDayLogAndMonthStat(member, dept.getId(), punCalendar, startCalendar);
         } catch (Exception e) {
-            LOGGER.error("refresh day log and month stat Wrong", e);
+            LOGGER.error("refresh day log and month stat Wrong userId is {} owner id is {}", userId, ownerId, e);
         }
 
     }
