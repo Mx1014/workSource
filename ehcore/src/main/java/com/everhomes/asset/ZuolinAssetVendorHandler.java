@@ -1060,7 +1060,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
-
         //假设了第一行为标题
         RowResult headerRow = (RowResult) resultList.get(1);
         String[] headers = getOrderedCellValues(headerRow, null);
@@ -1068,21 +1067,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         ImportFileResultLog<List<String>> headLog = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
         headLog.setData(Arrays.asList(headers));
         datas.add(headLog);
-        int itemStart = 8;
-        int itemEnd = 0;
-        int buildingIndex = 0;
-        int apartmentIndex = 0;
-        int dateStrIndex = 0;
-        int targetTypeIndex = 0;
+        int itemStart = 0;//费项开始列下标（费项的个数是动态的，不是固定的）
+        int itemEnd = 0;//费项结束列下标（费项的个数是动态的，不是固定的）
+        int addressIndex = 0;//楼栋/门牌列下标
+        int dateStrBegin = 0;//账单开始时间列下标
+        int dateStrEnd = 0;//账单结束时间列下标
         for (int i = 0; i < headers.length; i++) {
-            if (headers[i].equalsIgnoreCase("*催缴手机号")) itemStart = i + 1;
-            else if (headers[i].equalsIgnoreCase("楼栋")) {
+            if (headers[i].contains("催缴手机号")) itemStart = i + 1;
+            else if (headers[i].contains("楼栋/门牌")) {
                 itemEnd = i - 1;
-                buildingIndex = i;
+                addressIndex = i;
             }
-            else if (headers[i].equalsIgnoreCase("门牌")) apartmentIndex = i;
-            else if (headers[i].contains("客户属性")) targetTypeIndex = i;
-            else if(headers[i].contains("账期")) dateStrIndex = i;
+            else if(headers[i].contains("账单开始时间")) dateStrBegin = i;
+            else if(headers[i].contains("账单结束时间")) dateStrEnd = i;
         }
         bill:for (int i = 2; i < resultList.size(); i++) {
             RowResult currentRow = (RowResult) resultList.get(i);
@@ -1091,16 +1088,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             ImportFileResultLog<List<String>> log = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
             log.setData(Arrays.asList(data));
 
-
             CreateBillCommand cmd = new CreateBillCommand();
             BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
             List<BillItemDTO> billItemDTOList = new ArrayList<>();
             List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
-//            RowResult dataRow = (RowResult) resultList.get(i);
-//            String[] data = getOrderedCellValues(dataRow, headers.length);
             ExemptionItemDTO exemptionItemDTO = null;
             ExemptionItemDTO increaseItemDTO = null;
-            //账期被依赖
+            
+            /*//账期被依赖
             String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
             if(StringUtils.isBlank(dateStr)){
                 log.setErrorLog("日期格式错误,请参考说明进行填写");
@@ -1108,50 +1103,42 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 datas.add(log);
                 continue bill;
             }
-            cmd.setDateStr(dateStr);
-            //楼栋门牌也是
+            cmd.setDateStr(dateStr);*/
+            
+            /*//楼栋门牌也是
             String building = data[buildingIndex];
-            String apartment = data[apartmentIndex];
-            //客户属性也是
-            switch (data[targetTypeIndex]){
-                case "企业客户":
-                    cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
-                    break;
-                case "个人客户":
-                    cmd.setTargetType(AssetTargetType.USER.getCode());
-                    break;
-                default:
-                    //构造log然后离开这一行的处理
-                    log.setErrorLog("客户属性错误，只允许填写个人客户或者企业客户");
-                    log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
-                    datas.add(log);
-                    continue bill;
-            }
+            String apartment = data[apartmentIndex];*/
+            
+            cmd.setTargetType(targetType);//客户属性
+            
             for(int j = 0; j < data.length; j++){
-
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
-                    if(StringUtils.isBlank(data[j])){
-                        log.setErrorLog("customer name cannot be empty");
-                        log.setCode(AssetBillImportErrorCodes.CUSTOM_NAME_EMPTY_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                    cmd.setTargetName(data[j]);
-                    if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())){
-                        Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
-                        if(organizationByName != null){
-                            cmd.setTargetId(organizationByName.getId());
-                        }
-                        // 找不到用户也可以导入
-//                        if(organizationProvider.findOrganizationByName(data[j], namespaceId).getId() == null){
-//                            log.setErrorLog("customer Id cannot be found， org name might be wrong");
-//                            log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
-//                            datas.add(log);
-//                            continue bill;
-//                        };
+                    if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){
+                    	if(StringUtils.isBlank(data[j])) {
+                    		log.setErrorLog("企业客户导入账单情况下，客户名称必填");
+                            log.setCode(AssetBillImportErrorCodes.CUSTOM_NAME_EMPTY_ERROR);
+                            datas.add(log);
+                            continue bill;
+                    	}else {
+                    		cmd.setTargetName(data[j]);
+                            if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())){
+                                Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
+                                if(organizationByName != null){
+                                    cmd.setTargetId(organizationByName.getId());
+                                }
+                                // 找不到用户也可以导入
+//                                if(organizationProvider.findOrganizationByName(data[j], namespaceId).getId() == null){
+//                                    log.setErrorLog("customer Id cannot be found， org name might be wrong");
+//                                    log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
+//                                    datas.add(log);
+//                                    continue bill;
+//                                };
 
+                            }
+                    	}
                     }
+                    
                 }else if(headers[j].contains("客户手机号")){
                     if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
                         if(StringUtils.isBlank(data[j])){
@@ -1174,11 +1161,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         cmd.setCustomerTel(data[j]);
                     }
                 }
-                else if(headers[j].equals("*账单开始时间")){
+                else if(headers[j].contains("账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("*账单结束时间")){
+                }else if(headers[j].contains("账单结束时间")){
                     cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("合同编号")){
+                }else if(headers[j].contains("合同编号")){
                     cmd.setContractNum(data[j]);
                     List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
                     if(list.size() != 1){
