@@ -18,7 +18,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('visitorsys.inviter.route', '%s/visitor-appointment/build/index.html?id=%s&ns=%s#/appointment-detail#sign_suffix', '访客管理消息详情连接', '0', NULL);
 
 -- 访客管理1.0 模块配置
-SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url');
+SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('52100', '企业访客', '50000', '/50000/52100', '1', '2', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-appointment/build/index.html?ns=%s#/home#sign_suffix "}'), '13', now(), '0', '0', '0', '0', 'org_control');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41800', '园区访客', '40000', '/40000/41800', '1', '2', '2', '180', now(), '{"url":"https://www.zuolin.com/mobile/static/coming_soon/index.html"}', '13', now(), '0', '0', '0', '0', 'community_control');
 
