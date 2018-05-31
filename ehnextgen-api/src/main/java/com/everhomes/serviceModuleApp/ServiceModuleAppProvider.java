@@ -1,10 +1,12 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppMappings;
 
 import java.util.List;
+
 
 public interface ServiceModuleAppProvider {
 
@@ -39,4 +41,6 @@ public interface ServiceModuleAppProvider {
     Long getOriginIdFromMappingApp(Long originId, long targetModuleId);
 
 	void insertAppMapping(EhServiceModuleAppMappings relation);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
@@ -33,4 +34,6 @@ public interface ServiceModuleAppService {
 	Long getOriginIdFromMappingApp(Long originId, long targetModuleId);
 
 	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

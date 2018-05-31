@@ -4,6 +4,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.servicehotline.*;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
@@ -52,6 +53,20 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
 	public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
 		serviceModuleAppService.createAnAppMapping(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * forcely update a mapping relation to be allocated again
+	 * @param cmd
+	 * @return OK
+	 */
+	@RequestMapping("updateAnAppMapping")
+	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+	public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+		serviceModuleAppService.updateAnAppMapping(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

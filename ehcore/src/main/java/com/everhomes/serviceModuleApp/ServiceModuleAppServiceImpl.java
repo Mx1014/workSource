@@ -13,6 +13,7 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
@@ -222,4 +223,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         serviceModuleAppProvider.insertAppMapping(relation);
 
     }
+
+	@Override
+	public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+		serviceModuleAppProvider.updateAnAppMapping(cmd);
+	}
 }
