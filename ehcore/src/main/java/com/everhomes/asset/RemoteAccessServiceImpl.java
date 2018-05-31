@@ -17,6 +17,7 @@ import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.AmountUtil;
@@ -219,10 +220,15 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentOrderBillDTO.setOrderSource(sb.toString());
         //获得付款人员
         User userById = userProvider.findUserById(order.getUid());
-        dto.setPayerName(userById.getNickName());
-        dto.setPayerTel(userById.getAccountName());
-        paymentOrderBillDTO.setPayerName(userById.getNickName());
-        paymentOrderBillDTO.setPayerTel(userById.getAccountName());
+        if(userById != null) {
+        	dto.setPayerName(userById.getNickName());
+        	paymentOrderBillDTO.setPayerName(userById.getNickName());
+            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+            if(userIdentifier != null) {
+            	dto.setPayerTel(userIdentifier.getIdentifierToken());
+            	paymentOrderBillDTO.setPayerTel(userIdentifier.getIdentifierToken());
+            }
+        }
         //获取账单信息：若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         for( int i = 0; i < orderBills.size(); i ++){
             AssetPaymentOrderBills orderBill = orderBills.get(i);
