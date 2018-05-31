@@ -16,6 +16,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationAttachment;
@@ -27,6 +28,7 @@ import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
@@ -34,6 +36,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -41,6 +44,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -142,6 +146,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private ContractSearcher contractSearcher;
 
+    @Autowired
+    private ImportFileService importFileService;
+
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData) {
@@ -169,6 +176,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         ds.setClassName(group.getName());
         ds.setDisplayName(groupDisplayName);
         ds.setGroupId(group.getId());
+        ds.setOwnerId(groupCommand.getOrgId());
 
         List<DynamicField> dynamicFields = new ArrayList<>();
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
@@ -176,11 +184,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
-//            //去除普通人员的跟进人cell
-//            ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
-//            fields = fields.stream()
-//                    .filter((r) -> !groupCommand.getIsAdmin() && "trackingUid".equals(r.getFieldName()))
-//                    .collect(Collectors.toList());
             fields.forEach(fieldDTO -> {
                 LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
@@ -195,9 +198,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             df.setMandatory(true);
                         }
                         if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                                return item.getItemDisplayName();
-                            }).collect(Collectors.toList());
+                            List<String> allowedValued = fieldDTO.getItems().stream().map(FieldItemDTO::getItemDisplayName).collect(Collectors.toList());
                             df.setAllowedValued(allowedValued);
                         }
                         dynamicFields.add(df);
@@ -217,9 +218,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 df.setMandatory(true);
                             }
                             if (fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                                List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                                    return item.getItemDisplayName();
-                                }).collect(Collectors.toList());
+                                List<String> allowedValued = fieldDTO.getItems().stream().map(FieldItemDTO::getItemDisplayName).collect(Collectors.toList());
                                 df.setAllowedValued(allowedValued);
                             }
                             df.setGroupId(fieldDTO.getGroupId());
@@ -275,7 +274,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     }
 
     @Override
-    public void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response) {
+    public void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response,List<ImportFileResultLog<Map<String,String>>> resultLogs) {
         ImportFieldExcelCommand customerInfo = ConvertHelper.convert(params, ImportFieldExcelCommand.class);
         Long customerId = customerInfo.getCustomerId();
         Byte customerType = Byte.valueOf(customerInfo.getCustomerType());
@@ -292,139 +291,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
+                // record import file logs
+                ImportFileResultLog<Map<String,String>> importLogs = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
                 List<DynamicColumnDTO> columns = rowData.getColumns();
                 Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
-                        if(customerId != 0) {
-                            //不为0时为管理里面导入的 直接break
-                            break;
-                        }
-                        //列表里导入时：
-                        EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
-                        enterpriseCustomer.setNamespaceId(namespaceId);
-                        enterpriseCustomer.setCommunityId(communityId);
-                        enterpriseCustomer.setOwnerId(ownerId);
-                        enterpriseCustomer.setOwnerType(ownerType);
-                        enterpriseCustomer.setCreatorUid(uid);
-                        String customerAdminString = "";
-                        String customerAddressString = "";
-
-                        if(columns != null && columns.size() > 0) {
-                            for(DynamicColumnDTO column : columns) {
-                                LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
-                                if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
-                                        || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
-                                        || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
-                                        || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
-                                        || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
-                                        || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
-                                        || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
-                                        || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
-                                        || "serialEntrepreneurId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
-                                    if(item != null) {
-                                        column.setValue(item.getItemId().toString());
-                                    }
-                                }
-
-                                if ("trackingUid".equals(column.getFieldName())) {
-                                    Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
-                                    if (isAdmin) {
-                                        //产品要求改成 姓名（phone）
-                                        String username = "";
-                                        String contactPhone = "";
-                                        if(StringUtils.isNotEmpty(column.getValue())){
-                                            username =  column.getValue().split("\\(")[0];
-                                            contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
-                                        }
-                                        enterpriseCustomer.setTrackingName(username);
-                                        List<User> users = null;
-                                        if (StringUtils.isNotEmpty(column.getValue())) {
-                                            users = userProvider.listUserByKeyword(contactPhone, namespaceId, new CrossShardListingLocator(), 2);
-                                        }
-                                        if (users != null && users.size() > 0) {
-                                            column.setValue(users.get(0).getId().toString());
-                                        } else {
-                                            column.setValue(null);
-                                        }
-                                    } else {
-                                        column.setValue(String.valueOf(UserContext.currentUserId()));
-//                                        enterpriseCustomer.setTrackingUid(UserContext.currentUserId());
-                                        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
-                                        if (organizationMembers != null && organizationMembers.size() > 0) {
-                                            enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
-                                        }
-
-                                    }
-                                }
-                                try {
-                                    if(!"enterpriseAdmins".equals(column.getFieldName())&&!"entryInfos".equals(column.getFieldName())){
-                                        setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
-                                    }else {
-                                        if("enterpriseAdmins".equals(column.getFieldName()))
-                                           customerAdminString = column.getValue();
-                                        if("entryInfos".equals(column.getFieldName()))
-                                            customerAddressString = column.getValue();
-                                    }
-                                } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed:{}",e);
-                                    failedNumber ++;
-                                    flag = false;
-                                    break;
-                                }
-
-                                continue;
-                            }
-                        }
-
-//                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
-//                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
-//                            if(customers != null && customers.size() > 0) {
-////                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
-////                                failedNumber ++;
-////                                flag = false;
-////                                break;
-//                                customers.forEach((c)-> {
-//                                    customerSearcher.deleteById(c.getId());
-//                                    customerProvider.deleteEnterpriseCustomer(c);
-//                                });
-//                            }
-//                        }
-                        if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, enterpriseCustomer.getName());
-                            if(customers != null && customers.size() > 0) {
-//                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
-//                                failedNumber ++;
-//                                flag = false;
-//                                break;
-                                for (EnterpriseCustomer customer : customers) {
-                                    updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
-                                }
-                                continue;
-                            }
-                        }
-
-                        if(flag) {
-                            if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
-                                String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
-                                enterpriseCustomer.setGeohash(geohash);
-                            }
-                            customerProvider.createEnterpriseCustomer(enterpriseCustomer);
-
-                            //企业客户新增成功,保存客户事件
-                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
-                            if (StringUtils.isNotEmpty(customerAddressString)) {
-                                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                                enterpriseCustomer.setOrganizationId(organizationDTO.getId());
-                            }
-                            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-                            customerSearcher.feedDoc(enterpriseCustomer);
-                            //这里还需要增加企业管理员的record和role  & address buildings 呵
-                            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
-                            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
-                        }
-                        break;
+                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns, flag);
+                        continue;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);
@@ -448,8 +322,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -477,8 +349,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -510,8 +380,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -541,8 +409,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -596,8 +462,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -627,8 +491,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
 
@@ -652,8 +514,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -677,8 +537,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         flag = false;
                                         break;
                                     }
-
-                                    continue;
                                 }
                         }
                         if(flag) {
@@ -707,8 +565,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -731,8 +587,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -769,8 +623,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -808,8 +660,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -850,8 +700,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
                         if(flag) {
@@ -876,15 +724,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), departureInfo, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
-                                    failedNumber ++;
+                                    failedNumber++;
                                     flag = false;
                                     break;
                                 }
-
-                                continue;
                             }
                         }
-                        if(flag) {
+                        if (flag) {
                             customerProvider.createCustomerDepartureInfo(departureInfo);
                         }
                         break;
@@ -894,6 +740,175 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
             response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
+    }
+
+    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns, Boolean flag) {
+        if (customerInfo.getCustomerId() != 0) {
+            //不为0时为管理里面导入的 直接break
+            return failedNumber;
+        }
+        //列表里导入时：
+        EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+        enterpriseCustomer.setNamespaceId(customerInfo.getNamespaceId());
+        enterpriseCustomer.setCommunityId(customerInfo.getCommunityId());
+        enterpriseCustomer.setOwnerId(customerInfo.getOwnerId());
+        enterpriseCustomer.setOwnerType(customerInfo.getOwnerType());
+        enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
+        String customerAdminString = "";
+        String customerAddressString = "";
+
+        if(columns != null && columns.size() > 0) {
+            for(DynamicColumnDTO column : columns) {
+                LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
+                if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
+                        || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
+                        || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
+                        || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
+                        || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
+                        || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
+                        || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
+                        || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
+                        || "serialEntrepreneurId".equals(column.getFieldName())) {
+                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue());
+                    if(item != null) {
+                        column.setValue(item.getItemId().toString());
+                    }else {
+                        Map<String, String> dataMap = new HashMap<>();
+                        columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                        LOGGER.error("can't find any scope items :item field ={}",column.getHeaderDisplay());
+                        importLogs.setData(dataMap);
+                        importLogs.setErrorDescription("can't find any scope items ");
+                        importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
+                        break;
+                    }
+                }
+
+                if ("trackingUid".equals(column.getFieldName())) {
+                    Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
+                    if (isAdmin) {
+                        //产品要求改成 姓名（phone）
+                        String username = "";
+                        String contactPhone = "";
+                        try {
+                            if(StringUtils.isNotEmpty(column.getValue())){
+                                username =  column.getValue().split("\\(")[0];
+                                contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
+                            }
+                        } catch (Exception e) {
+                            Map<String, String> dataMap = new HashMap<>();
+                            columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                            LOGGER.error("wrong trackingUid and contacPhone format  : field ={}",column.getHeaderDisplay());
+                            importLogs.setData(dataMap);
+                            importLogs.setErrorDescription("wrong trackingUid and contacPhone format");
+                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
+                            break;
+                        }
+                        enterpriseCustomer.setTrackingName(username);
+                        List<User> users = null;
+                        if (StringUtils.isNotEmpty(column.getValue())) {
+                            users = userProvider.listUserByKeyword(contactPhone, customerInfo.getNamespaceId(), new CrossShardListingLocator(), 2);
+                        }
+                        if (users != null && users.size() > 0) {
+                            column.setValue(users.get(0).getId().toString());
+                        } else {
+                            column.setValue(null);
+                        }
+                    } else {
+                        column.setValue(String.valueOf(UserContext.currentUserId()));
+                        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+                        if (organizationMembers != null && organizationMembers.size() > 0) {
+                            enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
+                        }
+                    }
+                }
+                try {
+                    if(!"enterpriseAdmins".equals(column.getFieldName())&&!"entryInfos".equals(column.getFieldName())){
+                        setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
+                    }else {
+                        if("enterpriseAdmins".equals(column.getFieldName()))
+                           customerAdminString = column.getValue();
+                        if("entryInfos".equals(column.getFieldName()))
+                            customerAddressString = column.getValue();
+                        if(StringUtils.isNotBlank(customerAddressString)){
+                            //todo:校验格式
+                            customerAddressString = customerAddressString.replaceAll("\n", "");
+                            String buildingNames[] = customerAddressString.split(",");
+                            if (buildingNames.length > 0) {
+                                for (String buildingNameString : buildingNames) {
+                                    String buildingName = buildingNameString.split("/")[0];
+                                    String apartmentName = buildingNameString.split("/")[1];
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                                    Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
+                                    if (address == null || building == null) {
+                                        Map<String, String> dataMap = new HashMap<>();
+                                        LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
+                                        importLogs.setData(dataMap);
+                                        importLogs.setErrorDescription("address and building not exist");
+                                        importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
+                                        break;
+                                    }
+                                }
+                            }
+                            Map<String, String> dataMap = new HashMap<>();
+                            LOGGER.error("customer address format error : field ={}",column.getHeaderDisplay());
+                            importLogs.setData(dataMap);
+                            importLogs.setErrorDescription("customer address format error");
+                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
+                            break;
+                        }
+                        if(StringUtils.isNotBlank(customerAdminString)){
+                            //todo:校验格式
+                            Map<String, String> dataMap = new HashMap<>();
+                            columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                            LOGGER.error("customer enterprise admins format error: field ={}",column.getHeaderDisplay());
+                            importLogs.setData(dataMap);
+                            importLogs.setErrorDescription("customer enterprise admins format error");
+                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
+                            break;
+                        }
+                    }
+                } catch(Exception e){
+                    Map<String, String> dataMap = new HashMap<>();
+                    columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                    LOGGER.error("unknow exceptions : field ={}",column.getHeaderDisplay());
+                    importLogs.setData(dataMap);
+                    importLogs.setErrorDescription("unknow exceptions");
+                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_UNKNOW_ERROR);
+                    break;
+                }
+            }
+        }
+
+        if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
+            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+            if(customers != null && customers.size() > 0) {
+                for (EnterpriseCustomer customer : customers) {
+                    updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                }
+                return failedNumber;
+            }
+        }
+
+        if(flag) {
+            if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
+                String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                enterpriseCustomer.setGeohash(geohash);
+            }
+            customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+
+            //企业客户新增成功,保存客户事件
+            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
+            if (StringUtils.isNotEmpty(customerAddressString)) {
+                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+            }
+            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            customerSearcher.feedDoc(enterpriseCustomer);
+            //这里还需要增加企业管理员的record和role  & address buildings 呵
+            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
+            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+        }
+        return failedNumber;
     }
 
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
