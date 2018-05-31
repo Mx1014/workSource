@@ -1114,33 +1114,25 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             for(int j = 0; j < data.length; j++){
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
-                    if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){
+                    if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){//企业客户
                     	if(StringUtils.isBlank(data[j])) {
-                    		log.setErrorLog("企业客户导入账单情况下，客户名称必填");
+                    		log.setErrorLog("企业客户情况下，客户名称必填");
                             log.setCode(AssetBillImportErrorCodes.CUSTOM_NAME_EMPTY_ERROR);
                             datas.add(log);
                             continue bill;
                     	}else {
                     		cmd.setTargetName(data[j]);
-                            if(cmd.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())){
-                                Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
-                                if(organizationByName != null){
-                                    cmd.setTargetId(organizationByName.getId());
-                                }
-                                // 找不到用户也可以导入
-//                                if(organizationProvider.findOrganizationByName(data[j], namespaceId).getId() == null){
-//                                    log.setErrorLog("customer Id cannot be found， org name might be wrong");
-//                                    log.setCode(AssetBillImportErrorCodes.CUSTOM_TYPE_ERROR);
-//                                    datas.add(log);
-//                                    continue bill;
-//                                };
-
+                    		//通过客户名称查询关联的企业id
+                    		Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
+                            if(organizationByName != null){
+                                cmd.setTargetId(organizationByName.getId());
                             }
                     	}
+                    }else {//个人客户
+                    	cmd.setTargetName(data[j]);
                     }
-                    
                 }else if(headers[j].contains("客户手机号")){
-                    if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
+                    /*if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
                         if(StringUtils.isBlank(data[j])){
                             log.setErrorLog("个人客户情况下，客户手机号不能为空");
                             log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
@@ -1159,7 +1151,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
                         cmd.setCustomerTel(data[j]);
-                    }
+                    }*/
                 }
                 else if(headers[j].contains("账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
