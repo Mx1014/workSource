@@ -184,4 +184,8 @@ public class MonthCardInfo {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    public boolean isNormalCarStatus() {
+        return "1".equals(cardstatus);
+    }
 }

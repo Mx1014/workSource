@@ -236,6 +236,22 @@ public class Utils {
     }
 
     /**
+     * 中天停车场，要求月卡时间计算为30天
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThirtyDays(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.DAY_OF_MONTH,30*month);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    /**
      *
      * @param source
      * @param month
@@ -587,4 +603,9 @@ public class Utils {
 
         return result;
     }
+
+//    public static void main(String[] args) {
+//        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddThirtyDays(1517469829000L, 1);
+//        System.out.println(timestampByAddThirtyDays);
+//    }
 }

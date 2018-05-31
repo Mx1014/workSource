@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -29,13 +30,37 @@ public class BeeZhongTianVendorHandler extends BeeVendorHandler {
     ConfigurationProvider configProvider;
     @Override
     public String getParkingSysPrivatekey() {
-        String url = configProvider.getValue("parking.beezhongtian.privatekey", "");
-        return url;
+        String privatekey = configProvider.getValue("parking.beezhongtian.privatekey", "D3029C73406221B02026B684BB00579C");
+        return privatekey;
     }
 
     @Override
     public String getParkingSysHost() {
         String url = configProvider.getValue("parking.beezhongtian.url", "http://www.szkljy.com/trade/data");
         return url;
+    }
+
+    @Override
+    protected void processMapParams(TreeMap<String, Object> tmap) {
+        String clientType = configProvider.getValue("parking.beezhongtian.clientType", "java");
+        String method = configProvider.getValue("parking.beezhongtian.method", "doActivity");
+        String module = configProvider.getValue("parking.beezhongtian.module", "activity");
+
+        String service = configProvider.getValue("parking.beezhongtian.service", "Entrance");
+        String typeflag = configProvider.getValue("parking.beezhongtian.typeflag", "ThirdQuery");
+        String gcode = configProvider.getValue("parking.beezhongtian.gcode", "ZTGJ001");
+        tmap.put("clientType",clientType);
+        tmap.put("method",method);
+        tmap.put("module",module);
+
+        tmap.put("service",service);
+        tmap.put("typeflag",typeflag);
+        tmap.put("gcode",gcode);
+    }
+
+    @Override
+    protected void processJSONParams(JSONObject params) {
+        String comid = configProvider.getValue("parking.beezhongtian.comid", "000000771");
+        params.put("comid",comid);
     }
 }

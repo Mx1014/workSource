@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * @Author dengs[shuang.deng@zuolin.com]
  * @Date 2018/5/29 15:30
  */
-public class MonthCardEntity<T> {
+public class OutListEntity<T> {
     private T datalist;
     private String message;
     private String pageIndex;
