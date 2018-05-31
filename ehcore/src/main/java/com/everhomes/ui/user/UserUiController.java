@@ -19,6 +19,7 @@ import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -84,24 +85,25 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
- 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-
+// 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Long organizationId = UserContext.current().getAppContext().getOrganizationId();
 		//SceneTokenDTO sceneToken = SceneTokenGenerator.fromWebToken(cmd.getSceneToken());
 
  	    List<SceneContactDTO> dtos = null;
-		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+		//if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			//兼容老版本的app by sfyan 20161020
 			if(null == cmd.getOrganizationId()){
-				cmd.setOrganizationId(sceneToken.getEntityId());
+				//cmd.setOrganizationId(sceneToken.getEntityId());
+				cmd.setOrganizationId(organizationId);
 			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
 			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
 			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
-			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
-			List<OrganizationContactDTO> members = res.getMembers();
+			ListOrganizationContactCommandResponse res1 = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res1.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -121,45 +123,45 @@ public class UserUiController extends ControllerBase {
 				}).collect(Collectors.toList());
 			}
 			 
-		}
+		//}
 
-		List<FamilyMemberDTO> resp = null;
+		//List<FamilyMemberDTO> resp = null;
 		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
- 	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-// 	    	command.setIsPinyin(1);
-// 	    	command.setType(ParamType.COMMUNITY.getCode());
-// 	    	command.setId(sceneToken.getEntityId());
-// 	    	resp= familyService.listNeighborUsers(command);
-		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-
-// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-// 	    	command.setIsPinyin(1);
-// 	    	command.setType(ParamType.FAMILY.getCode());
-// 	    	command.setId(sceneToken.getEntityId());
-//			resp = familyService.listNeighborUsers(command);
-			
-			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
-			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
-		}
+// 	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+//// 	    	command.setIsPinyin(1);
+//// 	    	command.setType(ParamType.COMMUNITY.getCode());
+//// 	    	command.setId(sceneToken.getEntityId());
+//// 	    	resp= familyService.listNeighborUsers(command);
+//		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//
+//// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+//// 	    	command.setIsPinyin(1);
+//// 	    	command.setType(ParamType.FAMILY.getCode());
+//// 	    	command.setId(sceneToken.getEntityId());
+////			resp = familyService.listNeighborUsers(command);
+//
+//			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
+//			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
+//		}
  	    
- 	    if(null != resp &&  0 != resp.size()){
- 	    	dtos = resp.stream().map(r->{
-				SceneContactDTO dto = new SceneContactDTO();
-				dto.setContactId(r.getMemberUid());
-				dto.setContactName(r.getMemberName());
-				dto.setStatusLine(r.getStatusLine());
-				dto.setOccupation(r.getOccupation());
-				dto.setContactAvatar(r.getMemberAvatarUrl());
-				dto.setUserId(r.getMemberUid());
-
-				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
-				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
-				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
-				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
-				return dto;
-			}).collect(Collectors.toList());
- 	    }
+// 	    if(null != resp &&  0 != resp.size()){
+// 	    	dtos = resp.stream().map(r->{
+//				SceneContactDTO dto = new SceneContactDTO();
+//				dto.setContactId(r.getMemberUid());
+//				dto.setContactName(r.getMemberName());
+//				dto.setStatusLine(r.getStatusLine());
+//				dto.setOccupation(r.getOccupation());
+//				dto.setContactAvatar(r.getMemberAvatarUrl());
+//				dto.setUserId(r.getMemberUid());
+//
+//				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
+//				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+//				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+//				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+//				return dto;
+//			}).collect(Collectors.toList());
+// 	    }
  	    
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);
