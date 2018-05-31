@@ -289,7 +289,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
             LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
             EnterpriseApprovalHandler handler;
             //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
-            if (flowCase.getReferId().longValue() == 0L)
+            if (flowCase.getReferId() == 0L)
                 handler = getEnterpriseApprovalHandler(flowCase.getOwnerId());
             else
                 handler = getEnterpriseApprovalHandler(flowCase.getReferId());
@@ -443,7 +443,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                 Integer.MAX_VALUE - 1, (locator, query) -> {
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
-                    query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(EnterpriseApprovalController.MODULE_ID));
 
                     if (ownerType != null && ownerId != null) {
                         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
@@ -476,24 +476,21 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                 command.setModuleType(EnterpriseApprovalController.MODULE_TYPE);
                 ListGeneralFormResponse response = generalFormService.listGeneralForms(command);
                 if (response.getForms() != null && response.getForms().size() > 0)
-                    response.getForms().forEach(r -> {
-                        FlowFormDTO dto = new FlowFormDTO();
-                        dto.setName(r.getFormName());
-                        dto.setFormVersion(r.getFormVersion());
-                        dto.setFormOriginId(r.getFormOriginId());
-                        flowFormDTOS.add(dto);
-                    });
+                    response.getForms().forEach(r -> flowFormDTOS.add(getFlowFormDTO(r.getFormName(), r.getFormVersion(), r.getFormOriginId())));
             } else {
                 GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(approval.getFormOriginId());
-                if (form != null) {
-                    FlowFormDTO dto = new FlowFormDTO();
-                    dto.setName(form.getFormName());
-                    dto.setFormVersion(form.getFormVersion());
-                    dto.setFormOriginId(form.getFormOriginId());
-                    flowFormDTOS.add(dto);
-                }
+                if (form != null)
+                    flowFormDTOS.add(getFlowFormDTO(form.getFormName(), form.getFormVersion(), form.getFormOriginId()));
             }
         }
         return flowFormDTOS;
+    }
+
+    private FlowFormDTO getFlowFormDTO(String formName, Long formVersion, Long formOriginId){
+        FlowFormDTO dto = new FlowFormDTO();
+        dto.setName(formName);
+        dto.setFormVersion(formVersion);
+        dto.setFormOriginId(formOriginId);
+        return dto;
     }
 }

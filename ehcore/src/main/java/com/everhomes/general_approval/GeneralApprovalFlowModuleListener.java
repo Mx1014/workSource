@@ -1,7 +1,5 @@
 package com.everhomes.general_approval;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +15,6 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.*;
-import com.everhomes.util.Tuple;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
-    protected static List<String> DEFAULT_FIELDS = new ArrayList<String>();
+    private static List<String> DEFAULT_FIELDS = new ArrayList<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalFlowModuleListener.class);
     @Autowired
@@ -70,140 +66,6 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         return null;
     }
 
-    @Override
-    public void onFlowCreating(Flow flow) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseStart(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onFlowCaseAbsorted(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-        //todo: 去除以下代码
-/*
-
-        FlowCase flowCase = ctx.getRootState().getFlowCase();
-        LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : " + ctx.getCurrentEvent().getUserType());
-        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
-        handler.onFlowCaseAbsorted(ctx);
-*/
-
-    }
-
-
-/*
-    private GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
-
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
-        return getGeneralApprovalHandler(ga.getApprovalAttribute());
-    }
-
-    private GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
-        if (generalApprovalAttribute != null) {
-            GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
-                    + generalApprovalAttribute);
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return null;
-//        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
-    }
-*/
-
-
-    @Override
-    public void onFlowCaseCreating(FlowCase flowCase) {
-        //todo: 去除以下代码
-        PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n");
-        List<FlowCaseEntity> entities = processEntities(cmd.getValues());
-        for (int i = 0; i < entities.size(); i++) {
-            if (i == 3)
-                break;
-            String key = entities.get(i).getKey();
-            //  将"null"屏蔽为空字符串
-            String value = StringUtils.isEmpty(entities.get(i).getValue()) ? "无" : entities.get(i).getValue();
-            content.append(key).append(" : ").append(value).append("\n");
-        }
-        content = new StringBuilder(content.substring(0, content.length() - 1));
-        flowCase.setContent(content.toString());
-    }
-
-    private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
-        List<FlowCaseEntity> entities = new ArrayList<>();
-        for (PostApprovalFormItem value : values) {
-            FlowCaseEntity e = new FlowCaseEntity();
-            e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
-            if (!DEFAULT_FIELDS.contains(value.getFieldName())) {
-                // 不在默认fields的就是自定义字符串，组装这些
-                switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
-                    case SINGLE_LINE_TEXT:
-                    case NUMBER_TEXT:
-                    case DATE:
-                    case DROP_BOX:
-                        generalApprovalFieldProcessor.processDropBoxField(entities, e, value.getFieldValue());
-                        break;
-                    case MULTI_LINE_TEXT:
-                        generalApprovalFieldProcessor.processMultiLineTextField(entities, e, value.getFieldValue());
-                        break;
-                    case IMAGE:
-                        break;
-                    case FILE:
-                        break;
-                    case INTEGER_TEXT:
-                        generalApprovalFieldProcessor.processIntegerTextField(entities, e, value.getFieldValue());
-                        break;
-                    case SUBFORM:
-                        break;
-                    case CONTACT:
-                        //企业联系人
-                        generalApprovalFieldProcessor.processContactField(entities, e, value.getFieldValue());
-                        break;
-                }
-            }
-        }
-        return entities;
-    }
-
-    @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-    }
-
-    @Override
-    public void onFlowCaseEnd(FlowCaseState ctx) {
-        /*// 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
-        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)) {
-            FlowCase flowCase = ctx.getRootState().getFlowCase();
-            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
-            GeneralApprovalHandler handler;
-            //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
-            if (flowCase.getReferId().longValue() == 0L)
-                handler = getGeneralApprovalHandler(flowCase.getOwnerId());
-            else
-                handler = getGeneralApprovalHandler(flowCase.getReferId());
-            handler.onFlowCaseEnd(flowCase);
-        }*/
-    }
-
-    @Override
-    public void onFlowCaseActionFired(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     /**
      * 组装自定义字符串
      */
@@ -212,6 +74,11 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<FlowCaseEntity> entities = new ArrayList<>();
         entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
         return entities;
+    }
+
+    @Override
+    public void onFlowButtonFired(FlowCaseState ctx) {
+
     }
 
     protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
@@ -282,34 +149,13 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void onFlowButtonFired(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public FlowModuleInfo initModule() {
         return new FlowModuleInfo();
     }
 
-
     @Override
-    public void onFlowCaseCreated(FlowCase flowCase) {
-        // TODO Auto-generated method stub
-
-
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
+        return null;
     }
 
-    @Override
-    public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-                                        List<Tuple<String, Object>> variables) {
-        // TODO Auto-generated method stub
-
-    }
 }

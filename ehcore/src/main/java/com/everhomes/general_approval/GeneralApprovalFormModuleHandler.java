@@ -46,43 +46,4 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
         return null;
     }
 
-    /*@Autowired
-    private GeneralApprovalService generalApprovalService;
-    @Autowired
-    private GeneralFormProvider generalFormProvider;
-
-
-    @Override
-    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
-
-        PostApprovalFormCommand cmd2 = new PostApprovalFormCommand();
-        cmd2.setApprovalId(cmd.getSourceId());
-        cmd2.setValues(cmd.getValues());
-        cmd2.setOrganizationId(cmd.getCurrentOrganizationId());
-
-        GetTemplateByApprovalIdResponse response = generalApprovalService.postApprovalForm(cmd2);
-        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
-
-        List<PostApprovalFormItem> items = new ArrayList<>();
-        PostApprovalFormItem item = new PostApprovalFormItem();
-        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        item.setFieldValue(JSONObject.toJSONString(response));
-
-        items.add(item);
-        dto.setValues(items);
-        return dto;
-    }
-
-
-
-    @Override
-    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-
-    }
-
-    @Override
-    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
-        return null;
-    }*/
 }
