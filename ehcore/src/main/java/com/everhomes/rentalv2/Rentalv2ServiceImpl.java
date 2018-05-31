@@ -1214,7 +1214,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (ids.length>0) {
 				String aclinkName = "";
 				for (String id:ids)
-					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getName()+",";
+					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getDisplayName()+",";
 				rSiteDTO.setAclinkName(aclinkName.substring(0,aclinkName.length()-1));
 			}
 		}
@@ -1759,6 +1759,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		RentalBillDTO billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 		mappingRentalBillDTO(billDTO, rentalBill, rs);
+		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
 		return billDTO;
 	}
 

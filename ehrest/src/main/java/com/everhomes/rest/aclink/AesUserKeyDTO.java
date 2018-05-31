@@ -43,6 +43,7 @@ public class AesUserKeyDTO {
     private Long authId;
     private String macCopy;
     private Byte rightRemote;
+    private Byte rightFaceOpen;
 
     
 
@@ -223,7 +224,22 @@ public class AesUserKeyDTO {
 	public void setRightRemote(Byte rightRemote) {
 		this.rightRemote = rightRemote;
 	}
-    @Override
+
+
+
+	public Byte getRightFaceOpen() {
+		return rightFaceOpen;
+	}
+
+
+
+	public void setRightFaceOpen(Byte rightFaceOpen) {
+		this.rightFaceOpen = rightFaceOpen;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

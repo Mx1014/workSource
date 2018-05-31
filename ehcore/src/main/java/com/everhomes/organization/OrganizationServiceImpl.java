@@ -354,6 +354,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
@@ -1666,6 +1667,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
 //            if(customer.getTrackingUid() == null) {
 //                customer.setTrackingUid(-1L);
 //            }
@@ -1686,6 +1696,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
 //            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
@@ -1844,7 +1862,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setCorpLogoUri(cmd.getAvatar());
                 customer.setPostUri(cmd.getPostUri());
                 customer.setHotline(cmd.getContactsPhone());
+                customer.setCorpDescription(cmd.getDescription());
+                customer.setCorpEntryDate(new Timestamp(DateUtil.parseDate(cmd.getCheckinDate()).getTime()));
                 customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+                customer.setCorpEmail(cmd.getEmailDomain());
+                customer.setCorpEmployeeAmount(cmd.getMemberCount().intValue());
 
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
@@ -12846,6 +12868,29 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         return null;
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address) {
+        LOGGER.debug("updateCustomerEntryInfo customer id: {}, address: {}", customer.getId(), address);
+        if (address != null) {
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            List<Long> addressIds = new ArrayList<>();
+            if (entryInfos != null && entryInfos.size() > 0) {
+                addressIds = entryInfos.stream().map(EhCustomerEntryInfos::getAddressId).collect(Collectors.toList());
+            }
+
+            if (!addressIds.contains(address.getAddressId())) {
+                CustomerEntryInfo info = new CustomerEntryInfo();
+                info.setNamespaceId(customer.getNamespaceId());
+                info.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                info.setCustomerId(customer.getId());
+                info.setCustomerName(customer.getName());
+                info.setAddressId(address.getAddressId());
+                info.setBuildingId(address.getBuildingId());
+                enterpriseCustomerProvider.createCustomerEntryInfo(info);
+            }
+        }
     }
 }
 

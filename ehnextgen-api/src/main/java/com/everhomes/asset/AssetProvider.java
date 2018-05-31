@@ -173,7 +173,8 @@ public interface AssetProvider {
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId);
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
+            , Byte useUnitPrice);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
@@ -316,4 +317,5 @@ public interface AssetProvider {
     List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
+	void setRent(Long contractId, BigDecimal rent);
 }

@@ -1,18 +1,14 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowNashornEngineService;
+import com.everhomes.flow.NashornEngineService;
 import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
-import com.everhomes.util.StringHelper;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.jooq.impl.DSL;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class NashornScriptConfig implements NashornScript<FlowNashornEngineService, ScriptObjectMirror> {
+public class NashornScriptConfig implements NashornScript<ScriptObjectMirror> {
 
     private final static String FUNCTION_NAME = "config";
 
@@ -35,11 +31,11 @@ public class NashornScriptConfig implements NashornScript<FlowNashornEngineServi
     }
 
     @Override
-    public ScriptObjectMirror process(FlowNashornEngineService input) {
+    public ScriptObjectMirror process(NashornEngineService input) {
         if (finished.get()) {
             return null;
         }
-        ScriptObjectMirror mirror = input.getScriptObjectMirror(script.getScriptMainId(), script.getScriptVersion());
+        ScriptObjectMirror mirror = input.getScriptObjectMirror(script.getScriptMainId(), script.getScriptVersion(), this);
         if (mirror == null) {
             throw new RuntimeException("Could not found script to eval, scriptMainId = "
                     + script.getScriptMainId() + ", scriptVersion = " + script.getScriptVersion());
@@ -69,8 +65,8 @@ public class NashornScriptConfig implements NashornScript<FlowNashornEngineServi
     }
 
     @Override
-    public FlowScript getScript() {
-        return script;
+    public String getScript() {
+        return script.getScript();
     }
 
     @Override

@@ -110,6 +110,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncResultViewedCommand;
 import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
@@ -1637,14 +1638,13 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("syncOrganizationToCustomer")
     @RestReturn(value = String.class)
-    public RestResponse syncOrganizationToCustomer() {
-        customerService.syncOrganizationToCustomer();
+    public RestResponse syncOrganizationToCustomer(SyncCustomerDataCommand cmd) {
+        customerService.syncOrganizationToCustomer(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-
 
     /**
      * <b>URL: /customer/exportCustomerDetails</b>

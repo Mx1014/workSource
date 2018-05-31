@@ -81,6 +81,10 @@ public class ServiceAlliances extends EhServiceAlliances {
 	}
 
 	public void setEnableProvider(Byte enableProvider) {
+		if (null == enableProvider) {
+			enableProvider = (byte)0;
+		}
+		
 		NewServiceAllianceCustomField.ENABLEPROVIDER .setIntegralValue(this, enableProvider.longValue());
 	}
 
