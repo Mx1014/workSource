@@ -318,27 +318,26 @@ public class ForumServiceImpl implements ForumService {
         List<String> changeList = new ArrayList<>();
         if (!StringUtils.isEmpty(cmd.getSubject()) && !cmd.getSubject().equals(post.getSubject())) {
             post.setSubject(cmd.getSubject());
-            changeList.add("subject");
         }
         if (!StringUtils.isEmpty(cmd.getTag()) && !cmd.getTag().equals(post.getTag())) {
             post.setTag(cmd.getTag());
         }
-        if (cmd.getStartTime() != post.getStartTime().getTime() || cmd.getEndTime() != post.getEndTime().getTime()) {
+        if (null != post.getStartTime() && cmd.getStartTime() != post.getStartTime().getTime()) {
             Timestamp startTime = new Timestamp(cmd.getStartTime());
             post.setStartTime(startTime);
+        }
+        if (null != post.getEndTime() && cmd.getEndTime() != post.getEndTime().getTime()) {
             Timestamp endTime = new Timestamp(cmd.getEndTime());
             post.setEndTime(endTime);
-            changeList.add("time");
         }
         if (cmd.getLongitude() != post.getLongitude() || cmd.getLatitude() != post.getLatitude()) {
             post.setLatitude(cmd.getLatitude());
             post.setLongitude(cmd.getLongitude());
-            changeList.add("address");
         }
         if (!StringUtils.isEmpty(cmd.getContent()) && !cmd.getContent().equals(post.getContent())) {
             post.setContent(cmd.getContent());
         }
-        Activity activity = setActivityPostCommand(post, cmd);
+        Activity activity = setActivityPostCommand(post, cmd, changeList);
         this.forumProvider.updatePostAfterPublish(post);
 
         //更新了活动后，先删除所有的附件，再保存附件
@@ -367,7 +366,7 @@ public class ForumServiceImpl implements ForumService {
         return ConvertHelper.convert(post, PostDTO.class);
     }
 
-    private Activity setActivityPostCommand(Post post, NewTopicCommand cmd) {
+    private Activity setActivityPostCommand(Post post, NewTopicCommand cmd, List<String> changeList) {
         ActivityPostCommand oldCmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
 
@@ -383,6 +382,7 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(newCmd.getSubject()) && !newCmd.getSubject().equals(oldCmd.getSubject())) {
             oldCmd.setSubject(newCmd.getSubject());
             activity.setSubject(newCmd.getSubject());
+            changeList.add("subject");
         }
         if (newCmd.getContentCategoryId() != oldCmd.getContentCategoryId()) {
             oldCmd.setContentCategoryId(newCmd.getContentCategoryId());
@@ -397,15 +397,16 @@ public class ForumServiceImpl implements ForumService {
             activity.setPosterUri(newCmd.getPosterUri());
         }
 
-        if (!StringUtils.isEmpty(newCmd.getStartTime()) && !newCmd.getStartTime().equals(oldCmd.getStartTime())) {
+        if ((!StringUtils.isEmpty(newCmd.getStartTime()) && !newCmd.getStartTime().equals(oldCmd.getStartTime())) ||
+                (!StringUtils.isEmpty(newCmd.getEndTime()) && !newCmd.getEndTime().equals(oldCmd.getEndTime()))) {
             oldCmd.setStartTime(newCmd.getStartTime());
             activity.setStartTime(post.getStartTime());
             activity.setStartTimeMs(post.getStartTime().getTime());
-        }
-        if (!StringUtils.isEmpty(newCmd.getEndTime()) && !newCmd.getEndTime().equals(oldCmd.getEndTime())) {
+
             oldCmd.setEndTime(newCmd.getEndTime());
             activity.setEndTime(post.getEndTime());
             activity.setEndTimeMs(post.getEndTime().getTime());
+            changeList.add("time");
         }
         if (newCmd.getLatitude() != oldCmd.getLatitude() || newCmd.getLongitude() != oldCmd.getLongitude()) {
             oldCmd.setLatitude(newCmd.getLatitude());
@@ -414,6 +415,7 @@ public class ForumServiceImpl implements ForumService {
             activity.setLatitude(newCmd.getLatitude());
             activity.setLongitude(newCmd.getLongitude());
             activity.setLocation(newCmd.getLocation());
+            changeList.add("address");
         }
         if (!StringUtils.isEmpty(newCmd.getContent()) && !newCmd.getContent().equals(oldCmd.getContent())) {
             oldCmd.setContent(newCmd.getContent());
