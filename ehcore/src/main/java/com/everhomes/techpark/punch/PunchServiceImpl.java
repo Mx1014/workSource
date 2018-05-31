@@ -5976,7 +5976,7 @@ public class PunchServiceImpl implements PunchService {
                                            Calendar punCalendar, Calendar startCalendar) throws ParseException {
         orgId = getTopEnterpriseId(orgId);
 //        try {
-        LOGGER.debug("refresh day log stat " + StringHelper.toJsonString(member));
+//        LOGGER.debug("refresh day log stat " + StringHelper.toJsonString(member));
         //刷新 daylog
         PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(member.getTargetId(), orgId,
                 dateSF.get().format(punCalendar.getTime()));
