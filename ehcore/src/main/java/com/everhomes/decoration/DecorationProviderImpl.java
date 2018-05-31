@@ -318,6 +318,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
         long id = sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhDecorationRequests.class));
         request.setId(id);
+        request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhDecorationRequestsRecord record = ConvertHelper.convert(request,EhDecorationRequestsRecord.class);
         InsertQuery<EhDecorationRequestsRecord> query = context
