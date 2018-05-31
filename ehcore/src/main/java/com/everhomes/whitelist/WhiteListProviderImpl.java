@@ -93,7 +93,7 @@ public class WhiteListProviderImpl implements WhiteListProvider{
         SelectQuery<EhPhoneWhiteListRecord> query = context.selectQuery(Tables.EH_PHONE_WHITE_LIST);
 
         if (!StringUtils.isEmpty(phoneNumber)) {
-            query.addConditions(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER.eq(phoneNumber));
+            query.addConditions(Tables.EH_PHONE_WHITE_LIST.PHONE_NUMBER.like("%" + phoneNumber + "%"));
         }
 
         if (null != namespaceId) {
