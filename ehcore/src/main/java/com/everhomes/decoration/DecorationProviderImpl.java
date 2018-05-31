@@ -193,7 +193,26 @@ public class DecorationProviderImpl implements  DecorationProvider {
         step.where(condition);
         if (pageSize != null)
             step.limit(pageSize);
-        return step.fetch().map(r-> ConvertHelper.convert(r,DecorationRequest.class));
+        return step.fetch().map(r->{
+            DecorationRequest request = new DecorationRequest();
+            request.setId(r.getValue(Tables.EH_DECORATION_REQUESTS.ID));
+            request.setCreateTime(r.getValue(Tables.EH_DECORATION_REQUESTS.CREATE_TIME));
+            request.setCancelFlag(r.getValue(Tables.EH_DECORATION_REQUESTS.CANCEL_FLAG));
+            request.setStatus(r.getValue(Tables.EH_DECORATION_REQUESTS.STATUS));
+            request.setDecoratorUid(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_UID));
+            request.setDecoratorCompanyId(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_COMPANY_ID));
+            request.setDecoratorCompany(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_COMPANY));
+            request.setDecoratorPhone(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE));
+            request.setStartTime(r.getValue(Tables.EH_DECORATION_REQUESTS.START_TIME));
+            request.setEndTime(r.getValue(Tables.EH_DECORATION_REQUESTS.END_TIME));
+            request.setAddress(r.getValue(Tables.EH_DECORATION_REQUESTS.ADDRESS));
+            request.setNamespaceId(r.getValue(Tables.EH_DECORATION_REQUESTS.NAMESPACE_ID));
+            request.setApplyUid(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_UID));
+            request.setApplyCompany(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_COMPANY));
+            request.setApplyPhone(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_PHONE));
+            request.setApplyName(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_NAME));
+            return request;
+        });
     }
 
     @Override
