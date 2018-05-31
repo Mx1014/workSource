@@ -64,7 +64,7 @@ public class AclinkWebSocketState {
             
             AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
             cmd.setId(this.getId());
-            //by liuyilin 20180419 TODO 内网服务器心跳包处理
+            //by liuyilin 20180419 TODO 鍐呯綉鏈嶅姟鍣ㄩ厤瀵圭爜浣滀负uuid
             if(this.getUuid().length() == 6){
             	cmd.setType(1);
             }
