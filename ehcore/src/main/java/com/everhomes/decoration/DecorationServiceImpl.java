@@ -322,7 +322,7 @@ public class DecorationServiceImpl implements  DecorationService {
         this.dbProvider.execute((TransactionStatus status) -> {
             decorationProvider.createDecorationRequest(request);
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),cmd.getCommunityId(),
-                DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.APPLY.getFlowOwnerType());
+                DecorationController.moduleId, DecorationController.moduleType, cmd.getCommunityId(), DecorationRequestStatus.APPLY.getFlowOwnerType());
             if (flow == null) {
                 LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
                 throw RuntimeErrorException.errorWith("decoration",
@@ -552,7 +552,8 @@ public class DecorationServiceImpl implements  DecorationService {
                     map.put(adSplit[0],new ArrayList<>());
                     map.get(adSplit[0]).add(adSplit[1]);
                 }
-            }
+            }else if (map.containsKey(adSplit[0]))
+                map.put(adSplit[0],new ArrayList<>());
         }
 
         Iterator<String> iterator = map.keySet().iterator();
@@ -561,10 +562,12 @@ public class DecorationServiceImpl implements  DecorationService {
             String building = iterator.next();
             builder.append(building);
             List<String> ads = map.get(building);
-            builder.append(ads.get(0));
-            if (ads.size()>1){
-                for (int i=1;i<ads.size();i++)
-                    builder.append(ads.get(i));
+            if (ads.size()>0) {
+                builder.append(ads.get(0));
+                if (ads.size() > 1) {
+                    for (int i = 1; i < ads.size(); i++)
+                        builder.append("/").append(ads.get(i));
+                }
             }
             builder.append(";");
             finalAddress.append(builder.toString());
@@ -795,7 +798,7 @@ public class DecorationServiceImpl implements  DecorationService {
             }
             //工作流
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
-                    DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.FILE_APPROVAL.getFlowOwnerType());
+                    DecorationController.moduleId, DecorationController.moduleType, request.getCommunityId(), DecorationRequestStatus.FILE_APPROVAL.getFlowOwnerType());
             if (flow == null) {
                 LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
                 throw RuntimeErrorException.errorWith("decoration",
@@ -865,7 +868,7 @@ public class DecorationServiceImpl implements  DecorationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
-                DecorationController.moduleId, DecorationController.moduleType, null, DecorationRequestStatus.CHECK.getFlowOwnerType());
+                DecorationController.moduleId, DecorationController.moduleType, request.getCommunityId(), DecorationRequestStatus.CHECK.getFlowOwnerType());
         if (flow == null) {
             LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
             throw RuntimeErrorException.errorWith("decoration",
