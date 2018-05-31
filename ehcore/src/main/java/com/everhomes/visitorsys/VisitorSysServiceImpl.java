@@ -1346,7 +1346,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private void sendSMSVerificationCode(Integer namespaceId, String visitorPhone) {
         List<Tuple<String, Object>> variables =  new ArrayList();
-        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_MODLUENAME, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_MODLUENAME, VisitorsysConstant.SMS_MODLUENAME_CN));
+        smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_MODLUENAME, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_MODLUENAME, ""));
         smsProvider.addToTupleList(variables, VisitorsysConstant.SMS_VERIFICATIONCODE, generateVerificationCode(visitorPhone));
         String templateLocale = UserContext.current().getUser().getLocale();
         smsProvider.sendSms(namespaceId, visitorPhone, SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_VERIFICATION_CODER, templateLocale, variables);
