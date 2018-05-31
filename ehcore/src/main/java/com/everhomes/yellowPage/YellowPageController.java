@@ -619,5 +619,25 @@ public class YellowPageController  extends ControllerBase {
    		yellowPageService.exportServiceAllianceProviders(cmd, httpResp);
         return new RestResponse();
     }
+   	
+    /**
+   	 * <b>URL: /yellowPage/transferServiceToCommunity</b> 
+   	 * <p> 数据迁移  </p>
+   	 */
+   	@RequestMapping("transferServiceToCommunity")
+   	@RestReturn(value = String.class)
+	public RestResponse transferServiceToCommunity(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
+			return rsp;
+		}
+
+		String ret = yellowPageService.transferServiceToCommunity();
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+   	
 
 }
