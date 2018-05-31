@@ -14,6 +14,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
@@ -177,7 +178,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     private void processAskForLeaveField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormAskForLeaveValue leaveValue = JSON.parseObject(jsonVal, PostApprovalFormAskForLeaveValue.class);
+        ComponentAskForLeaveValue leaveValue = JSON.parseObject(jsonVal, ComponentAskForLeaveValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "1", "zh_CN", "请假类型"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -204,7 +205,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     private void processBusinessTripField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormBusinessTripValue tripValue = JSON.parseObject(jsonVal, PostApprovalFormBusinessTripValue.class);
+        ComponentBusinessTripValue tripValue = JSON.parseObject(jsonVal, ComponentBusinessTripValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -225,7 +226,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     private void processOverTimeField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormOverTimeValue overTimeValue = JSON.parseObject(jsonVal, PostApprovalFormOverTimeValue.class);
+        ComponentOverTimeValue overTimeValue = JSON.parseObject(jsonVal, ComponentOverTimeValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -246,7 +247,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     private void processGoOutField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormGoOutValue outValue = JSON.parseObject(jsonVal, PostApprovalFormGoOutValue.class);
+        ComponentGoOutValue outValue = JSON.parseObject(jsonVal, ComponentGoOutValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -267,7 +268,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     private void processAbnormalPunchField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormAbnormalPunchValue punchValue = JSON.parseObject(jsonVal, PostApprovalFormAbnormalPunchValue.class);
+        ComponentAbnormalPunchValue punchValue = JSON.parseObject(jsonVal, ComponentAbnormalPunchValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "1", "zh_CN", "异常日期"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());

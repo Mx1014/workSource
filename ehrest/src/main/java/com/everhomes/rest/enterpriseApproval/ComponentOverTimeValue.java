@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.enterpriseApproval;
 
 import com.everhomes.util.StringHelper;
 
@@ -6,10 +6,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>startTime: 开始时间 格式为:yy-MM-dd HH:mm</li>
  * <li>endTime: 结束时间 格式为:yy-MM-dd HH:mm</li>
- * <li>duration: 外出时长</li>
+ * <li>duration: 加班时长</li>
  * </ul>
  */
-public class PostApprovalFormGoOutValue {
+public class ComponentOverTimeValue {
 
 	private String startTime;
 

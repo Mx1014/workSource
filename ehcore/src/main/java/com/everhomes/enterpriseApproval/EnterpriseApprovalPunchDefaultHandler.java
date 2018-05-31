@@ -9,8 +9,8 @@ import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormAbnormalPunchValue;
-import com.everhomes.rest.general_approval.PostApprovalFormAskForLeaveValue;
+import com.everhomes.rest.enterpriseApproval.ComponentAbnormalPunchValue;
+import com.everhomes.rest.enterpriseApproval.ComponentAskForLeaveValue;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchLog;
 import com.everhomes.techpark.punch.PunchProvider;
@@ -84,7 +84,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 
 			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
 					ga.getApprovalAttribute());
-			PostApprovalFormAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), PostApprovalFormAskForLeaveValue.class);
+			ComponentAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), ComponentAskForLeaveValue.class);
 			request.setBeginTime(Timestamp.valueOf(valDTO.getStartTime() + ":00"));
 			request.setEndTime(Timestamp.valueOf(valDTO.getEndTime() + ":00"));
 			request.setDuration(valDTO.getDuration());
@@ -93,7 +93,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 
 			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
 					GeneralFormFieldType.ABNORMAL_PUNCH.getCode());
-			PostApprovalFormAbnormalPunchValue valDTO= JSON.parseObject(val.getFieldStr3(), PostApprovalFormAbnormalPunchValue.class);
+			ComponentAbnormalPunchValue valDTO= JSON.parseObject(val.getFieldStr3(), ComponentAbnormalPunchValue.class);
 
 			request.setPunchDate(java.sql.Date.valueOf(valDTO.getAbnormalDate()));
 			request.setPunchType(valDTO.getPunchType());

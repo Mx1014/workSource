@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.enterpriseApproval;
 
 import com.everhomes.util.StringHelper;
 
@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchType: 异常是上班/下班</li>
  * </ul>
  */
-public class PostApprovalFormAbnormalPunchValue {
+public class ComponentAbnormalPunchValue {
 
 	private String abnormalDate;
 	
