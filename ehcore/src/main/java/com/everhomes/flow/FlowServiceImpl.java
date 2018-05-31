@@ -5359,7 +5359,7 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request) {
-        DeferredResult<Object> deferredResult = new DeferredResult<>(5 * 60 * 1000);
+        DeferredResult<Object> deferredResult = new DeferredResult<>(5 * 60 * 1000L);
 
         FlowScript flowScript = null;
 
