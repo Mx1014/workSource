@@ -390,6 +390,7 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
+        // add  privilege code for checking different  privileges
         if (1 == cmd.getPrivilegeCode()) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         }

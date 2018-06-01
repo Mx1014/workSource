@@ -212,7 +212,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         importFileResponse.setTitle(dynamicFieldGroup);
                     }
                     List<ImportFileResultLog<Map<String,String>>> results =  importCustomerDynamicExcelData(finalHeadRow, params, response, excelHandler, context, finalSheet, headers, ds, rowDatas, dynamicFields);
-//                    importFileResponse.setTotalCount((long) datas.size());
+                    importFileResponse.setTotalCount((long) rowDatas.size());
                     importFileResponse.setFailCount((long) results.size());
                     importFileResponse.setLogs(results);
                     return importFileResponse;
@@ -224,7 +224,6 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 }
             }
         }
-        response.write2failCause(workbook.getNumberOfSheets());
         return response;
     }
 

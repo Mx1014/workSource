@@ -70,6 +70,7 @@ import org.springframework.stereotype.Component;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -760,117 +761,31 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         if(columns != null && columns.size() > 0) {
             for(DynamicColumnDTO column : columns) {
                 LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
-                if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
-                        || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
-                        || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
-                        || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
-                        || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
-                        || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
-                        || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
-                        || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
-                        || "serialEntrepreneurId".equals(column.getFieldName())) {
-                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue());
-                    if(item != null) {
-                        column.setValue(item.getItemId().toString());
-                    }else {
-                        Map<String, String> dataMap = new HashMap<>();
-                        columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
-                        LOGGER.error("can't find any scope items :item field ={}",column.getHeaderDisplay());
-                        importLogs.setData(dataMap);
-                        importLogs.setErrorDescription("can't find any scope items ");
-                        importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
-                        break;
-                    }
-                }
-
-                if ("trackingUid".equals(column.getFieldName())) {
-                    Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
-                    if (isAdmin) {
-                        //产品要求改成 姓名（phone）
-                        String username = "";
-                        String contactPhone = "";
-                        try {
-                            if(StringUtils.isNotEmpty(column.getValue())){
-                                username =  column.getValue().split("\\(")[0];
-                                contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
-                            }
-                        } catch (Exception e) {
-                            Map<String, String> dataMap = new HashMap<>();
-                            columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
-                            LOGGER.error("wrong trackingUid and contacPhone format  : field ={}",column.getHeaderDisplay());
-                            importLogs.setData(dataMap);
-                            importLogs.setErrorDescription("wrong trackingUid and contacPhone format");
-                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
-                            break;
-                        }
-                        enterpriseCustomer.setTrackingName(username);
-                        List<User> users = null;
-                        if (StringUtils.isNotEmpty(column.getValue())) {
-                            users = userProvider.listUserByKeyword(contactPhone, customerInfo.getNamespaceId(), new CrossShardListingLocator(), 2);
-                        }
-                        if (users != null && users.size() > 0) {
-                            column.setValue(users.get(0).getId().toString());
-                        } else {
-                            column.setValue(null);
-                        }
-                    } else {
-                        column.setValue(String.valueOf(UserContext.currentUserId()));
-                        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
-                        if (organizationMembers != null && organizationMembers.size() > 0) {
-                            enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
-                        }
-                    }
+                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, columns, enterpriseCustomer, column)){
+                    //如果发生异常 break
+                    break;
                 }
                 try {
-                    if(!"enterpriseAdmins".equals(column.getFieldName())&&!"entryInfos".equals(column.getFieldName())){
+                    if (!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())) {
+                        // 非企业管理员和楼栋门牌字段 直接invoke
                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
-                    }else {
-                        if("enterpriseAdmins".equals(column.getFieldName()))
-                           customerAdminString = column.getValue();
-                        if("entryInfos".equals(column.getFieldName()))
-                            customerAddressString = column.getValue();
-                        if(StringUtils.isNotBlank(customerAddressString)){
-                            //todo:校验格式
-                            customerAddressString = customerAddressString.replaceAll("\n", "");
-                            String buildingNames[] = customerAddressString.split(",");
-                            if (buildingNames.length > 0) {
-                                for (String buildingNameString : buildingNames) {
-                                    String buildingName = buildingNameString.split("/")[0];
-                                    String apartmentName = buildingNameString.split("/")[1];
-                                    Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
-                                    Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
-                                    if (address == null || building == null) {
-                                        Map<String, String> dataMap = new HashMap<>();
-                                        LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
-                                        importLogs.setData(dataMap);
-                                        importLogs.setErrorDescription("address and building not exist");
-                                        importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
-                                        break;
-                                    }
-                                }
-                            }
-                            Map<String, String> dataMap = new HashMap<>();
-                            LOGGER.error("customer address format error : field ={}",column.getHeaderDisplay());
-                            importLogs.setData(dataMap);
-                            importLogs.setErrorDescription("customer address format error");
-                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
-                            break;
+                    } else {
+                        if ("enterpriseAdmins".equals(column.getFieldName())) {
+                            customerAdminString = column.getValue();
                         }
-                        if(StringUtils.isNotBlank(customerAdminString)){
-                            //todo:校验格式
-                            Map<String, String> dataMap = new HashMap<>();
-                            columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
-                            LOGGER.error("customer enterprise admins format error: field ={}",column.getHeaderDisplay());
-                            importLogs.setData(dataMap);
-                            importLogs.setErrorDescription("customer enterprise admins format error");
-                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
+                        if ("entryInfos".equals(column.getFieldName())) {
+                            customerAddressString = column.getValue();
+                        }
+                        // 校验 admin address
+                       boolean dealResult =  dealCustomerAdminsAndAddress(customerAddressString,customerAdminString,importLogs,enterpriseCustomer,column,columns);
+                        if(dealResult){
                             break;
                         }
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     Map<String, String> dataMap = new HashMap<>();
-                    columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
-                    LOGGER.error("unknow exceptions : field ={}",column.getHeaderDisplay());
+                    columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                    LOGGER.error("unknow exceptions : field ={}", column.getHeaderDisplay());
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("unknow exceptions");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_UNKNOW_ERROR);
@@ -879,9 +794,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
         }
 
-        if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
+        if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
             List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
-            if(customers != null && customers.size() > 0) {
+            if (customers != null && customers.size() > 0) {
                 for (EnterpriseCustomer customer : customers) {
                     updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
                 }
@@ -911,6 +826,128 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         return failedNumber;
     }
 
+    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns) {
+        if (StringUtils.isNotBlank(customerAddressString)) {
+            //todo:校验格式
+            String[] buildingNames = null;
+            try {
+                customerAddressString = customerAddressString.replaceAll("\n", "");
+                buildingNames = customerAddressString.split(",");
+                if (buildingNames.length > 0) {
+                    for (String buildingNameString : buildingNames) {
+                        String buildingName = buildingNameString.split("/")[0];
+                        String apartmentName = buildingNameString.split("/")[1];
+                        Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                        Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
+                        if (address == null || building == null) {
+                            Map<String, String> dataMap = new HashMap<>();
+                            LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
+                            importLogs.setData(dataMap);
+                            importLogs.setErrorDescription("address and building not exist");
+                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
+                            return true;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Map<String, String> dataMap = new HashMap<>();
+                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                LOGGER.error("wrong building and address format  : field ={}", column.getHeaderDisplay());
+                importLogs.setData(dataMap);
+                importLogs.setErrorDescription("wrong building and address format");
+                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
+                return true;
+            }
+        }
+        if (StringUtils.isNotBlank(customerAdminString)) {
+            try {
+                String[] adminStrings = customerAdminString.split(",");
+                if (adminStrings.length > 0) {
+                    for (int i = 0; i < adminStrings.length; i++) {
+                        String[] adminInfo = adminStrings[i].split("\\(");
+                        String contactName = adminInfo[0];
+                        String contactToken = adminStrings[i].substring(adminStrings[i].indexOf("(") + 1, adminStrings[i].indexOf(")"));
+                    }
+                }
+            } catch (Exception e) {
+                //todo:校验格式
+                Map<String, String> dataMap = new HashMap<>();
+                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
+                importLogs.setData(dataMap);
+                importLogs.setErrorDescription("customer enterprise admins format error");
+                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean dealDynamicItemsAndTrackingUidField(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, List<DynamicColumnDTO> columns, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column) {
+        if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
+                || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
+                || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
+                || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
+                || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
+                || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
+                || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
+                || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
+                || "serialEntrepreneurId".equals(column.getFieldName())) {
+            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue());
+            if(item != null) {
+                column.setValue(item.getItemId().toString());
+            }else {
+                Map<String, String> dataMap = new HashMap<>();
+                columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                LOGGER.error("can't find any scope items :item field ={}",column.getHeaderDisplay());
+                importLogs.setData(dataMap);
+                importLogs.setErrorDescription("can't find any scope items ");
+                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
+                return true;
+            }
+        }
+
+        if ("trackingUid".equals(column.getFieldName())) {
+            Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
+            if (isAdmin) {
+                //产品要求改成 姓名（phone）
+                String username = "";
+                String contactPhone = "";
+                try {
+                    if(StringUtils.isNotEmpty(column.getValue())){
+                        username =  column.getValue().split("\\(")[0];
+                        contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
+                    }
+                } catch (Exception e) {
+                    Map<String, String> dataMap = new HashMap<>();
+                    columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                    LOGGER.error("wrong trackingUid and contacPhone format  : field ={}",column.getHeaderDisplay());
+                    importLogs.setData(dataMap);
+                    importLogs.setErrorDescription("wrong trackingUid and contacPhone format");
+                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
+                    return true;
+                }
+                enterpriseCustomer.setTrackingName(username);
+                List<User> users = null;
+                if (StringUtils.isNotEmpty(column.getValue())) {
+                    users = userProvider.listUserByKeyword(contactPhone, customerInfo.getNamespaceId(), new CrossShardListingLocator(), 2);
+                }
+                if (users != null && users.size() > 0) {
+                    column.setValue(users.get(0).getId().toString());
+                } else {
+                    column.setValue(null);
+                }
+            } else {
+                column.setValue(String.valueOf(UserContext.currentUserId()));
+                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+                if (organizationMembers != null && organizationMembers.size() > 0) {
+                    enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
+                }
+            }
+        }
+        return false;
+    }
+
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
@@ -918,6 +955,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 syncCustomerInfoIntoOrganization(exist);
             }
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
+            //对比
+            try {
+                compareCustomerFieldValues(exist, enterpriseCustomer);
+            } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+                LOGGER.error("Invoke compare erro :{}", e);
+            }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
             //修改了客户名称则要同步修改合同里面的客户名称
@@ -933,14 +976,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
             try {
+                if(StringUtils.isNotBlank(customerAdminString))
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             } catch (Exception e) {
                 //todo:接口过时 没有批量删除
                 LOGGER.error("create enterprise admin error :{}", e);
             }
-            customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
-            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
-            if (StringUtils.isEmpty(customerAddressString)) {
+            if (StringUtils.isNotBlank(customerAddressString)) {
+                customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+                createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            }
+            /*if (StringUtils.isEmpty(customerAddressString)) {
                 organizationProvider.deleteOrganizationById(exist.getOrganizationId());
                 Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
                 if (organization != null){
@@ -949,6 +995,28 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setOrganizationId(0L);
                 //there is no need to feedDoc
                 customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            }*/
+        }
+    }
+
+    private void compareCustomerFieldValues(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+        // compare customer from excel and db exist and filter all blank fields
+        Class<?> clz = EnterpriseCustomer.class;
+        Field[] fields = clz.getSuperclass().getDeclaredFields();
+        if (fields.length > 0) {
+            Object existData = null;
+            Object excelData = null;
+            for (Field field : fields) {
+                PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), clz);
+                Method method = descriptor.getReadMethod();
+                existData = method.invoke(exist);
+                excelData = method.invoke(enterpriseCustomer);
+                if (excelData == null || excelData.equals("")) {
+                    if (existData != null && excelData != "") {
+                        Method writeMethod = descriptor.getWriteMethod();
+                        writeMethod.invoke(enterpriseCustomer, existData);
+                    }
+                }
             }
         }
     }
@@ -1111,8 +1179,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Class<?> clz = dto.getClass().getSuperclass();
         Object val = value;
         String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-        System.out.println(type);
-        System.out.println("==============");
+//        System.out.println(type);
+//        System.out.println("==============");
+        LOGGER.info("current declared field type is {}",type);
         if(StringUtils.isEmpty((String)value)){
             val = null;
         }else{

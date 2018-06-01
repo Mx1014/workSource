@@ -28,7 +28,7 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_TAX_NOT_EXIST = 10020;  //客户税务信息不存在
     int ERROR_CUSTOMER_IMPORT_ERROR = 10021;  //客户税务信息不存在
     int ERROR_CUSTOMER_MANDATORY_ERROR = 10022;  //必填写未填写
-    int ERROR_CUSTOMER_ITEM_ERROR = 10023;  //动态表单找不到item
+    int ERROR_CUSTOMER_ITEM_ERROR = 10023;  //枚举类型找不到
     int ERROR_CUSTOMER_TRACKING_ERROR = 10024;  //跟进人格式错误
     int ERROR_CUSTOMER_UNKNOW_ERROR = 10025;  //未知格式错误
     int ERROR_CUSTOMER_ADMIN_FORMAT_ERROR = 10026;  //管理员格式错误
