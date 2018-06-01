@@ -17,6 +17,7 @@ import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.AmountUtil;
@@ -130,7 +131,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     processAmount(paymentBillDTO, cmd);
                     //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
                     List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-                    putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+                    putOrderInfo(paymentBillDTO, paymentOrderBillDTO, listBillDetailVOs, cmd);//组装订单信息
                     List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
                     BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
                     BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
@@ -189,7 +190,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         return result;
     }
     
-    private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
+    private void putOrderInfo(PaymentBillResp dto, PaymentOrderBillDTO paymentOrderBillDTO, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
         String orderRemark2 = dto.getOrderRemark2();
         Long orderId = null;
         try{
@@ -216,10 +217,18 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         dto.setOrderSource(sb.toString());
+        paymentOrderBillDTO.setOrderSource(sb.toString());
         //获得付款人员
         User userById = userProvider.findUserById(order.getUid());
-        dto.setPayerName(userById.getNickName());
-        dto.setPayerTel(userById.getAccountName());
+        if(userById != null) {
+        	dto.setPayerName(userById.getNickName());
+        	paymentOrderBillDTO.setPayerName(userById.getNickName());
+            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+            if(userIdentifier != null) {
+            	dto.setPayerTel(userIdentifier.getIdentifierToken());
+            	paymentOrderBillDTO.setPayerTel(userIdentifier.getIdentifierToken());
+            }
+        }
         //获取账单信息：若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         for( int i = 0; i < orderBills.size(); i ++){
             AssetPaymentOrderBills orderBill = orderBills.get(i);
@@ -625,9 +634,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentOrderBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
         paymentOrderBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
         paymentOrderBillDTO.setUserId(Long.parseLong("1210"));
-      //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+        //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+        putOrderInfo(paymentBillDTO,paymentOrderBillDTO, listBillDetailVOs, cmd);//组装订单信息
         List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
         BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
         BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
