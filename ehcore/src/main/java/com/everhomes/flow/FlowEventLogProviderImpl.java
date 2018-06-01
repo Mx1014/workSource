@@ -436,9 +436,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                         userTypeCondition = userTypeCondition.or(FlowEventCustomField.TRACKER_PROCESSOR.getField().eq(1L));
                     }
                 }
-                if (userTypeCondition != null) {
-                    query.addConditions(userTypeCondition);
-                }
+            }
+            if (userTypeCondition != null) {
+                query.addConditions(userTypeCondition);
             }
             return query;
         });
