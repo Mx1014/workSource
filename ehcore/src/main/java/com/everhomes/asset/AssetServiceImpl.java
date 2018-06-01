@@ -3035,10 +3035,6 @@ public class AssetServiceImpl implements AssetService {
                 //天企汇（中天）要求能够显示上传凭证按钮
             	hasUploadCertificate = 1;
                 break;
-            case 999992:
-                //深业物业要求能够显示上传凭证按钮，测试使用，后面要删 steve
-            	hasUploadCertificate = 1;
-                break;
             default:
                 break;
         }
