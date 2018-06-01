@@ -96,32 +96,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     private ContentServerService contentServerService;
 
     @Autowired
-    private BigCollectionProvider bigCollectionProvider;
-
-    @Autowired
     private DbProvider dbProvider;
-
-
-/*
-    public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
-        GetTemplateByApprovalIdResponse res = new GetTemplateByApprovalIdResponse();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Long userId = UserContext.currentUserId();
-
-        RedisTemplate template = bigCollectionProvider.getMapAccessor("enterprise_approval_no", "").getTemplate(new StringRedisSerializer());
-        ValueOperations op = template.opsForValue();
-
-
-        dbProvider.execute((TransactionStatus status) -> {
-//           User user = UserContext.current().getUser();
-
-            Long flowCaseId = flowService.getNextFlowCaseId();
-
-            return null;
-        });
-       return null;
-    }
-*/
 
     @Override
     public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
