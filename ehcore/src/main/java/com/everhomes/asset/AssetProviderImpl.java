@@ -1428,7 +1428,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
-        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME)
+        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1451,6 +1451,7 @@ public class AssetProviderImpl implements AssetProvider {
                         itemDTO.setApartmentName(f.getValue(o.APARTMENT_NAME));
                         itemDTO.setBuildingName(f.getValue(o.BUILDING_NAME));
                     }
+                    itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
                     list1.add(itemDTO);
                     return null;
                 });
