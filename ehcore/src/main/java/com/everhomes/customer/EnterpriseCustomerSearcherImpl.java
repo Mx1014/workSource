@@ -522,9 +522,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
         if (customer.getLastTrackingTime() != null && customer.getTrackingUid() != null && customer.getTrackingUid() != -1) {
-             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
+            result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
+            dto.setTrackingPeriod(result);
         }
-        dto.setTrackingPeriod(result);
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(customer.getOrganizationId());
         command.setCustomerId(customer.getId());
