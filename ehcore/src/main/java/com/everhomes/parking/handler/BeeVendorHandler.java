@@ -4,24 +4,23 @@ package com.everhomes.parking.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.parking.ParkingLot;
-import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingRechargeRate;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.parking.*;
 import com.everhomes.parking.bee.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +35,8 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
     private static final String GET_CARD_TYPE_LIST = "getCardTypeList";
     private static final String GET_ORDER = "getOrder";//临时车
     private static final String PAY_ORDER = "payOrder";//临时车充值
+    private static final String ADD_CARD = "addCard";//开月卡
+    private static final String ACTIVE_CARD_ORDER = "activeCardOrder";//激活月卡
 
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -71,6 +72,9 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         List<ParkingRechargeRate> parkingRechargeRateList = null;
         if(plateNumber!=null) {
             MonthCardInfo cardInfo = getCardInfo(plateNumber);
+            if(cardInfo==null){
+                return new ArrayList<>();
+            }
             parkingRechargeRateList = parkingProvider
                     .listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(), cardInfo.getCardtypeid());
         }else{
@@ -117,7 +121,131 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         return false;
     }
 
+    @Override
+    public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+
+        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
+                cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+        Integer requestMonthCount = REQUEST_MONTH_COUNT;
+        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+        if(null != parkingFlow) {
+            requestMonthCount = parkingFlow.getRequestMonthCount();
+            requestRechargeType = parkingFlow.getRequestRechargeType();
+        }
+
+        OpenCardInfoDTO dto = new OpenCardInfoDTO();
+        ParkingLot lot = ConvertHelper.convert(cmd,ParkingLot.class);
+        lot.setId(cmd.getParkingLotId());
+        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(lot, null, null);
+        if(null != parkingRechargeRates && !parkingRechargeRates.isEmpty()) {
+            ParkingRechargeRateDTO rate = null;
+            for(ParkingRechargeRateDTO r: parkingRechargeRates) {
+                if(r.getCardTypeId().equals(parkingCardRequest.getCardTypeId()) && r.getMonthCount().intValue() == 1) {
+                    rate = r;
+                    break;
+                }
+            }
+            if(rate == null){
+                for(ParkingRechargeRateDTO r: parkingRechargeRates) {
+                    if(r.getCardTypeId().equals(parkingCardRequest.getCardTypeId())) {
+                        rate = r;
+                        break;
+                    }
+                }
+            }
+            if(rate == null){
+                return null;
+            }
+
+            dto.setOwnerId(cmd.getOwnerId());
+            dto.setOwnerType(cmd.getOwnerType());
+            dto.setParkingLotId(cmd.getParkingLotId());
+            dto.setRateToken(rate.getRateToken());
+            dto.setRateName(rate.getRateName());
+            dto.setCardType(rate.getCardType());
+            dto.setMonthCount(new BigDecimal(requestMonthCount));
+            dto.setPrice(rate.getPrice().divide(rate.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
+
+            dto.setPlateNumber(cmd.getPlateNumber());
+            long now = System.currentTimeMillis();
+            dto.setOpenDate(now);
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
+            if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
+                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+            }else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(now);
+                int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                int today = calendar.get(Calendar.DAY_OF_MONTH);
+
+                BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
+                        .add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+                dto.setPayMoney(price);
+            }
+            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+        }
+
+        return dto;
+    }
+
     private Boolean openMonthCard(ParkingRechargeOrder order) {
+        ParkingCardRequest request;
+        if (null != order.getCardRequestId()) {
+            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+        }else {
+            request = getParkingCardRequestByOrder(order);
+        }
+
+        Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
+        Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
+        order.setStartPeriod(timestampStart);
+        order.setEndPeriod(timestampEnd);
+
+        if(addMonthCard(order, request)) {
+            updateFlowStatus(request);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean addMonthCard(ParkingRechargeOrder order, ParkingCardRequest request) {
+        JSONObject params = new JSONObject();
+        processJSONParams(params);
+        params.put("realname",request.getPlateOwnerName());
+//        params.put("tel",request.);
+        params.put("sex",order.getPlateNumber());
+        params.put("carnumber",request.getPlateNumber());
+        params.put("itemtype",request.getCardTypeId());
+        params.put("startdate",order.getStartPeriod().getTime());
+        params.put("enddate",order.getEndPeriod().getTime());
+        params.put("cardnum",order.getMonthCount().intValue());
+//        params.put("unitprice",order.);
+        params.put("totalprice",order.getPrice());
+//        params.put("mebtype",null);
+//        params.put("mebtypename",null);
+//        params.put("mebremark",null);
+        params.put("paymode","1");
+        BeeResponse response = post(ADD_CARD, params);
+        order.setErrorDescriptionJson(response.toString());
+        if(isSuccess(response)){
+            List<OpenCardInfo> entities= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<OpenCardInfo>>(){});
+            if(entities!=null && entities.size()>0){
+                OpenCardInfo openCardInfo = entities.get(0);
+                if(openCardInfo!=null && openCardInfo.getCardid()!=null) {
+                    JSONObject activeParams = new JSONObject();
+                    activeParams.put("cardid",openCardInfo.getCardid());
+                    BeeResponse activeResponse = post(ACTIVE_CARD_ORDER, activeParams);
+                    return isSuccess(activeResponse);
+                }
+            }
+        }
         return false;
     }
 
@@ -145,12 +273,12 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
         JSONObject params=new JSONObject();
         processJSONParams(params);
-        params.put("cardid",order.getOrderToken());
+        params.put("cardid",cardInfo.getId());
         params.put("startdate",newStart+"");
         params.put("enddate",timestampEnd.getTime()+"");
         params.put("cardnum",order.getMonthCount());
         params.put("totalprice",order.getPrice());
-//        params.put("paymode","2");//付费方式 (1-现金 ,2-刷卡, 3-转账
+        params.put("paymode","1");//付费方式 (1-现金 ,2-刷卡, 3-转账
         params.put("paytype","1");//续费类型(1-充值续费 2-封存延期)
 
         order.setStartPeriod(new Timestamp(newStart));

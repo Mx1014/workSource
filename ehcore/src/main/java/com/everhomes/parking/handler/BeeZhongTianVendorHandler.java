@@ -61,6 +61,8 @@ public class BeeZhongTianVendorHandler extends BeeVendorHandler {
     @Override
     protected void processJSONParams(JSONObject params) {
         String comid = configProvider.getValue("parking.beezhongtian.comid", "000000771");
+        String ploid = configProvider.getValue("parking.beezhongtian.ploid", "");
         params.put("comid",comid);
+        params.put("ploid",ploid);
     }
 }
