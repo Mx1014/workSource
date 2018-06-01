@@ -186,7 +186,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         }
         Condition allCondition = condition0.and(condition1).and(condition2);
 
-        sql.where(allCondition).orderBy(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
+        sql.where(allCondition).orderBy(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 
         Result<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> result = sql.fetch();
         if (result != null && result.size() > 0) {

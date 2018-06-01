@@ -92,10 +92,6 @@ public interface AssetService {
 
 	String deletExemptionItem(ExemptionItemIdCommand cmd);
 
-	PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
-
-	void generateBillsOnContractSigned(String contractNum);
-
 	void upodateBillStatusOnContractStatusChange(Long contractId, String targetStatus);
 
 	PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
@@ -111,8 +107,6 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	void updateBillSwitchOnTime();
 
 	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -150,13 +144,11 @@ public interface AssetService {
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
-	void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
+	void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd);
 
 	ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
-
-	void activeAutoBillNotice();
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
@@ -166,11 +158,7 @@ public interface AssetService {
 
 	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
-	void syncCustomer(Integer namespaceId);
-
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
-
-	void activeLateFine();
 
 	void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 
@@ -183,4 +171,6 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
+
+    void noticeTrigger(Integer namespaceId);
 }

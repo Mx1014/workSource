@@ -1,12 +1,10 @@
 
 package com.everhomes.asset;
 
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -15,7 +13,6 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1132,7 +1129,7 @@ public class AssetController extends ControllerBase {
 //                list.get(j).setVariableValue(c);
 //            }
 //        }
-        assetService.paymentExpectancies_re_struct(cmd);
+        assetService.paymentExpectanciesCalculate(cmd);
         return "ROU ARE WA GA DEKI ROU KU ROU!";
     }
     /**
@@ -1176,19 +1173,6 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return restResponse;
     }
-    /**
-     * <b>URL: /asset/activeLateFine</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-//    @RequestMapping("activeLateFine")
-//    @RestReturn(String.class)
-//    public RestResponse activeLateFine(){
-//        assetService.activeLateFine();
-//        RestResponse restResponse = new RestResponse();
-//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
 
     /**
      * <b>URL: /asset/functionDisableList</b>
@@ -1204,19 +1188,6 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
-    /**
-     * <b>URL: /asset/sc</b>
-     * <p></p>
-     */
-//    @RequestMapping("sc")
-//    @RequireAuthentication(value = false)
-//    public RestResponse syncCustomer(SyncCustomerCommand cmd){
-//        RestResponse restResponse = new RestResponse();
-//        assetService.syncCustomer(cmd.getNamespaceId());
-//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
 
     /**
      * <b>URL: /asset/batchImportBills</b>
@@ -1262,6 +1233,19 @@ public class AssetController extends ControllerBase {
     @RequestMapping("reCalBill")
     public RestResponse reCalBill(ReCalBillCommand cmd){
         assetService.reCalBill(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(NoticeTriggerCommand cmd){
+        assetService.noticeTrigger(cmd.getNamespaceId());
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");

@@ -28,4 +28,6 @@ public interface FlowStateProcessor {
     void rejectToNode(FlowCaseState ctx, Integer gotoLevel, FlowGraphNode currentNode);
 
     boolean allProcessorCompleteInCurrentNode(FlowCaseState ctx, FlowGraphNode currentNode, UserInfo firedUser);
+
+    void startStepEnter(FlowCaseState ctx, FlowGraphNode from);
 }

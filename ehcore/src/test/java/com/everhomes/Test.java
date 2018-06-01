@@ -13,6 +13,9 @@ public class Test {
     public static void main(String[] args) {
 //        String testStr = "ewr";
 //        System.out.println(testStr.indexOf("/", 0));
+        String a = "YYYYMM";
+        System.out.println(a.substring(0,3)+"年"+a.substring(4,5));
+
         String testStr = "//dddd/sdf/cvd//df///44//3/a";
         String[] result = split2(testStr);
         System.out.println(testStr+"转换成了"+StringHelper.toJsonString(result));

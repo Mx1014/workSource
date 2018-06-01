@@ -22,10 +22,11 @@ public interface FileDownloadTaskService{
     void cancelTask(CancelTaskCommand cmd);
 
     /**
-     * 上传文件到contenServer，fileName需要带上后缀，例如.xsl
+     * 上传文件到contenServer，fileName需要带上后缀，例如.xsl，带上任务
      * @param fileName
      * @param ops
+     * @param taskId 任务Id为非必传，传了的话会记录上传文件的开始时间和结束时间
      * @return
      */
-    CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops);
+    CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops, Long taskId);
 }

@@ -60,6 +60,7 @@ public class Utils {
         public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
         public static final String DATE = "yyyy-MM-dd";
         public static final String DATE_TIME_STR = "yyyyMMddHHmmss";
+        public static final String DATE_HOUR_MINUTE = "yyyy-MM-dd HH:mm";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);

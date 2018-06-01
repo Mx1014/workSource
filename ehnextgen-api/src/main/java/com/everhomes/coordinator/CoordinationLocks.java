@@ -98,6 +98,8 @@ public enum CoordinationLocks {
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+    SYNC_THIRD_CONTRACT("sync.third.contract"),
+    SYNC_THIRD_CUSTOMER("sync.third.customer"),
 
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
 
@@ -129,7 +131,11 @@ public enum CoordinationLocks {
     REMIND_DEMO_ADD("remind_demo_add"),
     REMIND_CATEGORY_SORTING("remind_category_sorting"),
     REMIND_SORTING("remind_sorting"),
-    REMIND_SCHEDULED("remind_scheduled");
+    REMIND_SCHEDULED("remind_scheduled"),
+
+    ARCHIVES_CONFIGURATION("archives_configuration"),
+    ARCHIVES_NOTIFICATION("archives_notification");
+
 
     private String code;
 
