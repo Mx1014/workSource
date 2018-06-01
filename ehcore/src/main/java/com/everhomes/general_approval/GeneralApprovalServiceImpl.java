@@ -121,14 +121,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Autowired
     private WorkReportService workReportService;
 
-
     private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
-
-
-    private SimpleDateFormat approvalNoFormat = new SimpleDateFormat("yyyyMMdd");
-
 
     @Override
     public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
@@ -175,29 +170,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
-/*        GeneralApprovalFormHandler handler = getApprovalPostItemHandler();
-        return handler.postApprovalForm();*/
-return null;
-    }
-
-  /*  public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
-
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
-        return getGeneralApprovalHandler(ga.getApprovalAttribute());
-    }
-
-    public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
-        if (generalApprovalAttribute != null) {
-            GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
-                    + generalApprovalAttribute);
-            if (handler != null) {
-                return handler;
-            }
-        }
-//        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
         return null;
     }
-*/
+
 
     @Override
     public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {
@@ -225,9 +200,9 @@ return null;
         }
     };
 
-    public GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
+    private GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-        List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
+        List<GeneralFormFieldDTO> fieldDTOs;
         fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
         checkFieldDTOs(fieldDTOs);
         dto.setFormFields(fieldDTOs);

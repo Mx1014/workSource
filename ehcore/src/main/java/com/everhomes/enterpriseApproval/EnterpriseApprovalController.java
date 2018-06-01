@@ -278,20 +278,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterpriseApproval/checkArchivesApproval</b>
-     * <p>OA 校验已存在的流程</p>
-     */
-    @RequestMapping("checkArchivesApproval")
-    @RestReturn(value = CheckArchivesApprovalResponse.class)
-    public RestResponse checkArchivesApproval(@Valid CheckArchivesApprovalCommand cmd){
-        CheckArchivesApprovalResponse res = enterpriseApprovalService.checkArchivesApproval(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /enterpriseApproval/listAvailableEnterpriseApprovals</b>
      * <p>OA 可见的审批列表</p>
      */
