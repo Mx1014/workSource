@@ -4651,16 +4651,16 @@ public class GroupServiceImpl implements GroupService {
             //说明传过来的参数都不为空，那么我们才能进行发送消息
             //接下来我们需要判断我们现在做的操作是开启工作台还是关闭工作台，这个需要根据我们传进来的openOrCloseType字段，来进行判断
             //根据uid来查询eh_organization_members表，然后拿到所有的公司的id
-            List<Long> orgIdList = organizationProvider.findOrganizationIdListByTargetId(uid);
-            boolean openWorkBench = false;
+//            List<Long> orgIdList = organizationProvider.findOrganizationIdListByTargetId(uid);
+//            boolean openWorkBench = false;
             if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode())){
                 //说明我们需要做的是开启工作台
                 //接下来我们需要做的是查询该员工所在的公司是否已经开启了工作台，如果都没有开启工作台，那么我们就给该客户发消息说将要开启工作台，如果
                 //只要存在一个公司已经开启了工作台，那么我们就不需要给该用户发消息了
                 //接下来进行非空校验
-                if(!CollectionUtils.isEmpty(orgIdList)){
+//                if(!CollectionUtils.isEmpty(orgIdList)){
                     //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
-                    for(Long lon : orgIdList){
+                    /*for(Long lon : orgIdList){
                         //接下来根据每一个公司id来查询eh_organizations 表中的工作台（work_platform_flag）是否是1,1-表示的是已经开启了工作台，0-表示的是没有开启工作台
                         Organization organization = organizationProvider.findOrganizationById(lon);
                         if(organization.getWorkPlatformFlag() == TrueOrFalseFlag.TRUE.getCode()){
@@ -4672,8 +4672,8 @@ public class GroupServiceImpl implements GroupService {
                         //说明该公司之前是没有开启工作台，那么我们就直接continue操作，进行第二次循环，目的是循环完所有的公司，如果都是没有开启工作台，那么我们就给该
                         //用户进行发送消息，说将要开启工作台
                         continue;
-                    }
-                    if(!openWorkBench){
+                    }*/
+//                    if(!openWorkBench){
                         //说明该员工所在的公司之前都没有开启工作台，那么我们就该该员工发送消息，说将要开启工作台
                         MessageDTO messageDto = new MessageDTO();
                         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -4686,46 +4686,46 @@ public class GroupServiceImpl implements GroupService {
 
                         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                    }
-
-                }
-            }else if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode())){
-                //说明我们需要做的是关闭工作台
-                //接下来对orgIdList集合进行非空校验
-                if(!CollectionUtils.isEmpty(orgIdList)){
-                    //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
-                    for(Long lon : orgIdList){
-                        //接下来根据每一个公司id来查询eh_organizations 表中的工作台（work_platform_flag）是否是1,1-表示的是已经开启了工作台，0-表示的是没有开启工作台
-                        Organization organization = organizationProvider.findOrganizationById(lon);
-                        if(organization.getWorkPlatformFlag() == TrueOrFalseFlag.TRUE.getCode()){
-                            //说明该公司已经开启了工作台，那么我们就不需要给该员工发送将要开启工作台的消息了
-                            //直接跳出
-                            openWorkBench = true;
-                            break;
-                        }
-                        //说明该公司之前是没有开启工作台，那么我们就直接continue操作，进行第二次循环，目的是循环完所有的公司，如果都是没有开启工作台，那么我们就给该
-                        //用户进行发送消息，说将要开启工作台
-                        continue;
-                    }
-                    if(openWorkBench == true){
-                        //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
-                        MessageDTO messageDto = new MessageDTO();
-                        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                        messageDto.setSenderUid(User.SYSTEM_UID);
-                        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-                        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                        messageDto.setBody(content);
-                        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
-//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
-                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                    }
-
-                }
+//                    }
 
             }
-        }
+        }else if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode())){
+            //说明我们需要做的是关闭工作台
+            //接下来对orgIdList集合进行非空校验
+//                if(!CollectionUtils.isEmpty(orgIdList)){
+                //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
+                /*for(Long lon : orgIdList){
+                    //接下来根据每一个公司id来查询eh_organizations 表中的工作台（work_platform_flag）是否是1,1-表示的是已经开启了工作台，0-表示的是没有开启工作台
+                    Organization organization = organizationProvider.findOrganizationById(lon);
+                    if(organization.getWorkPlatformFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                        //说明该公司已经开启了工作台，那么我们就不需要给该员工发送将要开启工作台的消息了
+                        //直接跳出
+                        openWorkBench = true;
+                        break;
+                    }
+                    //说明该公司之前是没有开启工作台，那么我们就直接continue操作，进行第二次循环，目的是循环完所有的公司，如果都是没有开启工作台，那么我们就给该
+                    //用户进行发送消息，说将要开启工作台
+                    continue;
+                }*/
+//                    if(openWorkBench == true){
+                    //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                    messageDto.setSenderUid(User.SYSTEM_UID);
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    messageDto.setBody(content);
+                    messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                            uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                    }
+
+//                }
+
+            }
     }
+
 
     private void sendSystemMessageToUser(Long uid, String content, Map<String, String> meta) {
         MessageDTO messageDto = new MessageDTO();

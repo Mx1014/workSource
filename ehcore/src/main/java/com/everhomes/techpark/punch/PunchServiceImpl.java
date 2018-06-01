@@ -4364,10 +4364,14 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public Long getTopEnterpriseId(Long organizationId) {
         Organization organization = organizationProvider.findOrganizationById(organizationId);
-        if (organization.getParentId() == null)
+        if(organization != null){
+            if (organization.getParentId() == null)
+                return organizationId;
+            else {
+                return Long.valueOf(organization.getPath().split("/")[1]);
+            }
+        }else{
             return organizationId;
-        else {
-            return Long.valueOf(organization.getPath().split("/")[1]);
         }
     }
 
