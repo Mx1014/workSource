@@ -77,32 +77,37 @@ public class DynamicExcelImpl implements DynamicExcelService{
         DynamicExcelHandler h = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
-        for( int i = 0; i < sheetNames.size(); i++){
-            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false,withData );
+        for (int i = 0; i < sheetNames.size(); i++) {
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i), params, null, false, withData);
             LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
-            for(DynamicSheet sheet: sheets){
+            for (DynamicSheet sheet : sheets) {
                 List<DynamicField> fields = sheet.getDynamicFields();
                 List<List<String>> data = null;
-                StringBuilder intro = new StringBuilder(baseInfo);
-                if(withData){
+                StringBuilder intro = null;
+                if (baseInfo == null) {
+                    intro = new StringBuilder();
+                } else {
+                    intro = new StringBuilder(baseInfo);
+                }
+                if (withData) {
                     //获取数据
                     data = h.getExportData(sheet, params, context);
                 }
-                if(StringUtils.isEmpty(baseInfo)){
+                if (StringUtils.isEmpty(baseInfo)) {
                     intro = new StringBuilder(DynamicExcelStrings.baseIntro);
                 }
-                if(enumSupport){
+                if (enumSupport) {
                     intro.append(DynamicExcelStrings.enumNotice);
-                    for(DynamicField df : fields){
-                        if(df.getAllowedValued() !=null){
+                    for (DynamicField df : fields) {
+                        if (df.getAllowedValued() != null) {
                             StringBuilder enumItem = new StringBuilder();
                             enumItem.append(df.getDisplayName());
                             enumItem.append(":");
-                            for(String enumStr : df.getAllowedValued()){
+                            for (String enumStr : df.getAllowedValued()) {
                                 enumItem.append(enumStr);
                                 enumItem.append(",");
                             }
-                            if(enumItem.lastIndexOf(",") == enumItem.length() - 1){
+                            if (enumItem.lastIndexOf(",") == enumItem.length() - 1) {
                                 enumItem.deleteCharAt(enumItem.length() - 1);
                             }
                             enumItem.append("\n");
@@ -111,10 +116,10 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     }
                 }
                 try {
-                    DebugExcelUtil.exportExcel(workbook,dynamicSheetNum.get(),sheet.getDisplayName(), intro.toString(),fields,data);
-                    dynamicSheetNum.set(dynamicSheetNum.get()+1);
+                    DebugExcelUtil.exportExcel(workbook, dynamicSheetNum.get(), sheet.getDisplayName(), intro.toString(), fields, data);
+                    dynamicSheetNum.set(dynamicSheetNum.get() + 1);
                 } catch (Exception e) {
-                    LOGGER.info("one sheet export failed, sheet name = {}",sheet.getDisplayName());
+                    LOGGER.info("one sheet export failed, sheet name = {}", sheet.getDisplayName());
                 }
             }
         }
@@ -122,9 +127,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        if(excelName == null){
+        if (excelName == null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            excelName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
+            excelName = "客户数据导出" + sdf.format(Calendar.getInstance().getTime());
             excelName = excelName + ".xls";
         }
         response.setContentType("application/msexcel");
@@ -132,6 +137,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            LOGGER.error("UnsupportedEncodingException",e);
         }
         try {
             out = response.getOutputStream();
@@ -140,8 +146,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            LOGGER.error("IoException",e);
         } finally {
-            if(byteArray!=null){
+            if (byteArray != null) {
                 byteArray = null;
             }
         }
