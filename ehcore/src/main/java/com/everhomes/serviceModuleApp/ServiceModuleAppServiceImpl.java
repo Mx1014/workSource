@@ -435,6 +435,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 				AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
 				appDTO.setName(app.getName());
+				appDTO.setAppId(app.getOriginId());
 				if(app.getIconUri() != null){
 					String url = contentServerService.parserUri(app.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
 					appDTO.setIconUrl(url);

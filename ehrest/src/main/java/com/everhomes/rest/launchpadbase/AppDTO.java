@@ -8,36 +8,34 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>originId: 应用跨版本不变id</li>
+ *     <li>appId: appId</li>
  *     <li>name: 模块应用名称</li>
  *     <li>moduleId: 模块id</li>
+ *     <li>instanceConfig: 参数json</li>
+ *     <li>actionType: actionType</li>
+ *     <li>actionData: actionData</li>
+ *     <li>routerPath: 路由路径，例如: ""</li>
+ *     <li>routerQuery: 路由参数，例如: ""</li>
  *     <li>moduleName: 模块名称</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
- *     <li>actionType: actionType</li>
- *     <li>instanceConfig: 参数json</li>
- *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
  * </ul>
  */
 public class AppDTO {
 
     //给客户端用的对象，减少字段传输
-    private Long originId;
+    private Long appId;
     private String name;
     private Long moduleId;
+    private String instanceConfig;
+    private Byte actionType;
+    private String actionData;
+    private String routerPath;
+    private String routerQuery;
     private String moduleName;
     private Byte clientHandlerType;
-    private Byte actionType;
-    private String instanceConfig;
     private String iconUrl;
 
-    public Long getOriginId() {
-        return originId;
-    }
-
-    public void setOriginId(Long originId) {
-        this.originId = originId;
-    }
 
     public String getName() {
         return name;
@@ -93,6 +91,39 @@ public class AppDTO {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public String getActionData() {
+        return actionData;
+    }
+
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
+    }
+
+    public String getRouterPath() {
+        return routerPath;
+    }
+
+    public void setRouterPath(String routerPath) {
+        this.routerPath = routerPath;
+    }
+
+    public String getRouterQuery() {
+        return routerQuery;
+    }
+
+    public void setRouterQuery(String routerQuery) {
+        this.routerQuery = routerQuery;
     }
 
     @Override
