@@ -796,48 +796,21 @@ public class AssetServiceImpl implements AssetService {
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
         titleSize.add(20);
-        propertyNames.add("noticeTel");
+        propertyNames.add("amountExemption");
         titleName.add("减免金额");
         titleSize.add(20);
-        propertyNames.add("noticeTel");
+        propertyNames.add("remarkExemption");
         titleName.add("减免备注");
         titleSize.add(20);
-        /*String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
-                , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};*/
-        
-        /*List<exportPaymentBillsDetail> dataList = new ArrayList<>();
-        //组装datalist来确定propertyNames的值
-        for(int i = 0; i < dtos.size(); i++) {
-            ListBillsDTO dto = dtos.get(i);
-            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
-            detail.setAmountOwed(dto.getAmountOwed().toString());
-            detail.setAmountReceivable(dto.getAmountReceivable().toString());
-            detail.setAmountReceived(dto.getAmountReceived().toString());
-            detail.setContractNum(dto.getContractNum());
-            detail.setBillGroupName(dto.getBillGroupName());
-            detail.setNoticeTel(dto.getNoticeTel());
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
-            }else{
-                detail.setNoticeTimes("");
-            }
-            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
-            detail.setTargetName(dto.getTargetName());
-            detail.setDateStr(dto.getDateStr());
-            // 增加发票单号 by wentian 2018/4/27
-            detail.setInvoiceNum(dto.getInvoiceNum());
-            // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
-            detail.setDateStrBegin(dto.getDateStrBegin());
-            detail.setDateStrEnd(dto.getDateStrEnd());
-            //detail.setBuildingName(dto.getBuildingName());
-            //detail.setApartmentName(dto.getApartmentName());
-            detail.setAddresses(dto.getAddresses());
-            detail.setCustomerTel(dto.getCustomerTel());
-            
-            dataList.add(detail);
-        }*/
+        propertyNames.add("amountSupplement");
+        titleName.add("增收金额");
+        titleSize.add(20);
+        propertyNames.add("remarkSupplement");
+        titleName.add("增收备注");
+        titleSize.add(20);
+        propertyNames.add("invoiceNum");
+        titleName.add("发票单号");
+        titleSize.add(20);
         List<Map<String, String>> dataList = new ArrayList<>();
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {
@@ -849,31 +822,51 @@ public class AssetServiceImpl implements AssetService {
             detail.put("contractNum", dto.getContractNum());
             detail.put("customerTel", dto.getCustomerTel());
             detail.put("noticeTel", dto.getNoticeTel());
-            //导出增加费项列、减免、增收
+            //导出增加费项列
             List<BillItemDTO> billItemDTOs = new ArrayList<>();
             List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
+            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
             if(dto.getBillId() != null) {
-    			ListBillDetailVO listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
-    			if(listBillDetailVO.getBillGroupDTO() != null) {
+    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
+    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
     				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
     				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
     			}
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
+            	BigDecimal amountRecivable = BigDecimal.ZERO;
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
-        				detail.put(billItemDTO.getBillItemId().toString(), 
-        						billItemDTO2.getAmountReceivable() == null ? "0" : String.valueOf(billItemDTO2.getAmountReceivable()));
+        				//如果费项是一样的，那么导出的时候，对费项做相加
+        				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
         			}
         		}
-        		if(billItemDTO.getBillItemId() != null && detail.get(billItemDTO.getBillItemId().toString()) == null) {
-        			detail.put(billItemDTO.getBillItemId().toString(), "0");//如果费项没有，那么显示0，为了美观
-        		}
+        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
             }
             detail.put("addresses", dto.getAddresses());
+            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
+            if(listBillDetailVO != null) {
+            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
+            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
+            }
+            StringBuffer remarkExemption = new StringBuffer();//减免备注
+            StringBuffer remarkSupplement = new StringBuffer();//增收备注
+            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
+            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
+            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
+                }else{
+                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
+                }
+            }
+            if(remarkExemption.length() != 0) {
+            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
+            }
+            if(remarkSupplement.length() != 0) {
+            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
+            }
+            detail.put("invoiceNum", dto.getInvoiceNum());
             dataList.add(detail);
         }
-
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
