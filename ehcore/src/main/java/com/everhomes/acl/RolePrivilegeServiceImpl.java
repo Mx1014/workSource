@@ -2708,6 +2708,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			}else{
 				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
+				response.setTopAdminToken(null);
+				response.setTopAdminName(null);
 			}
 
 		}

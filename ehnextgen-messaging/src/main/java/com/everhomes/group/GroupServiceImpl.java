@@ -4682,16 +4682,15 @@ public class GroupServiceImpl implements GroupService {
                         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                         messageDto.setBody(content);
                         messageDto.setMetaAppId(AppConstants.APPID_GROUP);
-//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
 
                         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 //                    }
 
-            }
-        }else if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode())){
-            //说明我们需要做的是关闭工作台
-            //接下来对orgIdList集合进行非空校验
+            }else if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode())){
+                //说明我们需要做的是关闭工作台
+                //接下来对orgIdList集合进行非空校验
 //                if(!CollectionUtils.isEmpty(orgIdList)){
                 //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
                 /*for(Long lon : orgIdList){
@@ -4708,22 +4707,23 @@ public class GroupServiceImpl implements GroupService {
                     continue;
                 }*/
 //                    if(openWorkBench == true){
-                    //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
-                    MessageDTO messageDto = new MessageDTO();
-                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                    messageDto.setSenderUid(User.SYSTEM_UID);
-                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                    messageDto.setBody(content);
-                    messageDto.setMetaAppId(AppConstants.APPID_GROUP);
-//                        messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
-                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                            uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto.setBody(content);
+                messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 //                    }
 
 //                }
 
             }
+        }
     }
 
 
