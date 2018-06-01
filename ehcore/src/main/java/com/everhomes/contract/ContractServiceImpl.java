@@ -45,7 +45,6 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -2129,9 +2128,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	public void contractAutoSync() {
 		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
 		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-		String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
-		if(StringUtils.isEmpty(runningFlag)) {
+		Map<String,String> runningMap  =new HashMap<>();
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()).tryEnter(() -> {
+			String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+			runningMap.put(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), runningFlag);
+			if(StringUtils.isBlank(runningFlag))
 			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+		});
+		if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()))) {
 			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
 			if (communities != null) {
 				for (Community community : communities) {

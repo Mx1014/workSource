@@ -2828,9 +2828,14 @@ public class CustomerServiceImpl implements CustomerService {
     public void customerAutoSync() {
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
-        if(StringUtils.isEmpty(runningFlag)) {
+        Map<String,String> runningMap  =new HashMap<>();
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
+            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
+            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
+            if(StringUtils.isBlank(runningFlag))
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
+        });
+        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
             List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
             if (communities != null) {
                 for (Community community : communities) {
