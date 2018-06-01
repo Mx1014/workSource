@@ -40,10 +40,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Created by Wentian Wang on 2018/1/23.
@@ -287,7 +286,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
     }
 
     private Map<String,String> getDynamicFieldMap(List<DynamicField> dynamicFields) {
-        SortedMap<String, String> dynamicFieldMap = new TreeMap<>();
+        Map<String, String> dynamicFieldMap = new LinkedHashMap<>();
         if(dynamicFields!=null && dynamicFields.size()>0){
             dynamicFields.forEach((field)->{
                 dynamicFieldMap.put(field.getFieldName(), field.getDisplayName());
