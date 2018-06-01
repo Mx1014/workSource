@@ -2697,7 +2697,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//根据admin_target_id来查询eh_users表
 		User user = userProvider.findUserById(adminTargetId);
 		if(user != null){
-			if(adminTargetId != null && user.getId() == cmd.getUserId()){
+			if(adminTargetId != null && user.getId().equals(cmd.getUserId())){
 				response.setIsTopAdminFlag(AllFlagType.YES.getCode());
 
 				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
