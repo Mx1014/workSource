@@ -26,6 +26,7 @@ public class CheckArchivesApprovalCommand {
         this.userId = userId;
     }
 
+
     public Long getOrganizationId() {
         return organizationId;
     }

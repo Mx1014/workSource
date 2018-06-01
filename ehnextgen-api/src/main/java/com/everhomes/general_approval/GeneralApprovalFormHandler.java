@@ -1,9 +1,6 @@
 package com.everhomes.general_approval;
 
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.general_approval.*;
 
 public interface GeneralApprovalFormHandler {
 
@@ -13,4 +10,5 @@ public interface GeneralApprovalFormHandler {
 
     GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 
+    GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd);
 }

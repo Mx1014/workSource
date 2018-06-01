@@ -1,20 +1,16 @@
 package com.everhomes.general_approval;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.sql.Timestamp;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
@@ -23,7 +19,6 @@ import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import com.everhomes.workReport.WorkReportService;
-import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -38,7 +33,6 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.OrganizationCommunity;
@@ -76,14 +70,9 @@ import com.everhomes.util.RuntimeErrorException;
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
-    @Autowired
-    private GeneralApprovalValProvider generalApprovalValProvider;
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
-
-    @Autowired
-    private GeneralFormService generalFormService;
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
@@ -92,25 +81,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
-    private FlowCaseProvider flowCaseProvider;
-
-    @Autowired
-    private ConfigurationProvider configProvider;
-
-    @Autowired
     private FlowService flowService;
-
-    @Autowired
-    private DbProvider dbProvider;
-
-    @Autowired
-    private YellowPageProvider yellowPageProvider;
-
-    @Autowired
-    private BigCollectionProvider bigCollectionProvider;
-
-    @Autowired
-    private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
 
     @Autowired
     private ContentServerService contentServerService;
@@ -673,34 +644,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
-
-    /*@Override
-    public void initializeGeneralApprovalScope() {
-        Integer count = Integer.MAX_VALUE - 1;
-        List<GeneralApproval> approvals = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), count, ((locator, query) -> {
-            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
-            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq("any-module"));
-            return query;
-        }));
-        if (approvals == null || approvals.size() == 0)
-            return;
-        for (GeneralApproval approval : approvals) {
-            Organization organization = organizationProvider.findOrganizationById(approval.getOwnerId());
-            if (organization == null)
-                continue;
-            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(approval.getNamespaceId(),
-                    approval.getId(), organization.getId(), UniongroupTargetType.ORGANIZATION.getCode());
-            if (scope == null) {
-                scope = new GeneralApprovalScopeMap();
-                scope.setSourceId(organization.getId());
-                scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
-                scope.setSourceDescription(organization.getName());
-                scope.setApprovalId(approval.getId());
-                scope.setNamespaceId(approval.getNamespaceId());
-                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
-            }
-        }
-    }*/
 
     @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {

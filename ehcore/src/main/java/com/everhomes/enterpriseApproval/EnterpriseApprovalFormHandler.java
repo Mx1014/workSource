@@ -5,20 +5,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
 import com.everhomes.general_approval.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalServiceErrorCode;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -64,6 +65,9 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
     @Autowired
     private FlowService flowService;
+
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
     @Autowired
     private DbProvider dbProvider;
@@ -245,4 +249,32 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         dto.setFormFields(fieldDTOs);
         return dto;
     }
+
+    @Override
+    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+        GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
+        Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
+        command.setOrganizationId(cmd.getOwnerId());
+        command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        command.setNamespaceId(namespaceId);
+        command.setModuleId(EnterpriseApprovalController.MODULE_ID);
+        command.setUserId(userId);
+
+        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(new ListingLocator(), Integer.MAX_VALUE - 1, command, (locator1, query) -> {
+            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getSourceId()));
+            query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
+            query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
+            return query;
+        });
+        if (details != null && details.size() > 0){
+            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
+
+        }
+        dto.setFlag(TrueOrFalseFlag.FALSE.getCode());
+        return dto;
+    }
+
 }

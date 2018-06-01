@@ -9,6 +9,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -171,5 +172,10 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;
+    }
+
+    @Override
+    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+        return new GeneralFormReminderDTO(TrueOrFalseFlag.FALSE.getCode());
     }
 }
