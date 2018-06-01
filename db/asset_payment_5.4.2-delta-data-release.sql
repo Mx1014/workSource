@@ -8,7 +8,7 @@ UPDATE `eh_service_module_privileges` SET `remark`='账单管理 修改缴费状
 -- 设置eh_service_module_exclude_functions表的主键id
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_service_module_exclude_functions`),0);
 
--- 设置 上传了缴费凭证的账单tab 对应的黑名单
+-- 设置 上传了缴费凭证的账单tab 对应的黑名单（除了天企汇（中天）这个域空间，其他域空间全部加入该tab的黑名单）
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999973', NULL, '20400', '100');
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999955', NULL, '20400', '100');
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:=@id+1, '999986', NULL, '20400', '100');
