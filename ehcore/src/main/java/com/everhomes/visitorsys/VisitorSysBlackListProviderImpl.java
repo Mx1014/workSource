@@ -78,7 +78,7 @@ public class VisitorSysBlackListProviderImpl implements VisitorSysBlackListProvi
 		if(keyWords!=null){
 			Condition or = Tables.EH_VISITOR_SYS_BLACK_LIST.VISITOR_NAME.like("%" + keyWords + "%")
 					.or(Tables.EH_VISITOR_SYS_BLACK_LIST.VISITOR_PHONE.like("%" + keyWords + "%"));
-			condition.and(or);
+			condition = condition.and(or);
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_BLACK_LIST)
