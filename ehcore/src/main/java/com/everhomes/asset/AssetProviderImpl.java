@@ -656,7 +656,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<NoticeInfo> list = new ArrayList<>();
-        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME,Tables.EH_PAYMENT_BILLS.DATE_STR)
+        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME,Tables.EH_PAYMENT_BILLS.DATE_STR, Tables.EH_PAYMENT_BILLS.NAMESPACE_ID)
                 .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetch().map(r -> {
@@ -668,6 +668,7 @@ public class AssetProviderImpl implements AssetProvider {
             info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
             info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
             info.setDateStr(r.getValue(Tables.EH_PAYMENT_BILLS.DATE_STR));
+            info.setNamespaceId(r.getValue(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID));
             list.add(info);
             return null;});
         List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)

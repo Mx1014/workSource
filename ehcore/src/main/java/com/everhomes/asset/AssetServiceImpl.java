@@ -294,6 +294,10 @@ public class AssetServiceImpl implements AssetService {
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                //携带了namespaceId
+                if(noticeInfo.getNamespaceId() != null){
+                    nameSpaceId = noticeInfo.getNamespaceId();
+                }
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
@@ -387,7 +391,8 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+//                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                Integer nameSpaceId = noticeInfo.getNamespaceId();
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
@@ -659,6 +664,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     info.setDateStr(dto.getDateStr());
+                    info.setNamespaceId(999971);
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
@@ -2673,6 +2679,8 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
                     info.setTargetId(b.getTargetId());
+                    // 增加域空间信息
+                    info.setNamespaceId(b.getNamespaceId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
@@ -3051,6 +3059,8 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
                     info.setTargetId(b.getTargetId());
+                    // 增加域空间信息
+                    info.setNamespaceId(b.getNamespaceId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<NoticeMemberIdAndContact> userIds = new ArrayList<>();

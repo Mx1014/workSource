@@ -255,3 +255,8 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 -- issue-30573 路福门禁切换成zuolin_v2 by liuyilin 20180521
 SET @var_id = (SELECT MAX(`id`) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@var_id:=@var_id+1, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver', '999963', NULL);
+
+-- 动态表单数据不一致修复  by jiarui 20180531
+update  eh_var_fields set mandatory_flag =1 where id = 10;
+
+update eh_var_field_scopes set field_param = (SELECT t1.field_param from eh_var_fields t1 where id = field_id);
