@@ -394,6 +394,25 @@ public class DecorationServiceImpl implements  DecorationService {
             dto.setProcessorType(ProcessorType.ROOT.getCode());
             dto.setCancelFlag(r.getCancelFlag());
 
+            DecorationRequestStatus status = DecorationRequestStatus.fromCode(r.getStatus());
+            FlowCase flowCase;
+            DecorationFlowCaseDTO flowCaseDTO;
+            switch (status) {
+                case APPLY:
+                case FILE_APPROVAL:
+                case CHECK:
+                    flowCase = this.flowCaseProvider.findFlowCaseByReferId(r.getId(), status.getFlowOwnerType(),
+                            DecorationController.moduleId);
+                    dto.setFlowCasees(new ArrayList<>());
+                    flowCaseDTO = new DecorationFlowCaseDTO();
+                    flowCaseDTO.setFlowCaseId(flowCase.getId());
+                    flowCaseDTO.setStatus(flowCase.getStatus());
+                    dto.getFlowCasees().add(flowCaseDTO);
+                    break;
+                default:
+                    break;
+            }
+
             return dto;
         }).collect(Collectors.toList());
     }
