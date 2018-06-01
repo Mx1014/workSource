@@ -2662,7 +2662,7 @@ public class PunchServiceImpl implements PunchService {
         //2018年5月17日 by wh 删除statistics提前到这里
         List<Long> orgIds = new ArrayList<>();
         orgIds.add(ownerId);
-        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
+        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId(),statistic.getDetailId());
         //没有规则的也要保存,只是没考勤数据
         if (null == pr){
             this.punchProvider.createPunchStatistic(statistic);
@@ -5957,7 +5957,7 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.setTime(punCalendar.getTime());
         startCalendar.set(Calendar.HOUR_OF_DAY, 0);
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-        try {
+        try { 
             OrganizationDTO dept = findUserDepartment(userId, ownerId);
             OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, ownerId);
             refreshDayLogAndMonthStat(member, dept.getId(), punCalendar, startCalendar);
