@@ -1067,19 +1067,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         ImportFileResultLog<List<String>> headLog = new ImportFileResultLog<>(AssetBillImportErrorCodes.SCOPE);
         headLog.setData(Arrays.asList(headers));
         datas.add(headLog);
-        int itemStart = 0;//费项开始列下标（费项的个数是动态的，不是固定的）
-        int itemEnd = 0;//费项结束列下标（费项的个数是动态的，不是固定的）
+        int itemStartIndex = 0;//费项开始列下标（费项的个数是动态的，不是固定的）
+        int itemEndIndex = 0;//费项结束列下标（费项的个数是动态的，不是固定的）
         int addressIndex = 0;//楼栋/门牌列下标
-        int dateStrBegin = 0;//账单开始时间列下标
-        int dateStrEnd = 0;//账单结束时间列下标
+        int dateStrBeginIndex = 0;//账单开始时间列下标
+        int dateStrEndIndex = 0;//账单结束时间列下标
         for (int i = 0; i < headers.length; i++) {
-            if (headers[i].contains("催缴手机号")) itemStart = i + 1;
+            if (headers[i].contains("催缴手机号")) itemStartIndex = i + 1;
             else if (headers[i].contains("楼栋/门牌")) {
-                itemEnd = i - 1;
+            	itemEndIndex = i - 1;
                 addressIndex = i;
             }
-            else if(headers[i].contains("账单开始时间")) dateStrBegin = i;
-            else if(headers[i].contains("账单结束时间")) dateStrEnd = i;
+            else if(headers[i].contains("账单开始时间")) dateStrBeginIndex = i;
+            else if(headers[i].contains("账单结束时间")) dateStrEndIndex = i;
         }
         bill:for (int i = 2; i < resultList.size(); i++) {
             RowResult currentRow = (RowResult) resultList.get(i);
@@ -1089,27 +1089,57 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             log.setData(Arrays.asList(data));
 
             CreateBillCommand cmd = new CreateBillCommand();
+            cmd.setTargetType(targetType);//客户属性
             BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
             List<BillItemDTO> billItemDTOList = new ArrayList<>();
             List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
             ExemptionItemDTO exemptionItemDTO = null;
             ExemptionItemDTO increaseItemDTO = null;
             
-            /*//账期被依赖
-            String dateStr = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrIndex], "yyyy-MM");
-            if(StringUtils.isBlank(dateStr)){
-                log.setErrorLog("日期格式错误,请参考说明进行填写");
-                log.setCode(AssetBillImportErrorCodes.DATE_STR_EMPTY_ERROR);
+            //账单开始时间和账单结束时间被依赖
+            String dateStrBegin = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrBeginIndex], "yyyy-MM-dd");
+            if(StringUtils.isBlank(dateStrBegin)){
+                log.setErrorLog("账单开始时间格式错误,请参考说明进行填写");
+                log.setCode(AssetBillImportErrorCodes.DATE_STR_BEGIN_EMPTY_ERROR);
                 datas.add(log);
                 continue bill;
             }
-            cmd.setDateStr(dateStr);*/
+            cmd.setDateStrBegin(dateStrBegin);
             
-            /*//楼栋门牌也是
-            String building = data[buildingIndex];
-            String apartment = data[apartmentIndex];*/
+            String dateStrEnd = DateUtils.guessDateTimeFormatAndFormatIt(data[dateStrEndIndex], "yyyy-MM-dd");
+            if(StringUtils.isBlank(dateStrEnd)){
+                log.setErrorLog("账单结束时间格式错误,请参考说明进行填写");
+                log.setCode(AssetBillImportErrorCodes.DATE_STR_END_EMPTY_ERROR);
+                datas.add(log);
+                continue bill;
+            }
+            cmd.setDateStrEnd(dateStrEnd);
             
-            cmd.setTargetType(targetType);//客户属性
+            //楼栋门牌被依赖
+            String address = data[addressIndex];
+        	if(targetType.equals(AssetTargetType.USER.getCode())){
+        		if(StringUtils.isBlank(address)){
+                    log.setErrorLog("个人客户情况下，楼栋门牌必填");
+                    log.setCode(AssetBillImportErrorCodes.ADDRESS_EMPTY_ERROR);
+                    datas.add(log);
+                    continue bill;
+                }
+        	}
+        	String buildingName,apartmentName;
+        	Long addressId = null;
+        	if(address.indexOf("/") != -1) {
+        		buildingName = address.split("/")[0];
+        		apartmentName = address.split("/")[1];
+        		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
+        		if(addressByBuildingApartmentName != null) {
+        			addressId = addressByBuildingApartmentName.getId();
+        		}
+        	}else {
+        		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
+        		log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
+                datas.add(log);
+                continue bill;
+        	}
             
             for(int j = 0; j < data.length; j++){
                 BillItemDTO item = new BillItemDTO();
@@ -1139,10 +1169,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         continue bill;
                     }
                 	cmd.setCustomerTel(data[j]);
-                }else if(headers[j].contains("账单开始时间")){
-                    cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].contains("账单结束时间")){
-                    cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
                 }else if(headers[j].contains("合同编号")){
                     cmd.setContractNum(data[j]);
                     List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
@@ -1159,9 +1185,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         continue bill;
                     }
                     cmd.setNoticeTel(data[j]);
-                }
-                // 收费项目
-                else if(j >= itemStart && j <= itemEnd){
+                }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
                     if(itemPojo == null){
                         log.setErrorLog("没有找到收费项目");
@@ -1183,19 +1207,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         datas.add(log);
                         continue bill;
                     }
-                    // id , name, groupRuleId, amount, 楼栋，门牌，addressId
                     item.setBillItemId(itemPojo.getId());
                     item.setBillItemName(headers[j]);
                     item.setAmountReceivable(amountReceivable);
-                    /*item.setBuildingName(building);
-                    item.setApartmentName(apartment);*/
-                    
-                    if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){//企业客户
-                    	
-                    }else {//个人客户
-                    	
-                    }
-                    
+                    item.setBuildingName(buildingName);
+                    item.setApartmentName(apartmentName);
+                    item.setAddressId(addressId);
                     billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
@@ -1204,7 +1221,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
                             exemptionItemDTO.setIsPlus((byte)0);
-                            //exemptionItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(exemptionItemDTO);
                         }
                     }catch(Exception e){
@@ -1223,7 +1239,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
                             increaseItemDTO.setIsPlus((byte)1);
-                            //increaseItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(increaseItemDTO);
                         }
                     }catch(Exception e){
