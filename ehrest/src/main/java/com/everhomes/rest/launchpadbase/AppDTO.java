@@ -11,7 +11,6 @@ import java.util.List;
  *     <li>appId: appId</li>
  *     <li>name: 模块应用名称</li>
  *     <li>moduleId: 模块id</li>
- *     <li>instanceConfig: 参数json</li>
  *     <li>actionType: actionType</li>
  *     <li>actionData: actionData</li>
  *     <li>routerPath: 路由路径，例如: ""</li>
@@ -27,7 +26,6 @@ public class AppDTO {
     private Long appId;
     private String name;
     private Long moduleId;
-    private String instanceConfig;
     private Byte actionType;
     private String actionData;
     private String routerPath;
@@ -75,14 +73,6 @@ public class AppDTO {
 
     public void setActionType(Byte actionType) {
         this.actionType = actionType;
-    }
-
-    public String getInstanceConfig() {
-        return instanceConfig;
-    }
-
-    public void setInstanceConfig(String instanceConfig) {
-        this.instanceConfig = instanceConfig;
     }
 
     public String getIconUrl() {

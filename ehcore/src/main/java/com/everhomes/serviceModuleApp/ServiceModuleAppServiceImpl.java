@@ -29,10 +29,12 @@ import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleLocationType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -103,6 +105,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+	@Autowired
+	private RouterService routerService;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -440,15 +445,28 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
 				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
 
+				if(ClientHandlerType.fromCode(serviceModule.getClientHandlerType()) == ClientHandlerType.NATIVE){
+					RouterInfo routerInfo = routerService.getRouterInfo(app.getModuleId(), RouterListener.INDEX_NAME, app.getInstanceConfig());
+					if(routerInfo != null){
+						appDTO.setRouterPath(routerInfo.getPath());
+						appDTO.setRouterQuery(routerInfo.getQuery());
+					}
+				}
+
 				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 				if(profile != null && profile.getIconUri() != null){
 					String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
 					appDTO.setIconUrl(url);
 				}
 
-
-
-
+				appDTO.setActionData(app.getInstanceConfig());
+				PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+				if(handler != null){
+					String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
+					if(itemActionData != null){
+						appDTO.setActionData(itemActionData);
+					}
+				}
 
 				appDtos.add(appDTO);
 			}
