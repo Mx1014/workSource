@@ -20,6 +20,8 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -133,6 +135,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	@Autowired
+	public CommunityProvider communityProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -680,11 +684,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
-			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName());
+			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot);
 		}
 	}
 
-	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
+	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
 //        PreOrderCommand preOrderCommand = new PreOrderCommand();
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
@@ -705,9 +709,16 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		String extendInfo = null;
+		if(parkingLot!=null){
+			Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+			if(community!=null){
+				extendInfo = community.getName()+parkingLot.getName();
+			}
+		}
 		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
-				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
+				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
 
 
 		return callBack;
