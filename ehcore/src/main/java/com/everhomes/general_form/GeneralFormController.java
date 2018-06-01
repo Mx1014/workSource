@@ -66,4 +66,19 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
+    /**
+     * <b>URL: /general_form/getGeneralFormReminder</b>
+     * <p> 表单提醒项</p>
+     */
+    @RequestMapping("getGeneralFormReminder")
+    @RestReturn(value=GeneralFormReminderDTO.class)
+    public RestResponse getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+        GeneralFormReminderDTO dto = generalFormService.getGeneralFormReminder(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
 }

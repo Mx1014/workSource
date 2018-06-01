@@ -58,4 +58,6 @@ public interface GeneralFormService {
 	Long createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd);
 
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
+
+	GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd);
 }

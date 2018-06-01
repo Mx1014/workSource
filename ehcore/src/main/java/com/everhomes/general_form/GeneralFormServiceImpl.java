@@ -85,9 +85,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
-        PostGeneralFormDTO dto = handler.postGeneralFormVal(cmd);
-
-        return dto;
+        return handler.postGeneralFormVal(cmd);
     }
 
     private GeneralFormModuleHandler getOrderHandler(String type) {
@@ -633,8 +631,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             gf = convertFormFromTemplate(gf, form, cmd);
             gf.setStatus(GeneralFormStatus.CONFIG.getCode());
             gf.setFormVersion(0L);
-            Long formOriginId = generalFormProvider.createGeneralForm(gf);
-            return formOriginId;
+            return generalFormProvider.createGeneralForm(gf);
         }
     }
 
@@ -653,9 +650,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
-        PostGeneralFormDTO dto = handler.updateGeneralFormVal(cmd);
+        return handler.updateGeneralFormVal(cmd);
+    }
 
-        return dto;
+    @Override
+    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.getGeneralFormReminder(cmd);
     }
 }
 

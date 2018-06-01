@@ -54,7 +54,7 @@ public class ServiceAllianceGeneralApprovalFormHandler implements GeneralApprova
         User user = UserContext.current().getUser();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga.getFormOriginId());
-        dbProvider.execute((TransactionStatus status) -> {
+        FlowCase fc = dbProvider.execute((TransactionStatus status) -> {
 
             if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
             // 使用表单/审批 注意状态 config
@@ -104,16 +104,20 @@ public class ServiceAllianceGeneralApprovalFormHandler implements GeneralApprova
             cmd21.setFlowMainId(flow.getFlowMainId());
             cmd21.setFlowVersion(flow.getFlowVersion());
             cmd21.setFlowCaseId(flowCaseId);
-            flowService.createFlowCase(cmd21);
+            flowCase = flowService.createFlowCase(cmd21);
         }
-            return null;
+            return flowCase;
         });
 
-        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+
+        GetTemplateByApprovalIdResponse res = new GetTemplateByApprovalIdResponse();
+        res.setFlowCaseId(fc.getId());
+        PostGeneralFormDTO dto = new PostGeneralFormDTO();
         List<PostApprovalFormItem> items = new ArrayList<>();
         PostApprovalFormItem item = new PostApprovalFormItem();
         item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(JSONObject.toJSONString(res));
         items.add(item);
         dto.setValues(items);
         return dto;

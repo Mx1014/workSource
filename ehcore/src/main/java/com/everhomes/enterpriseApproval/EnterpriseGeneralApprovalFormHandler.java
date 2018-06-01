@@ -33,6 +33,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -89,7 +90,7 @@ public class EnterpriseGeneralApprovalFormHandler implements GeneralApprovalForm
                     EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
 
 
-        dbProvider.execute((TransactionStatus status) -> {
+        GetTemplateByApprovalIdResponse res = dbProvider.execute((TransactionStatus status) -> {
             //  3.check the user is in the scope(判断是否在范围内)
             OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOrganizationId());
             if (member == null)
@@ -154,10 +155,20 @@ public class EnterpriseGeneralApprovalFormHandler implements GeneralApprovalForm
             EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(flowCase.getReferId());
             LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
             handler.onApprovalCreated(flowCase);
-            return null;
+
+            GetTemplateByApprovalIdResponse response = new GetTemplateByApprovalIdResponse();
+            response.setFlowCaseId(flowCase.getId());
+            return response;
         });
+
         PostGeneralFormDTO dto = new PostGeneralFormDTO();
-        dto.setValues(cmd.getValues());
+        List<PostApprovalFormItem> items = new ArrayList<>();
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(JSONObject.toJSONString(res));
+        items.add(item);
+        dto.setValues(items);
         return dto;
     }
 
