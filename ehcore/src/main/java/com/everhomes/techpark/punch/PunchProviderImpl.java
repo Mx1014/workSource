@@ -1040,7 +1040,7 @@ public class PunchProviderImpl implements PunchProvider {
         SelectConditionStep<Record1<Integer>> step = context.select(Tables.EH_PUNCH_STATISTICS.ID.count()).from(Tables.EH_PUNCH_STATISTICS)
                 .where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth));
-        return step.fetchCount();
+        return step.fetchAny().value1();
     }
 
     @Override
