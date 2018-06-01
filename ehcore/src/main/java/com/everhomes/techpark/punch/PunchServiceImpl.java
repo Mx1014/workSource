@@ -4666,15 +4666,15 @@ public class PunchServiceImpl implements PunchService {
 //
 //        }
 
-      List<Long> userIds = listDptUserIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
-      if (null == userIds || userIds.size() == 0)
+      List<Long> detailIds = listDptDetailIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
+      if (null == detailIds || detailIds.size() == 0)
           return response;
       //分页查询
       if (cmd.getPageAnchor() == null)
           cmd.setPageAnchor(0L);
       List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
                 organizationId, months,
-                cmd.getExceptionStatus(), userIds, locator, pageSize + 1);
+                cmd.getExceptionStatus(), detailIds, locator, pageSize + 1);
       if(null == results){
     	  return response;
       }
@@ -4817,15 +4817,13 @@ public class PunchServiceImpl implements PunchService {
 
         return response;
     }
+ 
+    public List<OrganizationMember> listDptOrganizationMembers(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
 
-    @Override
-    public List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
-        //找到所有子部门 下面的用户
-
+        List<OrganizationMember> organizationMembers = null;
         List<String> groupTypeList = new ArrayList<String>();
         groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-        List<OrganizationMember> organizationMembers = null;
         if (null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())) {
 
             List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%", groupTypeList);
@@ -4847,12 +4845,36 @@ public class PunchServiceImpl implements PunchService {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, null,
                     null, null, Integer.MAX_VALUE - 1);
         }
+        return organizationMembers;
+    } 
+    public List<Long> listDptDetailIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
+    	List<OrganizationMember> organizationMembers =  listDptOrganizationMembers(org,ownerId,userName,includeSubDpt);
+
+        if (null == organizationMembers)
+            return null;
+
+        List<Long> detailIds = new ArrayList<Long>();
+        for (OrganizationMember member : organizationMembers) {
+//            if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+//                userIds.add(member.getTargetId());
+        	detailIds.add(member.getDetailId());
+        }
+
+        LOGGER.debug("detailIds  : " + StringHelper.toJsonString(detailIds));
+        return detailIds; 
+    }
+    @Override
+    public List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
+        //找到所有子部门 下面的用户
+    	List<OrganizationMember> organizationMembers =  listDptOrganizationMembers(org,ownerId,userName,includeSubDpt);
+
         if (null == organizationMembers)
             return null;
         List<Long> userIds = new ArrayList<Long>();
         for (OrganizationMember member : organizationMembers) {
             if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
                 userIds.add(member.getTargetId());
+//        	userIds.add(member.getDetailId());
         }
 
         LOGGER.debug("userIds  : " + StringHelper.toJsonString(userIds));

@@ -2377,7 +2377,7 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-                                                     List<Long> userIds, CrossShardListingLocator locator, int i) {
+                                                     List<Long> detailIds, CrossShardListingLocator locator, int i) {
         List<PunchStatistic> result = queryPunchStatistics(locator, i, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -2386,8 +2386,8 @@ public class PunchProviderImpl implements PunchProvider {
                 query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));
                 if (null != exceptionStatus)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));
-                if (null != userIds)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));
+                if (null != detailIds)
+                    query.addConditions(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.in(detailIds));
                 if (null != months)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));
 
