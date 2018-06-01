@@ -1057,6 +1057,8 @@ public class AssetServiceImpl implements AssetService {
                     }
                     // build a billItem
                     PaymentBillItems item = new PaymentBillItems();
+                    // add categoryid
+                    item.setCategoryId(categoryId);
                     item.setAddressId(property.getAddressId());
                     item.setBuildingName(property.getBuldingName());
                     item.setApartmentName(property.getApartmentName());

@@ -1233,6 +1233,8 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setOwnerId(ownerId);
                     item.setContractId(contractId);
                     item.setContractNum(contractNum);
+                    // item 也添加categoryId， 这样费用清单简单些
+                    item.setCategoryId(categoryId);
                     if(targetType!=null){
                         item.setTargetType(targetType);
                     }
