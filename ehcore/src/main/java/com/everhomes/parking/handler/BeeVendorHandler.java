@@ -218,6 +218,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
     private boolean addMonthCard(ParkingRechargeOrder order, ParkingCardRequest request) {
         JSONObject params = new JSONObject();
         processJSONParams(params);
+        params.put("ploid",getParkingPloid());
         params.put("realname",request.getPlateOwnerName());
 //        params.put("tel",request.);
         params.put("sex",order.getPlateNumber());
@@ -253,6 +254,8 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         JSONObject params=new JSONObject();
         processJSONParams(params);
         params.put("orderid",order.getOrderToken());
+        params.put("amount","0");
+        params.put("time","0");
         params.put("payAmount",order.getPrice());
 
         BeeResponse beeResponse = post(PAY_ORDER, params);
@@ -324,6 +327,8 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
         JSONObject params = new JSONObject();
         params.put("carnumber", plateNumber);
+        params.put("amount", "0");//优惠金额（元）曹丹，这里必须穿
+        params.put("time", "0");//优惠时间（毫秒）曹丹，这里必须穿
         BeeResponse response = post(GET_ORDER, params);
 
         List<TempCardInfo> tempCardInfos= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<TempCardInfo>>(){});
@@ -423,4 +428,5 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
     public abstract String getParkingSysPrivatekey();
     public abstract String getParkingSysHost();
+    public abstract String getParkingPloid();
 }

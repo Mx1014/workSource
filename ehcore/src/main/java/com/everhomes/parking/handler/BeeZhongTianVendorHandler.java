@@ -28,6 +28,13 @@ import java.util.TreeMap;
 public class BeeZhongTianVendorHandler extends BeeVendorHandler {
     @Autowired
     ConfigurationProvider configProvider;
+
+    @Override
+    public String getParkingPloid() {
+        String ploid = configProvider.getValue("parking.beezhongtian.ploid", "20180516100018550498928837853806");
+        return ploid;
+    }
+
     @Override
     public String getParkingSysPrivatekey() {
         String privatekey = configProvider.getValue("parking.beezhongtian.privatekey", "D3029C73406221B02026B684BB00579C");
@@ -61,8 +68,6 @@ public class BeeZhongTianVendorHandler extends BeeVendorHandler {
     @Override
     protected void processJSONParams(JSONObject params) {
         String comid = configProvider.getValue("parking.beezhongtian.comid", "000000771");
-        String ploid = configProvider.getValue("parking.beezhongtian.ploid", "");
         params.put("comid",comid);
-        params.put("ploid",ploid);
     }
 }
