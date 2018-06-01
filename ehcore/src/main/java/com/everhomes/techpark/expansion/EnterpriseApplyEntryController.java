@@ -87,7 +87,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterprisesAbstract(ListEnterpriseDetailCommand cmd){
 		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
-//		command.setPageSize(100000);
+		if (cmd.getAllFlag() != null){
+			command.setPageSize(100000);
+		}
 		RestResponse response = new RestResponse(organizationService.listEnterprisesAbstract(command));
 
 		response.setErrorCode(ErrorCodes.SUCCESS);
