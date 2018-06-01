@@ -23,8 +23,8 @@ import org.springframework.transaction.TransactionStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component(ServiceAllianceGeneralApprovalFormHandler.SERVICE_ALLIANCE_APPROVAL_FROM)
-public class ServiceAllianceGeneralApprovalFormHandler implements GeneralApprovalFormHandler {
+@Component(ServiceAllianceApprovalFormHandler.SERVICE_ALLIANCE_APPROVAL_FROM)
+public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHandler {
 
     static final String SERVICE_ALLIANCE_APPROVAL_FROM = GeneralApprovalFormHandler.GENERAL_APPROVAL_FORM_PREFIX + "service_alliance";
 

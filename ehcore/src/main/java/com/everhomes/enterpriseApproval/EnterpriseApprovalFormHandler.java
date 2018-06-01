@@ -37,10 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Component(EnterpriseGeneralApprovalFormHandler.ENTERPRISE_APPROVAL_FORM)
-public class EnterpriseGeneralApprovalFormHandler implements GeneralApprovalFormHandler {
+@Component(EnterpriseApprovalFormHandler.ENTERPRISE_APPROVAL_FORM)
+public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseGeneralApprovalFormHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalFormHandler.class);
 
     static final String ENTERPRISE_APPROVAL_FORM = GeneralApprovalFormHandler.GENERAL_APPROVAL_FORM_PREFIX + "any-module";
 
