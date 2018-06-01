@@ -4839,12 +4839,12 @@ public class PunchServiceImpl implements PunchService {
             }
             CrossShardListingLocator locator = new CrossShardListingLocator();
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
-                    OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE - 1);
+                    OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
 
             LOGGER.debug("members  : " + organizationMembers.size());
         } else {
             org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-            organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, null,
                     null, null, Integer.MAX_VALUE - 1);
         }
         if (null == organizationMembers)
