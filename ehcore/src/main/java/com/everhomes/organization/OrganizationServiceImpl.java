@@ -1698,7 +1698,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setLongitude(enterprise.getLongitude());
             customer.setCorpEntryDate(enterprise.getCheckinDate());
             customer.setCorpDescription(enterprise.getDescription());
-            customer.setCorpEmployeeAmount(enterprise.getMemberCount().intValue());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(enterprise.getPostUri());
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
@@ -1863,10 +1863,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setPostUri(cmd.getPostUri());
                 customer.setHotline(cmd.getContactsPhone());
                 customer.setCorpDescription(cmd.getDescription());
-                customer.setCorpEntryDate(new Timestamp(DateUtil.parseDate(cmd.getCheckinDate()).getTime()));
+                Date date = DateUtil.parseDate(cmd.getCheckinDate());
+                if (date != null) {
+                    customer.setCorpEntryDate(new Timestamp(date.getTime()));
+                }
                 customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
                 customer.setCorpEmail(cmd.getEmailDomain());
-                customer.setCorpEmployeeAmount(cmd.getMemberCount().intValue());
+                customer.setCorpEmployeeAmount(cmd.getMemberCount() == null ? null : cmd.getMemberCount().intValue());
 
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
